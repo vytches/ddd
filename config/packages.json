@@ -1,0 +1,117 @@
+{
+  "$schema": "./packages-schema.json",
+  "packages": {
+    "core": {
+      "description": "Core DDD building blocks (Value Objects, Entities, Aggregates)",
+      "dependencies": [],
+      "scope": "core",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "foundation"
+    },
+    "utils": {
+      "description": "Common utilities and helpers",
+      "dependencies": [],
+      "scope": "utils",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "foundation"
+    },
+    "validation": {
+      "description": "Business rules, specifications, and validation patterns",
+      "dependencies": ["core", "utils"],
+      "scope": "validation",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "patterns"
+    },
+    "policies": {
+      "description": "Business policies and domain policies",
+      "dependencies": ["core", "validation", "utils"],
+      "scope": "policies",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "patterns"
+    },
+    "events": {
+      "description": "Event-driven architecture components",
+      "dependencies": ["core", "utils"],
+      "scope": "events",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "architecture"
+    },
+    "cqrs": {
+      "description": "Command Query Responsibility Segregation",
+      "dependencies": ["core", "events", "validation", "utils"],
+      "scope": "cqrs",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "architecture"
+    },
+    "acl": {
+      "description": "Anti-Corruption Layer for external systems",
+      "dependencies": ["core", "events", "utils"],
+      "scope": "acl",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "integration"
+    },
+    "projections": {
+      "description": "Event projections and read models",
+      "dependencies": ["core", "events", "utils"],
+      "scope": "projections",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "architecture"
+    },
+    "messaging": {
+      "description": "Outbox pattern, sagas, and messaging patterns",
+      "dependencies": ["core", "events", "policies", "utils"],
+      "scope": "messaging",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "integration"
+    },
+    "resilience": {
+      "description": "Circuit breakers, retry patterns, timeouts",
+      "dependencies": ["core", "utils"],
+      "scope": "resilience",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "infrastructure"
+    },
+    "testing": {
+      "description": "Test utilities for DDD patterns",
+      "dependencies": ["core", "events", "cqrs", "validation", "utils"],
+      "scope": "testing",
+      "type": "lib",
+      "includeInEnterprise": false,
+      "category": "tooling",
+      "peerDependencies": {
+        "vitest": "^1.0.0"
+      }
+    },
+    "enterprise": {
+      "description": "All-in-one enterprise bundle",
+      "dependencies": ["*"],
+      "scope": "enterprise",
+      "type": "bundle",
+      "includeInEnterprise": false,
+      "category": "bundle"
+    },
+    "cli": {
+      "description": "Code generation and development tools",
+      "dependencies": ["core", "utils"],
+      "scope": "cli",
+      "type": "tool",
+      "includeInEnterprise": false,
+      "category": "tooling"
+    }
+  },
+  "bundleStrategies": {
+    "core-bundle": ["core", "utils", "validation"],
+    "advanced-bundle": ["core-bundle", "events", "cqrs", "projections"],
+    "enterprise-bundle": ["advanced-bundle", "acl", "policies", "messaging", "resilience"]
+  }
+}

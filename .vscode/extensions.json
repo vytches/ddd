@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "nrwl.angular-console",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    "vitest.explorer",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "ms-vscode.vscode-node-azure-pack",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-todo-highlight",
+    "gruntfuggly.todo-tree"
+  ]
+}

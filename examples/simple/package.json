@@ -1,0 +1,26 @@
+{
+  "name": "@vytches-ddd/example-simple",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@vytches-ddd/core": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vitest": "^1.0.4",
+    "typescript": "^5.2.2"
+  },
+  "nx": {
+    "tags": [
+      "scope:examples",
+      "type:example"
+    ]
+  }
+}

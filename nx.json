@@ -1,0 +1,112 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "extends": "@nx/workspace/presets/npm.json",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "test", "lint", "type-check", "e2e"],
+        "parallel": 3
+      }
+    }
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true,
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"]
+    },
+    "dev": {
+      "executor": "@nx/vite:dev-server",
+      "cache": false
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/vitest.config.ts"],
+      "cache": true,
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage"],
+      "options": {
+        "passWithNoTests": true,
+        "run": true
+      }
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"],
+      "cache": true,
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["{projectRoot}/**/*.{ts,tsx,js,jsx}"],
+        "quiet": false
+      }
+    },
+    "type-check": {
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit"
+      }
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/vitest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+      "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/**/*.test.ts"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci.yml",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/.eslintrc.json",
+      "{workspaceRoot}/prettier.config.js",
+      "{workspaceRoot}/vitest.config.ts"
+    ]
+  },
+  "generators": {
+    "@nx/js:lib": {
+      "buildable": true,
+      "publishable": true,
+      "bundler": "vite",
+      "unitTestRunner": "vitest",
+      "strict": true,
+      "directory": "packages"
+    },
+    "@nx/node:app": {
+      "bundler": "vite",
+      "framework": "none",
+      "directory": "examples"
+    }
+  },
+  "release": {
+    "projects": ["packages/*"],
+    "version": {
+      "conventionalCommits": true
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github"
+      }
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "implicitDependencies": {
+    "examples/*": []
+  }
+}

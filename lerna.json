@@ -1,0 +1,89 @@
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "independent",
+  "npmClient": "pnpm",
+  "useWorkspaces": true,
+  "packages": ["packages/*"],
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish packages",
+      "registry": "https://registry.npmjs.org/",
+      "distTag": "latest",
+      "allowBranch": ["main", "release/*", "next"],
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.spec.ts",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/stories/**",
+        "**/*.stories.*"
+      ]
+    },
+    "version": {
+      "allowBranch": ["main", "release/*"],
+      "conventionalCommits": true,
+      "exact": true,
+      "push": false,
+      "createRelease": "github",
+      "message": "chore(release): version packages",
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.spec.ts",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/stories/**",
+        "**/*.stories.*"
+      ]
+    }
+  },
+  "changelogPreset": {
+    "name": "conventionalcommits",
+    "types": [
+      {
+        "type": "feat",
+        "section": "✨ Features"
+      },
+      {
+        "type": "fix",
+        "section": "🐛 Bug Fixes"
+      },
+      {
+        "type": "docs",
+        "section": "📚 Documentation"
+      },
+      {
+        "type": "style",
+        "section": "💎 Styles"
+      },
+      {
+        "type": "refactor",
+        "section": "📦 Refactor"
+      },
+      {
+        "type": "perf",
+        "section": "🚀 Performance"
+      },
+      {
+        "type": "test",
+        "section": "🚨 Tests"
+      },
+      {
+        "type": "build",
+        "section": "🛠 Build System"
+      },
+      {
+        "type": "ci",
+        "section": "⚙️ CI/CD"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      }
+    ]
+  }
+}

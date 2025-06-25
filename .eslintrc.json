@@ -1,0 +1,174 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "lib/**",
+    "*.js",
+    "*.d.ts",
+    "**/*.d.ts",
+    ".nx/**",
+    "coverage/**",
+    "**/index.d.ts"
+  ],
+  "plugins": ["@nx", "@typescript-eslint"],
+  "extends": ["plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "extends": ["plugin:@typescript-eslint/recommended", "prettier"],
+      "rules": {
+        "@nx/enforce-module-boundaries": [
+          "error",
+          {
+            "enforceBuildableLibDependency": true,
+            "allow": [],
+            "depConstraints": [
+              {
+                "sourceTag": "scope:core",
+                "onlyDependOnLibsWithTags": ["scope:core"]
+              },
+              {
+                "sourceTag": "scope:utils",
+                "onlyDependOnLibsWithTags": ["scope:utils"]
+              },
+              {
+                "sourceTag": "scope:validation",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:validation"]
+              },
+              {
+                "sourceTag": "scope:policies",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:validation",
+                  "scope:utils",
+                  "scope:policies"
+                ]
+              },
+              {
+                "sourceTag": "scope:events",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:events"]
+              },
+              {
+                "sourceTag": "scope:cqrs",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:events",
+                  "scope:validation",
+                  "scope:utils",
+                  "scope:cqrs"
+                ]
+              },
+              {
+                "sourceTag": "scope:acl",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:events",
+                  "scope:utils",
+                  "scope:acl"
+                ]
+              },
+              {
+                "sourceTag": "scope:projections",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:events",
+                  "scope:utils",
+                  "scope:projections"
+                ]
+              },
+              {
+                "sourceTag": "scope:messaging",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:events",
+                  "scope:policies",
+                  "scope:utils",
+                  "scope:messaging"
+                ]
+              },
+              {
+                "sourceTag": "scope:resilience",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:resilience"]
+              },
+              {
+                "sourceTag": "scope:testing",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:events",
+                  "scope:cqrs",
+                  "scope:validation",
+                  "scope:utils",
+                  "scope:testing",
+                  "*"
+                ]
+              },
+              {
+                "sourceTag": "scope:enterprise",
+                "onlyDependOnLibsWithTags": ["scope:*", "scope:enterprise", "*"]
+              },
+              {
+                "sourceTag": "scope:cli",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:cli"]
+              },
+              {
+                "sourceTag": "scope:examples",
+                "onlyDependOnLibsWithTags": ["*"]
+              }
+            ]
+          }
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/explicit-function-return-type": "error",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/prefer-readonly": "off",
+        "@typescript-eslint/prefer-nullish-coalescing": "off",
+        "@typescript-eslint/prefer-optional-chain": "off",
+        "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "disallowTypeAnnotations": false
+          }
+        ],
+        "prefer-const": "error",
+        "no-var": "error",
+        "object-shorthand": "error",
+        "prefer-template": "error"
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@nx/typescript"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@nx/javascript"],
+      "rules": {}
+    },
+    {
+      "files": ["*.spec.ts", "*.test.ts", "*.spec.tsx", "*.test.tsx"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    }
+  ]
+}
