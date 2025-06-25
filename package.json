@@ -169,5 +169,8 @@
     "*.{ts,js}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
   }
 }
