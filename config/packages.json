@@ -19,7 +19,10 @@
     },
     "validation": {
       "description": "Business rules, specifications, and validation patterns",
-      "dependencies": ["core", "utils"],
+      "dependencies": [
+        "core",
+        "utils"
+      ],
       "scope": "validation",
       "type": "lib",
       "includeInEnterprise": true,
@@ -27,7 +30,11 @@
     },
     "policies": {
       "description": "Business policies and domain policies",
-      "dependencies": ["core", "validation", "utils"],
+      "dependencies": [
+        "core",
+        "validation",
+        "utils"
+      ],
       "scope": "policies",
       "type": "lib",
       "includeInEnterprise": true,
@@ -35,7 +42,10 @@
     },
     "events": {
       "description": "Event-driven architecture components",
-      "dependencies": ["core", "utils"],
+      "dependencies": [
+        "core",
+        "utils"
+      ],
       "scope": "events",
       "type": "lib",
       "includeInEnterprise": true,
@@ -43,7 +53,12 @@
     },
     "cqrs": {
       "description": "Command Query Responsibility Segregation",
-      "dependencies": ["core", "events", "validation", "utils"],
+      "dependencies": [
+        "core",
+        "events",
+        "validation",
+        "utils"
+      ],
       "scope": "cqrs",
       "type": "lib",
       "includeInEnterprise": true,
@@ -51,7 +66,11 @@
     },
     "acl": {
       "description": "Anti-Corruption Layer for external systems",
-      "dependencies": ["core", "events", "utils"],
+      "dependencies": [
+        "core",
+        "events",
+        "utils"
+      ],
       "scope": "acl",
       "type": "lib",
       "includeInEnterprise": true,
@@ -59,7 +78,11 @@
     },
     "projections": {
       "description": "Event projections and read models",
-      "dependencies": ["core", "events", "utils"],
+      "dependencies": [
+        "core",
+        "events",
+        "utils"
+      ],
       "scope": "projections",
       "type": "lib",
       "includeInEnterprise": true,
@@ -67,7 +90,12 @@
     },
     "messaging": {
       "description": "Outbox pattern, sagas, and messaging patterns",
-      "dependencies": ["core", "events", "policies", "utils"],
+      "dependencies": [
+        "core",
+        "events",
+        "policies",
+        "utils"
+      ],
       "scope": "messaging",
       "type": "lib",
       "includeInEnterprise": true,
@@ -75,7 +103,10 @@
     },
     "resilience": {
       "description": "Circuit breakers, retry patterns, timeouts",
-      "dependencies": ["core", "utils"],
+      "dependencies": [
+        "core",
+        "utils"
+      ],
       "scope": "resilience",
       "type": "lib",
       "includeInEnterprise": true,
@@ -83,7 +114,13 @@
     },
     "testing": {
       "description": "Test utilities for DDD patterns",
-      "dependencies": ["core", "events", "cqrs", "validation", "utils"],
+      "dependencies": [
+        "core",
+        "events",
+        "cqrs",
+        "validation",
+        "utils"
+      ],
       "scope": "testing",
       "type": "lib",
       "includeInEnterprise": false,
@@ -94,7 +131,9 @@
     },
     "enterprise": {
       "description": "All-in-one enterprise bundle",
-      "dependencies": ["*"],
+      "dependencies": [
+        "*"
+      ],
       "scope": "enterprise",
       "type": "bundle",
       "includeInEnterprise": false,
@@ -102,16 +141,41 @@
     },
     "cli": {
       "description": "Code generation and development tools",
-      "dependencies": ["core", "utils"],
+      "dependencies": [
+        "core",
+        "utils"
+      ],
       "scope": "cli",
       "type": "tool",
       "includeInEnterprise": false,
       "category": "tooling"
+    },
+    "contracts": {
+      "dependencies": [],
+      "scope": "contracts",
+      "type": "lib",
+      "includeInEnterprise": true,
+      "category": "foundation"
     }
   },
   "bundleStrategies": {
-    "core-bundle": ["core", "utils", "validation"],
-    "advanced-bundle": ["core-bundle", "events", "cqrs", "projections"],
-    "enterprise-bundle": ["advanced-bundle", "acl", "policies", "messaging", "resilience"]
+    "core-bundle": [
+      "core",
+      "utils",
+      "validation"
+    ],
+    "advanced-bundle": [
+      "core-bundle",
+      "events",
+      "cqrs",
+      "projections"
+    ],
+    "enterprise-bundle": [
+      "advanced-bundle",
+      "acl",
+      "policies",
+      "messaging",
+      "resilience"
+    ]
   }
 }

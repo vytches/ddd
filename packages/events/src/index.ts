@@ -1,7 +1,9 @@
-// Event-driven architecture components
 
-// Export your main components here
-export * from './lib/events';
-
-// Placeholder export - replace with actual implementation
-export const eventsVersion = '0.1.0';
+export * from './event-bus';
+export * from './event-dispatcher';
+export * from './event-handler';
+export * from './integration';
+export * from './generic-event-persistence-handler';
+export * from './event-processor';
+export * from './base-event-bus';
+export * from './event-bus-registry';

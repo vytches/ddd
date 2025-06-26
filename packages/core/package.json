@@ -25,6 +25,10 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
+  },
   "nx": {
     "tags": [
       "scope:core",

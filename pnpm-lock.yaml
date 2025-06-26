@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -198,7 +201,14 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      '@vytches-ddd/events':
+        specifier: workspace:*
+        version: link:../events
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   packages/cqrs:
     dependencies:
@@ -11598,6 +11608,10 @@ packages:
       indent-string: 4.0.0
       strip-indent: 3.0.0
     dev: true
+
+  /reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
+    dev: false
 
   /reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}

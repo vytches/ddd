@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
   },
   "nx": {
     "tags": [

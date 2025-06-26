@@ -35,6 +35,7 @@ module.exports = {
         'testing',
         'enterprise',
         'cli',
+        'contracts',
         'examples',
         'deps',
         'release',

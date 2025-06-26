@@ -171,6 +171,7 @@
     ]
   },
   "dependencies": {
+    "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0"
   }
 }
