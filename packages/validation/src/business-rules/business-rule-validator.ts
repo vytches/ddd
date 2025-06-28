@@ -258,6 +258,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     return combined;
   }
 
+
   /**
    * Tworzy nowy walidator ze specyfikacji
    */

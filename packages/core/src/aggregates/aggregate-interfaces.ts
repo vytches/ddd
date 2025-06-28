@@ -1,9 +1,10 @@
-import type { 
-  IExtendedDomainEvent, 
-  IEventMetadata, 
-  IEventUpcaster, 
-  IAuditEvent, 
-  IEventStore 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type {
+  IExtendedDomainEvent,
+  IEventMetadata,
+  IEventUpcaster,
+  IAuditEvent,
+  IEventStore
 } from '@vytches-ddd/contracts';
 
 import type { EntityId } from '../value-objects';

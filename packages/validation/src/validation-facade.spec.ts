@@ -1,8 +1,11 @@
 import {describe, it, expect} from 'vitest'
 
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification, IValidator, IValidationErrors } from '@vytches-ddd/contracts';
+import { Result } from '@vytches-ddd/utils';
 import { Validation } from './validation-facade';
+
 import { BusinessRuleValidator } from './business-rules';
+import { ValidationError, ValidationErrors } from './validation-error';
 
 
 // Create a test specification
@@ -301,6 +304,116 @@ describe('ValidationFacade', () => {
       // Assert
       expect(result.isFailure).toBe(true);
       // The error path would depend on the implementation details
+    });
+  });
+
+  describe('useExternal', () => {
+    it('should use external validator implementing IValidator interface', () => {
+      // Arrange - mock external validator (like zod or class-validator adapter)
+      class MockExternalValidator implements IValidator<TestUser> {
+        validate(value: TestUser): Result<TestUser, IValidationErrors> {
+          const errors: ValidationError[] = [];
+
+          if (!value.name || value.name.length === 0) {
+            errors.push(new ValidationError('name', 'Name is required from external validator'));
+          }
+
+          if (value.age < 18) {
+            errors.push(new ValidationError('age', 'Must be 18+ from external validator'));
+          }
+
+          if (!/^\S+@\S+\.\S+$/.test(value.email)) {
+            errors.push(new ValidationError('email', 'Invalid email from external validator'));
+          }
+
+          if (errors.length > 0) {
+            return Result.fail(new ValidationErrors(errors));
+          }
+
+          return Result.ok(value);
+        }
+      }
+
+      const externalValidator = new MockExternalValidator();
+
+      // Act
+      const validator = Validation.useExternal(externalValidator);
+      const result = validator.validate(invalidUser);
+
+      // Assert
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors.length).toBe(3);
+      expect(result.error.errors[0]?.message).toBe('Name is required from external validator');
+      expect(result.error.errors[1]?.message).toBe('Must be 18+ from external validator');
+      expect(result.error.errors[2]?.message).toBe('Invalid email from external validator');
+    });
+
+    it('should pass validation when external validator passes', () => {
+      // Arrange
+      class AlwaysPassValidator implements IValidator<TestUser> {
+        validate(value: TestUser): Result<TestUser, IValidationErrors> {
+          return Result.ok(value);
+        }
+      }
+
+      const externalValidator = new AlwaysPassValidator();
+
+      // Act
+      const validator = Validation.useExternal(externalValidator);
+      const result = validator.validate(invalidUser);
+
+      // Assert
+      expect(result.isSuccess).toBe(true);
+      expect(result.value).toBe(invalidUser);
+    });
+
+    it('should combine external validator with built-in validators', () => {
+      // Arrange
+      class ExternalAgeValidator implements IValidator<TestUser> {
+        validate(value: TestUser): Result<TestUser, IValidationErrors> {
+          if (value.age < 21) {
+            return Result.fail(new ValidationErrors([
+              new ValidationError('age', 'Must be 21+ from external validator')
+            ]));
+          }
+          return Result.ok(value);
+        }
+      }
+
+      const externalValidator = new ExternalAgeValidator();
+      const builtInValidator = Validation.create<TestUser>()
+        .addRule('name', (user) => user.name.length > 0, 'Name is required from built-in validator');
+
+      // Act
+      const combinedValidator = Validation.combine(
+        Validation.useExternal(externalValidator),
+        builtInValidator
+      );
+
+      const result = combinedValidator.validate(invalidUser);
+
+      // Assert
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors.length).toBe(2);
+      expect(result.error.errors.some(e => e.message.includes('external validator'))).toBe(true);
+      expect(result.error.errors.some(e => e.message.includes('built-in validator'))).toBe(true);
+    });
+
+    it('should return the same validator instance when using useExternal', () => {
+      // Arrange
+      class DummyValidator implements IValidator<TestUser> {
+        validate(value: TestUser): Result<TestUser, IValidationErrors> {
+          return Result.ok(value);
+        }
+      }
+
+      const originalValidator = new DummyValidator();
+
+      // Act
+      const wrappedValidator = Validation.useExternal(originalValidator);
+
+      // Assert
+      expect(wrappedValidator).toBe(originalValidator);
     });
   });
 });

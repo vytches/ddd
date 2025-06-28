@@ -1,4 +1,5 @@
-import { IDomainError, DomainErrorCode, DomainErrorOptions } from '../core';
+import type { DomainErrorOptions} from "../errors";
+import { DomainErrorCode, IDomainError } from "../errors";
 
 export class ActorError extends IDomainError {
   static withType(type: string, data?: DomainErrorOptions): ActorError {

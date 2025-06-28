@@ -823,7 +823,282 @@ const failureResult = Result.fail(new ValidationErrors([
 ]));
 ```
 
-## 10. Rozszerzenia Domeny
+## 10. Integracja z Zewnętrznymi Bibliotekami Walidacji
+
+### BaseValidationAdapter
+
+Moduł zawiera bazową klasę `BaseValidationAdapter` która ułatwia tworzenie adapterów dla zewnętrznych bibliotek walidacji:
+
+```typescript
+import { BaseValidationAdapter, AdapterUtils } from '@vytches-ddd/validation';
+
+export abstract class BaseValidationAdapter<T, TSchema = any> implements IValidator<T> {
+  constructor(protected readonly schema: TSchema) {}
+  
+  abstract validate(value: T): Result<T, IValidationErrors>;
+  
+  // Helper methods:
+  protected createValidationError(property: string, message: string, context?: any): ValidationError;
+  protected createValidationErrors(errors: ValidationError[]): ValidationErrors;
+  protected pathToString(path: (string | number)[]): string;
+  protected failWithErrors(errors: ValidationError[]): Result<T, IValidationErrors>;
+  protected success(value: T): Result<T, IValidationErrors>;
+}
+```
+
+### Adapter dla Zod
+
+```typescript
+import { z } from 'zod';
+import { BaseValidationAdapter } from '@vytches-ddd/validation';
+
+export class ZodAdapter<T> extends BaseValidationAdapter<T, z.ZodSchema<T>> {
+  validate(value: T): Result<T, IValidationErrors> {
+    const result = this.schema.safeParse(value);
+
+    if (!result.success) {
+      const validationErrors = result.error.issues.map(issue => 
+        this.createValidationError(
+          this.pathToString(issue.path),
+          issue.message,
+          { 
+            code: issue.code,
+            zodIssue: issue 
+          }
+        )
+      );
+
+      return this.failWithErrors(validationErrors);
+    }
+
+    return this.success(result.data);
+  }
+
+  static create<T>(schema: z.ZodSchema<T>): ZodAdapter<T> {
+    return new ZodAdapter(schema);
+  }
+}
+
+// Użycie
+const userSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email format'),
+  age: z.number().min(18, 'Must be at least 18 years old')
+});
+
+const validator = Validation.combine(
+  ZodAdapter.create(userSchema),
+  Validation.create<User>()
+    .addRule('subscription', user => user.subscription !== 'banned', 'User is banned')
+    .when(
+      user => user.isPremium,
+      v => v.addRule('profile', user => !!user.profile, 'Premium users need profile')
+    )
+);
+```
+
+### Adapter dla Class-Validator
+
+```typescript
+import { validate, ValidationError as ClassValidationError } from 'class-validator';
+import { BaseValidationAdapter } from '@vytches-ddd/validation';
+
+export class ClassValidatorAdapter<T> extends BaseValidationAdapter<T, new (data: T) => any> {
+  async validate(value: T): Promise<Result<T, IValidationErrors>> {
+    const dto = new this.schema(value);
+    const errors = await validate(dto);
+
+    if (errors.length > 0) {
+      const validationErrors = errors.flatMap(error => 
+        Object.values(error.constraints || {}).map(message =>
+          this.createValidationError(
+            error.property,
+            message,
+            { 
+              classValidatorError: error,
+              value: error.value 
+            }
+          )
+        )
+      );
+
+      return this.failWithErrors(validationErrors);
+    }
+
+    return this.success(value);
+  }
+
+  static create<T>(dtoClass: new (data: T) => any): ClassValidatorAdapter<T> {
+    return new ClassValidatorAdapter(dtoClass);
+  }
+}
+
+// Definicja DTO
+import { IsEmail, IsNotEmpty, MinLength, Min } from 'class-validator';
+
+class UserDto {
+  @IsNotEmpty()
+  @MinLength(2)
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @Min(18)
+  age: number;
+
+  constructor(data: any) {
+    Object.assign(this, data);
+  }
+}
+
+// Użycie
+const validator = Validation.combine(
+  ClassValidatorAdapter.create(UserDto),
+  Validation.create<User>()
+    .addRule('isActive', user => user.isActive, 'User must be active')
+    .when(
+      user => user.role === 'admin',
+      v => v.addRule('permissions', user => user.permissions.length > 0, 'Admin needs permissions')
+    )
+);
+```
+
+### Adapter dla Joi
+
+```typescript
+import * as Joi from 'joi';
+import { BaseValidationAdapter } from '@vytches-ddd/validation';
+
+export class JoiAdapter<T> extends BaseValidationAdapter<T, Joi.Schema> {
+  validate(value: T): Result<T, IValidationErrors> {
+    const result = this.schema.validate(value, { abortEarly: false });
+
+    if (result.error) {
+      const validationErrors = result.error.details.map(detail => 
+        this.createValidationError(
+          this.pathToString(detail.path),
+          detail.message,
+          {
+            joiType: detail.type,
+            joiContext: detail.context
+          }
+        )
+      );
+
+      return this.failWithErrors(validationErrors);
+    }
+
+    return this.success(result.value);
+  }
+
+  static create<T>(schema: Joi.Schema): JoiAdapter<T> {
+    return new JoiAdapter(schema);
+  }
+}
+
+// Użycie
+const userSchema = Joi.object({
+  name: Joi.string().min(2).required(),
+  email: Joi.string().email().required(),
+  age: Joi.number().min(18).required()
+});
+
+const validator = Validation.combine(
+  JoiAdapter.create<User>(userSchema),
+  Validation.create<User>()
+    .addRule('lastLogin', user => user.lastLogin > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'Must login within 30 days')
+);
+```
+
+### Utility Functions
+
+Moduł udostępnia również utility functions do łatwego tworzenia prostych adapterów:
+
+```typescript
+import { AdapterUtils } from '@vytches-ddd/validation';
+
+// Prosty adapter z funkcji
+const customValidator = AdapterUtils.create<User>(
+  (user) => ({
+    success: user.name.length >= 2 && user.age >= 18,
+    errors: user.name.length < 2 ? ['Name too short'] : user.age < 18 ? ['Too young'] : undefined
+  })
+);
+
+// Adapter z custom error mapping
+const mappedValidator = AdapterUtils.withErrorMapping<User, string>(
+  (user) => ({
+    success: user.email.includes('@'),
+    errors: user.email.includes('@') ? undefined : ['Invalid email format']
+  }),
+  (errorMessage) => new ValidationError('email', errorMessage, { custom: true })
+);
+
+// Kombinowanie adapterów
+const combinedAdapter = AdapterUtils.combine(
+  ZodAdapter.create(basicSchema),
+  customValidator,
+  mappedValidator
+);
+```
+
+### Kompletny Przykład
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+  subscription: 'basic' | 'premium' | 'banned';
+  profile?: UserProfile;
+}
+
+// Kombinowanie różnych podejść
+const comprehensiveUserValidator = Validation.combine(
+  // Zewnętrzna walidacja (Zod)
+  ZodAdapter.create(z.object({
+    id: z.string().uuid(),
+    name: z.string().min(2),
+    email: z.string().email(),
+    age: z.number().min(18)
+  })),
+  
+  // Business rules
+  Validation.create<User>()
+    .addRule('subscription', user => user.subscription !== 'banned', 'User is banned')
+    .when(
+      user => user.subscription === 'premium',
+      v => v
+        .addRule('profile', user => !!user.profile, 'Premium users must have profile')
+        .addNested('profile', profileValidator, user => user.profile)
+    ),
+  
+  // Specyfikacje domenowe
+  Validation.fromSpecification(
+    Specification.create<User>(user => user.age >= 21 || user.subscription === 'basic'),
+    'Users under 21 can only have basic subscription'
+  )
+);
+
+// Użycie
+const result = comprehensiveUserValidator.validate(userData);
+if (result.isFailure) {
+  // Obsługa błędów z różnych źródeł (Zod, business rules, specifications)
+  console.log('Validation errors:', result.error.errors);
+}
+```
+
+### Zalety Podejścia z Adapterami
+
+1. **Czystość architektury** - każda biblioteka ma dedykowany adapter
+2. **Kompozycyjność** - łatwe łączenie różnych źródeł walidacji
+3. **Jednolity interfejs** - wszystkie adaptery implementują `IValidator<T>`
+4. **Testowanie** - każdy adapter można testować niezależnie
+5. **Elastyczność** - możliwość custom error mapping i kontekstu
+
+## 11. Rozszerzenia Domeny
 
 ### Tworzenie Domain-Specific Rules
 ```typescript

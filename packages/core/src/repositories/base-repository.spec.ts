@@ -2,17 +2,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
 
 import { IBaseRepository } from './base-repository';
-import { AggregateRoot, EntityId } from '..';
-import type { IDomainEvent } from '@vytches-ddd/contracts';
+import { AggregateRoot } from '../aggregates';
+import { EntityId } from '../value-objects';
+import type { IDomainEvent, IAggregateWithEvents } from '@vytches-ddd/contracts';
+import {  IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
 
-// Mock dla IEventDispatcher
-class MockEventDispatcher implements IEventDispatcher {
+// Mock dla IEnhancedEventDispatcher
+class MockEnhancedEventDispatcher extends IEnhancedEventDispatcher {
   public dispatchedEvents: IDomainEvent[] = [];
-  public dispatchedAggregates: AggregateRoot<any>[] = [];
+  public dispatchedAggregates: IAggregateWithEvents[] = [];
   public shouldFail = false;
 
   async dispatchEventsForAggregate(
-    aggregate: AggregateRoot<any>,
+    aggregate: IAggregateWithEvents,
   ): Promise<void> {
     if (this.shouldFail) {
       throw new Error('Dispatch events failed');
@@ -25,11 +27,28 @@ class MockEventDispatcher implements IEventDispatcher {
     aggregate.commit();
   }
 
-  async dispatchEvents(...events: IDomainEvent<any>[]): Promise<void> {
+  async dispatchEvent(event: IDomainEvent): Promise<void> {
+    if (this.shouldFail) {
+      throw new Error('Dispatch event failed');
+    }
+    this.dispatchedEvents.push(event);
+  }
+
+  async dispatchEvents(...events: IDomainEvent[]): Promise<void> {
     if (this.shouldFail) {
       throw new Error('Dispatch events failed');
     }
     events.forEach((event) => this.dispatchedEvents.push(event));
+  }
+
+  use(middleware: any): this {
+    // Mock implementation
+    return this;
+  }
+
+  registerProcessor(processor: any): this {
+    // Mock implementation
+    return this;
   }
 
   reset(): void {
@@ -39,14 +58,47 @@ class MockEventDispatcher implements IEventDispatcher {
   }
 }
 
+// Mock dla IEventPersistenceHandler
+class MockEventPersistenceHandler extends IEventPersistenceHandler {
+  public handledEvents: IDomainEvent[] = [];
+  public versions = new Map<any, number>();
+  public shouldFail = false;
+
+  async handleEvent(event: IDomainEvent): Promise<number> {
+    if (this.shouldFail) {
+      throw new Error('Handle event failed');
+    }
+    this.handledEvents.push(event);
+    // Zakładamy że event ma metadata z aggregateId
+    const aggregateId = (event as any).metadata?.aggregateId || 'default';
+    const currentVersion = this.versions.get(aggregateId) || 0;
+    const newVersion = currentVersion + 1;
+    this.versions.set(aggregateId, newVersion);
+    return newVersion;
+  }
+
+  async getCurrentVersion(aggregateId: any): Promise<number | undefined> {
+    return this.versions.get(aggregateId) ?? undefined;
+  }
+
+  reset(): void {
+    this.handledEvents = [];
+    this.versions.clear();
+    this.shouldFail = false;
+  }
+}
+
 // Mock dla AggregateRoot
 class TestAggregate extends AggregateRoot<string> {
   private _name = '';
   private _items: string[] = [];
-  // private getDomainEvents(): IDomainEvent[] = [];
 
   constructor({ id, version }: { id: EntityId<string>; version?: number }) {
-    super({ id, version });
+    super({ id, version: version ?? 0 });
+
+    // Register event handlers
+    this.registerEventHandler('NameChanged', (payload, _metadata) => this.onNameChanged(payload as { name: string }));
+    this.registerEventHandler('ItemAdded', (payload, _metadata) => this.onItemAdded(payload as { item: string }));
   }
 
   // Metody do manipulacji stanem
@@ -58,67 +110,63 @@ class TestAggregate extends AggregateRoot<string> {
     return [...this._items];
   }
 
-  // Metoda do dodawania testowych zdarzeń
-  addTestEvent(eventType: string, payload: any): void {
-    this['_domainEvents'].push({
-      eventType,
-      payload,
-    });
+  changeName(name: string): void {
+    this.apply('NameChanged', { name });
+  }
 
-    // Symulujemy zwiększenie wersji
-    (this as any)._version++;
+  addItem(item: string): void {
+    this.apply('ItemAdded', { item });
+  }
+
+  // Event handlers
+  private onNameChanged(payload: { name: string }): void {
+    this._name = payload.name;
+  }
+
+  private onItemAdded(payload: { item: string }): void {
+    this._items.push(payload.item);
+  }
+
+  // Metoda do dodawania testowych zdarzeń - dla backward compatibility
+  addTestEvent(eventType: string, payload: any): void {
+    this.apply(eventType, payload);
   }
 }
 
 // Konkretna implementacja BaseRepository do testów
 class TestRepository extends IBaseRepository {
-  private versions: Map<string, number> = new Map();
-  public handlerCalls: { eventType: string; payload: any }[] = [];
-
-  constructor(eventDispatcher: IEventDispatcher) {
-    super(eventDispatcher);
-  }
-
-  async getCurrentVersion(id: EntityId<string>): Promise<number> {
-    return this.versions.get(id.getValue()) ?? 0;
-  }
-
-  setVersion(id: EntityId<string>, version: number): void {
-    this.versions.set(id.getValue(), version);
-  }
-
-  // Przykładowe handlery dla różnych zdarzeń
-  async handleNameChanged(payload: { name: string }): Promise<void> {
-    this.handlerCalls.push({ eventType: 'NameChanged', payload });
-  }
-
-  async handleItemAdded(payload: { item: string }): Promise<void> {
-    this.handlerCalls.push({ eventType: 'ItemAdded', payload });
+  override async findById(id: any): Promise<any | null> {
+    return null;
   }
 
   // Metoda pomocnicza do resetowania stanu
   reset(): void {
-    this.versions.clear();
-    this.handlerCalls = [];
+    // Reset persistence handler versions
+    if (this.eventPersistenceHandler instanceof MockEventPersistenceHandler) {
+      this.eventPersistenceHandler.reset();
+    }
   }
 }
 
 describe('IBaseRepository', () => {
-  let eventDispatcher: MockEventDispatcher;
+  let eventDispatcher: MockEnhancedEventDispatcher;
+  let persistenceHandler: MockEventPersistenceHandler;
   let repository: TestRepository;
   let aggregate: TestAggregate;
   let aggregateId: EntityId<string>;
 
   beforeEach(() => {
     // Inicjalizacja przed każdym testem
-    eventDispatcher = new MockEventDispatcher();
-    repository = new TestRepository(eventDispatcher);
+    eventDispatcher = new MockEnhancedEventDispatcher();
+    persistenceHandler = new MockEventPersistenceHandler();
+    repository = new TestRepository(eventDispatcher, persistenceHandler);
     aggregateId = EntityId.fromUUID('123e4567-e89b-12d3-a456-426614174000');
     aggregate = new TestAggregate({ id: aggregateId });
 
     // Reset stanów mocków
     vi.clearAllMocks();
     eventDispatcher.reset();
+    persistenceHandler.reset();
     repository.reset();
   });
 
@@ -132,25 +180,22 @@ describe('IBaseRepository', () => {
     it('should successfully save aggregate with valid version', async () => {
       // Arrange
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 0);
-      // repository['handleNameChanged'] = vi.fn();
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
 
       // Act
       await repository.save(aggregate);
 
       // Assert
-      expect(repository.handlerCalls).toHaveLength(1);
-      expect(repository.handlerCalls[0]).toEqual({
-        eventType: eventNameChanged,
-        payload: { name: 'Test' },
-      });
-      expect(await eventDispatcher.dispatchedAggregates).toContain(aggregate);
+      expect(persistenceHandler.handledEvents).toHaveLength(1);
+      expect(persistenceHandler.handledEvents[0].eventType).toBe(eventNameChanged);
+      expect(eventDispatcher.dispatchedAggregates).toContain(aggregate);
     });
 
     it('should fail when version mismatch occurs', async () => {
       // Arrange
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 5); // Current version is 5, but aggregate expects 0
+      // Set the version using the aggregate's ID (same as what repository will pass)
+      persistenceHandler.versions.set(aggregate.getId(), 5); // Current version is 5, but aggregate expects 0
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
@@ -158,22 +203,23 @@ describe('IBaseRepository', () => {
       // Assert
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toContain('Version mismatch');
-      expect(repository.handlerCalls).toHaveLength(0);
+      expect(persistenceHandler.handledEvents).toHaveLength(0);
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
 
-    it('should fail when handler is missing for event type', async () => {
+    it('should handle persistence failure', async () => {
       // Arrange
-      aggregate.addTestEvent('UnknownEvent', { data: 'test' });
-      repository.setVersion(aggregateId, 0);
+      aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
+      persistenceHandler.shouldFail = true;
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
 
       // Assert
       expect(error).not.toBeNull();
-      expect(error?.message).toContain('Missing handler handleUnknownEvent');
-      expect(repository.handlerCalls).toHaveLength(0);
+      expect(error?.message).toBe('Handle event failed');
+      expect(persistenceHandler.handledEvents).toHaveLength(0);
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
 
@@ -181,51 +227,53 @@ describe('IBaseRepository', () => {
       // Arrange
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
       aggregate.addTestEvent('ItemAdded', { item: 'Item 1' });
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
 
       // Act
       await repository.save(aggregate);
 
       // Assert
-      expect(repository.handlerCalls).toHaveLength(2);
-      expect(repository.handlerCalls[0].eventType).toBe(eventNameChanged);
-      expect(repository.handlerCalls[1].eventType).toBe('ItemAdded');
+      expect(persistenceHandler.handledEvents).toHaveLength(2);
+      expect(persistenceHandler.handledEvents[0].eventType).toBe(eventNameChanged);
+      expect(persistenceHandler.handledEvents[1].eventType).toBe('ItemAdded');
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(1);
       expect(eventDispatcher.dispatchedEvents).toHaveLength(2);
     });
 
-    it('should not process any events if first event fails validation', async () => {
+    it('should not dispatch events if persistence fails', async () => {
       // Arrange
-      aggregate.addTestEvent('UnknownEvent', { data: 'test' });
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 0);
+      aggregate.addTestEvent('ItemAdded', { item: 'Item 1' });
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
+      persistenceHandler.shouldFail = true;
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
 
       // Assert
       expect(error).not.toBeNull();
-      expect(repository.handlerCalls).toHaveLength(0);
+      expect(persistenceHandler.handledEvents).toHaveLength(0);
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
 
     it('should handle case when aggregate has no events', async () => {
       // Arrange - No events in aggregate
-      repository.setVersion(aggregateId, 0);
-      const curVersion = (repository.getCurrentVersion = vi.fn());
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
+      const getCurrentVersionSpy = vi.spyOn(persistenceHandler, 'getCurrentVersion');
 
       // Act
       await repository.save(aggregate);
 
       // Assert
-      expect(repository.handlerCalls).toHaveLength(0);
-      expect(curVersion).toBeCalledTimes(0);
+      expect(persistenceHandler.handledEvents).toHaveLength(0);
+      expect(getCurrentVersionSpy).not.toHaveBeenCalled();
+      expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
 
     it('should handle failure in event dispatcher', async () => {
       // Arrange
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
       eventDispatcher.shouldFail = true;
 
       // Act
@@ -234,7 +282,7 @@ describe('IBaseRepository', () => {
       // Assert
       expect(error).not.toBeNull();
       expect(error?.message).toBe('Dispatch events failed');
-      expect(repository.handlerCalls).toHaveLength(1); // Handler still called
+      expect(persistenceHandler.handledEvents).toHaveLength(1); // Event still persisted
     });
 
     it('should handle first-time save with no previous version', async () => {
@@ -245,20 +293,20 @@ describe('IBaseRepository', () => {
       await repository.save(aggregate);
 
       // Assert
-      expect(repository.handlerCalls).toHaveLength(1);
+      expect(persistenceHandler.handledEvents).toHaveLength(1);
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(1);
     });
 
-    it('should handle handlers throwing errors', async () => {
+    it('should handle persistence handler throwing errors', async () => {
       // Arrange
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
 
-      // Mock handler to throw error
-      const handleSpy = vi
-        .spyOn(repository as any, 'handleNameChanged')
+      // Mock persistence handler to throw error
+      const handleEventSpy = vi
+        .spyOn(persistenceHandler, 'handleEvent')
         .mockImplementation(() => {
-          throw new Error('Handler error');
+          throw new Error('Persistence error');
         });
 
       // Act
@@ -266,82 +314,65 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(error).not.toBeNull();
-      expect(error?.message).toBe('Handler error');
-      expect(handleSpy).toHaveBeenCalledTimes(1);
+      expect(error?.message).toBe('Persistence error');
+      expect(handleEventSpy).toHaveBeenCalledTimes(1);
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
 
-    it('should execute all event handlers before dispatching events', async () => {
+    it('should persist all events before dispatching events', async () => {
       // Arrange
-      const handlerSpy = vi.spyOn(repository as any, 'handleNameChanged');
+      const persistSpy = vi.spyOn(persistenceHandler, 'handleEvent');
       const dispatchSpy = vi.spyOn(
         eventDispatcher,
         'dispatchEventsForAggregate',
       );
 
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
 
       // Act
       await repository.save(aggregate);
 
       // Assert
-      expect(handlerSpy).toHaveBeenCalledTimes(1);
+      expect(persistSpy).toHaveBeenCalledTimes(1);
       expect(dispatchSpy).toHaveBeenCalledTimes(1);
 
       // Check execution order
-      // dispatchEventsForAggregate should be called after handler
-      const handlerCallOrder = handlerSpy.mock.invocationCallOrder[0];
+      // dispatchEventsForAggregate should be called after persistence
+      const persistCallOrder = persistSpy.mock.invocationCallOrder[0];
       const dispatchCallOrder = dispatchSpy.mock.invocationCallOrder[0];
-      expect(handlerCallOrder).toBeLessThan(dispatchCallOrder);
+      expect(persistCallOrder).toBeLessThan(dispatchCallOrder);
     });
   });
 
-  describe('getCurrentVersion implementation', () => {
-    it('should return version from storage', async () => {
+  describe('version management', () => {
+    it('should get current version from persistence handler', async () => {
       // Arrange
-      repository.setVersion(aggregateId, 5);
+      persistenceHandler.versions.set(aggregateId.getValue(), 5);
 
       // Act
-      const version = await repository.getCurrentVersion(aggregateId);
+      const version = await persistenceHandler.getCurrentVersion(aggregateId.getValue());
 
       // Assert
       expect(version).toBe(5);
     });
 
-    it('should return 0 for non-existent aggregate', async () => {
+    it('should return undefined for non-existent aggregate', async () => {
       // Arrange
-      const nonExistentId = EntityId.fromUUID(
-        '00000000-0000-0000-0000-000000000000',
-      );
+      const nonExistentId = 'non-existent';
 
       // Act
-      const version = await repository.getCurrentVersion(nonExistentId);
+      const version = await persistenceHandler.getCurrentVersion(nonExistentId);
 
       // Assert
-      expect(version).toBe(0);
+      expect(version).toBeUndefined();
     });
   });
 
   describe('Edge cases', () => {
-    it('should verify event versions are processed in order', async () => {
+    it('should verify events are persisted in order', async () => {
       // Arrange
-      const orderOfExecution: string[] = [];
-
-      // Override handlers to track execution order
-      vi.spyOn(repository as any, 'handleNameChanged').mockImplementation(
-        async () => {
-          orderOfExecution.push('NameChanged');
-        },
-      );
-
-      vi.spyOn(repository as any, 'handleItemAdded').mockImplementation(
-        async () => {
-          orderOfExecution.push('ItemAdded');
-        },
-      );
-
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
       aggregate.addTestEvent('NameChanged', { name: 'Test' });
       aggregate.addTestEvent('ItemAdded', { item: 'Item 1' });
 
@@ -349,36 +380,33 @@ describe('IBaseRepository', () => {
       await repository.save(aggregate);
 
       // Assert
-      expect(orderOfExecution).toEqual(['NameChanged', 'ItemAdded']);
-      expect(aggregate.getVersion()).toBe(2); // Version should be incremented
+      expect(persistenceHandler.handledEvents).toHaveLength(2);
+      expect(persistenceHandler.handledEvents[0].eventType).toBe('NameChanged');
+      expect(persistenceHandler.handledEvents[1].eventType).toBe('ItemAdded');
+      expect(persistenceHandler.versions.get(aggregateId.getValue())).toBe(2);
     });
 
-    it('should fail entire transaction if any event handler fails', async () => {
+    it('should fail entire transaction if persistence fails for any event', async () => {
       // Arrange
-      // First handler succeeds
-      vi.spyOn(repository as any, 'handleNameChanged').mockImplementation(
-        async () => {
-          // Success
-        },
-      );
+      let callCount = 0;
+      vi.spyOn(persistenceHandler, 'handleEvent').mockImplementation(async () => {
+        callCount++;
+        if (callCount === 2) {
+          throw new Error('Second event persistence failed');
+        }
+        return 1;
+      });
 
-      // Second handler fails
-      vi.spyOn(repository as any, 'handleItemAdded').mockImplementation(
-        async () => {
-          throw new Error('Second handler failed');
-        },
-      );
-
-      repository.setVersion(aggregateId, 0);
+      persistenceHandler.versions.set(aggregateId.getValue(), 0);
       aggregate.addTestEvent('NameChanged', { name: 'Test' });
       aggregate.addTestEvent('ItemAdded', { item: 'Item 1' });
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
+      
       // Assert
-      expect(error?.message).toBe(`Second handler failed`);
-      expect(repository.handlerCalls).toHaveLength(0); // No handlers recorded due to spy
-      expect(eventDispatcher.dispatchedAggregates).toHaveLength(0); // Event dispatch didn't happen
+      expect(error?.message).toBe('Second event persistence failed');
+      expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);
     });
   });
 });

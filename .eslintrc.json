@@ -47,7 +47,8 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
                   "scope:contracts",
-                  "scope:utils"
+                  "scope:utils",
+                  "scope:validation"
                 ]
               },
               {
@@ -60,7 +61,6 @@
               {
                 "sourceTag": "scope:validation",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:utils",
                   "scope:validation",
                   "scope:contracts"

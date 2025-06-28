@@ -193,4 +193,13 @@ export const Validation = {
 
     return Result.ok(object);
   },
+
+  /**
+   * Używa zewnętrznego walidatora implementującego IValidator<T>
+   * Pozwala na integrację z bibliotekami takimi jak zod, class-validator, itp.
+   */
+  useExternal<T>(validator: IValidator<T>): IValidator<T> {
+    return validator;
+  },
+
 };

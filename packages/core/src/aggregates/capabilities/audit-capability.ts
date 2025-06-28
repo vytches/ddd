@@ -113,13 +113,8 @@ export class AuditCapability implements IAuditCapability {
       payload?: any,
       metadata?: any,
     ) => {
-      // Capture state before change if snapshot capability is available
-      const snapshotCapability = this.aggregate.getCapability(
-        CAPABILITY_NAMES.SNAPSHOT,
-      );
-      if (snapshotCapability && 'saveSnapshot' in snapshotCapability) {
-        (snapshotCapability as any).saveSnapshot();
-      }
+      // Note: State capture would require serializer function
+      // For now, we'll track changes without state snapshots
 
       // Call original apply
       const result = originalApply(eventTypeOrEvent, payload, metadata);
