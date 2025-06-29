@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/events": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/utils": "workspace:*"
   },
   "nx": {

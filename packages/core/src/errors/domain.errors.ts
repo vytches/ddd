@@ -30,12 +30,19 @@ export abstract class IDomainError
 
     if (options instanceof Error) {
       this.error = options;
-    } else if (LibUtils.isNotEmpty(options) && 'code' in options) {
-      this.domain = options?.domain;
-      this.code =
-        options?.code != null ? options?.code : DomainErrorCode.Default;
-      this.data = options?.data ?? {};
-      this.error = options?.error ?? new Error('__Defautl error__');
+    } else if (LibUtils.isNotEmpty(options)) {
+      if ('code' in options) {
+        this.domain = options?.domain;
+        this.code =
+          options?.code != null ? options?.code : DomainErrorCode.Default;
+        this.data = options?.data ?? {};
+        this.error = options?.error ?? new Error('__Defautl error__');
+      } else {
+        // Handle case where options is just data without code
+        this.data = options;
+        this.code = DomainErrorCode.Default;
+        this.error = new Error('__Default error__');
+      }
     }
 
     this.timestamp = IDomainError.generateTimestamp();

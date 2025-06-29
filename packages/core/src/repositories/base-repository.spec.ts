@@ -187,7 +187,7 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(1);
-      expect(persistenceHandler.handledEvents[0].eventType).toBe(eventNameChanged);
+      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe(eventNameChanged);
       expect(eventDispatcher.dispatchedAggregates).toContain(aggregate);
     });
 
@@ -234,8 +234,8 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(2);
-      expect(persistenceHandler.handledEvents[0].eventType).toBe(eventNameChanged);
-      expect(persistenceHandler.handledEvents[1].eventType).toBe('ItemAdded');
+      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe(eventNameChanged);
+      expect(persistenceHandler?.handledEvents?.[1]?.eventType).toBe('ItemAdded');
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(1);
       expect(eventDispatcher.dispatchedEvents).toHaveLength(2);
     });
@@ -341,7 +341,7 @@ describe('IBaseRepository', () => {
       // dispatchEventsForAggregate should be called after persistence
       const persistCallOrder = persistSpy.mock.invocationCallOrder[0];
       const dispatchCallOrder = dispatchSpy.mock.invocationCallOrder[0];
-      expect(persistCallOrder).toBeLessThan(dispatchCallOrder);
+      expect(persistCallOrder).toBeLessThan(dispatchCallOrder as number);
     });
   });
 
@@ -381,8 +381,8 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(2);
-      expect(persistenceHandler.handledEvents[0].eventType).toBe('NameChanged');
-      expect(persistenceHandler.handledEvents[1].eventType).toBe('ItemAdded');
+      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe('NameChanged');
+      expect(persistenceHandler?.handledEvents?.[1]?.eventType).toBe('ItemAdded');
       expect(persistenceHandler.versions.get(aggregateId.getValue())).toBe(2);
     });
 
@@ -403,7 +403,7 @@ describe('IBaseRepository', () => {
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
-      
+
       // Assert
       expect(error?.message).toBe('Second event persistence failed');
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(0);

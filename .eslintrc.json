@@ -108,6 +108,7 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
                   "scope:events",
+                  "scope:contracts",
                   "scope:utils",
                   "scope:projections"
                 ]

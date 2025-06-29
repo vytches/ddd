@@ -1,7 +1,10 @@
-// Event projections and read models
-
-// Export your main components here
-export * from './lib/projections';
-
-// Placeholder export - replace with actual implementation
-export const projectionsVersion = '0.1.0';
+export * from './projection-interfaces';
+export * from './projection-base';
+export * from './projection-engine';
+export * from './projection-registry';
+export * from './projection-processor';
+export * from './projection.builder';
+export * from './capabilities';
+export * from './projection-errors';
+export * from './error-strategy';
+export * from './error-projection';
