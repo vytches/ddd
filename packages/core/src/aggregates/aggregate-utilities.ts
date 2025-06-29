@@ -5,7 +5,8 @@ import type {
   ISnapshotCapability,
   IVersioningCapability,
   IEventSourcingCapability,
-  IAuditCapability} from './aggregate-interfaces';
+  IAuditCapability,
+} from './aggregate-interfaces';
 import {
   CAPABILITY_NAMES,
   hasSnapshotCapability,
@@ -45,7 +46,7 @@ export type AggregateWithEventSourcingCapability<TId> = IAggregateRoot<TId> & {
  * Helper function to cast aggregate to specific capability type
  */
 export function asSnapshotAggregate<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): AggregateWithSnapshotCapability<TId> {
   if (!hasSnapshotCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('snapshot');
@@ -54,7 +55,7 @@ export function asSnapshotAggregate<TId>(
 }
 
 export function asVersioningAggregate<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): AggregateWithVersioningCapability<TId> {
   if (!hasVersioningCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('versioning');
@@ -63,7 +64,7 @@ export function asVersioningAggregate<TId>(
 }
 
 export function asAuditAggregate<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): AggregateWithAuditCapability<TId> {
   if (!hasAuditCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('audit');
@@ -72,7 +73,7 @@ export function asAuditAggregate<TId>(
 }
 
 export function asEventSourcingAggregate<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): AggregateWithEventSourcingCapability<TId> {
   if (!hasEventSourcingCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('eventSourcing');
@@ -87,9 +88,7 @@ export function asEventSourcingAggregate<TId>(
 /**
  * Gets a list of all capabilities attached to an aggregate
  */
-export function getAggregateCapabilities(
-  aggregate: IAggregateRoot<any>,
-): string[] {
+export function getAggregateCapabilities(aggregate: IAggregateRoot<any>): string[] {
   const capabilities: string[] = [];
 
   for (const capabilityName of Object.values(CAPABILITY_NAMES)) {
@@ -106,21 +105,16 @@ export function getAggregateCapabilities(
  */
 export function hasAllCapabilities(
   aggregate: IAggregateRoot<any>,
-  capabilities: string[],
+  capabilities: string[]
 ): boolean {
-  return capabilities.every((capability) =>
-    aggregate.hasCapability(capability),
-  );
+  return capabilities.every(capability => aggregate.hasCapability(capability));
 }
 
 /**
  * Checks if aggregate has any of the specified capabilities
  */
-export function hasAnyCapability(
-  aggregate: IAggregateRoot<any>,
-  capabilities: string[],
-): boolean {
-  return capabilities.some((capability) => aggregate.hasCapability(capability));
+export function hasAnyCapability(aggregate: IAggregateRoot<any>, capabilities: string[]): boolean {
+  return capabilities.some(capability => aggregate.hasCapability(capability));
 }
 
 /**
@@ -154,12 +148,10 @@ export function getAggregateInfo(aggregate: IAggregateRoot<any>): {
 export function createSnapshotIfCapable<TState>(
   aggregate: IAggregateRoot<any>,
   serializer: () => TState,
-  metadataCreator?: () => any,
+  metadataCreator?: () => any
 ): any | null {
   if (hasSnapshotCapability(aggregate)) {
-    const snapshotCap = aggregate.getCapability(
-      CAPABILITY_NAMES.SNAPSHOT,
-    ) as ISnapshotCapability;
+    const snapshotCap = aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT) as ISnapshotCapability;
     return snapshotCap.createSnapshot(serializer, metadataCreator);
   }
   return null;
@@ -172,12 +164,10 @@ export function restoreFromSnapshotIfCapable<TState>(
   aggregate: IAggregateRoot<any>,
   snapshot: any,
   deserializer: (state: TState) => void,
-  metadataRestorer?: (metadata: any) => void,
+  metadataRestorer?: (metadata: any) => void
 ): boolean {
   if (hasSnapshotCapability(aggregate)) {
-    const snapshotCap = aggregate.getCapability(
-      CAPABILITY_NAMES.SNAPSHOT,
-    ) as ISnapshotCapability;
+    const snapshotCap = aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT) as ISnapshotCapability;
     snapshotCap.restoreFromSnapshot(snapshot, deserializer, metadataRestorer);
     return true;
   }
@@ -193,9 +183,7 @@ export function restoreFromSnapshotIfCapable<TState>(
  */
 export function getAuditLogIfCapable(aggregate: IAggregateRoot<any>): any[] {
   if (hasAuditCapability(aggregate)) {
-    const auditCap = aggregate.getCapability(
-      CAPABILITY_NAMES.AUDIT,
-    ) as IAuditCapability;
+    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as IAuditCapability;
     return auditCap.getAuditLog() as any[];
   }
   return [];
@@ -204,9 +192,7 @@ export function getAuditLogIfCapable(aggregate: IAggregateRoot<any>): any[] {
 /**
  * Gets audit statistics if the aggregate has audit capability
  */
-export function getAuditStatsIfCapable(
-  aggregate: IAggregateRoot<any>,
-): any | null {
+export function getAuditStatsIfCapable(aggregate: IAggregateRoot<any>): any | null {
   if (hasAuditCapability(aggregate)) {
     const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as any;
     return auditCap.getAuditStatistics?.() || null;
@@ -223,11 +209,11 @@ export function getAuditStatsIfCapable(
  */
 export async function loadFromEventStoreIfCapable(
   aggregate: IAggregateRoot<any>,
-  aggregateId: any,
+  aggregateId: any
 ): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
     const eventSourcingCap = aggregate.getCapability(
-      CAPABILITY_NAMES.EVENT_SOURCING,
+      CAPABILITY_NAMES.EVENT_SOURCING
     ) as IEventSourcingCapability;
     await eventSourcingCap.loadFromEventStore(aggregateId);
     return true;
@@ -238,12 +224,10 @@ export async function loadFromEventStoreIfCapable(
 /**
  * Saves to event store if the aggregate has event sourcing capability
  */
-export async function saveToEventStoreIfCapable(
-  aggregate: IAggregateRoot<any>,
-): Promise<boolean> {
+export async function saveToEventStoreIfCapable(aggregate: IAggregateRoot<any>): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
     const eventSourcingCap = aggregate.getCapability(
-      CAPABILITY_NAMES.EVENT_SOURCING,
+      CAPABILITY_NAMES.EVENT_SOURCING
     ) as IEventSourcingCapability;
     await eventSourcingCap.saveToEventStore();
     return true;
@@ -262,11 +246,11 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
   aggregate: IAggregateRoot<any>,
   eventType: string,
   sourceVersion: number,
-  upcaster: { upcast(payload: TFrom, metadata?: any): TTo },
+  upcaster: { upcast(payload: TFrom, metadata?: any): TTo }
 ): boolean {
   if (hasVersioningCapability(aggregate)) {
     const versioningCap = aggregate.getCapability(
-      CAPABILITY_NAMES.VERSIONING,
+      CAPABILITY_NAMES.VERSIONING
     ) as IVersioningCapability;
     versioningCap.registerUpcaster(eventType, sourceVersion, upcaster);
     return true;
@@ -277,13 +261,9 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 /**
  * Gets versioning information if the aggregate has versioning capability
  */
-export function getVersioningInfoIfCapable(
-  aggregate: IAggregateRoot<any>,
-): any | null {
+export function getVersioningInfoIfCapable(aggregate: IAggregateRoot<any>): any | null {
   if (hasVersioningCapability(aggregate)) {
-    const versioningCap = aggregate.getCapability(
-      CAPABILITY_NAMES.VERSIONING,
-    ) as any;
+    const versioningCap = aggregate.getCapability(CAPABILITY_NAMES.VERSIONING) as any;
     return {
       registeredEventTypes: versioningCap.getRegisteredEventTypes?.() || [],
       hasUpcaster: (eventType: string, version: number) =>
@@ -306,10 +286,8 @@ export async function processAggregatesWithCapabilities<TId>(
     snapshot?: (aggregate: AggregateWithSnapshotCapability<TId>) => void;
     audit?: (aggregate: AggregateWithAuditCapability<TId>) => void;
     versioning?: (aggregate: AggregateWithVersioningCapability<TId>) => void;
-    eventSourcing?: (
-      aggregate: AggregateWithEventSourcingCapability<TId>,
-    ) => Promise<void>;
-  },
+    eventSourcing?: (aggregate: AggregateWithEventSourcingCapability<TId>) => Promise<void>;
+  }
 ): Promise<void> {
   const promises: Promise<void>[] = [];
 
@@ -327,9 +305,7 @@ export async function processAggregatesWithCapabilities<TId>(
     }
 
     if (processors.eventSourcing && hasEventSourcingCapability(aggregate)) {
-      promises.push(
-        processors.eventSourcing(asEventSourcingAggregate(aggregate)),
-      );
+      promises.push(processors.eventSourcing(asEventSourcingAggregate(aggregate)));
     }
   }
 
@@ -348,7 +324,7 @@ export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
     includeVersioning?: boolean;
     includeAudit?: boolean;
     includeEventSourcing?: boolean;
-  } = {},
+  } = {}
 ): void {
   const {
     includeSnapshot = true,

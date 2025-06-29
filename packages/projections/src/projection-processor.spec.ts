@@ -57,15 +57,18 @@ describe('ProjectionProcessor', () => {
 
   const createMockEvent = (eventType: string, aggregateId = 'test-id'): IDomainEvent => ({
     eventType,
-    payload: { data: 'test', aggregateId, aggregateType: 'TestAggregate', eventVersion: 1 }
+    payload: { data: 'test', aggregateId, aggregateType: 'TestAggregate', eventVersion: 1 },
   });
 
-  const createExtendedMockEvent = (eventType: string, aggregateId = 'test-id'): IExtendedDomainEvent => ({
+  const createExtendedMockEvent = (
+    eventType: string,
+    aggregateId = 'test-id'
+  ): IExtendedDomainEvent => ({
     ...createMockEvent(eventType, aggregateId),
     metadata: {
       eventId: 'event-123',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   beforeEach(() => {
@@ -156,8 +159,8 @@ describe('ProjectionProcessor', () => {
           eventType: 'UserCreated',
           metadata: expect.objectContaining({
             eventId: expect.any(String),
-            timestamp: expect.any(Date)
-          })
+            timestamp: expect.any(Date),
+          }),
         })
       );
     });
@@ -201,14 +204,16 @@ describe('ProjectionProcessor', () => {
 
     it('should handle processing errors gracefully', async () => {
       // Arrange
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({} as any));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({}) as any);
       registry.register(mockFailingEngine);
       const event = createMockEvent('UserCreated');
 
       // Act & Assert - should not throw
       await expect(processor.process(event)).resolves.toBeUndefined();
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error processing event UserCreated in projection FailingProjection'),
+        expect.stringContaining(
+          'Error processing event UserCreated in projection FailingProjection'
+        ),
         expect.any(Error)
       );
 
@@ -217,7 +222,7 @@ describe('ProjectionProcessor', () => {
 
     it('should process all engines even if some fail', async () => {
       // Arrange
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({} as any));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({}) as any);
       const successSpy = vi.spyOn(mockEngine1, 'processEvent');
 
       // Both engines handle UserCreated, but one fails
@@ -253,8 +258,8 @@ describe('ProjectionProcessor', () => {
           eventType: 'UserCreated',
           metadata: expect.objectContaining({
             eventId: expect.any(String),
-            timestamp: expect.any(Date)
-          })
+            timestamp: expect.any(Date),
+          }),
         })
       );
     });
@@ -268,8 +273,8 @@ describe('ProjectionProcessor', () => {
         ...createMockEvent('UserCreated'),
         metadata: {
           eventId: 'original-id',
-          timestamp: originalTimestamp
-        }
+          timestamp: originalTimestamp,
+        },
       } as IExtendedDomainEvent;
 
       // Act
@@ -281,8 +286,8 @@ describe('ProjectionProcessor', () => {
           eventType: 'UserCreated',
           metadata: {
             eventId: 'original-id',
-            timestamp: originalTimestamp
-          }
+            timestamp: originalTimestamp,
+          },
         })
       );
     });
@@ -299,10 +304,7 @@ describe('ProjectionProcessor', () => {
       const event2 = createMockEvent('OrderPlaced');
 
       // Act
-      await Promise.all([
-        processor.process(event1),
-        processor.process(event2)
-      ]);
+      await Promise.all([processor.process(event1), processor.process(event2)]);
 
       // Assert
       expect(processEventSpy1).toHaveBeenCalledTimes(1);
@@ -322,17 +324,17 @@ describe('ProjectionProcessor', () => {
             email: 'john@example.com',
             preferences: {
               theme: 'dark',
-              notifications: true
-            }
+              notifications: true,
+            },
           },
           metadata: {
             aggregateId: 'user-123',
             aggregateType: 'User',
             eventVersion: 1,
             source: 'web-app',
-            ipAddress: '192.168.1.1'
-          }
-        }
+            ipAddress: '192.168.1.1',
+          },
+        },
       };
 
       // Act
@@ -341,7 +343,7 @@ describe('ProjectionProcessor', () => {
       // Assert
       expect(processEventSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          payload: complexEvent.payload
+          payload: complexEvent.payload,
         })
       );
     });
@@ -350,7 +352,7 @@ describe('ProjectionProcessor', () => {
   describe('edge cases', () => {
     it('should handle undefined event gracefully', async () => {
       // This would typically be caught by TypeScript, but testing runtime behavior
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({} as any));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({}) as any);
 
       try {
         await processor.process(undefined as any);
@@ -364,14 +366,14 @@ describe('ProjectionProcessor', () => {
 
     it('should handle events with missing required properties', async () => {
       // Arrange
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({} as any));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => ({}) as any);
       registry.register(mockEngine1);
 
       const malformedEvent = {
         eventType: 'UserCreated',
         aggregateType: 'User',
         eventVersion: 1,
-        payload: {}
+        payload: {},
         // Missing other required properties intentionally
       } as IDomainEvent;
 

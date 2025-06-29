@@ -10,7 +10,7 @@ export class EntityId<T = string> extends BaseValueObject<T> {
 
   constructor(
     override readonly value: T,
-    type: IdType,
+    type: IdType
   ) {
     super(value);
     this.type = type;
@@ -49,9 +49,7 @@ export class EntityId<T = string> extends BaseValueObject<T> {
 
   static fromInteger(value: number): EntityId {
     if (!LibUtils.isValidInteger(value)) {
-      throw InvalidParameterError.withParameter(
-        'entity identifier must be a non-negative integer',
-      );
+      throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
     }
 
     return new EntityId(value.toString(), 'integer');
@@ -61,9 +59,7 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     const stringValue = LibUtils.normalizeIdToString(value);
 
     if (!LibUtils.isValidBigInt(stringValue)) {
-      throw InvalidParameterError.withParameter(
-        'entity identifier must be a valid bigint',
-      );
+      throw InvalidParameterError.withParameter('entity identifier must be a valid bigint');
     }
 
     return new EntityId(stringValue, 'bigint');
@@ -75,18 +71,14 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     }
 
     if (!LibUtils.isValidTextId(value)) {
-      throw InvalidParameterError.withParameter(
-        'entity identifier contains invalid characters',
-      );
+      throw InvalidParameterError.withParameter('entity identifier contains invalid characters');
     }
 
     return new EntityId(value, 'text');
   }
 
   override equals(entityId: EntityId<T>): boolean {
-    return (
-      entityId.getValue() === this.value && entityId.getType() === this.type
-    );
+    return entityId.getValue() === this.value && entityId.getType() === this.type;
   }
 
   getType(): IdType {

@@ -14,7 +14,7 @@ class NamedSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly predicate: (candidate: T) => boolean,
     name: string,
-    description: string,
+    description: string
   ) {
     super();
     this.name = name;
@@ -41,7 +41,7 @@ class ExplainableAndSpecification<T> extends CompositeSpecification<T> {
     private readonly left: ISpecification<T>,
     private readonly right: ISpecification<T>,
     name: string,
-    description: string,
+    description: string
   ) {
     super();
     this.name = name;
@@ -49,9 +49,7 @@ class ExplainableAndSpecification<T> extends CompositeSpecification<T> {
   }
 
   isSatisfiedBy(candidate: T): boolean {
-    return (
-      this.left.isSatisfiedBy(candidate) && this.right.isSatisfiedBy(candidate)
-    );
+    return this.left.isSatisfiedBy(candidate) && this.right.isSatisfiedBy(candidate);
   }
 
   explainFailure(candidate: T): string | null {
@@ -104,38 +102,32 @@ describe('Named Specifications with Explanations', () => {
     it('should include name and description in specification', () => {
       // Arrange
       const usernameSpec = new NamedSpecification<User>(
-        (user) => user.username.length >= 3,
+        user => user.username.length >= 3,
         'UsernameMinLengthSpec',
-        'Username must be at least 3 characters long',
+        'Username must be at least 3 characters long'
       );
 
       // Assert
       expect(usernameSpec.name).toBe('UsernameMinLengthSpec');
-      expect(usernameSpec.description).toBe(
-        'Username must be at least 3 characters long',
-      );
+      expect(usernameSpec.description).toBe('Username must be at least 3 characters long');
     });
 
     it('should validate correctly', () => {
       // Arrange
       const usernameSpec = new NamedSpecification<User>(
-        (user) => user.username.length >= 3,
+        user => user.username.length >= 3,
         'UsernameMinLengthSpec',
-        'Username must be at least 3 characters long',
+        'Username must be at least 3 characters long'
       );
 
       // Act - Valid case
-      const [, validResult] = safeRun(() =>
-        usernameSpec.isSatisfiedBy(validUser),
-      );
+      const [, validResult] = safeRun(() => usernameSpec.isSatisfiedBy(validUser));
 
       // Assert - Valid case
       expect(validResult).toBe(true);
 
       // Act - Invalid case
-      const [, invalidResult] = safeRun(() =>
-        usernameSpec.isSatisfiedBy(invalidUser),
-      );
+      const [, invalidResult] = safeRun(() => usernameSpec.isSatisfiedBy(invalidUser));
 
       // Assert - Invalid case
       expect(invalidResult).toBe(false);
@@ -144,29 +136,23 @@ describe('Named Specifications with Explanations', () => {
     it('should explain failures', () => {
       // Arrange
       const usernameSpec = new NamedSpecification<User>(
-        (user) => user.username.length >= 3,
+        user => user.username.length >= 3,
         'UsernameMinLengthSpec',
-        'Username must be at least 3 characters long',
+        'Username must be at least 3 characters long'
       );
 
       // Act - Valid case
-      const [, validExplanation] = safeRun(() =>
-        usernameSpec.explainFailure(validUser),
-      );
+      const [, validExplanation] = safeRun(() => usernameSpec.explainFailure(validUser));
 
       // Assert - Valid case
       expect(validExplanation).toBeNull(); // No failure to explain
 
       // Act - Invalid case
-      const [, invalidExplanation] = safeRun(() =>
-        usernameSpec.explainFailure(invalidUser),
-      );
+      const [, invalidExplanation] = safeRun(() => usernameSpec.explainFailure(invalidUser));
 
       // Assert - Invalid case
       expect(invalidExplanation).toContain('UsernameMinLengthSpec');
-      expect(invalidExplanation).toContain(
-        'Username must be at least 3 characters long',
-      );
+      expect(invalidExplanation).toContain('Username must be at least 3 characters long');
     });
   });
 
@@ -174,30 +160,30 @@ describe('Named Specifications with Explanations', () => {
     const createComplexUserSpecification = (): ISpecification<User> => {
       // Username specification
       const usernameSpec = new NamedSpecification<User>(
-        (user) => user.username.length >= 3,
+        user => user.username.length >= 3,
         'UsernameMinLengthSpec',
-        'Username must be at least 3 characters long',
+        'Username must be at least 3 characters long'
       );
 
       // Email specification
       const emailSpec = new NamedSpecification<User>(
-        (user) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
+        user => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
         'EmailFormatSpec',
-        'Email must be in a valid format',
+        'Email must be in a valid format'
       );
 
       // Age specification
       const ageSpec = new NamedSpecification<User>(
-        (user) => user.age >= 18,
+        user => user.age >= 18,
         'MinimumAgeSpec',
-        'User must be at least 18 years old',
+        'User must be at least 18 years old'
       );
 
       // Has roles specification
       const hasRolesSpec = new NamedSpecification<User>(
-        (user) => user.roles.length > 0,
+        user => user.roles.length > 0,
         'HasRolesSpec',
-        'User must have at least one role assigned',
+        'User must have at least one role assigned'
       );
 
       // Combine specifications
@@ -205,14 +191,14 @@ describe('Named Specifications with Explanations', () => {
         usernameSpec,
         emailSpec,
         'BasicInfoSpec',
-        'Basic user information must be valid',
+        'Basic user information must be valid'
       );
 
       const accessInfoSpec = new ExplainableAndSpecification<User>(
         ageSpec,
         hasRolesSpec,
         'AccessInfoSpec',
-        'User access information must be valid',
+        'User access information must be valid'
       );
 
       // Final composite specification
@@ -220,7 +206,7 @@ describe('Named Specifications with Explanations', () => {
         basicInfoSpec,
         accessInfoSpec,
         'ValidUserSpec',
-        'User must satisfy all validation requirements',
+        'User must satisfy all validation requirements'
       );
     };
 
@@ -235,9 +221,7 @@ describe('Named Specifications with Explanations', () => {
       expect(validResult).toBe(true);
 
       // Act - Invalid user
-      const [, invalidResult] = safeRun(() =>
-        userSpec.isSatisfiedBy(invalidUser),
-      );
+      const [, invalidResult] = safeRun(() => userSpec.isSatisfiedBy(invalidUser));
 
       // Assert - Invalid user
       expect(invalidResult).toBe(false);
@@ -248,9 +232,7 @@ describe('Named Specifications with Explanations', () => {
       const userSpec = createComplexUserSpecification();
 
       // Act - Invalid user (with multiple validation failures)
-      const [, invalidExplanation] = safeRun(
-        () => userSpec.explainFailure?.(invalidUser) || null,
-      );
+      const [, invalidExplanation] = safeRun(() => userSpec.explainFailure?.(invalidUser) || null);
 
       // Assert - Invalid user
       expect(invalidExplanation).toContain('ValidUserSpec');
@@ -267,7 +249,7 @@ describe('Named Specifications with Explanations', () => {
       create<T>(
         predicate: (candidate: T) => boolean,
         name: string,
-        description: string,
+        description: string
       ): ISpecification<T> {
         return new NamedSpecification<T>(predicate, name, description);
       },
@@ -276,7 +258,7 @@ describe('Named Specifications with Explanations', () => {
       and<T>(
         specs: Array<ISpecification<T>>,
         name: string,
-        description: string,
+        description: string
       ): ISpecification<T> {
         if (specs.length === 0) {
           return Specification.alwaysTrue<T>();
@@ -288,7 +270,7 @@ describe('Named Specifications with Explanations', () => {
             result!,
             specs[i]!,
             `${name}_Part${i}`,
-            `Part ${i} of ${description}`,
+            `Part ${i} of ${description}`
           );
         }
 
@@ -296,7 +278,7 @@ describe('Named Specifications with Explanations', () => {
           result!,
           Specification.alwaysTrue<T>(),
           name,
-          description,
+          description
         );
       },
     };
@@ -305,48 +287,42 @@ describe('Named Specifications with Explanations', () => {
       // Arrange
       const userSpecs = [
         NamedSpec.create<User>(
-          (user) => user.username.length >= 3,
+          user => user.username.length >= 3,
           'UsernameMinLengthSpec',
-          'Username must be at least 3 characters long',
+          'Username must be at least 3 characters long'
         ),
         NamedSpec.create<User>(
-          (user) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
+          user => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
           'EmailFormatSpec',
-          'Email must be in a valid format',
+          'Email must be in a valid format'
         ),
         NamedSpec.create<User>(
-          (user) => user.age >= 18,
+          user => user.age >= 18,
           'MinimumAgeSpec',
-          'User must be at least 18 years old',
+          'User must be at least 18 years old'
         ),
       ];
 
       const combinedSpec = NamedSpec.and<User>(
         userSpecs,
         'UserValidationSpec',
-        'User must pass all validation rules',
+        'User must pass all validation rules'
       );
 
       // Act - Valid user
-      const [, validResult] = safeRun(() =>
-        combinedSpec.isSatisfiedBy(validUser),
-      );
+      const [, validResult] = safeRun(() => combinedSpec.isSatisfiedBy(validUser));
 
       // Assert - Valid user
       expect(validResult).toBe(true);
 
       // Act - Invalid user
-      const [, invalidResult] = safeRun(() =>
-        combinedSpec.isSatisfiedBy(invalidUser),
-      );
+      const [, invalidResult] = safeRun(() => combinedSpec.isSatisfiedBy(invalidUser));
 
       // Assert - Invalid user
       expect(invalidResult).toBe(false);
 
       // Act - Explanation
-      const [, explanation] = safeRun(
-        () => combinedSpec.explainFailure?.(invalidUser) || null,
-      );
+      const [, explanation] = safeRun(() => combinedSpec.explainFailure?.(invalidUser) || null);
 
       // Assert - Explanation
       expect(explanation).not.toBeNull();

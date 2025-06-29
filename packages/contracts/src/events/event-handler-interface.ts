@@ -4,9 +4,7 @@ import type { IDomainEvent } from './domain-event-interfaces';
  * Function type for handling domain events
  * This supports both synchronous and asynchronous handlers
  */
-export type EventHandlerFn<T extends IDomainEvent> = (
-  event: T,
-) => Promise<void> | void;
+export type EventHandlerFn<T extends IDomainEvent> = (event: T) => Promise<void> | void;
 
 /**
  * Interface for class-based event handlers
@@ -51,10 +49,5 @@ export interface EventHandlerMetadata {
  * @returns True if the object implements IEventHandler
  */
 export function isEventHandler(obj: any): obj is IEventHandler<any> {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    'handle' in obj &&
-    typeof obj.handle === 'function'
-  );
+  return obj && typeof obj === 'object' && 'handle' in obj && typeof obj.handle === 'function';
 }

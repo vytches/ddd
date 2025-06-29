@@ -14,21 +14,14 @@ export class BusinessRuleValidatorExtension<T> {
   /**
    * Converts the validator to a specification
    */
-  toSpecification(
-    _errorMessage = 'Validation failed',
-  ): ISpecification<T> {
-    return Specification.create<T>(
-      (candidate) => this.validator.validate(candidate).isSuccess,
-    );
+  toSpecification(_errorMessage = 'Validation failed'): ISpecification<T> {
+    return Specification.create<T>(candidate => this.validator.validate(candidate).isSuccess);
   }
 
   /**
    * Validates an object using additional specifications
    */
-  validateWithSpecifications(
-    value: T,
-    ...specs: ISpecification<T>[]
-  ): Result<T, ValidationErrors> {
+  validateWithSpecifications(value: T, ...specs: ISpecification<T>[]): Result<T, ValidationErrors> {
     const allErrors: ValidationError[] = [];
 
     // First validate with the rules of this validator
@@ -43,8 +36,8 @@ export class BusinessRuleValidatorExtension<T> {
           new ValidationError(
             '', // No specific property
             'Object does not satisfy specification',
-            { specification: spec },
-          ),
+            { specification: spec }
+          )
         );
       }
     }
@@ -74,7 +67,7 @@ declare module './business-rule-validator' {
     ): Result<T, ValidationErrors>;
 
     apply(
-      rule: (validator: BusinessRuleValidator<T>) => BusinessRuleValidator<T>,
+      rule: (validator: BusinessRuleValidator<T>) => BusinessRuleValidator<T>
     ): BusinessRuleValidator<T>;
   }
 }
@@ -82,7 +75,7 @@ declare module './business-rule-validator' {
 // Implementacja metody apply
 BusinessRuleValidator.prototype.apply = function <T>(
   this: BusinessRuleValidator<T>,
-  rule: (validator: BusinessRuleValidator<T>) => BusinessRuleValidator<T>,
+  rule: (validator: BusinessRuleValidator<T>) => BusinessRuleValidator<T>
 ): BusinessRuleValidator<T> {
   return rule(this);
 };
@@ -90,7 +83,7 @@ BusinessRuleValidator.prototype.apply = function <T>(
 // Implement the extension methods
 BusinessRuleValidator.prototype.toSpecification = function <T>(
   this: BusinessRuleValidator<T>,
-  errorMessage = 'Validation failed',
+  errorMessage = 'Validation failed'
 ): ISpecification<T> {
   const extension = new BusinessRuleValidatorExtension(this);
   return extension.toSpecification(errorMessage);

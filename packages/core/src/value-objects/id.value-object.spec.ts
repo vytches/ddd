@@ -39,9 +39,8 @@ describe('EntityId', () => {
 
     expect(error).toBeDefined();
     expect(error?.message).toEqual(
-      InvalidParameterError.withParameter(
-        'entity identifier must be a non-negative integer',
-      ).message,
+      InvalidParameterError.withParameter('entity identifier must be a non-negative integer')
+        .message
     );
   });
 
@@ -58,9 +57,7 @@ describe('EntityId', () => {
 
     expect(error).toBeInstanceOf(InvalidParameterError);
     expect(error).toEqual(
-      InvalidParameterError.withParameter(
-        'entity identifier must be a valid bigint',
-      ),
+      InvalidParameterError.withParameter('entity identifier must be a valid bigint')
     );
   });
 
@@ -103,8 +100,6 @@ describe('EntityId', () => {
     const entityId = EntityId.fromText('validTextId');
     const json = entityId.toJSON();
 
-    expect(json).toEqual(
-      JSON.stringify({ value: 'validTextId', type: 'text' }),
-    );
+    expect(json).toEqual(JSON.stringify({ value: 'validTextId', type: 'text' }));
   });
 });

@@ -5,12 +5,8 @@ import type {
   IAggregateEventHandler,
 } from './aggregate-interfaces';
 
-import type {
-  IExtendedDomainEvent,
-  IEventMetadata} from '@vytches-ddd/contracts';
-import {
-  createDomainEvent
-} from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IEventMetadata } from '@vytches-ddd/contracts';
+import { createDomainEvent } from '@vytches-ddd/contracts';
 
 import type { EntityId } from '../value-objects';
 
@@ -65,10 +61,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // EVENT HANDLING - Type-safe approach
   // ==========================================
 
-  protected registerEventHandler<T>(
-    eventType: string,
-    handler: IAggregateEventHandler<T>,
-  ): this {
+  protected registerEventHandler<T>(eventType: string, handler: IAggregateEventHandler<T>): this {
     this._eventHandlers.set(eventType, handler);
     return this;
   }
@@ -76,7 +69,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   protected apply<P = any>(
     eventTypeOrEvent: string | IExtendedDomainEvent<P>,
     payload?: P,
-    metadata?: Partial<IEventMetadata>,
+    metadata?: Partial<IEventMetadata>
   ): void {
     let event: IExtendedDomainEvent<P | undefined>;
 
@@ -110,14 +103,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     // Check if versioning capability is attached
     const versioningCapability = this._capabilities.get('versioning');
 
-    if (
-      versioningCapability &&
-      'handleVersionedEvent' in versioningCapability
-    ) {
-      (versioningCapability as any).handleVersionedEvent(
-        event,
-        this._eventHandlers,
-      );
+    if (versioningCapability && 'handleVersionedEvent' in versioningCapability) {
+      (versioningCapability as any).handleVersionedEvent(event, this._eventHandlers);
     } else {
       // Standard event handling
       const handler = this._eventHandlers.get(event.eventType);
@@ -143,10 +130,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // CAPABILITY MANAGEMENT
   // ==========================================
 
-  addCapability<T extends IAggregateCapability>(
-    name: string,
-    capability: T,
-  ): this {
+  addCapability<T extends IAggregateCapability>(name: string, capability: T): this {
     capability.attach(this);
     this._capabilities.set(name, capability);
     return this;
@@ -182,7 +166,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
       version: number;
       initialVersion: number;
       domainEvents: IExtendedDomainEvent[];
-    }>,
+    }>
   ): void {
     if (updates.version !== undefined) {
       this._version = updates.version;

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ISpecification } from "@vytches-ddd/contracts";
-import type { IAuditable } from "./audible.interface";
-
+import type { ISpecification } from '@vytches-ddd/contracts';
+import type { IAuditable } from './audible.interface';
 
 /**
  * Decorator for capturing entity/aggregate state before changes
@@ -11,21 +10,19 @@ import type { IAuditable } from "./audible.interface";
  *                                when to capture state. If not provided, always captures.
  */
 export function captureState<T extends IAuditable>(
-  conditionOrSpecification?:
-    | ISpecification<T>
-    | ((instance: T, args: any[]) => boolean),
+  conditionOrSpecification?: ISpecification<T> | ((instance: T, args: any[]) => boolean)
 ): MethodDecorator {
   return function (
     _target: object,
     _propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
+    descriptor: PropertyDescriptor
   ): PropertyDescriptor {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]): any {
       if (!('saveSnapshot' in this)) {
         console.warn(
-          `Class ${this.constructor.name} doesn't properly implement IAuditable interface. @captureState decorator has no effect.`,
+          `Class ${this.constructor.name} doesn't properly implement IAuditable interface. @captureState decorator has no effect.`
         );
         return originalMethod.apply(this, args);
       }

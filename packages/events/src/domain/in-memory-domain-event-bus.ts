@@ -16,10 +16,7 @@ export interface InMemoryDomainEventBusOptions extends BaseEventBusOptions {
  * In-memory implementation of EventBus
  * Processes events locally within the same process
  */
-export class InMemoryDomainEventBus
-  extends BaseEventBus<IDomainEvent>
-  implements IDomainEventBus
-{
+export class InMemoryDomainEventBus extends BaseEventBus<IDomainEvent> implements IDomainEventBus {
   /**
    * Creates a new in-memory event bus
    */

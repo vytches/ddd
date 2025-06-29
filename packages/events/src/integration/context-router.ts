@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent, ISpecification } from "@vytches-ddd/contracts";
+import type { IExtendedDomainEvent, ISpecification } from '@vytches-ddd/contracts';
 
 export interface IContextRouter {
   determineTargetContexts(event: IExtendedDomainEvent): string[];
@@ -44,13 +44,10 @@ export class ContextRouter implements IContextRouter {
 
     for (const [key, value] of Object.entries(rules)) {
       // Jeśli wartość to tablica stringów, to są to eventy, które powinny trafić do tego kontekstu
-      if (
-        Array.isArray(value) &&
-        value.every((item) => typeof item === 'string')
-      ) {
+      if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
         this.routingRules.push({
           targetContexts: [key],
-          condition: (event) => (value as string[]).includes(event.eventType),
+          condition: event => (value as string[]).includes(event.eventType),
         });
       }
       // W przeciwnym razie traktujemy wartość jako condition
@@ -78,7 +75,7 @@ export class ContextRouter implements IContextRouter {
   sendEventTypeTo(eventType: string, ...contexts: string[]): this {
     this.routingRules.push({
       targetContexts: contexts,
-      condition: (event) => event.eventType === eventType,
+      condition: event => event.eventType === eventType,
     });
     return this;
   }
@@ -90,7 +87,7 @@ export class ContextRouter implements IContextRouter {
   ): this {
     this.routingRules.push({
       targetContexts: contexts,
-      condition: (event) => specification.isSatisfiedBy(event),
+      condition: event => specification.isSatisfiedBy(event),
     });
     return this;
   }
@@ -125,7 +122,7 @@ export class ContextRouter implements IContextRouter {
   }
 
   private normalizeCondition(
-    condition: EventRoutingCondition,
+    condition: EventRoutingCondition
   ): (event: IExtendedDomainEvent) => boolean {
     // Jeśli to funkcja, użyj jej bezpośrednio
     if (typeof condition === 'function') {
@@ -134,12 +131,12 @@ export class ContextRouter implements IContextRouter {
 
     // Jeśli to specyfikacja, użyj jej metody isSatisfiedBy
     if (typeof condition === 'object' && 'isSatisfiedBy' in condition) {
-      return (event) => condition.isSatisfiedBy(event);
+      return event => condition.isSatisfiedBy(event);
     }
 
     // Jeśli to string, traktuj jako typ eventu
     if (typeof condition === 'string') {
-      return (event) => event.eventType === condition;
+      return event => event.eventType === condition;
     }
 
     // Domyślnie zawsze prawda
@@ -148,7 +145,7 @@ export class ContextRouter implements IContextRouter {
 
   private evaluateCondition(
     condition: EventRoutingCondition,
-    event: IExtendedDomainEvent,
+    event: IExtendedDomainEvent
   ): boolean {
     return this.normalizeCondition(condition)(event);
   }

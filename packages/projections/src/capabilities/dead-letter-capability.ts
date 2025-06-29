@@ -16,10 +16,10 @@ export class DeadLetterCapability<TReadModel>
 
   constructor(
     private readonly deadLetterStore: IDeadLetterStore,
-    private readonly shouldDeadLetter: (
-      error: Error,
-      attempts: number,
-    ) => boolean = (error, attempts) => attempts >= 3,
+    private readonly shouldDeadLetter: (error: Error, attempts: number) => boolean = (
+      error,
+      attempts
+    ) => attempts >= 3
   ) {}
 
   readonly name = 'dead-letter';
@@ -28,10 +28,7 @@ export class DeadLetterCapability<TReadModel>
     this.context = context;
   }
 
-  async onError(
-    error: ProjectionError,
-    event?: IExtendedDomainEvent,
-  ): Promise<void> {
+  async onError(error: ProjectionError, event?: IExtendedDomainEvent): Promise<void> {
     if (!event || !this.context) return;
 
     const attemptCount = this.getAttemptCount(error);

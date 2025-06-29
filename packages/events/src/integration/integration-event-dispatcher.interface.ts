@@ -20,9 +20,7 @@ export abstract class IIntegrationEventDispatcher {
    * Dispatches multiple integration events
    * @param events Integration events to dispatch
    */
-  abstract dispatchBatch<T = any>(
-    events: IIntegrationEvent<T>[],
-  ): Promise<void>;
+  abstract dispatchBatch<T = any>(events: IIntegrationEvent<T>[]): Promise<void>;
 
   /**
    * Transforms and dispatches a domain event as an integration event
@@ -33,6 +31,6 @@ export abstract class IIntegrationEventDispatcher {
   abstract dispatchFromDomainEvent<D = any, I = any>(
     domainEvent: D,
     transformer: IDomainToIntegrationEventTransformer<D, I>,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): Promise<void>;
 }

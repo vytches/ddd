@@ -4,20 +4,15 @@ import type { IProjectionCheckpointStore } from '../projection-interfaces';
 
 import { BaseIntervalCapability } from './base-capability';
 
-export class CheckpointCapability<
-  TReadModel,
-> extends BaseIntervalCapability<TReadModel> {
+export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<TReadModel> {
   constructor(
     private readonly checkpointStore: IProjectionCheckpointStore,
-    interval = 100,
+    interval = 100
   ) {
     super('checkpoint', interval);
   }
 
-  protected async handleInterval(
-    state: TReadModel,
-    event: IExtendedDomainEvent,
-  ): Promise<void> {
+  protected async handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
     this.ensureAttached();
 
     const position = event.metadata?.position || 0;
@@ -36,11 +31,9 @@ export class CheckpointCapability<
     this.ensureAttached();
 
     const checkpoint = await this.checkpointStore.load<TReadModel>(
-      this.context!.getProjectionName(),
+      this.context!.getProjectionName()
     );
 
-    return checkpoint
-      ? { state: checkpoint.state, position: checkpoint.position }
-      : null;
+    return checkpoint ? { state: checkpoint.state, position: checkpoint.position } : null;
   }
 }

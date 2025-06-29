@@ -45,9 +45,7 @@ describe('Result', () => {
       const result = Result.fail<number>(error);
 
       // Act & Assert
-      expect(() => result.value).toThrow(
-        'Cannot get value of a failure result',
-      );
+      expect(() => result.value).toThrow('Cannot get value of a failure result');
     });
 
     it('should throw when accessing error of success result', () => {
@@ -55,9 +53,7 @@ describe('Result', () => {
       const result = Result.ok<number>(42);
 
       // Act & Assert
-      expect(() => result.error).toThrow(
-        'Cannot get error of a success result',
-      );
+      expect(() => result.error).toThrow('Cannot get error of a success result');
     });
   });
 
@@ -179,8 +175,8 @@ describe('Result', () => {
     it('should call onSuccess for success result', () => {
       // Arrange
       const value = 42;
-      const onSuccess = vi.fn((x) => `Success: ${x}`);
-      const onFailure = vi.fn((e) => `Error: ${e.message}`);
+      const onSuccess = vi.fn(x => `Success: ${x}`);
+      const onFailure = vi.fn(e => `Error: ${e.message}`);
 
       // Act
       const result = Result.ok(value).match(onSuccess, onFailure);
@@ -194,8 +190,8 @@ describe('Result', () => {
     it('should call onFailure for failure result', () => {
       // Arrange
       const error = new Error('Test error');
-      const onSuccess = vi.fn((x) => `Success: ${x}`);
-      const onFailure = vi.fn((e) => `Error: ${e.message}`);
+      const onSuccess = vi.fn(x => `Success: ${x}`);
+      const onFailure = vi.fn(e => `Error: ${e.message}`);
 
       // Act
       const result = Result.fail<number>(error).match(onSuccess, onFailure);
@@ -384,9 +380,9 @@ describe('Result', () => {
 
       // Act
       const result = Result.ok(initialValue)
-        .map((x) => x * 2)
-        .flatMap((x) => Result.ok(x + 5))
-        .tap((x) => {
+        .map(x => x * 2)
+        .flatMap(x => Result.ok(x + 5))
+        .tap(x => {
           /* noop */
         });
 
@@ -402,10 +398,10 @@ describe('Result', () => {
 
       // Act
       const result = Result.ok(initialValue)
-        .map((x) => x * 2)
-        .flatMap((_) => Result.fail<number>(error))
-        .map((x) => x + 5)
-        .tap((x) => {
+        .map(x => x * 2)
+        .flatMap(_ => Result.fail<number>(error))
+        .map(x => x + 5)
+        .tap(x => {
           /* noop */
         });
 
@@ -420,9 +416,9 @@ describe('Result', () => {
 
       // Act
       const result = await Result.ok(initialValue)
-        .map((x) => x * 2)
-        .flatMapAsync(async (x) => Result.ok(x + 5))
-        .then((r) => r.mapAsync(async (x) => x * 2));
+        .map(x => x * 2)
+        .flatMapAsync(async x => Result.ok(x + 5))
+        .then(r => r.mapAsync(async x => x * 2));
 
       // Assert
       expect(result.isSuccess).toBe(true);
@@ -436,9 +432,9 @@ describe('Result', () => {
 
       // Act
       const result = await Result.ok(initialValue)
-        .mapAsync(async (x) => x * 2)
-        .then((r) => r.flatMapAsync(async (_) => Result.fail<number>(error)))
-        .then((r) => r.mapAsync(async (x) => x * 2));
+        .mapAsync(async x => x * 2)
+        .then(r => r.flatMapAsync(async _ => Result.fail<number>(error)))
+        .then(r => r.mapAsync(async x => x * 2));
 
       // Assert
       expect(result.isFailure).toBe(true);
@@ -449,11 +445,14 @@ describe('Result', () => {
   describe('type handling', () => {
     it('should handle complex objects', () => {
       // Arrange
-      type User = { id: number; name: string };
+      interface User {
+        id: number;
+        name: string;
+      }
       const user: User = { id: 1, name: 'John' };
 
       // Act
-      const result = Result.ok<User>(user).map((u) => ({
+      const result = Result.ok<User>(user).map(u => ({
         ...u,
         name: u.name.toUpperCase(),
       }));
@@ -468,7 +467,7 @@ describe('Result', () => {
       class ValidationError extends Error {
         constructor(
           public readonly field: string,
-          message: string,
+          message: string
         ) {
           super(message);
           this.name = 'ValidationError';

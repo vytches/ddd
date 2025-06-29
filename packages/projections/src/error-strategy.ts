@@ -1,14 +1,7 @@
-import type {
-  IProjectionErrorStrategy,
-  IProjectionRetryConfig,
-} from './projection-interfaces';
+import type { IProjectionErrorStrategy, IProjectionRetryConfig } from './projection-interfaces';
 
 export class ExponentialBackoffStrategy implements IProjectionErrorStrategy {
-  shouldRetry(
-    error: Error,
-    attempt: number,
-    config?: IProjectionRetryConfig,
-  ): boolean {
+  shouldRetry(error: Error, attempt: number, config?: IProjectionRetryConfig): boolean {
     if (!config) {
       // Default retry logic - retry up to 3 times for transient errors
       return attempt < 3 && this.isTransientError(error);
@@ -17,8 +10,7 @@ export class ExponentialBackoffStrategy implements IProjectionErrorStrategy {
   }
 
   getRetryDelay(attempt: number, config: IProjectionRetryConfig): number {
-    const delay =
-      config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
+    const delay = config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
     return Math.min(delay, config.maxDelayMs);
   }
 
@@ -43,11 +35,7 @@ export class ExponentialBackoffStrategy implements IProjectionErrorStrategy {
     }
 
     // Default: retry network/db errors, don't retry validation errors
-    const retryableByDefault = [
-      'NetworkError',
-      'TimeoutError',
-      'DatabaseError',
-    ];
+    const retryableByDefault = ['NetworkError', 'TimeoutError', 'DatabaseError'];
     const nonRetryableByDefault = ['ValidationError', 'ProjectionError'];
 
     if (nonRetryableByDefault.includes(errorType)) return false;
@@ -56,11 +44,13 @@ export class ExponentialBackoffStrategy implements IProjectionErrorStrategy {
 
   private isTransientError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    return message.includes('transient') || 
-           message.includes('timeout') || 
-           message.includes('network') ||
-           message.includes('temporary') ||
-           message.includes('temporarily unavailable') ||
-           message.includes('store temporarily unavailable');
+    return (
+      message.includes('transient') ||
+      message.includes('timeout') ||
+      message.includes('network') ||
+      message.includes('temporary') ||
+      message.includes('temporarily unavailable') ||
+      message.includes('store temporarily unavailable')
+    );
   }
 }

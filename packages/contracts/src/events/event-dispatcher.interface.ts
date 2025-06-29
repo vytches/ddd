@@ -7,7 +7,7 @@ import type { IAggregateWithEvents } from '../aggregates';
  */
 export type EventMiddleware = (
   event: IDomainEvent,
-  next: (event: IDomainEvent) => Promise<void>,
+  next: (event: IDomainEvent) => Promise<void>
 ) => Promise<void>;
 
 /**
@@ -35,9 +35,7 @@ export abstract class IEventDispatcher {
   /**
    * Dispatch all events from an aggregate and clear them
    */
-  abstract dispatchEventsForAggregate(
-    aggregate: IAggregateWithEvents,
-  ): Promise<void>;
+  abstract dispatchEventsForAggregate(aggregate: IAggregateWithEvents): Promise<void>;
 
   /**
    * Dispatch a single event

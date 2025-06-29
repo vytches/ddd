@@ -23,13 +23,9 @@ export const Validation = {
   fromSpecification<T>(
     specification: ISpecification<T>,
     message: string,
-    property?: string,
+    property?: string
   ): IValidator<T> {
-    return SpecificationValidator.fromSpecification(
-      specification,
-      message,
-      property,
-    );
+    return SpecificationValidator.fromSpecification(specification, message, property);
   },
 
   /**
@@ -49,7 +45,7 @@ export const Validation = {
 
         if (errors.length > 0) {
           // Łączymy wszystkie błędy
-          const allErrors = errors.flatMap((e) => e.errors);
+          const allErrors = errors.flatMap(e => e.errors);
           return Result.fail(new ValidationErrors(allErrors as ValidationError[]));
         }
 
@@ -64,7 +60,7 @@ export const Validation = {
   validateWithSpecification<T>(
     value: T,
     specification: ISpecification<T>,
-    message: string,
+    message: string
   ): Result<T, IValidationErrors> {
     return this.fromSpecification(specification, message).validate(value);
   },
@@ -78,7 +74,7 @@ export const Validation = {
       specification: ISpecification<T>;
       message: string;
       property?: string;
-    }>,
+    }>
   ): Result<T, ValidationErrors> {
     const validator = SpecificationValidator.create<T>();
 
@@ -97,7 +93,7 @@ export const Validation = {
   specificationToValidator<T>(
     specification: ISpecification<T>,
     message: string,
-    property?: string,
+    property?: string
   ): IValidator<T> {
     return this.fromSpecification(specification, message, property);
   },
@@ -106,9 +102,7 @@ export const Validation = {
    * Konwertuje walidator na specyfikację
    */
   validatorToSpecification<T>(validator: IValidator<T>): ISpecification<T> {
-    return Specification.create<T>(
-      (candidate) => validator.validate(candidate).isSuccess,
-    );
+    return Specification.create<T>(candidate => validator.validate(candidate).isSuccess);
   },
 
   /**
@@ -126,7 +120,7 @@ export const Validation = {
       const property = path[i];
       const nestedValidator = BusinessRuleValidator.create();
 
-      nestedValidator.addNested(property as string, currentValidator, (obj) => {
+      nestedValidator.addNested(property as string, currentValidator, obj => {
         return obj ? obj[property as keyof typeof obj] : undefined;
       });
 
@@ -142,13 +136,10 @@ export const Validation = {
   validatePath<T, P>(
     object: T,
     path: (string | number)[],
-    valueValidator: IValidator<P>,
+    valueValidator: IValidator<P>
   ): Result<T, ValidationErrors> {
     // Funkcja pomocnicza do pobierania wartości po ścieżce
-    const getValueByPath = (
-      obj: any,
-      pathSegments: (string | number)[],
-    ): any => {
+    const getValueByPath = (obj: any, pathSegments: (string | number)[]): any => {
       let current = obj;
 
       for (const segment of pathSegments) {
@@ -166,9 +157,7 @@ export const Validation = {
 
     if (pathValue === undefined) {
       return Result.fail(
-        new ValidationErrors([
-          new ValidationError(path.join('.'), 'Path does not exist', { path }),
-        ]),
+        new ValidationErrors([new ValidationError(path.join('.'), 'Path does not exist', { path })])
       );
     }
 
@@ -176,7 +165,7 @@ export const Validation = {
 
     if (valueResult.isFailure) {
       // Przekształć błędy, dodając ścieżkę
-      const prefixedErrors = valueResult.error.errors.map((err) => {
+      const prefixedErrors = valueResult.error.errors.map(err => {
         const fullPath = [...path];
         if (err.property) {
           fullPath.push(err.property);
@@ -201,5 +190,4 @@ export const Validation = {
   useExternal<T>(validator: IValidator<T>): IValidator<T> {
     return validator;
   },
-
 };

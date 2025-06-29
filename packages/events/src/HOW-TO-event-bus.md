@@ -4,7 +4,8 @@
 
 - **Pattern Name**: Event Bus
 - **Category**: Infrastructure Pattern
-- **Purpose**: Handle domain event publication and subscription with middleware support
+- **Purpose**: Handle domain event publication and subscription with middleware
+  support
 - **Library**: DomainTS
 - **Language**: TypeScript
 - **Version**: 1.0.0
@@ -13,15 +14,18 @@
 
 ### What is the Event Bus?
 
-The Event Bus is an infrastructure component that manages publication and subscription of domain events. It provides a decoupled way for different parts of the system to communicate through events.
+The Event Bus is an infrastructure component that manages publication and
+subscription of domain events. It provides a decoupled way for different parts
+of the system to communicate through events.
 
 **Core Concept**:
+
 ```typescript
 // Publish an event
 await eventBus.publish(new OrderPlacedEvent({ orderId: '123' }));
 
 // Subscribe to events
-eventBus.subscribe(OrderPlacedEvent, (event) => {
+eventBus.subscribe(OrderPlacedEvent, event => {
   console.log('Order placed:', event.payload.orderId);
 });
 ```
@@ -35,17 +39,17 @@ Abstract interface defining the event bus contract:
 ```typescript
 abstract class IEventBus {
   abstract publish<T extends IDomainEvent>(event: T): Promise<void>;
-  
+
   abstract subscribe<T extends IDomainEvent>(
     eventType: new (...args: any[]) => T,
     handler: EventHandlerFn<T>
   ): void;
-  
+
   abstract registerHandler<T extends IDomainEvent>(
     eventType: new (...args: any[]) => T,
     handler: IEventHandler<T>
   ): void;
-  
+
   abstract unsubscribe<T extends IDomainEvent>(
     eventType: new (...args: any[]) => T,
     handler: EventHandlerFn<T> | IEventHandler<T>
@@ -58,11 +62,15 @@ abstract class IEventBus {
 Two types of event handlers are supported:
 
 **Function Handlers**:
+
 ```typescript
-type EventHandlerFn<T extends IDomainEvent> = (event: T) => Promise<void> | void;
+type EventHandlerFn<T extends IDomainEvent> = (
+  event: T
+) => Promise<void> | void;
 ```
 
 **Class-based Handlers**:
+
 ```typescript
 interface IEventHandler<T extends IDomainEvent> {
   handle(event: T): Promise<void> | void;
@@ -70,6 +78,7 @@ interface IEventHandler<T extends IDomainEvent> {
 ```
 
 **Handler Detection**:
+
 ```typescript
 function isEventHandler(obj: any): obj is IEventHandler<any> {
   return (
@@ -95,12 +104,13 @@ class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
 ```
 
 **EventHandlerOptions**:
+
 ```typescript
 interface EventHandlerOptions {
-  active?: boolean;        // Enable/disable handler conditionally
-  availableFrom?: string;  // Version-based activation
-  priority?: number;       // Execution order (higher = earlier)
-  [key: string]: any;      // Custom metadata
+  active?: boolean; // Enable/disable handler conditionally
+  availableFrom?: string; // Version-based activation
+  priority?: number; // Execution order (higher = earlier)
+  [key: string]: any; // Custom metadata
 }
 ```
 
@@ -113,7 +123,7 @@ class UserNotifications {
   onUserCreated(event: UserCreatedEvent): void {
     console.log('User created:', event.payload.userId);
   }
-  
+
   @EventHandler(UserDeletedEvent, { priority: 10 })
   onUserDeleted(event: UserDeletedEvent): void {
     console.log('User deleted:', event.payload.userId);
@@ -175,17 +185,17 @@ The in-memory implementation stores handlers and manages event publishing:
 ```typescript
 export class InMemoryEventBus implements IEventBus {
   // Store handlers by event type name
-  private handlers: Map<string, Set<EventHandlerFn<any> | IEventHandler<any>>> = 
+  private handlers: Map<string, Set<EventHandlerFn<any> | IEventHandler<any>>> =
     new Map();
-  
+
   // Middleware pipeline for processing events
   private publishPipeline: (event: IDomainEvent) => Promise<void>;
-  
+
   constructor(options: InMemoryEventBusOptions = {}) {
     this.options = { enableLogging: false, ...options };
     this.publishPipeline = this.buildPublishPipeline();
   }
-  
+
   // Extract event name from constructor
   private getEventName<T extends IDomainEvent>(
     eventType: new (...args: any[]) => T
@@ -196,42 +206,42 @@ export class InMemoryEventBus implements IEventBus {
     }
     return eventType.name;
   }
-  
+
   // Dynamic middleware addition
   public addMiddleware(middleware: EventBusMiddleware): void {
     this.options.middlewares = [
       ...(this.options.middlewares || []),
-      middleware
+      middleware,
     ];
     this.publishPipeline = this.buildPublishPipeline();
   }
-  
+
   // Building the middleware pipeline
   private buildPublishPipeline(): (event: IDomainEvent) => Promise<void> {
     // Base pipeline - actual event handling
     const basePipeline = async (event: IDomainEvent): Promise<void> => {
       const eventName = (event as any).eventType || event.constructor.name;
       const handlers = this.handlers.get(eventName);
-      
+
       if (!handlers || handlers.size === 0) {
         if (this.options.enableLogging) {
           console.log(`[EventBus] No handlers for ${eventName}`);
         }
         return;
       }
-      
+
       // Execute handlers
       const promises: Promise<void>[] = [];
       for (const handler of handlers) {
         try {
           let result: void | Promise<void>;
-          
+
           if (isEventHandler(handler)) {
             result = handler.handle(event);
           } else {
             result = handler(event);
           }
-          
+
           if (result instanceof Promise) {
             promises.push(result);
           }
@@ -239,12 +249,12 @@ export class InMemoryEventBus implements IEventBus {
           this.handleError(error as Error, eventName);
         }
       }
-      
+
       if (promises.length > 0) {
         await Promise.all(promises);
       }
     };
-    
+
     // Apply middlewares in reverse order
     let pipeline = basePipeline;
     if (this.options.middlewares) {
@@ -252,7 +262,7 @@ export class InMemoryEventBus implements IEventBus {
         pipeline = this.options.middlewares[i](pipeline);
       }
     }
-    
+
     return pipeline;
   }
 }
@@ -309,8 +319,8 @@ class LoggingHandler implements IEventHandler<OrderPlacedEvent> {
 
 ```typescript
 // Environment-based activation
-@EventHandler(PaymentProcessedEvent, { 
-  active: process.env.PAYMENT_WEBHOOKS_ENABLED === 'true' 
+@EventHandler(PaymentProcessedEvent, {
+  active: process.env.PAYMENT_WEBHOOKS_ENABLED === 'true',
 })
 class PaymentWebhookHandler implements IEventHandler<PaymentProcessedEvent> {
   handle(event: PaymentProcessedEvent): void {
@@ -319,8 +329,8 @@ class PaymentWebhookHandler implements IEventHandler<PaymentProcessedEvent> {
 }
 
 // Feature flag based activation
-@EventHandler(NewFeatureEvent, { 
-  active: featureFlags.isEnabled('new-feature') 
+@EventHandler(NewFeatureEvent, {
+  active: featureFlags.isEnabled('new-feature'),
 })
 class NewFeatureHandler implements IEventHandler<NewFeatureEvent> {
   handle(event: NewFeatureEvent): void {
@@ -352,7 +362,7 @@ class ModernUserHandler implements IEventHandler<UserCreatedEvent> {
 
 ```typescript
 // Authentication middleware
-const authMiddleware: EventBusMiddleware = (next) => async (event) => {
+const authMiddleware: EventBusMiddleware = next => async event => {
   const metadata = (event as IExtendedDomainEvent).metadata;
   if (metadata?.userId) {
     await validateUserPermissions(metadata.userId);
@@ -361,7 +371,7 @@ const authMiddleware: EventBusMiddleware = (next) => async (event) => {
 };
 
 // Performance monitoring middleware
-const performanceMiddleware: EventBusMiddleware = (next) => async (event) => {
+const performanceMiddleware: EventBusMiddleware = next => async event => {
   const start = performance.now();
   await next(event);
   const duration = performance.now() - start;
@@ -369,7 +379,7 @@ const performanceMiddleware: EventBusMiddleware = (next) => async (event) => {
 };
 
 // Retry middleware
-const retryMiddleware: EventBusMiddleware = (next) => async (event) => {
+const retryMiddleware: EventBusMiddleware = next => async event => {
   let lastError: Error;
   for (let i = 0; i < 3; i++) {
     try {
@@ -397,13 +407,13 @@ const eventBus = EventBusBuilder.create()
 
 ```typescript
 // Debug middleware for tracing event flow
-const debugMiddleware: EventBusMiddleware = (next) => async (event) => {
+const debugMiddleware: EventBusMiddleware = next => async event => {
   const eventId = (event as IExtendedDomainEvent).metadata?.eventId;
   console.group(`Event: ${event.eventType} (${eventId})`);
   console.log('Payload:', event.payload);
   console.log('Metadata:', (event as IExtendedDomainEvent).metadata);
   console.time('Processing');
-  
+
   try {
     await next(event);
     console.log('✓ Success');
@@ -426,7 +436,7 @@ class DebuggableEventBus extends InMemoryEventBus {
     const eventName = this.getEventName(eventType);
     return this.handlers.get(eventName)?.size || 0;
   }
-  
+
   listHandlers(): Map<string, number> {
     const result = new Map<string, number>();
     this.handlers.forEach((handlers, eventType) => {
@@ -440,16 +450,19 @@ class DebuggableEventBus extends InMemoryEventBus {
 ### Common Issues and Solutions
 
 1. **Handler Not Being Called**
+
    - Check event type name matches exactly
    - Verify handler is properly registered
    - Ensure handler options are correct (active: true)
 
 2. **Events Lost During Processing**
+
    - Check error handler configuration
    - Verify async handlers are properly awaited
    - Review middleware error handling
 
 3. **Performance Issues**
+
    - Avoid blocking operations in handlers
    - Use async handlers for I/O operations
    - Consider batching for high-frequency events
@@ -482,4 +495,6 @@ DomainTS Event Bus provides:
 - **Dynamic Configuration**: Runtime middleware addition
 - **Debugging Support**: Tools for troubleshooting
 
-The implementation supports simple event publishing as well as complex event-driven architectures with features like priority handling, conditional activation, and sophisticated middleware pipelines.
+The implementation supports simple event publishing as well as complex
+event-driven architectures with features like priority handling, conditional
+activation, and sophisticated middleware pipelines.

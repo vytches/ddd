@@ -15,9 +15,7 @@ import type {
 } from './projection-interfaces';
 import { ExponentialBackoffStrategy } from './error-strategy';
 
-export class ProjectionEngine<TReadModel>
-  implements IProjectionEngine<TReadModel>
-{
+export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadModel> {
   private capabilities = new Map<string, IProjectionCapability<TReadModel>>();
   protected projection: IProjection<TReadModel>;
   protected store: IProjectionStore<TReadModel>;
@@ -25,11 +23,11 @@ export class ProjectionEngine<TReadModel>
   constructor(
     projection: IProjection<TReadModel>,
     store: IProjectionStore<TReadModel>,
-    capabilities?: IProjectionCapability<TReadModel>[],
+    capabilities?: IProjectionCapability<TReadModel>[]
   ) {
     this.projection = projection;
     this.store = store;
-    
+
     // Attach initial capabilities if provided
     if (capabilities) {
       capabilities.forEach(capability => this.addCapability(capability));
@@ -61,9 +59,7 @@ export class ProjectionEngine<TReadModel>
       await this.executeHooks('onBeforeApply', currentState, event);
 
       // Apply event
-      const newState = await Promise.resolve(
-        this.projection.apply(currentState, event),
-      );
+      const newState = await Promise.resolve(this.projection.apply(currentState, event));
 
       // Save state
       await this.store.save(this.projection.name, newState);
@@ -76,11 +72,14 @@ export class ProjectionEngine<TReadModel>
         await this.executeHooks('onError', error, event);
         throw error;
       }
-      
+
       // For regular errors from the projection, preserve the original error
       // if it contains meaningful domain information
       const errorMessage = (error as Error).message || 'Unknown error';
-      if (errorMessage.includes('Failed to apply event') || errorMessage.includes('Failed to create initial state')) {
+      if (
+        errorMessage.includes('Failed to apply event') ||
+        errorMessage.includes('Failed to create initial state')
+      ) {
         await this.executeHooks('onError', error as Error, event);
         throw error;
       }
@@ -89,7 +88,7 @@ export class ProjectionEngine<TReadModel>
       const projectionError = ProjectionError.processingFailed(
         this.projection.name,
         event.eventType,
-        error as Error,
+        error as Error
       );
 
       await this.executeHooks('onError', projectionError, event);
@@ -127,9 +126,7 @@ export class ProjectionEngine<TReadModel>
     }
   }
 
-  addCapability<T extends IProjectionCapability<TReadModel>>(
-    capability: T,
-  ): this {
+  addCapability<T extends IProjectionCapability<TReadModel>>(capability: T): this {
     const context: ICapabilityContext<TReadModel> = {
       getProjectionName: () => this.projection.name,
       getStore: () => this.store,
@@ -141,17 +138,13 @@ export class ProjectionEngine<TReadModel>
     return this;
   }
 
-  protected async executeHooks(
-    hookName: string,
-    ...args: any[]
-  ): Promise<void> {
+  protected async executeHooks(hookName: string, ...args: any[]): Promise<void> {
     const capabilities = Array.from(this.capabilities.values());
 
     // Execute hooks sequentially for critical operations
     if (hookName === 'onBeforeApply' || hookName === 'onError') {
       for (const capability of capabilities) {
-        const lifecycleCapability =
-          capability as IProjectionLifecycleCapability<TReadModel>;
+        const lifecycleCapability = capability as IProjectionLifecycleCapability<TReadModel>;
         const hook = (lifecycleCapability as any)[hookName];
 
         if (typeof hook === 'function') {
@@ -164,8 +157,7 @@ export class ProjectionEngine<TReadModel>
     // For non-critical hooks, execute in parallel
     const promises: Promise<void>[] = [];
     for (const capability of capabilities) {
-      const lifecycleCapability =
-        capability as IProjectionLifecycleCapability<TReadModel>;
+      const lifecycleCapability = capability as IProjectionLifecycleCapability<TReadModel>;
       const hook = (lifecycleCapability as any)[hookName];
 
       if (typeof hook === 'function') {
@@ -182,17 +174,15 @@ export class ProjectionEngine<TReadModel>
   }
 }
 
-export class EnhancedProjectionEngine<
-  TReadModel,
-> extends ProjectionEngine<TReadModel> {
+export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TReadModel> {
   constructor(
     projection: IProjection<TReadModel>,
     store: IProjectionStore<TReadModel>,
     retryConfigOrCapabilities: IProjectionRetryConfig | IProjectionCapability<TReadModel>[],
-    private readonly errorStrategy: IProjectionErrorStrategy = new ExponentialBackoffStrategy(),
+    private readonly errorStrategy: IProjectionErrorStrategy = new ExponentialBackoffStrategy()
   ) {
     super(projection, store);
-    
+
     // Handle both constructor signatures for backward compatibility
     if (Array.isArray(retryConfigOrCapabilities)) {
       // Old signature: capabilities array passed as third parameter
@@ -202,7 +192,7 @@ export class EnhancedProjectionEngine<
         maxDelayMs: 5000,
         backoffMultiplier: 2,
         retryableErrors: [],
-        nonRetryableErrors: []
+        nonRetryableErrors: [],
       };
       retryConfigOrCapabilities.forEach(capability => this.addCapability(capability));
     } else {
@@ -210,7 +200,7 @@ export class EnhancedProjectionEngine<
       this.retryConfig = retryConfigOrCapabilities;
     }
   }
-  
+
   private readonly retryConfig: IProjectionRetryConfig;
 
   override async processEvent(event: IExtendedDomainEvent): Promise<void> {
@@ -227,18 +217,16 @@ export class EnhancedProjectionEngine<
         if (!currentState) {
           throw ProjectionError.stateNotFound(this.projection.name);
         }
-        
+
         // Before hooks
         await this.executeHooks('onBeforeApply', currentState, event);
 
         // Apply event
-        const newState = await Promise.resolve(
-          this.projection.apply(currentState, event),
-        );
+        const newState = await Promise.resolve(this.projection.apply(currentState, event));
 
         // Save state
         await this.store.save(this.projection.name, newState);
-        
+
         // After hooks
         await this.executeHooks('onAfterApply', newState, event);
 
@@ -253,7 +241,7 @@ export class EnhancedProjectionEngine<
             : ProjectionError.processingFailed(
                 this.projection.name,
                 event.eventType,
-                error as Error,
+                error as Error
               );
 
         // Add attempt count to error data
@@ -262,10 +250,7 @@ export class EnhancedProjectionEngine<
         }
 
         // Check if should retry - pass the original error, not the wrapped one
-        const shouldRetry = this.errorStrategy.shouldRetry(
-          error as Error,
-          attempt,
-        );
+        const shouldRetry = this.errorStrategy.shouldRetry(error as Error, attempt);
 
         if (!shouldRetry || attempt >= this.retryConfig.maxAttempts) {
           await this.executeHooks('onError', projectionError, event);
@@ -273,10 +258,7 @@ export class EnhancedProjectionEngine<
         }
 
         // Wait before retry
-        const delay = this.errorStrategy.getRetryDelay(
-          attempt,
-          this.retryConfig,
-        );
+        const delay = this.errorStrategy.getRetryDelay(attempt, this.retryConfig);
         await LibUtils.sleep(delay);
       }
     }
@@ -285,11 +267,7 @@ export class EnhancedProjectionEngine<
     const finalError =
       lastError instanceof ProjectionError
         ? lastError
-        : ProjectionError.processingFailed(
-            this.projection.name,
-            event.eventType,
-            lastError,
-          );
+        : ProjectionError.processingFailed(this.projection.name, event.eventType, lastError);
 
     await this.executeHooks('onError', finalError, event);
     throw finalError;

@@ -4,7 +4,7 @@ import type {
   IEventMetadata,
   IEventUpcaster,
   IAuditEvent,
-  IEventStore
+  IEventStore,
 } from '@vytches-ddd/contracts';
 
 import type { EntityId } from '../value-objects';
@@ -50,10 +50,7 @@ export interface IAggregateRoot<TId = string> {
   /**
    * Adds a capability to the aggregate
    */
-  addCapability<T extends IAggregateCapability>(
-    name: string,
-    capability: T,
-  ): this;
+  addCapability<T extends IAggregateCapability>(name: string, capability: T): this;
 
   /**
    * Gets a specific capability
@@ -101,14 +98,13 @@ export interface IAggregateCapability {
 /**
  * Interface for snapshot capability
  */
-export interface ISnapshotCapability<TState = any, TMeta = any>
-  extends IAggregateCapability {
+export interface ISnapshotCapability<TState = any, TMeta = any> extends IAggregateCapability {
   /**
    * Creates a snapshot of the current aggregate state
    */
   createSnapshot(
     serializer: () => TState,
-    metadataCreator?: () => TMeta,
+    metadataCreator?: () => TMeta
   ): IAggregateSnapshot<TState, TMeta>;
 
   /**
@@ -117,7 +113,7 @@ export interface ISnapshotCapability<TState = any, TMeta = any>
   restoreFromSnapshot(
     snapshot: IAggregateSnapshot<TState, TMeta>,
     deserializer: (state: TState) => void,
-    metadataRestorer?: (metadata: TMeta) => void,
+    metadataRestorer?: (metadata: TMeta) => void
   ): void;
 
   /**
@@ -141,7 +137,7 @@ export interface IVersioningCapability extends IAggregateCapability {
   registerUpcaster<TFrom = any, TTo = any>(
     eventType: string,
     sourceVersion: number,
-    upcaster: IEventUpcaster<TFrom, TTo>,
+    upcaster: IEventUpcaster<TFrom, TTo>
   ): this;
 
   /**
@@ -149,7 +145,7 @@ export interface IVersioningCapability extends IAggregateCapability {
    */
   handleVersionedEvent(
     event: IExtendedDomainEvent,
-    handlers: Map<string, IAggregateEventHandler>,
+    handlers: Map<string, IAggregateEventHandler>
   ): void;
 }
 
@@ -229,10 +225,7 @@ export interface IAggregateBuilder<TId> {
   /**
    * Adds custom capability
    */
-  withCustomCapability<T extends IAggregateCapability>(
-    name: string,
-    capability: T,
-  ): this;
+  withCustomCapability<T extends IAggregateCapability>(name: string, capability: T): this;
 
   /**
    * Builds the aggregate with all configured capabilities
@@ -256,7 +249,7 @@ export interface IAggregateEventHandler<T = any> {
  */
 export type EventAggregateMiddleware<T = any> = (
   event: IExtendedDomainEvent<T>,
-  next: (event: IExtendedDomainEvent<T>) => void,
+  next: (event: IExtendedDomainEvent<T>) => void
 ) => void;
 
 /**
@@ -285,7 +278,6 @@ export interface IAggregateSnapshot<TState = any, TMeta = any> {
   lastEventId?: string | undefined;
 }
 
-
 // ==========================================
 // TYPE GUARDS
 // ==========================================
@@ -294,7 +286,7 @@ export interface IAggregateSnapshot<TState = any, TMeta = any> {
  * Type guard to check if aggregate has snapshot capability
  */
 export function hasSnapshotCapability<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): aggregate is IAggregateRoot<TId> & {
   getCapability(name: 'snapshot'): ISnapshotCapability;
 } {
@@ -305,7 +297,7 @@ export function hasSnapshotCapability<TId>(
  * Type guard to check if aggregate has versioning capability
  */
 export function hasVersioningCapability<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): aggregate is IAggregateRoot<TId> & {
   getCapability(name: 'versioning'): IVersioningCapability;
 } {
@@ -316,7 +308,7 @@ export function hasVersioningCapability<TId>(
  * Type guard to check if aggregate has event sourcing capability
  */
 export function hasEventSourcingCapability<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): aggregate is IAggregateRoot<TId> & {
   getCapability(name: 'eventSourcing'): IEventSourcingCapability;
 } {
@@ -327,7 +319,7 @@ export function hasEventSourcingCapability<TId>(
  * Type guard to check if aggregate has audit capability
  */
 export function hasAuditCapability<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): aggregate is IAggregateRoot<TId> & {
   getCapability(name: 'audit'): IAuditCapability;
 } {
@@ -338,7 +330,7 @@ export function hasAuditCapability<TId>(
  * Type guard to check if aggregate has middleware capability
  */
 export function hasMiddlewareCapability<TId>(
-  aggregate: IAggregateRoot<TId>,
+  aggregate: IAggregateRoot<TId>
 ): aggregate is IAggregateRoot<TId> & {
   getCapability(name: 'middleware'): IMiddlewareCapability;
 } {
@@ -363,8 +355,7 @@ export const CAPABILITY_NAMES = {
 /**
  * Type for capability names
  */
-export type CapabilityName =
-  (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_NAMES];
+export type CapabilityName = (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_NAMES];
 
 // ==========================================
 // UTILITY TYPES
@@ -373,8 +364,7 @@ export type CapabilityName =
 /**
  * Extract the ID type from an aggregate
  */
-export type AggregateIdType<T> =
-  T extends IAggregateRoot<infer TId> ? TId : never;
+export type AggregateIdType<T> = T extends IAggregateRoot<infer TId> ? TId : never;
 
 /**
  * Type for aggregates with specific capabilities
@@ -384,7 +374,7 @@ export type AggregateWithCapabilities<
   TCapabilities extends CapabilityName[],
 > = IAggregateRoot<TId> & {
   [K in TCapabilities[number] as `getCapability`]: (
-    name: K,
+    name: K
   ) => K extends 'snapshot'
     ? ISnapshotCapability
     : K extends 'versioning'
@@ -405,10 +395,7 @@ export type AggregateWithCapabilities<
 /**
  * Factory interface for creating aggregates
  */
-export interface IAggregateFactory<
-  TId,
-  TAggregate extends IAggregateRoot<TId>,
-> {
+export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> {
   /**
    * Creates a new aggregate instance
    */
@@ -424,7 +411,7 @@ export interface IAggregateFactory<
    */
   fromSnapshot<TState, TMeta>(
     snapshot: IAggregateSnapshot<TState, TMeta>,
-    events: IExtendedDomainEvent[],
+    events: IExtendedDomainEvent[]
   ): TAggregate;
 }
 
@@ -444,10 +431,7 @@ export interface IAggregateValidator<TAggregate extends IAggregateRoot<any>> {
   /**
    * Validates aggregate before applying event
    */
-  validateBeforeEvent(
-    aggregate: TAggregate,
-    event: IExtendedDomainEvent,
-  ): ValidationResult;
+  validateBeforeEvent(aggregate: TAggregate, event: IExtendedDomainEvent): ValidationResult;
 }
 
 /**

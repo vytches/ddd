@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IValidationRule as ValidationRule, IValidator, ISpecification } from '@vytches-ddd/contracts';
+import type {
+  IValidationRule as ValidationRule,
+  IValidator,
+  ISpecification,
+} from '@vytches-ddd/contracts';
 import { Result } from '@vytches-ddd/utils';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
@@ -13,7 +17,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     property: string,
     validationFn: (value: T) => boolean,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): BusinessRuleValidator<T> {
     this.rules.push({
       property,
@@ -30,14 +34,9 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     property: string,
     specification: ISpecification<T>,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): BusinessRuleValidator<T> {
-    return this.addRule(
-      property,
-      (value) => specification.isSatisfiedBy(value),
-      message,
-      context,
-    );
+    return this.addRule(property, value => specification.isSatisfiedBy(value), message, context);
   }
 
   /**
@@ -46,7 +45,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
   mustSatisfy(
     specification: ISpecification<T>,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): BusinessRuleValidator<T> {
     return this.addSpecification('', specification, message, context);
   }
@@ -59,13 +58,13 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     specification: ISpecification<P>,
     message: string,
     getValue: (obj: T) => P,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): BusinessRuleValidator<T> {
     return this.addRule(
       property,
-      (value) => specification.isSatisfiedBy(getValue(value)),
+      value => specification.isSatisfiedBy(getValue(value)),
       message,
-      context,
+      context
     );
   }
 
@@ -75,7 +74,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
   addNested<P>(
     property: string,
     validator: IValidator<P>,
-    getValue: (obj: T) => P | undefined | null,
+    getValue: (obj: T) => P | undefined | null
   ): BusinessRuleValidator<T> {
     this.rules.push({
       property,
@@ -85,11 +84,9 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
         // Obsługa przypadku, gdy zagnieżdżona wartość jest null/undefined
         if (propertyValue === undefined || propertyValue === null) {
           return Result.fail(
-            new ValidationError(
-              property,
-              'Cannot validate undefined or null nested object',
-              { path: property },
-            ),
+            new ValidationError(property, 'Cannot validate undefined or null nested object', {
+              path: property,
+            })
           );
         }
 
@@ -97,7 +94,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
 
         if (result.isFailure) {
           // Dodaje prefiks do nazw właściwości z zachowaniem pełnej ścieżki
-          const prefixedErrors = result.error.errors.map((err) => {
+          const prefixedErrors = result.error.errors.map(err => {
             // Zachowaj oryginalny kontekst z dodatkową ścieżką
             const enrichedContext = {
               ...(err.context || {}),
@@ -109,7 +106,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
             return new ValidationError(
               `${property}${err.property ? `.${err.property}` : ''}`,
               err.message,
-              enrichedContext,
+              enrichedContext
             );
           });
 
@@ -118,7 +115,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
               errors: prefixedErrors,
               path: property,
               errorCount: prefixedErrors.length,
-            }),
+            })
           );
         }
 
@@ -133,7 +130,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
    */
   when(
     condition: (value: T) => boolean,
-    thenValidator: (validator: BusinessRuleValidator<T>) => void,
+    thenValidator: (validator: BusinessRuleValidator<T>) => void
   ): BusinessRuleValidator<T> {
     if (typeof condition !== 'function') {
       throw new Error('Condition must be a function');
@@ -158,17 +155,17 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
    * Dodaje walidację warunkową
    */
   otherwise(
-    elseValidator: (validator: BusinessRuleValidator<T>) => void,
+    elseValidator: (validator: BusinessRuleValidator<T>) => void
   ): BusinessRuleValidator<T> {
     if (this.lastCondition === null || this.lastCondition === undefined) {
       throw new Error(
-        'Cannot call otherwise() without a preceding when() - lastCondition is null/undefined',
+        'Cannot call otherwise() without a preceding when() - lastCondition is null/undefined'
       );
     }
 
     if (typeof this.lastCondition !== 'function') {
       throw new Error(
-        `Cannot call otherwise() - lastCondition is not a function but a ${typeof this.lastCondition}`,
+        `Cannot call otherwise() - lastCondition is not a function but a ${typeof this.lastCondition}`
       );
     }
 
@@ -197,12 +194,9 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
    */
   whenSatisfies(
     specification: ISpecification<T>,
-    thenValidator: (validator: BusinessRuleValidator<T>) => void,
+    thenValidator: (validator: BusinessRuleValidator<T>) => void
   ): BusinessRuleValidator<T> {
-    return this.when(
-      (value) => specification.isSatisfiedBy(value),
-      thenValidator,
-    );
+    return this.when(value => specification.isSatisfiedBy(value), thenValidator);
   }
 
   /**
@@ -249,15 +243,10 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     const combined = new BusinessRuleValidator<T>();
     combined.rules = [...this.rules];
 
-    combined.addRule(
-      '',
-      (value) => other.validate(value).isSuccess,
-      'Failed combined validation',
-    );
+    combined.addRule('', value => other.validate(value).isSuccess, 'Failed combined validation');
 
     return combined;
   }
-
 
   /**
    * Tworzy nowy walidator ze specyfikacji
@@ -265,7 +254,7 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
   static fromSpecification<T>(
     specification: ISpecification<T>,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): BusinessRuleValidator<T> {
     const validator = new BusinessRuleValidator<T>();
     return validator.mustSatisfy(specification, message, context);

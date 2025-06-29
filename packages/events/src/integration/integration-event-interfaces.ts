@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IActor } from "@vytches-ddd/core";
+import type { IActor } from '@vytches-ddd/core';
 
 /**
  * Metadata for integration events
@@ -67,7 +67,7 @@ export interface IDomainToIntegrationEventTransformer<D = any, I = any> {
    */
   transform(
     domainEvent: D,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I>;
 
   /**
@@ -77,6 +77,6 @@ export interface IDomainToIntegrationEventTransformer<D = any, I = any> {
    */
   transformToMultipleTargets(
     domainEvent: D,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I>[];
 }

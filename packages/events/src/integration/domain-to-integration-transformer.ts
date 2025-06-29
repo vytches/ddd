@@ -37,15 +37,14 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
 
   public transformToMultipleTargets(
     domainEvent: IExtendedDomainEvent<D>,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I>[] {
     if (!this.contextRouter) {
       // Bez routera zwracamy pojedynczy event bez kontekstu docelowego
       return [this.transform(domainEvent, additionalMetadata)];
     }
 
-    const targetContexts =
-      this.contextRouter.determineTargetContexts(domainEvent);
+    const targetContexts = this.contextRouter.determineTargetContexts(domainEvent);
 
     // Jeśli brak kontekstów docelowych, zwracamy pojedynczy event
     if (targetContexts.length === 0) {
@@ -53,11 +52,11 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
     }
 
     // Tworzymy event dla każdego kontekstu docelowego
-    return targetContexts.map((targetContext) =>
+    return targetContexts.map(targetContext =>
       this.transform(domainEvent, {
         ...additionalMetadata,
         targetContext,
-      }),
+      })
     );
   }
 
@@ -69,7 +68,7 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
    */
   public transform(
     domainEvent: IExtendedDomainEvent<D>,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I> {
     // Transform payload to integration format
     const transformedPayload = this.transformPayload(domainEvent.payload);
@@ -77,19 +76,13 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
     // Create integration metadata from domain metadata
     const integrationMetadata = this.transformMetadata(
       domainEvent.metadata as IEventMetadata,
-      additionalMetadata,
+      additionalMetadata
     );
 
     // Create integration event with appropriate type (possibly mapped)
-    const integrationEventType = this.getIntegrationEventType(
-      domainEvent.eventType,
-    );
+    const integrationEventType = this.getIntegrationEventType(domainEvent.eventType);
 
-    return createIntegrationEvent<I>(
-      integrationEventType,
-      transformedPayload,
-      integrationMetadata,
-    );
+    return createIntegrationEvent<I>(integrationEventType, transformedPayload, integrationMetadata);
   }
 
   /**
@@ -108,7 +101,7 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
    */
   protected transformMetadata(
     domainMetadata: IEventMetadata,
-    additionalMetadata?: Partial<IIntegrationEventMetadata>,
+    additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): Partial<IIntegrationEventMetadata> {
     const metadata: Partial<IIntegrationEventMetadata> = {
       // Add source and target context

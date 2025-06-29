@@ -13,19 +13,25 @@
 
 ### What are Domain Events?
 
-Domain Events represent something important that happened in the domain. They are immutable records of past occurrences that other parts of the system might need to know about.
+Domain Events represent something important that happened in the domain. They
+are immutable records of past occurrences that other parts of the system might
+need to know about.
 
 **Core Concept**:
+
 ```typescript
 // Create an event when something happens
 const event = createDomainEvent('OrderPlaced', {
   orderId: '123',
   customerId: '456',
-  totalAmount: 100.00
+  totalAmount: 100.0,
 });
 
 // Or use a typed event class
-class OrderPlacedEvent extends DomainEvent<{ orderId: string; customerId: string }> {
+class OrderPlacedEvent extends DomainEvent<{
+  orderId: string;
+  customerId: string;
+}> {
   constructor(payload: { orderId: string; customerId: string }) {
     super(payload);
   }
@@ -37,14 +43,16 @@ class OrderPlacedEvent extends DomainEvent<{ orderId: string; customerId: string
 ### 1. Domain Event Interfaces
 
 **IDomainEvent**: Basic event structure
+
 ```typescript
 interface IDomainEvent<P = any> {
-  eventType: string;      // What happened
-  payload?: P;            // Event data
+  eventType: string; // What happened
+  payload?: P; // Event data
 }
 ```
 
 **IExtendedDomainEvent**: Event with metadata
+
 ```typescript
 interface IExtendedDomainEvent<P = any> extends IDomainEvent<P> {
   metadata?: IEventMetadata;
@@ -52,18 +60,19 @@ interface IExtendedDomainEvent<P = any> extends IDomainEvent<P> {
 ```
 
 **IEventMetadata**: Contextual information
+
 ```typescript
 interface IEventMetadata {
-  eventId?: string;               // Unique event identifier
-  timestamp?: Date;               // When it occurred
-  correlationId?: string;         // Track related operations
-  causationId?: string;           // What caused this event
-  aggregateId?: string | number;  // Source aggregate
-  aggregateType?: string;         // Type of aggregate
-  aggregateVersion?: number;      // Aggregate version after event
-  eventVersion?: number;          // Event schema version
-  userId?: string;                // Who triggered it
-  [key: string]: any;            // Additional metadata
+  eventId?: string; // Unique event identifier
+  timestamp?: Date; // When it occurred
+  correlationId?: string; // Track related operations
+  causationId?: string; // What caused this event
+  aggregateId?: string | number; // Source aggregate
+  aggregateType?: string; // Type of aggregate
+  aggregateVersion?: number; // Aggregate version after event
+  eventVersion?: number; // Event schema version
+  userId?: string; // Who triggered it
+  [key: string]: any; // Additional metadata
 }
 ```
 
@@ -73,14 +82,14 @@ Base implementation for typed domain events:
 
 ```typescript
 abstract class DomainEvent<T = any> implements IExtendedDomainEvent<T> {
-  readonly eventId: string;        // Auto-generated UUID
-  readonly occurredOn: Date;       // Auto-set timestamp
-  readonly eventType: string;      // Defaults to class name
+  readonly eventId: string; // Auto-generated UUID
+  readonly occurredOn: Date; // Auto-set timestamp
+  readonly eventType: string; // Defaults to class name
   readonly payload?: T;
   readonly metadata?: IEventMetadata;
-  
+
   constructor(payload?: T, metadata?: IEventMetadata);
-  
+
   // Create copy with additional metadata
   withMetadata(metadata: Partial<IEventMetadata>): DomainEvent<T>;
 }
@@ -95,7 +104,7 @@ function createDomainEvent<P = any>(
   eventType: string,
   payload: P,
   metadata?: Partial<IEventMetadata>
-): IExtendedDomainEvent<P>
+): IExtendedDomainEvent<P>;
 ```
 
 ## Usage Patterns
@@ -121,7 +130,7 @@ class CustomerRegisteredEvent extends DomainEvent<{
 const event = new CustomerRegisteredEvent({
   customerId: '123',
   email: 'user@example.com',
-  registeredAt: new Date()
+  registeredAt: new Date(),
 });
 ```
 
@@ -132,16 +141,16 @@ const event = new CustomerRegisteredEvent({
 const event = createDomainEvent('ProductAddedToCart', {
   productId: 'prod-123',
   quantity: 2,
-  cartId: 'cart-456'
+  cartId: 'cart-456',
 });
 
 // With additional metadata
 const eventWithMeta = createDomainEvent(
   'PaymentProcessed',
   { orderId: 'order-789', amount: 99.99 },
-  { 
+  {
     correlationId: 'session-123',
-    userId: 'user-456'
+    userId: 'user-456',
   }
 );
 ```
@@ -154,7 +163,7 @@ const originalEvent = new OrderShippedEvent({ orderId: '123' });
 // Add correlation for tracking
 const correlatedEvent = originalEvent.withMetadata({
   correlationId: 'batch-456',
-  causationId: originalEvent.eventId
+  causationId: originalEvent.eventId,
 });
 ```
 
@@ -185,12 +194,14 @@ Metadata provides context and enables advanced patterns:
 ### Event Naming
 
 Use past tense to indicate something has happened:
+
 - ✅ OrderPlaced, PaymentProcessed, CustomerRegistered
 - ❌ PlaceOrder, ProcessPayment, RegisterCustomer
 
 ### Immutability
 
 Events are immutable records:
+
 ```typescript
 // Create new event with metadata, don't modify original
 const newEvent = originalEvent.withMetadata({ userId: '123' });
@@ -241,12 +252,17 @@ class OrderShippedEvent extends DomainEvent<{
 class Order extends AggregateRoot<string> {
   placeOrder(customerId: string, items: OrderItem[]) {
     // Apply domain event
-    this.apply(new OrderPlacedEvent({
-      orderId: this.getId().getValue(),
-      customerId,
-      items: items.map(i => ({ productId: i.productId, quantity: i.quantity })),
-      totalAmount: this.calculateTotal(items)
-    }));
+    this.apply(
+      new OrderPlacedEvent({
+        orderId: this.getId().getValue(),
+        customerId,
+        items: items.map(i => ({
+          productId: i.productId,
+          quantity: i.quantity,
+        })),
+        totalAmount: this.calculateTotal(items),
+      })
+    );
   }
 }
 ```
@@ -261,4 +277,6 @@ DomainTS Domain Events provide:
 - **Flexibility**: Both class-based and factory approaches
 - **Integration Ready**: Works with event buses and stores
 
-This implementation enables event-driven architectures while maintaining clean domain models and supporting advanced patterns like event sourcing and distributed tracing.
+This implementation enables event-driven architectures while maintaining clean
+domain models and supporting advanced patterns like event sourcing and
+distributed tracing.

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IEventMetadata, IExtendedDomainEvent } from "@vytches-ddd/contracts";
-import { LibUtils } from "@vytches-ddd/utils";
-
+import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { LibUtils } from '@vytches-ddd/utils';
 
 /**
  * Base implementation of a domain event
@@ -68,7 +67,7 @@ export abstract class DomainEvent<T = any> implements IExtendedDomainEvent<T> {
   public withMetadata(metadata: Partial<IEventMetadata>): DomainEvent<T> {
     const EventClass = this.constructor as new (
       payload?: T,
-      metadata?: IEventMetadata,
+      metadata?: IEventMetadata
     ) => DomainEvent<T>;
 
     return new EventClass(this.payload, {

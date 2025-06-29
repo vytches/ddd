@@ -4,22 +4,17 @@ import type { IProjectionSnapshotStore } from '../projection-interfaces';
 
 import { BaseIntervalCapability } from './base-capability';
 
-export class SnapshotProjectionCapability<
-  TReadModel,
-> extends BaseIntervalCapability<TReadModel> {
+export class SnapshotProjectionCapability<TReadModel> extends BaseIntervalCapability<TReadModel> {
   private version = 0;
 
   constructor(
     private readonly snapshotStore: IProjectionSnapshotStore,
-    interval = 1000,
+    interval = 1000
   ) {
     super('snapshot', interval);
   }
 
-  protected async handleInterval(
-    state: TReadModel,
-    event: IExtendedDomainEvent,
-  ): Promise<void> {
+  protected async handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
     this.ensureAttached();
 
     this.version++;
@@ -43,7 +38,7 @@ export class SnapshotProjectionCapability<
     this.ensureAttached();
 
     const snapshot = await this.snapshotStore.loadLatest<TReadModel>(
-      this.context!.getProjectionName(),
+      this.context!.getProjectionName()
     );
 
     if (snapshot) {

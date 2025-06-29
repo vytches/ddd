@@ -16,9 +16,7 @@ export class ProjectionEngineRegistry {
     return this;
   }
 
-  get<TReadModel>(
-    projectionName: string,
-  ): IProjectionEngine<TReadModel> | undefined {
+  get<TReadModel>(projectionName: string): IProjectionEngine<TReadModel> | undefined {
     return this.engines.get(projectionName) as IProjectionEngine<TReadModel>;
   }
 
@@ -27,7 +25,7 @@ export class ProjectionEngineRegistry {
   }
 
   getInterestedEngines(event: IExtendedDomainEvent): IProjectionEngine<any>[] {
-    return this.getAll().filter((engine) => engine.isInterestedIn(event));
+    return this.getAll().filter(engine => engine.isInterestedIn(event));
   }
 
   size(): number {

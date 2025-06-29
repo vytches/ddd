@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IDomainEvent, IEventPersistenceHandler } from "@vytches-ddd/contracts";
+import type { IDomainEvent, IEventPersistenceHandler } from '@vytches-ddd/contracts';
 
 /**
  * Generic implementation of event persistence handler
@@ -10,9 +10,7 @@ import type { IDomainEvent, IEventPersistenceHandler } from "@vytches-ddd/contra
 // TODO: zaktualizować HOW-TO
 // TODO: zogbaczyć co można tutaj zrobić i czy jakoś się pozbyć tego mechanizmu
 
-export abstract class GenericEventPersistenceHandler
-  implements IEventPersistenceHandler
-{
+export abstract class GenericEventPersistenceHandler implements IEventPersistenceHandler {
   private handlers = new Map<string, (payload: any) => Promise<number>>();
 
   /**
@@ -20,7 +18,7 @@ export abstract class GenericEventPersistenceHandler
    */
   protected registerHandler<T = any>(
     eventType: string,
-    handler: (payload: T) => Promise<number>,
+    handler: (payload: T) => Promise<number>
   ): void {
     this.handlers.set(eventType, handler as any);
   }
@@ -33,7 +31,7 @@ export abstract class GenericEventPersistenceHandler
 
     if (!handler) {
       throw new Error(
-        `No handler registered for event type ${event.eventType} in ${this.constructor.name}`,
+        `No handler registered for event type ${event.eventType} in ${this.constructor.name}`
       );
     }
 

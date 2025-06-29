@@ -9,5 +9,3 @@ import type { IIntegrationEvent } from './integration';
 export type IDomainEventBus = IEventBus<IDomainEvent>;
 export type IIntegrationEventBus = IEventBus<IIntegrationEvent>;
 export type IAuditEventBus = IEventBus<IAuditEvent>;
-
-

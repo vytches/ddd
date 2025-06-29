@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { LibUtils } from "@vytches-ddd/utils";
+import { LibUtils } from '@vytches-ddd/utils';
 import { createDomainEvent } from '@vytches-ddd/contracts';
-
 
 describe('createDomainEvent', () => {
   beforeEach(() => {

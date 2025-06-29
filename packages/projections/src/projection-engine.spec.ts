@@ -57,7 +57,7 @@ class MockUserProjection implements IProjection<UserReadModel> {
       id: '',
       name: '',
       email: '',
-      version: 0
+      version: 0,
     };
   }
 
@@ -72,19 +72,19 @@ class MockUserProjection implements IProjection<UserReadModel> {
           id: event.metadata?.aggregateId || '',
           name: event.payload.name,
           email: event.payload.email,
-          version: readModel.version + 1
+          version: readModel.version + 1,
         };
       case 'UserUpdated':
         return {
           ...readModel,
           name: event.payload.name || readModel.name,
           email: event.payload.email || readModel.email,
-          version: readModel.version + 1
+          version: readModel.version + 1,
         };
       case 'UserDeleted':
         return {
           ...readModel,
-          version: readModel.version + 1
+          version: readModel.version + 1,
         };
       default:
         return readModel;
@@ -135,8 +135,8 @@ describe('ProjectionEngine', () => {
       eventVersion: 1,
       aggregateId,
       eventId: 'event-123',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   beforeEach(() => {
@@ -165,7 +165,7 @@ describe('ProjectionEngine', () => {
       // Arrange
       const event = createMockEvent('UserCreated', 'user-123', {
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
 
       // Act
@@ -177,7 +177,7 @@ describe('ProjectionEngine', () => {
         id: 'user-123',
         name: 'John Doe',
         email: 'john@example.com',
-        version: 1
+        version: 1,
       });
     });
 
@@ -185,10 +185,10 @@ describe('ProjectionEngine', () => {
       // Arrange
       const createEvent = createMockEvent('UserCreated', 'user-123', {
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
       const updateEvent = createMockEvent('UserUpdated', 'user-123', {
-        name: 'Jane Doe'
+        name: 'Jane Doe',
       });
 
       // Act
@@ -201,7 +201,7 @@ describe('ProjectionEngine', () => {
         id: 'user-123',
         name: 'Jane Doe',
         email: 'john@example.com',
-        version: 2
+        version: 2,
       });
     });
 
@@ -224,12 +224,12 @@ describe('ProjectionEngine', () => {
         id: 'user-123',
         name: 'Existing User',
         email: 'existing@example.com',
-        version: 5
+        version: 5,
       };
       await store.save('UserProjection', existingState);
 
       const event = createMockEvent('UserUpdated', 'user-123', {
-        name: 'Updated User'
+        name: 'Updated User',
       });
 
       // Act
@@ -241,7 +241,7 @@ describe('ProjectionEngine', () => {
         id: 'user-123',
         name: 'Updated User',
         email: 'existing@example.com',
-        version: 6
+        version: 6,
       });
     });
 
@@ -252,14 +252,16 @@ describe('ProjectionEngine', () => {
       const event = createMockEvent('UserCreated', 'user-123', {});
 
       // Act & Assert
-      await expect(failingEngine.processEvent(event)).rejects.toThrow('Failed to create initial state');
+      await expect(failingEngine.processEvent(event)).rejects.toThrow(
+        'Failed to create initial state'
+      );
     });
 
     it('should save state after successful event processing', async () => {
       // Arrange
       const event = createMockEvent('UserCreated', 'user-123', {
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
 
       // Act
@@ -271,7 +273,7 @@ describe('ProjectionEngine', () => {
         id: 'user-123',
         name: 'John Doe',
         email: 'john@example.com',
-        version: 1
+        version: 1,
       });
     });
   });
@@ -295,7 +297,7 @@ describe('ProjectionEngine', () => {
         id: '',
         name: '',
         email: '',
-        version: 0
+        version: 0,
       });
     });
 
@@ -305,7 +307,7 @@ describe('ProjectionEngine', () => {
         id: 'user-456',
         name: 'Manual Save',
         email: 'manual@example.com',
-        version: 10
+        version: 10,
       };
 
       // Act
@@ -321,7 +323,7 @@ describe('ProjectionEngine', () => {
       const events = [
         createMockEvent('UserCreated', 'user-123', { name: 'John', email: 'john@example.com' }),
         createMockEvent('UserUpdated', 'user-123', { name: 'Jane' }),
-        createMockEvent('UserUpdated', 'user-123', { email: 'jane@example.com' })
+        createMockEvent('UserUpdated', 'user-123', { email: 'jane@example.com' }),
       ];
 
       // Act - process events sequentially to avoid race conditions
@@ -343,7 +345,10 @@ describe('ProjectionEngine', () => {
       const capability2 = new MockCapability();
 
       // Act
-      const engineWithCapabilities = new ProjectionEngine(projection, store, [capability1, capability2]);
+      const engineWithCapabilities = new ProjectionEngine(projection, store, [
+        capability1,
+        capability2,
+      ]);
 
       // Assert
       expect(capability1.onAttachCalled).toBe(true);
@@ -384,8 +389,8 @@ describe('EnhancedProjectionEngine', () => {
       aggregateType: 'User',
       eventVersion: 1,
       eventId: 'event-123',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   beforeEach(() => {
@@ -398,7 +403,7 @@ describe('EnhancedProjectionEngine', () => {
       maxDelayMs: 5000,
       backoffMultiplier: 2,
       retryableErrors: [],
-      nonRetryableErrors: []
+      nonRetryableErrors: [],
     };
     engine = new EnhancedProjectionEngine(projection, store, retryConfig, errorStrategy);
   });
@@ -407,7 +412,12 @@ describe('EnhancedProjectionEngine', () => {
     it('should retry failed operations according to strategy', async () => {
       // Arrange
       const failingProjection = new MockUserProjection(true);
-      const failingEngine = new EnhancedProjectionEngine(failingProjection, store, [], errorStrategy);
+      const failingEngine = new EnhancedProjectionEngine(
+        failingProjection,
+        store,
+        [],
+        errorStrategy
+      );
       const event = createMockEvent('UserCreated', 'user-123', {});
 
       // Mock the shouldRetry method to return true initially, then false
@@ -439,7 +449,7 @@ describe('EnhancedProjectionEngine', () => {
           id: event?.metadata?.aggregateId,
           name: 'Recovered User',
           email: 'recovered@example.com',
-          version: readModel.version + 1
+          version: readModel.version + 1,
         };
       });
 
@@ -457,7 +467,9 @@ describe('EnhancedProjectionEngine', () => {
 
     it('should not retry non-retryable errors', async () => {
       // Arrange
-      const nonRetryableError = new ProjectionError('Non-retryable error', { name: 'UserProjection' });
+      const nonRetryableError = new ProjectionError('Non-retryable error', {
+        name: 'UserProjection',
+      });
       const projection = new MockUserProjection();
 
       vi.spyOn(projection, 'apply').mockRejectedValue(nonRetryableError);
@@ -495,7 +507,8 @@ describe('EnhancedProjectionEngine', () => {
       const originalSave = store.save.bind(store);
       vi.spyOn(store, 'save').mockImplementation(async (projectionName: string, state: any) => {
         saveCallCount++;
-        if (saveCallCount <= 2) { // Fail first 2 attempts
+        if (saveCallCount <= 2) {
+          // Fail first 2 attempts
           throw new Error('Store temporarily unavailable');
         }
         // Succeed on fourth attempt - actually save the data
@@ -504,7 +517,7 @@ describe('EnhancedProjectionEngine', () => {
 
       const event = createMockEvent('UserCreated', 'user-123', {
         name: 'Test User',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       // Act
@@ -530,7 +543,7 @@ describe('EnhancedProjectionEngine', () => {
 
       const event = createMockEvent('UserCreated', 'user-123', {
         name: 'Test User',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       // Act
@@ -568,9 +581,12 @@ describe('EnhancedProjectionEngine', () => {
 
     it('should handle concurrent events safely', async () => {
       // Arrange - first create the user, then update it
-      const createEvent = createMockEvent('UserCreated', 'user-123', { name: 'Initial User', email: 'initial@example.com' });
+      const createEvent = createMockEvent('UserCreated', 'user-123', {
+        name: 'Initial User',
+        email: 'initial@example.com',
+      });
       await engine.processEvent(createEvent);
-      
+
       const updateEvents = Array.from({ length: 10 }, (_, i) =>
         createMockEvent('UserUpdated', 'user-123', { name: `Concurrent User ${i}` })
       );
@@ -598,8 +614,8 @@ describe('EnhancedProjectionEngine', () => {
         payload: null,
         metadata: {
           eventId: 'event-123',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       } as any;
 
       // Act & Assert
@@ -626,7 +642,7 @@ describe('EnhancedProjectionEngine', () => {
       // Arrange
       const largePayload = {
         data: 'x'.repeat(1000000), // 1MB string
-        metadata: { size: 'large' }
+        metadata: { size: 'large' },
       };
       const event = createMockEvent('UserCreated', 'user-123', largePayload);
 

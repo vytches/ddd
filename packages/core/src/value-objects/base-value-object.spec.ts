@@ -232,9 +232,7 @@ describe('BaseValueObject', () => {
 
       // Act & Assert
       for (const invalidPerson of invalidPersons) {
-        const [error] = safeRun(
-          () => new PersonValueObject(invalidPerson as any),
-        );
+        const [error] = safeRun(() => new PersonValueObject(invalidPerson as any));
         expect(error).toBeInstanceOf(Error);
         expect(error?.message).toBe('Invalid person data');
       }
@@ -346,9 +344,7 @@ describe('BaseValueObject', () => {
       expect(validVO?.getValue()).toBe(validValue);
 
       // Act & Assert - Invalid value (passes parent validation but fails child validation)
-      const [error] = safeRun(
-        () => new ExtendedStringValueObject(invalidValue),
-      );
+      const [error] = safeRun(() => new ExtendedStringValueObject(invalidValue));
       expect(error).toBeInstanceOf(Error);
     });
 

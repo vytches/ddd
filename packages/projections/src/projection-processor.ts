@@ -23,12 +23,11 @@ export class ProjectionProcessor implements IEventProcessor {
   async process(event: IDomainEvent): Promise<void> {
     const extendedEvent = this.ensureExtendedEvent(event);
 
-    const interestedEngines =
-      this.engineRegistry.getInterestedEngines(extendedEvent);
+    const interestedEngines = this.engineRegistry.getInterestedEngines(extendedEvent);
     if (interestedEngines.length === 0) return;
 
-    const promises = interestedEngines.map((engine) =>
-      this.processWithErrorHandling(engine, extendedEvent),
+    const promises = interestedEngines.map(engine =>
+      this.processWithErrorHandling(engine, extendedEvent)
     );
 
     await Promise.all(promises);
@@ -36,14 +35,14 @@ export class ProjectionProcessor implements IEventProcessor {
 
   private async processWithErrorHandling(
     engine: IProjectionEngine<any>,
-    event: IExtendedDomainEvent,
+    event: IExtendedDomainEvent
   ): Promise<void> {
     try {
       await engine.processEvent(event);
     } catch (error) {
       console.error(
         `Error processing event ${event.eventType} in projection ${engine.getProjectionName()}:`,
-        error,
+        error
       );
       // Could add configurable error handling strategy
     }

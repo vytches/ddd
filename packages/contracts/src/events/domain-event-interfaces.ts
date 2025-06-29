@@ -59,4 +59,3 @@ export interface IExtendedDomainEvent<P = any> extends IDomainEvent<P> {
   /** Event metadata */
   metadata?: IEventMetadata;
 }
-

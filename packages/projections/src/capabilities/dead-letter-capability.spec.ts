@@ -70,8 +70,8 @@ describe('DeadLetterCapability', () => {
     metadata: {
       eventVersion: 1,
       eventId: 'event-123',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   beforeEach(() => {
@@ -214,7 +214,10 @@ describe('DeadLetterCapability', () => {
     it('should handle malformed error data gracefully', async () => {
       // Arrange
       // Create an error with malformed data structure by manually setting the data after construction
-      const errorWithMalformedData = new ProjectionError('Test error', { code: DomainErrorCode.Default, data: 'invalid-data' });
+      const errorWithMalformedData = new ProjectionError('Test error', {
+        code: DomainErrorCode.Default,
+        data: 'invalid-data',
+      });
       const event = createMockEvent();
 
       // Act & Assert - should not throw
@@ -272,7 +275,7 @@ describe('DeadLetterCapability', () => {
   describe('attempt count extraction', () => {
     it('should extract attempt count from error data when valid', async () => {
       // Arrange
-      const error = new ProjectionError('Test error',  { attemptCount: 4 });
+      const error = new ProjectionError('Test error', { attemptCount: 4 });
       const event = createMockEvent();
 
       // Act
@@ -286,7 +289,7 @@ describe('DeadLetterCapability', () => {
 
     it('should handle non-number attempt count in error data', async () => {
       // Arrange
-      const error = new ProjectionError('Test error',  { attemptCount: 'invalid' });
+      const error = new ProjectionError('Test error', { attemptCount: 'invalid' });
       const event = createMockEvent();
 
       // Act
@@ -301,7 +304,7 @@ describe('DeadLetterCapability', () => {
       // Arrange
       const error = new ProjectionError('Test error', {
         nested: { attemptCount: 5 },
-        attemptCount: 3 // This should be used
+        attemptCount: 3, // This should be used
       });
       const event = createMockEvent();
 
@@ -348,15 +351,14 @@ describe('DeadLetterCapability', () => {
 
     it('should handle rapid error processing', async () => {
       // Arrange
-      const errors = Array.from({ length: 10 }, (_, i) =>
-        new ProjectionError(`Error ${i}`,  { attemptCount: 5 })
+      const errors = Array.from(
+        { length: 10 },
+        (_, i) => new ProjectionError(`Error ${i}`, { attemptCount: 5 })
       );
       const events = Array.from({ length: 10 }, () => createMockEvent());
 
       // Act
-      await Promise.all(
-        errors.map((error, index) => capability.onError(error, events[index]))
-      );
+      await Promise.all(errors.map((error, index) => capability.onError(error, events[index])));
 
       // Assert
       const deadLetters = store.getAllDeadLetters();
@@ -369,10 +371,10 @@ describe('DeadLetterCapability', () => {
 
     it('should handle complex error metadata', async () => {
       // Arrange
-      const complexError = new ProjectionError('Complex error',  {
+      const complexError = new ProjectionError('Complex error', {
         attemptCount: 3,
         retryHistory: ['attempt1', 'attempt2', 'attempt3'],
-        context: { userId: '123', action: 'update' }
+        context: { userId: '123', action: 'update' },
       });
       const event = createMockEvent();
 
@@ -392,7 +394,7 @@ describe('DeadLetterCapability', () => {
     it('should handle edge case with different error types', async () => {
       // Arrange
       const standardError = new Error('Standard error');
-      const projectionError = new ProjectionError('Projection error',  { attemptCount: 3 });
+      const projectionError = new ProjectionError('Projection error', { attemptCount: 3 });
       const typeError = new TypeError('Type error');
 
       const event = createMockEvent();

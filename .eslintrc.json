@@ -11,13 +11,8 @@
     "coverage/**",
     "**/index.d.ts"
   ],
-  "plugins": [
-    "@nx",
-    "@typescript-eslint"
-  ],
-  "extends": [
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "plugins": ["@nx", "@typescript-eslint"],
+  "extends": ["plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -25,16 +20,8 @@
   },
   "overrides": [
     {
-      "files": [
-        "*.ts",
-        "*.tsx",
-        "*.js",
-        "*.jsx"
-      ],
-      "extends": [
-        "plugin:@typescript-eslint/recommended",
-        "prettier"
-      ],
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "extends": ["plugin:@typescript-eslint/recommended", "prettier"],
       "rules": {
         "@nx/enforce-module-boundaries": [
           "error",
@@ -53,23 +40,16 @@
               },
               {
                 "sourceTag": "scope:utils",
-                "onlyDependOnLibsWithTags": [
-                  "scope:utils",
-                  "scope:contracts"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:utils", "scope:contracts"]
               },
               {
                 "sourceTag": "scope:validation",
-                "onlyDependOnLibsWithTags": [
-                  "scope:utils",
-                  "scope:validation",
-                  "scope:contracts"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:utils", "scope:validation", "scope:contracts"]
               },
               {
                 "sourceTag": "scope:policies",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
+                  "scope:contracts",
                   "scope:validation",
                   "scope:utils",
                   "scope:policies"
@@ -125,11 +105,7 @@
               },
               {
                 "sourceTag": "scope:resilience",
-                "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:utils",
-                  "scope:resilience"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:resilience"]
               },
               {
                 "sourceTag": "scope:testing",
@@ -145,32 +121,19 @@
               },
               {
                 "sourceTag": "scope:enterprise",
-                "onlyDependOnLibsWithTags": [
-                  "scope:*",
-                  "scope:enterprise",
-                  "*"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:*", "scope:enterprise", "*"]
               },
               {
                 "sourceTag": "scope:cli",
-                "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:utils",
-                  "scope:cli"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:cli"]
               },
               {
                 "sourceTag": "scope:contracts",
-                "onlyDependOnLibsWithTags": [
-                  "scope:contracts",
-                  "scope:utils"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:contracts", "scope:utils"]
               },
               {
                 "sourceTag": "scope:examples",
-                "onlyDependOnLibsWithTags": [
-                  "*"
-                ]
+                "onlyDependOnLibsWithTags": ["*"]
               }
             ]
           }
@@ -188,10 +151,7 @@
         "@typescript-eslint/prefer-readonly": "off",
         "@typescript-eslint/prefer-nullish-coalescing": "off",
         "@typescript-eslint/prefer-optional-chain": "off",
-        "@typescript-eslint/consistent-type-definitions": [
-          "error",
-          "interface"
-        ],
+        "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
         "@typescript-eslint/consistent-type-imports": [
           "error",
           {
@@ -206,32 +166,17 @@
       }
     },
     {
-      "files": [
-        "*.ts",
-        "*.tsx"
-      ],
-      "extends": [
-        "plugin:@nx/typescript"
-      ],
+      "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@nx/typescript"],
       "rules": {}
     },
     {
-      "files": [
-        "*.js",
-        "*.jsx"
-      ],
-      "extends": [
-        "plugin:@nx/javascript"
-      ],
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@nx/javascript"],
       "rules": {}
     },
     {
-      "files": [
-        "*.spec.ts",
-        "*.test.ts",
-        "*.spec.tsx",
-        "*.test.tsx"
-      ],
+      "files": ["*.spec.ts", "*.test.ts", "*.spec.tsx", "*.test.tsx"],
       "env": {
         "jest": true
       },

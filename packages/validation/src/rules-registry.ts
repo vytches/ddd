@@ -22,55 +22,33 @@ export interface IRulesProvider {
 export interface ICoreRules {
   // Basic validation rules
   required: <T>(property: keyof T, message?: string) => RuleFunction<T>;
-  minLength: <T>(
-    property: keyof T,
-    length: number,
-    message?: string,
-  ) => RuleFunction<T>;
-  maxLength: <T>(
-    property: keyof T,
-    length: number,
-    message?: string,
-  ) => RuleFunction<T>;
-  pattern: <T>(
-    property: keyof T,
-    regex: RegExp,
-    message?: string,
-  ) => RuleFunction<T>;
-  range: <T>(
-    property: keyof T,
-    min: number,
-    max: number,
-    message?: string,
-  ) => RuleFunction<T>;
+  minLength: <T>(property: keyof T, length: number, message?: string) => RuleFunction<T>;
+  maxLength: <T>(property: keyof T, length: number, message?: string) => RuleFunction<T>;
+  pattern: <T>(property: keyof T, regex: RegExp, message?: string) => RuleFunction<T>;
+  range: <T>(property: keyof T, min: number, max: number, message?: string) => RuleFunction<T>;
   email: <T>(property: keyof T, message?: string) => RuleFunction<T>;
 
   // Specification-based rules
-  satisfies: <T>(
-    specification: ISpecification<T>,
-    message: string,
-  ) => RuleFunction<T>;
+  satisfies: <T>(specification: ISpecification<T>, message: string) => RuleFunction<T>;
   propertySatisfies: <T, P>(
     property: keyof T & string,
     specification: ISpecification<P>,
     message: string,
-    getValue: (obj: T) => P,
+    getValue: (obj: T) => P
   ) => RuleFunction<T>;
 
   // Conditional rules
   when: <T>(
     condition: (value: T) => boolean,
-    thenRules: (validator: BusinessRuleValidator<T>) => void,
+    thenRules: (validator: BusinessRuleValidator<T>) => void
   ) => RuleFunction<T>;
 
   whenSatisfies: <T>(
     specification: ISpecification<T>,
-    thenRules: (validator: BusinessRuleValidator<T>) => void,
+    thenRules: (validator: BusinessRuleValidator<T>) => void
   ) => RuleFunction<T>;
 
-  otherwise: <T>(
-    elseRules: (validator: BusinessRuleValidator<T>) => void,
-  ) => RuleFunction<T>;
+  otherwise: <T>(elseRules: (validator: BusinessRuleValidator<T>) => void) => RuleFunction<T>;
 }
 
 /**
@@ -84,8 +62,8 @@ export class CoreRules implements ICoreRules, IRulesProvider {
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        (value) => value[property] !== undefined && value[property] !== null,
-        message,
+        value => value[property] !== undefined && value[property] !== null,
+        message
       );
 
   minLength =
@@ -93,8 +71,8 @@ export class CoreRules implements ICoreRules, IRulesProvider {
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        (value) => String(value[property]).length >= length,
-        message || `Minimum length is ${length}`,
+        value => String(value[property]).length >= length,
+        message || `Minimum length is ${length}`
       );
 
   maxLength =
@@ -102,29 +80,25 @@ export class CoreRules implements ICoreRules, IRulesProvider {
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        (value) => String(value[property]).length <= length,
-        message || `Maximum length is ${length}`,
+        value => String(value[property]).length <= length,
+        message || `Maximum length is ${length}`
       );
 
   pattern =
     <T>(property: keyof T, regex: RegExp, message = 'Invalid format') =>
     (validator: BusinessRuleValidator<T>) =>
-      validator.addRule(
-        property as string,
-        (value) => regex.test(String(value[property])),
-        message,
-      );
+      validator.addRule(property as string, value => regex.test(String(value[property])), message);
 
   range =
     <T>(property: keyof T, min: number, max: number, message?: string) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        (value) => {
+        value => {
           const num = Number(value[property]);
           return !isNaN(num) && num >= min && num <= max;
         },
-        message || `Value must be between ${min} and ${max}`,
+        message || `Value must be between ${min} and ${max}`
       );
 
   email =
@@ -132,8 +106,8 @@ export class CoreRules implements ICoreRules, IRulesProvider {
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value[property])),
-        message,
+        value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value[property])),
+        message
       );
 
   satisfies =
@@ -146,7 +120,7 @@ export class CoreRules implements ICoreRules, IRulesProvider {
       property: keyof T & string,
       specification: ISpecification<P>,
       message: string,
-      getValue: (obj: T) => P,
+      getValue: (obj: T) => P
     ) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.propertyMustSatisfy(property, specification, message, getValue);
@@ -154,7 +128,7 @@ export class CoreRules implements ICoreRules, IRulesProvider {
   whenSatisfies =
     <T>(
       specification: ISpecification<T>,
-      thenRules: (validator: BusinessRuleValidator<T>) => void,
+      thenRules: (validator: BusinessRuleValidator<T>) => void
     ) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.whenSatisfies(specification, thenRules);
@@ -167,7 +141,7 @@ export class CoreRules implements ICoreRules, IRulesProvider {
   when =
     <T>(
       condition: (value: T) => boolean,
-      thenRules: (validator: BusinessRuleValidator<T>) => void,
+      thenRules: (validator: BusinessRuleValidator<T>) => void
     ) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.when(condition, thenRules);
@@ -185,9 +159,7 @@ export class RulesRegistry {
    */
   static register(provider: IRulesProvider): void {
     if (this.providers.has(provider.name)) {
-      throw new Error(
-        `Rule provider with name "${provider.name}" is already registered`,
-      );
+      throw new Error(`Rule provider with name "${provider.name}" is already registered`);
     }
     this.providers.set(provider.name, provider);
   }

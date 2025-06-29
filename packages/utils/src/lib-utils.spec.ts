@@ -586,7 +586,7 @@ describe('LibUtils', () => {
     it('should return true for valid integers', () => {
       const validIntegers = [0, 1, 42, 100];
 
-      validIntegers.forEach((num) => {
+      validIntegers.forEach(num => {
         expect(LibUtils.isValidInteger(num)).toBe(true);
       });
     });
@@ -594,7 +594,7 @@ describe('LibUtils', () => {
     it('should return false for negative integers', () => {
       const negativeIntegers = [-1, -42, -100];
 
-      negativeIntegers.forEach((num) => {
+      negativeIntegers.forEach(num => {
         expect(LibUtils.isValidInteger(num)).toBe(false);
       });
     });
@@ -602,7 +602,7 @@ describe('LibUtils', () => {
     it('should return false for floating point numbers', () => {
       const floats = [0.5, 1.1, 42.42];
 
-      floats.forEach((num) => {
+      floats.forEach(num => {
         expect(LibUtils.isValidInteger(num)).toBe(false);
       });
     });
@@ -618,7 +618,7 @@ describe('LibUtils', () => {
         '115792089237316195423570985008687907853269984665640564039457584007913129639935', // 2^256 - 1, typical for blockchain
       ];
 
-      edgeCases.forEach((str) => {
+      edgeCases.forEach(str => {
         expect(LibUtils.isValidBigInt(str)).toBe(true);
       });
 
@@ -630,14 +630,9 @@ describe('LibUtils', () => {
     });
 
     it('should return true for valid big integers strings', () => {
-      const validBigIntStrings = [
-        '0',
-        '1',
-        '9007199254740991',
-        '12345678901234567890',
-      ];
+      const validBigIntStrings = ['0', '1', '9007199254740991', '12345678901234567890'];
 
-      validBigIntStrings.forEach((str) => {
+      validBigIntStrings.forEach(str => {
         expect(LibUtils.isValidBigInt(str)).toBe(true);
       });
     });
@@ -651,7 +646,7 @@ describe('LibUtils', () => {
         '', // Empty
       ];
 
-      invalidBigIntStrings.forEach((str) => {
+      invalidBigIntStrings.forEach(str => {
         expect(LibUtils.isValidBigInt(str)).toBe(false);
       });
     });
@@ -671,7 +666,7 @@ describe('LibUtils', () => {
         'z9_-Z', // Mix of all allowed characters
       ];
 
-      edgeCases.forEach((id) => {
+      edgeCases.forEach(id => {
         expect(LibUtils.isValidTextId(id)).toBe(true);
       });
 
@@ -687,7 +682,7 @@ describe('LibUtils', () => {
     it('should return true for valid text IDs', () => {
       const validTextIds = ['abc', 'ABC', '123', 'abc_123', 'abc-123', 'a_b-c'];
 
-      validTextIds.forEach((id) => {
+      validTextIds.forEach(id => {
         expect(LibUtils.isValidTextId(id)).toBe(true);
       });
     });
@@ -701,7 +696,7 @@ describe('LibUtils', () => {
         'abc@123', // Contains special character
       ];
 
-      invalidTextIds.forEach((id) => {
+      invalidTextIds.forEach(id => {
         expect(LibUtils.isValidTextId(id)).toBe(false);
       });
     });

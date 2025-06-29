@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IActor } from "@vytches-ddd/core";
+import type { IActor } from '@vytches-ddd/core';
 
 /**
  * Enum dla typów akcji audytowych
@@ -126,10 +126,7 @@ export interface IDomainToAuditEventTransformer<D = any, A = any> {
    * @param domainEvent Event domenowy do transformacji
    * @param additionalMetadata Opcjonalne dodatkowe metadane
    */
-  transform(
-    domainEvent: D,
-    additionalMetadata?: Partial<IAuditEventMetadata>,
-  ): IAuditEvent<A>;
+  transform(domainEvent: D, additionalMetadata?: Partial<IAuditEventMetadata>): IAuditEvent<A>;
 }
 
 /**
@@ -169,6 +166,6 @@ export interface IAuditService {
     resourceType: string,
     resourceId: string,
     data?: any,
-    metadata?: Partial<IAuditEventMetadata>,
+    metadata?: Partial<IAuditEventMetadata>
   ): Promise<void>;
 }

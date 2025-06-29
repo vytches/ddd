@@ -48,19 +48,19 @@ class MockJoiAdapter<T> extends BaseValidationAdapter<T, any> {
       const obj = value as any;
 
       if (!obj.name || obj.name.length < 2) {
-        errors.push(this.createValidationError(
-          'name',
-          'Name must be at least 2 characters',
-          { joiType: 'string.min' }
-        ));
+        errors.push(
+          this.createValidationError('name', 'Name must be at least 2 characters', {
+            joiType: 'string.min',
+          })
+        );
       }
 
       if (obj.status && !['active', 'inactive', 'pending'].includes(obj.status)) {
-        errors.push(this.createValidationError(
-          'status',
-          'Status must be one of: active, inactive, pending',
-          { joiType: 'any.only' }
-        ));
+        errors.push(
+          this.createValidationError('status', 'Status must be one of: active, inactive, pending', {
+            joiType: 'any.only',
+          })
+        );
       }
     }
 
@@ -82,9 +82,11 @@ class ExternalApiValidator<T> implements IValidator<T> {
 
   validate(value: T): Result<T, IValidationErrors> {
     if (this.shouldFail) {
-      return Result.fail(new ValidationErrors([
-        new ValidationError('external', 'External API validation failed', { source: 'api' })
-      ]));
+      return Result.fail(
+        new ValidationErrors([
+          new ValidationError('external', 'External API validation failed', { source: 'api' }),
+        ])
+      );
     }
     return Result.ok(value);
   }
@@ -112,7 +114,7 @@ describe('Adapter Integration Tests', () => {
     email: 'john@example.com',
     age: 25,
     status: 'active',
-    subscription: 'premium'
+    subscription: 'premium',
   };
 
   const invalidUser: User = {
@@ -121,7 +123,7 @@ describe('Adapter Integration Tests', () => {
     email: 'invalid-email',
     age: -5,
     status: 'unknown' as any,
-    subscription: 'premium'
+    subscription: 'premium',
   };
 
   describe('Single Adapter Usage', () => {
@@ -160,18 +162,18 @@ describe('Adapter Integration Tests', () => {
       const zodAdapter = MockZodAdapter.create({});
       const joiAdapter = MockJoiAdapter.create({});
       const businessRules = Validation.create<User>()
-        .addRule('subscription', user => user.subscription !== undefined, 'Subscription is required')
+        .addRule(
+          'subscription',
+          user => user.subscription !== undefined,
+          'Subscription is required'
+        )
         .when(
           user => user.subscription === 'premium',
           v => v.addRule('age', user => user.age >= 21, 'Premium users must be 21+')
         );
 
       // Act
-      const combinedValidator = Validation.combine(
-        zodAdapter,
-        joiAdapter,
-        businessRules
-      );
+      const combinedValidator = Validation.combine(zodAdapter, joiAdapter, businessRules);
 
       const validResult = combinedValidator.validate(validUser);
       const invalidResult = combinedValidator.validate(invalidUser);
@@ -195,19 +197,17 @@ describe('Adapter Integration Tests', () => {
         .addRule('status', user => user.status === 'active', 'User must be active')
         .addRule('subscription', user => !!user.subscription, 'Subscription required');
 
-      const domainValidator = AdapterUtils.create<User>( // Domain rules
-        (user) => {
-          const errors: string[] = [];
-          if (user.age < 18) errors.push('Must be adult');
-          if (!user.email.endsWith('.com')) errors.push('Must use .com email');
+      const domainValidator = AdapterUtils.create<User>(user => {
+        // Domain rules
+        const errors: string[] = [];
+        if (user.age < 18) errors.push('Must be adult');
+        if (!user.email.endsWith('.com')) errors.push('Must use .com email');
 
-          return {
-            success: errors.length === 0,
-            errors: errors.length > 0 ? errors : undefined
-          };
-        },
-        'domain'
-      );
+        return {
+          success: errors.length === 0,
+          errors: errors.length > 0 ? errors : undefined,
+        };
+      }, 'domain');
 
       // Act
       const layeredValidator = Validation.combine(
@@ -220,7 +220,7 @@ describe('Adapter Integration Tests', () => {
         ...validUser,
         status: 'inactive' as const,
         email: 'john@example.org',
-        age: 17
+        age: 17,
       };
 
       const result = layeredValidator.validate(testUser);
@@ -236,8 +236,11 @@ describe('Adapter Integration Tests', () => {
       // Arrange
       const formatValidator = MockZodAdapter.create({});
       const externalValidator = new ExternalApiValidator(true); // Will fail
-      const businessValidator = Validation.create<User>()
-        .addRule('id', user => user.id.length > 0, 'ID cannot be empty');
+      const businessValidator = Validation.create<User>().addRule(
+        'id',
+        user => user.id.length > 0,
+        'ID cannot be empty'
+      );
 
       // Act
       const combinedValidator = Validation.combine(
@@ -259,12 +262,15 @@ describe('Adapter Integration Tests', () => {
   describe('Complex Validation Scenarios', () => {
     it('should handle nested object validation with adapters', () => {
       // Arrange
-      const profileValidator = Validation.create<UserProfile>()
-        .addRule('bio', profile => profile.bio.length >= 10, 'Bio must be at least 10 characters');
+      const profileValidator = Validation.create<UserProfile>().addRule(
+        'bio',
+        profile => profile.bio.length >= 10,
+        'Bio must be at least 10 characters'
+      );
 
       const userWithProfile: User = {
         ...validUser,
-        profile: { bio: 'Short' }
+        profile: { bio: 'Short' },
       };
 
       const mainValidator = Validation.combine(
@@ -289,13 +295,12 @@ describe('Adapter Integration Tests', () => {
       const conditionalValidator = Validation.create<User>()
         .when(
           user => user.subscription === 'premium',
-          v => v
-            .addRule('age', user => user.age >= 21, 'Premium users must be 21+')
-            .addRule('email', user => user.email.includes('+'), 'Premium users need + in email')
+          v =>
+            v
+              .addRule('age', user => user.age >= 21, 'Premium users must be 21+')
+              .addRule('email', user => user.email.includes('+'), 'Premium users need + in email')
         )
-        .otherwise(
-          v => v.addRule('age', user => user.age >= 13, 'Basic users must be 13+')
-        );
+        .otherwise(v => v.addRule('age', user => user.age >= 13, 'Basic users must be 13+'));
 
       const premiumUser = { ...validUser, subscription: 'premium' as const, age: 20 };
       const basicUser = { ...validUser, subscription: 'basic' as const, age: 15 };
@@ -307,7 +312,9 @@ describe('Adapter Integration Tests', () => {
 
       // Assert
       expect(premiumResult.isFailure).toBe(true);
-      expect(premiumResult.error.errors.some(e => e.message.includes('Premium users must be 21+'))).toBe(true);
+      expect(
+        premiumResult.error.errors.some(e => e.message.includes('Premium users must be 21+'))
+      ).toBe(true);
 
       expect(basicResult.isSuccess).toBe(true);
     });
@@ -338,19 +345,28 @@ describe('Adapter Integration Tests', () => {
 
       // Structure validation (like Zod)
       const structureValidator = AdapterUtils.create<Order>(
-        (order) => ({
+        order => ({
           success: order.id.length > 0 && order.items.length > 0 && order.total > 0,
-          errors: order.id.length === 0 ? ['Order ID required'] :
-                 order.items.length === 0 ? ['Order must have items'] :
-                 order.total <= 0 ? ['Order total must be positive'] : undefined
+          errors:
+            order.id.length === 0
+              ? ['Order ID required']
+              : order.items.length === 0
+                ? ['Order must have items']
+                : order.total <= 0
+                  ? ['Order total must be positive']
+                  : undefined,
         }),
         'structure'
       );
 
       // Business rules
       const businessValidator = Validation.create<Order>()
-        .addRule('total', order => order.total >= 1.00, 'Minimum order $1.00')
-        .addRule('currency', order => ['USD', 'EUR', 'GBP'].includes(order.currency), 'Invalid currency')
+        .addRule('total', order => order.total >= 1.0, 'Minimum order $1.00')
+        .addRule(
+          'currency',
+          order => ['USD', 'EUR', 'GBP'].includes(order.currency),
+          'Invalid currency'
+        )
         .when(
           order => order.total > 100,
           v => v.addRule('items', order => order.items.length <= 50, 'Large orders max 50 items')
@@ -362,16 +378,16 @@ describe('Adapter Integration Tests', () => {
       const testOrder: Order = {
         id: 'ORD-123',
         userId: 'USR-456',
-        items: [{ productId: 'PROD-1', quantity: 2, price: 25.00 }],
-        total: 50.00,
+        items: [{ productId: 'PROD-1', quantity: 2, price: 25.0 }],
+        total: 50.0,
         currency: 'USD',
         status: 'pending',
         shippingAddress: {
           street: '123 Main St',
           city: 'New York',
           country: 'USA',
-          zipCode: '10001'
-        }
+          zipCode: '10001',
+        },
       };
 
       // Act

@@ -14,7 +14,7 @@ export interface ISpecification<T> {
   and(other: ISpecification<T>): ISpecification<T>;
 
   /**
-   * Combine with another specification using OR logic  
+   * Combine with another specification using OR logic
    */
   or(other: ISpecification<T>): ISpecification<T>;
 

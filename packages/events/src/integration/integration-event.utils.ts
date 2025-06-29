@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LibUtils } from '@vytches-ddd/utils';
 
-import type {
-  IIntegrationEvent,
-  IIntegrationEventMetadata,
-} from './integration-event-interfaces';
+import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
 /**
  * Creates a new integration event with basic metadata
@@ -16,7 +13,7 @@ import type {
 export function createIntegrationEvent<P = any>(
   eventType: string,
   payload: P,
-  metadata?: Partial<IIntegrationEventMetadata>,
+  metadata?: Partial<IIntegrationEventMetadata>
 ): IIntegrationEvent<P> {
   return {
     eventType,
@@ -35,9 +32,7 @@ export function createIntegrationEvent<P = any>(
  * @param event Integration event to serialize
  * @returns Serialized event as JSON string
  */
-export function serializeIntegrationEvent<P = any>(
-  event: IIntegrationEvent<P>,
-): string {
+export function serializeIntegrationEvent<P = any>(event: IIntegrationEvent<P>): string {
   return JSON.stringify(event);
 }
 
@@ -46,9 +41,7 @@ export function serializeIntegrationEvent<P = any>(
  * @param jsonString JSON string to deserialize
  * @returns Integration event object
  */
-export function deserializeIntegrationEvent<P = any>(
-  jsonString: string,
-): IIntegrationEvent<P> {
+export function deserializeIntegrationEvent<P = any>(jsonString: string): IIntegrationEvent<P> {
   return JSON.parse(jsonString);
 }
 
@@ -57,9 +50,7 @@ export function deserializeIntegrationEvent<P = any>(
  * @param event Integration event
  * @returns Idempotency key
  */
-export function generateIdempotencyKey<P = any>(
-  event: IIntegrationEvent<P>,
-): string {
+export function generateIdempotencyKey<P = any>(event: IIntegrationEvent<P>): string {
   if (event.metadata?.idempotencyKey) {
     return event.metadata.idempotencyKey;
   }

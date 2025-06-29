@@ -18,7 +18,7 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
    */
   abstract subscribe<T extends TEvent>(
     eventType: string | (new (...args: any[]) => T),
-    handler: (event: T) => Promise<void> | void,
+    handler: (event: T) => Promise<void> | void
   ): void;
 
   /**
@@ -28,17 +28,18 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
     eventType: string | (new (...args: any[]) => T),
     handler: {
       handle(event: T): Promise<void> | void;
-    },
+    }
   ): void;
 
   /**
    * Unsubscribe from an event type
    */
-  abstract unsubscribe(eventType: string | (new (...args: any[]) => TEvent),
+  abstract unsubscribe(
+    eventType: string | (new (...args: any[]) => TEvent),
     handler:
       | ((event: TEvent) => Promise<void> | void)
       | { handle(event: TEvent): Promise<void> | void }
-    ): void;
+  ): void;
 
   /**
    * Publish multiple events
@@ -101,7 +102,5 @@ export interface BaseEventBusOptions {
  * Enables creation of processing pipelines for events
  */
 export type EventBusMiddleware = (
-  next: (event: any) => Promise<void>,
+  next: (event: any) => Promise<void>
 ) => (event: any) => Promise<void>;
-
-

@@ -45,7 +45,7 @@ export class PredicateSpecification<T> extends CompositeSpecification<T> {
 export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly propertyName: keyof T,
-    private readonly expectedValue: any,
+    private readonly expectedValue: any
   ) {
     super();
   }
@@ -61,7 +61,7 @@ export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
 export class PropertyInSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly propertyName: keyof T,
-    private readonly possibleValues: any[],
+    private readonly possibleValues: any[]
   ) {
     super();
   }
@@ -78,7 +78,7 @@ export class PropertyBetweenSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly propertyName: keyof T,
     private readonly min: number,
-    private readonly max: number,
+    private readonly max: number
   ) {
     super();
   }
@@ -117,31 +117,21 @@ export const Specification = {
   /**
    * Tworzy specyfikację sprawdzającą równość właściwości
    */
-  propertyEquals<T>(
-    propertyName: keyof T,
-    expectedValue: any,
-  ): ISpecification<T> {
+  propertyEquals<T>(propertyName: keyof T, expectedValue: any): ISpecification<T> {
     return new PropertyEqualsSpecification<T>(propertyName, expectedValue);
   },
 
   /**
    * Tworzy specyfikację sprawdzającą zawieranie się właściwości w zbiorze
    */
-  propertyIn<T>(
-    propertyName: keyof T,
-    possibleValues: any[],
-  ): ISpecification<T> {
+  propertyIn<T>(propertyName: keyof T, possibleValues: any[]): ISpecification<T> {
     return new PropertyInSpecification<T>(propertyName, possibleValues);
   },
 
   /**
    * Tworzy specyfikację sprawdzającą zakres wartości
    */
-  propertyBetween<T>(
-    propertyName: keyof T,
-    min: number,
-    max: number,
-  ): ISpecification<T> {
+  propertyBetween<T>(propertyName: keyof T, min: number, max: number): ISpecification<T> {
     return new PropertyBetweenSpecification<T>(propertyName, min, max);
   },
 

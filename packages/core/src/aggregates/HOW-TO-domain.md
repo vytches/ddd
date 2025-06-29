@@ -4,7 +4,8 @@
 
 - **Pattern Name**: Aggregate Root
 - **Category**: Domain-Driven Design (DDD) Pattern
-- **Purpose**: Maintain consistency boundaries and coordinate domain object changes
+- **Purpose**: Maintain consistency boundaries and coordinate domain object
+  changes
 - **Library**: DomainTS
 - **Language**: TypeScript
 - **Version**: 1.0.0
@@ -13,20 +14,23 @@
 
 ### What are Aggregates?
 
-Aggregates are clusters of domain objects that are treated as a single unit for data changes. The Aggregate Root is the gateway to the aggregate, ensuring consistency and invariants.
+Aggregates are clusters of domain objects that are treated as a single unit for
+data changes. The Aggregate Root is the gateway to the aggregate, ensuring
+consistency and invariants.
 
 **Core Concept**:
+
 ```typescript
 class Order extends AggregateRoot<string> {
   constructor(id: EntityId<string>) {
     super({ id });
   }
-  
+
   // Apply domain events to change state
   placeOrder(customerId: string) {
     this.apply('OrderPlaced', { customerId });
   }
-  
+
   // Handle events to update state
   protected onOrderPlaced(payload: { customerId: string }) {
     this.customerId = payload.customerId;
@@ -57,14 +61,21 @@ Complete implementation with optional capabilities:
 
 ```typescript
 class AggregateRoot<TId = string, TState = any, TMeta = object>
-  implements IAggregateRoot<TId>, ISnapshotable<TState, TMeta>, IVersioned {
-  
+  implements IAggregateRoot<TId>, ISnapshotable<TState, TMeta>, IVersioned
+{
   constructor({ id, version = 0 }: IAggregateConstructorParams<TId>);
-  
+
   // Core functionality
-  protected apply(eventType: string, payload: any, metadata?: Partial<IEventMetadata>): void;
-  protected apply(domainEvent: IDomainEvent, metadata?: Partial<IEventMetadata>): void;
-  
+  protected apply(
+    eventType: string,
+    payload: any,
+    metadata?: Partial<IEventMetadata>
+  ): void;
+  protected apply(
+    domainEvent: IDomainEvent,
+    metadata?: Partial<IEventMetadata>
+  ): void;
+
   // Optional features
   enableSnapshots(): this;
   enableVersioning(): this;
@@ -74,11 +85,13 @@ class AggregateRoot<TId = string, TState = any, TMeta = object>
 ### 3. Optional Capabilities
 
 **Snapshots** (ISnapshotable):
+
 - Save aggregate state at a point in time
 - Restore from saved state
 - Optimize event replay
 
 **Versioning** (IVersioned):
+
 - Support for event schema evolution
 - Register upcasters for event transformation
 - Handle multiple event versions
@@ -108,17 +121,17 @@ Aggregates change state by applying domain events:
 ```typescript
 class Customer extends AggregateRoot<string> {
   private email: string;
-  
+
   changeEmail(newEmail: string) {
     // Validation
     if (!isValidEmail(newEmail)) {
       throw new Error('Invalid email');
     }
-    
+
     // Apply event
     this.apply('EmailChanged', { email: newEmail });
   }
-  
+
   protected onEmailChanged(payload: { email: string }) {
     this.email = payload.email;
   }
@@ -134,7 +147,7 @@ Built-in optimistic concurrency control:
 aggregate.checkVersion(expectedVersion); // Throws on mismatch
 
 // Track versions
-aggregate.getVersion();      // Current version
+aggregate.getVersion(); // Current version
 aggregate.getInitialVersion(); // Version when loaded
 ```
 
@@ -166,11 +179,11 @@ class Account extends AggregateRoot<string, AccountState> {
     super({ id });
     this.enableSnapshots();
   }
-  
+
   serializeState(): AccountState {
     return { balance: this.balance, status: this.status };
   }
-  
+
   deserializeState(state: AccountState): void {
     this.balance = state.balance;
     this.status = state.status;
@@ -195,20 +208,20 @@ class Product extends AggregateRoot<string> {
   constructor(id: EntityId<string>) {
     super({ id });
     this.enableVersioning();
-    
+
     // Register upcaster from v1 to v2
     this.registerUpcaster('PriceChanged', 1, {
       upcast(payload: { price: number }) {
         return { price: payload.price, currency: 'USD' };
-      }
+      },
     });
   }
-  
+
   // Version-specific handlers
   protected onPriceChanged_v1(payload: { price: number }) {
     this.price = payload.price;
   }
-  
+
   protected onPriceChanged_v2(payload: { price: number; currency: string }) {
     this.price = payload.price;
     this.currency = payload.currency;
@@ -225,25 +238,31 @@ class Order extends AggregateRoot<string> {
   private customerId: string;
   private items: OrderItem[] = [];
   private status: OrderStatus = 'pending';
-  
+
   constructor(id: EntityId<string>) {
     super({ id });
   }
-  
+
   place(customerId: string) {
     this.apply('OrderPlaced', { customerId });
   }
-  
+
   addItem(productId: string, quantity: number, price: number) {
     this.apply('ItemAdded', { productId, quantity, price });
   }
-  
+
   protected onOrderPlaced(payload: { customerId: string }) {
     this.customerId = payload.customerId;
   }
-  
-  protected onItemAdded(payload: { productId: string; quantity: number; price: number }) {
-    this.items.push(new OrderItem(payload.productId, payload.quantity, payload.price));
+
+  protected onItemAdded(payload: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }) {
+    this.items.push(
+      new OrderItem(payload.productId, payload.quantity, payload.price)
+    );
   }
 }
 ```
@@ -253,27 +272,30 @@ class Order extends AggregateRoot<string> {
 ```typescript
 class BankAccount extends AggregateRoot<string> {
   private balance: number = 0;
-  
-  static fromHistory(id: EntityId<string>, events: IExtendedDomainEvent[]): BankAccount {
+
+  static fromHistory(
+    id: EntityId<string>,
+    events: IExtendedDomainEvent[]
+  ): BankAccount {
     const account = new BankAccount(id);
     (account as any).loadFromHistory(events);
     return account;
   }
-  
+
   deposit(amount: number) {
     if (amount <= 0) throw new Error('Amount must be positive');
     this.apply('MoneyDeposited', { amount });
   }
-  
+
   withdraw(amount: number) {
     if (amount > this.balance) throw new Error('Insufficient funds');
     this.apply('MoneyWithdrawn', { amount });
   }
-  
+
   protected onMoneyDeposited(payload: { amount: number }) {
     this.balance += payload.amount;
   }
-  
+
   protected onMoneyWithdrawn(payload: { amount: number }) {
     this.balance -= payload.amount;
   }
@@ -291,6 +313,7 @@ class BankAccount extends AggregateRoot<string> {
 ## Integration with DomainTS
 
 Aggregates integrate with:
+
 - **Repositories**: Persist and retrieve aggregates
 - **Unit of Work**: Manage transactions and event dispatch
 - **Event Bus**: Publish collected domain events
@@ -299,6 +322,7 @@ Aggregates integrate with:
 ## Error Handling
 
 The system provides specific errors for aggregate operations:
+
 - Version conflicts for concurrency control
 - Feature not enabled for optional capabilities
 - Invalid snapshots or mismatched IDs
@@ -307,10 +331,12 @@ The system provides specific errors for aggregate operations:
 ## Conclusion
 
 DomainTS Aggregates provide:
+
 - **Consistency Boundaries**: Enforce business invariants
 - **Event Sourcing Ready**: Built-in event collection and replay
 - **Version Control**: Optimistic concurrency handling
 - **Optional Features**: Snapshots and versioning when needed
 - **Type Safety**: Full TypeScript support with generics
 
-The pattern ensures domain consistency while providing flexibility for different persistence strategies and event sourcing implementations.
+The pattern ensures domain consistency while providing flexibility for different
+persistence strategies and event sourcing implementations.

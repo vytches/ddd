@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LibUtils } from '@vytches-ddd/utils';
 
-import type {
-  IIntegrationEvent,
-  IIntegrationEventMetadata,
-} from './integration-event-interfaces';
+import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
 /**
  * Base implementation of an integration event
  * Provides core functionality for all integration events
  */
-export abstract class IntegrationEvent<T = any>
-  implements IIntegrationEvent<T>
-{
+export abstract class IntegrationEvent<T = any> implements IIntegrationEvent<T> {
   /**
    * Unique identifier for the event
    */
@@ -72,12 +67,10 @@ export abstract class IntegrationEvent<T = any>
    * @param metadata - Metadata to merge with existing metadata
    * @returns A new event instance with combined metadata
    */
-  public withMetadata(
-    metadata: Partial<IIntegrationEventMetadata>,
-  ): IntegrationEvent<T> {
+  public withMetadata(metadata: Partial<IIntegrationEventMetadata>): IntegrationEvent<T> {
     const EventClass = this.constructor as new (
       payload?: T,
-      metadata?: IIntegrationEventMetadata,
+      metadata?: IIntegrationEventMetadata
     ) => IntegrationEvent<T>;
 
     return new EventClass(this.payload, {
@@ -106,7 +99,7 @@ export abstract class IntegrationEvent<T = any>
    */
   public static deserialize<E, P>(
     EventClass: new (payload?: P, metadata?: IIntegrationEventMetadata) => E,
-    jsonString: string,
+    jsonString: string
   ): E {
     const data = JSON.parse(jsonString);
     return new EventClass(data.payload, data.metadata);

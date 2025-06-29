@@ -1,4 +1,4 @@
-import {describe, it, expect} from 'vitest'
+import { describe, it, expect } from 'vitest';
 
 import type { ISpecification, IValidator, IValidationErrors } from '@vytches-ddd/contracts';
 import { Result } from '@vytches-ddd/utils';
@@ -6,7 +6,6 @@ import { Validation } from './validation-facade';
 
 import { BusinessRuleValidator } from './business-rules';
 import { ValidationError, ValidationErrors } from './validation-error';
-
 
 // Create a test specification
 class TestSpecification<T> implements ISpecification<T> {
@@ -18,22 +17,18 @@ class TestSpecification<T> implements ISpecification<T> {
 
   and(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate)
     );
   }
 
   or(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate)
     );
   }
 
   not(): ISpecification<T> {
-    return new TestSpecification<T>(
-      (candidate) => !this.isSatisfiedBy(candidate),
-    );
+    return new TestSpecification<T>(candidate => !this.isSatisfiedBy(candidate));
   }
 }
 
@@ -72,13 +67,10 @@ describe('ValidationFacade', () => {
 
     it('should create a validator from specification', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
 
       // Act
-      const validator = Validation.fromSpecification(
-        isAdult,
-        'Must be 18 or older',
-      );
+      const validator = Validation.fromSpecification(isAdult, 'Must be 18 or older');
 
       // Assert
       const result = validator.validate(invalidUser);
@@ -92,14 +84,14 @@ describe('ValidationFacade', () => {
       // Arrange
       const nameValidator = Validation.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
       const ageValidator = Validation.create<TestUser>().addRule(
         'age',
-        (user) => user.age >= 18,
-        'Must be 18 or older',
+        user => user.age >= 18,
+        'Must be 18 or older'
       );
 
       // Act
@@ -115,14 +107,14 @@ describe('ValidationFacade', () => {
       // Arrange
       const nameValidator = Validation.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
       const ageValidator = Validation.create<TestUser>().addRule(
         'age',
-        (user) => user.age >= 18,
-        'Must be 18 or older',
+        user => user.age >= 18,
+        'Must be 18 or older'
       );
 
       // Act
@@ -138,13 +130,13 @@ describe('ValidationFacade', () => {
   describe('validateWithSpecification', () => {
     it('should validate using a specification', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
 
       // Act
       const result = Validation.validateWithSpecification(
         invalidUser,
         isAdult,
-        'Must be 18 or older',
+        'Must be 18 or older'
       );
 
       // Assert
@@ -156,12 +148,10 @@ describe('ValidationFacade', () => {
   describe('validateWithRules', () => {
     it('should validate using multiple specification rules', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
-      const hasName = new TestSpecification<TestUser>(
-        (user) => user.name.length > 0,
-      );
-      const hasValidEmail = new TestSpecification<TestUser>((user) =>
-        /^\S+@\S+\.\S+$/.test(user.email),
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
+      const hasName = new TestSpecification<TestUser>(user => user.name.length > 0);
+      const hasValidEmail = new TestSpecification<TestUser>(user =>
+        /^\S+@\S+\.\S+$/.test(user.email)
       );
 
       const rules = [
@@ -194,13 +184,10 @@ describe('ValidationFacade', () => {
   describe('Converter methods', () => {
     it('should convert specification to validator', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
 
       // Act
-      const validator = Validation.specificationToValidator(
-        isAdult,
-        'Must be 18 or older',
-      );
+      const validator = Validation.specificationToValidator(isAdult, 'Must be 18 or older');
 
       // Assert
       const result = validator.validate(invalidUser);
@@ -212,8 +199,8 @@ describe('ValidationFacade', () => {
       // Arrange
       const validator = Validation.create<TestUser>().addRule(
         'age',
-        (user) => user.age >= 18,
-        'Must be 18 or older',
+        user => user.age >= 18,
+        'Must be 18 or older'
       );
 
       // Act
@@ -230,8 +217,8 @@ describe('ValidationFacade', () => {
       // Arrange
       const streetValidator = Validation.create<string>().addRule(
         '',
-        (street) => Boolean(street) && street.length > 0,
-        'Street is required',
+        street => Boolean(street) && street.length > 0,
+        'Street is required'
       );
 
       const userWithAddress: TestUser = {
@@ -247,7 +234,7 @@ describe('ValidationFacade', () => {
       const result = Validation.validatePath(
         userWithAddress,
         ['address', 'street'],
-        streetValidator,
+        streetValidator
       );
 
       // Assert
@@ -260,15 +247,15 @@ describe('ValidationFacade', () => {
       // Arrange
       const validator = Validation.create<any>().addRule(
         '',
-        (value) => value !== undefined,
-        'Value is required',
+        value => value !== undefined,
+        'Value is required'
       );
 
       // Act
       const result = Validation.validatePath(
         validUser,
         ['address', 'postalCode'], // postalCode doesn't exist
-        validator,
+        validator
       );
 
       // Assert
@@ -280,14 +267,11 @@ describe('ValidationFacade', () => {
       // Arrange
       const zipValidator = Validation.create<string>().addRule(
         '',
-        (zip) => /^\d{5}$/.test(zip),
-        'Invalid ZIP code',
+        zip => /^\d{5}$/.test(zip),
+        'Invalid ZIP code'
       );
 
-      const addressValidator = Validation.forNestedPath<TestUser>(
-        ['address', 'zip'],
-        zipValidator,
-      );
+      const addressValidator = Validation.forNestedPath<TestUser>(['address', 'zip'], zipValidator);
 
       const userWithInvalidZip: TestUser = {
         ...validUser,
@@ -372,17 +356,22 @@ describe('ValidationFacade', () => {
       class ExternalAgeValidator implements IValidator<TestUser> {
         validate(value: TestUser): Result<TestUser, IValidationErrors> {
           if (value.age < 21) {
-            return Result.fail(new ValidationErrors([
-              new ValidationError('age', 'Must be 21+ from external validator')
-            ]));
+            return Result.fail(
+              new ValidationErrors([
+                new ValidationError('age', 'Must be 21+ from external validator'),
+              ])
+            );
           }
           return Result.ok(value);
         }
       }
 
       const externalValidator = new ExternalAgeValidator();
-      const builtInValidator = Validation.create<TestUser>()
-        .addRule('name', (user) => user.name.length > 0, 'Name is required from built-in validator');
+      const builtInValidator = Validation.create<TestUser>().addRule(
+        'name',
+        user => user.name.length > 0,
+        'Name is required from built-in validator'
+      );
 
       // Act
       const combinedValidator = Validation.combine(

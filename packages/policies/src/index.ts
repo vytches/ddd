@@ -1,7 +1,15 @@
-// Business policies and domain policies
+// Core interfaces and types
+export * from './business-policy-interface';
+export * from './policy-violation';
+export { PolicyContextBuilder, PolicyRequestBuilder } from './policy-context';
 
-// Export your main components here
-export * from './lib/policies';
+// Core policy implementations
+export * from './business-policy';
+export * from './composite-policy';
 
-// Placeholder export - replace with actual implementation
-export const policiesVersion = '0.1.0';
+// Builder pattern API
+export * from './policy-builder';
+export { ConditionalPolicyBuilder } from './composite-policy';
+
+// Registry system
+export * from './policy-registry';

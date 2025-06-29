@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IEventHandler} from '@vytches-ddd/contracts';
+import type { IEventHandler } from '@vytches-ddd/contracts';
 import { isEventHandler } from '@vytches-ddd/contracts';
 import type { IEventBus, BaseEventBusOptions } from '@vytches-ddd/contracts';
 
@@ -11,12 +11,11 @@ export interface ContextAwareEventBus<TEvent = any> extends IEventBus<TEvent> {
   subscribeWithContext(
     eventType: string | (new (...args: any[]) => TEvent),
     handler: (event: TEvent) => Promise<void> | void,
-    context: string,
+    context: string
   ): void;
 }
 
-export interface InMemoryIntegrationEventBusOptions
-  extends BaseEventBusOptions {
+export interface InMemoryIntegrationEventBusOptions extends BaseEventBusOptions {
   /**
    * Whether to process events synchronously
    */
@@ -43,7 +42,7 @@ export class InMemoryIntegrationEventBus
   override subscribe<T extends IIntegrationEvent>(
     eventType: string | (new (...args: any[]) => T),
     handler: (event: T) => Promise<void> | void,
-    context?: string, // Opcjonalny kontekst
+    context?: string // Opcjonalny kontekst
   ): void {
     // Wywołujemy oryginalną metodę subscribe z klasy bazowej
     super.subscribe(eventType, handler);
@@ -58,7 +57,7 @@ export class InMemoryIntegrationEventBus
   override registerHandler<T extends IIntegrationEvent>(
     eventType: string | (new (...args: any[]) => T),
     handler: IEventHandler<T>,
-    context?: string, // Opcjonalny kontekst
+    context?: string // Opcjonalny kontekst
   ): void {
     super.registerHandler(eventType, handler);
 
@@ -68,13 +67,11 @@ export class InMemoryIntegrationEventBus
 
     const eventName = this.getEventName(eventType);
     this.log(
-      `Registered class handler to ${eventName}${context ? ` for context: ${context}` : ''}`,
+      `Registered class handler to ${eventName}${context ? ` for context: ${context}` : ''}`
     );
   }
 
-  protected override buildPublishPipeline(): (
-    event: IIntegrationEvent,
-  ) => Promise<void> {
+  protected override buildPublishPipeline(): (event: IIntegrationEvent) => Promise<void> {
     const basePipeline = async (event: IIntegrationEvent): Promise<void> => {
       const eventName = this.getEventTypeName(event);
       const handlers = this.handlers.get(eventName);
@@ -92,11 +89,7 @@ export class InMemoryIntegrationEventBus
         const handlerContext = this.handlerContexts.get(handler);
 
         // Filtruj tylko jeśli zarówno target jak i handler mają określony kontekst
-        if (
-          !targetContext ||
-          !handlerContext ||
-          targetContext === handlerContext
-        ) {
+        if (!targetContext || !handlerContext || targetContext === handlerContext) {
           try {
             let result: void | Promise<void>;
 
@@ -130,8 +123,6 @@ export class InMemoryIntegrationEventBus
 
     return pipeline;
   }
-
-
 
   /**
    * Dostosowanie komunikatów logowania dla eventów integracyjnych (opcjonalnie)

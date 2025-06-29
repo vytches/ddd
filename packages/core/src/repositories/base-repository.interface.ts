@@ -1,4 +1,4 @@
-import type { IAggregateRoot } from "../aggregates";
+import type { IAggregateRoot } from '../aggregates';
 
 /**
  * Interface for basic repository operations
@@ -37,8 +37,7 @@ export interface IRepositoryProvider {
  * Extended repository interface with additional operations
  * Provides more advanced functionality while remaining optional
  */
-export interface IExtendedRepository<T extends IAggregateRoot<any>>
-  extends IRepository<T> {
+export interface IExtendedRepository<T extends IAggregateRoot<any>> extends IRepository<T> {
   /**
    * Check if an aggregate exists
    *

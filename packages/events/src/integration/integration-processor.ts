@@ -8,18 +8,13 @@ import type { IntegrationEventTransformerRegistry } from './integration-event-tr
  * Processor for transforming domain events to integration events
  */
 export class IntegrationEventProcessor implements IEventProcessor {
-  constructor(
-    private readonly transformerRegistry: IntegrationEventTransformerRegistry,
-  ) {}
+  constructor(private readonly transformerRegistry: IntegrationEventTransformerRegistry) {}
 
   /**
    * Process a domain event by transforming it to an integration event
    * if a suitable transformer is registered
    */
-  async process(
-    event: IDomainEvent,
-    registry: EventBusRegistry,
-  ): Promise<void> {
+  async process(event: IDomainEvent, registry: EventBusRegistry): Promise<void> {
     // Get integration event bus if registered
     const integrationBus = registry.get<IIntegrationEvent>('integration');
     if (!integrationBus) return;

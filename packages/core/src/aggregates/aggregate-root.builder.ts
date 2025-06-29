@@ -3,11 +3,10 @@ import type {
   IAggregateRoot,
   IAggregateBuilder,
   IAggregateConstructorParams,
-  IAggregateCapability} from './aggregate-interfaces';
-import type { IEventStore } from '@vytches-ddd/contracts';
-import {
-  CAPABILITY_NAMES
+  IAggregateCapability,
 } from './aggregate-interfaces';
+import type { IEventStore } from '@vytches-ddd/contracts';
+import { CAPABILITY_NAMES } from './aggregate-interfaces';
 
 import { AggregateRoot } from './aggregate-root';
 
@@ -30,32 +29,27 @@ export class AggregateBuilder<TId> implements IAggregateBuilder<TId> {
     this.aggregate = new AggregateRoot(params);
   }
 
-  static create<TId>(
-    params: IAggregateConstructorParams<TId>,
-  ): AggregateBuilder<TId> {
+  static create<TId>(params: IAggregateConstructorParams<TId>): AggregateBuilder<TId> {
     return new AggregateBuilder(params);
   }
 
   withSnapshots<TState = any, TMeta = any>(): this {
     this.aggregate.addCapability(
       CAPABILITY_NAMES.SNAPSHOT,
-      new SnapshotCapability<TState, TMeta>(),
+      new SnapshotCapability<TState, TMeta>()
     );
     return this;
   }
 
   withVersioning(): this {
-    this.aggregate.addCapability(
-      CAPABILITY_NAMES.VERSIONING,
-      new VersioningCapability(),
-    );
+    this.aggregate.addCapability(CAPABILITY_NAMES.VERSIONING, new VersioningCapability());
     return this;
   }
 
   withEventSourcing(eventStore?: IEventStore): this {
     this.aggregate.addCapability(
       CAPABILITY_NAMES.EVENT_SOURCING,
-      new EventSourcingCapability(eventStore),
+      new EventSourcingCapability(eventStore)
     );
     return this;
   }
@@ -65,10 +59,7 @@ export class AggregateBuilder<TId> implements IAggregateBuilder<TId> {
     return this;
   }
 
-  withCustomCapability<T extends IAggregateCapability>(
-    name: string,
-    capability: T,
-  ): this {
+  withCustomCapability<T extends IAggregateCapability>(name: string, capability: T): this {
     this.aggregate.addCapability(name, capability);
     return this;
   }
@@ -97,11 +88,7 @@ export class AggregateTestBuilder<TId> {
   }
 
   withAllCapabilities(): this {
-    this.builder
-      .withSnapshots()
-      .withVersioning()
-      .withEventSourcing()
-      .withAudit();
+    this.builder.withSnapshots().withVersioning().withEventSourcing().withAudit();
     return this;
   }
 
@@ -123,9 +110,7 @@ export class AggregateTestBuilder<TId> {
  * Builder for lightweight aggregates (high-performance scenarios)
  */
 export class LightweightAggregateBuilder<TTId> {
-  static create<TId>(
-    params: IAggregateConstructorParams<TId>,
-  ): IAggregateRoot<TId> {
+  static create<TId>(params: IAggregateConstructorParams<TId>): IAggregateRoot<TId> {
     return new AggregateRoot(params);
   }
 }
@@ -134,9 +119,7 @@ export class LightweightAggregateBuilder<TTId> {
  * Builder for full-featured aggregates (complex business scenarios)
  */
 export class FullFeaturedAggregateBuilder<TId> {
-  static create<TId>(
-    params: IAggregateConstructorParams<TId>,
-  ): IAggregateRoot<TId> {
+  static create<TId>(params: IAggregateConstructorParams<TId>): IAggregateRoot<TId> {
     return AggregateBuilder.create(params)
       .withSnapshots()
       .withVersioning()
@@ -178,7 +161,7 @@ export interface CapabilityConfig {
  */
 export function createAggregateWithConfig<TId>(
   params: IAggregateConstructorParams<TId>,
-  config: CapabilityConfig,
+  config: CapabilityConfig
 ): IAggregateRoot<TId> {
   const builder = AggregateBuilder.create(params);
 

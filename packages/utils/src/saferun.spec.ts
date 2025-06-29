@@ -61,7 +61,7 @@ describe('safeRun', () => {
         { message: 'object as error' },
       ];
 
-      errorTypes.forEach((expectedError) => {
+      errorTypes.forEach(expectedError => {
         // Arrange
         const fn = () => {
           throw expectedError;
@@ -155,7 +155,7 @@ describe('safeRun', () => {
       // Arrange
       const expectedError = new Error('delayed error');
       const fn = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         throw expectedError;
       };
 
@@ -170,7 +170,7 @@ describe('safeRun', () => {
     it('should handle promises that resolve after a delay', async () => {
       // Arrange
       const fn = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         return 'delayed success';
       };
 

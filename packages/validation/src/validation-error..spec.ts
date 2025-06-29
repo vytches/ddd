@@ -1,5 +1,5 @@
-import {describe, it, expect} from 'vitest'
-import { ValidationError, ValidationErrors } from "./validation-error";
+import { describe, it, expect } from 'vitest';
+import { ValidationError, ValidationErrors } from './validation-error';
 
 describe('ValidationError', () => {
   it('should create a validation error with property and message', () => {
@@ -70,15 +70,13 @@ describe('ValidationErrors', () => {
 
     // Assert
     expect(errors.message).toBe(
-      'Validation failed with 2 error(s): name: Name is required; email: Invalid email format',
+      'Validation failed with 2 error(s): name: Name is required; email: Invalid email format'
     );
   });
 
   it('should be an instance of Error', () => {
     // Arrange & Act
-    const errors = new ValidationErrors([
-      new ValidationError('test', 'Test error'),
-    ]);
+    const errors = new ValidationErrors([new ValidationError('test', 'Test error')]);
 
     // Assert
     expect(errors).toBeInstanceOf(Error);

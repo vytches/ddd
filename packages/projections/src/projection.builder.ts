@@ -5,10 +5,7 @@ import {
   SnapshotProjectionCapability,
 } from './capabilities';
 import { ExponentialBackoffStrategy } from './error-strategy';
-import {
-  ProjectionEngine,
-  EnhancedProjectionEngine,
-} from './projection-engine';
+import { ProjectionEngine, EnhancedProjectionEngine } from './projection-engine';
 import type {
   ICircuitBreakerConfig,
   IDeadLetterStore,
@@ -26,10 +23,7 @@ export class ProjectionBuilder<TReadModel> {
   protected projection: IProjection<TReadModel>; // dodane
   protected store: IProjectionStore<TReadModel>; // dodane
 
-  constructor(
-    projection: IProjection<TReadModel>,
-    store: IProjectionStore<TReadModel>,
-  ) {
+  constructor(projection: IProjection<TReadModel>, store: IProjectionStore<TReadModel>) {
     this.projection = projection; // dodane
     this.store = store; // dodane
     this.engine = new ProjectionEngine(projection, store);
@@ -37,7 +31,7 @@ export class ProjectionBuilder<TReadModel> {
 
   static create<TReadModel>(
     projection: IProjection<TReadModel>,
-    store: IProjectionStore<TReadModel>,
+    store: IProjectionStore<TReadModel>
   ): ProjectionBuilder<TReadModel> {
     return new ProjectionBuilder(projection, store);
   }
@@ -48,9 +42,7 @@ export class ProjectionBuilder<TReadModel> {
   }
 
   withSnapshots(store: IProjectionSnapshotStore, interval = 1000): this {
-    this.engine.addCapability(
-      new SnapshotProjectionCapability(store, interval),
-    );
+    this.engine.addCapability(new SnapshotProjectionCapability(store, interval));
     return this;
   }
 
@@ -60,19 +52,14 @@ export class ProjectionBuilder<TReadModel> {
 }
 
 // projection-builder-enhanced.ts
-export class EnhancedProjectionBuilder<
-  TReadModel,
-> extends ProjectionBuilder<TReadModel> {
-  withRetryStrategy(
-    config: IProjectionRetryConfig,
-    strategy?: IProjectionErrorStrategy,
-  ): this {
+export class EnhancedProjectionBuilder<TReadModel> extends ProjectionBuilder<TReadModel> {
+  withRetryStrategy(config: IProjectionRetryConfig, strategy?: IProjectionErrorStrategy): this {
     // Teraz this.projection i this.store są dostępne
     this.engine = new EnhancedProjectionEngine(
       this.projection,
       this.store,
       config,
-      strategy || new ExponentialBackoffStrategy(),
+      strategy || new ExponentialBackoffStrategy()
     );
     return this;
   }
@@ -84,11 +71,9 @@ export class EnhancedProjectionBuilder<
 
   withDeadLetter(
     store: IDeadLetterStore,
-    shouldDeadLetter?: (error: Error, attempts: number) => boolean,
+    shouldDeadLetter?: (error: Error, attempts: number) => boolean
   ): this {
-    this.engine.addCapability(
-      new DeadLetterCapability(store, shouldDeadLetter),
-    );
+    this.engine.addCapability(new DeadLetterCapability(store, shouldDeadLetter));
     return this;
   }
 

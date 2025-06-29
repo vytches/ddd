@@ -4,7 +4,8 @@
 
 - **Pattern Name**: Error Handling System
 - **Category**: Core Infrastructure
-- **Purpose**: Structured error handling for domain, application, and framework layers
+- **Purpose**: Structured error handling for domain, application, and framework
+  layers
 - **Library**: DomainTS
 - **Language**: TypeScript
 - **Version**: 1.0.0
@@ -13,14 +14,17 @@
 
 ### What is the Error Handling System?
 
-DomainTS provides a hierarchical error handling system that distinguishes between domain, application, and framework errors. It offers structured error classes with specific error codes and metadata support.
+DomainTS provides a hierarchical error handling system that distinguishes
+between domain, application, and framework errors. It offers structured error
+classes with specific error codes and metadata support.
 
 **Core Concept**:
+
 ```typescript
 // Domain errors carry specific context and codes
-throw MissingValueError.withValue('email', { 
+throw MissingValueError.withValue('email', {
   domain: 'user',
-  code: DomainErrorCode.MissingValue 
+  code: DomainErrorCode.MissingValue,
 });
 ```
 
@@ -43,11 +47,11 @@ Abstract base for domain-specific errors:
 
 ```typescript
 abstract class IDomainError extends BaseError {
-  domain?: string | any;        // Domain context
-  code: DomainErrorCode;        // Specific error code
-  data?: unknown;               // Additional error data
-  timestamp?: Date;             // When error occurred
-  error?: Error;                // Original error if wrapped
+  domain?: string | any; // Domain context
+  code: DomainErrorCode; // Specific error code
+  data?: unknown; // Additional error data
+  timestamp?: Date; // When error occurred
+  error?: Error; // Original error if wrapped
 }
 ```
 
@@ -64,9 +68,9 @@ Pre-defined domain error types with factory methods:
 
 Three categories of error codes:
 
-- **DomainErrorCode**: Domain layer errors (D_* prefix)
-- **ApplicationErrorCode**: Application layer errors (A_* prefix)
-- **FrameworkErrorCode**: Framework/infrastructure errors (F_* prefix)
+- **DomainErrorCode**: Domain layer errors (D\_\* prefix)
+- **ApplicationErrorCode**: Application layer errors (A\_\* prefix)
+- **FrameworkErrorCode**: Framework/infrastructure errors (F\_\* prefix)
 
 ## Usage Patterns
 
@@ -76,25 +80,26 @@ Three categories of error codes:
 // Missing value with context
 throw MissingValueError.withValue('customer email', {
   domain: 'order',
-  data: { orderId: '123' }
+  data: { orderId: '123' },
 });
 
 // Invalid parameter with details
 throw InvalidParameterError.withParameter('age', 'Age must be positive', {
   domain: 'customer',
-  data: { providedValue: -5 }
+  data: { providedValue: -5 },
 });
 
 // Duplicate entity
 throw DuplicateError.withEntityId('user-123', {
   domain: 'user',
-  data: { email: 'duplicate@example.com' }
+  data: { email: 'duplicate@example.com' },
 });
 ```
 
 ### Error Structure
 
 Each domain error includes:
+
 - **message**: Human-readable error description
 - **code**: Enum value for programmatic handling
 - **domain**: Context where error occurred
@@ -104,31 +109,38 @@ Each domain error includes:
 
 ## Error Code Categories
 
-### Domain Error Codes (D_*)
+### Domain Error Codes (D\_\*)
+
 - Basic validation and business rule violations
 - Entity-specific errors (not found, duplicate)
 - Data format and parameter errors
 
-### Application Error Codes (A_*)
+### Application Error Codes (A\_\*)
+
 - Service-level errors
 - Permission and authorization failures
 - External system integration errors
 
-### Framework Error Codes (F_*)
+### Framework Error Codes (F\_\*)
+
 - Infrastructure and configuration errors
 - Security and rate limiting
 - Service availability issues
 
 ## Best Practices
 
-1. **Use Factory Methods**: Prefer static factory methods over direct instantiation
+1. **Use Factory Methods**: Prefer static factory methods over direct
+   instantiation
 2. **Provide Context**: Always include relevant domain and data information
-3. **Choose Appropriate Codes**: Use specific error codes for better error handling
-4. **Wrap External Errors**: Use the `error` property to preserve original errors
+3. **Choose Appropriate Codes**: Use specific error codes for better error
+   handling
+4. **Wrap External Errors**: Use the `error` property to preserve original
+   errors
 
 ## Integration with DomainTS
 
 The error system integrates with:
+
 - **Result Pattern**: Errors can be wrapped in Result.fail()
 - **Validation**: Validation errors extend these base error types
 - **Domain Services**: Services throw domain-specific errors
@@ -137,9 +149,11 @@ The error system integrates with:
 ## Conclusion
 
 DomainTS error handling provides:
+
 - **Structured Errors**: Consistent error format across the system
 - **Contextual Information**: Rich metadata for debugging
 - **Layer Separation**: Different error types for different architectural layers
 - **Type Safety**: Full TypeScript support with enums and interfaces
 
-This system enables precise error handling and reporting throughout your domain-driven application.
+This system enables precise error handling and reporting throughout your
+domain-driven application.

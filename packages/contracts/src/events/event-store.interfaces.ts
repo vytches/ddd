@@ -45,14 +45,11 @@ export interface IEventStore {
   saveEvents(
     aggregateId: any,
     events: IExtendedDomainEvent[],
-    expectedVersion: number,
+    expectedVersion: number
   ): Promise<void>;
 
   /**
    * Gets events after a specific version
    */
-  getEventsAfterVersion(
-    aggregateId: any,
-    version: number,
-  ): Promise<IExtendedDomainEvent[]>;
+  getEventsAfterVersion(aggregateId: any, version: number): Promise<IExtendedDomainEvent[]>;
 }

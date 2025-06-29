@@ -1,9 +1,8 @@
-import {describe, it, expect, beforeAll} from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest';
 
 import type { ISpecification } from '@vytches-ddd/contracts';
 import { CoreRules, RulesRegistry } from './rules-registry';
 import { BusinessRuleValidator } from './business-rules';
-
 
 // Create a test specification
 class TestSpecification<T> implements ISpecification<T> {
@@ -15,22 +14,18 @@ class TestSpecification<T> implements ISpecification<T> {
 
   and(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate)
     );
   }
 
   or(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate)
     );
   }
 
   not(): ISpecification<T> {
-    return new TestSpecification<T>(
-      (candidate) => !this.isSatisfiedBy(candidate),
-    );
+    return new TestSpecification<T>(candidate => !this.isSatisfiedBy(candidate));
   }
 }
 
@@ -107,64 +102,39 @@ describe('Validation Integration Tests', () => {
     it('should validate user with nested address and conditional rules', () => {
       // Arrange
       // 1. Create specifications
-      const isAdult = new TestSpecification<User>((user) => user.age >= 18);
-      const isPremium = new TestSpecification<User>(
-        (user) => user.premium === true,
-      );
+      const isAdult = new TestSpecification<User>(user => user.age >= 18);
+      const isPremium = new TestSpecification<User>(user => user.premium === true);
 
       // 2. Create address validator
       const addressValidator = BusinessRuleValidator.create<Address>()
-        .addRule(
-          'street',
-          (addr) => addr.street.length > 0,
-          'Street is required',
-        )
-        .addRule('city', (addr) => addr.city.length > 0, 'City is required')
-        .addRule(
-          'zip',
-          (addr) => /^\d{5}(-\d{4})?$/.test(addr.zip),
-          'Invalid ZIP code format',
-        )
-        .addRule(
-          'country',
-          (addr) => addr.country.length > 0,
-          'Country is required',
-        );
+        .addRule('street', addr => addr.street.length > 0, 'Street is required')
+        .addRule('city', addr => addr.city.length > 0, 'City is required')
+        .addRule('zip', addr => /^\d{5}(-\d{4})?$/.test(addr.zip), 'Invalid ZIP code format')
+        .addRule('country', addr => addr.country.length > 0, 'Country is required');
 
       // 3. Create complex user validator
       const userValidator = BusinessRuleValidator.create<User>()
         // Basic rules
         .apply(RulesRegistry.Rules.required('name', 'Name is required'))
-        .apply(
-          RulesRegistry.Rules.minLength(
-            'name',
-            2,
-            'Name must have at least 2 characters',
-          ),
-        )
+        .apply(RulesRegistry.Rules.minLength('name', 2, 'Name must have at least 2 characters'))
         .apply(RulesRegistry.Rules.email('email', 'Invalid email format'))
         .mustSatisfy(isAdult, 'User must be 18 or older')
 
         // Conditional validation for premium users
-        .whenSatisfies(isPremium, (validator) => {
+        .whenSatisfies(isPremium, validator => {
           validator.apply(
             RulesRegistry.Rules.minLength(
               'name',
               3,
-              'Premium users must have at least 3 characters in name',
-            ),
+              'Premium users must have at least 3 characters in name'
+            )
           );
         })
 
         // Nested validation for address when present
         .when(
-          (user) => user.address !== undefined,
-          (validator) =>
-            validator.addNested(
-              'address',
-              addressValidator,
-              (user) => user.address,
-            ),
+          user => user.address !== undefined,
+          validator => validator.addNested('address', addressValidator, user => user.address)
         );
 
       // Act
@@ -180,9 +150,7 @@ describe('Validation Integration Tests', () => {
       expect(errors.length).toBeGreaterThanOrEqual(4);
 
       // Find the premium name error
-      const nameError = errors.find(
-        (e) => e.property === 'name' && e.message.includes('Premium'),
-      );
+      const nameError = errors.find(e => e.property === 'name' && e.message.includes('Premium'));
       expect(nameError).toBeDefined();
     });
   });
@@ -194,9 +162,7 @@ describe('Validation Integration Tests', () => {
       const validOrder: Order = {
         id: '1234',
         userId: 'user123',
-        items: [
-          { productId: 'p1', quantity: 2, unitPrice: 10.0, totalPrice: 20.0 },
-        ],
+        items: [{ productId: 'p1', quantity: 2, unitPrice: 10.0, totalPrice: 20.0 }],
         totalAmount: 20.0,
         status: 'pending',
         createdAt: new Date(),
@@ -220,38 +186,21 @@ describe('Validation Integration Tests', () => {
 
       // 1. Define item validator
       const orderItemValidator = BusinessRuleValidator.create<OrderItem>()
-        .addRule(
-          'quantity',
-          (item) => item.quantity > 0,
-          'Quantity must be greater than zero',
-        )
-        .addRule(
-          'productId',
-          (item) => item.productId.length > 0,
-          'Product ID is required',
-        )
+        .addRule('quantity', item => item.quantity > 0, 'Quantity must be greater than zero')
+        .addRule('productId', item => item.productId.length > 0, 'Product ID is required')
         .addRule(
           'totalPrice',
-          (item) =>
-            Math.abs(item.totalPrice - item.quantity * item.unitPrice) < 0.01,
-          'Total price must equal quantity × unit price',
+          item => Math.abs(item.totalPrice - item.quantity * item.unitPrice) < 0.01,
+          'Total price must equal quantity × unit price'
         );
 
       // 2. Define order validator with nested item validation
       const orderValidator = BusinessRuleValidator.create<Order>()
-        .addRule(
-          'userId',
-          (order) => order.userId.length > 0,
-          'User ID is required',
-        )
+        .addRule('userId', order => order.userId.length > 0, 'User ID is required')
+        .addRule('items', order => order.items.length > 0, 'Order must have at least one item')
         .addRule(
           'items',
-          (order) => order.items.length > 0,
-          'Order must have at least one item',
-        )
-        .addRule(
-          'items',
-          (order) => {
+          order => {
             // Validate each item individually
             for (const item of order.items) {
               const result = orderItemValidator.validate(item);
@@ -259,39 +208,34 @@ describe('Validation Integration Tests', () => {
             }
             return true;
           },
-          'One or more order items are invalid',
+          'One or more order items are invalid'
         )
 
         // Validate total amount matches sum of item totals
         .addRule(
           'totalAmount',
-          (order) => {
-            const calculatedTotal = order.items.reduce(
-              (sum, item) => sum + item.totalPrice,
-              0,
-            );
+          order => {
+            const calculatedTotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
             return Math.abs(calculatedTotal - order.totalAmount) < 0.01;
           },
-          'Order total amount does not match sum of item totals',
+          'Order total amount does not match sum of item totals'
         )
 
         // Additional validation for pending orders
         .when(
-          (order) => order.status === 'pending',
-          (validator) => {
+          order => order.status === 'pending',
+          validator => {
             validator.addRule(
               'createdAt',
-              (order) => {
+              order => {
                 const now = new Date();
-                const diffTime = Math.abs(
-                  now.getTime() - order.createdAt.getTime(),
-                );
+                const diffTime = Math.abs(now.getTime() - order.createdAt.getTime());
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return diffDays <= 30;
               },
-              'Pending orders cannot be older than 30 days',
+              'Pending orders cannot be older than 30 days'
             );
-          },
+          }
         );
 
       // Act
@@ -343,60 +287,45 @@ describe('Validation Integration Tests', () => {
       };
 
       // Create specifications for loan rules
-      const hasMinimumIncome = new TestSpecification<LoanApplication>(
-        (app) => app.income >= 30000,
-      );
-      const hasGoodCredit = new TestSpecification<LoanApplication>(
-        (app) => app.creditScore >= 700,
-      );
+      const hasMinimumIncome = new TestSpecification<LoanApplication>(app => app.income >= 30000);
+      const hasGoodCredit = new TestSpecification<LoanApplication>(app => app.creditScore >= 700);
       const hasModerateCredit = new TestSpecification<LoanApplication>(
-        (app) => app.creditScore >= 600 && app.creditScore < 700,
+        app => app.creditScore >= 600 && app.creditScore < 700
       );
       const hasReasonableAmount = new TestSpecification<LoanApplication>(
-        (app) => app.amount <= app.income * 0.5,
+        app => app.amount <= app.income * 0.5
       );
-      const hasNoExistingLoan = new TestSpecification<LoanApplication>(
-        (app) => !app.hasExistingLoan,
-      );
+      const hasNoExistingLoan = new TestSpecification<LoanApplication>(app => !app.hasExistingLoan);
       const hasReasonableTerm = new TestSpecification<LoanApplication>(
-        (app) => app.term >= 6 && app.term <= 60,
+        app => app.term >= 6 && app.term <= 60
       );
 
       // Define complex validator with conditional paths
       const loanValidator = BusinessRuleValidator.create<LoanApplication>()
         // Basic requirements for all loans
-        .mustSatisfy(
-          hasMinimumIncome,
-          'Minimum annual income of $30,000 required',
-        )
-        .mustSatisfy(
-          hasReasonableAmount,
-          'Loan amount cannot exceed 50% of annual income',
-        )
-        .mustSatisfy(
-          hasReasonableTerm,
-          'Loan term must be between 6 and 60 months',
-        )
+        .mustSatisfy(hasMinimumIncome, 'Minimum annual income of $30,000 required')
+        .mustSatisfy(hasReasonableAmount, 'Loan amount cannot exceed 50% of annual income')
+        .mustSatisfy(hasReasonableTerm, 'Loan term must be between 6 and 60 months')
 
         // Different rules based on credit score
-        .whenSatisfies(hasGoodCredit, (validator) => {
+        .whenSatisfies(hasGoodCredit, validator => {
           // With good credit, can have larger loans and existing loans
           validator.addRule(
             'amount',
-            (app) => app.amount <= app.income * 0.6,
-            'With good credit, loan amount can be up to 60% of income',
+            app => app.amount <= app.income * 0.6,
+            'With good credit, loan amount can be up to 60% of income'
           );
         })
-        .whenSatisfies(hasModerateCredit, (validator) => {
+        .whenSatisfies(hasModerateCredit, validator => {
           // With moderate credit, more restrictions
           validator.mustSatisfy(
             hasNoExistingLoan,
-            'Applicants with moderate credit cannot have existing loans',
+            'Applicants with moderate credit cannot have existing loans'
           );
           validator.addRule(
             'term',
-            (app) => app.term <= 36,
-            'With moderate credit, maximum term is 36 months',
+            app => app.term <= 36,
+            'With moderate credit, maximum term is 36 months'
           );
         });
 
@@ -415,10 +344,8 @@ describe('Validation Integration Tests', () => {
       const errors = invalidResult.error.errors;
 
       // Check for specific errors
-      const termError = errors.find((e) => e.message.includes('term'));
-      const existingLoanError = errors.find((e) =>
-        e.message.includes('existing loans'),
-      );
+      const termError = errors.find(e => e.message.includes('term'));
+      const existingLoanError = errors.find(e => e.message.includes('existing loans'));
 
       expect(termError).toBeDefined();
       expect(existingLoanError).toBeDefined();

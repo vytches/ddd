@@ -5,7 +5,7 @@ export class ValidationError implements IValidationError {
   constructor(
     public readonly property: string,
     public readonly message: string,
-    public readonly context?: Record<string, any>,
+    public readonly context?: Record<string, any>
   ) {}
 
   toString(): string {
@@ -18,7 +18,7 @@ export class ValidationErrors extends Error implements IValidationErrors {
 
   constructor(errors: ValidationError[]) {
     super(
-      `Validation failed with ${errors.length} error(s): ${errors.map((e) => e.toString()).join('; ')}`,
+      `Validation failed with ${errors.length} error(s): ${errors.map(e => e.toString()).join('; ')}`
     );
     this.name = 'ValidationErrors';
     this.errors = errors;

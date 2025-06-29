@@ -1,11 +1,10 @@
-import {describe, it, expect, beforeEach} from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import type { ISpecification } from '@vytches-ddd/contracts';
 
-import type { IRulesProvider} from './rules-registry';
+import type { IRulesProvider } from './rules-registry';
 import { CoreRules, RulesRegistry } from './rules-registry';
 import { BusinessRuleValidator } from './business-rules';
-
 
 describe('CoreRules', () => {
   interface TestData {
@@ -27,8 +26,7 @@ describe('CoreRules', () => {
     name: '',
     age: 16,
     email: 'not-an-email',
-    description:
-      'A very long description that exceeds the maximum length limit for testing',
+    description: 'A very long description that exceeds the maximum length limit for testing',
   };
 
   // Create a test specification
@@ -41,22 +39,18 @@ describe('CoreRules', () => {
 
     and(other: ISpecification<T>): ISpecification<T> {
       return new TestSpecification<T>(
-        (candidate) =>
-          this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate),
+        candidate => this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate)
       );
     }
 
     or(other: ISpecification<T>): ISpecification<T> {
       return new TestSpecification<T>(
-        (candidate) =>
-          this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate),
+        candidate => this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate)
       );
     }
 
     not(): ISpecification<T> {
-      return new TestSpecification<T>(
-        (candidate) => !this.isSatisfiedBy(candidate),
-      );
+      return new TestSpecification<T>(candidate => !this.isSatisfiedBy(candidate));
     }
   }
 
@@ -70,7 +64,7 @@ describe('CoreRules', () => {
     it('should validate required fields', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.required('name', 'Name is required'),
+        coreRules.required('name', 'Name is required')
       );
 
       // Act
@@ -86,7 +80,7 @@ describe('CoreRules', () => {
     it('should validate minimum length', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.minLength('name', 3, 'Name must be at least 3 characters'),
+        coreRules.minLength('name', 3, 'Name must be at least 3 characters')
       );
 
       // Act
@@ -96,15 +90,13 @@ describe('CoreRules', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Name must be at least 3 characters',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Name must be at least 3 characters');
     });
 
     it('should validate maximum length', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.maxLength('description', 20, 'Description is too long'),
+        coreRules.maxLength('description', 20, 'Description is too long')
       );
 
       // Act
@@ -117,9 +109,7 @@ describe('CoreRules', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Description is too long',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Description is too long');
     });
 
     it('should validate patterns', () => {
@@ -128,8 +118,8 @@ describe('CoreRules', () => {
         coreRules.pattern(
           'name',
           /^[A-Z][a-z]+ [A-Z][a-z]+$/,
-          'Name must be in format "First Last"',
-        ),
+          'Name must be in format "First Last"'
+        )
       );
 
       // Act
@@ -143,14 +133,14 @@ describe('CoreRules', () => {
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
       expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Name must be in format "First Last"',
+        'Name must be in format "First Last"'
       );
     });
 
     it('should validate numeric ranges', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.range('age', 18, 65, 'Age must be between 18 and 65'),
+        coreRules.range('age', 18, 65, 'Age must be between 18 and 65')
       );
 
       // Act
@@ -160,15 +150,13 @@ describe('CoreRules', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Age must be between 18 and 65',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Age must be between 18 and 65');
     });
 
     it('should validate email format', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.email('email', 'Invalid email address'),
+        coreRules.email('email', 'Invalid email address')
       );
 
       // Act
@@ -178,19 +166,17 @@ describe('CoreRules', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Invalid email address',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Invalid email address');
     });
   });
 
   describe('Specification-based rules', () => {
     it('should validate with satisfies', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestData>((data) => data.age >= 18);
+      const isAdult = new TestSpecification<TestData>(data => data.age >= 18);
 
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.satisfies(isAdult, 'Must be 18 or older'),
+        coreRules.satisfies(isAdult, 'Must be 18 or older')
       );
 
       // Act
@@ -205,17 +191,15 @@ describe('CoreRules', () => {
 
     it('should validate with propertySatisfies', () => {
       // Arrange
-      const isLongEnough = new TestSpecification<string>(
-        (str) => str.length >= 3,
-      );
+      const isLongEnough = new TestSpecification<string>(str => str.length >= 3);
 
       const validator = BusinessRuleValidator.create<TestData>().apply(
         coreRules.propertySatisfies(
           'name',
           isLongEnough,
           'Name must be at least 3 characters',
-          (data) => data.name,
-        ),
+          data => data.name
+        )
       );
 
       // Act
@@ -225,9 +209,7 @@ describe('CoreRules', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Name must be at least 3 characters',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Name must be at least 3 characters');
     });
   });
 
@@ -236,12 +218,10 @@ describe('CoreRules', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>().apply(
         coreRules.when(
-          (data) => data.premium === true,
-          (validator) =>
-            validator.apply(
-              coreRules.minLength('name', 5, 'Premium users need longer names'),
-            ),
-        ),
+          data => data.premium === true,
+          validator =>
+            validator.apply(coreRules.minLength('name', 5, 'Premium users need longer names'))
+        )
       );
 
       // Act
@@ -261,22 +241,18 @@ describe('CoreRules', () => {
       expect(premiumValidResult.isSuccess).toBe(true);
       expect(premiumInvalidResult.isFailure).toBe(true);
       expect(premiumInvalidResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
+        'Premium users need longer names'
       );
     });
 
     it('should apply rules conditionally with whenSatisfies', () => {
       // Arrange
-      const isPremium = new TestSpecification<TestData>(
-        (data) => data.premium === true,
-      );
+      const isPremium = new TestSpecification<TestData>(data => data.premium === true);
 
       const validator = BusinessRuleValidator.create<TestData>().apply(
-        coreRules.whenSatisfies(isPremium, (validator) =>
-          validator.apply(
-            coreRules.minLength('name', 5, 'Premium users need longer names'),
-          ),
-        ),
+        coreRules.whenSatisfies(isPremium, validator =>
+          validator.apply(coreRules.minLength('name', 5, 'Premium users need longer names'))
+        )
       );
 
       // Act
@@ -296,7 +272,7 @@ describe('CoreRules', () => {
       expect(premiumValidResult.isSuccess).toBe(true);
       expect(premiumInvalidResult.isFailure).toBe(true);
       expect(premiumInvalidResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
+        'Premium users need longer names'
       );
     });
 
@@ -304,20 +280,20 @@ describe('CoreRules', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>()
         .when(
-          (data) => data.premium === true,
-          (validator) =>
+          data => data.premium === true,
+          validator =>
             validator.addRule(
               'name',
-              (user) => user.name.length >= 5,
-              'Premium users need longer names',
-            ),
+              user => user.name.length >= 5,
+              'Premium users need longer names'
+            )
         )
-        .otherwise((validator) =>
+        .otherwise(validator =>
           validator.addRule(
             'name',
-            (user) => user.name.length >= 2,
-            'Regular users need at least 2 chars',
-          ),
+            user => user.name.length >= 2,
+            'Regular users need at least 2 chars'
+          )
         );
 
       // Act
@@ -343,12 +319,12 @@ describe('CoreRules', () => {
       expect(regularValidResult.isSuccess).toBe(true);
       expect(regularInvalidResult.isFailure).toBe(true);
       expect(regularInvalidResult?.error?.errors?.[0]?.message).toBe(
-        'Regular users need at least 2 chars',
+        'Regular users need at least 2 chars'
       );
       expect(premiumValidResult.isSuccess).toBe(true);
       expect(premiumInvalidResult.isFailure).toBe(true);
       expect(premiumInvalidResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
+        'Premium users need longer names'
       );
     });
   });
@@ -358,9 +334,7 @@ describe('CoreRules', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestData>()
         .apply(coreRules.required('name', 'Name is required'))
-        .apply(
-          coreRules.minLength('name', 3, 'Name must be at least 3 characters'),
-        )
+        .apply(coreRules.minLength('name', 3, 'Name must be at least 3 characters'))
         .apply(coreRules.email('email', 'Invalid email format'))
         .apply(coreRules.range('age', 18, 65, 'Age must be between 18 and 65'));
 
@@ -422,7 +396,7 @@ describe('RulesRegistry', () => {
 
       // Act & Assert
       expect(() => RulesRegistry.register(provider2)).toThrow(
-        'Rule provider with name "test-provider" is already registered',
+        'Rule provider with name "test-provider" is already registered'
       );
     });
   });
@@ -434,8 +408,7 @@ describe('RulesRegistry', () => {
       RulesRegistry.register(provider);
 
       // Act
-      const retrieved =
-        RulesRegistry.getProvider<TestRuleProvider>('test-provider');
+      const retrieved = RulesRegistry.getProvider<TestRuleProvider>('test-provider');
 
       // Assert
       expect(retrieved).toBe(provider);
@@ -445,7 +418,7 @@ describe('RulesRegistry', () => {
     it('should throw error when getting a non-existent provider', () => {
       // Act & Assert
       expect(() => RulesRegistry.getProvider('non-existent')).toThrow(
-        'Rule provider "non-existent" not found',
+        'Rule provider "non-existent" not found'
       );
     });
   });
@@ -485,8 +458,7 @@ describe('RulesRegistry', () => {
       RulesRegistry.register(provider);
 
       // Act
-      const retrieved =
-        RulesRegistry.forDomain<TestRuleProvider>('test-provider');
+      const retrieved = RulesRegistry.forDomain<TestRuleProvider>('test-provider');
 
       // Assert
       expect(retrieved).toBe(provider);
@@ -495,7 +467,7 @@ describe('RulesRegistry', () => {
     it('should throw error when domain does not exist', () => {
       // Act & Assert
       expect(() => RulesRegistry.forDomain('non-existent')).toThrow(
-        'Rule provider "non-existent" not found',
+        'Rule provider "non-existent" not found'
       );
     });
 

@@ -34,17 +34,15 @@ describe('SpecificationValidator', () => {
 
   // Helper function to create specifications
   const createUsernameSpec = (): ISpecification<string> => {
-    return Specification.create<string>((username) => username.length >= 3);
+    return Specification.create<string>(username => username.length >= 3);
   };
 
   const createEmailSpec = (): ISpecification<string> => {
-    return Specification.create<string>((email) =>
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-    );
+    return Specification.create<string>(email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
   };
 
   const createAgeSpec = (): ISpecification<number> => {
-    return Specification.create<number>((age) => age >= 18);
+    return Specification.create<number>(age => age >= 18);
   };
 
   describe('Basic Validation', () => {
@@ -52,20 +50,14 @@ describe('SpecificationValidator', () => {
       // Arrange
       const validator = new SpecificationValidator<TestUser>();
 
-      const usernameSpec = Specification.create<TestUser>(
-        (user) => user.username.length >= 3,
+      const usernameSpec = Specification.create<TestUser>(user => user.username.length >= 3);
+      const emailSpec = Specification.create<TestUser>(user =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)
       );
-      const emailSpec = Specification.create<TestUser>((user) =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
-      );
-      const ageSpec = Specification.create<TestUser>((user) => user.age >= 18);
+      const ageSpec = Specification.create<TestUser>(user => user.age >= 18);
 
       validator
-        .addRule(
-          usernameSpec,
-          'Username must be at least 3 characters long',
-          'username',
-        )
+        .addRule(usernameSpec, 'Username must be at least 3 characters long', 'username')
         .addRule(emailSpec, 'Email must be valid', 'email')
         .addRule(ageSpec, 'Age must be at least 18', 'age');
 
@@ -82,20 +74,14 @@ describe('SpecificationValidator', () => {
       // Arrange
       const validator = new SpecificationValidator<TestUser>();
 
-      const usernameSpec = Specification.create<TestUser>(
-        (user) => user.username.length >= 3,
+      const usernameSpec = Specification.create<TestUser>(user => user.username.length >= 3);
+      const emailSpec = Specification.create<TestUser>(user =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)
       );
-      const emailSpec = Specification.create<TestUser>((user) =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email),
-      );
-      const ageSpec = Specification.create<TestUser>((user) => user.age >= 18);
+      const ageSpec = Specification.create<TestUser>(user => user.age >= 18);
 
       validator
-        .addRule(
-          usernameSpec,
-          'Username must be at least 3 characters long',
-          'username',
-        )
+        .addRule(usernameSpec, 'Username must be at least 3 characters long', 'username')
         .addRule(emailSpec, 'Email must be valid', 'email')
         .addRule(ageSpec, 'Age must be at least 18', 'age');
 
@@ -117,21 +103,21 @@ describe('SpecificationValidator', () => {
         'username',
         createUsernameSpec(),
         'Username must be at least 3 characters long',
-        (user) => user.username,
+        user => user.username
       );
 
       validator.addPropertyRule<string>(
         'email',
         createEmailSpec(),
         'Email must be valid',
-        (user) => user.email,
+        user => user.email
       );
 
       validator.addPropertyRule<number>(
         'age',
         createAgeSpec(),
         'Age must be at least 18',
-        (user) => user.age,
+        user => user.age
       );
 
       // Act
@@ -147,11 +133,11 @@ describe('SpecificationValidator', () => {
   describe('Factory methods', () => {
     it('fromSpecification should create a validator with a single rule', () => {
       // Arrange
-      const ageSpec = Specification.create<TestUser>((user) => user.age >= 18);
+      const ageSpec = Specification.create<TestUser>(user => user.age >= 18);
       const validator = SpecificationValidator.fromSpecification(
         ageSpec,
         'Age must be at least 18',
-        'age',
+        'age'
       );
 
       // Act
@@ -182,14 +168,14 @@ describe('SpecificationValidator', () => {
   describe('Context in validation errors', () => {
     it('should include context in validation errors', () => {
       // Arrange
-      const ageSpec = Specification.create<TestUser>((user) => user.age >= 18);
+      const ageSpec = Specification.create<TestUser>(user => user.age >= 18);
       const context = { minAge: 18, field: 'age' };
 
       const validator = SpecificationValidator.fromSpecification(
         ageSpec,
         'Age must be at least {minAge}',
         'age',
-        context,
+        context
       );
 
       // Act

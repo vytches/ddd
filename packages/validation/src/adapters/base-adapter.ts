@@ -21,7 +21,7 @@ export abstract class BaseValidationAdapter<T, TSchema = any> implements IValida
   protected createValidationError(
     property: string,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, any>
   ): ValidationError {
     return new ValidationError(property, message, context);
   }
@@ -71,7 +71,7 @@ export class AdapterUtils {
    */
   static create<T>(
     validateFn: (value: T) => { success: boolean; errors?: string[] | undefined },
-    errorProperty = '',
+    errorProperty = ''
   ): IValidator<T> {
     return {
       validate: (value: T): Result<T, IValidationErrors> => {
@@ -118,7 +118,7 @@ export class AdapterUtils {
    */
   static withErrorMapping<T, TError>(
     validateFn: (value: T) => { success: boolean; errors?: TError[] | undefined },
-    errorMapper: ErrorMapper<TError>,
+    errorMapper: ErrorMapper<TError>
   ): IValidator<T> {
     return {
       validate: (value: T): Result<T, IValidationErrors> => {

@@ -2,7 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AggregateRoot } from '@vytches-ddd/core';
 
-import type { EventMiddleware, IDomainEvent, IEnhancedEventDispatcher, IEventBus } from '@vytches-ddd/contracts';
+import type {
+  EventMiddleware,
+  IDomainEvent,
+  IEnhancedEventDispatcher,
+  IEventBus,
+} from '@vytches-ddd/contracts';
 import { EventBusRegistry } from './event-bus-registry';
 import type { IEventProcessor } from './event-processor';
 
@@ -56,9 +61,7 @@ export class UniversalEventDispatcher implements IEnhancedEventDispatcher {
   /**
    * Dispatch all events from an aggregate and clear them
    */
-  async dispatchEventsForAggregate(
-    aggregate: AggregateRoot<any>,
-  ): Promise<void> {
+  async dispatchEventsForAggregate(aggregate: AggregateRoot<any>): Promise<void> {
     const events = aggregate.getDomainEvents();
     if (events.length === 0) return;
 

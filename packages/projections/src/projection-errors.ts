@@ -1,10 +1,10 @@
-import { DomainErrorCode, IDomainError } from "@vytches-ddd/core";
+import { DomainErrorCode, IDomainError } from '@vytches-ddd/core';
 
 export class ProjectionError extends IDomainError {
   static processingFailed(
     projectionName: string,
     eventType: string,
-    originalError: Error,
+    originalError: Error
   ): ProjectionError {
     const message = `Failed to process event ${eventType} in projection ${projectionName}`;
     return new ProjectionError(message, {
@@ -29,10 +29,7 @@ export class ProjectionError extends IDomainError {
     });
   }
 
-  static invalidConfiguration(
-    parameter: string,
-    reason: string,
-  ): ProjectionError {
+  static invalidConfiguration(parameter: string, reason: string): ProjectionError {
     const message = `Invalid configuration for '${parameter}': ${reason}`;
     return new ProjectionError(message, {
       code: DomainErrorCode.InvalidParameter,

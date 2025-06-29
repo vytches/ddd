@@ -28,7 +28,7 @@ export class VersioningCapability implements IVersioningCapability {
   registerUpcaster<TFrom = any, TTo = any>(
     eventType: string,
     sourceVersion: number,
-    upcaster: IEventUpcaster<TFrom, TTo>,
+    upcaster: IEventUpcaster<TFrom, TTo>
   ): this {
     if (!this._eventUpcasters.has(eventType)) {
       this._eventUpcasters.set(eventType, new Map());
@@ -46,7 +46,7 @@ export class VersioningCapability implements IVersioningCapability {
 
   handleVersionedEvent(
     event: IExtendedDomainEvent,
-    handlers: Map<string, IAggregateEventHandler>,
+    handlers: Map<string, IAggregateEventHandler>
   ): void {
     // Upcast event if needed
     const upcastedEvent = this.upcastEvent(event);
@@ -92,11 +92,7 @@ export class VersioningCapability implements IVersioningCapability {
     while (currentVersion < latestVersion) {
       const upcaster = typeUpcasters.get(currentVersion);
       if (!upcaster) {
-        throw AggregateError.missingUpcaster(
-          eventType,
-          currentVersion,
-          currentVersion + 1,
-        );
+        throw AggregateError.missingUpcaster(eventType, currentVersion, currentVersion + 1);
       }
 
       currentPayload = upcaster.upcast(currentPayload, currentMetadata);

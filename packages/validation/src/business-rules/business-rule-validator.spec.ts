@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 import type { ISpecification } from '@vytches-ddd/contracts';
 import { BusinessRuleValidator } from './business-rule-validator';
 
@@ -13,22 +13,18 @@ class TestSpecification<T> implements ISpecification<T> {
 
   and(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate)
     );
   }
 
   or(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate)
     );
   }
 
   not(): ISpecification<T> {
-    return new TestSpecification<T>(
-      (candidate) => !this.isSatisfiedBy(candidate),
-    );
+    return new TestSpecification<T>(candidate => !this.isSatisfiedBy(candidate));
   }
 }
 
@@ -64,8 +60,8 @@ describe('BusinessRuleValidator', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
       // Act
@@ -80,8 +76,8 @@ describe('BusinessRuleValidator', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
       // Act
@@ -96,13 +92,9 @@ describe('BusinessRuleValidator', () => {
     it('should collect all validation errors by default', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>()
-        .addRule('name', (user) => user.name.length > 0, 'Name is required')
-        .addRule('age', (user) => user.age >= 18, 'Must be 18 or older')
-        .addRule(
-          'email',
-          (user) => /^\S+@\S+\.\S+$/.test(user.email),
-          'Invalid email format',
-        );
+        .addRule('name', user => user.name.length > 0, 'Name is required')
+        .addRule('age', user => user.age >= 18, 'Must be 18 or older')
+        .addRule('email', user => /^\S+@\S+\.\S+$/.test(user.email), 'Invalid email format');
 
       // Act
       const result = validator.validate(invalidUser);
@@ -116,11 +108,11 @@ describe('BusinessRuleValidator', () => {
   describe('Specification integration', () => {
     it('should validate using mustSatisfy with specifications', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
 
       const validator = BusinessRuleValidator.create<TestUser>().mustSatisfy(
         isAdult,
-        'User must be 18 or older',
+        'User must be 18 or older'
       );
 
       // Act
@@ -130,24 +122,19 @@ describe('BusinessRuleValidator', () => {
       // Assert
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'User must be 18 or older',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('User must be 18 or older');
     });
 
     it('should validate property with propertyMustSatisfy', () => {
       // Arrange
-      const validEmail = new TestSpecification<string>((email) =>
-        /^\S+@\S+\.\S+$/.test(email),
-      );
+      const validEmail = new TestSpecification<string>(email => /^\S+@\S+\.\S+$/.test(email));
 
-      const validator =
-        BusinessRuleValidator.create<TestUser>().propertyMustSatisfy(
-          'email',
-          validEmail,
-          'Invalid email format',
-          (user) => user.email,
-        );
+      const validator = BusinessRuleValidator.create<TestUser>().propertyMustSatisfy(
+        'email',
+        validEmail,
+        'Invalid email format',
+        user => user.email
+      );
 
       // Act
       const validResult = validator.validate(validUser);
@@ -157,9 +144,7 @@ describe('BusinessRuleValidator', () => {
       expect(validResult.isSuccess).toBe(true);
       expect(invalidResult.isFailure).toBe(true);
       expect(invalidResult?.error?.errors?.[0]?.property).toBe('email');
-      expect(invalidResult?.error?.errors?.[0]?.message).toBe(
-        'Invalid email format',
-      );
+      expect(invalidResult?.error?.errors?.[0]?.message).toBe('Invalid email format');
     });
   });
 
@@ -167,13 +152,8 @@ describe('BusinessRuleValidator', () => {
     it('should apply rules conditionally with when', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().when(
-        (user) => user.premium === true,
-        (v) =>
-          v.addRule(
-            'name',
-            (user) => user.name.length >= 3,
-            'Premium users need longer names',
-          ),
+        user => user.premium === true,
+        v => v.addRule('name', user => user.name.length >= 3, 'Premium users need longer names')
       );
 
       const premiumUser = { ...validUser, premium: true, name: 'Jo' }; // Too short for premium
@@ -185,29 +165,18 @@ describe('BusinessRuleValidator', () => {
       // Assert
       expect(regularResult.isSuccess).toBe(true);
       expect(premiumResult.isFailure).toBe(true);
-      expect(premiumResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
-      );
+      expect(premiumResult?.error?.errors?.[0]?.message).toBe('Premium users need longer names');
     });
 
     it('should apply conditional rules with otherwise', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>()
         .when(
-          (user) => user.premium === true,
-          (v) =>
-            v.addRule(
-              'name',
-              (user) => user.name.length >= 3,
-              'Premium users need longer names',
-            ),
+          user => user.premium === true,
+          v => v.addRule('name', user => user.name.length >= 3, 'Premium users need longer names')
         )
-        .otherwise((v) =>
-          v.addRule(
-            'name',
-            (user) => user.name.length >= 2,
-            'Regular users need at least 2 chars',
-          ),
+        .otherwise(v =>
+          v.addRule('name', user => user.name.length >= 2, 'Regular users need at least 2 chars')
         );
 
       const shortNameUser = { ...validUser, name: 'J' }; // Too short for regular
@@ -221,30 +190,18 @@ describe('BusinessRuleValidator', () => {
 
       // Assert
       expect(shortResult.isFailure).toBe(true);
-      expect(shortResult?.error?.errors?.[0]?.message).toBe(
-        'Regular users need at least 2 chars',
-      );
+      expect(shortResult?.error?.errors?.[0]?.message).toBe('Regular users need at least 2 chars');
       expect(regularResult.isSuccess).toBe(true);
       expect(premiumResult.isFailure).toBe(true);
-      expect(premiumResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
-      );
+      expect(premiumResult?.error?.errors?.[0]?.message).toBe('Premium users need longer names');
     });
 
     it('should apply conditional rules with whenSatisfies using specifications', () => {
       // Arrange
-      const isPremium = new TestSpecification<TestUser>(
-        (user) => user.premium === true,
-      );
+      const isPremium = new TestSpecification<TestUser>(user => user.premium === true);
 
-      const validator = BusinessRuleValidator.create<TestUser>().whenSatisfies(
-        isPremium,
-        (v) =>
-          v.addRule(
-            'name',
-            (user) => user.name.length >= 3,
-            'Premium users need longer names',
-          ),
+      const validator = BusinessRuleValidator.create<TestUser>().whenSatisfies(isPremium, v =>
+        v.addRule('name', user => user.name.length >= 3, 'Premium users need longer names')
       );
 
       const premiumUser = { ...validUser, premium: true, name: 'Jo' }; // Too short for premium
@@ -256,28 +213,20 @@ describe('BusinessRuleValidator', () => {
       // Assert
       expect(regularResult.isSuccess).toBe(true);
       expect(premiumResult.isFailure).toBe(true);
-      expect(premiumResult?.error?.errors?.[0]?.message).toBe(
-        'Premium users need longer names',
-      );
+      expect(premiumResult?.error?.errors?.[0]?.message).toBe('Premium users need longer names');
     });
   });
 
   describe('Nested validation', () => {
     it('should validate nested objects', () => {
       // Arrange
-      const addressValidator = BusinessRuleValidator.create<
-        TestUser['address']
-      >()
-        .addRule(
-          'street',
-          (addr) => (addr?.street?.length ?? 0) > 0,
-          'Street is required',
-        )
-        .addRule('zip', (addr) => /^\d{5}$/.test(addr!.zip), 'Invalid ZIP code');
+      const addressValidator = BusinessRuleValidator.create<TestUser['address']>()
+        .addRule('street', addr => (addr?.street?.length ?? 0) > 0, 'Street is required')
+        .addRule('zip', addr => /^\d{5}$/.test(addr!.zip), 'Invalid ZIP code');
 
       const validator = BusinessRuleValidator.create<TestUser>().when(
-        (user) => user.address !== undefined,
-        (v) => v.addNested('address', addressValidator, (user) => user.address),
+        user => user.address !== undefined,
+        v => v.addNested('address', addressValidator, user => user.address)
       );
 
       const userWithInvalidAddress = {
@@ -303,13 +252,9 @@ describe('BusinessRuleValidator', () => {
     it('should stop on first failure when setStopOnFirstFailure is used', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>()
-        .addRule('name', (user) => user.name.length > 0, 'Name is required')
-        .addRule('age', (user) => user.age >= 18, 'Must be 18 or older')
-        .addRule(
-          'email',
-          (user) => /^\S+@\S+\.\S+$/.test(user.email),
-          'Invalid email format',
-        )
+        .addRule('name', user => user.name.length > 0, 'Name is required')
+        .addRule('age', user => user.age >= 18, 'Must be 18 or older')
+        .addRule('email', user => /^\S+@\S+\.\S+$/.test(user.email), 'Invalid email format')
         .setStopOnFirstFailure();
 
       // Act
@@ -326,14 +271,14 @@ describe('BusinessRuleValidator', () => {
       // Arrange
       const nameValidator = BusinessRuleValidator.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
       const ageValidator = BusinessRuleValidator.create<TestUser>().addRule(
         'age',
-        (user) => user.age >= 18,
-        'Must be 18 or older',
+        user => user.age >= 18,
+        'Must be 18 or older'
       );
 
       // Act
@@ -349,13 +294,10 @@ describe('BusinessRuleValidator', () => {
   describe('Static factory methods', () => {
     it('should create validator from specification', () => {
       // Arrange
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
 
       // Act
-      const validator = BusinessRuleValidator.fromSpecification(
-        isAdult,
-        'Must be 18 or older',
-      );
+      const validator = BusinessRuleValidator.fromSpecification(isAdult, 'Must be 18 or older');
       const result = validator.validate(invalidUser);
 
       // Assert

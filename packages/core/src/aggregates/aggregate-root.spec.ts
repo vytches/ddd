@@ -1,28 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import type {
-  IExtendedDomainEvent,
-  IDomainEvent
-} from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IDomainEvent } from '@vytches-ddd/contracts';
 
 import { AggregateRoot } from './aggregate-root';
 import { AggregateBuilder, AggregateTestBuilder } from './aggregate-root.builder';
 import { EntityId } from '../value-objects';
 import { AggregateError } from './aggregate-errors';
-import type {
-  IAggregateSnapshot,
-} from './aggregate-interfaces';
+import type { IAggregateSnapshot } from './aggregate-interfaces';
 import type { IEventUpcaster } from '@vytches-ddd/contracts';
-import {
-  SnapshotCapability,
-  VersioningCapability,
-  AuditCapability
-} from './capabilities';
+import { SnapshotCapability, VersioningCapability, AuditCapability } from './capabilities';
 import {
   asSnapshotAggregate,
   asVersioningAggregate,
   getAggregateCapabilities,
-  createSnapshotIfCapable
+  createSnapshotIfCapable,
 } from './aggregate-utilities';
 
 // Test implementation of entity
@@ -34,9 +25,15 @@ class TestAggregate extends AggregateRoot<string> {
     super({ id, version: version ?? 0 });
 
     // Register event handlers
-    this.registerEventHandler('NameChanged', (payload, _metadata) => this.onNameChanged(payload as { name: string }));
-    this.registerEventHandler('ItemAdded', (payload, _metadata) => this.onItemAdded(payload as { item: string }));
-    this.registerEventHandler('ItemRemoved', (payload, _metadata) => this.onItemRemoved(payload as { item: string }));
+    this.registerEventHandler('NameChanged', (payload, _metadata) =>
+      this.onNameChanged(payload as { name: string })
+    );
+    this.registerEventHandler('ItemAdded', (payload, _metadata) =>
+      this.onItemAdded(payload as { item: string })
+    );
+    this.registerEventHandler('ItemRemoved', (payload, _metadata) =>
+      this.onItemRemoved(payload as { item: string })
+    );
   }
 
   // Getters for testing internal state
@@ -87,7 +84,7 @@ class TestAggregate extends AggregateRoot<string> {
   }
 
   protected onItemRemoved(payload: { item: string }): void {
-    this._items = this._items.filter((i) => i !== payload.item);
+    this._items = this._items.filter(i => i !== payload.item);
   }
 
   // Implementation for snapshots
@@ -114,10 +111,7 @@ interface TestAggregateState {
 class NameChangedUpcaster
   implements IEventUpcaster<{ name: string }, { name: string; timestamp: Date }>
 {
-  upcast(
-    payload: { name: string },
-    _metadata: any,
-  ): { name: string; timestamp: Date } {
+  upcast(payload: { name: string }, _metadata: any): { name: string; timestamp: Date } {
     return {
       name: payload.name,
       timestamp: new Date(),
@@ -265,9 +259,7 @@ describe('AggregateRoot', () => {
       expect(emptyItemError).not.toBeNull();
       expect(emptyItemError?.message).toBe('Item cannot be empty');
 
-      const [nonexistentItemError] = safeRun(() =>
-        aggregate.removeItem('Nonexistent'),
-      );
+      const [nonexistentItemError] = safeRun(() => aggregate.removeItem('Nonexistent'));
       expect(nonexistentItemError).not.toBeNull();
       expect(nonexistentItemError?.message).toBe('Item does not exist');
 
@@ -451,10 +443,7 @@ describe('AggregateRoot', () => {
       // Arrange - already done in beforeEach
 
       // Act
-      const snapshot = createSnapshotIfCapable(
-        aggregate,
-        () => aggregate.serializeState()
-      );
+      const snapshot = createSnapshotIfCapable(aggregate, () => aggregate.serializeState());
 
       // Assert
       expect(snapshot).toBeNull();
@@ -474,9 +463,9 @@ describe('AggregateRoot', () => {
 
       // Act - Create snapshot using capability
       const snapshotAggregate = asSnapshotAggregate(aggregate);
-      const snapshot = snapshotAggregate.getCapability('snapshot').createSnapshot(
-        () => aggregate.serializeState()
-      );
+      const snapshot = snapshotAggregate
+        .getCapability('snapshot')
+        .createSnapshot(() => aggregate.serializeState());
 
       // Assert - Verify snapshot
       expect(snapshot.id).toBe(aggregateId.getValue());
@@ -495,10 +484,9 @@ describe('AggregateRoot', () => {
 
       // Act - Restore from snapshot
       const newSnapshotAggregate = asSnapshotAggregate(newAggregate);
-      newSnapshotAggregate.getCapability('snapshot').restoreFromSnapshot(
-        snapshot,
-        (state) => newAggregate.deserializeState(state)
-      );
+      newSnapshotAggregate
+        .getCapability('snapshot')
+        .restoreFromSnapshot(snapshot, state => newAggregate.deserializeState(state));
 
       // Assert - Check state after restoration
       expect(newAggregate.name).toBe(testName);
@@ -524,10 +512,9 @@ describe('AggregateRoot', () => {
       // Act
       const [error] = safeRun(() => {
         const snapshotAggregate = asSnapshotAggregate(aggregate);
-        snapshotAggregate.getCapability('snapshot').restoreFromSnapshot(
-          wrongIdSnapshot,
-          (state) => aggregate.deserializeState(state)
-        );
+        snapshotAggregate
+          .getCapability('snapshot')
+          .restoreFromSnapshot(wrongIdSnapshot, state => aggregate.deserializeState(state));
       });
 
       // Assert
@@ -551,10 +538,9 @@ describe('AggregateRoot', () => {
       // Act
       const [error] = safeRun(() => {
         const snapshotAggregate = asSnapshotAggregate(aggregate);
-        snapshotAggregate.getCapability('snapshot').restoreFromSnapshot(
-          wrongTypeSnapshot,
-          (state) => aggregate.deserializeState(state)
-        );
+        snapshotAggregate
+          .getCapability('snapshot')
+          .restoreFromSnapshot(wrongTypeSnapshot, state => aggregate.deserializeState(state));
       });
 
       // Assert
@@ -578,10 +564,9 @@ describe('AggregateRoot', () => {
       // Act
       const [error] = safeRun(() => {
         const snapshotAggregate = asSnapshotAggregate(aggregate);
-        snapshotAggregate.getCapability('snapshot').restoreFromSnapshot(
-          invalidSnapshot,
-          (state) => aggregate.deserializeState(state)
-        );
+        snapshotAggregate
+          .getCapability('snapshot')
+          .restoreFromSnapshot(invalidSnapshot, state => aggregate.deserializeState(state));
       });
 
       // Assert
@@ -631,27 +616,26 @@ describe('AggregateRoot', () => {
 
       // Act
       const versioningAggregate = asVersioningAggregate(aggregate);
-      const result = versioningAggregate.getCapability('versioning').registerUpcaster('NameChanged', 1, upcaster);
+      const result = versioningAggregate
+        .getCapability('versioning')
+        .registerUpcaster('NameChanged', 1, upcaster);
 
       // Assert
       expect(result).toBe(versioningCap);
 
       // Act & Assert - Trying to register again for the same version should throw exception
       const [error] = safeRun(() =>
-        versioningAggregate.getCapability('versioning').registerUpcaster('NameChanged', 1, upcaster),
+        versioningAggregate.getCapability('versioning').registerUpcaster('NameChanged', 1, upcaster)
       );
       expect(error).not.toBeNull();
-      expect(error?.message).toMatch(
-        /Upcaster for event NameChanged version 1 already exists/,
-      );
+      expect(error?.message).toMatch(/Upcaster for event NameChanged version 1 already exists/);
     });
   });
 
   describe('Aggregate Builder Tests', () => {
     it('should create aggregate with basic configuration', () => {
       // Arrange & Act
-      const builtAggregate = AggregateBuilder.create({ id: aggregateId })
-        .build();
+      const builtAggregate = AggregateBuilder.create({ id: aggregateId }).build();
 
       // Assert
       expect(builtAggregate.getId()).toBe(aggregateId);
@@ -742,10 +726,7 @@ describe('AggregateRoot', () => {
       aggregate.changeName('Test Name');
 
       // Act
-      const snapshot = createSnapshotIfCapable(
-        aggregate,
-        () => aggregate.serializeState()
-      );
+      const snapshot = createSnapshotIfCapable(aggregate, () => aggregate.serializeState());
 
       // Assert
       expect(snapshot).not.toBeNull();
@@ -758,10 +739,7 @@ describe('AggregateRoot', () => {
       aggregate.changeName('Test Name');
 
       // Act
-      const snapshot = createSnapshotIfCapable(
-        aggregate,
-        () => aggregate.serializeState()
-      );
+      const snapshot = createSnapshotIfCapable(aggregate, () => aggregate.serializeState());
 
       // Assert
       expect(snapshot).toBeNull();
@@ -808,9 +786,9 @@ describe('AggregateRoot', () => {
 
       // Act - Create snapshot
       const snapshotAggregate = asSnapshotAggregate(aggregate);
-      const snapshot = snapshotAggregate.getCapability('snapshot').createSnapshot(
-        () => aggregate.serializeState()
-      );
+      const snapshot = snapshotAggregate
+        .getCapability('snapshot')
+        .createSnapshot(() => aggregate.serializeState());
 
       // Arrange - Create new aggregate
       const newAggregate = new TestAggregate({ id: aggregateId });
@@ -820,10 +798,9 @@ describe('AggregateRoot', () => {
 
       // Act - Restore from snapshot
       const newSnapshotAggregate = asSnapshotAggregate(newAggregate);
-      newSnapshotAggregate.getCapability('snapshot').restoreFromSnapshot(
-        snapshot,
-        (state) => newAggregate.deserializeState(state)
-      );
+      newSnapshotAggregate
+        .getCapability('snapshot')
+        .restoreFromSnapshot(snapshot, state => newAggregate.deserializeState(state));
 
       // Assert - Verify state
       expect(newAggregate.name).toBe('Complex Test');
@@ -879,9 +856,9 @@ describe('AggregateRoot', () => {
 
       // Act - Create snapshot
       const snapshotAggregate = asSnapshotAggregate(aggregate);
-      const snapshot = snapshotAggregate.getCapability('snapshot').createSnapshot(
-        () => aggregate.serializeState()
-      );
+      const snapshot = snapshotAggregate
+        .getCapability('snapshot')
+        .createSnapshot(() => aggregate.serializeState());
 
       // Assert - Verify snapshot
       expect(snapshot.version).toBe(4);

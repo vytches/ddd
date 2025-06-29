@@ -5,7 +5,7 @@ import { IBaseRepository } from './base-repository';
 import { AggregateRoot } from '../aggregates';
 import { EntityId } from '../value-objects';
 import type { IDomainEvent, IAggregateWithEvents } from '@vytches-ddd/contracts';
-import {  IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
+import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
 
 // Mock dla IEnhancedEventDispatcher
 class MockEnhancedEventDispatcher extends IEnhancedEventDispatcher {
@@ -13,16 +13,12 @@ class MockEnhancedEventDispatcher extends IEnhancedEventDispatcher {
   public dispatchedAggregates: IAggregateWithEvents[] = [];
   public shouldFail = false;
 
-  async dispatchEventsForAggregate(
-    aggregate: IAggregateWithEvents,
-  ): Promise<void> {
+  async dispatchEventsForAggregate(aggregate: IAggregateWithEvents): Promise<void> {
     if (this.shouldFail) {
       throw new Error('Dispatch events failed');
     }
     this.dispatchedAggregates.push(aggregate);
-    aggregate
-      .getDomainEvents()
-      .forEach((event) => this.dispatchedEvents.push(event));
+    aggregate.getDomainEvents().forEach(event => this.dispatchedEvents.push(event));
 
     aggregate.commit();
   }
@@ -38,7 +34,7 @@ class MockEnhancedEventDispatcher extends IEnhancedEventDispatcher {
     if (this.shouldFail) {
       throw new Error('Dispatch events failed');
     }
-    events.forEach((event) => this.dispatchedEvents.push(event));
+    events.forEach(event => this.dispatchedEvents.push(event));
   }
 
   use(middleware: any): this {
@@ -97,8 +93,12 @@ class TestAggregate extends AggregateRoot<string> {
     super({ id, version: version ?? 0 });
 
     // Register event handlers
-    this.registerEventHandler('NameChanged', (payload, _metadata) => this.onNameChanged(payload as { name: string }));
-    this.registerEventHandler('ItemAdded', (payload, _metadata) => this.onItemAdded(payload as { item: string }));
+    this.registerEventHandler('NameChanged', (payload, _metadata) =>
+      this.onNameChanged(payload as { name: string })
+    );
+    this.registerEventHandler('ItemAdded', (payload, _metadata) =>
+      this.onItemAdded(payload as { item: string })
+    );
   }
 
   // Metody do manipulacji stanem
@@ -303,11 +303,9 @@ describe('IBaseRepository', () => {
       persistenceHandler.versions.set(aggregateId.getValue(), 0);
 
       // Mock persistence handler to throw error
-      const handleEventSpy = vi
-        .spyOn(persistenceHandler, 'handleEvent')
-        .mockImplementation(() => {
-          throw new Error('Persistence error');
-        });
+      const handleEventSpy = vi.spyOn(persistenceHandler, 'handleEvent').mockImplementation(() => {
+        throw new Error('Persistence error');
+      });
 
       // Act
       const [error] = await safeRun(() => repository.save(aggregate));
@@ -322,10 +320,7 @@ describe('IBaseRepository', () => {
     it('should persist all events before dispatching events', async () => {
       // Arrange
       const persistSpy = vi.spyOn(persistenceHandler, 'handleEvent');
-      const dispatchSpy = vi.spyOn(
-        eventDispatcher,
-        'dispatchEventsForAggregate',
-      );
+      const dispatchSpy = vi.spyOn(eventDispatcher, 'dispatchEventsForAggregate');
 
       aggregate.addTestEvent(eventNameChanged, { name: 'Test' });
       persistenceHandler.versions.set(aggregateId.getValue(), 0);

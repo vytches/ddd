@@ -35,15 +35,15 @@ describe('CircuitBreakerCapability', () => {
       aggregateType: 'TestAggregate',
       eventVersion: 1,
       eventId: 'event-123',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   beforeEach(() => {
     config = {
       failureThreshold: 3,
       recoveryTimeoutMs: 1000,
-      halfOpenMaxAttempts: 2
+      halfOpenMaxAttempts: 2,
     };
 
     context = new MockContext('TestProjection');
@@ -61,7 +61,7 @@ describe('CircuitBreakerCapability', () => {
       const customConfig = {
         failureThreshold: 5,
         recoveryTimeoutMs: 2000,
-        halfOpenMaxAttempts: 3
+        halfOpenMaxAttempts: 3,
       };
 
       const customCapability = new CircuitBreakerCapability(customConfig);
@@ -74,7 +74,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - trigger failures up to threshold
       for (let i = 0; i < config.failureThreshold; i++) {
@@ -87,7 +89,9 @@ describe('CircuitBreakerCapability', () => {
 
     it('should remain CLOSED when failures are below threshold', async () => {
       // Arrange
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - trigger failures below threshold
       for (let i = 0; i < config.failureThreshold - 1; i++) {
@@ -102,7 +106,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - trigger circuit to open
       for (let i = 0; i < config.failureThreshold; i++) {
@@ -127,7 +133,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange - get to HALF_OPEN state
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       for (let i = 0; i < config.failureThreshold; i++) {
         await capability.onError(error);
@@ -153,7 +161,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange - get to HALF_OPEN state
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       for (let i = 0; i < config.failureThreshold; i++) {
         await capability.onError(error);
@@ -179,7 +189,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange - open the circuit
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       for (let i = 0; i < config.failureThreshold; i++) {
         await capability.onError(error);
@@ -205,7 +217,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange - get to HALF_OPEN state
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       for (let i = 0; i < config.failureThreshold; i++) {
         await capability.onError(error);
@@ -226,7 +240,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - have some failures, then success
       await capability.onError(error);
@@ -251,7 +267,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange - open the circuit
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       for (let i = 0; i < config.failureThreshold; i++) {
         await capability.onError(error);
@@ -310,14 +328,16 @@ describe('CircuitBreakerCapability', () => {
         getProjectionName: () => undefined,
         getStore: () => null,
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        executeHooks: async () => {}
+        executeHooks: async () => {},
       } as any;
 
       const newCapability = new CircuitBreakerCapability(config);
       newCapability.attach(contextWithoutName);
 
       // Open the circuit
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
       for (let i = 0; i < config.failureThreshold; i++) {
         await newCapability.onError(error);
       }
@@ -337,7 +357,9 @@ describe('CircuitBreakerCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       vi.useFakeTimers();
 
@@ -370,12 +392,12 @@ describe('CircuitBreakerCapability', () => {
 
     it('should handle concurrent operations safely', async () => {
       // Arrange
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - concurrent errors
-      const errorPromises = Array.from({ length: 10 }, () =>
-        capability.onError(error)
-      );
+      const errorPromises = Array.from({ length: 10 }, () => capability.onError(error));
 
       await Promise.all(errorPromises);
 
@@ -388,7 +410,7 @@ describe('CircuitBreakerCapability', () => {
       const zeroThresholdConfig = {
         failureThreshold: 0,
         recoveryTimeoutMs: 1000,
-        halfOpenMaxAttempts: 1
+        halfOpenMaxAttempts: 1,
       };
 
       // Act
@@ -404,7 +426,7 @@ describe('CircuitBreakerCapability', () => {
       const shortTimeoutConfig = {
         failureThreshold: 1,
         recoveryTimeoutMs: 1,
-        halfOpenMaxAttempts: 1
+        halfOpenMaxAttempts: 1,
       };
 
       const shortTimeoutCapability = new CircuitBreakerCapability(shortTimeoutConfig);
@@ -412,7 +434,9 @@ describe('CircuitBreakerCapability', () => {
 
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Act - open circuit
       await shortTimeoutCapability.onError(error);
@@ -433,7 +457,7 @@ describe('CircuitBreakerCapability', () => {
       const multiAttemptConfig = {
         failureThreshold: 1,
         recoveryTimeoutMs: 100,
-        halfOpenMaxAttempts: 5
+        halfOpenMaxAttempts: 5,
       };
 
       const multiAttemptCapability = new CircuitBreakerCapability(multiAttemptConfig);
@@ -441,7 +465,9 @@ describe('CircuitBreakerCapability', () => {
 
       const state = { id: 'test', version: 1 };
       const event = createMockEvent();
-      const error = new ProjectionError('Test error', { data: { projectionName: 'TestProjection' } });
+      const error = new ProjectionError('Test error', {
+        data: { projectionName: 'TestProjection' },
+      });
 
       // Open circuit
       await multiAttemptCapability.onError(error);

@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { SnapshotProjectionCapability } from './snapshot-capability';
-import type { ICapabilityContext, IProjectionSnapshotStore, IProjectionSnapshot } from '../projection-interfaces';
+import type {
+  ICapabilityContext,
+  IProjectionSnapshotStore,
+  IProjectionSnapshot,
+} from '../projection-interfaces';
 
 // Mock store implementation
 class MockSnapshotStore implements IProjectionSnapshotStore {
@@ -14,7 +18,7 @@ class MockSnapshotStore implements IProjectionSnapshotStore {
     if (!this.snapshots.has(projectionName)) {
       this.snapshots.set(projectionName, []);
     }
-    
+
     const snapshots = this.snapshots.get(projectionName)!;
     snapshots.push({
       projectionName,
@@ -43,7 +47,7 @@ class MockSnapshotStore implements IProjectionSnapshotStore {
     const initialCount = snapshots.length;
     const filtered = snapshots.filter(s => s.timestamp > date);
     this.snapshots.set(projectionName, filtered);
-    
+
     return initialCount - filtered.length;
   }
 
@@ -92,8 +96,8 @@ describe('SnapshotProjectionCapability', () => {
     metadata: {
       eventId: 'event-123',
       timestamp: new Date(),
-      position
-    }
+      position,
+    },
   });
 
   beforeEach(() => {
@@ -109,8 +113,12 @@ describe('SnapshotProjectionCapability', () => {
     });
 
     it('should throw error for invalid interval', () => {
-      expect(() => new SnapshotProjectionCapability(store, 0)).toThrow('snapshot capability: interval must be positive');
-      expect(() => new SnapshotProjectionCapability(store, -1)).toThrow('snapshot capability: interval must be positive');
+      expect(() => new SnapshotProjectionCapability(store, 0)).toThrow(
+        'snapshot capability: interval must be positive'
+      );
+      expect(() => new SnapshotProjectionCapability(store, -1)).toThrow(
+        'snapshot capability: interval must be positive'
+      );
     });
 
     it('should use default interval when not specified', () => {
@@ -203,8 +211,8 @@ describe('SnapshotProjectionCapability', () => {
         payload: { data: 'test' },
         metadata: {
           eventId: 'event-123',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
 
       // Act
@@ -223,20 +231,20 @@ describe('SnapshotProjectionCapability', () => {
       // Arrange
       const state1 = { id: 'test', version: 1 };
       const state2 = { id: 'test', version: 2 };
-      
+
       // Create multiple snapshots
       await store.save('TestProjection', {
         state: state1,
         position: 100,
         timestamp: new Date('2023-01-01'),
-        version: 1
+        version: 1,
       });
-      
+
       await store.save('TestProjection', {
         state: state2,
         position: 200,
         timestamp: new Date('2023-01-02'),
-        version: 2
+        version: 2,
       });
 
       // Act
@@ -262,7 +270,7 @@ describe('SnapshotProjectionCapability', () => {
         state: { id: 'test', version: 5 },
         position: 500,
         timestamp: new Date(),
-        version: 10
+        version: 10,
       });
 
       // Act
@@ -297,10 +305,10 @@ describe('SnapshotProjectionCapability', () => {
       // Arrange
       const failingStore = new MockSnapshotStore();
       vi.spyOn(failingStore, 'save').mockRejectedValue(new Error('Store error'));
-      
+
       const failingCapability = new SnapshotProjectionCapability(failingStore, 1);
       failingCapability.attach(context);
-      
+
       const state = { id: 'test', version: 1 };
       const event = createMockEvent(100);
 
@@ -312,7 +320,7 @@ describe('SnapshotProjectionCapability', () => {
       // Arrange
       const failingStore = new MockSnapshotStore();
       vi.spyOn(failingStore, 'loadLatest').mockRejectedValue(new Error('Load error'));
-      
+
       const failingCapability = new SnapshotProjectionCapability(failingStore);
       failingCapability.attach(context);
 
@@ -338,7 +346,7 @@ describe('SnapshotProjectionCapability', () => {
 
       // Act
       newCapability.attach(context);
-      
+
       // Assert - should not throw when attached
       expect(() => newCapability.loadLatestSnapshot()).not.toThrow();
 
@@ -353,10 +361,10 @@ describe('SnapshotProjectionCapability', () => {
   describe('integration scenarios', () => {
     it('should handle rapid snapshot creation', async () => {
       // Arrange
-      const states = Array.from({ length: 10 }, (_, i) => ({ 
-        id: 'test', 
-        version: i + 1, 
-        data: `data-${i}` 
+      const states = Array.from({ length: 10 }, (_, i) => ({
+        id: 'test',
+        version: i + 1,
+        data: `data-${i}`,
       }));
       const events = Array.from({ length: 10 }, (_, i) => createMockEvent(i + 1));
 
@@ -379,7 +387,7 @@ describe('SnapshotProjectionCapability', () => {
       const capability2 = new SnapshotProjectionCapability(store, 1);
       const context1 = new MockContext('Projection1');
       const context2 = new MockContext('Projection2');
-      
+
       capability1.attach(context1);
       capability2.attach(context2);
 
@@ -389,13 +397,13 @@ describe('SnapshotProjectionCapability', () => {
       // Act
       await Promise.all([
         capability1.onAfterApply(state, event),
-        capability2.onAfterApply(state, event)
+        capability2.onAfterApply(state, event),
       ]);
 
       // Assert
       const snapshot1 = await store.loadLatest('Projection1');
       const snapshot2 = await store.loadLatest('Projection2');
-      
+
       expect(snapshot1).toBeDefined();
       expect(snapshot2).toBeDefined();
       expect(snapshot1!.projectionName).toBe('Projection1');
@@ -412,23 +420,23 @@ describe('SnapshotProjectionCapability', () => {
             email: 'john@example.com',
             preferences: {
               theme: 'dark',
-              notifications: ['email', 'push']
-            }
+              notifications: ['email', 'push'],
+            },
           },
           activity: {
             lastLogin: new Date('2023-01-01'),
             sessionCount: 15,
-            features: new Set(['feature1', 'feature2'])
-          }
+            features: new Set(['feature1', 'feature2']),
+          },
         },
         metadata: {
           version: 1,
           tags: ['user', 'active'],
           timestamps: {
             created: new Date('2022-12-01'),
-            updated: new Date('2023-01-01')
-          }
-        }
+            updated: new Date('2023-01-01'),
+          },
+        },
       };
       const event = createMockEvent(500);
 
@@ -449,7 +457,7 @@ describe('SnapshotProjectionCapability', () => {
       const states = [
         { id: 'test', version: 1, status: 'active' },
         { id: 'test', version: 2, status: 'inactive' },
-        { id: 'test', version: 3, status: 'archived' }
+        { id: 'test', version: 3, status: 'archived' },
       ];
       const event = createMockEvent(100);
 
@@ -463,11 +471,11 @@ describe('SnapshotProjectionCapability', () => {
       // Assert
       const snapshots = store.getSnapshots('TestProjection');
       expect(snapshots).toHaveLength(3);
-      
+
       expect(snapshots[0].state.status).toBe('active');
       expect(snapshots[1].state.status).toBe('inactive');
       expect(snapshots[2].state.status).toBe('archived');
-      
+
       expect(snapshots[0].version).toBe(1);
       expect(snapshots[1].version).toBe(2);
       expect(snapshots[2].version).toBe(3);
@@ -478,7 +486,7 @@ describe('SnapshotProjectionCapability', () => {
       await store.save('TestProjection', {
         state: { id: 'test', version: 1 },
         position: 100,
-        timestamp: new Date()
+        timestamp: new Date(),
         // version is optional and not provided
       });
 

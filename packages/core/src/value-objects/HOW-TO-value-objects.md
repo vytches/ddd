@@ -4,7 +4,8 @@
 
 - **Pattern Name**: Value Objects
 - **Category**: Domain-Driven Design (DDD) Pattern
-- **Purpose**: Represent immutable, self-validating domain concepts without identity
+- **Purpose**: Represent immutable, self-validating domain concepts without
+  identity
 - **Library**: DomainTS
 - **Language**: TypeScript
 - **Version**: 1.0.0
@@ -13,9 +14,12 @@
 
 ### What are Value Objects?
 
-Value Objects represent descriptive aspects of the domain with no conceptual identity. They are defined by their attributes rather than a unique identifier. Examples include Money, Email, Address, or DateRange.
+Value Objects represent descriptive aspects of the domain with no conceptual
+identity. They are defined by their attributes rather than a unique identifier.
+Examples include Money, Email, Address, or DateRange.
 
 **Key Characteristics**:
+
 - Immutable (cannot be changed after creation)
 - Equality based on value, not identity
 - Self-validating
@@ -39,19 +43,19 @@ abstract class BaseValueObject<T> implements ValueObjectValidator<T> {
   protected readonly value: T;
 
   constructor(value: T);
-  
+
   // Equality comparison
   equals(valueObject: BaseValueObject<T>): boolean;
-  
+
   // String representation
   toString(): string;
-  
+
   // JSON serialization
   toJSON(): string;
-  
+
   // Get raw value
   getValue(): T;
-  
+
   // Validation - must be implemented
   abstract validate(value: any): boolean;
 }
@@ -74,14 +78,14 @@ class EntityId<T = string> extends BaseValueObject<T> {
   private readonly type: IdType;
 
   constructor(value: T, type: IdType);
-  
+
   // Factory methods
   static createWithRandomUUID(): EntityId;
   static fromUUID(value: string): EntityId;
   static fromInteger(value: number): EntityId;
   static fromBigInt(value: string | bigint): EntityId;
   static fromText(value: string): EntityId;
-  
+
   // Type checking
   getType(): IdType;
   isType(type: IdType): boolean;
@@ -106,11 +110,11 @@ class Email extends BaseValueObject<string> {
       throw new InvalidParameterError('Invalid email format');
     }
   }
-  
+
   validate(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
-  
+
   getDomain(): string {
     return this.value.split('@')[1];
   }
@@ -148,7 +152,7 @@ class Money extends BaseValueObject<{ amount: number; currency: string }> {
     // Returns new instance instead of modifying current one
     return new Money({
       amount: this.value.amount + other.value.amount,
-      currency: this.value.currency
+      currency: this.value.currency,
     });
   }
 }
@@ -163,7 +167,7 @@ const email1 = new Email('user@example.com');
 const email2 = new Email('user@example.com');
 
 email1.equals(email2); // true - same value
-email1 === email2;     // false - different instances
+email1 === email2; // false - different instances
 ```
 
 ### Validation
@@ -178,7 +182,7 @@ class Age extends BaseValueObject<number> {
       throw new InvalidParameterError('Age must be between 0 and 150');
     }
   }
-  
+
   validate(value: number): boolean {
     return value >= 0 && value <= 150;
   }
@@ -210,7 +214,7 @@ class DateRange extends BaseValueObject<{ start: Date; end: Date }> {
   static fromDates(start: Date, end: Date): DateRange {
     return new DateRange({ start, end });
   }
-  
+
   static forDays(startDate: Date, days: number): DateRange {
     const end = new Date(startDate);
     end.setDate(end.getDate() + days);
@@ -228,11 +232,11 @@ class PhoneNumber extends BaseValueObject<string> {
   getCountryCode(): string {
     return this.value.substring(0, 3);
   }
-  
+
   getAreaCode(): string {
     return this.value.substring(3, 6);
   }
-  
+
   format(): string {
     return `(${this.getAreaCode()}) ${this.value.substring(6)}`;
   }
@@ -302,7 +306,7 @@ class MinimumOrderAmountSpec extends CompositeSpecification<Order> {
   constructor(private minimumAmount: Money) {
     super();
   }
-  
+
   isSatisfiedBy(order: Order): boolean {
     return order.totalAmount.isGreaterThan(this.minimumAmount);
   }
@@ -328,11 +332,11 @@ static fromUUID(value: string): EntityId {
   if (!LibUtils.hasValue(value)) {
     throw MissingValueError.withValue('entity identifier');
   }
-  
+
   if (!LibUtils.isValidUUID(value)) {
     throw InvalidParameterError.withParameter('entity identifier');
   }
-  
+
   return new EntityId(value, 'uuid');
 }
 ```
@@ -347,4 +351,6 @@ Value Objects in DomainTS provide:
 - **Immutability**: Predictable behavior without side effects
 - **Reusability**: Share common domain concepts
 
-The pattern is essential for building a rich domain model that captures business rules and prevents invalid states, while the EntityId implementation provides type-safe identifiers across your domain.
+The pattern is essential for building a rich domain model that captures business
+rules and prevents invalid states, while the EntityId implementation provides
+type-safe identifiers across your domain.

@@ -1,12 +1,11 @@
-import type { AggregateRoot} from "../aggregates";
-import { VersionError } from "../aggregates";
+import type { AggregateRoot } from '../aggregates';
+import { VersionError } from '../aggregates';
 import type { IEnhancedEventDispatcher, IEventPersistenceHandler } from '@vytches-ddd/contracts';
-
 
 export abstract class IBaseRepository {
   constructor(
     protected readonly eventDispatcher: IEnhancedEventDispatcher,
-    protected readonly eventPersistenceHandler: IEventPersistenceHandler,
+    protected readonly eventPersistenceHandler: IEventPersistenceHandler
   ) {}
 
   async save(aggregate: AggregateRoot): Promise<void> {
@@ -15,17 +14,11 @@ export abstract class IBaseRepository {
     if (events.length === 0) return;
 
     const currentVersion =
-      (await this.eventPersistenceHandler.getCurrentVersion(
-        aggregate.getId(),
-      )) ?? 0;
+      (await this.eventPersistenceHandler.getCurrentVersion(aggregate.getId())) ?? 0;
     const initialVersion = aggregate.getInitialVersion();
 
     if (initialVersion !== currentVersion) {
-      throw VersionError.withEntityIdAndVersions(
-        aggregate.getId(),
-        currentVersion,
-        initialVersion,
-      );
+      throw VersionError.withEntityIdAndVersions(aggregate.getId(), currentVersion, initialVersion);
     }
 
     let version = currentVersion;

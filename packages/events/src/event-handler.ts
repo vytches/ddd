@@ -75,22 +75,18 @@ export interface EventHandlerOptions {
  */
 export function EventHandler<T extends IDomainEvent>(
   eventType: new (...args: any[]) => T,
-  options: EventHandlerOptions = {},
+  options: EventHandlerOptions = {}
 ) {
   return function (
     target: any,
     propertyKey?: string | symbol,
-    descriptor?: TypedPropertyDescriptor<any>,
+    descriptor?: TypedPropertyDescriptor<any>
   ) {
     const metadata = { eventType };
 
     if (propertyKey !== undefined && descriptor !== undefined) {
       // Użycie jako dekorator metody
-      Reflect.defineMetadata(
-        EVENT_HANDLER_METADATA,
-        metadata,
-        descriptor.value,
-      );
+      Reflect.defineMetadata(EVENT_HANDLER_METADATA, metadata, descriptor.value);
       Reflect.defineMetadata(EVENT_HANDLER_OPTIONS, options, descriptor.value);
       return descriptor;
     } else {

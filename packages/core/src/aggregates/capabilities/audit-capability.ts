@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LibUtils } from '@vytches-ddd/utils';
 
-import type {
-  IAggregateRoot,
-  IAuditCapability,
-} from '../aggregate-interfaces';
+import type { IAggregateRoot, IAuditCapability } from '../aggregate-interfaces';
 import type { IAuditEvent } from '@vytches-ddd/contracts';
-import {
-  CAPABILITY_NAMES,
-} from '../aggregate-interfaces';
+import { CAPABILITY_NAMES } from '../aggregate-interfaces';
 import { AggregateError } from '../aggregate-errors';
 
 /**
@@ -42,25 +37,22 @@ export class AuditCapability implements IAuditCapability {
    * Gets audit entries for a specific event type
    */
   getAuditLogByEventType(eventType: string): ReadonlyArray<IAuditEvent> {
-    return this._auditLog.filter((entry) => entry.eventType === eventType);
+    return this._auditLog.filter(entry => entry.eventType === eventType);
   }
 
   /**
    * Gets audit entries by actor
    */
   getAuditLogByActor(actorId: string): ReadonlyArray<IAuditEvent> {
-    return this._auditLog.filter((entry) => entry.actor?.id === actorId);
+    return this._auditLog.filter(entry => entry.actor?.id === actorId);
   }
 
   /**
    * Gets audit entries within a date range
    */
-  getAuditLogByDateRange(
-    startDate: Date,
-    endDate: Date,
-  ): ReadonlyArray<IAuditEvent> {
+  getAuditLogByDateRange(startDate: Date, endDate: Date): ReadonlyArray<IAuditEvent> {
     return this._auditLog.filter(
-      (entry) => entry.timestamp >= startDate && entry.timestamp <= endDate,
+      entry => entry.timestamp >= startDate && entry.timestamp <= endDate
     );
   }
 
@@ -81,14 +73,8 @@ export class AuditCapability implements IAuditCapability {
     firstEntry?: Date | undefined;
     lastEntry?: Date | undefined;
   } {
-    const eventTypes = [
-      ...new Set(this._auditLog.map((entry) => entry.eventType)),
-    ];
-    const actors = [
-      ...new Set(
-        this._auditLog.map((entry) => entry.actor?.id).filter(Boolean),
-      ),
-    ];
+    const eventTypes = [...new Set(this._auditLog.map(entry => entry.eventType))];
+    const actors = [...new Set(this._auditLog.map(entry => entry.actor?.id).filter(Boolean))];
 
     return {
       totalEntries: this._auditLog.length,
@@ -103,16 +89,10 @@ export class AuditCapability implements IAuditCapability {
     const originalApply = (this.aggregate as any).apply?.bind(this.aggregate);
 
     if (!originalApply) {
-      throw AggregateError.cannotInterceptApplyMethod(
-        this.aggregate.getId().getValue(),
-      );
+      throw AggregateError.cannotInterceptApplyMethod(this.aggregate.getId().getValue());
     }
 
-    (this.aggregate as any).apply = (
-      eventTypeOrEvent: any,
-      payload?: any,
-      metadata?: any,
-    ) => {
+    (this.aggregate as any).apply = (eventTypeOrEvent: any, payload?: any, metadata?: any) => {
       // Note: State capture would require serializer function
       // For now, we'll track changes without state snapshots
 
@@ -126,15 +106,9 @@ export class AuditCapability implements IAuditCapability {
     };
   }
 
-  private createAuditEntry(
-    eventTypeOrEvent: any,
-    payload?: any,
-    metadata?: any,
-  ): void {
+  private createAuditEntry(eventTypeOrEvent: any, payload?: any, metadata?: any): void {
     const eventType =
-      typeof eventTypeOrEvent === 'string'
-        ? eventTypeOrEvent
-        : eventTypeOrEvent.eventType;
+      typeof eventTypeOrEvent === 'string' ? eventTypeOrEvent : eventTypeOrEvent.eventType;
 
     const auditEvent: IAuditEvent = {
       eventId: LibUtils.getUUID(),
@@ -153,9 +127,7 @@ export class AuditCapability implements IAuditCapability {
   }
 
   private getPreviousStateFromSnapshot(): any | null {
-    const snapshotCapability = this.aggregate.getCapability(
-      CAPABILITY_NAMES.SNAPSHOT,
-    );
+    const snapshotCapability = this.aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT);
     if (snapshotCapability && 'getPreviousState' in snapshotCapability) {
       return (snapshotCapability as any).getPreviousState();
     }

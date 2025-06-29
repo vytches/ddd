@@ -11,10 +11,7 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ESNext",
-    "lib": [
-      "ES2020",
-      "DOM"
-    ],
+    "lib": ["ES2020", "DOM"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "strict": true,
@@ -33,54 +30,21 @@
     "baseUrl": ".",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
-      "@vytches-ddd/core": [
-        "packages/core/src/index.ts"
-      ],
-      "@vytches-ddd/utils": [
-        "packages/utils/src/index.ts"
-      ],
-      "@vytches-ddd/validation": [
-        "packages/validation/src/index.ts"
-      ],
-      "@vytches-ddd/policies": [
-        "packages/policies/src/index.ts"
-      ],
-      "@vytches-ddd/events": [
-        "packages/events/src/index.ts"
-      ],
-      "@vytches-ddd/cqrs": [
-        "packages/cqrs/src/index.ts"
-      ],
-      "@vytches-ddd/acl": [
-        "packages/acl/src/index.ts"
-      ],
-      "@vytches-ddd/projections": [
-        "packages/projections/src/index.ts"
-      ],
-      "@vytches-ddd/messaging": [
-        "packages/messaging/src/index.ts"
-      ],
-      "@vytches-ddd/resilience": [
-        "packages/resilience/src/index.ts"
-      ],
-      "@vytches-ddd/testing": [
-        "packages/testing/src/index.ts"
-      ],
-      "@vytches-ddd/enterprise": [
-        "packages/enterprise/src/index.ts"
-      ],
-      "@vytches-ddd/cli": [
-        "packages/cli/src/index.ts"
-      ],
-      "@vytches-ddd/contracts": [
-        "packages/contracts/src/index.ts"
-      ]
+      "@vytches-ddd/core": ["packages/core/src/index.ts"],
+      "@vytches-ddd/utils": ["packages/utils/src/index.ts"],
+      "@vytches-ddd/validation": ["packages/validation/src/index.ts"],
+      "@vytches-ddd/policies": ["packages/policies/src/index.ts"],
+      "@vytches-ddd/events": ["packages/events/src/index.ts"],
+      "@vytches-ddd/cqrs": ["packages/cqrs/src/index.ts"],
+      "@vytches-ddd/acl": ["packages/acl/src/index.ts"],
+      "@vytches-ddd/projections": ["packages/projections/src/index.ts"],
+      "@vytches-ddd/messaging": ["packages/messaging/src/index.ts"],
+      "@vytches-ddd/resilience": ["packages/resilience/src/index.ts"],
+      "@vytches-ddd/testing": ["packages/testing/src/index.ts"],
+      "@vytches-ddd/enterprise": ["packages/enterprise/src/index.ts"],
+      "@vytches-ddd/cli": ["packages/cli/src/index.ts"],
+      "@vytches-ddd/contracts": ["packages/contracts/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp",
-    "dist",
-    "coverage"
-  ]
+  "exclude": ["node_modules", "tmp", "dist", "coverage"]
 }

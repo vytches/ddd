@@ -1,9 +1,5 @@
-import type {
-  DomainErrorOptions} from '../errors';
-import {
-  IDomainError,
-  DomainErrorCode
-} from '../errors';
+import type { DomainErrorOptions } from '../errors';
+import { IDomainError, DomainErrorCode } from '../errors';
 
 /**
  * Unified error class for aggregate-related errors
@@ -12,10 +8,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for invalid arguments provided to the aggregate
    */
-  static invalidArguments(
-    message: string,
-    data?: DomainErrorOptions,
-  ): AggregateError {
+  static invalidArguments(message: string, data?: DomainErrorOptions): AggregateError {
     const options = {
       code: DomainErrorCode.InvalidParameter,
       data,
@@ -30,7 +23,7 @@ export class AggregateError extends IDomainError {
     aggregateType: string,
     aggregateId: any,
     currentVersion: number,
-    expectedVersion: number,
+    expectedVersion: number
   ): AggregateError {
     const message = `Version conflict: Aggregate ${aggregateType} with ID ${aggregateId} has version ${currentVersion}, but expected ${expectedVersion}`;
     const options = {
@@ -62,10 +55,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for when a required method is not implemented
    */
-  static methodNotImplemented(
-    methodName: string,
-    aggregateType: string,
-  ): AggregateError {
+  static methodNotImplemented(methodName: string, aggregateType: string): AggregateError {
     const message = `Method '${methodName}' must be implemented by ${aggregateType} to use this feature`;
     const options = {
       code: DomainErrorCode.MissingValue,
@@ -80,10 +70,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for invalid snapshot
    */
-  static invalidSnapshot(
-    aggregateType: string,
-    reason?: string,
-  ): AggregateError {
+  static invalidSnapshot(aggregateType: string, reason?: string): AggregateError {
     const message = `Invalid snapshot for aggregate ${aggregateType}${reason ? `: ${reason}` : ''}`;
     const options = {
       code: DomainErrorCode.InvalidFormat,
@@ -113,10 +100,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for type mismatch during snapshot restoration
    */
-  static typeMismatch(
-    snapshotType: string,
-    aggregateType: string,
-  ): AggregateError {
+  static typeMismatch(snapshotType: string, aggregateType: string): AggregateError {
     const message = `Aggregate type mismatch: Snapshot is for type ${snapshotType}, but trying to load into ${aggregateType}`;
     const options = {
       code: DomainErrorCode.ValidationFailed,
@@ -131,10 +115,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for duplicate upcaster registration
    */
-  static duplicateUpcaster(
-    eventType: string,
-    sourceVersion: number,
-  ): AggregateError {
+  static duplicateUpcaster(eventType: string, sourceVersion: number): AggregateError {
     const message = `Upcaster for event ${eventType} version ${sourceVersion} already exists`;
     const options = {
       code: DomainErrorCode.DuplicateEntry,
@@ -152,7 +133,7 @@ export class AggregateError extends IDomainError {
   static missingUpcaster(
     eventType: string,
     fromVersion: number,
-    toVersion: number,
+    toVersion: number
   ): AggregateError {
     const message = `Missing upcaster for event ${eventType} from version ${fromVersion} to ${toVersion}`;
     const options = {
@@ -171,7 +152,7 @@ export class AggregateError extends IDomainError {
    */
   static cannotInterceptApplyMethod(
     aggergateId: string,
-    data?: DomainErrorOptions,
+    data?: DomainErrorOptions
   ): AggregateError {
     const message = `Cannot intercept apply method - method not found on aggregate ${aggergateId}`;
     const options = {
@@ -201,7 +182,7 @@ export class AggregateError extends IDomainError {
    */
   static aggregateDoesNotSupportReplay(
     aggregateType: string,
-    data?: DomainErrorOptions,
+    data?: DomainErrorOptions
   ): AggregateError {
     const message = `Aggregate ${aggregateType} does not support event replay`;
     const options = {
@@ -220,7 +201,7 @@ export class VersionError extends IDomainError {
     id: any,
     dbVersion: any,
     newVersion: any,
-    data?: DomainErrorOptions,
+    data?: DomainErrorOptions
   ): VersionError {
     const message = `Version mismatch for entity with id ${id}: expected [${dbVersion}], got [${newVersion}]`;
     const options = {

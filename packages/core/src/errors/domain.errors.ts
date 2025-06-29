@@ -11,10 +11,7 @@ export type DomainErrorOptions = ErrorOptions & {
   error?: Error | undefined;
 };
 
-export abstract class IDomainError
-  extends BaseError
-  implements DomainErrorOptions
-{
+export abstract class IDomainError extends BaseError implements DomainErrorOptions {
   domain?: string | any;
 
   code: DomainErrorCode = DomainErrorCode.Default;
@@ -33,8 +30,7 @@ export abstract class IDomainError
     } else if (LibUtils.isNotEmpty(options)) {
       if ('code' in options) {
         this.domain = options?.domain;
-        this.code =
-          options?.code != null ? options?.code : DomainErrorCode.Default;
+        this.code = options?.code != null ? options?.code : DomainErrorCode.Default;
         this.data = options?.data ?? {};
         this.error = options?.error ?? new Error('__Defautl error__');
       } else {
@@ -68,7 +64,7 @@ export class InvalidParameterError extends IDomainError {
   static withParameter(
     parameter: string,
     msg?: string,
-    data?: DomainErrorOptions,
+    data?: DomainErrorOptions
   ): InvalidParameterError {
     const message = msg ?? `Invalid ${parameter}`;
     const options: DomainErrorOptions = {

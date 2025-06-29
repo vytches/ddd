@@ -76,9 +76,7 @@ export class Result<TValue, TError = Error> {
     try {
       return Result.ok(fn());
     } catch (error) {
-      return Result.fail(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      return Result.fail(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -97,9 +95,7 @@ export class Result<TValue, TError = Error> {
    * Transform the success value with a function that returns a Result
    * @param fn - The transformation function
    */
-  flatMap<TNewValue>(
-    fn: (value: TValue) => Result<TNewValue, TError>,
-  ): Result<TNewValue, TError> {
+  flatMap<TNewValue>(fn: (value: TValue) => Result<TNewValue, TError>): Result<TNewValue, TError> {
     if (this.isFailure) {
       return Result.fail<TNewValue, TError>(this.error);
     }
@@ -113,7 +109,7 @@ export class Result<TValue, TError = Error> {
    */
   match<TResult>(
     onSuccess: (value: TValue) => TResult,
-    onFailure: (error: TError) => TResult,
+    onFailure: (error: TError) => TResult
   ): TResult {
     if (this.isSuccess) {
       return onSuccess(this.value);
@@ -148,16 +144,12 @@ export class Result<TValue, TError = Error> {
    * @param fn - The async function to try
    * @returns A Promise of a Result containing the function result or error
    */
-  static async tryAsync<TValue>(
-    fn: () => Promise<TValue>,
-  ): Promise<Result<TValue, Error>> {
+  static async tryAsync<TValue>(fn: () => Promise<TValue>): Promise<Result<TValue, Error>> {
     try {
       const value = await fn();
       return Result.ok(value);
     } catch (error) {
-      return Result.fail(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      return Result.fail(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -166,7 +158,7 @@ export class Result<TValue, TError = Error> {
    * @param fn - The async transformation function
    */
   async mapAsync<TNewValue>(
-    fn: (value: TValue) => Promise<TNewValue>,
+    fn: (value: TValue) => Promise<TNewValue>
   ): Promise<Result<TNewValue, TError>> {
     if (this.isFailure) {
       return Result.fail<TNewValue, TError>(this.error);
@@ -184,7 +176,7 @@ export class Result<TValue, TError = Error> {
    * @param fn - The async transformation function
    */
   async flatMapAsync<TNewValue>(
-    fn: (value: TValue) => Promise<Result<TNewValue, TError>>,
+    fn: (value: TValue) => Promise<Result<TNewValue, TError>>
   ): Promise<Result<TNewValue, TError>> {
     if (this.isFailure) {
       return Result.fail<TNewValue, TError>(this.error);

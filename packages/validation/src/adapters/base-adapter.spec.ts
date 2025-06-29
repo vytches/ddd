@@ -20,7 +20,7 @@ class TestValidationAdapter<T> extends BaseValidationAdapter<T, any> {
         return this.failWithErrors(this.customErrors);
       }
       return this.failWithErrors([
-        this.createValidationError('test', 'Test validation failed', { value })
+        this.createValidationError('test', 'Test validation failed', { value }),
       ]);
     }
     return this.success(value);
@@ -37,13 +37,13 @@ describe('BaseValidationAdapter', () => {
   const validUser: TestUser = {
     name: 'John Doe',
     email: 'john@example.com',
-    age: 25
+    age: 25,
   };
 
   const invalidUser: TestUser = {
     name: '',
     email: 'invalid',
-    age: 16
+    age: 16,
   };
 
   describe('Helper Methods', () => {
@@ -52,7 +52,9 @@ describe('BaseValidationAdapter', () => {
       const adapter = new TestValidationAdapter({});
 
       // Act
-      const error = adapter['createValidationError']('email', 'Invalid email', { code: 'INVALID_FORMAT' });
+      const error = adapter['createValidationError']('email', 'Invalid email', {
+        code: 'INVALID_FORMAT',
+      });
 
       // Assert
       expect(error).toBeInstanceOf(ValidationError);
@@ -66,7 +68,7 @@ describe('BaseValidationAdapter', () => {
       const adapter = new TestValidationAdapter({});
       const errors = [
         new ValidationError('name', 'Name required'),
-        new ValidationError('email', 'Invalid email')
+        new ValidationError('email', 'Invalid email'),
       ];
 
       // Act
@@ -149,7 +151,7 @@ describe('BaseValidationAdapter', () => {
       // Arrange
       const customErrors = [
         new ValidationError('name', 'Name is required'),
-        new ValidationError('email', 'Invalid email format')
+        new ValidationError('email', 'Invalid email format'),
       ];
       const adapter = new TestValidationAdapter({}, true, customErrors);
 
@@ -175,13 +177,13 @@ describe('AdapterUtils', () => {
   const validData: TestData = {
     name: 'John',
     email: 'john@example.com',
-    age: 25
+    age: 25,
   };
 
   const invalidData: TestData = {
     name: '',
     email: 'invalid-email',
-    age: 15
+    age: 15,
   };
 
   describe('create', () => {
@@ -194,7 +196,7 @@ describe('AdapterUtils', () => {
 
         return {
           success: errors.length === 0,
-          errors: errors.length > 0 ? errors : undefined
+          errors: errors.length > 0 ? errors : undefined,
         };
       };
 
@@ -232,7 +234,7 @@ describe('AdapterUtils', () => {
       // Arrange
       const validateFn = () => ({
         success: false,
-        errors: ['Error 1', 'Error 2', 'Error 3']
+        errors: ['Error 1', 'Error 2', 'Error 3'],
       });
       const adapter = AdapterUtils.create(validateFn, 'field');
 
@@ -249,20 +251,29 @@ describe('AdapterUtils', () => {
   describe('combine', () => {
     it('should combine multiple adapters successfully', () => {
       // Arrange
-      const adapter1 = AdapterUtils.create((data: TestData) => ({
-        success: data.name.length > 0,
-        errors: data.name.length === 0 ? ['Name required'] : undefined
-      }), 'name');
+      const adapter1 = AdapterUtils.create(
+        (data: TestData) => ({
+          success: data.name.length > 0,
+          errors: data.name.length === 0 ? ['Name required'] : undefined,
+        }),
+        'name'
+      );
 
-      const adapter2 = AdapterUtils.create((data: TestData) => ({
-        success: data.age >= 18,
-        errors: data.age < 18 ? ['Must be adult'] : undefined
-      }), 'age');
+      const adapter2 = AdapterUtils.create(
+        (data: TestData) => ({
+          success: data.age >= 18,
+          errors: data.age < 18 ? ['Must be adult'] : undefined,
+        }),
+        'age'
+      );
 
-      const adapter3 = AdapterUtils.create((data: TestData) => ({
-        success: data.email.includes('@'),
-        errors: !data.email.includes('@') ? ['Invalid email'] : undefined
-      }), 'email');
+      const adapter3 = AdapterUtils.create(
+        (data: TestData) => ({
+          success: data.email.includes('@'),
+          errors: !data.email.includes('@') ? ['Invalid email'] : undefined,
+        }),
+        'email'
+      );
 
       // Act
       const combinedAdapter = AdapterUtils.combine(adapter1, adapter2, adapter3);
@@ -316,8 +327,8 @@ describe('AdapterUtils', () => {
         success: false,
         errors: [
           { code: 'REQUIRED', field: 'name', description: 'Name is required' },
-          { code: 'MIN_AGE', field: 'age', description: 'Must be at least 18' }
-        ]
+          { code: 'MIN_AGE', field: 'age', description: 'Must be at least 18' },
+        ],
       });
 
       const errorMapper = (error: CustomError) =>

@@ -5,10 +5,9 @@ import { ProjectionError } from '../projection-errors';
 import type {
   ICapabilityContext,
   ICircuitBreakerConfig,
-  IProjectionLifecycleCapability} from '../projection-interfaces';
-import {
-  CircuitState
+  IProjectionLifecycleCapability,
 } from '../projection-interfaces';
+import { CircuitState } from '../projection-interfaces';
 
 export class CircuitBreakerCapability<TReadModel>
   implements IProjectionLifecycleCapability<TReadModel>
@@ -31,27 +30,19 @@ export class CircuitBreakerCapability<TReadModel>
 
   readonly name = 'circuit-breaker';
 
-  async onBeforeApply(
-    _state: TReadModel,
-    _event: IExtendedDomainEvent,
-  ): Promise<void> {
+  async onBeforeApply(_state: TReadModel, _event: IExtendedDomainEvent): Promise<void> {
     if (this.state === CircuitState.OPEN) {
       if (this.shouldAttemptReset()) {
         this.state = CircuitState.HALF_OPEN;
         this.halfOpenAttempts = 0;
       } else {
         const projectionName = this.context?.getProjectionName() || 'unknown';
-        throw new ProjectionError(
-          `Circuit breaker OPEN for projection ${projectionName}`,
-        );
+        throw new ProjectionError(`Circuit breaker OPEN for projection ${projectionName}`);
       }
     }
   }
 
-  async onAfterApply(
-    _state: TReadModel,
-    _event: IExtendedDomainEvent,
-  ): Promise<void> {
+  async onAfterApply(_state: TReadModel, _event: IExtendedDomainEvent): Promise<void> {
     if (this.state === CircuitState.HALF_OPEN) {
       this.halfOpenAttempts++;
       if (this.halfOpenAttempts >= this.config.halfOpenMaxAttempts) {
@@ -76,10 +67,7 @@ export class CircuitBreakerCapability<TReadModel>
 
   private shouldAttemptReset(): boolean {
     if (!this.lastFailureTime) return false;
-    return (
-      Date.now() - this.lastFailureTime.getTime() >
-      this.config.recoveryTimeoutMs
-    );
+    return Date.now() - this.lastFailureTime.getTime() > this.config.recoveryTimeoutMs;
   }
 
   getState(): CircuitState {

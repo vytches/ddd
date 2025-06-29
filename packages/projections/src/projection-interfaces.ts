@@ -11,10 +11,7 @@ export interface IProjection<TReadModel> {
   readonly eventTypes: string[];
 
   createInitialState(): TReadModel | Promise<TReadModel>;
-  apply(
-    readModel: TReadModel,
-    event: IExtendedDomainEvent,
-  ): TReadModel | Promise<TReadModel>;
+  apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel | Promise<TReadModel>;
   handles(eventType: string): boolean;
 }
 
@@ -41,18 +38,9 @@ export interface ICapabilityContext<TReadModel> {
 // Lifecycle hooks
 export interface IProjectionLifecycleCapability<TReadModel>
   extends IProjectionCapability<TReadModel> {
-  onBeforeApply?(
-    state: TReadModel,
-    event: IExtendedDomainEvent,
-  ): Promise<void> | void;
-  onAfterApply?(
-    state: TReadModel,
-    event: IExtendedDomainEvent,
-  ): Promise<void> | void;
-  onError?(
-    error: ProjectionError,
-    event?: IExtendedDomainEvent,
-  ): Promise<void> | void;
+  onBeforeApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
+  onAfterApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
+  onError?(error: ProjectionError, event?: IExtendedDomainEvent): Promise<void> | void;
 }
 
 export interface IProjectionEngine<TReadModel> {
@@ -92,12 +80,10 @@ export interface IProjectionCheckpoint<TState = any> {
 export interface IProjectionCheckpointStore {
   save<TState>(
     projectionName: string,
-    checkpoint: Omit<IProjectionCheckpoint<TState>, 'projectionName'>,
+    checkpoint: Omit<IProjectionCheckpoint<TState>, 'projectionName'>
   ): Promise<void>;
 
-  load<TState>(
-    projectionName: string,
-  ): Promise<IProjectionCheckpoint<TState> | null>;
+  load<TState>(projectionName: string): Promise<IProjectionCheckpoint<TState> | null>;
 
   delete(projectionName: string): Promise<void>;
 }
@@ -114,16 +100,12 @@ export interface IProjectionSnapshot<TState = any> {
 export interface IProjectionSnapshotStore {
   save<TState>(
     projectionName: string,
-    snapshot: Omit<IProjectionSnapshot<TState>, 'projectionName'>,
+    snapshot: Omit<IProjectionSnapshot<TState>, 'projectionName'>
   ): Promise<void>;
 
-  load<TState>(
-    projectionName: string,
-  ): Promise<IProjectionSnapshot<TState> | null>;
+  load<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null>;
 
-  loadLatest<TState>(
-    projectionName: string,
-  ): Promise<IProjectionSnapshot<TState> | null>;
+  loadLatest<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null>;
 
   delete(projectionName: string): Promise<void>;
 
@@ -134,17 +116,9 @@ export interface IProjectionSnapshotStore {
  * Builder interface
  */
 export interface IProjectionBuilder<TReadModel> {
-  withCheckpoints(
-    store: IProjectionCheckpointStore,
-    options?: CheckpointProjectionOptions,
-  ): this;
-  withSnapshots(
-    store: IProjectionSnapshotStore,
-    options?: SnapshotProjectionOptions,
-  ): this;
-  withCustomCapability<T extends IProjectionCapability<TReadModel>>(
-    capability: T,
-  ): this;
+  withCheckpoints(store: IProjectionCheckpointStore, options?: CheckpointProjectionOptions): this;
+  withSnapshots(store: IProjectionSnapshotStore, options?: SnapshotProjectionOptions): this;
+  withCustomCapability<T extends IProjectionCapability<TReadModel>>(capability: T): this;
   build(): IProjectionEngine<TReadModel>;
 }
 
@@ -173,11 +147,7 @@ export interface IProjectionRetryConfig {
 }
 
 export interface IProjectionErrorStrategy {
-  shouldRetry(
-    error: Error,
-    attempt: number,
-    config?: IProjectionRetryConfig,
-  ): boolean;
+  shouldRetry(error: Error, attempt: number, config?: IProjectionRetryConfig): boolean;
   getRetryDelay(attempt: number, config: IProjectionRetryConfig): number;
   getDelay?(attempt: number, config?: IProjectionRetryConfig): number; // For test compatibility
   isRetryableError(error: Error, config: IProjectionRetryConfig): boolean;

@@ -6,7 +6,6 @@ import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches-ddd/cont
 import type { EventHandlerOptions } from './event-handler';
 import { EventHandler } from './event-handler';
 
-
 // Przykładowe zdarzenia do testowania
 class TestEvent implements IDomainEvent {
   eventType = 'TestEvent';
@@ -34,10 +33,7 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const metadata = Reflect.getMetadata(
-        EVENT_HANDLER_METADATA,
-        TestEventHandler,
-      );
+      const metadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, TestEventHandler);
 
       // Assert
       expect(metadata).toBeDefined();
@@ -60,10 +56,7 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const appliedOptions = Reflect.getMetadata(
-        EVENT_HANDLER_OPTIONS,
-        TestEventHandler,
-      );
+      const appliedOptions = Reflect.getMetadata(EVENT_HANDLER_OPTIONS, TestEventHandler);
 
       // Assert
       expect(appliedOptions).toBeDefined();
@@ -134,14 +127,8 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const firstMetadata = Reflect.getMetadata(
-        EVENT_HANDLER_METADATA,
-        FirstHandler,
-      );
-      const secondMetadata = Reflect.getMetadata(
-        EVENT_HANDLER_METADATA,
-        SecondHandler,
-      );
+      const firstMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, FirstHandler);
+      const secondMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, SecondHandler);
 
       // Assert
       expect(firstMetadata.eventType).toBe(TestEvent);
@@ -162,7 +149,7 @@ describe('EventHandler Decorator', () => {
       // Act
       const metadata = Reflect.getMetadata(
         EVENT_HANDLER_METADATA,
-        TestService.prototype.handleTestEvent,
+        TestService.prototype.handleTestEvent
       );
 
       // Assert
@@ -188,7 +175,7 @@ describe('EventHandler Decorator', () => {
       // Act
       const appliedOptions = Reflect.getMetadata(
         EVENT_HANDLER_OPTIONS,
-        TestService.prototype.handleTestEvent,
+        TestService.prototype.handleTestEvent
       );
 
       // Assert
@@ -219,25 +206,25 @@ describe('EventHandler Decorator', () => {
       // Act
       const firstMetadata = Reflect.getMetadata(
         EVENT_HANDLER_METADATA,
-        MultiEventHandler.prototype.handleTestEvent,
+        MultiEventHandler.prototype.handleTestEvent
       );
       const firstOptions = Reflect.getMetadata(
         EVENT_HANDLER_OPTIONS,
-        MultiEventHandler.prototype.handleTestEvent,
+        MultiEventHandler.prototype.handleTestEvent
       );
 
       const secondMetadata = Reflect.getMetadata(
         EVENT_HANDLER_METADATA,
-        MultiEventHandler.prototype.handleAnotherEvent,
+        MultiEventHandler.prototype.handleAnotherEvent
       );
       const secondOptions = Reflect.getMetadata(
         EVENT_HANDLER_OPTIONS,
-        MultiEventHandler.prototype.handleAnotherEvent,
+        MultiEventHandler.prototype.handleAnotherEvent
       );
 
       const regularMetadata = Reflect.getMetadata(
         EVENT_HANDLER_METADATA,
-        MultiEventHandler.prototype.regularMethod,
+        MultiEventHandler.prototype.regularMethod
       );
 
       // Assert
@@ -262,10 +249,7 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const options = Reflect.getMetadata(
-        EVENT_HANDLER_OPTIONS,
-        DefaultOptionsHandler,
-      );
+      const options = Reflect.getMetadata(EVENT_HANDLER_OPTIONS, DefaultOptionsHandler);
 
       // Assert
       expect(options).toEqual({});
@@ -283,7 +267,7 @@ describe('EventHandler Decorator', () => {
       // Act
       const options = Reflect.getMetadata(
         EVENT_HANDLER_OPTIONS,
-        DefaultOptionsService.prototype.handleEvent,
+        DefaultOptionsService.prototype.handleEvent
       );
 
       // Assert
@@ -309,10 +293,7 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const baseMetadata = Reflect.getMetadata(
-        EVENT_HANDLER_METADATA,
-        BaseHandler,
-      );
+      const baseMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, BaseHandler);
 
       const baseInstance = new BaseHandler();
       const derivedInstance = new DerivedHandler();
@@ -346,10 +327,7 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const options = Reflect.getMetadata(
-        EVENT_HANDLER_OPTIONS,
-        ComplexHandler,
-      );
+      const options = Reflect.getMetadata(EVENT_HANDLER_OPTIONS, ComplexHandler);
 
       // Assert
       expect(options).toEqual(complexOptions);
@@ -374,14 +352,8 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const firstOptions = Reflect.getMetadata(
-        EVENT_HANDLER_OPTIONS,
-        FirstHandler,
-      );
-      const secondOptions = Reflect.getMetadata(
-        EVENT_HANDLER_OPTIONS,
-        SecondHandler,
-      );
+      const firstOptions = Reflect.getMetadata(EVENT_HANDLER_OPTIONS, FirstHandler);
+      const secondOptions = Reflect.getMetadata(EVENT_HANDLER_OPTIONS, SecondHandler);
 
       // Assert
       expect(firstOptions.active).toBe(true);
@@ -407,14 +379,8 @@ describe('EventHandler Decorator', () => {
       }
 
       // Act
-      const eventMetadata = Reflect.getMetadata(
-        EVENT_HANDLER_METADATA,
-        MultiDecoratorHandler,
-      );
-      const customMetadata = Reflect.getMetadata(
-        'custom:metadata',
-        MultiDecoratorHandler,
-      );
+      const eventMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, MultiDecoratorHandler);
+      const customMetadata = Reflect.getMetadata('custom:metadata', MultiDecoratorHandler);
 
       // Assert
       expect(eventMetadata.eventType).toBe(TestEvent);

@@ -13,11 +13,7 @@ export class LibUtils {
   }
 
   private static _isSpecialCaseFalse(input: unknown): boolean {
-    if (
-      input === Object.create(null) ||
-      typeof input === 'function' ||
-      typeof input === 'symbol'
-    ) {
+    if (input === Object.create(null) || typeof input === 'function' || typeof input === 'symbol') {
       return true;
     }
 
@@ -174,7 +170,7 @@ export class LibUtils {
   }
 
   static async sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   static isValidUUID(value: string): boolean {
@@ -212,21 +208,12 @@ export class LibUtils {
     return value;
   }
 
-  static deepEqual(
-    obj1: unknown,
-    obj2: unknown,
-    visitedPairs = new WeakMap(),
-  ): boolean {
+  static deepEqual(obj1: unknown, obj2: unknown, visitedPairs = new WeakMap()): boolean {
     if (Object.is(obj1, obj2) || obj1 === obj2) {
       return true;
     }
 
-    if (
-      typeof obj1 !== 'object' ||
-      typeof obj2 !== 'object' ||
-      obj1 === null ||
-      obj2 === null
-    ) {
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) {
       return false;
     }
 

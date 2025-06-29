@@ -1,8 +1,7 @@
 import type { ISpecification } from '@vytches-ddd/contracts';
-import {describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 import { BusinessRuleValidator } from './business-rule-validator';
 import './business-rule-validator-extension'; // Import extension to add methods to prototype
-
 
 // Create a test specification
 class TestSpecification<T> implements ISpecification<T> {
@@ -14,22 +13,18 @@ class TestSpecification<T> implements ISpecification<T> {
 
   and(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) && other.isSatisfiedBy(candidate)
     );
   }
 
   or(other: ISpecification<T>): ISpecification<T> {
     return new TestSpecification<T>(
-      (candidate) =>
-        this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate),
+      candidate => this.isSatisfiedBy(candidate) || other.isSatisfiedBy(candidate)
     );
   }
 
   not(): ISpecification<T> {
-    return new TestSpecification<T>(
-      (candidate) => !this.isSatisfiedBy(candidate),
-    );
+    return new TestSpecification<T>(candidate => !this.isSatisfiedBy(candidate));
   }
 }
 
@@ -57,8 +52,8 @@ describe('BusinessRuleValidatorExtension', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().addRule(
         'age',
-        (user) => user.age >= 18,
-        'Must be 18 or older',
+        user => user.age >= 18,
+        'Must be 18 or older'
       );
 
       // Act
@@ -72,8 +67,8 @@ describe('BusinessRuleValidatorExtension', () => {
     it('should convert validator with multiple rules to specification', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>()
-        .addRule('name', (user) => user.name.length > 0, 'Name is required')
-        .addRule('age', (user) => user.age >= 18, 'Must be 18 or older');
+        .addRule('name', user => user.name.length > 0, 'Name is required')
+        .addRule('age', user => user.age >= 18, 'Must be 18 or older');
 
       // Act
       const specification = validator.toSpecification();
@@ -89,21 +84,17 @@ describe('BusinessRuleValidatorExtension', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
-      const hasValidEmail = new TestSpecification<TestUser>((user) =>
-        /^\S+@\S+\.\S+$/.test(user.email),
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
+      const hasValidEmail = new TestSpecification<TestUser>(user =>
+        /^\S+@\S+\.\S+$/.test(user.email)
       );
 
       // Act
-      const result = validator.validateWithSpecifications(
-        invalidUser,
-        isAdult,
-        hasValidEmail,
-      );
+      const result = validator.validateWithSpecifications(invalidUser, isAdult, hasValidEmail);
 
       // Assert
       expect(result.isFailure).toBe(true);
@@ -115,21 +106,17 @@ describe('BusinessRuleValidatorExtension', () => {
       // Arrange
       const validator = BusinessRuleValidator.create<TestUser>().addRule(
         'name',
-        (user) => user.name.length > 0,
-        'Name is required',
+        user => user.name.length > 0,
+        'Name is required'
       );
 
-      const isAdult = new TestSpecification<TestUser>((user) => user.age >= 18);
-      const hasValidEmail = new TestSpecification<TestUser>((user) =>
-        /^\S+@\S+\.\S+$/.test(user.email),
+      const isAdult = new TestSpecification<TestUser>(user => user.age >= 18);
+      const hasValidEmail = new TestSpecification<TestUser>(user =>
+        /^\S+@\S+\.\S+$/.test(user.email)
       );
 
       // Act
-      const result = validator.validateWithSpecifications(
-        validUser,
-        isAdult,
-        hasValidEmail,
-      );
+      const result = validator.validateWithSpecifications(validUser, isAdult, hasValidEmail);
 
       // Assert
       expect(result.isSuccess).toBe(true);
@@ -141,18 +128,13 @@ describe('BusinessRuleValidatorExtension', () => {
     it('should apply rule functions to the validator', () => {
       // Arrange
       const addAgeRule = <T extends { age: number }>(
-        validator: BusinessRuleValidator<T>,
+        validator: BusinessRuleValidator<T>
       ): BusinessRuleValidator<T> => {
-        return validator.addRule(
-          'age',
-          (obj) => obj.age >= 18,
-          'Must be 18 or older',
-        );
+        return validator.addRule('age', obj => obj.age >= 18, 'Must be 18 or older');
       };
 
       // Act
-      const validator =
-        BusinessRuleValidator.create<TestUser>().apply(addAgeRule);
+      const validator = BusinessRuleValidator.create<TestUser>().apply(addAgeRule);
 
       const result = validator.validate(invalidUser);
 
@@ -165,23 +147,15 @@ describe('BusinessRuleValidatorExtension', () => {
     it('should chain multiple rule functions', () => {
       // Arrange
       const addAgeRule = <T extends { age: number }>(
-        validator: BusinessRuleValidator<T>,
+        validator: BusinessRuleValidator<T>
       ): BusinessRuleValidator<T> => {
-        return validator.addRule(
-          'age',
-          (obj) => obj.age >= 18,
-          'Must be 18 or older',
-        );
+        return validator.addRule('age', obj => obj.age >= 18, 'Must be 18 or older');
       };
 
       const addNameRule = <T extends { name: string }>(
-        validator: BusinessRuleValidator<T>,
+        validator: BusinessRuleValidator<T>
       ): BusinessRuleValidator<T> => {
-        return validator.addRule(
-          'name',
-          (obj) => obj.name.length > 0,
-          'Name is required',
-        );
+        return validator.addRule('name', obj => obj.name.length > 0, 'Name is required');
       };
 
       // Act

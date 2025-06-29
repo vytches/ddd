@@ -73,19 +73,25 @@ export default defineConfig({
     alias: {
       '@vytches-ddd/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/utils': new URL('./packages/utils/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/validation': new URL('./packages/validation/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/policies': new URL('./packages/policies/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/validation': new URL('./packages/validation/src/index.ts', import.meta.url)
+        .pathname,
+      '@vytches-ddd/policies': new URL('./packages/policies/src/index.ts', import.meta.url)
+        .pathname,
       '@vytches-ddd/events': new URL('./packages/events/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/cqrs': new URL('./packages/cqrs/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/acl': new URL('./packages/acl/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/projections': new URL('./packages/projections/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/messaging': new URL('./packages/messaging/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/resilience': new URL('./packages/resilience/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/projections': new URL('./packages/projections/src/index.ts', import.meta.url)
+        .pathname,
+      '@vytches-ddd/messaging': new URL('./packages/messaging/src/index.ts', import.meta.url)
+        .pathname,
+      '@vytches-ddd/resilience': new URL('./packages/resilience/src/index.ts', import.meta.url)
+        .pathname,
       '@vytches-ddd/testing': new URL('./packages/testing/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/enterprise': new URL('./packages/enterprise/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/enterprise': new URL('./packages/enterprise/src/index.ts', import.meta.url)
+        .pathname,
       '@vytches-ddd/cli': new URL('./packages/cli/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/contracts': new URL('./packages/contracts/src/index.ts', import.meta.url).pathname,
-
+      '@vytches-ddd/contracts': new URL('./packages/contracts/src/index.ts', import.meta.url)
+        .pathname,
     },
   },
 });

@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-  IAggregateRoot,
-  IEventSourcingCapability,
-} from '../aggregate-interfaces';
+import type { IAggregateRoot, IEventSourcingCapability } from '../aggregate-interfaces';
 import type { IExtendedDomainEvent, IEventStore } from '@vytches-ddd/contracts';
 
 import { AggregateError } from '../aggregate-errors';
@@ -49,7 +46,7 @@ export class EventSourcingCapability implements IEventSourcingCapability {
     await this._eventStore.saveEvents(
       this.aggregate.getId().getValue(),
       [...events],
-      this.aggregate.getVersion(),
+      this.aggregate.getVersion()
     );
 
     this.aggregate.commit();
@@ -60,9 +57,7 @@ export class EventSourcingCapability implements IEventSourcingCapability {
     if (typeof (this.aggregate as any).loadFromHistory === 'function') {
       (this.aggregate as any).loadFromHistory(events);
     } else {
-      throw AggregateError.aggregateDoesNotSupportReplay(
-        this.aggregate.constructor.name,
-      );
+      throw AggregateError.aggregateDoesNotSupportReplay(this.aggregate.constructor.name);
     }
   }
 
@@ -92,25 +87,19 @@ export class EventSourcingCapability implements IEventSourcingCapability {
    */
   async loadEventsFromVersion(
     aggregateId: any,
-    fromVersion: number,
+    fromVersion: number
   ): Promise<IExtendedDomainEvent[]> {
     if (!this._eventStore) {
       throw AggregateError.eventStoreNotConfigured();
     }
 
-    return await this._eventStore.getEventsAfterVersion(
-      aggregateId,
-      fromVersion,
-    );
+    return await this._eventStore.getEventsAfterVersion(aggregateId, fromVersion);
   }
 
   /**
    * Rebuilds aggregate from a specific point in time
    */
-  async rebuildFromVersion(
-    aggregateId: any,
-    fromVersion: number,
-  ): Promise<void> {
+  async rebuildFromVersion(aggregateId: any, fromVersion: number): Promise<void> {
     const events = await this.loadEventsFromVersion(aggregateId, fromVersion);
     this.replayEvents(events);
   }

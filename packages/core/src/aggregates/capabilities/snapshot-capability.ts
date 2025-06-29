@@ -27,7 +27,7 @@ export class SnapshotCapability<TState = any, TMeta = any>
 
   createSnapshot(
     serializer: () => TState,
-    metadataCreator?: () => TMeta,
+    metadataCreator?: () => TMeta
   ): IAggregateSnapshot<TState, TMeta> {
     const events = this.aggregate.getDomainEvents();
     const lastEvent = events.length > 0 ? events[events.length - 1] : null;
@@ -51,27 +51,18 @@ export class SnapshotCapability<TState = any, TMeta = any>
   restoreFromSnapshot(
     snapshot: IAggregateSnapshot<TState, TMeta>,
     deserializer: (state: TState) => void,
-    metadataRestorer?: (metadata: TMeta) => void,
+    metadataRestorer?: (metadata: TMeta) => void
   ): void {
     if (!snapshot || !snapshot.state) {
-      throw AggregateError.invalidSnapshot(
-        this.aggregate.constructor.name,
-        'Invalid snapshot',
-      );
+      throw AggregateError.invalidSnapshot(this.aggregate.constructor.name, 'Invalid snapshot');
     }
 
     if (snapshot.id !== this.aggregate.getId().getValue()) {
-      throw AggregateError.idMismatch(
-        snapshot.id,
-        this.aggregate.getId().getValue(),
-      );
+      throw AggregateError.idMismatch(snapshot.id, this.aggregate.getId().getValue());
     }
 
     if (snapshot.aggregateType !== this.aggregate.constructor.name) {
-      throw AggregateError.typeMismatch(
-        snapshot.aggregateType,
-        this.aggregate.constructor.name,
-      );
+      throw AggregateError.typeMismatch(snapshot.aggregateType, this.aggregate.constructor.name);
     }
 
     deserializer(snapshot.state);

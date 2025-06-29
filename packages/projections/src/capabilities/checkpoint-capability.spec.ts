@@ -2,7 +2,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { CheckpointCapability } from './checkpoint-capability';
-import type { ICapabilityContext, IProjectionCheckpointStore, IProjectionCheckpoint } from '../projection-interfaces';
+import type {
+  ICapabilityContext,
+  IProjectionCheckpointStore,
+  IProjectionCheckpoint,
+} from '../projection-interfaces';
 
 // Mock store implementation
 class MockCheckpointStore implements IProjectionCheckpointStore {
@@ -67,8 +71,8 @@ describe('CheckpointCapability', () => {
       aggregateType: 'TestAggregate',
       eventId: 'event-123',
       timestamp: new Date(),
-      position
-    }
+      position,
+    },
   });
 
   beforeEach(() => {
@@ -84,8 +88,12 @@ describe('CheckpointCapability', () => {
     });
 
     it('should throw error for invalid interval', () => {
-      expect(() => new CheckpointCapability(store, 0)).toThrow('checkpoint capability: interval must be positive');
-      expect(() => new CheckpointCapability(store, -1)).toThrow('checkpoint capability: interval must be positive');
+      expect(() => new CheckpointCapability(store, 0)).toThrow(
+        'checkpoint capability: interval must be positive'
+      );
+      expect(() => new CheckpointCapability(store, -1)).toThrow(
+        'checkpoint capability: interval must be positive'
+      );
     });
 
     it('should use default interval when not specified', () => {
@@ -160,8 +168,8 @@ describe('CheckpointCapability', () => {
           aggregateType: 'TestAggregate',
           aggregateId: 'test-123',
           eventId: 'event-123',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
 
       // Act
@@ -185,7 +193,7 @@ describe('CheckpointCapability', () => {
         state: expectedState,
         position: expectedPosition,
         timestamp: new Date(),
-        eventCount: 15
+        eventCount: 15,
       });
 
       // Act
@@ -305,7 +313,7 @@ describe('CheckpointCapability', () => {
       // Act
       await Promise.all([
         capability1.onAfterApply(state, event),
-        capability2.onAfterApply(state, event)
+        capability2.onAfterApply(state, event),
       ]);
 
       // Assert
@@ -324,12 +332,12 @@ describe('CheckpointCapability', () => {
         id: 'complex-test',
         nested: {
           data: ['item1', 'item2'],
-          metadata: { version: 1, tags: ['tag1', 'tag2'] }
+          metadata: { version: 1, tags: ['tag1', 'tag2'] },
         },
         timestamps: {
           created: new Date('2023-01-01'),
-          updated: new Date('2023-01-02')
-        }
+          updated: new Date('2023-01-02'),
+        },
       };
       const event = createMockEvent(500);
 

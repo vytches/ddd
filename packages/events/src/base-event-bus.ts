@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { EventHandlerFn, IEventHandler, BaseEventBusOptions, EventBusMiddleware } from '@vytches-ddd/contracts';
+import type {
+  EventHandlerFn,
+  IEventHandler,
+  BaseEventBusOptions,
+  EventBusMiddleware,
+} from '@vytches-ddd/contracts';
 import { IEventBus } from '@vytches-ddd/contracts';
 import { isEventHandler } from '@vytches-ddd/contracts';
-
 
 /**
  * Symbol for custom middleware
@@ -19,10 +23,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
   /**
    * Map of event types to their handlers
    */
-  protected handlers: Map<
-    string,
-    Set<EventHandlerFn<any> | IEventHandler<any>>
-  > = new Map();
+  protected handlers: Map<string, Set<EventHandlerFn<any> | IEventHandler<any>>> = new Map();
 
   /**
    * Configuration options for this event bus
@@ -59,7 +60,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
     // Publish all events in parallel for better performance
     const publishPromises = events.map(event => this.publish(event));
-    
+
     try {
       await Promise.all(publishPromises);
       this.log(`Successfully published ${events.length} events`);
@@ -77,10 +78,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
     });
 
     // Add middleware to options and rebuild pipeline
-    this.options.middlewares = [
-      ...(this.options.middlewares || []),
-      middleware,
-    ];
+    this.options.middlewares = [...(this.options.middlewares || []), middleware];
     this.publishPipeline = this.buildPublishPipeline();
 
     return this;
@@ -150,7 +148,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    */
   subscribe<T extends TEvent>(
     eventType: string | (new (...args: any[]) => T),
-    handler: (event: T) => Promise<void> | void,
+    handler: (event: T) => Promise<void> | void
   ): void {
     const eventName = this.getEventName(eventType);
 
@@ -168,7 +166,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    */
   registerHandler<T extends TEvent>(
     eventType: string | (new (...args: any[]) => T),
-    handler: { handle(event: T): Promise<void> | void },
+    handler: { handle(event: T): Promise<void> | void }
   ): void {
     const eventName = this.getEventName(eventType);
 
@@ -186,9 +184,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    */
   unsubscribe<T extends TEvent>(
     eventType: string | (new (...args: any[]) => T),
-    handler:
-      | ((event: T) => Promise<void> | void)
-      | { handle(event: T): Promise<void> | void },
+    handler: ((event: T) => Promise<void> | void) | { handle(event: T): Promise<void> | void }
   ): void {
     const eventName = this.getEventName(eventType);
     const handlers = this.handlers.get(eventName);
@@ -230,7 +226,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Extracts the event name from a constructor or string
    */
   protected getEventName<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: any[]) => T)
   ): string {
     if (typeof eventType === 'string') {
       return eventType;
@@ -264,7 +260,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Useful for testing and debugging
    */
   getHandlers(
-    eventType: string | (new (...args: any[]) => any),
+    eventType: string | (new (...args: any[]) => any)
   ): Set<EventHandlerFn<any> | IEventHandler<any>> | undefined {
     const eventName = this.getEventName(eventType);
     return this.handlers.get(eventName);

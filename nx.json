@@ -5,75 +5,45 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "test",
-          "lint",
-          "type-check",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "test", "lint", "type-check", "e2e"],
         "parallel": 3
       }
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ],
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
       "cache": true,
       "executor": "@nx/vite:build",
-      "outputs": [
-        "{options.outputPath}"
-      ]
+      "outputs": ["{options.outputPath}"]
     },
     "dev": {
       "executor": "@nx/vite:dev-server",
       "cache": false
     },
     "test": {
-      "inputs": [
-        "default",
-        "^production",
-        "{workspaceRoot}/vitest.config.ts"
-      ],
+      "inputs": ["default", "^production", "{workspaceRoot}/vitest.config.ts"],
       "cache": true,
       "executor": "@nx/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage"
-      ],
+      "outputs": ["{workspaceRoot}/coverage"],
       "options": {
         "passWithNoTests": true,
         "run": true
       }
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore"
-      ],
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"],
       "cache": true,
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "{projectRoot}/**/*.{ts,tsx,js,jsx}"
-        ],
+        "lintFilePatterns": ["{projectRoot}/**/*.{ts,tsx,js,jsx}"],
         "quiet": false
       }
     },
     "type-check": {
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "inputs": ["default", "^production"],
       "cache": true,
       "executor": "nx:run-commands",
       "options": {
@@ -82,10 +52,7 @@
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -126,9 +93,7 @@
     }
   },
   "release": {
-    "projects": [
-      "packages/*"
-    ],
+    "projects": ["packages/*"],
     "version": {
       "conventionalCommits": true
     },

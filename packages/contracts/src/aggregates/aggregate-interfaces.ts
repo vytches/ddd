@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from "../events";
+import type { IExtendedDomainEvent } from '../events';
 
 /**
  * Interface for objects that can produce domain events
