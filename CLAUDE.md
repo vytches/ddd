@@ -18,6 +18,9 @@ pnpm playground
 pnpm dev:core
 pnpm dev:events
 pnpm dev:cqrs
+pnpm dev:policies
+pnpm dev:projections
+pnpm dev:validation
 ```
 
 ### Testing
@@ -83,14 +86,15 @@ pnpm format
 ```
 Foundation Layer:
 ├── @vytches-ddd/core (Value Objects, Entities, Aggregates)
-└── @vytches-ddd/utils (Common utilities)
+├── @vytches-ddd/utils (Common utilities)
+└── @vytches-ddd/contracts (Shared interfaces and contracts)
 
 Patterns Layer:
 ├── @vytches-ddd/validation (Business rules, specifications)
-└── @vytches-ddd/policies (Business policies)
+└── @vytches-ddd/policies (Business policies, policy builder)
 
 Architecture Layer:
-├── @vytches-ddd/events (Event-driven architecture)
+├── @vytches-ddd/events (Event-driven architecture, domain events)
 ├── @vytches-ddd/cqrs (Command Query Responsibility Segregation)
 └── @vytches-ddd/projections (Event projections, read models)
 
@@ -99,7 +103,8 @@ Integration Layer:
 └── @vytches-ddd/messaging (Outbox pattern, sagas)
 
 Infrastructure Layer:
-└── @vytches-ddd/resilience (Circuit breakers, retry patterns)
+├── @vytches-ddd/resilience (Circuit breakers, retry patterns)
+└── @vytches-ddd/enterprise (Health checks, monitoring)
 
 Tooling Layer:
 ├── @vytches-ddd/testing (Test utilities)
@@ -116,9 +121,12 @@ This project implements enterprise-grade Domain-Driven Design patterns:
 - **Domain Events**: Event-driven architecture for loose coupling
 - **CQRS**: Command Query Responsibility Segregation
 - **Anti-Corruption Layer**: External system integration patterns
-- **Event Projections**: Read model generation from events
+- **Event Projections**: Read model generation from events with capabilities
+- **Business Policies**: Fluent policy builder with specifications and validations
+- **Validation Specifications**: Composite specifications and business rules
 - **Outbox Pattern**: Reliable message delivery
 - **Circuit Breakers**: Resilience patterns for external dependencies
+- **Shared Contracts**: Common interfaces across domain boundaries
 
 ### Module Boundaries
 
@@ -217,10 +225,44 @@ packages/<package-name>/
 
 ### Current State
 
-- Project is in initial setup phase with complete infrastructure
-- Core DDD implementations are placeholder/minimal
-- Development workflow and tooling are fully functional
-- Package structure and dependencies are well-defined
+- **Core Infrastructure**: Complete monorepo setup with build tooling
+- **Foundation Layer**: Core value objects, entities, aggregates, and utilities implemented
+- **Patterns Layer**: Advanced validation with specifications and fluent policy builder implemented
+- **Architecture Layer**: Event-driven architecture with domain events, CQRS, and projections with capabilities
+- **Development Workflow**: Fully functional with smart development mode and testing
+- **Package Structure**: Well-defined dependencies with strict module boundaries
+
+### Recently Implemented Features
+
+#### Business Policies Package (@vytches-ddd/policies)
+
+- **Fluent Policy Builder**: Chain policies with `.must()`, `.mustAsync()`, `.and()`, `.or()`
+- **Composite Policies**: Group policies with AND/OR logic
+- **Conditional Policies**: Apply policies based on runtime conditions with `.when().then().otherwise()`
+- **Violation Management**: Structured policy violations with severity levels
+- **Policy Registry**: Central registration and retrieval of domain policies
+
+#### Event Projections Package (@vytches-ddd/projections)
+
+- **Projection Engine**: Enhanced projection engine with retry capabilities
+- **Capability System**: Extensible capabilities (checkpoints, circuit breakers, dead letter handling)
+- **Error Strategies**: Configurable retry strategies with exponential backoff
+- **Lifecycle Hooks**: Before/after hooks for projection processing
+- **State Management**: Automated initial state creation and persistence
+
+#### Shared Contracts Package (@vytches-ddd/contracts)
+
+- **Domain Event Interfaces**: Standardized event contracts across packages
+- **Aggregate Interfaces**: Common aggregate behavior contracts
+- **Validation Interfaces**: Specification and validator contracts
+- **Event Infrastructure**: Event bus, dispatcher, and store interfaces
+
+#### Enhanced Validation Package (@vytches-ddd/validation)
+
+- **Composite Specifications**: Combine specifications with AND/OR/NOT operations
+- **Business Rule Validators**: Domain-specific validation with error context
+- **Adapter Pattern**: External validator integration support
+- **Validation Facade**: Simplified validation API with comprehensive error reporting
 
 ### Key Files to Understand
 
