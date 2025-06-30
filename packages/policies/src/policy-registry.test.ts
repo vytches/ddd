@@ -278,14 +278,14 @@ describe('PolicyRegistry', () => {
     it('should return all policies when no filters', () => {
       const results = registry.search({});
 
-      expect(results).toHaveLength(3);
+      expect(results).toHaveLength(2); // Deprecated policy excluded by default
     });
 
     it('should filter by domain', () => {
       const results = registry.search({ domain: 'domain1' });
 
-      expect(results).toHaveLength(2);
-      expect(results.every(r => r.policy.domain === 'domain1')).toBe(true);
+      expect(results).toHaveLength(1); // Only non-deprecated policy from domain1
+      expect(results[0]?.policy.id).toBe('test-policy'); // Should be policy1
     });
 
     it('should filter by policy ID', () => {
@@ -298,7 +298,7 @@ describe('PolicyRegistry', () => {
     it('should filter by tags', () => {
       const results = registry.search({ tags: ['validation'] });
 
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(1); // Only non-deprecated policy with validation tag
       expect(results.every(r => r.metadata.tags?.includes('validation'))).toBe(true);
     });
 

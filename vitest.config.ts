@@ -92,6 +92,8 @@ export default defineConfig({
       '@vytches-ddd/cli': new URL('./packages/cli/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/contracts': new URL('./packages/contracts/src/index.ts', import.meta.url)
         .pathname,
+      '@vytches-ddd/domain-services': new URL('./packages/domain-services/src/index.ts', import.meta.url)
+        .pathname,
     },
   },
 });

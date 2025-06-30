@@ -108,6 +108,14 @@ export class PolicyStepBuilder<T> {
     return this.builder.build();
   }
 
+  /**
+   * Build and register the final policy
+   */
+  buildAndRegister(registryDomain?: string, policyName?: string): IBusinessPolicy<T> {
+    this.addToBuilder();
+    return this.builder.buildAndRegister(registryDomain, policyName);
+  }
+
   private addToBuilder(): void {
     if (!this.code) {
       throw new Error('Policy step requires violation code. Use .withCode()');
@@ -179,6 +187,14 @@ export class AsyncPolicyStepBuilder<T> {
   build(): IBusinessPolicy<T> {
     this.addToBuilder();
     return this.builder.build();
+  }
+
+  /**
+   * Build and register the final policy
+   */
+  buildAndRegister(registryDomain?: string, policyName?: string): IBusinessPolicy<T> {
+    this.addToBuilder();
+    return this.builder.buildAndRegister(registryDomain, policyName);
   }
 
   private addToBuilder(): void {
@@ -441,7 +457,8 @@ export class PolicyBuilder<T> {
       );
     }
 
-    if (this.policies.length === 1) {
+    if (this.policies.length === 1 && this.id === 'GENERATED_POLICY' && this.domain === 'default' && this.version === '1.0.0') {
+      // Return single policy only if no custom metadata was set
       return this.policies[0]!;
     }
 

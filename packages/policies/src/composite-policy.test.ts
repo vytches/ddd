@@ -179,7 +179,7 @@ describe('CompositePolicy', () => {
       const result = await composite.check(testRequest);
 
       expect(result.isSuccess).toBe(true);
-      expect(result.getValue()).toBe(testEntity);
+      expect(result.value).toBe(testEntity);
     });
 
     it('should return failure and stop early when first policy fails', async () => {

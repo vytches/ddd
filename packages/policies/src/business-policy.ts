@@ -299,7 +299,7 @@ export class AsyncBusinessPolicy<T> implements IBusinessPolicy<T> {
 
   async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     try {
-      const isSatisfied = await this.isSatisfiedBy(request);
+      const isSatisfied = await this.specification.isSatisfiedByAsync(request.entity, request.context);
 
       if (isSatisfied) {
         return Result.ok(request.entity);

@@ -132,6 +132,17 @@
                 "onlyDependOnLibsWithTags": ["scope:contracts", "scope:utils"]
               },
               {
+                "sourceTag": "scope:domain-services",
+                "onlyDependOnLibsWithTags": [
+                  "scope:contracts",
+                  "scope:core",
+                  "scope:events",
+                  "scope:validation",
+                  "scope:utils",
+                  "scope:domain-services"
+                ]
+              },
+              {
                 "sourceTag": "scope:examples",
                 "onlyDependOnLibsWithTags": ["*"]
               }

@@ -6,3 +6,4 @@ export * from './generic-event-persistence-handler';
 export * from './event-processor';
 export * from './base-event-bus';
 export * from './event-bus-registry';
+export * from './domain';

@@ -21,6 +21,7 @@ pnpm dev:cqrs
 pnpm dev:policies
 pnpm dev:projections
 pnpm dev:validation
+pnpm dev:domain-services
 ```
 
 ### Testing
@@ -91,7 +92,8 @@ Foundation Layer:
 
 Patterns Layer:
 ├── @vytches-ddd/validation (Business rules, specifications)
-└── @vytches-ddd/policies (Business policies, policy builder)
+├── @vytches-ddd/policies (Business policies, policy builder)
+└── @vytches-ddd/domain-services (Domain services, domain logic coordination)
 
 Architecture Layer:
 ├── @vytches-ddd/events (Event-driven architecture, domain events)

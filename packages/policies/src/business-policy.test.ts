@@ -124,7 +124,7 @@ describe('BusinessPolicy', () => {
       const result = await policy.check(testRequest);
 
       expect(result.isSuccess).toBe(true);
-      expect(result.getValue()).toBe(testEntity);
+      expect(result.value).toBe(testEntity);
     });
 
     it('should return failure with violation when specification is not satisfied', async () => {
@@ -447,7 +447,7 @@ describe('AsyncBusinessPolicy', () => {
       const result = await policy.check(testRequest);
 
       expect(result.isSuccess).toBe(true);
-      expect(result.getValue()).toBe(testEntity);
+      expect(result.value).toBe(testEntity);
     });
 
     it('should return failure when async specification is not satisfied', async () => {

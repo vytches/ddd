@@ -93,7 +93,8 @@ export class CompositePolicy<T> implements IBusinessPolicy<T> {
         violations.add(errorViolation);
 
         if (this.operator === 'AND') {
-          break; // Fail fast for AND
+          // For AND logic, return evaluation error immediately
+          return Result.fail(errorViolation);
         }
       }
     }
