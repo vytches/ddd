@@ -29,7 +29,8 @@
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
   },
   "nx": {
     "tags": [

@@ -1,7 +1,26 @@
-// Command Query Responsibility Segregation
+// Core interfaces
+export * from './interfaces';
 
-// Export your main components here
-export * from './lib/cqrs';
+// Abstract classes (service tokens)
+export * from './abstracts';
 
-// Placeholder export - replace with actual implementation
-export const cqrsVersion = '0.1.0';
+// Concrete implementations
+export * from './implementations';
+
+// Decorators
+export * from './decorators';
+
+// Middleware
+export * from './middleware';
+
+// Metadata registry
+export * from './registry';
+
+// Validation
+export * from './validation';
+
+// Errors
+export * from './errors';
+
+// Configuration
+export * from './configuration';
