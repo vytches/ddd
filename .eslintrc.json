@@ -96,9 +96,7 @@
               {
                 "sourceTag": "scope:messaging",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:events",
-                  "scope:policies",
+                  "scope:contracts",
                   "scope:utils",
                   "scope:messaging"
                 ]
