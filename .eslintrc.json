@@ -80,7 +80,8 @@
                   "scope:core",
                   "scope:events",
                   "scope:utils",
-                  "scope:acl"
+                  "scope:acl",
+                  "scope:validation"
                 ]
               },
               {

@@ -28,7 +28,8 @@
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/validation": "workspace:*"
   },
   "nx": {
     "tags": [

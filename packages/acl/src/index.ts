@@ -1,7 +1,12 @@
-// Anti-Corruption Layer patterns
-
-// Export your main components here
-export * from './lib/acl';
-
-// Placeholder export - replace with actual implementation
-export const aclVersion = '0.1.0';
+export * from './application';
+export * from './acl-middleware';
+export * from './acl.interfaces';
+export * from './acl-errors';
+export * from './base-acl-adapter';
+export * from './enhanced-acl-adapter';
+export * from './typed-operations';
+export * from './base-acl-registry';
+export * from './acl-registry';
+export * from './versioned-acl-registry';
+export * from './base-translator';
+export * from './context-acl-registry';
