@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IQuery } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { QueryBus } from './query-bus';

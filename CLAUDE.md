@@ -22,6 +22,12 @@ pnpm dev:policies
 pnpm dev:projections
 pnpm dev:validation
 pnpm dev:domain-services
+pnpm dev:acl
+pnpm dev:messaging
+pnpm dev:resilience
+pnpm dev:enterprise
+pnpm dev:cli
+pnpm dev:testing
 ```
 
 ### Testing
@@ -127,7 +133,8 @@ This project implements enterprise-grade Domain-Driven Design patterns:
 - **Business Policies**: Fluent policy builder with specifications and validations
 - **Validation Specifications**: Composite specifications and business rules
 - **Outbox Pattern**: Reliable message delivery
-- **Circuit Breakers**: Resilience patterns for external dependencies
+- **Resilience Patterns**: Circuit breakers, retry, bulkhead, timeout strategies
+- **Observability**: Metrics collection, monitoring, and event-driven telemetry
 - **Shared Contracts**: Common interfaces across domain boundaries
 
 ### Module Boundaries
@@ -231,6 +238,9 @@ packages/<package-name>/
 - **Foundation Layer**: Core value objects, entities, aggregates, and utilities implemented
 - **Patterns Layer**: Advanced validation with specifications and fluent policy builder implemented
 - **Architecture Layer**: Event-driven architecture with domain events, CQRS, and projections with capabilities
+- **Integration Layer**: Anti-corruption layer and outbox pattern messaging implemented
+- **Infrastructure Layer**: Comprehensive resilience patterns with observability
+- **Tooling Layer**: CLI framework and testing utilities available  
 - **Development Workflow**: Fully functional with smart development mode and testing
 - **Package Structure**: Well-defined dependencies with strict module boundaries
 
@@ -265,6 +275,46 @@ packages/<package-name>/
 - **Business Rule Validators**: Domain-specific validation with error context
 - **Adapter Pattern**: External validator integration support
 - **Validation Facade**: Simplified validation API with comprehensive error reporting
+
+#### Resilience Package (@vytches-ddd/resilience)
+
+- **Circuit Breaker Pattern**: Three-state circuit breaker (CLOSED/OPEN/HALF_OPEN) with automatic recovery
+- **Retry Pattern**: Exponential backoff with jitter, configurable retry conditions and maximum attempts
+- **Bulkhead Pattern**: Resource isolation with concurrency limits and queue management
+- **Timeout Strategy**: Operation timeouts with AbortSignal integration
+- **Strategy Composition**: Combine multiple resilience patterns via CompositeResilienceStrategy
+- **Fluent Policy Builder**: Chainable pattern configuration with ResiliencePolicyBuilder
+- **Resilience Context**: Correlation tracking, attempt counting, and metadata propagation
+- **Comprehensive Observability**: Metrics collection, event bus, and multiple export formats
+- **Decorator System**: Method decorators for applying resilience patterns
+- **Zero Dependencies**: Pure TypeScript implementation with no external runtime dependencies
+
+#### Messaging Package (@vytches-ddd/messaging)
+
+- **Outbox Pattern**: Complete implementation with reliable message delivery
+- **Priority Processing**: Configurable message priorities (LOW/NORMAL/HIGH/CRITICAL)
+- **Delayed Messages**: Support for scheduled message processing
+- **Batch Operations**: Efficient bulk message handling
+- **Retry Mechanism**: Configurable retry logic with exponential backoff
+- **Middleware Support**: Extensible message processing pipeline
+- **Domain Event Integration**: Seamless conversion of domain events to outbox messages
+- **Comprehensive Testing**: Full test coverage for outbox functionality
+- **Sagas Support**: Basic interfaces defined (implementation pending)
+
+#### Enterprise Package (@vytches-ddd/enterprise)
+
+- **Bundle Architecture**: Enterprise-grade package aggregation
+- **Health Checks**: Interface for system health monitoring (implementation pending)
+- **Monitoring**: Basic monitoring configuration (implementation pending)
+- **Enterprise Configuration**: Centralized configuration management
+
+#### CLI Package (@vytches-ddd/cli)
+
+- **Code Generation Framework**: Basic structure for DDD component generation
+- **Template System**: Foundation for Value Objects, Entities, and Aggregates
+- **Command Interface**: CLI runner with help system
+- **Configuration Support**: Output directory and template configuration
+- **Binary Distribution**: `vytches-ddd` command available after installation
 
 ### Key Files to Understand
 

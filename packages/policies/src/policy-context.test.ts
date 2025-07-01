@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { PolicyContextBuilder, PolicyRequestBuilder } from './policy-context';
-import type { PolicyContext, PolicyRequest } from './business-policy-interface';
+import type { PolicyContext } from './business-policy-interface';
 
 describe('PolicyContextBuilder', () => {
   beforeEach(() => {

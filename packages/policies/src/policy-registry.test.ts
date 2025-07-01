@@ -11,7 +11,7 @@ describe('PolicyRegistry', () => {
 
   beforeEach(() => {
     registry = new PolicyRegistry();
-    
+
     mockPolicy = {
       id: 'test-policy',
       domain: 'test-domain',
@@ -56,7 +56,7 @@ describe('PolicyRegistry', () => {
 
       const policies = registry.getPolicies('test-domain');
       const definition = policies['test-policy'];
-      
+
       expect(definition).toBeDefined();
       expect(definition!.metadata.description).toBe('Test policy description');
       expect(definition!.metadata.tags).toEqual(['test', 'validation']);
@@ -360,7 +360,7 @@ describe('PolicyRegistry', () => {
       expect(exported.exportedAt).toBeInstanceOf(Date);
       expect(exported.data['test-domain']).toBeDefined();
       expect(exported.data['test-domain']['test-policy']).toBeDefined();
-      
+
       const policyData = exported.data['test-domain']['test-policy'];
       expect(policyData.policyId).toBe('test-policy');
       expect(policyData.domain).toBe('test-domain');
@@ -385,7 +385,7 @@ describe('LegacyPolicyRegistry', () => {
 
   beforeEach(() => {
     globalPolicyRegistry.clear();
-    
+
     mockPolicy = {
       id: 'legacy-policy',
       domain: 'legacy-domain',

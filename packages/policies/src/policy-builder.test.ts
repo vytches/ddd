@@ -65,7 +65,7 @@ describe('Policy Builder', () => {
           .withCode('TEST_CODE')
           .withMessage('Test message')
           .build();
-        
+
         expect(policy.domain).toBe('test-domain');
       });
 
@@ -491,24 +491,24 @@ describe('Policy Builder', () => {
 
     describe('then method', () => {
       it('should accept policy builder function', () => {
-        const result = conditionalBuilder.then(b => 
+        const result = conditionalBuilder.then(b =>
           b.must(mockSpecification)
            .withCode('THEN_CODE')
            .withMessage('Then message')
         );
-        
+
         expect(result).toBe(conditionalBuilder);
       });
     });
 
     describe('otherwise method', () => {
       it('should accept policy builder function', () => {
-        const result = conditionalBuilder.otherwise(b => 
+        const result = conditionalBuilder.otherwise(b =>
           b.must(mockSpecification)
            .withCode('OTHERWISE_CODE')
            .withMessage('Otherwise message')
         );
-        
+
         expect(result).toBe(conditionalBuilder);
       });
     });
@@ -521,12 +521,12 @@ describe('Policy Builder', () => {
 
       it('should build complete conditional policy', () => {
         const policy = conditionalBuilder
-          .then(b => 
+          .then(b =>
             b.must(mockSpecification)
              .withCode('THEN_CODE')
              .withMessage('Then message')
           )
-          .otherwise(b => 
+          .otherwise(b =>
             b.must(mockSpecification)
              .withCode('OTHERWISE_CODE')
              .withMessage('Otherwise message')
@@ -539,9 +539,9 @@ describe('Policy Builder', () => {
 
     describe('async condition', () => {
       it('should handle async condition function', () => {
-        const asyncCondition = async (request: PolicyRequest<TestEntity>) => 
+        const asyncCondition = async (request: PolicyRequest<TestEntity>) =>
           Promise.resolve(request.entity.isValid);
-        
+
         const asyncConditionalBuilder = builder.when(asyncCondition);
         expect(asyncConditionalBuilder).toBeInstanceOf(FluentConditionalPolicyBuilder);
       });
@@ -571,12 +571,12 @@ describe('Policy Builder', () => {
         .shouldSatisfyAll(validationGroup, businessGroup)
         .and()
         .when(req => req.entity.value > 5)
-        .then(b => 
+        .then(b =>
           b.must(mockSpecification)
            .withCode('HIGH_VALUE')
            .withMessage('High value validation')
         )
-        .otherwise(b => 
+        .otherwise(b =>
           b.must(mockSpecification)
            .withCode('LOW_VALUE')
            .withMessage('Low value validation')
