@@ -29,7 +29,8 @@
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
     "@vytches-ddd/policies": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/logging": "workspace:*"
   },
   "nx": {
     "tags": [

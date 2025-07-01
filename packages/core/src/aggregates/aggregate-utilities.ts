@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Logger } from '@vytches-ddd/logging';
 import { AggregateError } from './aggregate-errors';
 import type {
   IAggregateRoot,
@@ -336,6 +337,7 @@ export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
   if (includeSnapshot && hasSnapshotCapability(sourceAggregate)) {
     // Note: This would require more sophisticated capability cloning
     // For now, just indicate that the capability exists
-    console.log('Source has snapshot capability - consider adding to target');
+    const logger = Logger.create('AggregateUtilities');
+    logger.info('Source has snapshot capability - consider adding to target');
   }
 }

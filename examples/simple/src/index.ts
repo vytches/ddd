@@ -2,9 +2,12 @@
  * Simple VytchesDDD Example
  */
 
+import { Logger } from '@vytches-ddd/logging';
+
 // import { coreVersion } from '@vytches-ddd/core';
 // import { utilsVersion } from '@vytches-ddd/utils';
 
-console.log('🎯 Simple VytchesDDD Example');
-// console.log('Core version:', coreVersion);
-// console.log('Utils version:', utilsVersion);
+const logger = Logger.create('SimpleExample');
+logger.info('🎯 Simple VytchesDDD Example');
+// logger.info('Core version:', { version: coreVersion });
+// logger.info('Utils version:', { version: utilsVersion });

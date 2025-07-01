@@ -4,10 +4,13 @@
  * Test your features here!
  */
 
+import { Logger } from '@vytches-ddd/logging';
+
 // import { coreVersion } from '@vytches-ddd/core';
 
-console.log('🎮 VytchesDDD Playground Active!');
-// console.log('Core version:', coreVersion);
+const logger = Logger.create('Playground');
+logger.info('🎮 VytchesDDD Playground Active!');
+// logger.info('Core version:', { version: coreVersion });
 
 // Add your test code here
 export const playground = {

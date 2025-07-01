@@ -77,8 +77,8 @@ export class ContextDetector {
       }
       
       if (Array.isArray(stack)) {
-        return stack
-          .map(frame => `    at ${frame.toString()}`)
+        return (stack as NodeJS.CallSite[])
+          .map((frame: NodeJS.CallSite) => `    at ${frame.toString()}`)
           .join('\n');
       }
 

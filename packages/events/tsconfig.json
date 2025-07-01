@@ -6,6 +6,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "../contracts/src/**/*", "../core/src/**/*", "../utils/src/**/*"],
+  "include": ["src/**/*", "../contracts/src/**/*", "../core/src/**/*", "../utils/src/**/*","../logging/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

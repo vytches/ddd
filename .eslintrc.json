@@ -35,7 +35,8 @@
                   "scope:core",
                   "scope:contracts",
                   "scope:utils",
-                  "scope:validation"
+                  "scope:validation",
+                  "scope:logging"
                 ]
               },
               {
@@ -61,7 +62,8 @@
                   "scope:core",
                   "scope:utils",
                   "scope:events",
-                  "scope:contracts"
+                  "scope:contracts",
+                  "scope:logging"
                 ]
               },
               {
@@ -81,6 +83,7 @@
                   "scope:events",
                   "scope:utils",
                   "scope:acl",
+                  "scope:logging",
                   "scope:validation"
                 ]
               },
@@ -91,7 +94,8 @@
                   "scope:events",
                   "scope:contracts",
                   "scope:utils",
-                  "scope:projections"
+                  "scope:projections",
+                  "scope:logging"
                 ]
               },
               {
@@ -99,12 +103,13 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:contracts",
                   "scope:utils",
-                  "scope:messaging"
+                  "scope:messaging",
+                  "scope:logging"
                 ]
               },
               {
                 "sourceTag": "scope:resilience",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:resilience"]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:resilience", "scope:logging"]
               },
               {
                 "sourceTag": "scope:testing",
@@ -124,7 +129,7 @@
               },
               {
                 "sourceTag": "scope:cli",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:cli"]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:cli", "scope:logging"]
               },
               {
                 "sourceTag": "scope:contracts",

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ISpecification } from '@vytches-ddd/contracts';
+import { Logger } from '@vytches-ddd/logging';
 import type { IAuditable } from './audible.interface';
 
 /**
@@ -12,6 +13,8 @@ import type { IAuditable } from './audible.interface';
 export function captureState<T extends IAuditable>(
   conditionOrSpecification?: ISpecification<T> | ((instance: T, args: any[]) => boolean)
 ): MethodDecorator {
+  const logger = Logger.create('CaptureStateDecorator');
+  
   return function (
     _target: object,
     _propertyKey: string | symbol,
@@ -21,7 +24,7 @@ export function captureState<T extends IAuditable>(
 
     descriptor.value = function (...args: any[]): any {
       if (!('saveSnapshot' in this)) {
-        console.warn(
+        logger.warn(
           `Class ${this.constructor.name} doesn't properly implement IAuditable interface. @captureState decorator has no effect.`
         );
         return originalMethod.apply(this, args);

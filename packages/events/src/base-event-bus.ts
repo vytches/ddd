@@ -8,6 +8,7 @@ import type {
 } from '@vytches-ddd/contracts';
 import { IEventBus } from '@vytches-ddd/contracts';
 import { isEventHandler } from '@vytches-ddd/contracts';
+import { Logger } from '@vytches-ddd/logging';
 
 /**
  * Symbol for custom middleware
@@ -32,6 +33,8 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
   protected publishPipeline: (event: TEvent) => Promise<void>;
 
+  private logger = Logger.create('EventBus');
+
   /**
    * Creates a new event bus with the specified options
    */
@@ -39,7 +42,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
     super();
     this.options = {
       enableLogging: false,
-      logger: console.log,
+      logger: (message: string) => this.logger.info(message),
       ...options,
     };
 
@@ -52,18 +55,18 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
   async publishMany(events: TEvent[]): Promise<void> {
     if (events.length === 0) {
-      this.log('publishMany called with empty events array');
+      this.logger.debug('publishMany called with empty events array');
       return;
     }
 
-    this.log(`Publishing ${events.length} events`);
+    this.logger.info(`Publishing ${events.length} events`);
 
     // Publish all events in parallel for better performance
     const publishPromises = events.map(event => this.publish(event));
 
     try {
       await Promise.all(publishPromises);
-      this.log(`Successfully published ${events.length} events`);
+      this.logger.info(`Successfully published ${events.length} events`);
     } catch (error) {
       this.handleError(error as Error, 'publishMany');
       throw error; // Re-throw to let caller handle
@@ -92,11 +95,11 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
       const handlers = this.handlers.get(eventName);
 
       if (!handlers || handlers.size === 0) {
-        this.log(`No handlers for ${eventName}`);
+        this.logger.debug(`No handlers for ${eventName}`);
         return;
       }
 
-      this.log(`Publishing ${eventName} to ${handlers.size} handlers`);
+      this.logger.debug(`Publishing ${eventName} to ${handlers.size} handlers`);
 
       // Execute handlers
       const promises: Promise<void>[] = [];
@@ -158,7 +161,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
     this.handlers.get(eventName)!.add(handler);
 
-    this.log(`Subscribed function handler to ${eventName}`);
+    this.logger.debug(`Subscribed function handler to ${eventName}`);
   }
 
   /**
@@ -176,7 +179,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
     this.handlers.get(eventName)!.add(handler);
 
-    this.log(`Registered class handler to ${eventName}`);
+    this.logger.debug(`Registered class handler to ${eventName}`);
   }
 
   /**
@@ -197,7 +200,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
         this.handlers.delete(eventName);
       }
 
-      this.log(`Unsubscribed handler from ${eventName}`);
+      this.logger.debug(`Unsubscribed handler from ${eventName}`);
     }
   }
 
@@ -217,7 +220,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
     if (this.options.onError) {
       this.options.onError(error, eventType);
     } else {
-      console.error(`[EventBus] Error processing ${eventType}:`, error);
+      this.logger.error(`Error processing ${eventType}`, error);
       throw error; // Re-throw by default
     }
   }

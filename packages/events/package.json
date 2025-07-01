@@ -28,7 +28,8 @@
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*"
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/logging": "workspace:*"
   },
   "nx": {
     "tags": [

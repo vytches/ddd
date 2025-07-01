@@ -1,7 +1,10 @@
+import { Logger } from '@vytches-ddd/logging';
+
 export class CLI {
+  private logger = Logger.create('CLI');
   async run(args: string[]): Promise<void> {
-    console.log('🎯 VytchesDDD CLI');
-    console.log('Version: 0.1.0');
+    this.logger.info('🎯 VytchesDDD CLI');
+    this.logger.info('Version: 0.1.0');
 
     const command = args[2];
 
@@ -16,18 +19,18 @@ export class CLI {
         this.showHelp();
         break;
       default:
-        console.log('Unknown command:', command);
+        this.logger.warn('Unknown command:', { command });
         this.showHelp();
     }
   }
 
   private async generateCode(args: string[]): Promise<void> {
-    console.log('🔧 Code generation coming soon...');
-    console.log('Args:', args);
+    this.logger.info('🔧 Code generation coming soon...');
+    this.logger.debug('Args:', { args });
   }
 
   private showHelp(): void {
-    console.log(`
+    this.logger.info(`
 🎯 VytchesDDD CLI
 
 Usage:

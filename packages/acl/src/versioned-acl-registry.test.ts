@@ -107,7 +107,6 @@ describe('VersionedACLRegistry', () => {
         .registerVersioned('TestContext', '1.0.1', adapter3);
 
       const versions = registry.getVersions('TestContext');
-      console.log('VERS', registry)
       expect(versions).toEqual(['1.0.0', '1.0.1-alpha', '1.0.1']);
       expect(registry.getLatestVersion('TestContext')).toBe('1.0.1');
     });

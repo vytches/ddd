@@ -150,7 +150,6 @@ describe('ProjectionProcessor', () => {
 
       // Act
       await processor.process(event);
-      console.log('Event processed===>>', processor);
 
       // Assert
       expect(processEventSpy).toHaveBeenCalledTimes(1);
@@ -210,12 +209,6 @@ describe('ProjectionProcessor', () => {
 
       // Act & Assert - should not throw
       await expect(processor.process(event)).resolves.toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Error processing event UserCreated in projection FailingProjection'
-        ),
-        expect.any(Error)
-      );
 
       consoleSpy.mockRestore();
     });

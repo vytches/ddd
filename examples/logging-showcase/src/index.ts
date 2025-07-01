@@ -148,45 +148,45 @@ async function demonstrateErrorHandling() {
 
 // Run examples
 async function runExamples() {
-  console.log('🚀 DDD Logging Showcase\n');
+  const showcaseLogger = Logger.forContext('LoggingShowcase');
+  
+  showcaseLogger.info('🚀 DDD Logging Showcase');
 
   // Example 1: Basic usage
-  console.log('1. Basic logging with context detection:');
+  showcaseLogger.info('1. Basic logging with context detection:');
   const userService = new UserService();
   await userService.createUser({
     email: 'user@example.com',
     password: 'secret123'
   });
-  console.log('');
 
   // Example 2: CQRS integration
-  console.log('2. CQRS command logging:');
+  showcaseLogger.info('2. CQRS command logging:');
   const commandHandler = new CreateUserCommandHandler();
   await commandHandler.handle({
     email: 'admin@example.com',
     password: 'admin123'
   });
-  console.log('');
 
   // Example 3: Aggregate state changes
-  console.log('3. Aggregate state change logging:');
+  showcaseLogger.info('3. Aggregate state change logging:');
   const user = new UserAggregate('user-123', 'old@example.com');
   user.changeEmail('new@example.com');
   user.deactivate();
-  console.log('');
 
   // Example 4: Custom context
-  console.log('4. Custom context and correlation:');
+  showcaseLogger.info('4. Custom context and correlation:');
   const orderService = new OrderService('req-789', 'user-456');
   await orderService.processOrder('order-999');
-  console.log('');
 
   // Example 5: Error handling
-  console.log('5. Error handling:');
+  showcaseLogger.info('5. Error handling:');
   await demonstrateErrorHandling();
-  console.log('');
 
-  console.log('✅ All examples completed!');
+  showcaseLogger.info('✅ All examples completed!');
 }
 
-runExamples().catch(console.error);
+runExamples().catch(error => {
+  const errorLogger = Logger.forContext('ShowcaseRunner');
+  errorLogger.error('Failed to run logging showcase', error);
+});

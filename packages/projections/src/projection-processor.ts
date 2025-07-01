@@ -2,11 +2,14 @@
 
 import type { IDomainEvent, IEventProcessor, IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';
+import { Logger } from '@vytches-ddd/logging';
 
 import type { IProjectionEngine } from './projection-interfaces';
 import type { ProjectionEngineRegistry } from './projection-registry';
 
 export class ProjectionProcessor implements IEventProcessor {
+  private logger = Logger.create('ProjectionProcessor');
+
   constructor(private readonly engineRegistry: ProjectionEngineRegistry) {}
 
   /**
@@ -40,9 +43,9 @@ export class ProjectionProcessor implements IEventProcessor {
     try {
       await engine.processEvent(event);
     } catch (error) {
-      console.error(
-        `Error processing event ${event.eventType} in projection ${engine.getProjectionName()}:`,
-        error
+      this.logger.error(
+        `Error processing event ${event.eventType} in projection ${engine.getProjectionName()}`,
+        error as Error
       );
       // Could add configurable error handling strategy
     }

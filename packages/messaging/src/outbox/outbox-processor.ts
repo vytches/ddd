@@ -1,5 +1,6 @@
 import type { IEventBus } from '@vytches-ddd/contracts';
 import { safeRun } from '@vytches-ddd/utils';
+import { Logger } from '@vytches-ddd/logging';
 import type {
   IOutboxMessage,
   IOutboxMessageHandler,
@@ -37,6 +38,7 @@ export class OutboxProcessor {
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
+  private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(
     repository: IOutboxRepository,
@@ -63,7 +65,7 @@ export class OutboxProcessor {
    */
   registerHandler(messageType: string, handler: IOutboxMessageHandler): void {
     this.handlers.set(messageType, handler);
-    this.log(`Registered handler for message type: ${messageType}`);
+    this.logger.debug(`Registered handler for message type: ${messageType}`);
   }
 
   /**
@@ -71,7 +73,7 @@ export class OutboxProcessor {
    */
   use(middleware: OutboxMiddleware): void {
     this.middlewares.push(middleware);
-    this.log('Registered middleware');
+    this.logger.debug('Registered middleware');
   }
 
   /**
@@ -79,12 +81,12 @@ export class OutboxProcessor {
    */
   start(): void {
     if (this.isRunning) {
-      this.log('Processor is already running');
+      this.logger.warn('Processor is already running');
       return;
     }
 
     this.isRunning = true;
-    this.log('Starting outbox processor');
+    this.logger.info('Starting outbox processor');
     this.scheduleProcessing();
   }
 
@@ -93,7 +95,7 @@ export class OutboxProcessor {
    */
   stop(): void {
     if (!this.isRunning) {
-      this.log('Processor is not running');
+      this.logger.warn('Processor is not running');
       return;
     }
 
@@ -102,7 +104,7 @@ export class OutboxProcessor {
       clearTimeout(this.processingTimer);
       this.processingTimer = undefined;
     }
-    this.log('Stopped outbox processor');
+    this.logger.info('Stopped outbox processor');
   }
 
   /**
@@ -122,17 +124,17 @@ export class OutboxProcessor {
 
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.log(`Error retrieving messages: ${errorMessage}`);
+      this.logger.error(`Error retrieving messages: ${errorMessage}`);
       return;
     }
 
     const messages = result;
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      this.log('No pending messages to process');
+      this.logger.debug('No pending messages to process');
       return;
     }
 
-    this.log(`Processing ${messages.length} messages`);
+    this.logger.info(`Processing ${messages.length} messages`);
 
     // Process messages in parallel within the batch
     const processingPromises = messages.map((message) =>
@@ -140,7 +142,7 @@ export class OutboxProcessor {
     );
 
     await Promise.allSettled(processingPromises);
-    this.log(`Completed processing batch of ${messages.length} messages`);
+    this.logger.info(`Completed processing batch of ${messages.length} messages`);
   }
 
   /**
@@ -157,7 +159,7 @@ export class OutboxProcessor {
 
       // Mark as processed
       await this.repository.updateStatus(message.id, MessageStatus.PROCESSED);
-      this.log(`Successfully processed message ${message.id}`);
+      this.logger.debug(`Successfully processed message ${message.id}`);
     });
 
     if (error) {
@@ -204,7 +206,7 @@ export class OutboxProcessor {
   ): Promise<void> {
     try {
       const attempts = await this.repository.incrementAttempt(message.id);
-      this.log(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
+      this.logger.warn(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
 
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(
@@ -212,15 +214,15 @@ export class OutboxProcessor {
           MessageStatus.FAILED,
           error,
         );
-        this.log(`Message ${message.id} marked as failed after ${attempts} attempts`);
+        this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
       } else {
         // Reset to pending for retry
         await this.repository.updateStatus(message.id, MessageStatus.PENDING);
-        this.log(`Message ${message.id} scheduled for retry (attempt ${attempts + 1})`);
+        this.logger.info(`Message ${message.id} scheduled for retry (attempt ${attempts + 1})`);
       }
     } catch (updateError) {
       const errorMessage = updateError instanceof Error ? updateError.message : String(updateError);
-      this.log(`Error updating message status: ${errorMessage}`);
+      this.logger.error(`Error updating message status: ${errorMessage}`);
     }
   }
 
@@ -243,7 +245,7 @@ export class OutboxProcessor {
    */
   private log(message: string): void {
     if (this.options.enableLogging) {
-      console.log(`[OutboxProcessor] ${message}`);
+      this.logger.info(message);
     }
   }
 

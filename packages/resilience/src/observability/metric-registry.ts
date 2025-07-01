@@ -3,6 +3,7 @@
  * Zero external dependencies - pure TypeScript implementation
  */
 
+import { Logger } from '@vytches-ddd/logging';
 import type {
   Metric,
   HistogramMetric,
@@ -19,6 +20,7 @@ import type {
  */
 export class DefaultMetricRegistry implements MetricRegistry {
   private collectors = new Map<string, MetricCollector>();
+  private logger = Logger.create('MetricRegistry');
 
   register(collector: MetricCollector): void {
     const name = collector.getName();
@@ -45,7 +47,7 @@ export class DefaultMetricRegistry implements MetricRegistry {
         allMetrics.push(...metrics);
       } catch (error) {
         // Log error but continue with other collectors
-        console.warn(`Failed to collect metrics from ${collector.getName()}:`, error);
+        this.logger.warn(`Failed to collect metrics from ${collector.getName()}`, { error });
       }
     }
 

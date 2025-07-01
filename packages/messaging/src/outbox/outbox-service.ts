@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { Logger } from '@vytches-ddd/logging';
 
 import type {
   IOutboxMessage,
@@ -34,6 +35,7 @@ export interface OutboxServiceOptions {
 export class OutboxService {
   private readonly repository: IOutboxRepository;
   private readonly options: Required<OutboxServiceOptions>;
+  private readonly logger = Logger.create('OutboxService');
 
   constructor(
     repository: IOutboxRepository,
@@ -64,7 +66,7 @@ export class OutboxService {
     });
 
     const messageId = await this.repository.saveMessage(message);
-    this.log(`Saved message ${messageId} of type ${messageType}`);
+    this.logger.debug(`Saved message ${messageId} of type ${messageType}`);
     return messageId;
   }
 
@@ -87,7 +89,7 @@ export class OutboxService {
     );
 
     const messageIds = await this.repository.saveBatch(outboxMessages);
-    this.log(`Saved batch of ${messages.length} messages`);
+    this.logger.debug(`Saved batch of ${messages.length} messages`);
     return messageIds;
   }
 
@@ -112,7 +114,7 @@ export class OutboxService {
     );
 
     const messageId = await this.repository.scheduleMessage(message, message.processAfter as Date);
-    this.log(
+    this.logger.debug(
       `Scheduled message ${messageId} of type ${messageType} for processing in ${delayMs}ms`,
     );
     return messageId;
@@ -171,7 +173,7 @@ export class OutboxService {
     );
 
     const messageId = await this.repository.saveMessage(message);
-    this.log(`Saved domain event ${event.eventType} as message ${messageId}`);
+    this.logger.debug(`Saved domain event ${event.eventType} as message ${messageId}`);
     return messageId;
   }
 
@@ -194,7 +196,7 @@ export class OutboxService {
    */
   async retryMessage(id: string): Promise<void> {
     await this.repository.updateStatus(id, MessageStatus.PENDING);
-    this.log(`Reset message ${id} to pending for retry`);
+    this.logger.info(`Reset message ${id} to pending for retry`);
   }
 
   /**
@@ -202,7 +204,7 @@ export class OutboxService {
    */
   async retryMessages(ids: string[]): Promise<void> {
     await this.repository.updateStatusBatch(ids, MessageStatus.PENDING);
-    this.log(`Reset ${ids.length} messages to pending for retry`);
+    this.logger.info(`Reset ${ids.length} messages to pending for retry`);
   }
 
   /**
@@ -214,7 +216,7 @@ export class OutboxService {
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     const deletedCount = await this.repository.deleteByStatusAndAge(cutoffDate, MessageStatus.PROCESSED);
-    this.log(`Cleaned up ${deletedCount} processed messages older than ${days} days`);
+    this.logger.info(`Cleaned up ${deletedCount} processed messages older than ${days} days`);
     return deletedCount;
   }
 
@@ -253,7 +255,7 @@ export class OutboxService {
    */
   private log(message: string): void {
     if (this.options.enableLogging) {
-      console.log(`[OutboxService] ${message}`);
+      this.logger.info(message);
     }
   }
 }
