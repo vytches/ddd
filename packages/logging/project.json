@@ -1,0 +1,26 @@
+{
+  "name": "logging",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/logging/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/logging/dist",
+        "main": "packages/logging/src/index.ts",
+        "tsConfig": "packages/logging/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "coverage/packages/logging"
+      }
+    }
+  },
+  "tags": ["scope:logging", "type:lib"]
+}

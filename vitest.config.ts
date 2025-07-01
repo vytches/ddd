@@ -94,6 +94,7 @@ export default defineConfig({
         .pathname,
       '@vytches-ddd/domain-services': new URL('./packages/domain-services/src/index.ts', import.meta.url)
         .pathname,
+      '@vytches-ddd/logging': new URL('./packages/logging/src/index.ts', import.meta.url).pathname,
     },
   },
 });

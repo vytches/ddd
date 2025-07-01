@@ -43,7 +43,8 @@
       "@vytches-ddd/testing": ["packages/testing/src/index.ts"],
       "@vytches-ddd/enterprise": ["packages/enterprise/src/index.ts"],
       "@vytches-ddd/cli": ["packages/cli/src/index.ts"],
-      "@vytches-ddd/contracts": ["packages/contracts/src/index.ts"]
+      "@vytches-ddd/contracts": ["packages/contracts/src/index.ts"],
+      "@vytches-ddd/logging": ["packages/logging/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp", "dist", "coverage"]

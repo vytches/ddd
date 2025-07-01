@@ -17,14 +17,14 @@ export class EnhancedCommandBus extends CommandBus {
   }
 
   override async execute<T extends ICommand>(command: T): Promise<void> {
-    const startTime = Date.now();
+    const startTime = performance.now();
 
     try {
       await super.execute(command);
 
       // Update metrics
       this.metrics.executionCount++;
-      this.metrics.totalExecutionTime += Date.now() - startTime;
+      this.metrics.totalExecutionTime += performance.now() - startTime;
     } catch (error) {
       this.metrics.errors++;
       throw error;

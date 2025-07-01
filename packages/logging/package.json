@@ -1,0 +1,48 @@
+{
+  "name": "@vytches-ddd/logging",
+  "version": "0.1.0",
+  "description": "Domain-Driven Design logging utilities with smart context detection and structured logging",
+  "keywords": [
+    "ddd",
+    "domain-driven-design",
+    "logging",
+    "structured-logging",
+    "typescript"
+  ],
+  "author": "Vytches DDD",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./providers": {
+      "import": "./dist/providers/index.js",
+      "types": "./dist/providers/index.d.ts"
+    },
+    "./integration": {
+      "import": "./dist/integration/index.js",
+      "types": "./dist/integration/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}

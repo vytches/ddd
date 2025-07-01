@@ -17,13 +17,13 @@ export class EnhancedQueryBus extends QueryBus {
   }
 
    override async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
-    const startTime = Date.now();
+    const startTime = performance.now();
 
     try {
       const result = await super.execute(query);
 
       this.metrics.executionCount++;
-      this.metrics.totalExecutionTime += Date.now() - startTime;
+      this.metrics.totalExecutionTime += performance.now() - startTime;
 
       return result as R;
     } catch (error) {
