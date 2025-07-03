@@ -18,7 +18,11 @@ export abstract class IBaseRepository {
     const initialVersion = aggregate.getInitialVersion();
 
     if (initialVersion !== currentVersion) {
-      throw VersionError.withEntityIdAndVersions(aggregate.getId(), currentVersion, initialVersion);
+      throw VersionError.withEntityIdAndVersions(
+        aggregate.getId().getValue() as string | number, 
+        currentVersion, 
+        initialVersion
+      );
     }
 
     let version = currentVersion;

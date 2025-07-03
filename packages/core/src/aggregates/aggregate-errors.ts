@@ -21,7 +21,7 @@ export class AggregateError extends IDomainError {
    */
   static versionConflict(
     aggregateType: string,
-    aggregateId: any,
+    aggregateId: string | number,
     currentVersion: number,
     expectedVersion: number
   ): AggregateError {
@@ -85,7 +85,7 @@ export class AggregateError extends IDomainError {
   /**
    * Error for ID mismatch during snapshot restoration
    */
-  static idMismatch(snapshotId: any, aggregateId: any): AggregateError {
+  static idMismatch(snapshotId: string | number, aggregateId: string | number): AggregateError {
     const message = `ID mismatch: Snapshot is for ID ${snapshotId}, but aggregate has ID ${aggregateId}`;
     const options = {
       code: DomainErrorCode.ValidationFailed,
@@ -198,9 +198,9 @@ export class AggregateError extends IDomainError {
 
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(
-    id: any,
-    dbVersion: any,
-    newVersion: any,
+    id: string | number,
+    dbVersion: number,
+    newVersion: number,
     data?: DomainErrorOptions
   ): VersionError {
     const message = `Version mismatch for entity with id ${id}: expected [${dbVersion}], got [${newVersion}]`;

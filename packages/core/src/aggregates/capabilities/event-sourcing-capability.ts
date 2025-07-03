@@ -16,15 +16,15 @@ export class EventSourcingCapability implements IEventSourcingCapability {
     this._eventStore = eventStore;
   }
 
-  attach(aggregate: IAggregateRoot<any>): void {
+  attach(aggregate: IAggregateRoot): void {
     this.aggregate = aggregate;
   }
 
   detach?(): void {
-    this.aggregate = null as any;
+    this.aggregate = undefined!;
   }
 
-  async loadFromEventStore(aggregateId: any): Promise<void> {
+  async loadFromEventStore(aggregateId: string | number): Promise<void> {
     if (!this._eventStore) {
       throw AggregateError.eventStoreNotConfigured();
     }
@@ -54,8 +54,12 @@ export class EventSourcingCapability implements IEventSourcingCapability {
 
   replayEvents(events: IExtendedDomainEvent[]): void {
     // Use the protected method if available
-    if (typeof (this.aggregate as any).loadFromHistory === 'function') {
-      (this.aggregate as any).loadFromHistory(events);
+    const aggregateWithHistory = this.aggregate as IAggregateRoot & {
+      loadFromHistory?: (events: IExtendedDomainEvent[]) => void;
+    };
+    
+    if (typeof aggregateWithHistory.loadFromHistory === 'function') {
+      aggregateWithHistory.loadFromHistory(events);
     } else {
       throw AggregateError.aggregateDoesNotSupportReplay(this.aggregate.constructor.name);
     }
@@ -86,7 +90,7 @@ export class EventSourcingCapability implements IEventSourcingCapability {
    * Loads events from a specific version onwards
    */
   async loadEventsFromVersion(
-    aggregateId: any,
+    aggregateId: string | number,
     fromVersion: number
   ): Promise<IExtendedDomainEvent[]> {
     if (!this._eventStore) {
@@ -99,7 +103,7 @@ export class EventSourcingCapability implements IEventSourcingCapability {
   /**
    * Rebuilds aggregate from a specific point in time
    */
-  async rebuildFromVersion(aggregateId: any, fromVersion: number): Promise<void> {
+  async rebuildFromVersion(aggregateId: string | number, fromVersion: number): Promise<void> {
     const events = await this.loadEventsFromVersion(aggregateId, fromVersion);
     this.replayEvents(events);
   }

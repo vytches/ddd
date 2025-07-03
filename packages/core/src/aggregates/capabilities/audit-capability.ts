@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LibUtils } from '@vytches-ddd/utils';
 
 import type { IAggregateRoot, IAuditCapability } from '../aggregate-interfaces';
@@ -11,17 +10,18 @@ import { AggregateError } from '../aggregate-errors';
  * Tracks all changes to the aggregate for audit purposes
  */
 export class AuditCapability implements IAuditCapability {
-  private aggregate!: IAggregateRoot<any>;
+  private aggregate!: IAggregateRoot;
   private _auditLog: IAuditEvent[] = [];
 
-  attach(aggregate: IAggregateRoot<any>): void {
+  attach(aggregate: IAggregateRoot): void {
     this.aggregate = aggregate;
     // Hook into apply method to capture audit info
     this.interceptApplyMethod();
   }
 
   detach?(): void {
-    this.aggregate = null as any;
+    // Clear reference without unsafe type assertion
+    this.aggregate = undefined!;
     this._auditLog = [];
   }
 
@@ -86,16 +86,18 @@ export class AuditCapability implements IAuditCapability {
   }
 
   private interceptApplyMethod(): void {
-    const originalApply = (this.aggregate as any).apply?.bind(this.aggregate);
+    // Type-safe method interception using known interface
+    const aggregateWithApply = this.aggregate as IAggregateRoot & {
+      apply?: (eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown) => unknown;
+    };
+    
+    const originalApply = aggregateWithApply.apply?.bind(this.aggregate);
 
     if (!originalApply) {
-      throw AggregateError.cannotInterceptApplyMethod(this.aggregate.getId().getValue());
+      throw AggregateError.cannotInterceptApplyMethod(this.aggregate.getId().getValue().toString());
     }
 
-    (this.aggregate as any).apply = (eventTypeOrEvent: any, payload?: any, metadata?: any) => {
-      // Note: State capture would require serializer function
-      // For now, we'll track changes without state snapshots
-
+    aggregateWithApply.apply = (eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown) => {
       // Call original apply
       const result = originalApply(eventTypeOrEvent, payload, metadata);
 
@@ -106,9 +108,10 @@ export class AuditCapability implements IAuditCapability {
     };
   }
 
-  private createAuditEntry(eventTypeOrEvent: any, payload?: any, metadata?: any): void {
-    const eventType =
-      typeof eventTypeOrEvent === 'string' ? eventTypeOrEvent : eventTypeOrEvent.eventType;
+  private createAuditEntry(eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown): void {
+    const eventType = typeof eventTypeOrEvent === 'string' 
+      ? eventTypeOrEvent 
+      : (eventTypeOrEvent as { eventType?: string }).eventType || 'unknown';
 
     const auditEvent: IAuditEvent = {
       eventId: LibUtils.getUUID(),
@@ -118,18 +121,18 @@ export class AuditCapability implements IAuditCapability {
       aggregateVersion: this.aggregate.getVersion(),
       eventType,
       payload,
-      metadata,
-      actor: metadata?.actor,
+      metadata: metadata as Parameters<typeof this.createAuditEntry>[2],
+      actor: (metadata as { actor?: unknown })?.actor,
       previousState: this.getPreviousStateFromSnapshot(),
     };
 
     this._auditLog.push(auditEvent);
   }
 
-  private getPreviousStateFromSnapshot(): any | null {
+  private getPreviousStateFromSnapshot(): unknown | null {
     const snapshotCapability = this.aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT);
     if (snapshotCapability && 'getPreviousState' in snapshotCapability) {
-      return (snapshotCapability as any).getPreviousState();
+      return (snapshotCapability as { getPreviousState(): unknown }).getPreviousState();
     }
     return null;
   }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   IAggregateRoot,
   IVersioningCapability,
@@ -13,19 +12,19 @@ import { AggregateError } from '../aggregate-errors';
  * Handles event versioning and upcasting for backward compatibility
  */
 export class VersioningCapability implements IVersioningCapability {
-  private aggregate?: IAggregateRoot<any> | undefined;
+  private aggregate?: IAggregateRoot | undefined;
   private _eventUpcasters = new Map<string, Map<number, IEventUpcaster>>();
 
-  attach(aggregate: IAggregateRoot<any>): void {
+  attach(aggregate: IAggregateRoot): void {
     this.aggregate = aggregate;
   }
 
   detach?(): void {
-    this.aggregate = null as any;
+    this.aggregate = undefined;
     this._eventUpcasters.clear();
   }
 
-  registerUpcaster<TFrom = any, TTo = any>(
+  registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
     sourceVersion: number,
     upcaster: IEventUpcaster<TFrom, TTo>

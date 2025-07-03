@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AggregateError } from '../aggregate-errors';
 import type {
   IAggregateRoot,
@@ -10,18 +9,18 @@ import type {
  * Snapshot capability implementation
  * Handles aggregate state snapshots for audit and performance optimization
  */
-export class SnapshotCapability<TState = any, TMeta = any>
+export class SnapshotCapability<TState = unknown, TMeta = unknown>
   implements ISnapshotCapability<TState, TMeta>
 {
-  private aggregate!: IAggregateRoot<any>;
-  private _snapshot: any = null;
+  private aggregate!: IAggregateRoot;
+  private _snapshot: IAggregateSnapshot<TState, TMeta> | null = null;
 
-  attach(aggregate: IAggregateRoot<any>): void {
+  attach(aggregate: IAggregateRoot): void {
     this.aggregate = aggregate;
   }
 
   detach?(): void {
-    this.aggregate = null as any;
+    this.aggregate = undefined!;
     this._snapshot = null;
   }
 
@@ -58,7 +57,10 @@ export class SnapshotCapability<TState = any, TMeta = any>
     }
 
     if (snapshot.id !== this.aggregate.getId().getValue()) {
-      throw AggregateError.idMismatch(snapshot.id, this.aggregate.getId().getValue());
+      throw AggregateError.idMismatch(
+        snapshot.id as string | number, 
+        this.aggregate.getId().getValue() as string | number
+      );
     }
 
     if (snapshot.aggregateType !== this.aggregate.constructor.name) {
@@ -71,9 +73,17 @@ export class SnapshotCapability<TState = any, TMeta = any>
       metadataRestorer(snapshot.metadata);
     }
 
-    // Reset aggregate state using internal method
-    if ('_internal_setState' in this.aggregate) {
-      (this.aggregate as any)._internal_setState({
+    // Reset aggregate state using internal method (type-safe approach)
+    const aggregateWithInternalState = this.aggregate as IAggregateRoot & {
+      _internal_setState?: (state: { 
+        version: number; 
+        initialVersion: number; 
+        domainEvents: unknown[];
+      }) => void;
+    };
+    
+    if (aggregateWithInternalState._internal_setState) {
+      aggregateWithInternalState._internal_setState({
         version: snapshot.version,
         initialVersion: snapshot.version,
         domainEvents: [],
@@ -85,7 +95,7 @@ export class SnapshotCapability<TState = any, TMeta = any>
     this._snapshot = this.createSnapshot(serializer, metadataCreator);
   }
 
-  getPreviousState(): any | null {
+  getPreviousState(): IAggregateSnapshot<TState, TMeta> | null {
     const snapshot = this._snapshot;
     this._snapshot = null;
     return snapshot;
