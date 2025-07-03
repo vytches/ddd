@@ -37,13 +37,5 @@ export {
   DomainToIntegrationTransformer
 } from './integration';
 
-// For advanced usage - full exports
-export * from './event-bus';
-export * from './event-dispatcher';
-export * from './event-handler';
-export * from './integration';
-export * from './generic-event-persistence-handler';
-export * from './event-processor';
-export * from './base-event-bus';
-export * from './event-bus-registry';
-export * from './domain';
+// For advanced usage - full exports removed for better tree-shaking
+// Import specific exports from subpaths when needed

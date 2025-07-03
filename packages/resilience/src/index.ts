@@ -1,9 +1,35 @@
-// Core functionality
-export * from './core/resilience-context';
-export * from './patterns/circuit-breaker';
-export * from './patterns/retry';
-export * from './patterns/bulkhead';
-export * from './patterns/resilience-strategy';
+// Most commonly used - prioritized exports
+export {
+  CircuitBreaker,
+  CircuitBreakerState,
+  CircuitBreakerOpenError
+} from './patterns/circuit-breaker';
+
+export {
+  RetryPolicy,
+  MaxRetriesExceededError
+} from './patterns/retry';
+
+export {
+  Bulkhead,
+  BulkheadRejectedException
+} from './patterns/bulkhead';
+
+export {
+  CircuitBreakerStrategy,
+  RetryStrategy,
+  BulkheadStrategy,
+  CompositeResilienceStrategy,
+  ResiliencePolicyBuilder
+} from './patterns/resilience-strategy';
+
+export {
+  DefaultResilienceContext,
+  TimeoutError,
+  OperationCancelledError
+} from './core/resilience-context';
+
+// Core functionality - full exports removed for better tree-shaking
 
 // Observability and metrics (explicit exports to avoid naming conflicts)
 export type {

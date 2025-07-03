@@ -1,10 +1,28 @@
-export * from './projection-interfaces';
-export * from './projection-base';
-export * from './projection-engine';
-export * from './projection-registry';
-export * from './projection-processor';
-export * from './projection.builder';
-export * from './capabilities';
-export * from './projection-errors';
-export * from './error-strategy';
-export * from './error-projection';
+// Priority exports for better tree-shaking
+export {
+  ProjectionEngine
+} from './projection-engine';
+
+export {
+  BaseProjection
+} from './projection-base';
+
+export {
+  ProjectionBuilder
+} from './projection.builder';
+
+export type {
+  IProjection,
+  IProjectionStore,
+  IProjectionCapability,
+  ICapabilityContext,
+  IProjectionEngine,
+  ErrorProjectionState
+} from './projection-interfaces';
+
+export {
+  ProjectionError
+} from './projection-errors';
+
+// For advanced usage - full exports removed for better tree-shaking
+// Import specific exports from subpaths when needed

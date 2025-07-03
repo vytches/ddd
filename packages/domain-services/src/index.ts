@@ -1,3 +1,52 @@
+// Most commonly used - prioritized exports
+export {
+  IBaseDomainService,
+  EventAwareDomainService,
+  UnitOfWorkAwareDomainService,
+  AsyncDomainService
+} from './base-domain-service';
+
+export {
+  DomainService,
+  getDomainServiceMetadata
+} from './domain-service.decorator';
+
+export {
+  DefaultDomainServiceRegistry
+} from './domain-service-registry';
+
+export {
+  GlobalServiceRegistry
+} from './global-service-registry';
+
+export {
+  ServiceBuilder
+} from './service-builder';
+
+// Types commonly used
+export type {
+  IDomainService,
+  IEventBusAware,
+  IUnitOfWorkAware,
+  IAsyncDomainService
+} from './domain-service.interface';
+
+export type {
+  DomainServiceOptions
+} from './domain-service.decorator';
+
+export type {
+  IDomainServiceRegistry
+} from './domain-service-registry.interface';
+
+// Errors
+export {
+  ServiceDuplicateError,
+  ServiceNotFoundError,
+  ServiceCircularError
+} from './service.errors';
+
+// For advanced usage - full exports
 export * from './domain-service.interface';
 export * from './base-domain-service';
 export * from './domain-service.decorator';

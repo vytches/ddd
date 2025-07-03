@@ -23,15 +23,15 @@ class CustomCompositePolicy<T> extends CompositePolicy<T> {
     super(operator, policies, customId);
   }
 
-  get id(): string {
+  override get id(): string {
     return this.customId;
   }
 
-  get domain(): string {
+  override get domain(): string {
     return this.customDomain;
   }
 
-  get version(): string {
+  override get version(): string {
     return this.customVersion;
   }
 }

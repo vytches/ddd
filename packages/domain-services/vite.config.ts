@@ -10,6 +10,7 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
+      declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
   build: {
@@ -25,7 +26,7 @@ export default defineConfig({
         return id.startsWith('@vytches-ddd/') && !id.includes('src/');
       },
     },
-    sourcemap: true,
+    sourcemap: false, // Disable source maps for production builds
     target: 'ES2020',
     emptyOutDir: true,
   },

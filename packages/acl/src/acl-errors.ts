@@ -102,3 +102,25 @@ export class TranslationError extends ACLError {
     );
   }
 }
+
+export class AdapterNotFoundError extends ACLError {
+  constructor(
+    contextName: string,
+    adapterName: string,
+    error?: Error,
+  ) {
+    super(
+      `Adapter '${adapterName}' not found for context '${contextName}'`,
+      contextName,
+      'ADAPTER_LOOKUP',
+      error,
+    );
+  }
+
+  static forContext(
+    contextName: string,
+    adapterName: string,
+  ): AdapterNotFoundError {
+    return new AdapterNotFoundError(contextName, adapterName);
+  }
+}
