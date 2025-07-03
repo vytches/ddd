@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Logger } from '../core/index.js';
 import { DefaultLogger } from '../logger.js';
 
@@ -9,13 +8,13 @@ export interface CQRSMiddlewareOptions {
 }
 
 export interface ExecutionContext {
-  commandOrQuery: any;
+  commandOrQuery: unknown;
   type: 'Command' | 'Query';
-  handler?: any;
+  handler?: unknown;
 }
 
 export interface ICQRSMiddleware {
-  handle(context: ExecutionContext, next: () => Promise<any>): Promise<any>;
+  handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown>;
 }
 
 export class EnhancedLoggingMiddleware implements ICQRSMiddleware {
@@ -34,11 +33,11 @@ export class EnhancedLoggingMiddleware implements ICQRSMiddleware {
 
   async handle(
     context: ExecutionContext,
-    next: () => Promise<any>,
-  ): Promise<any> {
+    next: () => Promise<unknown>,
+  ): Promise<unknown> {
     const { commandOrQuery, type, handler } = context;
-    const operationName = commandOrQuery.constructor.name;
-    const handlerName = handler?.constructor?.name || 'Unknown';
+    const operationName = (commandOrQuery as { constructor: { name: string } }).constructor.name;
+    const handlerName = (handler as { constructor?: { name: string } })?.constructor?.name || 'Unknown';
 
     const startTime = performance.now();
     const logLevel = this.options.logLevel!;

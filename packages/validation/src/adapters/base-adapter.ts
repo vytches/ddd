@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IValidator, IValidationErrors } from '@vytches-ddd/contracts';
 import { Result } from '@vytches-ddd/utils';
 import { ValidationError, ValidationErrors } from '../validation-error';
@@ -7,7 +6,7 @@ import { ValidationError, ValidationErrors } from '../validation-error';
  * Bazowa klasa abstrakcyjna dla adapterów zewnętrznych bibliotek walidacji
  * Zapewnia wspólny interfejs i utility methods dla różnych bibliotek
  */
-export abstract class BaseValidationAdapter<T, TSchema = any> implements IValidator<T> {
+export abstract class BaseValidationAdapter<T, TSchema = unknown> implements IValidator<T> {
   constructor(protected readonly schema: TSchema) {}
 
   /**
@@ -21,7 +20,7 @@ export abstract class BaseValidationAdapter<T, TSchema = any> implements IValida
   protected createValidationError(
     property: string,
     message: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): ValidationError {
     return new ValidationError(property, message, context);
   }

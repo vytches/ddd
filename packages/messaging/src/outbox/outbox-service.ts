@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 
@@ -19,7 +18,7 @@ export interface OutboxServiceOptions {
   /** Default priority for messages */
   defaultPriority?: MessagePriority;
   /** Default metadata to add to all messages */
-  defaultMetadata?: Record<string, any>;
+  defaultMetadata?: Record<string, unknown>;
   /** Enable automatic cleanup of processed messages */
   autoCleanup?: boolean;
   /** Age threshold for cleanup (in days) */
@@ -230,7 +229,9 @@ export class OutboxService {
     totalFailed: number;
   }> {
     // Check if repository has helper methods (for InMemoryOutboxRepository)
-    const repo = this.repository as any;
+    const repo = this.repository as IOutboxRepository & {
+      getMessageCountByStatus?: (status: MessageStatus) => number;
+    };
     if (repo.getMessageCountByStatus) {
       return {
         totalPending: repo.getMessageCountByStatus(MessageStatus.PENDING),

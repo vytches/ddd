@@ -1,2 +1,5 @@
-export * from './domain-event';
-export * from './in-memory-domain-event-bus';
+export { DomainEvent } from './domain-event';
+export { 
+  InMemoryDomainEventBus,
+  type InMemoryDomainEventBusOptions 
+} from './in-memory-domain-event-bus';

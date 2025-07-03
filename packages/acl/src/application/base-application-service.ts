@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IDomainError } from '@vytches-ddd/core';
 import { Result } from '@vytches-ddd/utils';
 import type { BusinessRuleValidator, ValidationErrors } from '@vytches-ddd/validation';
@@ -23,7 +22,7 @@ export abstract class BaseApplicationService implements IApplicationService {
     return Result.ok();
   }
 
-  protected handleDomainError(error: any): ApplicationError {
+  protected handleDomainError(error: unknown): ApplicationError {
     const errorMessage = this.extractErrorMessage(error);
     return new ApplicationError(
       `Domain operation failed: ${errorMessage}`,
@@ -31,7 +30,7 @@ export abstract class BaseApplicationService implements IApplicationService {
     );
   }
 
-  private extractErrorMessage(error: any): string {
+  private extractErrorMessage(error: unknown): string {
     if (error == null) {
       return String(error); // Will return 'null' or 'undefined'
     }
@@ -40,8 +39,8 @@ export abstract class BaseApplicationService implements IApplicationService {
       return error;
     }
     
-    if (error && typeof error.message === 'string') {
-      return error.message;
+    if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+      return (error as { message: string }).message;
     }
     
     return String(error);
@@ -51,7 +50,7 @@ export abstract class BaseApplicationService implements IApplicationService {
 export class ApplicationError extends IDomainError {
   constructor(
     message: string,
-    public readonly innerError?: any,
+    public readonly innerError?: unknown,
   ) {
     super(message, { 
       data: { innerError },
@@ -65,6 +64,6 @@ export class ApplicationError extends IDomainError {
     if (!this.data) {
       this.data = {};
     }
-    (this.data as any).innerError = innerError;
+    (this.data as Record<string, unknown>).innerError = innerError;
   }
 }

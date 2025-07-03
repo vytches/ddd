@@ -16,7 +16,7 @@ export interface IEventMetadata {
   causationId?: string;
 
   /** ID of the aggregate that generated the event */
-  aggregateId?: any;
+  aggregateId?: unknown;
 
   /** Type of the aggregate that generated the event */
   aggregateType?: string;
@@ -28,16 +28,16 @@ export interface IEventMetadata {
   eventVersion?: number;
 
   /** Actor who performed the action that led to this event */
-  actor?: any;
+  actor?: unknown;
 
   /** Owner of the resource affected by the event */
-  owner?: any;
+  owner?: unknown;
 
   /** Previous state captured for audit purposes */
-  _previousState?: any;
+  _previousState?: unknown;
 
   /** Additional application-specific metadata */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

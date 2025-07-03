@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IValidationError, IValidationErrors } from '@vytches-ddd/contracts';
 
 export class ValidationError implements IValidationError {
   constructor(
     public readonly property: string,
     public readonly message: string,
-    public readonly context?: Record<string, any>
+    public readonly context?: Record<string, unknown>
   ) {}
 
   toString(): string {

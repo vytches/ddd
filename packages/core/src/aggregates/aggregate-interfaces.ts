@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   IExtendedDomainEvent,
   IEventMetadata,
@@ -87,7 +86,7 @@ export interface IAggregateCapability {
   /**
    * Called when capability is attached to an aggregate
    */
-  attach(aggregate: IAggregateRoot<any>): void;
+  attach(aggregate: IAggregateRoot<unknown>): void;
 
   /**
    * Called when capability is detached from an aggregate
@@ -124,7 +123,7 @@ export interface ISnapshotCapability<TState = any, TMeta = any> extends IAggrega
   /**
    * Gets and clears the previous state
    */
-  getPreviousState(): any | null;
+  getPreviousState(): unknown | null;
 }
 
 /**
@@ -156,7 +155,7 @@ export interface IEventSourcingCapability extends IAggregateCapability {
   /**
    * Loads aggregate from event store
    */
-  loadFromEventStore(aggregateId: any): Promise<void>;
+  loadFromEventStore(aggregateId: unknown): Promise<void>;
 
   /**
    * Saves aggregate events to event store
@@ -257,7 +256,7 @@ export type EventAggregateMiddleware<T = any> = (
  */
 export interface IAggregateSnapshot<TState = any, TMeta = any> {
   /** Aggregate identifier */
-  id: any;
+  id: unknown;
 
   /** Aggregate version */
   version: number;
@@ -399,7 +398,7 @@ export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> 
   /**
    * Creates a new aggregate instance
    */
-  create(id: EntityId<TId>, ...args: any[]): TAggregate;
+  create(id: EntityId<TId>, ...args: unknown[]): TAggregate;
 
   /**
    * Rebuilds aggregate from events
@@ -422,7 +421,7 @@ export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> 
 /**
  * Interface for aggregate validation
  */
-export interface IAggregateValidator<TAggregate extends IAggregateRoot<any>> {
+export interface IAggregateValidator<TAggregate extends IAggregateRoot<unknown>> {
   /**
    * Validates aggregate state
    */
@@ -523,17 +522,17 @@ export interface ISecurityCapability extends IAggregateCapability {
   /**
    * Encrypts sensitive data
    */
-  encrypt(data: any): string;
+  encrypt(data: unknown): string;
 
   /**
    * Decrypts sensitive data
    */
-  decrypt(encryptedData: string): any;
+  decrypt(encryptedData: string): unknown;
 
   /**
    * Checks if user has permission to perform action
    */
-  hasPermission(action: string, user?: any): boolean;
+  hasPermission(action: string, user?: unknown): boolean;
 
   /**
    * Logs security events
@@ -547,7 +546,7 @@ export interface ISecurityCapability extends IAggregateCapability {
 export interface SecurityEvent {
   type: 'access' | 'modification' | 'failure';
   action: string;
-  user?: any;
+  user?: unknown;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

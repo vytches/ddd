@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ICommandBus } from '../abstracts';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware} from '../middleware';
@@ -9,26 +8,26 @@ import { CQRSMetadataRegistry } from '../registry';
 
 export class CommandBus extends ICommandBus {
   private handlers = new Map<
-    any,
-    ICommandHandler<any> | (() => ICommandHandler<any>)
+    unknown,
+    ICommandHandler<ICommand> | (() => ICommandHandler<ICommand>)
   >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver: ((handlerClass: any) => any) | undefined;
+  private handlerResolver: ((handlerClass: unknown) => unknown) | undefined;
 
-  constructor(handlerResolver?: (handlerClass: any) => any) {
+  constructor(handlerResolver?: (handlerClass: unknown) => unknown) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
   }
 
   register<T extends ICommand>(
-    commandType: any,
+    commandType: unknown,
     handler: ICommandHandler<T>,
   ): void {
     this.handlers.set(commandType, handler);
   }
 
   registerFactory<T extends ICommand>(
-    commandType: any,
+    commandType: unknown,
     factory: () => ICommandHandler<T>,
   ): void {
     this.handlers.set(commandType, factory);
@@ -88,15 +87,15 @@ export class CommandBus extends ICommandBus {
 
   private async executeWithMiddleware(
     context: CQRSExecutionContext,
-    handlerExecution: () => Promise<any>,
-  ): Promise<any> {
+    handlerExecution: () => Promise<unknown>,
+  ): Promise<unknown> {
     if (this.middlewares.length === 0) {
       return handlerExecution();
     }
 
     let index = 0;
 
-    const next = async (): Promise<any> => {
+    const next = async (): Promise<unknown> => {
       if (index < this.middlewares.length) {
         const middleware = this.middlewares[index++];
         return middleware?.handle(context, next);
@@ -108,7 +107,7 @@ export class CommandBus extends ICommandBus {
     return next();
   }
 
-  private isValidatable(obj: any): obj is ICqrsValidatable {
+  private isValidatable(obj: unknown): obj is ICqrsValidatable {
     return obj && typeof obj.validate === 'function';
   }
 }

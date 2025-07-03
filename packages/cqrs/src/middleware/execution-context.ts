@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ExecutionContext } from './middleware.interface';
 import type {
   ICommand,
@@ -8,19 +7,19 @@ import type {
 } from '../interfaces';
 
 export class CQRSExecutionContext implements ExecutionContext {
-  private _metadata = new Map<string, any>();
+  private _metadata = new Map<string, unknown>();
 
   constructor(
-    public readonly commandOrQuery: ICommand | IQuery<any>,
-    public readonly handler: ICommandHandler<any> | IQueryHandler<any, any>,
+    public readonly commandOrQuery: ICommand | IQuery<unknown>,
+    public readonly handler: ICommandHandler<ICommand> | IQueryHandler<IQuery<unknown>, unknown>,
     public readonly type: 'command' | 'query',
   ) {}
 
-  get metadata(): Map<string, any> {
+  get metadata(): Map<string, unknown> {
     return this._metadata;
   }
 
-  setMetadata(key: string, value: any): void {
+  setMetadata(key: string, value: unknown): void {
     this._metadata.set(key, value);
   }
 

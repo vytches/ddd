@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';
 
