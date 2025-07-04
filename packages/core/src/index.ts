@@ -28,6 +28,10 @@ export type {
 export {
   IDomainError,
   BaseError,
+  InvalidParameterError,
+  MissingValueError,
+  DuplicateError,
+  NotFoundError,
   DomainErrorCode,
   ApplicationErrorCode,
   FrameworkErrorCode
