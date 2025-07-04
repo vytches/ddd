@@ -1,0 +1,32 @@
+{
+  "name": "@vytches-ddd/repositories",
+  "projectType": "library",
+  "sourceRoot": "packages/repositories/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/repositories",
+        "main": "packages/repositories/src/index.ts",
+        "tsConfig": "packages/repositories/tsconfig.json",
+        "assets": ["packages/repositories/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/repositories"],
+      "options": {
+        "jestConfig": "packages/repositories/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["packages/repositories/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:repositories"]
+}

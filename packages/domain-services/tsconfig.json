@@ -6,6 +6,18 @@
     "declarationMap": false, // Disable .d.ts.map files for smaller bundles
     "sourceMap": false // Disable source maps for production builds
   },
-  "include": ["src/**/*", "../contracts/src/**/*", "../core/src/**/*", "../events/src/**/*", "../validation/src/**/*", "../utils/src/**/*", "../logging/src/**/*"],
+  "include": [
+    "src/**/*", 
+    "../contracts/src/**/*", 
+    "../core/src/**/*", 
+    "../domain-primitives/src/**/*",
+    "../value-objects/src/**/*", 
+    "../repositories/src/**/*",
+    "../aggregates/src/**/*",
+    "../events/src/**/*", 
+    "../validation/src/**/*", 
+    "../utils/src/**/*", 
+    "../logging/src/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

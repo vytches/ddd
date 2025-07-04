@@ -1,53 +1,59 @@
-// Core aggregates - most commonly used
+// Core aggregates - re-exported from aggregates package
 export {
   AggregateRoot,
   AggregateBuilder,
-  AggregateTestBuilder
-} from './aggregates';
+  AggregateTestBuilder,
+  AggregateError
+} from '@vytches-ddd/aggregates';
 
 // Aggregate interfaces
 export type {
   IAggregateRoot,
   IAggregateCapability,
   IAggregateBuilder
-} from './aggregates';
+} from '@vytches-ddd/aggregates';
 
-// Value objects
+// Value objects - re-exported from value-objects package
 export {
   BaseValueObject,
   EntityId
-} from './value-objects';
-
-// Errors
-export {
-  IDomainError,
-  BaseError
-} from './errors';
+} from '@vytches-ddd/value-objects';
 
 export type {
-  DomainErrorOptions
-} from './errors';
+  ValueObjectValidator,
+  IdType
+} from '@vytches-ddd/value-objects';
 
-// Error codes
+// Errors - re-exported from domain-primitives
 export {
+  IDomainError,
+  BaseError,
   DomainErrorCode,
   ApplicationErrorCode,
   FrameworkErrorCode
-} from './errors/error.enum';
+} from '@vytches-ddd/domain-primitives';
 
-// Repositories
+export type {
+  DomainErrorOptions
+} from '@vytches-ddd/domain-primitives';
+
+// Repositories - re-exported from repositories package
 export {
-  IBaseRepository
-} from './repositories';
-export type { 
-  IUnitOfWork,
-  IRepository 
-} from './repositories';
+  IBaseRepository,
+  VersionError
+} from '@vytches-ddd/repositories';
+export type {
+  IRepositoryAggregate,
+  IRepository,
+  IRepositoryProvider,
+  IExtendedRepository,
+  IUnitOfWork
+} from '@vytches-ddd/repositories';
 
-// Actor
+// Actor - re-exported from domain-primitives
 export type {
   IActor
-} from './actor';
+} from '@vytches-ddd/domain-primitives';
 
 // For advanced usage - import from specific subpaths
 // e.g., import { IAggregateCapability } from '@vytches-ddd/core/aggregates'

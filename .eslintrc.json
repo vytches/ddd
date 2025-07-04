@@ -30,9 +30,42 @@
             "allow": [],
             "depConstraints": [
               {
+                "sourceTag": "scope:domain-primitives",
+                "onlyDependOnLibsWithTags": ["scope:utils", "scope:domain-primitives"]
+              },
+              {
+                "sourceTag": "scope:value-objects",
+                "onlyDependOnLibsWithTags": ["scope:utils", "scope:domain-primitives", "scope:value-objects"]
+              },
+              {
+                "sourceTag": "scope:repositories",
+                "onlyDependOnLibsWithTags": [
+                  "scope:utils",
+                  "scope:domain-primitives",
+                  "scope:value-objects",
+                  "scope:contracts",
+                  "scope:repositories"
+                ]
+              },
+              {
+                "sourceTag": "scope:aggregates",
+                "onlyDependOnLibsWithTags": [
+                  "scope:utils",
+                  "scope:domain-primitives",
+                  "scope:value-objects",
+                  "scope:contracts",
+                  "scope:logging",
+                  "scope:aggregates"
+                ]
+              },
+              {
                 "sourceTag": "scope:core",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
+                  "scope:domain-primitives",
+                  "scope:value-objects",
+                  "scope:repositories",
+                  "scope:aggregates",
                   "scope:contracts",
                   "scope:utils",
                   "scope:validation",
@@ -45,7 +78,7 @@
               },
               {
                 "sourceTag": "scope:validation",
-                "onlyDependOnLibsWithTags": ["scope:utils", "scope:validation", "scope:contracts"]
+                "onlyDependOnLibsWithTags": ["scope:utils", "scope:domain-primitives", "scope:validation", "scope:contracts"]
               },
               {
                 "sourceTag": "scope:policies",
@@ -60,6 +93,7 @@
                 "sourceTag": "scope:events",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
+                  "scope:domain-primitives",
                   "scope:utils",
                   "scope:events",
                   "scope:contracts",
@@ -80,6 +114,7 @@
                 "sourceTag": "scope:acl",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
+                  "scope:domain-primitives",
                   "scope:events",
                   "scope:utils",
                   "scope:acl",
@@ -109,12 +144,13 @@
               },
               {
                 "sourceTag": "scope:resilience",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:resilience", "scope:logging"]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:domain-primitives", "scope:utils", "scope:resilience", "scope:logging"]
               },
               {
                 "sourceTag": "scope:testing",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
+                  "scope:domain-primitives",
                   "scope:events",
                   "scope:cqrs",
                   "scope:validation",
@@ -129,7 +165,7 @@
               },
               {
                 "sourceTag": "scope:cli",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:utils", "scope:cli", "scope:logging"]
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:domain-primitives", "scope:utils", "scope:cli", "scope:logging"]
               },
               {
                 "sourceTag": "scope:contracts",
@@ -140,6 +176,7 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:contracts",
                   "scope:core",
+                  "scope:domain-primitives",
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
@@ -150,6 +187,7 @@
                 "sourceTag": "scope:logging",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
+                  "scope:domain-primitives",
                   "scope:utils",
                   "scope:logging"
                 ]

@@ -1,0 +1,43 @@
+{
+  "name": "@vytches-ddd/aggregates",
+  "projectType": "library",
+  "sourceRoot": "packages/aggregates/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/aggregates",
+        "main": "packages/aggregates/src/index.ts",
+        "tsConfig": "packages/aggregates/tsconfig.json",
+        "assets": [
+          "packages/aggregates/*.md"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/aggregates"
+      ],
+      "options": {
+        "jestConfig": "packages/aggregates/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "packages/aggregates/**/*.ts"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "type:lib",
+    "scope:aggregates"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "@vytches-ddd/value-objects",
+  "version": "0.1.0",
+  "description": "Domain-Driven Design value objects with base classes and entity identifiers",
+  "keywords": [
+    "ddd",
+    "domain-driven-design",
+    "value-objects",
+    "entity-id",
+    "typescript"
+  ],
+  "author": "Vytches DDD",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@vytches-ddd/domain-primitives": "*",
+    "@vytches-ddd/utils": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.0.0"
+  }
+}

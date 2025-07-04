@@ -33,6 +33,10 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@vytches-ddd/core": ["packages/core/src/index.ts"],
+      "@vytches-ddd/domain-primitives": ["packages/domain-primitives/src/index.ts"],
+      "@vytches-ddd/value-objects": ["packages/value-objects/src/index.ts"],
+      "@vytches-ddd/repositories": ["packages/repositories/src/index.ts"],
+      "@vytches-ddd/aggregates": ["packages/aggregates/src/index.ts"],
       "@vytches-ddd/utils": ["packages/utils/src/index.ts"],
       "@vytches-ddd/validation": ["packages/validation/src/index.ts"],
       "@vytches-ddd/policies": ["packages/policies/src/index.ts"],

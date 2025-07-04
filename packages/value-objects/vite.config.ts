@@ -17,7 +17,7 @@ export default defineConfig({
     outDir: 'dist',
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'VytchesDDD',
+      name: 'VytchesDDDValueObjects',
       formats: ['es', 'cjs'],
       fileName: format => `index.${format === 'es' ? 'js' : format}`,
     },
@@ -35,13 +35,5 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
-    alias: {
-      '@vytches-ddd/core': new URL('../core/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/utils': new URL('../utils/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/events': new URL('../events/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
-    },
   },
 });

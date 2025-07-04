@@ -26,6 +26,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@vytches-ddd/domain-primitives": "workspace:*",
+    "@vytches-ddd/value-objects": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/logging": "workspace:*"

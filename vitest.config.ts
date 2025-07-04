@@ -72,6 +72,10 @@ export default defineConfig({
     },
     alias: {
       '@vytches-ddd/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/domain-primitives': new URL('./packages/domain-primitives/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/value-objects': new URL('./packages/value-objects/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/repositories': new URL('./packages/repositories/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/aggregates': new URL('./packages/aggregates/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/utils': new URL('./packages/utils/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/validation': new URL('./packages/validation/src/index.ts', import.meta.url)
         .pathname,

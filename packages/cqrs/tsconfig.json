@@ -9,6 +9,10 @@
   "include": [
     "src/**/*",
     "../core/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../value-objects/src/**/*", 
+    "../repositories/src/**/*",
+    "../aggregates/src/**/*",
     "../validation/src/**/*",
     "../contracts/src/**/*",
     "../utils/src/**/*",

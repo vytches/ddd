@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*",
+    "../utils/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../value-objects/src/**/*",
+    "../contracts/src/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

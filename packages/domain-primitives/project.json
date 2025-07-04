@@ -1,0 +1,32 @@
+{
+  "name": "@vytches-ddd/domain-primitives",
+  "projectType": "library",
+  "sourceRoot": "packages/domain-primitives/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/domain-primitives",
+        "main": "packages/domain-primitives/src/index.ts",
+        "tsConfig": "packages/domain-primitives/tsconfig.json",
+        "assets": ["packages/domain-primitives/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/domain-primitives"],
+      "options": {
+        "jestConfig": "packages/domain-primitives/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["packages/domain-primitives/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:domain-primitives"]
+}

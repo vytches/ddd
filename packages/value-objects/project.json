@@ -1,0 +1,32 @@
+{
+  "name": "@vytches-ddd/value-objects",
+  "projectType": "library",
+  "sourceRoot": "packages/value-objects/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/value-objects",
+        "main": "packages/value-objects/src/index.ts",
+        "tsConfig": "packages/value-objects/tsconfig.json",
+        "assets": ["packages/value-objects/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/value-objects"],
+      "options": {
+        "jestConfig": "packages/value-objects/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["packages/value-objects/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:value-objects"]
+}
