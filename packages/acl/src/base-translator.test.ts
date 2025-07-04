@@ -60,7 +60,7 @@ class OrderTranslator extends BaseModelTranslator<OrderDomainModel, OrderExterna
 }
 
 class ValidatingOrderTranslator extends BaseModelTranslator<OrderDomainModel, OrderExternalModel> {
-  public validateDomain = vi.fn((domainModel: OrderDomainModel): Result<void, Error> => {
+  public override validateDomain = vi.fn((domainModel: OrderDomainModel): Result<void, Error> => {
     if (!domainModel.orderId) {
       return Result.fail(new Error('Order ID is required'));
     }
@@ -73,7 +73,7 @@ class ValidatingOrderTranslator extends BaseModelTranslator<OrderDomainModel, Or
     return Result.ok(undefined);
   });
 
-  public validateExternal = vi.fn((externalModel: OrderExternalModel): Result<void, Error> => {
+  public override validateExternal = vi.fn((externalModel: OrderExternalModel): Result<void, Error> => {
     if (!externalModel.order_id) {
       return Result.fail(new Error('External order_id is required'));
     }
@@ -225,16 +225,19 @@ describe('BaseModelTranslator', () => {
       const error = (() => {
         try {
           validatingTranslator.toExternal(invalidDomain);
+          throw new Error('Expected method to throw but it did not');
         } catch (e) {
           return e as TranslationError;
         }
       })();
 
       expect(error).toBeInstanceOf(TranslationError);
-      expect(error.direction).toBe('TO_EXTERNAL');
-      expect(error.contextName).toBe('ValidatingOrderContext');
-      expect(error.sourceModel).toBe(invalidDomain);
-      expect(error.message).toContain('Domain validation failed');
+      if (error instanceof TranslationError) {
+        expect(error.direction).toBe('TO_EXTERNAL');
+        expect(error.contextName).toBe('ValidatingOrderContext');
+        expect(error.sourceModel).toBe(invalidDomain);
+        expect(error.message).toContain('Domain validation failed');
+      }
     });
 
     it('should throw TranslationError when translation implementation fails', () => {
@@ -247,14 +250,18 @@ describe('BaseModelTranslator', () => {
       const error = (() => {
         try {
           failingTranslator.toExternal(sampleDomainModel);
+          throw new Error('Expected method to throw but it did not');
         } catch (e) {
           return e as TranslationError;
         }
       })();
 
-      expect(error.direction).toBe('TO_EXTERNAL');
-      expect(error.contextName).toBe('FailingContext');
-      expect(error.message).toContain('Conversion to external failed');
+      expect(error).toBeInstanceOf(TranslationError);
+      if (error instanceof TranslationError) {
+        expect(error.direction).toBe('TO_EXTERNAL');
+        expect(error.contextName).toBe('FailingContext');
+        expect(error.message).toContain('Conversion to external failed');
+      }
     });
 
     it('should work without validation when validateDomain is not implemented', () => {
@@ -316,16 +323,19 @@ describe('BaseModelTranslator', () => {
       const error = (() => {
         try {
           validatingTranslator.fromExternal(invalidExternal);
+          throw new Error('Expected method to throw but it did not');
         } catch (e) {
           return e as TranslationError;
         }
       })();
 
       expect(error).toBeInstanceOf(TranslationError);
-      expect(error.direction).toBe('FROM_EXTERNAL');
-      expect(error.contextName).toBe('ValidatingOrderContext');
-      expect(error.sourceModel).toBe(invalidExternal);
-      expect(error.message).toContain('External validation failed');
+      if (error instanceof TranslationError) {
+        expect(error.direction).toBe('FROM_EXTERNAL');
+        expect(error.contextName).toBe('ValidatingOrderContext');
+        expect(error.sourceModel).toBe(invalidExternal);
+        expect(error.message).toContain('External validation failed');
+      }
     });
 
     it('should throw TranslationError when translation implementation fails', () => {
@@ -338,14 +348,18 @@ describe('BaseModelTranslator', () => {
       const error = (() => {
         try {
           failingTranslator.fromExternal(sampleExternalModel);
+          throw new Error('Expected method to throw but it did not');
         } catch (e) {
           return e as TranslationError;
         }
       })();
 
-      expect(error.direction).toBe('FROM_EXTERNAL');
-      expect(error.contextName).toBe('FailingContext');
-      expect(error.message).toContain('Conversion from external failed');
+      expect(error).toBeInstanceOf(TranslationError);
+      if (error instanceof TranslationError) {
+        expect(error.direction).toBe('FROM_EXTERNAL');
+        expect(error.contextName).toBe('FailingContext');
+        expect(error.message).toContain('Conversion from external failed');
+      }
     });
 
     it('should work without validation when validateExternal is not implemented', () => {

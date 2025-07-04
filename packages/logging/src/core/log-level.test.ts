@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LOG_LEVELS, isLogLevelEnabled, parseLogLevel } from './log-level.js';
+import { LOG_LEVELS, isLogLevelEnabled, parseLogLevel } from './log-level';
 
 describe('Log Levels', () => {
   describe('LOG_LEVELS constant', () => {
@@ -110,14 +110,15 @@ describe('Log Levels', () => {
         parseLogLevel('invalid');
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.message).toContain('Invalid log level: invalid');
-        expect(error.message).toContain('Valid levels are:');
-        expect(error.message).toContain('trace');
-        expect(error.message).toContain('debug');
-        expect(error.message).toContain('info');
-        expect(error.message).toContain('warn');
-        expect(error.message).toContain('error');
-        expect(error.message).toContain('fatal');
+        const errorMessage = (error as Error).message;
+        expect(errorMessage).toContain('Invalid log level: invalid');
+        expect(errorMessage).toContain('Valid levels are:');
+        expect(errorMessage).toContain('trace');
+        expect(errorMessage).toContain('debug');
+        expect(errorMessage).toContain('info');
+        expect(errorMessage).toContain('warn');
+        expect(errorMessage).toContain('error');
+        expect(errorMessage).toContain('fatal');
       }
     });
 

@@ -28,12 +28,12 @@ class MockSnapshotStore implements IProjectionSnapshotStore {
 
   async load<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null> {
     const snapshots = this.snapshots.get(projectionName);
-    return snapshots && snapshots.length > 0 ? snapshots[0] : null;
+    return snapshots && snapshots.length > 0 ? snapshots[0]! : null;
   }
 
   async loadLatest<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null> {
     const snapshots = this.snapshots.get(projectionName);
-    return snapshots && snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
+    return snapshots && snapshots.length > 0 ? snapshots[snapshots.length - 1]! : null;
   }
 
   async delete(projectionName: string): Promise<void> {
@@ -89,13 +89,13 @@ describe('SnapshotProjectionCapability', () => {
 
   const createMockEvent = (position = 100): IExtendedDomainEvent => ({
     eventType: 'TestEvent',
-    aggregateId: 'test-123',
-    aggregateType: 'TestAggregate',
-    eventVersion: 1,
     payload: { data: 'test' },
     metadata: {
       eventId: 'event-123',
       timestamp: new Date(),
+      aggregateId: 'test-123',
+      aggregateType: 'TestAggregate',
+      eventVersion: 1,
       position,
     },
   });
@@ -175,8 +175,8 @@ describe('SnapshotProjectionCapability', () => {
       // Assert
       const snapshots = store.getSnapshots('TestProjection');
       expect(snapshots).toHaveLength(2); // Two snapshots created
-      expect(snapshots[0].version).toBe(1);
-      expect(snapshots[1].version).toBe(2);
+      expect(snapshots[0]!.version).toBe(1);
+      expect(snapshots[1]!.version).toBe(2);
     });
 
     it('should reset counter after creating snapshot', async () => {
@@ -197,7 +197,7 @@ describe('SnapshotProjectionCapability', () => {
       // Assert - should still have only one snapshot
       const snapshots = store.getSnapshots('TestProjection');
       expect(snapshots).toHaveLength(1);
-      expect(snapshots[0].version).toBe(1);
+      expect(snapshots[0]!.version).toBe(1);
     });
 
     it('should handle events without position metadata', async () => {
@@ -205,13 +205,13 @@ describe('SnapshotProjectionCapability', () => {
       const state = { id: 'test', version: 1 };
       const eventWithoutPosition: IExtendedDomainEvent = {
         eventType: 'TestEvent',
-        aggregateId: 'test-123',
-        aggregateType: 'TestAggregate',
-        eventVersion: 1,
         payload: { data: 'test' },
         metadata: {
           eventId: 'event-123',
           timestamp: new Date(),
+          aggregateId: 'test-123',
+          aggregateType: 'TestAggregate',
+          eventVersion: 1,
         },
       };
 
@@ -370,15 +370,15 @@ describe('SnapshotProjectionCapability', () => {
 
       // Act
       for (let i = 0; i < 10; i++) {
-        await capability.onAfterApply(states[i], events[i]);
+        await capability.onAfterApply(states[i]!, events[i]!);
       }
 
       // Assert - should have created 3 snapshots (at events 3, 6, 9)
       const snapshots = store.getSnapshots('TestProjection');
       expect(snapshots).toHaveLength(3);
-      expect(snapshots[0].version).toBe(1);
-      expect(snapshots[1].version).toBe(2);
-      expect(snapshots[2].version).toBe(3);
+      expect(snapshots[0]!.version).toBe(1);
+      expect(snapshots[1]!.version).toBe(2);
+      expect(snapshots[2]!.version).toBe(3);
     });
 
     it('should handle concurrent snapshot operations for different projections', async () => {
@@ -448,8 +448,8 @@ describe('SnapshotProjectionCapability', () => {
       // Assert
       const snapshot = await store.loadLatest('TestProjection');
       expect(snapshot!.state).toEqual(complexState);
-      expect(snapshot!.state.userData.profile.name).toBe('John Doe');
-      expect(snapshot!.state.metadata.tags).toEqual(['user', 'active']);
+      expect((snapshot!.state as any).userData.profile.name).toBe('John Doe');
+      expect((snapshot!.state as any).metadata.tags).toEqual(['user', 'active']);
     });
 
     it('should maintain snapshot history', async () => {
@@ -472,13 +472,13 @@ describe('SnapshotProjectionCapability', () => {
       const snapshots = store.getSnapshots('TestProjection');
       expect(snapshots).toHaveLength(3);
 
-      expect(snapshots[0].state.status).toBe('active');
-      expect(snapshots[1].state.status).toBe('inactive');
-      expect(snapshots[2].state.status).toBe('archived');
+      expect((snapshots[0]!.state as any).status).toBe('active');
+      expect((snapshots[1]!.state as any).status).toBe('inactive');
+      expect((snapshots[2]!.state as any).status).toBe('archived');
 
-      expect(snapshots[0].version).toBe(1);
-      expect(snapshots[1].version).toBe(2);
-      expect(snapshots[2].version).toBe(3);
+      expect(snapshots[0]!.version).toBe(1);
+      expect(snapshots[1]!.version).toBe(2);
+      expect(snapshots[2]!.version).toBe(3);
     });
 
     it('should handle snapshot loading edge cases', async () => {

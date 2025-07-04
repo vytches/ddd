@@ -1,27 +1,39 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export class CQRSMetadataRegistry {
-  private static commandHandlers = new Map<any, any>();
-  private static queryHandlers = new Map<any, any>();
+import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../interfaces';
 
-  static registerCommandHandler(commandType: any, handlerType: any): void {
+type CommandConstructor<T extends ICommand = ICommand> = new (...args: any[]) => T;
+type CommandHandlerConstructor<T extends ICommand = ICommand> = new (...args: any[]) => ICommandHandler<T>;
+type QueryConstructor<T extends IQuery<unknown> = IQuery<unknown>> = new (...args: any[]) => T;
+type QueryHandlerConstructor<T extends IQuery<R>, R = unknown> = new (...args: any[]) => IQueryHandler<T, R>;
+
+export class CQRSMetadataRegistry {
+  private static commandHandlers = new Map<CommandConstructor, CommandHandlerConstructor>();
+  private static queryHandlers = new Map<QueryConstructor, QueryHandlerConstructor<IQuery<unknown>, unknown>>();
+
+  static registerCommandHandler<T extends ICommand>(
+    commandType: CommandConstructor<T>, 
+    handlerType: CommandHandlerConstructor<T>
+  ): void {
     this.commandHandlers.set(commandType, handlerType);
   }
 
-  static registerQueryHandler(queryType: any, handlerType: any): void {
-    this.queryHandlers.set(queryType, handlerType);
+  static registerQueryHandler<T extends IQuery<R>, R>(
+    queryType: QueryConstructor<T>, 
+    handlerType: QueryHandlerConstructor<T, R>
+  ): void {
+    this.queryHandlers.set(queryType, handlerType as QueryHandlerConstructor<IQuery<unknown>, unknown>);
   }
 
-  static getCommandHandlers(): Map<any, any> {
+  static getCommandHandlers(): Map<CommandConstructor, CommandHandlerConstructor> {
     return new Map(this.commandHandlers);
   }
 
-  static getQueryHandlers(): Map<any, any> {
+  static getQueryHandlers(): Map<QueryConstructor, QueryHandlerConstructor<IQuery<unknown>, unknown>> {
     return new Map(this.queryHandlers);
   }
 
   static getAllHandlers(): {
-    commands: Map<any, any>;
-    queries: Map<any, any>;
+    commands: Map<CommandConstructor, CommandHandlerConstructor>;
+    queries: Map<QueryConstructor, QueryHandlerConstructor<IQuery<unknown>, unknown>>;
   } {
     return {
       commands: this.getCommandHandlers(),

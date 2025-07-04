@@ -280,10 +280,10 @@ describe('Resilience Decorators', () => {
     it('should extract resilience configuration', () => {
       const service = new TestService();
 
-      const metrics = getResilienceMetrics(service, 'testMethod');
+      const metrics = getResilienceMetrics(service as unknown as Record<string, unknown>, 'testMethod');
 
       expect(metrics.config).toBeDefined();
-      expect(metrics.config.name).toBe('metrics-test');
+      expect((metrics.config as any).name).toBe('metrics-test');
       expect(metrics.className).toBe('TestService');
       expect(metrics.methodName).toBe('testMethod');
     });
@@ -291,7 +291,7 @@ describe('Resilience Decorators', () => {
     it('should throw for non-decorated methods', () => {
       const service = new TestService();
 
-      expect(() => getResilienceMetrics(service, 'nonExistentMethod'))
+      expect(() => getResilienceMetrics(service as unknown as Record<string, unknown>, 'nonExistentMethod'))
         .toThrow('Method nonExistentMethod is not decorated with resilience patterns');
     });
   });

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IDomainEvent, IEventPersistenceHandler } from '@vytches-ddd/contracts';
 
 /**
@@ -11,16 +9,16 @@ import type { IDomainEvent, IEventPersistenceHandler } from '@vytches-ddd/contra
 // TODO: zogbaczyć co można tutaj zrobić i czy jakoś się pozbyć tego mechanizmu
 
 export abstract class GenericEventPersistenceHandler implements IEventPersistenceHandler {
-  private handlers = new Map<string, (payload: any) => Promise<number>>();
+  private handlers = new Map<string, (payload: unknown) => Promise<number>>();
 
   /**
    * Register handler for specific event type
    */
-  protected registerHandler<T = any>(
+  protected registerHandler<T = unknown>(
     eventType: string,
     handler: (payload: T) => Promise<number>
   ): void {
-    this.handlers.set(eventType, handler as any);
+    this.handlers.set(eventType, handler as (payload: unknown) => Promise<number>);
   }
 
   /**
@@ -41,5 +39,5 @@ export abstract class GenericEventPersistenceHandler implements IEventPersistenc
   /**
    * Get current version of an aggregate
    */
-  abstract getCurrentVersion(aggregateId: any): Promise<number | undefined>;
+  abstract getCurrentVersion(aggregateId: string | number): Promise<number | undefined>;
 }

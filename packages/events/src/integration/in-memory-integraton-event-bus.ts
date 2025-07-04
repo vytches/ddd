@@ -9,7 +9,7 @@ import type { IIntegrationEvent } from './integration-event-interfaces';
 
 export interface ContextAwareEventBus<TEvent = any> extends IEventBus<TEvent> {
   subscribeWithContext(
-    eventType: string | (new (...args: any[]) => TEvent),
+    eventType: string | (new (...args: unknown[]) => TEvent),
     handler: (event: TEvent) => Promise<void> | void,
     context: string
   ): void;
@@ -40,7 +40,7 @@ export class InMemoryIntegrationEventBus
   }
 
   override subscribe<T extends IIntegrationEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: unknown[]) => T),
     handler: (event: T) => Promise<void> | void,
     context?: string // Opcjonalny kontekst
   ): void {
@@ -49,20 +49,20 @@ export class InMemoryIntegrationEventBus
 
     // Jeśli określono kontekst, zapisujemy go
     if (context) {
-      this.handlerContexts.set(handler as any, context);
+      this.handlerContexts.set(handler as unknown as (event: IIntegrationEvent) => Promise<void> | void, context);
     }
   }
 
   // Również nadpisujemy registerHandler dla zachowania spójności
   override registerHandler<T extends IIntegrationEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: unknown[]) => T),
     handler: IEventHandler<T>,
     context?: string // Opcjonalny kontekst
   ): void {
     super.registerHandler(eventType, handler);
 
     if (context) {
-      this.handlerContexts.set(handler as any, context);
+      this.handlerContexts.set(handler as unknown as (event: IIntegrationEvent) => Promise<void> | void, context);
     }
 
     const eventName = this.getEventName(eventType);

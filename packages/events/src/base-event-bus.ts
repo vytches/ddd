@@ -150,7 +150,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Subscribe a function to handle events of a specific type
    */
   subscribe<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: unknown[]) => T),
     handler: (event: T) => Promise<void> | void
   ): void {
     const eventName = this.getEventName(eventType);
@@ -168,7 +168,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Register a class-based handler for events of a specific type
    */
   registerHandler<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: unknown[]) => T),
     handler: { handle(event: T): Promise<void> | void }
   ): void {
     const eventName = this.getEventName(eventType);
@@ -186,14 +186,14 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Unsubscribe a handler from events of a specific type
    */
   unsubscribe<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | (new (...args: unknown[]) => T),
     handler: ((event: T) => Promise<void> | void) | { handle(event: T): Promise<void> | void }
   ): void {
     const eventName = this.getEventName(eventType);
     const handlers = this.handlers.get(eventName);
 
     if (handlers) {
-      handlers.delete(handler as any);
+      handlers.delete(handler as (event: TEvent) => Promise<void> | void);
 
       // Clean up empty sets
       if (handlers.size === 0) {
@@ -250,12 +250,12 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    */
   protected getEventTypeName(event: TEvent): string {
     // First check for eventType property
-    if ('eventType' in (event as any)) {
-      return (event as any).eventType;
+    if ('eventType' in (event as { eventType?: string })) {
+      return (event as { eventType: string }).eventType;
     }
 
     // Fall back to constructor name
-    return (event as any).constructor.name;
+    return (event as { constructor: { name: string } }).constructor.name;
   }
 
   /**

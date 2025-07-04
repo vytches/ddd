@@ -58,7 +58,7 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
 
     if (snapshot.id !== this.aggregate.getId().getValue()) {
       throw AggregateError.idMismatch(
-        snapshot.id as string | number, 
+        snapshot.id as string | number,
         this.aggregate.getId().getValue() as string | number
       );
     }
@@ -75,13 +75,13 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
 
     // Reset aggregate state using internal method (type-safe approach)
     const aggregateWithInternalState = this.aggregate as IAggregateRoot & {
-      _internal_setState?: (state: { 
-        version: number; 
-        initialVersion: number; 
+      _internal_setState?: (state: {
+        version: number;
+        initialVersion: number;
         domainEvents: unknown[];
       }) => void;
     };
-    
+
     if (aggregateWithInternalState._internal_setState) {
       aggregateWithInternalState._internal_setState({
         version: snapshot.version,

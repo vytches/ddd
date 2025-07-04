@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { Metric } from './index';
+import type { Metric, HistogramMetric, TimerMetric } from './index';
 import {
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
@@ -171,8 +171,8 @@ describe('Observability System', () => {
     });
 
     it('should subscribe and emit events', async () => {
-      const events: any[] = [];
-      const listener = (event: any) => { events.push(event); };
+      const events: unknown[] = [];
+      const listener = (event: unknown) => { events.push(event); };
 
       eventBus.subscribe('test.event', listener);
 
@@ -180,12 +180,12 @@ describe('Observability System', () => {
       await eventBus.emit(event);
 
       expect(events).toHaveLength(1);
-      expect(events[0].eventType).toBe('test.event');
+      expect((events[0] as any).eventType).toBe('test.event');
     });
 
     it('should support global listeners', async () => {
-      const events: any[] = [];
-      const globalListener = (event: any) => { events.push(event); };
+      const events: unknown[] = [];
+      const globalListener = (event: unknown) => { events.push(event); };
 
       eventBus.subscribeAll(globalListener);
 
@@ -199,8 +199,8 @@ describe('Observability System', () => {
     });
 
     it('should unsubscribe listeners', async () => {
-      const events: any[] = [];
-      const listener = (event: any) => { events.push(event); };
+      const events: unknown[] = [];
+      const listener = (event: unknown) => { events.push(event); };
 
       eventBus.subscribe('test.event', listener);
       eventBus.unsubscribe('test.event', listener);
@@ -256,7 +256,7 @@ describe('Observability System', () => {
 
   describe('Metric Exporters', () => {
     let collector: CircuitBreakerMetricCollector;
-    let metrics: any[];
+    let metrics: (Metric | HistogramMetric | TimerMetric)[];
 
     beforeEach(() => {
       collector = new CircuitBreakerMetricCollector('test', { service: 'test' });

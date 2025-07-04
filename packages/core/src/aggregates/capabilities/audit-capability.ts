@@ -1,7 +1,7 @@
 import { LibUtils } from '@vytches-ddd/utils';
 
 import type { IAggregateRoot, IAuditCapability } from '../aggregate-interfaces';
-import type { IAuditEvent } from '@vytches-ddd/contracts';
+import type { IAuditEvent, IEventMetadata } from '@vytches-ddd/contracts';
 import { CAPABILITY_NAMES } from '../aggregate-interfaces';
 import { AggregateError } from '../aggregate-errors';
 
@@ -20,8 +20,8 @@ export class AuditCapability implements IAuditCapability {
   }
 
   detach?(): void {
-    // Clear reference without unsafe type assertion
-    this.aggregate = undefined!;
+    // Clear reference safely
+    this.aggregate = {} as IAggregateRoot;
     this._auditLog = [];
   }
 
@@ -90,7 +90,7 @@ export class AuditCapability implements IAuditCapability {
     const aggregateWithApply = this.aggregate as IAggregateRoot & {
       apply?: (eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown) => unknown;
     };
-    
+
     const originalApply = aggregateWithApply.apply?.bind(this.aggregate);
 
     if (!originalApply) {
@@ -109,8 +109,8 @@ export class AuditCapability implements IAuditCapability {
   }
 
   private createAuditEntry(eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown): void {
-    const eventType = typeof eventTypeOrEvent === 'string' 
-      ? eventTypeOrEvent 
+    const eventType = typeof eventTypeOrEvent === 'string'
+      ? eventTypeOrEvent
       : (eventTypeOrEvent as { eventType?: string }).eventType || 'unknown';
 
     const auditEvent: IAuditEvent = {
@@ -121,7 +121,7 @@ export class AuditCapability implements IAuditCapability {
       aggregateVersion: this.aggregate.getVersion(),
       eventType,
       payload,
-      metadata: metadata as Parameters<typeof this.createAuditEntry>[2],
+      metadata: (metadata || {}) as IEventMetadata,
       actor: (metadata as { actor?: unknown })?.actor,
       previousState: this.getPreviousStateFromSnapshot(),
     };

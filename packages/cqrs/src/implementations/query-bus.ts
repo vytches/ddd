@@ -12,9 +12,9 @@ export class QueryBus extends IQueryBus {
     IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
   >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver: ((handlerClass: unknown) => unknown) | undefined;
+  private handlerResolver: ((handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>) | undefined;
 
-  constructor(handlerResolver?: (handlerClass: unknown) => unknown) {
+  constructor(handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
   }
@@ -82,7 +82,7 @@ export class QueryBus extends IQueryBus {
 
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
-    return this.executeWithMiddleware(context, () => handler.execute(query));
+    return this.executeWithMiddleware(context, () => (handler as IQueryHandler<T, R>).execute(query)) as Promise<R>;
   }
 
   private async executeWithMiddleware(
@@ -108,6 +108,6 @@ export class QueryBus extends IQueryBus {
   }
 
   private isValidatable(obj: unknown): obj is ICqrsValidatable {
-    return obj && typeof obj.validate === 'function';
+    return obj != null && typeof obj === 'object' && 'validate' in obj && typeof (obj as Record<string, unknown>).validate === 'function';
   }
 }

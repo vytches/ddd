@@ -18,14 +18,17 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./providers": {
       "import": "./dist/providers/index.js",
+      "require": "./dist/providers/index.js",
       "types": "./dist/providers/index.d.ts"
     },
     "./integration": {
       "import": "./dist/integration/index.js",
+      "require": "./dist/integration/index.js",
       "types": "./dist/integration/index.d.ts"
     }
   },

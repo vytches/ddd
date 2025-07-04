@@ -15,7 +15,7 @@ export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<TRe
   protected async handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
     this.ensureAttached();
 
-    const position = event.metadata?.position || 0;
+    const position: number = typeof event.metadata?.position === 'number' ? event.metadata.position : 0;
     await this.checkpointStore.save(this.context!.getProjectionName(), {
       state,
       position,

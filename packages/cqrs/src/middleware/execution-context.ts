@@ -24,6 +24,6 @@ export class CQRSExecutionContext implements ExecutionContext {
   }
 
   getMetadata<T>(key: string): T | undefined {
-    return this._metadata.get(key);
+    return this._metadata.get(key) as T | undefined;
   }
 }

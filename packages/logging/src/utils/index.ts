@@ -1,2 +1,11 @@
-export * from './context-detector.js';
-export * from './data-masker.js';
+export {
+  ContextDetector
+} from './context-detector';
+
+export type { ContextDetectionResult } from './context-detector';
+
+export {
+  DataMasker
+} from './data-masker';
+
+export type { MaskingOptions } from './data-masker';

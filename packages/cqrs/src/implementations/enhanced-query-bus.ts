@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IQuery } from '../interfaces';
+import type { IQuery, IQueryHandler } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { QueryBus } from './query-bus';
+
+type HandlerResolver = (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>;
 
 export class EnhancedQueryBus extends QueryBus {
   private metrics = {
@@ -10,7 +11,7 @@ export class EnhancedQueryBus extends QueryBus {
     errors: 0,
   };
 
-  constructor(handlerResolver?: (handlerClass: any) => any) {
+  constructor(handlerResolver?: HandlerResolver) {
     super(handlerResolver);
 
     this.use(new LoggingMiddleware());

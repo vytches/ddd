@@ -1,26 +1,67 @@
 // Core interfaces
-export * from './interfaces';
+export type { 
+  ICommand, 
+  IQuery, 
+  ICommandHandler, 
+  IQueryHandler 
+} from './interfaces';
 
 // Abstract classes (service tokens)
-export * from './abstracts';
+export { 
+  ICommandBus, 
+  IQueryBus 
+} from './abstracts';
 
 // Concrete implementations
-export * from './implementations';
+export { 
+  CommandBus, 
+  QueryBus, 
+  EnhancedCommandBus, 
+  EnhancedQueryBus 
+} from './implementations';
 
 // Decorators
-export * from './decorators';
+export { 
+  CommandHandler, 
+  QueryHandler 
+} from './decorators';
 
 // Middleware
-export * from './middleware';
+export type { 
+  ICQRSMiddleware, 
+  ExecutionContext 
+} from './middleware';
+export { 
+  CQRSExecutionContext, 
+  LoggingMiddleware 
+} from './middleware';
 
 // Metadata registry
-export * from './registry';
+export { 
+  CQRSMetadataRegistry 
+} from './registry';
 
 // Validation
-export * from './validation';
+export type { 
+  ICqrsValidatable 
+} from './validation';
+export { 
+  CqrsValidationError 
+} from './validation';
 
 // Errors
-export * from './errors';
+export { 
+  HandlerNotFoundError, 
+  CommandExecutionError, 
+  QueryExecutionError, 
+  CQRSConfigurationError 
+} from './errors';
 
 // Configuration
-export * from './configuration';
+export type { 
+  CQRSOptions 
+} from './configuration';
+export { 
+  CQRSConfiguration, 
+  CQRSModule 
+} from './configuration';

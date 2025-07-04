@@ -4,15 +4,15 @@ import type {
   LoggerConfiguration,
   LogLevel,
   LogContext,
-} from './core/index.js';
+} from './core';
 import {
   isLogLevelEnabled,
   DefaultLogContextBuilder,
   DefaultLogEventBuilder
-} from './core/index.js';
-import { ConsoleProvider } from './providers/console-provider.js';
-import { ContextDetector } from './utils/context-detector.js';
-import { DataMasker } from './utils/data-masker.js';
+} from './core/index';
+import { ConsoleProvider } from './providers/console-provider';
+import { ContextDetector } from './utils/context-detector';
+import { DataMasker } from './utils/data-masker';
 
 export class DefaultLogger implements Logger {
   private static globalConfig: LoggerConfiguration = {
@@ -103,15 +103,15 @@ export class DefaultLogger implements Logger {
     const maskedData = data ? this.masker.maskData(data) as Record<string, unknown> : undefined;
 
     const eventBuilder = new DefaultLogEventBuilder(level, message, this.context);
-    
+
     if (maskedData) {
       eventBuilder.withData(maskedData);
     }
-    
+
     if (error) {
       eventBuilder.withError(error);
     }
-    
+
     const event = eventBuilder.build();
 
     this.provider.write(event);

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ISpecification, IValidator } from '@vytches-ddd/contracts';
 import type { IAsyncSpecification, PolicyRequest } from './business-policy-interface';
 import { PolicyContextBuilder, PolicyRequestBuilder } from './policy-context';
+import { BusinessPolicy } from './business-policy';
 import {
   PolicyBuilder,
   PolicyStepBuilder,
@@ -32,10 +33,7 @@ describe('Policy Builder', () => {
     };
 
     mockAsyncSpecification = {
-      isSatisfiedBy: vi.fn().mockResolvedValue(true),
-      and: vi.fn(),
-      or: vi.fn(),
-      not: vi.fn(),
+      isSatisfiedByAsync: vi.fn().mockResolvedValue(true),
     };
 
     mockValidator = {
@@ -163,15 +161,11 @@ describe('Policy Builder', () => {
 
     describe('group methods', () => {
       it('should create OR policy with shouldSatisfyAny()', () => {
-        const group1 = GroupBuilder.create<TestEntity>('group1')
-          .must(mockSpecification)
-          .withCode('GROUP1')
-          .withMessage('Group 1 violation');
-
-        const group2 = GroupBuilder.create<TestEntity>('group2')
-          .must(mockSpecification)
-          .withCode('GROUP2')
-          .withMessage('Group 2 violation');
+        const policy1 = BusinessPolicy.fromSpecification('test-policy-1', 'test-domain', mockSpecification, 'GROUP1', 'Group 1 violation');
+        const policy2 = BusinessPolicy.fromSpecification('test-policy-2', 'test-domain', mockSpecification, 'GROUP2', 'Group 2 violation');
+        
+        const group1 = GroupBuilder.create<TestEntity>('group1').mustSatisfy(policy1);
+        const group2 = GroupBuilder.create<TestEntity>('group2').mustSatisfy(policy2);
 
         const policy = PolicyBuilder.create<TestEntity>()
           .shouldSatisfyAny(group1, group2)
@@ -181,15 +175,11 @@ describe('Policy Builder', () => {
       });
 
       it('should create AND policy with shouldSatisfyAll()', () => {
-        const group1 = GroupBuilder.create<TestEntity>('group1')
-          .must(mockSpecification)
-          .withCode('GROUP1')
-          .withMessage('Group 1 violation');
-
-        const group2 = GroupBuilder.create<TestEntity>('group2')
-          .must(mockSpecification)
-          .withCode('GROUP2')
-          .withMessage('Group 2 violation');
+        const policy1 = BusinessPolicy.fromSpecification('test-policy-1', 'test-domain', mockSpecification, 'GROUP1', 'Group 1 violation');
+        const policy2 = BusinessPolicy.fromSpecification('test-policy-2', 'test-domain', mockSpecification, 'GROUP2', 'Group 2 violation');
+        
+        const group1 = GroupBuilder.create<TestEntity>('group1').mustSatisfy(policy1);
+        const group2 = GroupBuilder.create<TestEntity>('group2').mustSatisfy(policy2);
 
         const policy = PolicyBuilder.create<TestEntity>()
           .shouldSatisfyAll(group1, group2)
@@ -355,7 +345,7 @@ describe('Policy Builder', () => {
       });
 
       it('should set violation severity', () => {
-        const result = asyncStepBuilder.withSeverity('CRITICAL');
+        const result = asyncStepBuilder.withSeverity('ERROR');
         expect(result).toBe(asyncStepBuilder);
       });
 
@@ -495,6 +485,7 @@ describe('Policy Builder', () => {
           b.must(mockSpecification)
            .withCode('THEN_CODE')
            .withMessage('Then message')
+           .and()
         );
 
         expect(result).toBe(conditionalBuilder);
@@ -507,6 +498,7 @@ describe('Policy Builder', () => {
           b.must(mockSpecification)
            .withCode('OTHERWISE_CODE')
            .withMessage('Otherwise message')
+           .and()
         );
 
         expect(result).toBe(conditionalBuilder);
@@ -525,11 +517,13 @@ describe('Policy Builder', () => {
             b.must(mockSpecification)
              .withCode('THEN_CODE')
              .withMessage('Then message')
+             .and()
           )
           .otherwise(b =>
             b.must(mockSpecification)
              .withCode('OTHERWISE_CODE')
              .withMessage('Otherwise message')
+             .and()
           )
           .build();
 
@@ -550,19 +544,17 @@ describe('Policy Builder', () => {
 
   describe('Integration scenarios', () => {
     it('should build complex policy with multiple patterns', () => {
+      const policy1 = BusinessPolicy.fromSpecification('validation-1', 'test-domain', mockSpecification, 'VALIDATION_1', 'First validation');
+      const policy2 = BusinessPolicy.fromAsyncSpecification('validation-2', 'test-domain', mockAsyncSpecification, 'VALIDATION_2', 'Second validation');
+      const policy3 = BusinessPolicy.fromSpecification('business-1', 'test-domain', mockSpecification, 'BUSINESS_1', 'Business rule');
+      
       const validationGroup = GroupBuilder.create<TestEntity>('validation')
-        .must(mockSpecification)
-        .withCode('VALIDATION_1')
-        .withMessage('First validation')
+        .mustSatisfy(policy1)
         .and()
-        .mustAsync(mockAsyncSpecification)
-        .withCode('VALIDATION_2')
-        .withMessage('Second validation');
+        .mustSatisfy(policy2);
 
       const businessGroup = GroupBuilder.create<TestEntity>('business')
-        .must(mockSpecification)
-        .withCode('BUSINESS_1')
-        .withMessage('Business rule');
+        .mustSatisfy(policy3);
 
       const policy = PolicyBuilder.create<TestEntity>()
         .withId('complex-policy')
@@ -575,11 +567,13 @@ describe('Policy Builder', () => {
           b.must(mockSpecification)
            .withCode('HIGH_VALUE')
            .withMessage('High value validation')
+           .and()
         )
         .otherwise(b =>
           b.must(mockSpecification)
            .withCode('LOW_VALUE')
            .withMessage('Low value validation')
+           .and()
         )
         .build();
 

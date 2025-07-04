@@ -12,7 +12,6 @@ describe('DomainService Decorator', () => {
   describe('string parameter', () => {
     it('should add metadata to class with string serviceId', () => {
       // Arrange & Act
-      // @ts-expect-error skip
       @DomainService('string-service')
       class TestService extends IBaseDomainService {
         constructor() {

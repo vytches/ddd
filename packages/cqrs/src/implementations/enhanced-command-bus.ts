@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ICommand } from '../interfaces';
+import type { ICommand, ICommandHandler } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { CommandBus } from './command-bus';
+
+type HandlerResolver = (handlerClass: unknown) => ICommandHandler<ICommand>;
 
 export class EnhancedCommandBus extends CommandBus {
   private metrics = {
@@ -10,7 +11,7 @@ export class EnhancedCommandBus extends CommandBus {
     errors: 0,
   };
 
-  constructor(handlerResolver?: (handlerClass: any) => any) {
+  constructor(handlerResolver?: HandlerResolver) {
     super(handlerResolver);
 
     this.use(new LoggingMiddleware());

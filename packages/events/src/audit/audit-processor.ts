@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IRepository } from '@vytches-ddd/core';
+import type { IRepository, IActor } from '@vytches-ddd/core';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 
 import type { IEventProcessor } from '../event-processor';
-import type { IAuditEvent } from './audit-event.interface';
+import type { IAuditEvent, IAuditEventMetadata } from './audit-event.interface';
 import { AuditActionType, AuditStatus } from './audit-event.interface';
 
 /**
@@ -65,20 +65,25 @@ export class AuditEventProcessor implements IEventProcessor {
     if (domainEvent.eventType.includes('Updated')) actionType = AuditActionType.UPDATE;
     if (domainEvent.eventType.includes('Deleted')) actionType = AuditActionType.DELETE;
 
+    const metadata: IAuditEventMetadata = {
+      previousState: domainEvent?.metadata?._previousState,
+      correlationId: domainEvent?.metadata?.correlationId ?? '',
+      timestamp: new Date(),
+      actionType,
+      status: AuditStatus.SUCCESS,
+      source: this.options.source || 'domain_event',
+      resourceId: domainEvent.metadata?.aggregateId?.toString() || 'unknown',
+      resourceType: domainEvent.metadata?.aggregateType || 'unknown',
+    };
+
+    if (domainEvent.metadata?.actor) {
+      metadata.actor = domainEvent.metadata.actor as IActor;
+    }
+
     return {
       eventType: `AUDIT_${domainEvent.eventType}`,
       payload: domainEvent.payload,
-      metadata: {
-        previousState: domainEvent?.metadata?._previousState,
-        correlationId: domainEvent?.metadata?.correlationId ?? '',
-        timestamp: new Date(),
-        actionType,
-        status: AuditStatus.SUCCESS,
-        source: this.options.source || 'domain_event',
-        resourceId: domainEvent.metadata?.aggregateId?.toString(),
-        resourceType: domainEvent.metadata?.aggregateType,
-        actor: domainEvent.metadata?.actor,
-      },
+      metadata,
     };
   }
 

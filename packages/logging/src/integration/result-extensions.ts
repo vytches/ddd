@@ -1,5 +1,5 @@
-import type { Logger } from '../core/index.js';
-import { DefaultLogger } from '../logger.js';
+import type { Logger } from '../core/index';
+import { DefaultLogger } from '../logger';
 
 export interface ResultLoggingOptions {
   logger?: Logger;

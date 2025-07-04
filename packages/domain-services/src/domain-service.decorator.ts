@@ -109,7 +109,7 @@ export interface DomainServiceOptions {
  * class OrderService extends UnitOfWorkAwareDomainService {...}
  */
 export function DomainService(options: string | DomainServiceOptions) {
-  return function (target: any) {
+  return function <T extends new (...args: unknown[]) => unknown>(target: T): T {
     // Convert string service ID to full options object
     const metadata: DomainServiceOptions =
       typeof options === 'string' ? { serviceId: options } : options;
@@ -125,7 +125,7 @@ export function DomainService(options: string | DomainServiceOptions) {
  * Retrieves domain service metadata from a class.
  * Used by frameworks and containers to discover and configure services.
  *
- * @param {any} target - The service class to inspect
+ * @param {unknown} target - The service class to inspect
  * @returns {DomainServiceOptions | undefined} The service metadata, or undefined if none exists
  * @example
  * const ServiceClass = require('./order-service');
@@ -136,7 +136,7 @@ export function DomainService(options: string | DomainServiceOptions) {
  * }
  */
 export function getDomainServiceMetadata(
-  target: any,
+  target: unknown,
 ): DomainServiceOptions | undefined {
-  return Reflect.getMetadata(DOMAIN_SERVICE_METADATA_KEY, target);
+  return Reflect.getMetadata(DOMAIN_SERVICE_METADATA_KEY, target as object);
 }

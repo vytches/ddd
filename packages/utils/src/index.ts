@@ -1,3 +1,7 @@
-export * from './result';
-export * from './lib-utils';
-export * from './saferun';
+export { Result } from './result';
+export {
+  LibUtils
+} from './lib-utils';
+export {
+  safeRun
+} from './saferun';

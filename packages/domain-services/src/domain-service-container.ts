@@ -227,12 +227,14 @@ export class DomainServiceContainer {
    * Checks if a service implements the IEventBusAware interface.
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if the service implements IEventBusAware
    */
-  private isEventBusAware(service: any): service is IEventBusAware {
+  private isEventBusAware(service: unknown): service is IEventBusAware {
     return (
-      'setEventBus' in service && typeof service.setEventBus === 'function'
+      service !== null &&
+      typeof service === 'object' &&
+      'setEventBus' in service && typeof (service as { setEventBus?: unknown }).setEventBus === 'function'
     );
   }
 
@@ -240,12 +242,14 @@ export class DomainServiceContainer {
    * Checks if a service implements the IUnitOfWorkAware interface.
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if the service implements IUnitOfWorkAware
    */
-  private isUnitOfWorkAware(service: any): service is IUnitOfWorkAware {
+  private isUnitOfWorkAware(service: unknown): service is IUnitOfWorkAware {
     return (
-      'setUnitOfWork' in service && typeof service.setUnitOfWork === 'function'
+      service !== null &&
+      typeof service === 'object' &&
+      'setUnitOfWork' in service && typeof (service as { setUnitOfWork?: unknown }).setUnitOfWork === 'function'
     );
   }
 
@@ -253,10 +257,14 @@ export class DomainServiceContainer {
    * Checks if a service implements the IAsyncDomainService interface.
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if the service implements IAsyncDomainService
    */
-  private isAsyncService(service: any): service is IAsyncDomainService {
-    return 'initialize' in service && typeof service.initialize === 'function';
+  private isAsyncService(service: unknown): service is IAsyncDomainService {
+    return (
+      service !== null &&
+      typeof service === 'object' &&
+      'initialize' in service && typeof (service as { initialize?: unknown }).initialize === 'function'
+    );
   }
 }

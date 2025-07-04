@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IActor } from '@vytches-ddd/core';
 import type { IContextRouter } from './context-router';
 import type {
   IIntegrationEvent,
@@ -128,11 +129,11 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
     }
 
     if (domainMetadata.actor !== undefined) {
-      metadata.actor = domainMetadata.actor;
+      metadata.actor = domainMetadata.actor as IActor;
     }
 
     if (domainMetadata.owner !== undefined) {
-      metadata.owner = domainMetadata.owner;
+      metadata.owner = domainMetadata.owner as IActor;
     }
 
     return metadata;
@@ -157,6 +158,6 @@ export abstract class DomainToIntegrationTransformer<D = any, I = any>
   protected getRoutingKey(domainMetadata: IEventMetadata): string {
     return domainMetadata.aggregateType
       ? `${domainMetadata.aggregateType}.${domainMetadata.eventType}`
-      : domainMetadata.eventType || '';
+      : (domainMetadata.eventType as string) || '';
   }
 }

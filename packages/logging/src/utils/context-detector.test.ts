@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ContextDetector } from './context-detector.js';
+import { ContextDetector } from './context-detector';
 
 describe('ContextDetector', () => {
   describe('basic context detection', () => {

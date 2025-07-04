@@ -12,11 +12,16 @@ export abstract class BaseApplicationService implements IApplicationService {
   protected validateRequest<T>(
     request: T,
     validator: BusinessRuleValidator<T>,
-  ): Result<void, ValidationErrors> {
+  ): Result<void, Array<{ field: string; message: string }>> {
     const validationResult = validator.validate(request);
 
     if (validationResult.isFailure) {
-      return Result.fail(validationResult.error);
+      // Convert ValidationErrors to array format expected by tests
+      const errorArray = validationResult.error.errors.map(error => ({
+        field: error.property,
+        message: error.message
+      }));
+      return Result.fail(errorArray);
     }
 
     return Result.ok();

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-function-type */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Logger } from '../core/index.js';
-import { DefaultLogger } from '../logger.js';
+import type { Logger } from '../core/index';
+import { DefaultLogger } from '../logger';
 
 export interface CQRSLoggingOptions {
   includePayload?: boolean;
@@ -10,8 +8,8 @@ export interface CQRSLoggingOptions {
   contextName?: string;
 }
 
-export function LogCommands(options: CQRSLoggingOptions = {}): ClassDecorator {
-  return function (target: any) {
+export function LogCommands(options: CQRSLoggingOptions = {}) {
+  return function (target: new (...args: unknown[]) => unknown) {
     const originalMethods = Object.getOwnPropertyNames(target.prototype);
 
     for (const methodName of originalMethods) {
@@ -30,8 +28,8 @@ export function LogCommands(options: CQRSLoggingOptions = {}): ClassDecorator {
   };
 }
 
-export function LogQueries(options: CQRSLoggingOptions = {}): ClassDecorator {
-  return function (target: any) {
+export function LogQueries(options: CQRSLoggingOptions = {}) {
+  return function (target: new (...args: unknown[]) => unknown) {
     const originalMethods = Object.getOwnPropertyNames(target.prototype);
 
     for (const methodName of originalMethods) {
@@ -50,8 +48,8 @@ export function LogQueries(options: CQRSLoggingOptions = {}): ClassDecorator {
   };
 }
 
-export function LogCQRS(options: CQRSLoggingOptions = {}): ClassDecorator {
-  return function (target: any) {
+export function LogCQRS(options: CQRSLoggingOptions = {}) {
+  return function (target: new (...args: unknown[]) => unknown) {
     const originalMethods = Object.getOwnPropertyNames(target.prototype);
 
     for (const methodName of originalMethods) {
@@ -71,22 +69,22 @@ export function LogCQRS(options: CQRSLoggingOptions = {}): ClassDecorator {
 }
 
 function createLoggingWrapper(
-  originalMethod: Function,
+  originalMethod: (...args: unknown[]) => unknown,
   methodName: string,
   operationType: string,
   options: CQRSLoggingOptions
 ) {
-  return async function (this: any, ...args: any[]) {
+  return async function (this: Record<string, unknown>, ...args: unknown[]) {
     const logger = getOrCreateLogger(this, options.contextName);
     const startTime = performance.now();
 
-    const commandOrQuery = args[0];
+    const commandOrQuery = args[0] as { constructor?: { name?: string } };
     const operationName = commandOrQuery?.constructor?.name || 'Unknown';
 
     const logLevel = options.logLevel || 'info';
     const logData: Record<string, unknown> = {
       operation: operationType,
-      handler: this.constructor.name,
+      handler: (this.constructor as { name: string }).name,
       method: methodName,
       operationName,
     };
@@ -122,10 +120,10 @@ function createLoggingWrapper(
   };
 }
 
-function getOrCreateLogger(instance: any, contextName?: string): Logger {
+function getOrCreateLogger(instance: Record<string, unknown>, contextName?: string): Logger {
   if (!instance._logger) {
-    const name = contextName || instance.constructor.name;
+    const name = contextName || (instance.constructor as { name: string }).name;
     instance._logger = DefaultLogger.forContext(name);
   }
-  return instance._logger;
+  return instance._logger as Logger;
 }

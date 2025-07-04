@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DataMasker } from './data-masker.js';
+import { DataMasker } from './data-masker';
 
 describe('DataMasker', () => {
   describe('sensitive key masking', () => {

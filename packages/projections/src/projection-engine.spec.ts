@@ -69,7 +69,7 @@ class MockUserProjection implements IProjection<UserReadModel> {
     switch (event.eventType) {
       case 'UserCreated':
         return {
-          id: event.metadata?.aggregateId || '',
+          id: (event.metadata?.aggregateId as string) || '',
           name: event.payload.name,
           email: event.payload.email,
           version: readModel.version + 1,
@@ -446,7 +446,7 @@ describe('EnhancedProjectionEngine', () => {
           throw new Error('Transient error');
         }
         return {
-          id: event?.metadata?.aggregateId,
+          id: (event?.metadata?.aggregateId as string) || '',
           name: 'Recovered User',
           email: 'recovered@example.com',
           version: readModel.version + 1,

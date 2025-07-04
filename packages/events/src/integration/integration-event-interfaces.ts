@@ -37,7 +37,7 @@ export interface IIntegrationEventMetadata {
   owner?: IActor;
 
   /** Additional application-specific metadata */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

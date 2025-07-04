@@ -17,7 +17,7 @@ import type {
  * @template T - Type of domain service being built
  * @template D - Tuple type representing dependencies (for type-safety)
  */
-export class ServiceBuilder<T extends IDomainService, D extends any[] = []> {
+export class ServiceBuilder<T extends IDomainService, D extends unknown[] = []> {
   /**
    * Array of dependencies to inject into the service
    *
@@ -126,8 +126,8 @@ export class ServiceBuilder<T extends IDomainService, D extends any[] = []> {
       this.factory as unknown as (...args: [...D, TDep]) => T,
     );
 
-    // Transfer configuration
-    (newBuilder as any).dependencies = newDeps;
+    // Transfer configuration - using type assertion to access private property
+    (newBuilder as ServiceBuilder<T, [...D, TDep]> & Record<string, unknown>)['dependencies'] = newDeps;
     if (this.eventBus) newBuilder.withEventBus(this.eventBus);
     if (this.unitOfWork) newBuilder.withUnitOfWork(this.unitOfWork);
     if (this.initializeAsync) newBuilder.withAsyncInitialization();
@@ -234,12 +234,14 @@ export class ServiceBuilder<T extends IDomainService, D extends any[] = []> {
    * Checks if a service implements the IEventBusAware interface
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if service is event bus aware
    */
-  private isEventBusAware(service: any): service is IEventBusAware {
+  private isEventBusAware(service: unknown): service is IEventBusAware {
     return (
-      'setEventBus' in service && typeof service.setEventBus === 'function'
+      service !== null &&
+      typeof service === 'object' &&
+      'setEventBus' in service && typeof (service as { setEventBus?: unknown }).setEventBus === 'function'
     );
   }
 
@@ -247,12 +249,14 @@ export class ServiceBuilder<T extends IDomainService, D extends any[] = []> {
    * Checks if a service implements the IUnitOfWorkAware interface
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if service is Unit of Work aware
    */
-  private isUnitOfWorkAware(service: any): service is IUnitOfWorkAware {
+  private isUnitOfWorkAware(service: unknown): service is IUnitOfWorkAware {
     return (
-      'setUnitOfWork' in service && typeof service.setUnitOfWork === 'function'
+      service !== null &&
+      typeof service === 'object' &&
+      'setUnitOfWork' in service && typeof (service as { setUnitOfWork?: unknown }).setUnitOfWork === 'function'
     );
   }
 
@@ -260,10 +264,14 @@ export class ServiceBuilder<T extends IDomainService, D extends any[] = []> {
    * Checks if a service implements the IAsyncDomainService interface
    *
    * @private
-   * @param {any} service - Service to check
+   * @param {unknown} service - Service to check
    * @returns {boolean} True if service is async-capable
    */
-  private isAsyncService(service: any): service is IAsyncDomainService {
-    return 'initialize' in service && typeof service.initialize === 'function';
+  private isAsyncService(service: unknown): service is IAsyncDomainService {
+    return (
+      service !== null &&
+      typeof service === 'object' &&
+      'initialize' in service && typeof (service as { initialize?: unknown }).initialize === 'function'
+    );
   }
 }

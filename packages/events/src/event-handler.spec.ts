@@ -21,7 +21,6 @@ describe('EventHandler Decorator', () => {
   describe('Class Decorator', () => {
     it('should apply metadata to a class', () => {
       // Arrange
-      // @ts-expect-error This is a test, we are not implementing the interface here
       @EventHandler(TestEvent)
       class TestEventHandler {
         // This is added to inform TypeScript that getEventType exists (added by decorator)

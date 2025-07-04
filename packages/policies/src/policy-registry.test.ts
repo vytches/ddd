@@ -359,9 +359,9 @@ describe('PolicyRegistry', () => {
       expect(exported.version).toBe('1.0.0');
       expect(exported.exportedAt).toBeInstanceOf(Date);
       expect(exported.data['test-domain']).toBeDefined();
-      expect(exported.data['test-domain']['test-policy']).toBeDefined();
+      expect(exported.data['test-domain']!['test-policy']).toBeDefined();
 
-      const policyData = exported.data['test-domain']['test-policy'];
+      const policyData = exported.data['test-domain']!['test-policy']!;
       expect(policyData.policyId).toBe('test-policy');
       expect(policyData.domain).toBe('test-domain');
       expect(policyData.version).toBe('1.0.0');

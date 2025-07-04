@@ -432,7 +432,6 @@ class InMemoryUnitOfWork implements IUnitOfWork {
 // # IMPLEMENTACJE SERWISÓW DOMENOWYCH
 // #############################################################################
 
-// @ts-expect-error skip
 @DomainService('product-service')
 class ProductService extends UnitOfWorkAwareDomainService {
   constructor() {

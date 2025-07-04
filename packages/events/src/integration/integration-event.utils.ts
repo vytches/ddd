@@ -52,7 +52,7 @@ export function deserializeIntegrationEvent<P = any>(jsonString: string): IInteg
  */
 export function generateIdempotencyKey<P = any>(event: IIntegrationEvent<P>): string {
   if (event.metadata?.idempotencyKey) {
-    return event.metadata.idempotencyKey;
+    return event.metadata.idempotencyKey as string;
   }
 
   // If no key exists, generate one based on event ID and type

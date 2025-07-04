@@ -13,6 +13,23 @@
 // export * from '@vytches-ddd/resilience';
 
 // Enterprise-specific utilities
-export * from './enterprise-config';
-export * from './monitoring';
-export * from './health-checks';
+export type { 
+  EnterpriseConfig 
+} from './enterprise-config';
+export { 
+  defaultEnterpriseConfig 
+} from './enterprise-config';
+
+export type { 
+  MonitoringConfig 
+} from './monitoring';
+export { 
+  EnterpriseMonitoring 
+} from './monitoring';
+
+export type { 
+  HealthCheckResult 
+} from './health-checks';
+export { 
+  EnterpriseHealthCheck 
+} from './health-checks';

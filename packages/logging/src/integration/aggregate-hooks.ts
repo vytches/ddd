@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Logger } from '../core/index.js';
-import { DefaultLogger } from '../logger.js';
+import type { Logger } from '../core/index';
+import { DefaultLogger } from '../logger';
 
 export interface StateChangeLoggingOptions {
   logLevel?: 'debug' | 'info';

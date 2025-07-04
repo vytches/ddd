@@ -1,6 +1,6 @@
-import type { LogLevel } from './log-level.js';
-import type { LogEvent } from './log-event.js';
-import type { LogContext } from './log-context.js';
+import type { LogLevel } from './log-level';
+import type { LogEvent } from './log-event';
+import type { LogContext } from './log-context';
 
 export interface Logger {
   readonly context: LogContext;

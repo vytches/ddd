@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 
+type CommandConstructor<T extends ICommand = ICommand> = new (...args: unknown[]) => T;
+
 export abstract class ICommandBus {
   abstract register<T extends ICommand>(
-    commandType: any,
+    commandType: CommandConstructor<T>,
     handler: ICommandHandler<T>,
   ): void;
   abstract registerFactory<T extends ICommand>(
-    commandType: any,
+    commandType: CommandConstructor<T>,
     factory: () => ICommandHandler<T>,
   ): void;
   abstract use(middleware: ICQRSMiddleware): this;

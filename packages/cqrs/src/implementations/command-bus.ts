@@ -12,9 +12,9 @@ export class CommandBus extends ICommandBus {
     ICommandHandler<ICommand> | (() => ICommandHandler<ICommand>)
   >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver: ((handlerClass: unknown) => unknown) | undefined;
+  private handlerResolver: ((handlerClass: unknown) => ICommandHandler<ICommand>) | undefined;
 
-  constructor(handlerResolver?: (handlerClass: unknown) => unknown) {
+  constructor(handlerResolver?: (handlerClass: unknown) => ICommandHandler<ICommand>) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
   }
@@ -108,6 +108,6 @@ export class CommandBus extends ICommandBus {
   }
 
   private isValidatable(obj: unknown): obj is ICqrsValidatable {
-    return obj && typeof obj.validate === 'function';
+    return obj != null && typeof obj === 'object' && 'validate' in obj && typeof (obj as Record<string, unknown>).validate === 'function';
   }
 }

@@ -57,7 +57,7 @@ export class EventSourcingCapability implements IEventSourcingCapability {
     const aggregateWithHistory = this.aggregate as IAggregateRoot & {
       loadFromHistory?: (events: IExtendedDomainEvent[]) => void;
     };
-    
+
     if (typeof aggregateWithHistory.loadFromHistory === 'function') {
       aggregateWithHistory.loadFromHistory(events);
     } else {

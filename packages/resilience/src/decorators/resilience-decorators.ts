@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ResilienceContext } from '../core/resilience-context';
 import { DefaultResilienceContext } from '../core/resilience-context';
 import type { CircuitBreakerConfig } from '../patterns/circuit-breaker';
@@ -39,24 +38,26 @@ export interface CompositeResilienceConfig extends BaseResilienceDecoratorConfig
 // Legacy export for backward compatibility
 export type ResilienceDecoratorConfig = BaseResilienceDecoratorConfig;
 
+import type { ResilienceStrategy } from '../patterns/resilience-strategy';
+
 // Core decorator factory - DRY principle
 function createResilienceDecorator<T extends BaseResilienceDecoratorConfig>(
-  policyFactory: (config: T) => any,
+  policyFactory: (config: T) => ResilienceStrategy,
   defaultDecoratorName = 'resilience'
 ) {
   return function (config: T) {
     return function (
-      target: any,
+      target: unknown,
       propertyKey: string,
       descriptor: PropertyDescriptor
     ) {
       const originalMethod = descriptor.value;
       const policy = policyFactory(config);
 
-      descriptor.value = async function (...args: any[]) {
+      descriptor.value = async function (...args: unknown[]) {
         const context = config.contextProvider?.() ?? DefaultResilienceContext.create({
           metadata: {
-            className: target.constructor.name,
+            className: (target as { constructor: { name: string } }).constructor.name,
             methodName: propertyKey,
             decoratorName: config.decoratorName ?? defaultDecoratorName
           }
@@ -82,7 +83,7 @@ function createResilienceDecorator<T extends BaseResilienceDecoratorConfig>(
 
 // Simple decorator factory for single-argument decorators
 function createSimpleDecorator<T extends BaseResilienceDecoratorConfig>(
-  policyFactory: (config: T) => any,
+  policyFactory: (config: T) => ResilienceStrategy,
   defaultDecoratorName: string
 ) {
   return function (config: T) {
@@ -226,7 +227,7 @@ export const Bulkhead = createSimpleDecorator<BulkheadDecoratorConfig>(
  */
 export const Resilience = function (config: CompositeResilienceConfig) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
@@ -258,10 +259,10 @@ export const Resilience = function (config: CompositeResilienceConfig) {
 
     const policy = policyBuilder.build();
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const context = config.contextProvider?.() ?? DefaultResilienceContext.create({
         metadata: {
-          className: target.constructor.name,
+          className: (target as { constructor: { name: string } }).constructor.name,
           methodName: propertyKey,
           decoratorName: config.decoratorName ?? 'composite-resilience'
         }
@@ -310,8 +311,12 @@ export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
 /**
  * Utility to extract resilience metrics from decorated methods
  */
-export function getResilienceMetrics(instance: any, methodName: string): any {
-  const method = instance[methodName];
+export function getResilienceMetrics(instance: Record<string, unknown>, methodName: string): {
+  config: BaseResilienceDecoratorConfig;
+  className: string;
+  methodName: string;
+} {
+  const method = instance[methodName] as { resilienceConfig?: BaseResilienceDecoratorConfig };
   const config = method?.resilienceConfig;
 
   if (!config) {

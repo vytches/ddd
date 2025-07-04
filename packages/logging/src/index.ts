@@ -1,21 +1,56 @@
 // Core exports
-export * from './core/index.js';
+export {
+  LOG_LEVELS,
+  isLogLevelEnabled,
+  parseLogLevel,
+  DefaultLogContextBuilder,
+  DefaultLogEventBuilder
+} from './core';
+
+export type {
+  LogLevel,
+  LogContext,
+  LogContextBuilder,
+  LogEvent,
+  LogEventBuilder,
+  LogProvider,
+  Logger as ILogger,
+  LoggerConfiguration
+} from './core';
 
 // Main logger
-export { DefaultLogger } from './logger.js';
+export { DefaultLogger } from './logger';
 
 // Providers
-export * from './providers/index.js';
+export { ConsoleProvider } from './providers';
+export type { ConsoleProviderOptions } from './providers';
 
 // Utils
-export * from './utils/index.js';
+export { ContextDetector } from './utils';
+export type { ContextDetectionResult, DataMasker, MaskingOptions } from './utils';
 
 // Integration
-export * from './integration/index.js';
+export {
+  LogCQRS,
+  LogCommands,
+  LogQueries,
+  EnhancedLoggingMiddleware,
+  AggregateLoggingMixin,
+  LogDomainEvents,
+  LogStateChanges
+} from './integration';
+
+export type {
+  CQRSLoggingOptions,
+  CQRSMiddlewareOptions,
+  ExecutionContext,
+  ICQRSMiddleware,
+  StateChangeLoggingOptions
+} from './integration';
 
 // Convenience exports
-import { DefaultLogger } from './logger.js';
-import type { LoggerConfiguration } from './core/index.js';
+import { DefaultLogger } from './logger';
+import type { LoggerConfiguration } from './core';
 
 export const Logger = {
   create: (contextName?: string) => DefaultLogger.create(contextName),

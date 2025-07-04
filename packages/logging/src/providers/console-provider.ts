@@ -1,4 +1,4 @@
-import type { LogProvider, LogEvent } from '../core/index.js';
+import type { LogProvider, LogEvent } from '../core/index';
 
 export interface ConsoleProviderOptions {
   colorize?: boolean;
