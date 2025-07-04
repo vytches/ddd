@@ -121,8 +121,8 @@ export function hasAnyCapability(aggregate: IAggregateRoot<any>, capabilities: s
 /**
  * Gets detailed information about aggregate capabilities
  */
-export function getAggregateInfo(aggregate: IAggregateRoot<any>): {
-  id: any;
+export function getAggregateInfo(aggregate: IAggregateRoot<unknown>): {
+  id: unknown;
   type: string;
   version: number;
   hasChanges: boolean;
@@ -182,10 +182,10 @@ export function restoreFromSnapshotIfCapable<TState>(
 /**
  * Gets audit log if the aggregate has audit capability
  */
-export function getAuditLogIfCapable(aggregate: IAggregateRoot<any>): any[] {
+export function getAuditLogIfCapable(aggregate: IAggregateRoot<unknown>): unknown[] {
   if (hasAuditCapability(aggregate)) {
     const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as IAuditCapability;
-    return auditCap.getAuditLog() as any[];
+    return auditCap.getAuditLog() as unknown[];
   }
   return [];
 }
@@ -193,9 +193,9 @@ export function getAuditLogIfCapable(aggregate: IAggregateRoot<any>): any[] {
 /**
  * Gets audit statistics if the aggregate has audit capability
  */
-export function getAuditStatsIfCapable(aggregate: IAggregateRoot<any>): any | null {
+export function getAuditStatsIfCapable(aggregate: IAggregateRoot<unknown>): unknown | null {
   if (hasAuditCapability(aggregate)) {
-    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as any;
+    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as { getAuditStatistics?(): unknown };
     return auditCap.getAuditStatistics?.() || null;
   }
   return null;

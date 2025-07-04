@@ -45,7 +45,7 @@ export class PredicateSpecification<T> extends CompositeSpecification<T> {
 export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly propertyName: keyof T,
-    private readonly expectedValue: any
+    private readonly expectedValue: T[keyof T]
   ) {
     super();
   }
@@ -61,7 +61,7 @@ export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
 export class PropertyInSpecification<T> extends CompositeSpecification<T> {
   constructor(
     private readonly propertyName: keyof T,
-    private readonly possibleValues: any[]
+    private readonly possibleValues: T[keyof T][]
   ) {
     super();
   }
@@ -117,14 +117,14 @@ export const Specification = {
   /**
    * Tworzy specyfikację sprawdzającą równość właściwości
    */
-  propertyEquals<T>(propertyName: keyof T, expectedValue: any): ISpecification<T> {
+  propertyEquals<T>(propertyName: keyof T, expectedValue: T[keyof T]): ISpecification<T> {
     return new PropertyEqualsSpecification<T>(propertyName, expectedValue);
   },
 
   /**
    * Tworzy specyfikację sprawdzającą zawieranie się właściwości w zbiorze
    */
-  propertyIn<T>(propertyName: keyof T, possibleValues: any[]): ISpecification<T> {
+  propertyIn<T>(propertyName: keyof T, possibleValues: T[keyof T][]): ISpecification<T> {
     return new PropertyInSpecification<T>(propertyName, possibleValues);
   },
 

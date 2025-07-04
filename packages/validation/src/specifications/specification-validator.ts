@@ -23,9 +23,14 @@ export class SpecificationValidator<T> implements IValidator<T> {
     specification: ISpecification<T>,
     message: string,
     property?: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): SpecificationValidator<T> {
-    const rule: any = {
+    const rule: {
+      specification: ISpecification<T>;
+      message: string;
+      property: string;
+      context?: Record<string, unknown>;
+    } = {
       specification,
       message,
       property: property || '',

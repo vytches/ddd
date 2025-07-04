@@ -5,6 +5,7 @@ import type {
   IBusinessPolicy,
   IAsyncSpecification,
   PolicyRequest,
+  PolicyContext,
 } from './business-policy-interface';
 import { BusinessPolicy } from './business-policy';
 import { CompositePolicy, ConditionalPolicy } from './composite-policy';
@@ -359,7 +360,7 @@ export class PolicyBuilder<T> {
    * Add a policy from predicate function
    */
   mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: PolicyContext) => boolean,
     violationCode: string,
     violationMessage: string
   ): PolicyBuilder<T> {

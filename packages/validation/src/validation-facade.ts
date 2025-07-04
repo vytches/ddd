@@ -108,7 +108,7 @@ export const Validation = {
   /**
    * Tworzy walidator dla głęboko zagnieżdżonej struktury obiektów
    */
-  forNestedPath<T>(path: string[], validator: IValidator<any>): IValidator<T> {
+  forNestedPath<T>(path: string[], validator: IValidator<unknown>): IValidator<T> {
     if (path.length === 0) {
       return validator as unknown as IValidator<T>;
     }
@@ -139,15 +139,19 @@ export const Validation = {
     valueValidator: IValidator<P>
   ): Result<T, ValidationErrors> {
     // Funkcja pomocnicza do pobierania wartości po ścieżce
-    const getValueByPath = (obj: any, pathSegments: (string | number)[]): any => {
-      let current = obj;
+    const getValueByPath = (obj: unknown, pathSegments: (string | number)[]): unknown => {
+      let current: unknown = obj;
 
       for (const segment of pathSegments) {
         if (current === null || current === undefined) {
           return undefined;
         }
 
-        current = current[segment];
+        if (typeof current === 'object' && current !== null) {
+          current = (current as Record<string | number, unknown>)[segment];
+        } else {
+          return undefined;
+        }
       }
 
       return current;
