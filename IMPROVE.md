@@ -161,12 +161,18 @@
 - ✅ Any types counted (294 bez testów)
 - ✅ TypeScript compilation issues resolved
 
-1.2 Create Architectural Decision Records (ADRs) - 🟡 PENDING
-- ❌ ADR-001: Dependency Management Strategy
-- ❌ ADR-002: Type Safety Standards  
-- ❌ ADR-003: Bundle Size Limits
-- ❌ ADR-004: Module Boundary Rules
-- ❌ ADR-005: Breaking Change Policy
+1.2 Create Architectural Decision Records (ADRs) - ✅ COMPLETE
+- ✅ ADR-0001: Adopt Monorepo Architecture with Nx and PNPM Workspaces  
+- ✅ ADR-0002: Adopt Meta-Package Pattern for Enterprise API Stability
+- ✅ ADR-0003: Implement Custom Enterprise Logging Instead of External Libraries
+- ✅ ADR-0004: Enforce TypeScript Strict Mode for Enterprise Type Safety
+- ✅ ADR-0005: Adopt Modular Package Architecture with Clear Boundaries
+
+**ADR System Implemented:**
+- ✅ Complete ADR tooling with `pnpm adr:*` commands
+- ✅ Fundamental architectural decisions documented  
+- ✅ Template and process established for future decisions
+- ✅ **IMPORTANT**: All future architectural decisions MUST be documented as ADRs
 
 1.3 Establish Metrics Baseline - ✅ DONE
 ```typescript
@@ -482,3 +488,42 @@ pnpm quality:performance  # Performance monitoring
 - ✅ **Quality Assurance**: Automated (CI/CD gates + dependency management)
 
 **VytchesDDD DDD Framework osiągnął enterprise-grade standard z doskonałą modularizacją, backward compatibility i pełną automatyzacją CI/CD! 🚀**
+
+---
+
+## 📋 **DEVELOPMENT GUIDELINES**
+
+### 🏛️ **Architecture Decision Records (ADR) - MANDATORY**
+
+**CRITICAL REQUIREMENT:** All significant architectural decisions MUST be documented as ADRs before implementation.
+
+**Commands:**
+```bash
+# Create new ADR
+pnpm adr:new "Decision Title"
+
+# List all ADRs  
+pnpm adr:list
+
+# Update ADR status
+pnpm adr:status <number> <status>
+```
+
+**What requires ADR documentation:**
+- ✅ Package architecture changes
+- ✅ New patterns or libraries adoption
+- ✅ API design affecting consumers
+- ✅ Infrastructure/tooling changes
+- ✅ Performance/security trade-offs
+- ✅ Breaking changes or deprecations
+
+**ADR Location:** `docs/adr/` with automatic indexing
+
+**Current ADRs:**
+- ADR-0001: Monorepo Architecture 
+- ADR-0002: Meta-Package Pattern
+- ADR-0003: Custom Enterprise Logging
+- ADR-0004: TypeScript Strict Mode
+- ADR-0005: Modular Package Architecture
+
+**Rule:** No architectural changes without proper ADR documentation! 📋

@@ -98,6 +98,35 @@ pnpm graph
 pnpm format
 ```
 
+### Architecture Decision Records (ADR)
+
+```bash
+# Create new ADR for architectural decisions
+pnpm adr:new "Decision Title"
+
+# List all ADRs
+pnpm adr:list
+
+# Change ADR status
+pnpm adr:status <number> <status>
+
+# Generate ADR documentation
+pnpm adr:generate
+
+# Export ADRs to HTML
+pnpm adr:export html
+```
+
+**IMPORTANT**: All significant architectural decisions MUST be documented as ADRs.
+This includes:
+- Changes to package architecture or boundaries
+- New patterns or technologies adopted
+- API design decisions affecting consumers
+- Infrastructure or tooling changes
+- Performance or security trade-offs
+
+ADRs are stored in `docs/adr/` and automatically indexed. See existing ADRs for examples of decision documentation format.
+
 ## Project Architecture
 
 ### Monorepo Structure
