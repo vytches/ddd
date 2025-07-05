@@ -16,6 +16,7 @@ applications using tactical and strategic DDD patterns, including:
 - **AI-First Design**: Documentation and structure optimized for LLM
   understanding
 - **Modular Architecture**: Use only what you need, compose as required
+- **Enterprise DI System**: Auto-discovery with context isolation and framework integration
 - **Production-Ready**: Enterprise features like circuit breakers, resilience
   patterns, ACL
 - **TypeScript Native**: Full type safety and modern TS features
@@ -24,35 +25,21 @@ applications using tactical and strategic DDD patterns, including:
 
 ## 📦 Packages
 
-| Package | Version | Description | | ---------|
-[@vytches-ddd/core](./packages/core) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/core) | Core DDD building
-blocks (Value Objects, Entities, Aggregates) | |
-[@vytches-ddd/utils](./packages/utils) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/utils) | Common utilities and
-helpers | | [@vytches-ddd/validation](./packages/validation) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/validation) | Business rules,
-specifications, and validation patterns | |
-[@vytches-ddd/policies](./packages/policies) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/policies) | Business policies
-and domain policies | | [@vytches-ddd/events](./packages/events) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/events) | Event-driven
-architecture components | | [@vytches-ddd/cqrs](./packages/cqrs) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/cqrs) | Command Query
-Responsibility Segregation | | [@vytches-ddd/acl](./packages/acl) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/acl) | Anti-Corruption Layer
-for external systems | | [@vytches-ddd/projections](./packages/projections) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/projections) | Event
-projections and read models | | [@vytches-ddd/messaging](./packages/messaging) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/messaging) | Outbox pattern,
-sagas, and messaging patterns | |
-[@vytches-ddd/resilience](./packages/resilience) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/resilience) | Circuit breakers,
-retry patterns, timeouts | | [@vytches-ddd/testing](./packages/testing) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/testing) | Test utilities for
-DDD patterns | | [@vytches-ddd/enterprise](./packages/enterprise) |
-![npm](https://img.shields.io/npm/v/@vytches-ddd/enterprise) | All-in-one
-enterprise bundle |
+| Package | Version | Description |
+| --------|---------|-------------|
+| [@vytches-ddd/core](./packages/core) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/core) | Core DDD building blocks (Value Objects, Entities, Aggregates) |
+| [@vytches-ddd/di](./packages/di) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/di) | Enterprise dependency injection with auto-discovery |
+| [@vytches-ddd/utils](./packages/utils) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/utils) | Common utilities and helpers |
+| [@vytches-ddd/validation](./packages/validation) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/validation) | Business rules, specifications, and validation patterns |
+| [@vytches-ddd/policies](./packages/policies) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/policies) | Business policies and domain policies |
+| [@vytches-ddd/events](./packages/events) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/events) | Event-driven architecture components |
+| [@vytches-ddd/cqrs](./packages/cqrs) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/cqrs) | Command Query Responsibility Segregation |
+| [@vytches-ddd/acl](./packages/acl) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/acl) | Anti-Corruption Layer for external systems |
+| [@vytches-ddd/projections](./packages/projections) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/projections) | Event projections and read models |
+| [@vytches-ddd/messaging](./packages/messaging) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/messaging) | Outbox pattern, sagas, and messaging patterns |
+| [@vytches-ddd/resilience](./packages/resilience) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/resilience) | Circuit breakers, retry patterns, timeouts |
+| [@vytches-ddd/testing](./packages/testing) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/testing) | Test utilities for DDD patterns |
+| [@vytches-ddd/enterprise](./packages/enterprise) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/enterprise) | All-in-one enterprise bundle |
 
 ## 🚀 Quick Start
 
@@ -128,33 +115,46 @@ class User extends AggregateRoot<UserId> {
 }
 ```
 
-### CQRS Example
+### CQRS with Dependency Injection
 
 ```typescript
-import { CQRSModule, CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
+import { 
+  VytchesDDD, 
+  SimpleContainer, 
+  CommandHandler, 
+  DomainService,
+  ServiceLifetime 
+} from '@vytches-ddd/core';
 
-// Commands
-class CreateUserCommand {
-  constructor(
-    public readonly email: string,
-    public readonly name: string
-  ) {}
+// Domain Service with DI
+@DomainService({
+  serviceId: 'userService',
+  lifetime: ServiceLifetime.Singleton
+})
+class UserService {
+  async createUser(email: Email): Promise<User> {
+    return User.create(email);
+  }
 }
 
-// Command Handlers
+// Command Handler with auto-discovery
 @CommandHandler(CreateUserCommand)
 class CreateUserHandler {
   async execute(command: CreateUserCommand): Promise<void> {
-    const user = User.create(new Email(command.email));
+    // Service automatically resolved from DI container
+    const userService = VytchesDDD.resolve<UserService>('userService');
+    const user = await userService.createUser(new Email(command.email));
     await this.userRepository.save(user);
   }
 }
 
-// Setup CQRS
-const cqrsModule = CQRSModule.createEnhanced();
-await cqrsModule.commandBus.execute(
-  new CreateUserCommand('user@example.com', 'John Doe')
-);
+// Setup DI and CQRS (one-time configuration)
+const container = new SimpleContainer();
+VytchesDDD.configure(container); // Auto-discovers all decorated services
+
+// Usage - zero configuration needed
+const commandBus = new CommandBus();
+await commandBus.execute(new CreateUserCommand('user@example.com', 'John Doe'));
 ```
 
 ### External System Integration with ACL
@@ -191,6 +191,46 @@ class PaymentACLAdapter extends BaseACLAdapter<
 
 // Usage in Domain Service
 const result = await paymentACL.execute('PROCESS_PAYMENT', paymentRequest);
+```
+
+### Dependency Injection & Auto-Discovery
+
+```typescript
+import { VytchesDDD, SimpleContainer, DomainService } from '@vytches-ddd/core';
+
+// Simple usage - services auto-discovered
+@DomainService('notificationService')
+class NotificationService {
+  async sendEmail(to: string, subject: string): Promise<void> {
+    // Implementation
+  }
+}
+
+// Context-aware services for DDD bounded contexts
+@DomainService({
+  serviceId: 'orderService',
+  context: 'OrderManagement',
+  lifetime: ServiceLifetime.Singleton,
+  dependencies: ['paymentService', 'inventoryService']
+})
+class OrderService {
+  processOrder(order: Order): Promise<OrderResult> {
+    // Service automatically registered in OrderManagement context
+    // Can access other services from same context or global container
+  }
+}
+
+// One-time setup with auto-discovery
+const globalContainer = new SimpleContainer();
+VytchesDDD.configure(globalContainer);
+
+// Optional: Context-specific containers for DDD isolation
+const orderContainer = new SimpleContainer();
+VytchesDDD.configureContext('OrderManagement', orderContainer);
+
+// Usage - services resolved automatically
+const notificationService = VytchesDDD.resolve<NotificationService>('notificationService');
+const orderService = VytchesDDD.resolve<OrderService>('orderService', 'OrderManagement');
 ```
 
 ## 🏗️ Development
@@ -250,18 +290,19 @@ pnpm release             # Release new versions
 ```
 vytches-ddd/
 ├── packages/
-│   ├── core/            # Core DDD
-│   ├── utils/            # Common utilities
-│   ├── validation/            # Business rules,
-│   ├── policies/            # Business policies
-│   ├── events/            # Event-driven architecture
-│   ├── cqrs/            # Command Query
-│   ├── acl/            # Anti-Corruption Layer
-│   ├── projections/            # Event projections
-│   ├── messaging/            # Outbox pattern,
-│   ├── resilience/            # Circuit breakers,
-│   ├── testing/            # Test utilities
-│   ├── enterprise/            # All-in-one enterprise
+│   ├── core/            # Core DDD building blocks
+│   ├── di/              # Dependency injection system
+│   ├── utils/           # Common utilities
+│   ├── validation/      # Business rules and specifications
+│   ├── policies/        # Business policies
+│   ├── events/          # Event-driven architecture
+│   ├── cqrs/            # Command Query Responsibility Segregation
+│   ├── acl/             # Anti-Corruption Layer
+│   ├── projections/     # Event projections
+│   ├── messaging/       # Outbox pattern and messaging
+│   ├── resilience/      # Circuit breakers and resilience patterns
+│   ├── testing/         # Test utilities
+│   └── enterprise/      # All-in-one enterprise bundle
 ├── examples/
 │   ├── simple/         # Basic usage examples
 │   ├── ecommerce/      # E-commerce domain example

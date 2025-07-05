@@ -106,6 +106,7 @@
                   "scope:utils",
                   "scope:events",
                   "scope:contracts",
+                  "scope:di",
                   "scope:logging"
                 ]
               },
@@ -116,6 +117,7 @@
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
+                  "scope:di",
                   "scope:cqrs"
                 ]
               },
@@ -201,6 +203,7 @@
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
+                  "scope:di",
                   "scope:domain-services"
                 ]
               },
@@ -211,6 +214,15 @@
                   "scope:domain-primitives",
                   "scope:utils",
                   "scope:logging"
+                ]
+              },
+              {
+                "sourceTag": "scope:di",
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:domain-primitives",
+                  "scope:utils",
+                  "scope:di"
                 ]
               },
               {

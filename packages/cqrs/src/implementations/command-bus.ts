@@ -1,3 +1,5 @@
+import { VytchesDDD } from '@vytches-ddd/di';
+
 import { ICommandBus } from '../abstracts';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
@@ -13,10 +15,12 @@ export class CommandBus extends ICommandBus {
   >();
   private middlewares: ICQRSMiddleware[] = [];
   private handlerResolver: ((handlerClass: unknown) => ICommandHandler<ICommand>) | undefined;
+  private useDI: boolean;
 
-  constructor(handlerResolver?: (handlerClass: unknown) => ICommandHandler<ICommand>) {
+  constructor(handlerResolver?: (handlerClass: unknown) => ICommandHandler<ICommand>, useDI = true) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
+    this.useDI = useDI && !!VytchesDDD;
   }
 
   register<T extends ICommand>(commandType: unknown, handler: ICommandHandler<T>): void {
@@ -42,16 +46,28 @@ export class CommandBus extends ICommandBus {
       // Skip if already manually registered
       if (this.handlers.has(commandClass)) return;
 
-      if (!this.handlerResolver) {
-        throw new CQRSConfigurationError(
-          'Handler resolver required for auto-discovery',
-          'CommandBus'
-        );
-      }
-
       try {
-        const handler = this.handlerResolver(handlerClass);
-        this.register(commandClass, handler);
+        const DI = VytchesDDD;
+        if (this.useDI && DI) {
+          // Phase 2: Use DI container for handler resolution
+          this.registerFactory(commandClass, () => {
+            try {
+              // Try to resolve from DI container first
+              return DI.resolve(handlerClass);
+            } catch {
+              // Fallback to direct instantiation if not registered in DI
+              return new handlerClass();
+            }
+          });
+        } else if (this.handlerResolver) {
+          // Phase 1: Use provided handler resolver
+          const handler = this.handlerResolver(handlerClass);
+          this.register(commandClass, handler);
+        } else {
+          // Fallback: Direct instantiation
+          const handler = new handlerClass();
+          this.register(commandClass, handler);
+        }
       } catch (error) {
         throw new CQRSConfigurationError(
           `Failed to resolve handler ${handlerClass.name}: ${error}`,

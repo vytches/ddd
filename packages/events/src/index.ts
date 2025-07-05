@@ -3,7 +3,8 @@ export type { IDomainEventBus, IIntegrationEventBus, IAuditEventBus } from './ev
 
 export { UniversalEventDispatcher } from './event-dispatcher';
 
-export { EventHandler } from './event-handler';
+export { EventHandler, EventDiscoveryPlugin, eventDiscoveryPlugin } from './decorators';
+export type { EventHandlerOptions, DIHandlerMetadata } from './decorators';
 
 export { BaseEventBus, CUSTOM_MIDDLEWARE_SYMBOL } from './base-event-bus';
 

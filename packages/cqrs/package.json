@@ -28,9 +28,15 @@
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
+    "@vytches-ddd/di": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*"
+    "@vytches-ddd/contracts": "workspace:*",
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.6.0"
+  },
+  "peerDependencies": {
+    "@vytches-ddd/di": "workspace:*"
   },
   "nx": {
     "tags": [

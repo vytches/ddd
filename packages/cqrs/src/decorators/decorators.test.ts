@@ -6,7 +6,7 @@ import { CQRSMetadataRegistry } from '../registry';
 
 // Type aliases for test readability
 type CommandConstructor<T extends ICommand = ICommand> = new (...args: any[]) => T;
-type QueryConstructor<T extends IQuery<unknown> = IQuery<unknown>> = new (...args: any[]) => T;
+type _QueryConstructor<T extends IQuery<unknown> = IQuery<unknown>> = new (...args: any[]) => T;
 
 describe('CQRS Decorators', () => {
   beforeEach(() => {
@@ -85,7 +85,7 @@ describe('CQRS Decorators', () => {
 
     it('should allow multiple handlers for the same command (last one wins)', () => {
       @CommandHandler(TestCommand)
-      class FirstHandler implements ICommandHandler<TestCommand> {
+      class _FirstHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
         }
@@ -192,7 +192,7 @@ describe('CQRS Decorators', () => {
 
     it('should allow multiple handlers for the same query (last one wins)', () => {
       @QueryHandler(TestQuery)
-      class FirstHandler implements IQueryHandler<TestQuery, string> {
+      class _FirstHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'first';
         }

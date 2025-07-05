@@ -29,7 +29,9 @@
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/logging": "workspace:*"
+    "@vytches-ddd/logging": "workspace:*",
+    "@vytches-ddd/di": "workspace:*",
+    "tslib": "^2.6.0"
   },
   "nx": {
     "tags": [

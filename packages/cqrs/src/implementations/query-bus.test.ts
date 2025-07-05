@@ -184,18 +184,20 @@ describe('QueryBus', () => {
       vi.clearAllMocks();
     });
 
-    it('should throw error when no handler resolver provided', () => {
-      const bus = new QueryBus();
+    it('should use direct instantiation when no handler resolver provided', () => {
+      const bus = new QueryBus(undefined, false); // Disable DI for this test
       vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
         new Map([[TestQuery, TestQueryHandler]])
       );
 
-      expect(() => bus.discoverHandlers()).toThrow(CQRSConfigurationError);
+      expect(() => bus.discoverHandlers()).not.toThrow();
+      // Should register handler via direct instantiation
+      expect(bus['handlers'].has(TestQuery)).toBe(true);
     });
 
     it('should auto-register handlers using resolver', () => {
       const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new QueryBus(resolver);
+      const bus = new QueryBus(resolver, false); // Disable DI to force resolver usage
 
       vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
         new Map([[TestQuery, TestQueryHandler]])
@@ -225,7 +227,7 @@ describe('QueryBus', () => {
       const resolver = vi.fn().mockImplementation(() => {
         throw new Error('Resolution failed');
       });
-      const bus = new QueryBus(resolver);
+      const bus = new QueryBus(resolver, false); // Disable DI to force resolver usage
 
       vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
         new Map([[TestQuery, TestQueryHandler]])

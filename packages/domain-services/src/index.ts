@@ -6,7 +6,12 @@ export {
   AsyncDomainService,
 } from './base-domain-service';
 
-export { DomainService, getDomainServiceMetadata } from './domain-service.decorator';
+export { 
+  DomainService, 
+  getDomainServiceMetadata, 
+  getDIDomainServiceMetadata, 
+  isDomainServicePendingDIRegistration 
+} from './domain-service.decorator';
 
 export { DefaultDomainServiceRegistry } from './domain-service-registry';
 
@@ -23,6 +28,7 @@ export type {
 } from './domain-service.interface';
 
 export type { DomainServiceOptions } from './domain-service.decorator';
+export type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
 
 export type { IDomainServiceRegistry } from './domain-service-registry.interface';
 
@@ -44,3 +50,6 @@ export * from './service-builder';
 export * from './service-registry-builder';
 export * from './global-service-registry';
 export * from './service.errors';
+
+// DI Integration
+export * from './di-integration';

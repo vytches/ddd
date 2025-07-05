@@ -50,6 +50,7 @@
     "dev:acl": "node scripts/dev-workflow.js acl",
     "dev:messaging": "node scripts/dev-workflow.js messaging",
     "dev:resilience": "node scripts/dev-workflow.js resilience",
+    "dev:di": "node scripts/dev-workflow.js di",
     "dev:cli": "node scripts/dev-workflow.js cli",
     "// === ENTERPRISE TESTING WORKFLOWS ===": "",
     "test": "vitest run --passWithNoTests",

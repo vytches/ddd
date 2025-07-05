@@ -1,3 +1,4 @@
+import { VytchesDDD } from '@vytches-ddd/di';
 import { IQueryBus } from '../abstracts';
 import type { IQuery, IQueryHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
@@ -15,12 +16,15 @@ export class QueryBus extends IQueryBus {
   private handlerResolver:
     | ((handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>)
     | undefined;
+  private useDI: boolean;
 
   constructor(
-    handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>
+    handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>,
+    useDI = true
   ) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
+    this.useDI = useDI && !!VytchesDDD;
   }
 
   register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
@@ -46,16 +50,27 @@ export class QueryBus extends IQueryBus {
       // Skip if already manually registered
       if (this.handlers.has(queryClass)) return;
 
-      if (!this.handlerResolver) {
-        throw new CQRSConfigurationError(
-          'Handler resolver required for auto-discovery',
-          'QueryBus'
-        );
-      }
-
       try {
-        const handler = this.handlerResolver(handlerClass);
-        this.register(queryClass, handler);
+        if (this.useDI && VytchesDDD) {
+          // Phase 2: Use DI container for handler resolution
+          this.registerFactory(queryClass, () => {
+            try {
+              // Try to resolve from DI container first
+              return VytchesDDD.resolve(handlerClass);
+            } catch {
+              // Fallback to direct instantiation if not registered in DI
+              return new handlerClass();
+            }
+          });
+        } else if (this.handlerResolver) {
+          // Phase 1: Use provided handler resolver
+          const handler = this.handlerResolver(handlerClass);
+          this.register(queryClass, handler);
+        } else {
+          // Fallback: Direct instantiation
+          const handler = new handlerClass();
+          this.register(queryClass, handler);
+        }
       } catch (error) {
         throw new CQRSConfigurationError(
           `Failed to resolve handler ${handlerClass.name}: ${error}`,

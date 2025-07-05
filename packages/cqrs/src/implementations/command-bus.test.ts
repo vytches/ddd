@@ -167,18 +167,20 @@ describe('CommandBus', () => {
       vi.clearAllMocks();
     });
 
-    it('should throw error when no handler resolver provided', () => {
-      const bus = new CommandBus();
+    it('should use direct instantiation when no handler resolver provided', () => {
+      const bus = new CommandBus(undefined, false); // Disable DI for this test
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])
       );
 
-      expect(() => bus.discoverHandlers()).toThrow(CQRSConfigurationError);
+      expect(() => bus.discoverHandlers()).not.toThrow();
+      // Should register handler via direct instantiation
+      expect(bus['handlers'].has(TestCommand)).toBe(true);
     });
 
     it('should auto-register handlers using resolver', () => {
       const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new CommandBus(resolver);
+      const bus = new CommandBus(resolver, false); // Disable DI to force resolver usage
 
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])
@@ -208,7 +210,7 @@ describe('CommandBus', () => {
       const resolver = vi.fn().mockImplementation(() => {
         throw new Error('Resolution failed');
       });
-      const bus = new CommandBus(resolver);
+      const bus = new CommandBus(resolver, false); // Disable DI to force resolver usage
 
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])

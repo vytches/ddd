@@ -16,6 +16,7 @@
     "../validation/src/**/*",
     "../contracts/src/**/*",
     "../utils/src/**/*",
+    "../di/src/**/*",
     "../logging/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]

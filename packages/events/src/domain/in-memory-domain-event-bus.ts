@@ -20,8 +20,8 @@ export class InMemoryDomainEventBus extends BaseEventBus<IDomainEvent> implement
   /**
    * Creates a new in-memory event bus
    */
-  constructor(options: InMemoryDomainEventBusOptions = {}) {
-    super(options);
+  constructor(options: InMemoryDomainEventBusOptions = {}, useDI = true) {
+    super(options, useDI);
   }
 
   protected override log(message: string): void {

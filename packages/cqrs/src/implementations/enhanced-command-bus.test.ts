@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EnhancedCommandBus } from './enhanced-command-bus';
 import type { ICommand, ICommandHandler } from '../interfaces';
-import { LoggingMiddleware } from '../middleware';
+// import { LoggingMiddleware } from '../middleware'; // Unused for now
 
 describe('EnhancedCommandBus', () => {
   class TestCommand implements ICommand {
     constructor(public readonly data: string) {}
   }
 
-  class TestCommandHandler implements ICommandHandler<TestCommand> {
+  class _TestCommandHandler implements ICommandHandler<TestCommand> {
     async execute(_command: TestCommand): Promise<void> {
       // Mock implementation
     }

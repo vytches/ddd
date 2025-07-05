@@ -35,8 +35,8 @@ export class InMemoryIntegrationEventBus
   /**
    * Creates a new in-memory integration event bus
    */
-  constructor(options: InMemoryIntegrationEventBusOptions = {}) {
-    super(options);
+  constructor(options: InMemoryIntegrationEventBusOptions = {}, useDI = true) {
+    super(options, useDI);
   }
 
   override subscribe<T extends IIntegrationEvent>(

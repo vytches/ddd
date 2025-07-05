@@ -6,9 +6,10 @@ import type {
   BaseEventBusOptions,
   EventBusMiddleware,
 } from '@vytches-ddd/contracts';
-import { IEventBus } from '@vytches-ddd/contracts';
-import { isEventHandler } from '@vytches-ddd/contracts';
+import { VytchesDDD } from '@vytches-ddd/di';
+import { IEventBus, isEventHandler } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
+
 
 /**
  * Symbol for custom middleware
@@ -34,17 +35,19 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
   protected publishPipeline: (event: TEvent) => Promise<void>;
 
   private logger = Logger.create('EventBus');
+  private useDI: boolean;
 
   /**
    * Creates a new event bus with the specified options
    */
-  constructor(options: BaseEventBusOptions = {}) {
+  constructor(options: BaseEventBusOptions = {}, useDI = true) {
     super();
     this.options = {
       enableLogging: false,
       logger: (message: string) => this.logger.info(message),
       ...options,
     };
+    this.useDI = useDI && !!VytchesDDD;
 
     this.publishPipeline = this.buildPublishPipeline();
   }
@@ -283,5 +286,66 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    */
   clearHandlers(): void {
     this.handlers.clear();
+  }
+
+  /**
+   * Discover and register event handlers with DI integration
+   * Uses metadata stored by enhanced @EventHandler decorators
+   */
+  discoverHandlers(): void {
+    this.logger.debug('Starting event handler discovery');
+
+    // Note: Event handlers don't have a centralized registry like commands/queries
+    // This is a simplified implementation that would work with explicitly registered handlers
+
+    if (this.useDI && VytchesDDD) {
+      this.logger.debug('DI is available, using DI-based handler resolution');
+      // For Phase 2C, we implement a pattern where handlers are resolved on-demand from DI
+      // This approach is different from Command/Query buses because events can have multiple handlers
+    } else {
+      this.logger.debug('DI not available, using direct instantiation');
+    }
+
+    this.logger.debug('Event handler discovery completed');
+  }
+
+  /**
+   * Register a handler factory that uses DI resolution
+   */
+  registerHandlerFactory(
+    eventType: string | (new (...args: unknown[]) => any),
+    handlerClass: new (...args: any[]) => IEventHandler<any>
+  ): void {
+    const eventName = this.getEventName(eventType);
+
+    if (!this.handlers.has(eventName)) {
+      this.handlers.set(eventName, new Set());
+    }
+
+    // Create a factory function that resolves the handler from DI
+    const handlerFactory: IEventHandler<any> = {
+      handle: async (event: any) => {
+        let handlerInstance: IEventHandler<any>;
+
+        if (this.useDI && VytchesDDD) {
+          try {
+            // Try to resolve from DI container first
+            handlerInstance = VytchesDDD.resolve(handlerClass);
+          } catch {
+            // Fallback to direct instantiation if not registered in DI
+            handlerInstance = new handlerClass();
+          }
+        } else {
+          // Direct instantiation fallback
+          handlerInstance = new handlerClass();
+        }
+
+        return handlerInstance.handle(event);
+      }
+    };
+
+    this.handlers.get(eventName)!.add(handlerFactory);
+
+    this.logger.debug(`Registered DI-enabled handler factory for ${eventName}`);
   }
 }

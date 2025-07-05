@@ -32,3 +32,6 @@ export {
 // Configuration
 export type { CQRSOptions } from './configuration';
 export { CQRSConfiguration, CQRSModule } from './configuration';
+
+// DI Integration (optional)
+export { CQRSDiscoveryPlugin } from './di-integration';

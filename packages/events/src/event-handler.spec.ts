@@ -3,8 +3,8 @@ import { describe, it, expect, vi } from 'vitest';
 import type { IDomainEvent } from '@vytches-ddd/contracts';
 import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches-ddd/contracts';
 
-import type { EventHandlerOptions } from './event-handler';
-import { EventHandler } from './event-handler';
+import type { EventHandlerOptions } from './decorators/event-handler.decorator';
+import { EventHandler } from './decorators/event-handler.decorator';
 
 // Przykładowe zdarzenia do testowania
 class TestEvent implements IDomainEvent {
