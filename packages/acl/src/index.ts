@@ -1,15 +1,9 @@
 // Priority exports for better tree-shaking
-export {
-  EnhancedACLAdapter
-} from './enhanced-acl-adapter';
+export { EnhancedACLAdapter } from './enhanced-acl-adapter';
 
-export {
-  SimpleACLAdapter as BaseACLAdapter
-} from './base-acl-adapter';
+export { SimpleACLAdapter as BaseACLAdapter } from './base-acl-adapter';
 
-export {
-  ACLRegistry
-} from './acl-registry';
+export { ACLRegistry } from './acl-registry';
 
 export type {
   IACLAdapter,
@@ -17,14 +11,10 @@ export type {
   IEnhancedACLAdapter,
   ACLContextInfo,
   ExecuteOptions,
-  ACLMiddleware
+  ACLMiddleware,
 } from './acl.interfaces';
 
-export {
-  ACLError,
-  TranslationError,
-  AdapterNotFoundError
-} from './acl-errors';
+export { ACLError, TranslationError, AdapterNotFoundError } from './acl-errors';
 
 // For advanced usage - full exports removed for better tree-shaking
 // Import specific exports from subpaths when needed

@@ -4,7 +4,7 @@ export {
   isLogLevelEnabled,
   parseLogLevel,
   DefaultLogContextBuilder,
-  DefaultLogEventBuilder
+  DefaultLogEventBuilder,
 } from './core';
 
 export type {
@@ -15,7 +15,7 @@ export type {
   LogEventBuilder,
   LogProvider,
   Logger as ILogger,
-  LoggerConfiguration
+  LoggerConfiguration,
 } from './core';
 
 // Main logger
@@ -37,7 +37,7 @@ export {
   EnhancedLoggingMiddleware,
   AggregateLoggingMixin,
   LogDomainEvents,
-  LogStateChanges
+  LogStateChanges,
 } from './integration';
 
 export type {
@@ -45,7 +45,7 @@ export type {
   CQRSMiddlewareOptions,
   ExecutionContext,
   ICQRSMiddleware,
-  StateChangeLoggingOptions
+  StateChangeLoggingOptions,
 } from './integration';
 
 // Convenience exports

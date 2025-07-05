@@ -1,23 +1,17 @@
 // Most commonly used - prioritized exports
-export {
-  captureState
-} from './capture-state.decorator';
+export { captureState } from './capture-state.decorator';
 
-export {
-  AuditEventProcessor
-} from './audit-processor';
+export { AuditEventProcessor } from './audit-processor';
 
 // Types commonly used
 export type {
   IAuditEvent,
   AuditActionType,
   AuditStatus,
-  IAuditEventMetadata
+  IAuditEventMetadata,
 } from './audit-event.interface';
 
-export type {
-  IAuditable
-} from './audible.interface';
+export type { IAuditable } from './audible.interface';
 
 // For advanced usage - full exports
 export * from './audit-event.interface';

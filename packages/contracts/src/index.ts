@@ -13,7 +13,7 @@ export type {
   IEventStore,
   EventBusMiddleware,
   EventMiddleware,
-  EventHandlerFn
+  EventHandlerFn,
 } from './events';
 
 export {
@@ -24,7 +24,7 @@ export {
   createDomainEvent,
   isEventHandler,
   EVENT_HANDLER_METADATA,
-  EVENT_HANDLER_OPTIONS
+  EVENT_HANDLER_OPTIONS,
 } from './events';
 
 // Aggregates
@@ -36,5 +36,5 @@ export type {
   IValidationErrors,
   IValidator,
   IValidationRule,
-  ISpecification
+  ISpecification,
 } from './validation';

@@ -12,7 +12,7 @@ import type {
   MetricRegistry,
   ObservabilityEvent,
   ObservabilityEventListener,
-  ObservabilityEventBus
+  ObservabilityEventBus,
 } from './metrics-interfaces';
 
 /**
@@ -120,7 +120,10 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
     await Promise.allSettled(promises);
   }
 
-  private async safeInvoke(listener: ObservabilityEventListener, event: ObservabilityEvent): Promise<void> {
+  private async safeInvoke(
+    listener: ObservabilityEventListener,
+    event: ObservabilityEvent
+  ): Promise<void> {
     try {
       await listener(event);
     } catch (error) {
@@ -209,8 +212,8 @@ export class ObservabilityEventFactory {
         patternType,
         success,
         duration,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     };
   }
 
@@ -231,8 +234,8 @@ export class ObservabilityEventFactory {
       data: {
         oldState,
         newState,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     };
   }
 
@@ -255,8 +258,8 @@ export class ObservabilityEventFactory {
         attempt,
         maxAttempts,
         delay,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     };
   }
 
@@ -279,8 +282,8 @@ export class ObservabilityEventFactory {
         reason,
         activeExecutions,
         queuedExecutions,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     };
   }
 
@@ -301,8 +304,8 @@ export class ObservabilityEventFactory {
       data: {
         timeoutDuration,
         actualDuration,
-        ...additionalData
-      }
+        ...additionalData,
+      },
     };
   }
 
@@ -320,7 +323,7 @@ export class ObservabilityEventFactory {
       source,
       eventType,
       severity,
-      data
+      data,
     };
   }
 }

@@ -201,7 +201,7 @@ describe('CQRSExecutionContext', () => {
       );
 
       const complexQueryHandler: IQueryHandler<ComplexQuery, { items: string[]; total: number }> = {
-        execute: async (_query) => ({ items: ['item1'], total: 1 }),
+        execute: async _query => ({ items: ['item1'], total: 1 }),
       };
 
       const context = new CQRSExecutionContext(complexQuery, complexQueryHandler, 'query');

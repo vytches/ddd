@@ -9,7 +9,5 @@ export abstract class TypedOperation<TInput, _TOutput> {
 
 export interface ITypedOperationRegistry {
   register<TInput, TOutput>(operation: TypedOperation<TInput, TOutput>): void;
-  get<TInput, TOutput>(
-    operationName: string,
-  ): TypedOperation<TInput, TOutput> | undefined;
+  get<TInput, TOutput>(operationName: string): TypedOperation<TInput, TOutput> | undefined;
 }

@@ -50,7 +50,7 @@ class ProductCreatedEvent extends DomainEventBase {
   constructor(
     public readonly productId: string,
     public readonly name: string,
-    public readonly price: number,
+    public readonly price: number
   ) {
     super();
   }
@@ -61,7 +61,7 @@ class CustomerRegisteredEvent extends DomainEventBase {
 
   constructor(
     public readonly customerId: string,
-    public readonly email: string,
+    public readonly email: string
   ) {
     super();
   }
@@ -73,7 +73,7 @@ class OrderCreatedEvent extends DomainEventBase {
   constructor(
     public readonly orderId: string,
     public readonly customerId: string,
-    public readonly items: Array<{ productId: string; quantity: number }>,
+    public readonly items: Array<{ productId: string; quantity: number }>
   ) {
     super();
   }
@@ -84,7 +84,7 @@ class OrderConfirmedEvent extends DomainEventBase {
 
   constructor(
     public readonly orderId: string,
-    public readonly customerId: string,
+    public readonly customerId: string
   ) {
     super();
   }
@@ -96,7 +96,7 @@ class OrderShippedEvent extends DomainEventBase {
   constructor(
     public readonly orderId: string,
     public readonly customerId: string,
-    public readonly shippingCode: string,
+    public readonly shippingCode: string
   ) {
     super();
   }
@@ -107,7 +107,7 @@ class CustomerNotifiedEvent extends DomainEventBase {
 
   constructor(
     public readonly customerId: string,
-    public readonly message: string,
+    public readonly message: string
   ) {
     super();
   }
@@ -119,12 +119,7 @@ class Product extends AggregateRoot {
   private _price: number;
   private _inStock: number;
 
-  private constructor(
-    id: EntityId,
-    name: string,
-    price: number,
-    inStock = 0,
-  ) {
+  private constructor(id: EntityId, name: string, price: number, inStock = 0) {
     super({ id, version: 0 });
     this._name = name;
     this._price = price;
@@ -221,9 +216,7 @@ class Order extends AggregateRoot {
 
   static create(id: EntityId, customerId: EntityId): Order {
     const order = new Order(id, customerId);
-    order.apply(
-      new OrderCreatedEvent(id.toString(), customerId.toString(), []),
-    );
+    order.apply(new OrderCreatedEvent(id.toString(), customerId.toString(), []));
     return order;
   }
 
@@ -244,26 +237,19 @@ class Order extends AggregateRoot {
   }
 
   get totalAmount(): number {
-    return this._items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
+    return this._items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
   addItem(productId: EntityId, quantity: number, price: number): void {
     if (this._status !== OrderStatus.Created) {
-      throw new Error(
-        'Cannot add items to an order that is not in Created status',
-      );
+      throw new Error('Cannot add items to an order that is not in Created status');
     }
 
     if (quantity <= 0) {
       throw new Error('Quantity must be positive');
     }
 
-    const existingItem = this._items.find((item) =>
-      item.productId.equals(productId),
-    );
+    const existingItem = this._items.find(item => item.productId.equals(productId));
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
@@ -281,12 +267,7 @@ class Order extends AggregateRoot {
     }
 
     this._status = OrderStatus.Confirmed;
-    this.apply(
-      new OrderConfirmedEvent(
-        this.getId().toString(),
-        this._customerId.toString(),
-      ),
-    );
+    this.apply(new OrderConfirmedEvent(this.getId().toString(), this._customerId.toString()));
   }
 
   ship(shippingCode: string): void {
@@ -297,32 +278,21 @@ class Order extends AggregateRoot {
     this._status = OrderStatus.Shipped;
     this._shippingCode = shippingCode;
     this.apply(
-      new OrderShippedEvent(
-        this.getId().toString(),
-        this._customerId.toString(),
-        shippingCode,
-      ),
+      new OrderShippedEvent(this.getId().toString(), this._customerId.toString(), shippingCode)
     );
   }
 
   markAsDelivered(): void {
     if (this._status !== OrderStatus.Shipped) {
-      throw new Error(
-        'Cannot mark as delivered an order that is not in Shipped status',
-      );
+      throw new Error('Cannot mark as delivered an order that is not in Shipped status');
     }
 
     this._status = OrderStatus.Delivered;
   }
 
   cancel(): void {
-    if (
-      this._status !== OrderStatus.Created &&
-      this._status !== OrderStatus.Confirmed
-    ) {
-      throw new Error(
-        'Cannot cancel an order that is not in Created or Confirmed status',
-      );
+    if (this._status !== OrderStatus.Created && this._status !== OrderStatus.Confirmed) {
+      throw new Error('Cannot cancel an order that is not in Created or Confirmed status');
     }
 
     this._status = OrderStatus.Cancelled;
@@ -330,9 +300,7 @@ class Order extends AggregateRoot {
 }
 
 // Implementacja InMemoryRepository
-class InMemoryRepository<T extends IAggregateRoot<any>>
-  implements IRepository<T>
-{
+class InMemoryRepository<T extends IAggregateRoot<any>> implements IRepository<T> {
   protected items: Map<string, T> = new Map();
 
   async findById(id: any): Promise<T | null> {
@@ -385,7 +353,7 @@ class InMemoryUnitOfWork implements IUnitOfWork {
     }
 
     // Publikuj wszystkie zdarzenia
-    this.pendingEvents.forEach((event) => {
+    this.pendingEvents.forEach(event => {
       this.eventBus.publish(event);
     });
 
@@ -410,10 +378,7 @@ class InMemoryUnitOfWork implements IUnitOfWork {
     return repo as T;
   }
 
-  registerRepository<T extends IRepository<any>>(
-    name: string,
-    repository: T,
-  ): void {
+  registerRepository<T extends IRepository<any>>(name: string, repository: T): void {
     this.repositories.set(name, repository);
   }
 
@@ -443,8 +408,7 @@ class ProductService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const productRepo =
-      this.unitOfWork.getRepository<ProductRepository>('productRepository');
+    const productRepo = this.unitOfWork.getRepository<ProductRepository>('productRepository');
 
     return this.executeInTransaction(async () => {
       const productId = EntityId.createWithRandomUUID();
@@ -457,16 +421,12 @@ class ProductService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async addProductStock(
-    productId: EntityId,
-    quantity: number,
-  ): Promise<Product> {
+  async addProductStock(productId: EntityId, quantity: number): Promise<Product> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
 
-    const productRepo =
-      this.unitOfWork.getRepository<ProductRepository>('productRepository');
+    const productRepo = this.unitOfWork.getRepository<ProductRepository>('productRepository');
 
     return this.executeInTransaction(async () => {
       const product = await productRepo.findById(productId);
@@ -487,8 +447,7 @@ class ProductService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const productRepo =
-      this.unitOfWork.getRepository<ProductRepository>('productRepository');
+    const productRepo = this.unitOfWork.getRepository<ProductRepository>('productRepository');
     return productRepo.findAll();
   }
 
@@ -508,8 +467,7 @@ class CustomerService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const customerRepo =
-      this.unitOfWork.getRepository<CustomerRepository>('customerRepository');
+    const customerRepo = this.unitOfWork.getRepository<CustomerRepository>('customerRepository');
 
     return this.executeInTransaction(async () => {
       const customerId = EntityId.createWithRandomUUID();
@@ -538,10 +496,8 @@ class OrderService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const orderRepo =
-      this.unitOfWork.getRepository<OrderRepository>('orderRepository');
-    const customerRepo =
-      this.unitOfWork.getRepository<CustomerRepository>('customerRepository');
+    const orderRepo = this.unitOfWork.getRepository<OrderRepository>('orderRepository');
+    const customerRepo = this.unitOfWork.getRepository<CustomerRepository>('customerRepository');
 
     return this.executeInTransaction(async () => {
       const customer = await customerRepo.findById(customerId);
@@ -559,19 +515,13 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async addOrderItem(
-    orderId: EntityId,
-    productId: EntityId,
-    quantity: number,
-  ): Promise<Order> {
+  async addOrderItem(orderId: EntityId, productId: EntityId, quantity: number): Promise<Order> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
 
-    const orderRepo =
-      this.unitOfWork.getRepository<OrderRepository>('orderRepository');
-    const productRepo =
-      this.unitOfWork.getRepository<ProductRepository>('productRepository');
+    const orderRepo = this.unitOfWork.getRepository<OrderRepository>('orderRepository');
+    const productRepo = this.unitOfWork.getRepository<ProductRepository>('productRepository');
 
     return this.executeInTransaction(async () => {
       const order = await orderRepo.findById(orderId);
@@ -606,8 +556,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const orderRepo =
-      this.unitOfWork.getRepository<OrderRepository>('orderRepository');
+    const orderRepo = this.unitOfWork.getRepository<OrderRepository>('orderRepository');
 
     return this.executeInTransaction(async () => {
       const order = await orderRepo.findById(orderId);
@@ -626,8 +575,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
       throw new Error('Unit of Work not set');
     }
 
-    const orderRepo =
-      this.unitOfWork.getRepository<OrderRepository>('orderRepository');
+    const orderRepo = this.unitOfWork.getRepository<OrderRepository>('orderRepository');
 
     return this.executeInTransaction(async () => {
       const order = await orderRepo.findById(orderId);
@@ -652,10 +600,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
 }
 
 @DomainService('notification-service')
-class NotificationService
-  extends EventAwareDomainService
-  implements IAsyncDomainService
-{
+class NotificationService extends EventAwareDomainService implements IAsyncDomainService {
   private sentNotifications: CustomerNotifiedEvent[] = [];
 
   constructor() {
@@ -667,12 +612,12 @@ class NotificationService
       throw new Error('Event bus not set');
     }
 
-    this.eventBus.subscribe<OrderConfirmedEvent>(OrderConfirmedEvent, (event) =>
-      this.handleOrderConfirmedEvent(event),
+    this.eventBus.subscribe<OrderConfirmedEvent>(OrderConfirmedEvent, event =>
+      this.handleOrderConfirmedEvent(event)
     );
 
-    this.eventBus.subscribe<OrderShippedEvent>(OrderShippedEvent, (event) =>
-      this.handleOrderShippedEvent(event),
+    this.eventBus.subscribe<OrderShippedEvent>(OrderShippedEvent, event =>
+      this.handleOrderShippedEvent(event)
     );
   }
 
@@ -691,10 +636,7 @@ class NotificationService
       throw new Error('Event bus not set');
     }
 
-    const notificationEvent = new CustomerNotifiedEvent(
-      customerId.toString(),
-      message,
-    );
+    const notificationEvent = new CustomerNotifiedEvent(customerId.toString(), message);
     this.sentNotifications.push(notificationEvent);
     this.publishEvent(notificationEvent);
   }
@@ -771,31 +713,21 @@ describe('Domain Services - End-to-End Tests', () => {
     unitOfWork.registerRepository('orderRepository', orderRepo);
 
     // Arrange: Inicjalizacja kontenera serwisów
-    container = new DomainServiceContainer(
-      undefined,
-      eventBus,
-      () => unitOfWork,
-    );
+    container = new DomainServiceContainer(undefined, eventBus, () => unitOfWork);
 
     // Arrange: Rejestracja serwisów
     container.registerFactory('product-service', () => new ProductService());
     container.registerFactory('customer-service', () => new CustomerService());
     container.registerFactory('order-service', () => new OrderService());
-    container.registerFactory(
-      'notification-service',
-      () => new NotificationService(),
-    );
+    container.registerFactory('notification-service', () => new NotificationService());
 
     // Arrange: Inicjalizacja serwisów
     await container.initializeServices();
 
     productService = container.getService<ProductService>('product-service')!;
-    customerService =
-      container.getService<CustomerService>('customer-service')!;
+    customerService = container.getService<CustomerService>('customer-service')!;
     orderService = container.getService<OrderService>('order-service')!;
-    notificationService = container.getService<NotificationService>(
-      'notification-service',
-    )!;
+    notificationService = container.getService<NotificationService>('notification-service')!;
   });
 
   describe('Full Business Flow', () => {
@@ -816,39 +748,22 @@ describe('Domain Services - End-to-End Tests', () => {
       const orderQuantity2 = 2;
 
       // Act: Create products
-      const laptop = await productService.createProduct(
-        productName1,
-        productPrice1,
-      );
-      const mouse = await productService.createProduct(
-        productName2,
-        productPrice2,
-      );
+      const laptop = await productService.createProduct(productName1, productPrice1);
+      const mouse = await productService.createProduct(productName2, productPrice2);
 
       // Act: Add stock to products
       await productService.addProductStock(laptop.getId(), productStock1);
       await productService.addProductStock(mouse.getId(), productStock2);
 
       // Act: Register customer
-      const customer = await customerService.registerCustomer(
-        customerEmail,
-        customerName,
-      );
+      const customer = await customerService.registerCustomer(customerEmail, customerName);
 
       // Act: Create order
       const order = await orderService.createOrder(customer.getId());
 
       // Act: Add items to order
-      await orderService.addOrderItem(
-        order.getId(),
-        laptop.getId(),
-        orderQuantity1,
-      );
-      await orderService.addOrderItem(
-        order.getId(),
-        mouse.getId(),
-        orderQuantity2,
-      );
+      await orderService.addOrderItem(order.getId(), laptop.getId(), orderQuantity1);
+      await orderService.addOrderItem(order.getId(), mouse.getId(), orderQuantity2);
 
       // Act: Confirm order
       const confirmedOrder = await orderService.confirmOrder(order.getId());
@@ -859,12 +774,8 @@ describe('Domain Services - End-to-End Tests', () => {
 
       // Act: Get updated products
       const allProducts = await productService.getAllProducts();
-      const updatedLaptop = allProducts.find((p) =>
-        p.getId().equals(laptop.getId()),
-      )!;
-      const updatedMouse = allProducts.find((p) =>
-        p.getId().equals(mouse.getId()),
-      )!;
+      const updatedLaptop = allProducts.find(p => p.getId().equals(laptop.getId()))!;
+      const updatedMouse = allProducts.find(p => p.getId().equals(mouse.getId()))!;
 
       // Assert: Product stock changes
       expect(updatedLaptop.inStock).toBe(productStock1 - orderQuantity1); // 9
@@ -877,8 +788,7 @@ describe('Domain Services - End-to-End Tests', () => {
       expect(shippedOrder.shippingCode?.startsWith('SHP-')).toBe(true);
 
       // Assert: Order total amount
-      const expectedTotal =
-        productPrice1 * orderQuantity1 + productPrice2 * orderQuantity2;
+      const expectedTotal = productPrice1 * orderQuantity1 + productPrice2 * orderQuantity2;
       expect(shippedOrder.totalAmount).toBe(expectedTotal);
 
       // Assert: Notifications
@@ -886,20 +796,14 @@ describe('Domain Services - End-to-End Tests', () => {
       expect(notifications.length).toBe(2);
 
       const confirmationNotification = notifications[0];
-      expect(confirmationNotification?.customerId).toBe(
-        customer.getId().toString(),
-      );
+      expect(confirmationNotification?.customerId).toBe(customer.getId().toString());
       expect(confirmationNotification?.message).toContain('has been confirmed');
-      expect(confirmationNotification?.message).toContain(
-        order.getId().toString(),
-      );
+      expect(confirmationNotification?.message).toContain(order.getId().toString());
 
       const shippingNotification = notifications[1];
       expect(shippingNotification?.customerId).toBe(customer.getId().toString());
       expect(shippingNotification?.message).toContain('has been shipped');
-      expect(shippingNotification?.message).toContain(
-        shippedOrder.shippingCode!,
-      );
+      expect(shippingNotification?.message).toContain(shippedOrder.shippingCode!);
     });
   });
 
@@ -915,37 +819,25 @@ describe('Domain Services - End-to-End Tests', () => {
       const customerName = 'Jane Smith';
 
       // Act: Create product with limited stock
-      const watch = await productService.createProduct(
-        productName,
-        productPrice,
-      );
+      const watch = await productService.createProduct(productName, productPrice);
       await productService.addProductStock(watch.getId(), initialStock);
 
       // Act: Register customer
-      const customer = await customerService.registerCustomer(
-        customerEmail,
-        customerName,
-      );
+      const customer = await customerService.registerCustomer(customerEmail, customerName);
 
       // Act: Create order
       const order = await orderService.createOrder(customer.getId());
 
       // Act & Assert: Try to add more items than available
       const [error] = await safeRun(() =>
-        orderService.addOrderItem(
-          order.getId(),
-          watch.getId(),
-          requestedQuantity,
-        ),
+        orderService.addOrderItem(order.getId(), watch.getId(), requestedQuantity)
       );
 
       expect(error?.message).toBe(`Not enough ${productName} in stock`);
 
       // Assert: Product stock remains unchanged
       const allProducts = await productService.getAllProducts();
-      const unchangedWatch = allProducts.find((p) =>
-        p.getId().equals(watch.getId()),
-      )!;
+      const unchangedWatch = allProducts.find(p => p.getId().equals(watch.getId()))!;
       expect(unchangedWatch.inStock).toBe(initialStock);
     });
 
@@ -955,16 +847,11 @@ describe('Domain Services - End-to-End Tests', () => {
       const customerName = 'Empty Order';
 
       // Act: Register customer and create empty order
-      const customer = await customerService.registerCustomer(
-        customerEmail,
-        customerName,
-      );
+      const customer = await customerService.registerCustomer(customerEmail, customerName);
       const order = await orderService.createOrder(customer.getId());
 
       // Act & Assert: Try to confirm empty order
-      const [error] = await safeRun(() =>
-        orderService.confirmOrder(order.getId()),
-      );
+      const [error] = await safeRun(() => orderService.confirmOrder(order.getId()));
 
       expect(error?.message).toBe('Cannot confirm an empty order');
 
@@ -983,28 +870,18 @@ describe('Domain Services - End-to-End Tests', () => {
       const customerName = 'Pro Gamer';
 
       // Act: Create product and customer
-      const console = await productService.createProduct(
-        productName,
-        productPrice,
-      );
+      const console = await productService.createProduct(productName, productPrice);
       await productService.addProductStock(console.getId(), productStock);
-      const customer = await customerService.registerCustomer(
-        customerEmail,
-        customerName,
-      );
+      const customer = await customerService.registerCustomer(customerEmail, customerName);
 
       // Act: Create order with item but don't confirm
       const order = await orderService.createOrder(customer.getId());
       await orderService.addOrderItem(order.getId(), console.getId(), 1);
 
       // Act & Assert: Try to ship non-confirmed order
-      const [error] = await safeRun(() =>
-        orderService.shipOrder(order.getId()),
-      );
+      const [error] = await safeRun(() => orderService.shipOrder(order.getId()));
 
-      expect(error?.message).toBe(
-        'Cannot ship an order that is not in Confirmed status',
-      );
+      expect(error?.message).toBe('Cannot ship an order that is not in Confirmed status');
 
       // Assert: Order remains in 'Created' status
       expect(order.status).toBe(OrderStatus.Created);
@@ -1049,10 +926,7 @@ describe('Domain Services - End-to-End Tests', () => {
       const laptop = await productServiceB.createProduct('Test Laptop', 999.99);
       await productServiceB.addProductStock(laptop.getId(), 3);
 
-      const customer = await customerServiceB.registerCustomer(
-        'test@builder.com',
-        'Builder Test',
-      );
+      const customer = await customerServiceB.registerCustomer('test@builder.com', 'Builder Test');
       const order = await orderServiceB.createOrder(customer.getId());
       await orderServiceB.addOrderItem(order.getId(), laptop.getId(), 1);
       await orderServiceB.confirmOrder(order.getId());
@@ -1088,33 +962,25 @@ describe('Domain Services - End-to-End Tests', () => {
       const complexContainer = new DomainServiceContainer(
         complexRegistry.build(),
         eventBus,
-        () => unitOfWork,
+        () => unitOfWork
       );
 
       // Arrange: Register services with dependencies
-      complexContainer.registerFactory(
+      complexContainer.registerFactory('infrastructure', () => new InfrastructureService());
+      complexContainer.registerFactory('domain-validation', () => new DomainValidationService(), [
         'infrastructure',
-        () => new InfrastructureService(),
-      );
-      complexContainer.registerFactory(
+      ]);
+      complexContainer.registerFactory('order-processor', () => new OrderProcessingService(), [
         'domain-validation',
-        () => new DomainValidationService(),
-        ['infrastructure'],
-      );
-      complexContainer.registerFactory(
-        'order-processor',
-        () => new OrderProcessingService(),
-        ['domain-validation', 'infrastructure'],
-      );
+        'infrastructure',
+      ]);
 
       // Act: Initialize services
       await complexContainer.initializeServices();
 
       // Assert: Services are properly initialized
-      const infrastructureService =
-        complexContainer.getService('infrastructure');
-      const validationService =
-        complexContainer.getService('domain-validation');
+      const infrastructureService = complexContainer.getService('infrastructure');
+      const validationService = complexContainer.getService('domain-validation');
       const processorService = complexContainer.getService('order-processor');
 
       expect(infrastructureService).toBeDefined();
@@ -1127,19 +993,11 @@ describe('Domain Services - End-to-End Tests', () => {
       const circularContainer = new DomainServiceContainer();
 
       // Act & Assert: Register services with circular dependencies
-      circularContainer.registerFactory('service-a', () => new ServiceA(), [
-        'service-b',
-      ]);
-      circularContainer.registerFactory('service-b', () => new ServiceB(), [
-        'service-c',
-      ]);
-      circularContainer.registerFactory('service-c', () => new ServiceC(), [
-        'service-a',
-      ]);
+      circularContainer.registerFactory('service-a', () => new ServiceA(), ['service-b']);
+      circularContainer.registerFactory('service-b', () => new ServiceB(), ['service-c']);
+      circularContainer.registerFactory('service-c', () => new ServiceC(), ['service-a']);
 
-      const [error] = await safeRun(() =>
-        circularContainer.initializeServices(),
-      );
+      const [error] = await safeRun(() => circularContainer.initializeServices());
 
       expect(error).toBeInstanceOf(ServiceCircularError);
     });

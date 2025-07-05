@@ -10,7 +10,7 @@ describe('CircuitBreaker', () => {
     recoveryTimeout: 1000,
     successThreshold: 2,
     timeout: 5000,
-    name: 'test-circuit'
+    name: 'test-circuit',
   };
 
   beforeEach(() => {
@@ -77,7 +77,7 @@ describe('CircuitBreaker', () => {
       const operation = vi.fn().mockResolvedValue('success');
 
       const [error, result] = await safeRun(() => circuitBreaker.execute(operation, context));
-      
+
       expect(result).toBeUndefined();
       expect(error).toBeInstanceOf(CircuitBreakerOpenError);
       expect(operation).not.toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe('CircuitBreaker', () => {
       const failOperation = vi.fn().mockRejectedValue(new Error('failure'));
 
       const [error, result] = await safeRun(() => circuitBreaker.execute(failOperation, context));
-      
+
       expect(result).toBeUndefined();
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('failure');
@@ -149,7 +149,7 @@ describe('CircuitBreaker', () => {
       const failOp = vi.fn().mockRejectedValue(new Error('fail'));
 
       await circuitBreaker.execute(successOp, context);
-      
+
       const [error, result] = await safeRun(() => circuitBreaker.execute(failOp, context));
       expect(result).toBeUndefined();
       expect(error).toBeInstanceOf(Error);

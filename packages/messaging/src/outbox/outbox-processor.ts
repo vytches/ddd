@@ -1,11 +1,7 @@
 import type { IEventBus } from '@vytches-ddd/contracts';
 import { safeRun } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
-import type {
-  IOutboxMessage,
-  IOutboxMessageHandler,
-  OutboxMiddleware,
-} from './outbox-interfaces';
+import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessageStatus, MessagePriority } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
@@ -40,10 +36,7 @@ export class OutboxProcessor {
   private processingTimer?: NodeJS.Timeout | undefined;
   private readonly logger = Logger.create('OutboxProcessor');
 
-  constructor(
-    repository: IOutboxRepository,
-    options: OutboxProcessorOptions = {},
-  ) {
+  constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
     this.repository = repository;
     this.options = {
       batchSize: options.batchSize ?? 10,
@@ -116,10 +109,7 @@ export class OutboxProcessor {
     }
 
     const [result, error] = await safeRun(() =>
-      this.repository.getUnprocessedMessages(
-        this.options.batchSize,
-        this.options.priorityOrder,
-      ),
+      this.repository.getUnprocessedMessages(this.options.batchSize, this.options.priorityOrder)
     );
 
     if (error) {
@@ -137,9 +127,7 @@ export class OutboxProcessor {
     this.logger.info(`Processing ${messages.length} messages`);
 
     // Process messages in parallel within the batch
-    const processingPromises = messages.map((message) =>
-      this.processMessage(message),
-    );
+    const processingPromises = messages.map(message => this.processMessage(message));
 
     await Promise.allSettled(processingPromises);
     this.logger.info(`Completed processing batch of ${messages.length} messages`);
@@ -184,36 +172,26 @@ export class OutboxProcessor {
         new Promise((_, reject) =>
           setTimeout(
             () => reject(new Error('Message processing timeout')),
-            this.options.messageTimeout,
-          ),
+            this.options.messageTimeout
+          )
         ),
       ]);
     };
 
     // Build the middleware chain from right to left
-    return this.middlewares.reduceRight(
-      (next, middleware) => middleware(next),
-      finalHandler,
-    );
+    return this.middlewares.reduceRight((next, middleware) => middleware(next), finalHandler);
   }
 
   /**
    * Handles errors during message processing
    */
-  private async handleMessageError(
-    message: IOutboxMessage,
-    error: Error,
-  ): Promise<void> {
+  private async handleMessageError(message: IOutboxMessage, error: Error): Promise<void> {
     try {
       const attempts = await this.repository.incrementAttempt(message.id);
       this.logger.warn(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
 
       if (attempts >= this.options.maxRetries) {
-        await this.repository.updateStatus(
-          message.id,
-          MessageStatus.FAILED,
-          error,
-        );
+        await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
         this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
       } else {
         // Reset to pending for retry

@@ -7,7 +7,7 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['password', 'secret', 'token'],
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
@@ -15,7 +15,7 @@ describe('DataMasker', () => {
         password: 'secret123',
         apiToken: 'abc123',
         secretKey: 'xyz789',
-        normalField: 'value'
+        normalField: 'value',
       };
 
       const masked = masker.maskData(data);
@@ -25,7 +25,7 @@ describe('DataMasker', () => {
         password: '[MASKED]',
         apiToken: '[MASKED]', // contains 'token'
         secretKey: '[MASKED]', // contains 'secret'
-        normalField: 'value'
+        normalField: 'value',
       });
     });
 
@@ -33,14 +33,14 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['password'],
-        replacement: '[HIDDEN]'
+        replacement: '[HIDDEN]',
       });
 
       const data = {
         Password: 'secret',
         PASSWORD: 'secret',
         userPassword: 'secret',
-        passwordField: 'secret'
+        passwordField: 'secret',
       };
 
       const masked = masker.maskData(data);
@@ -49,7 +49,7 @@ describe('DataMasker', () => {
         Password: '[HIDDEN]',
         PASSWORD: '[HIDDEN]',
         userPassword: '[HIDDEN]',
-        passwordField: '[HIDDEN]'
+        passwordField: '[HIDDEN]',
       });
     });
 
@@ -57,19 +57,19 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: [], // empty
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
         password: 'secret123',
-        token: 'abc123'
+        token: 'abc123',
       };
 
       const masked = masker.maskData(data);
 
       expect(masked).toEqual({
         password: 'secret123',
-        token: 'abc123'
+        token: 'abc123',
       });
     });
   });
@@ -78,51 +78,51 @@ describe('DataMasker', () => {
     it('should mask email addresses by default', () => {
       const masker = new DataMasker({
         enabled: true,
-        replacement: '[EMAIL]'
+        replacement: '[EMAIL]',
       });
 
       const data = {
         message: 'Contact john@example.com or admin@test.org for help',
-        description: 'User email is jane.doe@company.co.uk'
+        description: 'User email is jane.doe@company.co.uk',
       };
 
       const masked = masker.maskData(data);
 
       expect(masked).toEqual({
         message: 'Contact [EMAIL] or [EMAIL] for help',
-        description: 'User email is [EMAIL]'
+        description: 'User email is [EMAIL]',
       });
     });
 
     it('should mask SSN patterns by default', () => {
       const masker = new DataMasker({
         enabled: true,
-        replacement: '[SSN]'
+        replacement: '[SSN]',
       });
 
       const data = {
         notes: 'SSN: 123-45-6789 and also 987654321',
-        description: 'Another SSN 555-66-7777'
+        description: 'Another SSN 555-66-7777',
       };
 
       const masked = masker.maskData(data);
 
       expect(masked).toEqual({
         notes: 'SSN: [SSN] and also [SSN]',
-        description: 'Another SSN [SSN]'
+        description: 'Another SSN [SSN]',
       });
     });
 
     it('should mask credit card numbers by default', () => {
       const masker = new DataMasker({
         enabled: true,
-        replacement: '[CARD]'
+        replacement: '[CARD]',
       });
 
       const data = {
         payment: 'Card: 4532-1234-5678-9012',
         backup: 'Alternative: 4532 1234 5678 9012',
-        compact: 'Compact: 4532123456789012'
+        compact: 'Compact: 4532123456789012',
       };
 
       const masked = masker.maskData(data);
@@ -130,7 +130,7 @@ describe('DataMasker', () => {
       expect(masked).toEqual({
         payment: 'Card: [CARD]',
         backup: 'Alternative: [CARD]',
-        compact: 'Compact: [CARD]'
+        compact: 'Compact: [CARD]',
       });
     });
 
@@ -138,21 +138,21 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         patterns: [
-          '\\b[A-Z]{2}\\d{6}\\b' // Custom pattern like AB123456
+          '\\b[A-Z]{2}\\d{6}\\b', // Custom pattern like AB123456
         ],
-        replacement: '[CUSTOM]'
+        replacement: '[CUSTOM]',
       });
 
       const data = {
         code: 'Reference AB123456 and CD789012',
-        text: 'No match here: ab123456' // lowercase shouldn't match
+        text: 'No match here: ab123456', // lowercase shouldn't match
       };
 
       const masked = masker.maskData(data);
 
       expect(masked).toEqual({
         code: 'Reference [CUSTOM] and [CUSTOM]',
-        text: 'No match here: ab123456'
+        text: 'No match here: ab123456',
       });
     });
   });
@@ -162,7 +162,7 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['password', 'secret'],
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
@@ -171,10 +171,10 @@ describe('DataMasker', () => {
           password: 'secret123',
           profile: {
             email: 'john@example.com',
-            secretAnswer: 'blue'
-          }
+            secretAnswer: 'blue',
+          },
         },
-        apiSecret: 'xyz789'
+        apiSecret: 'xyz789',
       };
 
       const masked = masker.maskData(data);
@@ -185,10 +185,10 @@ describe('DataMasker', () => {
           password: '[MASKED]',
           profile: {
             email: 'john@example.com',
-            secretAnswer: '[MASKED]'
-          }
+            secretAnswer: '[MASKED]',
+          },
         },
-        apiSecret: '[MASKED]'
+        apiSecret: '[MASKED]',
       });
     });
 
@@ -196,15 +196,15 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['token'],
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
         tokens: [
           { token: 'abc123', name: 'api' },
-          { token: 'xyz789', name: 'refresh' }
+          { token: 'xyz789', name: 'refresh' },
         ],
-        users: ['john', 'jane']
+        users: ['john', 'jane'],
       };
 
       const masked = masker.maskData(data);
@@ -212,9 +212,9 @@ describe('DataMasker', () => {
       expect(masked).toEqual({
         tokens: [
           { token: '[MASKED]', name: 'api' },
-          { token: '[MASKED]', name: 'refresh' }
+          { token: '[MASKED]', name: 'refresh' },
         ],
-        users: ['john', 'jane']
+        users: ['john', 'jane'],
       });
     });
 
@@ -222,7 +222,7 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['password'],
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
@@ -231,8 +231,8 @@ describe('DataMasker', () => {
         value: 'normal',
         nested: {
           password: null,
-          data: undefined
-        }
+          data: undefined,
+        },
       };
 
       const masked = masker.maskData(data);
@@ -243,8 +243,8 @@ describe('DataMasker', () => {
         value: 'normal',
         nested: {
           password: '[MASKED]', // sensitive key is masked even if null
-          data: undefined
-        }
+          data: undefined,
+        },
       });
     });
   });
@@ -255,13 +255,13 @@ describe('DataMasker', () => {
         enabled: false,
         sensitiveKeys: ['password', 'secret'],
         patterns: ['\\d{4}-\\d{4}-\\d{4}-\\d{4}'],
-        replacement: '[MASKED]'
+        replacement: '[MASKED]',
       });
 
       const data = {
         password: 'secret123',
         card: '1234-5678-9012-3456',
-        email: 'test@example.com'
+        email: 'test@example.com',
       };
 
       const masked = masker.maskData(data);
@@ -282,7 +282,7 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['password'],
-        replacement: '***REDACTED***'
+        replacement: '***REDACTED***',
       });
 
       const data = { password: 'secret' };
@@ -295,13 +295,13 @@ describe('DataMasker', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['customSecret', 'apiKey'],
-        replacement: '[HIDDEN]'
+        replacement: '[HIDDEN]',
       });
 
       const data = {
         customSecret: 'value1',
         apiKey: 'value2',
-        normalField: 'value3'
+        normalField: 'value3',
       };
 
       const masked = masker.maskData(data);
@@ -309,7 +309,7 @@ describe('DataMasker', () => {
       expect(masked).toEqual({
         customSecret: '[HIDDEN]',
         apiKey: '[HIDDEN]',
-        normalField: 'value3'
+        normalField: 'value3',
       });
     });
   });
@@ -318,7 +318,7 @@ describe('DataMasker', () => {
     it('should handle empty objects', () => {
       const masker = new DataMasker({
         enabled: true,
-        sensitiveKeys: ['password']
+        sensitiveKeys: ['password'],
       });
 
       expect(masker.maskData({})).toEqual({});
@@ -327,7 +327,7 @@ describe('DataMasker', () => {
     it('should handle primitive values', () => {
       const masker = new DataMasker({
         enabled: true,
-        sensitiveKeys: ['password']
+        sensitiveKeys: ['password'],
       });
 
       expect(masker.maskData('string')).toBe('string');
@@ -338,7 +338,7 @@ describe('DataMasker', () => {
     it('should handle circular references gracefully', () => {
       const masker = new DataMasker({
         enabled: true,
-        sensitiveKeys: ['password']
+        sensitiveKeys: ['password'],
       });
 
       const obj: any = { name: 'test', password: 'secret' };
@@ -349,7 +349,7 @@ describe('DataMasker', () => {
       expect(result).toEqual({
         name: 'test',
         password: '[MASKED]',
-        self: '[Circular Reference]'
+        self: '[Circular Reference]',
       });
     });
   });

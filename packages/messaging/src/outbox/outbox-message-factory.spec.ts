@@ -47,11 +47,7 @@ describe('OutboxMessageFactory', () => {
       const delayMs = 10000;
       const beforeCreate = Date.now();
 
-      const message = OutboxMessageFactory.createDelayedMessage(
-        messageType,
-        payload,
-        delayMs,
-      );
+      const message = OutboxMessageFactory.createDelayedMessage(messageType, payload, delayMs);
 
       const afterCreate = Date.now();
       const expectedProcessAfter = beforeCreate + delayMs;
@@ -67,10 +63,7 @@ describe('OutboxMessageFactory', () => {
       const messageType = 'HighPriorityMessage';
       const payload = { urgent: true };
 
-      const message = OutboxMessageFactory.createHighPriorityMessage(
-        messageType,
-        payload,
-      );
+      const message = OutboxMessageFactory.createHighPriorityMessage(messageType, payload);
 
       expect(message.priority).toBe(MessagePriority.HIGH);
       expect(message.messageType).toBe(messageType);

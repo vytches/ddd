@@ -9,7 +9,7 @@ import type {
   HistogramMetric,
   TimerMetric,
   MetricExporter,
-  MetricLabels
+  MetricLabels,
 } from './metrics-interfaces';
 
 /**
@@ -25,12 +25,10 @@ export class JsonMetricExporter implements MetricExporter {
   export(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): string {
     const exportData = {
       timestamp: Date.now(),
-      metrics: metrics.map(metric => this.serializeMetric(metric))
+      metrics: metrics.map(metric => this.serializeMetric(metric)),
     };
 
-    return this.pretty
-      ? JSON.stringify(exportData, null, 2)
-      : JSON.stringify(exportData);
+    return this.pretty ? JSON.stringify(exportData, null, 2) : JSON.stringify(exportData);
   }
 
   getFormat(): string {
@@ -43,7 +41,7 @@ export class JsonMetricExporter implements MetricExporter {
       type: metric.type,
       labels: metric.labels,
       timestamp: metric.timestamp,
-      description: metric.description
+      description: metric.description,
     };
 
     switch (metric.type) {
@@ -53,20 +51,20 @@ export class JsonMetricExporter implements MetricExporter {
           ...base,
           buckets: histogramMetric.buckets,
           sum: histogramMetric.sum,
-          count: histogramMetric.count
+          count: histogramMetric.count,
         };
       case 'timer':
         const timerMetric = metric as TimerMetric;
         return {
           ...base,
           duration: timerMetric.duration,
-          unit: timerMetric.unit
+          unit: timerMetric.unit,
         };
       default:
         const basicMetric = metric as Metric;
         return {
           ...base,
-          value: basicMetric.value
+          value: basicMetric.value,
         };
     }
   }
@@ -107,7 +105,9 @@ export class PrometheusMetricExporter implements MetricExporter {
     return 'prometheus';
   }
 
-  private groupMetricsByName(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): Map<string, (Metric | HistogramMetric | TimerMetric)[]> {
+  private groupMetricsByName(
+    metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>
+  ): Map<string, (Metric | HistogramMetric | TimerMetric)[]> {
     const groups = new Map<string, (Metric | HistogramMetric | TimerMetric)[]>();
 
     for (const metric of metrics) {
@@ -143,8 +143,13 @@ export class PrometheusMetricExporter implements MetricExporter {
         const histogramMetric = metric as HistogramMetric;
         // Histogram buckets
         for (const bucket of histogramMetric.buckets) {
-          const bucketLabels = { ...metric.labels, le: bucket.upperBound === Infinity ? '+Inf' : bucket.upperBound.toString() };
-          lines.push(`${metric.name}_bucket${this.formatLabels(bucketLabels)} ${bucket.count} ${metric.timestamp}`);
+          const bucketLabels = {
+            ...metric.labels,
+            le: bucket.upperBound === Infinity ? '+Inf' : bucket.upperBound.toString(),
+          };
+          lines.push(
+            `${metric.name}_bucket${this.formatLabels(bucketLabels)} ${bucket.count} ${metric.timestamp}`
+          );
         }
         // Histogram sum and count
         lines.push(`${metric.name}_sum${labelStr} ${histogramMetric.sum} ${metric.timestamp}`);
@@ -177,10 +182,7 @@ export class PrometheusMetricExporter implements MetricExporter {
   }
 
   private escapeLabel(value: string): string {
-    return value
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n');
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
   }
 }
 
@@ -219,7 +221,7 @@ export class CsvMetricExporter implements MetricExporter {
       metric.timestamp.toString(),
       this.getMetricValue(metric),
       this.escapeCsv(JSON.stringify(metric.labels)),
-      this.escapeCsv(metric.description || '')
+      this.escapeCsv(metric.description || ''),
     ];
 
     return fields.join(',');
@@ -229,17 +231,21 @@ export class CsvMetricExporter implements MetricExporter {
     switch (metric.type) {
       case 'histogram':
         const histogramMetric = metric as HistogramMetric;
-        return this.escapeCsv(JSON.stringify({
-          buckets: histogramMetric.buckets,
-          sum: histogramMetric.sum,
-          count: histogramMetric.count
-        }));
+        return this.escapeCsv(
+          JSON.stringify({
+            buckets: histogramMetric.buckets,
+            sum: histogramMetric.sum,
+            count: histogramMetric.count,
+          })
+        );
       case 'timer':
         const timerMetric = metric as TimerMetric;
-        return this.escapeCsv(JSON.stringify({
-          duration: timerMetric.duration,
-          unit: timerMetric.unit
-        }));
+        return this.escapeCsv(
+          JSON.stringify({
+            duration: timerMetric.duration,
+            unit: timerMetric.unit,
+          })
+        );
       default:
         const basicMetric = metric as Metric;
         return this.escapeCsv(basicMetric.value.toString());
@@ -285,7 +291,9 @@ export class TextMetricExporter implements MetricExporter {
     return 'text';
   }
 
-  private groupMetricsByPattern(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): Map<string, (Metric | HistogramMetric | TimerMetric)[]> {
+  private groupMetricsByPattern(
+    metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>
+  ): Map<string, (Metric | HistogramMetric | TimerMetric)[]> {
     const groups = new Map<string, (Metric | HistogramMetric | TimerMetric)[]>();
 
     for (const metric of metrics) {
@@ -349,14 +357,17 @@ export class CompositeMetricExporter implements MetricExporter {
         const result = exporter.export(metrics);
         results[format] = typeof result === 'string' ? result : JSON.stringify(result);
       } catch (error) {
-        results[format] = `Error exporting to ${format}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        results[format] =
+          `Error exporting to ${format}: ${error instanceof Error ? error.message : 'Unknown error'}`;
       }
     }
 
     return JSON.stringify(results, null, 2);
   }
 
-  async exportAsync(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): Promise<Record<string, string>> {
+  async exportAsync(
+    metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>
+  ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
     const promises: Promise<void>[] = [];
 
@@ -367,7 +378,8 @@ export class CompositeMetricExporter implements MetricExporter {
             const result = await exporter.export(metrics);
             results[format] = result;
           } catch (error) {
-            results[format] = `Error exporting to ${format}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            results[format] =
+              `Error exporting to ${format}: ${error instanceof Error ? error.message : 'Unknown error'}`;
           }
         })()
       );
@@ -418,7 +430,10 @@ export class MetricExporterFactory {
   /**
    * Create a composite exporter with multiple formats
    */
-  static createComposite(formats: string[], options: Record<string, Record<string, unknown>> = {}): CompositeMetricExporter {
+  static createComposite(
+    formats: string[],
+    options: Record<string, Record<string, unknown>> = {}
+  ): CompositeMetricExporter {
     const exporters = formats.map(format =>
       MetricExporterFactory.create(format, options[format] || {})
     );

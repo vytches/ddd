@@ -10,7 +10,7 @@ describe('RetryPolicy', () => {
     baseDelay: 100,
     maxDelay: 1000,
     backoffMultiplier: 2,
-    jitter: false
+    jitter: false,
   };
 
   beforeEach(() => {
@@ -30,7 +30,8 @@ describe('RetryPolicy', () => {
 
     it('should return result from successful retry', async () => {
       const context = DefaultResilienceContext.create();
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('first failure'))
         .mockRejectedValueOnce(new Error('second failure'))
         .mockResolvedValue('success');
@@ -76,15 +77,14 @@ describe('RetryPolicy', () => {
     it('should respect retryableErrors function', async () => {
       const retryablePolicy = new RetryPolicy({
         ...defaultConfig,
-        retryableErrors: (error) => error.message.includes('retryable')
+        retryableErrors: error => error.message.includes('retryable'),
       });
 
       const context = DefaultResilienceContext.create();
       const nonRetryableError = new Error('fatal error');
       const operation = vi.fn().mockRejectedValue(nonRetryableError);
 
-      await expect(retryablePolicy.execute(operation, context))
-        .rejects.toThrow('fatal error');
+      await expect(retryablePolicy.execute(operation, context)).rejects.toThrow('fatal error');
 
       expect(operation).toHaveBeenCalledTimes(1);
     });
@@ -92,15 +92,16 @@ describe('RetryPolicy', () => {
     it('should retry retryable errors', async () => {
       const retryablePolicy = new RetryPolicy({
         ...defaultConfig,
-        retryableErrors: (error) => error.message.includes('retryable')
+        retryableErrors: error => error.message.includes('retryable'),
       });
 
       const context = DefaultResilienceContext.create();
       const retryableError = new Error('retryable error');
       const operation = vi.fn().mockRejectedValue(retryableError);
 
-      await expect(retryablePolicy.execute(operation, context))
-        .rejects.toThrow(MaxRetriesExceededError);
+      await expect(retryablePolicy.execute(operation, context)).rejects.toThrow(
+        MaxRetriesExceededError
+      );
 
       expect(operation).toHaveBeenCalledTimes(defaultConfig.maxAttempts);
     });
@@ -111,8 +112,9 @@ describe('RetryPolicy', () => {
       const context = DefaultResilienceContext.create();
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
 
-      await expect(retryPolicy.execute(operation, context))
-        .rejects.toThrow(MaxRetriesExceededError);
+      await expect(retryPolicy.execute(operation, context)).rejects.toThrow(
+        MaxRetriesExceededError
+      );
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -123,21 +125,21 @@ describe('RetryPolicy', () => {
         baseDelay: 1000,
         maxDelay: 2000,
         backoffMultiplier: 10,
-        jitter: false
+        jitter: false,
       });
 
       const context = DefaultResilienceContext.create();
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
 
-      await expect(policy.execute(operation, context))
-        .rejects.toThrow(MaxRetriesExceededError);
+      await expect(policy.execute(operation, context)).rejects.toThrow(MaxRetriesExceededError);
     });
   });
 
   describe('context handling', () => {
     it('should create new context for each attempt', async () => {
       const context = DefaultResilienceContext.create();
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('first'))
         .mockResolvedValue('success');
 
@@ -156,7 +158,11 @@ describe('RetryPolicy', () => {
     it('should respect context abort signal', async () => {
       const abortController = new AbortController();
       const context = new DefaultResilienceContext(
-        undefined, undefined, 1, new Map(), abortController
+        undefined,
+        undefined,
+        1,
+        new Map(),
+        abortController
       );
 
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
@@ -176,7 +182,7 @@ describe('RetryPolicy', () => {
     it('should merge configuration overrides', () => {
       const customPolicy = RetryPolicy.withConfig({
         maxAttempts: 5,
-        baseDelay: 200
+        baseDelay: 200,
       });
 
       expect(customPolicy).toBeInstanceOf(RetryPolicy);

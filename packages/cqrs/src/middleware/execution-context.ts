@@ -1,10 +1,5 @@
 import type { ExecutionContext } from './middleware.interface';
-import type {
-  ICommand,
-  ICommandHandler,
-  IQuery,
-  IQueryHandler,
-} from '../interfaces';
+import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../interfaces';
 
 export class CQRSExecutionContext implements ExecutionContext {
   private _metadata = new Map<string, unknown>();
@@ -12,7 +7,7 @@ export class CQRSExecutionContext implements ExecutionContext {
   constructor(
     public readonly commandOrQuery: ICommand | IQuery<unknown>,
     public readonly handler: ICommandHandler<ICommand> | IQueryHandler<IQuery<unknown>, unknown>,
-    public readonly type: 'command' | 'query',
+    public readonly type: 'command' | 'query'
   ) {}
 
   get metadata(): Map<string, unknown> {

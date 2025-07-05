@@ -22,12 +22,14 @@ class MockACLAdapter implements IACLAdapter<TestDomainModel, TestExternalModel> 
   fetch = vi.fn();
   supportsOperation = vi.fn(() => true);
 
-  getContextInfo = vi.fn((): ACLContextInfo => ({
-    contextName: this.contextName,
-    externalSystemName: 'TestSystem',
-    version: '1.0.0',
-    supportedOperations: ['CREATE', 'UPDATE'],
-  }));
+  getContextInfo = vi.fn(
+    (): ACLContextInfo => ({
+      contextName: this.contextName,
+      externalSystemName: 'TestSystem',
+      version: '1.0.0',
+      supportedOperations: ['CREATE', 'UPDATE'],
+    })
+  );
 }
 
 class MockEnhancedACLAdapter implements IEnhancedACLAdapter<TestDomainModel, TestExternalModel> {
@@ -39,12 +41,14 @@ class MockEnhancedACLAdapter implements IEnhancedACLAdapter<TestDomainModel, Tes
   executeTyped = vi.fn();
   use = vi.fn().mockReturnThis();
 
-  getContextInfo = vi.fn((): ACLContextInfo => ({
-    contextName: this.contextName,
-    externalSystemName: 'EnhancedTestSystem',
-    version: '2.0.0',
-    supportedOperations: ['CREATE', 'UPDATE', 'DELETE'],
-  }));
+  getContextInfo = vi.fn(
+    (): ACLContextInfo => ({
+      contextName: this.contextName,
+      externalSystemName: 'EnhancedTestSystem',
+      version: '2.0.0',
+      supportedOperations: ['CREATE', 'UPDATE', 'DELETE'],
+    })
+  );
 }
 
 describe('ACLRegistry', () => {
@@ -196,7 +200,7 @@ describe('ACLRegistry', () => {
       expect(result.imported).toEqual([]);
       expect(result.skipped).toEqual(['ConflictContext']);
       expect(result.conflicts).toEqual([
-        { contextName: 'ConflictContext', reason: 'Already registered' }
+        { contextName: 'ConflictContext', reason: 'Already registered' },
       ]);
 
       // Should keep the original adapter
@@ -235,7 +239,7 @@ describe('ACLRegistry', () => {
       expect(result.imported).toEqual(['NewContext']);
       expect(result.skipped).toEqual(['ExistingContext']);
       expect(result.conflicts).toEqual([
-        { contextName: 'ExistingContext', reason: 'Already registered' }
+        { contextName: 'ExistingContext', reason: 'Already registered' },
       ]);
 
       expect(registry.get('ExistingContext')).toBe(existingAdapter);
@@ -266,7 +270,7 @@ describe('ACLRegistry', () => {
 
       const options: ImportOptions = {
         validateAdapters: true,
-        overwriteConflicts: false
+        overwriteConflicts: false,
       };
 
       // Should not throw and should import successfully
@@ -312,9 +316,7 @@ describe('ACLRegistry', () => {
       const adapter1 = new MockACLAdapter('Context1');
       const adapter2 = new MockEnhancedACLAdapter('Context2');
 
-      registry
-        .registerDirect('Context1', adapter1)
-        .registerEnhanced('Context2', adapter2);
+      registry.registerDirect('Context1', adapter1).registerEnhanced('Context2', adapter2);
 
       // Modifying one registration should not affect the other
       expect(registry.get('Context1')).toBe(adapter1);
@@ -370,7 +372,7 @@ describe('ACLRegistry', () => {
       const result2 = registry.importFromContext(sourceRegistry);
       expect(result2.imported).toEqual(['Context2']);
       expect(result2.conflicts).toEqual([
-        { contextName: 'Context1', reason: 'Already registered' }
+        { contextName: 'Context1', reason: 'Already registered' },
       ]);
     });
   });

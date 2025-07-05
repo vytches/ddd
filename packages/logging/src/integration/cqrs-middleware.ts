@@ -31,13 +31,11 @@ export class EnhancedLoggingMiddleware implements ICQRSMiddleware {
     this.logger = options.logger || DefaultLogger.forContext('CQRS');
   }
 
-  async handle(
-    context: ExecutionContext,
-    next: () => Promise<unknown>,
-  ): Promise<unknown> {
+  async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
     const { commandOrQuery, type, handler } = context;
     const operationName = (commandOrQuery as { constructor: { name: string } }).constructor.name;
-    const handlerName = (handler as { constructor?: { name: string } })?.constructor?.name || 'Unknown';
+    const handlerName =
+      (handler as { constructor?: { name: string } })?.constructor?.name || 'Unknown';
 
     const startTime = performance.now();
     const logLevel = this.options.logLevel!;

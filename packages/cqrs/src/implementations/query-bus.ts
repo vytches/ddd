@@ -1,6 +1,6 @@
 import { IQueryBus } from '../abstracts';
 import type { IQuery, IQueryHandler } from '../interfaces';
-import type { ICQRSMiddleware} from '../middleware';
+import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
@@ -12,23 +12,24 @@ export class QueryBus extends IQueryBus {
     IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
   >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver: ((handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>) | undefined;
+  private handlerResolver:
+    | ((handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>)
+    | undefined;
 
-  constructor(handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>) {
+  constructor(
+    handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>
+  ) {
     super();
     this.handlerResolver = handlerResolver ?? undefined;
   }
 
-  register<T extends IQuery<R>, R>(
-    queryType: unknown,
-    handler: IQueryHandler<T, R>,
-  ): void {
+  register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
     this.handlers.set(queryType, handler);
   }
 
   registerFactory<T extends IQuery<R>, R>(
     queryType: unknown,
-    factory: () => IQueryHandler<T, R>,
+    factory: () => IQueryHandler<T, R>
   ): void {
     this.handlers.set(queryType, factory);
   }
@@ -48,7 +49,7 @@ export class QueryBus extends IQueryBus {
       if (!this.handlerResolver) {
         throw new CQRSConfigurationError(
           'Handler resolver required for auto-discovery',
-          'QueryBus',
+          'QueryBus'
         );
       }
 
@@ -58,7 +59,7 @@ export class QueryBus extends IQueryBus {
       } catch (error) {
         throw new CQRSConfigurationError(
           `Failed to resolve handler ${handlerClass.name}: ${error}`,
-          'QueryBus',
+          'QueryBus'
         );
       }
     });
@@ -70,10 +71,7 @@ export class QueryBus extends IQueryBus {
       throw new HandlerNotFoundError(query.constructor.name, 'query');
     }
 
-    const handler =
-      typeof handlerOrFactory === 'function'
-        ? handlerOrFactory()
-        : handlerOrFactory;
+    const handler = typeof handlerOrFactory === 'function' ? handlerOrFactory() : handlerOrFactory;
 
     // Optional validation
     if (this.isValidatable(query) && 'validate' in query) {
@@ -82,12 +80,14 @@ export class QueryBus extends IQueryBus {
 
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
-    return this.executeWithMiddleware(context, () => (handler as IQueryHandler<T, R>).execute(query)) as Promise<R>;
+    return this.executeWithMiddleware(context, () =>
+      (handler as IQueryHandler<T, R>).execute(query)
+    ) as Promise<R>;
   }
 
   private async executeWithMiddleware(
     context: CQRSExecutionContext,
-    handlerExecution: () => Promise<unknown>,
+    handlerExecution: () => Promise<unknown>
   ): Promise<unknown> {
     if (this.middlewares.length === 0) {
       return handlerExecution();
@@ -108,6 +108,11 @@ export class QueryBus extends IQueryBus {
   }
 
   private isValidatable(obj: unknown): obj is ICqrsValidatable {
-    return obj != null && typeof obj === 'object' && 'validate' in obj && typeof (obj as Record<string, unknown>).validate === 'function';
+    return (
+      obj != null &&
+      typeof obj === 'object' &&
+      'validate' in obj &&
+      typeof (obj as Record<string, unknown>).validate === 'function'
+    );
   }
 }

@@ -11,7 +11,7 @@ export abstract class BaseApplicationService implements IApplicationService {
 
   protected validateRequest<T>(
     request: T,
-    validator: BusinessRuleValidator<T>,
+    validator: BusinessRuleValidator<T>
   ): Result<void, Array<{ field: string; message: string }>> {
     const validationResult = validator.validate(request);
 
@@ -19,7 +19,7 @@ export abstract class BaseApplicationService implements IApplicationService {
       // Convert ValidationErrors to array format expected by tests
       const errorArray = validationResult.error.errors.map(error => ({
         field: error.property,
-        message: error.message
+        message: error.message,
       }));
       return Result.fail(errorArray);
     }
@@ -29,25 +29,27 @@ export abstract class BaseApplicationService implements IApplicationService {
 
   protected handleDomainError(error: unknown): ApplicationError {
     const errorMessage = this.extractErrorMessage(error);
-    return new ApplicationError(
-      `Domain operation failed: ${errorMessage}`,
-      error,
-    );
+    return new ApplicationError(`Domain operation failed: ${errorMessage}`, error);
   }
 
   private extractErrorMessage(error: unknown): string {
     if (error == null) {
       return String(error); // Will return 'null' or 'undefined'
     }
-    
+
     if (typeof error === 'string') {
       return error;
     }
-    
-    if (error && typeof error === 'object' && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof (error as { message: unknown }).message === 'string'
+    ) {
       return (error as { message: string }).message;
     }
-    
+
     return String(error);
   }
 }
@@ -55,16 +57,16 @@ export abstract class BaseApplicationService implements IApplicationService {
 export class ApplicationError extends IDomainError {
   constructor(
     message: string,
-    public readonly innerError?: unknown,
+    public readonly innerError?: unknown
   ) {
-    super(message, { 
+    super(message, {
       data: { innerError },
-      error: innerError instanceof Error ? innerError : undefined 
+      error: innerError instanceof Error ? innerError : undefined,
     });
-    
+
     // Set the error name to match what IDomainError expects
     this.name = 'IDomainError';
-    
+
     // Ensure data is properly set with innerError
     if (!this.data) {
       this.data = {};

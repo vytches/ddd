@@ -67,14 +67,17 @@ export class DefaultLogContextBuilder implements LogContextBuilder {
     return this;
   }
 
-  withMetadata(keyOrMetadata: string | Record<string, unknown>, value?: unknown): LogContextBuilder {
+  withMetadata(
+    keyOrMetadata: string | Record<string, unknown>,
+    value?: unknown
+  ): LogContextBuilder {
     if (typeof keyOrMetadata === 'string') {
       this.context = {
         ...this.context,
         metadata: {
           ...this.context.metadata,
           [keyOrMetadata]: value,
-        }
+        },
       };
     } else {
       this.context = {
@@ -82,7 +85,7 @@ export class DefaultLogContextBuilder implements LogContextBuilder {
         metadata: {
           ...this.context.metadata,
           ...keyOrMetadata,
-        }
+        },
       };
     }
     return this;
@@ -91,8 +94,12 @@ export class DefaultLogContextBuilder implements LogContextBuilder {
   build(): LogContext {
     return {
       name: this.context.name,
-      ...(this.context.boundedContext !== undefined && { boundedContext: this.context.boundedContext }),
-      ...(this.context.correlationId !== undefined && { correlationId: this.context.correlationId }),
+      ...(this.context.boundedContext !== undefined && {
+        boundedContext: this.context.boundedContext,
+      }),
+      ...(this.context.correlationId !== undefined && {
+        correlationId: this.context.correlationId,
+      }),
       ...(this.context.userId !== undefined && { userId: this.context.userId }),
       ...(this.context.tenantId !== undefined && { tenantId: this.context.tenantId }),
       ...(this.context.requestId !== undefined && { requestId: this.context.requestId }),

@@ -2,10 +2,10 @@
 
 /**
  * Quality Gates Orchestrator
- * 
+ *
  * Main script that coordinates all quality gate checks for the VytchesDDD project.
  * Integrates TypeScript any monitoring, bundle size protection, and performance monitoring.
- * 
+ *
  * Features:
  * - Centralized quality gate execution
  * - Parallel execution for performance
@@ -38,9 +38,9 @@ class QualityGateOrchestrator {
         totalImprovements: 0,
         passedGates: 0,
         totalGates: 0,
-        overallStatus: 'unknown'
+        overallStatus: 'unknown',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -53,13 +53,13 @@ class QualityGateOrchestrator {
       skipBundleSize = false,
       skipPerformance = false,
       parallel = true,
-      saveBaselines = false
+      saveBaselines = false,
     } = config;
 
     console.log('🚀 Running Quality Gates Analysis...\n');
-    console.log('=' .repeat(60));
+    console.log('='.repeat(60));
     console.log(`Timestamp: ${this.results.timestamp}`);
-    console.log('=' .repeat(60) + '\n');
+    console.log('='.repeat(60) + '\n');
 
     const tasks = [];
 
@@ -67,21 +67,21 @@ class QualityGateOrchestrator {
     if (!skipAnyTypes) {
       tasks.push({
         name: 'any-types',
-        task: () => this.runAnyTypeMonitoring(saveBaselines)
+        task: () => this.runAnyTypeMonitoring(saveBaselines),
       });
     }
 
     if (!skipBundleSize) {
       tasks.push({
         name: 'bundle-size',
-        task: () => this.runBundleSizeMonitoring(saveBaselines)
+        task: () => this.runBundleSizeMonitoring(saveBaselines),
       });
     }
 
     if (!skipPerformance) {
       tasks.push({
         name: 'performance',
-        task: () => this.runPerformanceMonitoring(saveBaselines)
+        task: () => this.runPerformanceMonitoring(saveBaselines),
       });
     }
 
@@ -96,7 +96,7 @@ class QualityGateOrchestrator {
 
     // Generate summary
     this.generateSummary();
-    
+
     return this.results;
   }
 
@@ -104,12 +104,12 @@ class QualityGateOrchestrator {
    * Run tasks in parallel
    */
   async runTasksInParallel(tasks) {
-    const promises = tasks.map(({ name, task }) => 
+    const promises = tasks.map(({ name, task }) =>
       task().catch(error => ({ error: error.message, name }))
     );
 
     const results = await Promise.all(promises);
-    
+
     // Check for errors
     for (const result of results) {
       if (result && result.error) {
@@ -136,7 +136,7 @@ class QualityGateOrchestrator {
    */
   async runAnyTypeMonitoring(saveBaseline = false) {
     console.log('🔍 Running TypeScript `any` Type Analysis...\n');
-    
+
     const monitor = new AnyTypeMonitor();
     await monitor.analyze();
     monitor.checkThresholds();
@@ -151,7 +151,7 @@ class QualityGateOrchestrator {
       unjustifiedAnyTypes: monitor.results.unjustifiedAnyTypes,
       violations: monitor.results.violations,
       packageResults: Object.fromEntries(monitor.results.packageResults),
-      passed: monitor.results.violations.length === 0
+      passed: monitor.results.violations.length === 0,
     };
 
     console.log(monitor.generateReport());
@@ -163,7 +163,7 @@ class QualityGateOrchestrator {
    */
   async runBundleSizeMonitoring(saveBaseline = false) {
     console.log('📦 Running Bundle Size Analysis...\n');
-    
+
     const monitor = new BundleSizeMonitor();
     await monitor.analyze();
     monitor.checkThresholds();
@@ -179,7 +179,7 @@ class QualityGateOrchestrator {
       regressions: monitor.results.regressions,
       improvements: monitor.results.improvements,
       packageResults: Object.fromEntries(monitor.results.packages),
-      passed: monitor.results.violations.length === 0 && monitor.results.regressions.length === 0
+      passed: monitor.results.violations.length === 0 && monitor.results.regressions.length === 0,
     };
 
     console.log(monitor.generateReport());
@@ -191,11 +191,11 @@ class QualityGateOrchestrator {
    */
   async runPerformanceMonitoring(saveBaseline = false) {
     console.log('⚡ Running Performance Analysis...\n');
-    
+
     const monitor = new PerformanceMonitor();
     await monitor.analyze({
       skipBuild: this.options.skipBuild,
-      skipTest: this.options.skipTest
+      skipTest: this.options.skipTest,
     });
     monitor.checkThresholds();
 
@@ -210,7 +210,7 @@ class QualityGateOrchestrator {
       violations: monitor.results.violations,
       regressions: monitor.results.regressions,
       improvements: monitor.results.improvements,
-      passed: monitor.results.violations.length === 0 && monitor.results.regressions.length === 0
+      passed: monitor.results.violations.length === 0 && monitor.results.regressions.length === 0,
     };
 
     console.log(monitor.generateReport());
@@ -222,7 +222,7 @@ class QualityGateOrchestrator {
    */
   generateSummary() {
     const { anyTypes, bundleSize, performance } = this.results;
-    
+
     let totalViolations = 0;
     let totalRegressions = 0;
     let totalImprovements = 0;
@@ -260,7 +260,7 @@ class QualityGateOrchestrator {
       totalImprovements,
       passedGates,
       totalGates,
-      overallStatus
+      overallStatus,
     };
   }
 
@@ -275,7 +275,7 @@ class QualityGateOrchestrator {
     }
 
     let report = '';
-    
+
     // Header
     report += '🏆 Quality Gates Summary Report\n';
     report += '='.repeat(60) + '\n\n';
@@ -283,7 +283,7 @@ class QualityGateOrchestrator {
     // Overall Status
     const { summary } = this.results;
     const statusIcon = summary.overallStatus === 'passed' ? '✅' : '❌';
-    
+
     report += `${statusIcon} Overall Status: ${summary.overallStatus.toUpperCase()}\n`;
     report += `📊 Gates Passed: ${summary.passedGates}/${summary.totalGates}\n`;
     report += `🚨 Total Violations: ${summary.totalViolations}\n`;
@@ -293,45 +293,45 @@ class QualityGateOrchestrator {
 
     // Individual Gate Status
     report += '📋 Individual Gate Status:\n';
-    
+
     if (this.results.anyTypes) {
       const status = this.results.anyTypes.passed ? '✅' : '❌';
       report += `   ${status} TypeScript any Types: ${this.results.anyTypes.totalAnyTypes} total (${this.results.anyTypes.unjustifiedAnyTypes} unjustified)\n`;
     }
-    
+
     if (this.results.bundleSize) {
       const status = this.results.bundleSize.passed ? '✅' : '❌';
       report += `   ${status} Bundle Size: ${this.results.bundleSize.totalSourceSize}KB total\n`;
     }
-    
+
     if (this.results.performance) {
       const status = this.results.performance.passed ? '✅' : '❌';
       const globalMetrics = this.results.performance.globalMetrics;
       const buildTime = globalMetrics.summary ? globalMetrics.summary.totalBuildTime : 'N/A';
       report += `   ${status} Performance: ${buildTime}s total build time\n`;
     }
-    
+
     report += '\n';
 
     // Recommendations
     if (summary.totalViolations > 0 || summary.totalRegressions > 0) {
       report += '💡 Recommendations:\n';
-      
+
       if (this.results.anyTypes && !this.results.anyTypes.passed) {
         report += '   • Review and reduce unjustified `any` type usage\n';
         report += '   • Consider using `unknown` or more specific types\n';
       }
-      
+
       if (this.results.bundleSize && !this.results.bundleSize.passed) {
         report += '   • Review large packages and optimize bundle sizes\n';
         report += '   • Ensure effective tree-shaking is enabled\n';
       }
-      
+
       if (this.results.performance && !this.results.performance.passed) {
         report += '   • Profile and optimize slow build or test operations\n';
         report += '   • Consider parallel execution strategies\n';
       }
-      
+
       report += '\n';
     }
 
@@ -359,7 +359,7 @@ class QualityGateOrchestrator {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     fs.writeFileSync(filePath, JSON.stringify(this.results, null, 2));
     console.log(`✅ Results saved to ${filePath}`);
   }
@@ -378,64 +378,63 @@ async function main() {
     .option('skip-any', {
       type: 'boolean',
       description: 'Skip any type monitoring',
-      default: false
+      default: false,
     })
     .option('skip-bundle', {
       type: 'boolean',
       description: 'Skip bundle size monitoring',
-      default: false
+      default: false,
     })
     .option('skip-performance', {
       type: 'boolean',
       description: 'Skip performance monitoring',
-      default: false
+      default: false,
     })
     .option('skip-build', {
       type: 'boolean',
       description: 'Skip build performance measurement',
-      default: false
+      default: false,
     })
     .option('skip-test', {
       type: 'boolean',
       description: 'Skip test performance measurement',
-      default: false
+      default: false,
     })
     .option('baseline', {
       type: 'boolean',
       description: 'Save current results as baseline',
-      default: false
+      default: false,
     })
     .option('parallel', {
       type: 'boolean',
       description: 'Run quality gates in parallel',
-      default: true
+      default: true,
     })
     .option('verbose', {
       type: 'boolean',
       description: 'Show detailed output',
-      default: false
+      default: false,
     })
     .option('format', {
       type: 'string',
       choices: ['console', 'json'],
       description: 'Output format',
-      default: 'console'
+      default: 'console',
     })
     .option('output', {
       type: 'string',
-      description: 'Save results to file'
+      description: 'Save results to file',
     })
     .option('ci', {
       type: 'boolean',
       description: 'CI mode - exit with error code on violations',
-      default: false
+      default: false,
     })
-    .help()
-    .argv;
+    .help().argv;
 
   const orchestrator = new QualityGateOrchestrator({
     skipBuild: argv.skipBuild,
-    skipTest: argv.skipTest
+    skipTest: argv.skipTest,
   });
 
   try {
@@ -444,12 +443,12 @@ async function main() {
       skipBundleSize: argv.skipBundle,
       skipPerformance: argv.skipPerformance,
       parallel: argv.parallel,
-      saveBaselines: argv.baseline
+      saveBaselines: argv.baseline,
     });
 
     const report = orchestrator.generateReport({
       verbose: argv.verbose,
-      format: argv.format
+      format: argv.format,
     });
 
     console.log(report);
@@ -466,7 +465,6 @@ async function main() {
     if (orchestrator.results.summary.overallStatus === 'passed') {
       console.log('🎉 All quality gates passed successfully!');
     }
-
   } catch (error) {
     console.error('❌ Error running quality gates:', error.message);
     if (argv.verbose) {

@@ -7,11 +7,11 @@
     "sourceMap": false // Disable source maps for production builds
   },
   "include": [
-    "src/**/*", 
-    "../contracts/src/**/*", 
+    "src/**/*",
+    "../contracts/src/**/*",
     "../core/src/**/*",
     "../domain-primitives/src/**/*",
-    "../value-objects/src/**/*", 
+    "../value-objects/src/**/*",
     "../repositories/src/**/*",
     "../aggregates/src/**/*",
     "../utils/src/**/*",

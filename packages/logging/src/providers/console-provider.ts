@@ -73,8 +73,8 @@ export class ConsoleProvider implements LogProvider {
         error: {
           name: event.error.name,
           message: event.error.message,
-          ...(this.options.includeStackTrace && { stack: event.error.stack })
-        }
+          ...(this.options.includeStackTrace && { stack: event.error.stack }),
+        },
       }),
       ...(event.tags && event.tags.length > 0 && { tags: event.tags }),
     };
@@ -106,8 +106,8 @@ export class ConsoleProvider implements LogProvider {
     const colors = {
       TRACE: '\x1b[90m', // gray
       DEBUG: '\x1b[36m', // cyan
-      INFO: '\x1b[32m',  // green
-      WARN: '\x1b[33m',  // yellow
+      INFO: '\x1b[32m', // green
+      WARN: '\x1b[33m', // yellow
       ERROR: '\x1b[31m', // red
       FATAL: '\x1b[35m', // magenta
     };

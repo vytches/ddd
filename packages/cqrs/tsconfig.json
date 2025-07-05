@@ -10,7 +10,7 @@
     "src/**/*",
     "../core/src/**/*",
     "../domain-primitives/src/**/*",
-    "../value-objects/src/**/*", 
+    "../value-objects/src/**/*",
     "../repositories/src/**/*",
     "../aggregates/src/**/*",
     "../validation/src/**/*",

@@ -49,7 +49,10 @@ export class InMemoryIntegrationEventBus
 
     // Jeśli określono kontekst, zapisujemy go
     if (context) {
-      this.handlerContexts.set(handler as unknown as (event: IIntegrationEvent) => Promise<void> | void, context);
+      this.handlerContexts.set(
+        handler as unknown as (event: IIntegrationEvent) => Promise<void> | void,
+        context
+      );
     }
   }
 
@@ -62,7 +65,10 @@ export class InMemoryIntegrationEventBus
     super.registerHandler(eventType, handler);
 
     if (context) {
-      this.handlerContexts.set(handler as unknown as (event: IIntegrationEvent) => Promise<void> | void, context);
+      this.handlerContexts.set(
+        handler as unknown as (event: IIntegrationEvent) => Promise<void> | void,
+        context
+      );
     }
 
     const eventName = this.getEventName(eventType);

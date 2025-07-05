@@ -10,7 +10,7 @@ export interface IACLAdapter<TDomainModel, _TExternalModel, TResult = any> {
   execute(
     operation: string,
     domainModel: TDomainModel,
-    options?: ExecuteOptions,
+    options?: ExecuteOptions
   ): Promise<Result<TResult, ACLError>>;
   fetch(identifier: string): Promise<Result<TDomainModel, ACLError>>;
   supportsOperation(operation: string): boolean;
@@ -22,7 +22,7 @@ export interface ACLMiddleware {
     operation: string,
     domainModel: any,
     options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>>;
 }
 
@@ -32,7 +32,7 @@ export interface IEnhancedACLAdapter<TDomain, TExternal, TResult = any>
   executeTyped<TInput, TOutput>(
     operation: TypedOperation<TInput, TOutput>,
     domainModel: TDomain,
-    options?: ExecuteOptions,
+    options?: ExecuteOptions
   ): Promise<Result<TOutput, ACLError>>;
 }
 

@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Result } from '@vytches-ddd/utils';
-import { BaseApplicationService, ApplicationError, type IApplicationService } from './base-application-service';
+import {
+  BaseApplicationService,
+  ApplicationError,
+  type IApplicationService,
+} from './base-application-service';
 import { BusinessRuleValidator } from '@vytches-ddd/validation';
 import { ValidationError, ValidationErrors } from '@vytches-ddd/validation';
 
@@ -42,40 +46,44 @@ class MockCreateOrderValidator extends BusinessRuleValidator<CreateOrderRequest>
   constructor() {
     super();
     // Override the validate method with mock implementation
-    this.validate = vi.fn((request: CreateOrderRequest): Result<CreateOrderRequest, ValidationErrors> => {
-      const errors = [];
+    this.validate = vi.fn(
+      (request: CreateOrderRequest): Result<CreateOrderRequest, ValidationErrors> => {
+        const errors = [];
 
-      if (!request.customerId) {
-        errors.push(new ValidationError('customerId', 'Customer ID is required'));
+        if (!request.customerId) {
+          errors.push(new ValidationError('customerId', 'Customer ID is required'));
+        }
+
+        if (!request.items || request.items.length === 0) {
+          errors.push(new ValidationError('items', 'Order must have at least one item'));
+        } else {
+          request.items.forEach((item, index) => {
+            if (item.quantity <= 0) {
+              errors.push(
+                new ValidationError(`items[${index}].quantity`, 'Quantity must be positive')
+              );
+            }
+            if (item.price < 0) {
+              errors.push(new ValidationError(`items[${index}].price`, 'Price cannot be negative'));
+            }
+          });
+        }
+
+        if (!request.shippingAddress.street) {
+          errors.push(new ValidationError('shippingAddress.street', 'Street address is required'));
+        }
+
+        if (!request.shippingAddress.country) {
+          errors.push(new ValidationError('shippingAddress.country', 'Country is required'));
+        }
+
+        if (errors.length > 0) {
+          return Result.fail(new ValidationErrors(errors));
+        }
+
+        return Result.ok(request);
       }
-
-      if (!request.items || request.items.length === 0) {
-        errors.push(new ValidationError('items', 'Order must have at least one item'));
-      } else {
-        request.items.forEach((item, index) => {
-          if (item.quantity <= 0) {
-            errors.push(new ValidationError(`items[${index}].quantity`, 'Quantity must be positive'));
-          }
-          if (item.price < 0) {
-            errors.push(new ValidationError(`items[${index}].price`, 'Price cannot be negative'));
-          }
-        });
-      }
-
-      if (!request.shippingAddress.street) {
-        errors.push(new ValidationError('shippingAddress.street', 'Street address is required'));
-      }
-
-      if (!request.shippingAddress.country) {
-        errors.push(new ValidationError('shippingAddress.country', 'Country is required'));
-      }
-
-      if (errors.length > 0) {
-        return Result.fail(new ValidationErrors(errors));
-      }
-
-      return Result.ok(request);
-    });
+    );
   }
 }
 
@@ -83,27 +91,32 @@ class MockUpdateOrderValidator extends BusinessRuleValidator<UpdateOrderRequest>
   constructor() {
     super();
     // Override the validate method with mock implementation
-    this.validate = vi.fn((request: UpdateOrderRequest): Result<UpdateOrderRequest, ValidationErrors> => {
-      const errors = [];
+    this.validate = vi.fn(
+      (request: UpdateOrderRequest): Result<UpdateOrderRequest, ValidationErrors> => {
+        const errors = [];
 
-      if (!request.orderId) {
-        errors.push(new ValidationError('orderId', 'Order ID is required'));
+        if (!request.orderId) {
+          errors.push(new ValidationError('orderId', 'Order ID is required'));
+        }
+
+        if (!request.updates || Object.keys(request.updates).length === 0) {
+          errors.push(new ValidationError('updates', 'At least one update field is required'));
+        }
+
+        if (
+          request.updates.status &&
+          !['pending', 'confirmed', 'shipped', 'delivered'].includes(request.updates.status)
+        ) {
+          errors.push(new ValidationError('updates.status', 'Invalid status value'));
+        }
+
+        if (errors.length > 0) {
+          return Result.fail(new ValidationErrors(errors));
+        }
+
+        return Result.ok(request);
       }
-
-      if (!request.updates || Object.keys(request.updates).length === 0) {
-        errors.push(new ValidationError('updates', 'At least one update field is required'));
-      }
-
-      if (request.updates.status && !['pending', 'confirmed', 'shipped', 'delivered'].includes(request.updates.status)) {
-        errors.push(new ValidationError('updates.status', 'Invalid status value'));
-      }
-
-      if (errors.length > 0) {
-        return Result.fail(new ValidationErrors(errors));
-      }
-
-      return Result.ok(request);
-    });
+    );
   }
 }
 
@@ -111,12 +124,14 @@ class MockUpdateOrderValidator extends BusinessRuleValidator<UpdateOrderRequest>
 class OrderApplicationService extends BaseApplicationService {
   constructor(
     private createOrderValidator: MockCreateOrderValidator,
-    private updateOrderValidator: MockUpdateOrderValidator,
+    private updateOrderValidator: MockUpdateOrderValidator
   ) {
     super('OrderApplicationService');
   }
 
-  async createOrder(request: CreateOrderRequest): Promise<Result<OrderResponse, ApplicationError | Array<{ field: string; message: string }>>> {
+  async createOrder(
+    request: CreateOrderRequest
+  ): Promise<Result<OrderResponse, ApplicationError | Array<{ field: string; message: string }>>> {
     // Validate request
     const validationResult = this.validateRequest(request, this.createOrderValidator);
     if (validationResult.isFailure) {
@@ -125,7 +140,7 @@ class OrderApplicationService extends BaseApplicationService {
 
     try {
       // Simulate domain operation
-      const total = request.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const total = request.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
       const response: OrderResponse = {
         orderId: `ORDER-${Date.now()}`,
@@ -139,7 +154,9 @@ class OrderApplicationService extends BaseApplicationService {
     }
   }
 
-  async updateOrder(request: UpdateOrderRequest): Promise<Result<OrderResponse, ApplicationError | Array<{ field: string; message: string }>>> {
+  async updateOrder(
+    request: UpdateOrderRequest
+  ): Promise<Result<OrderResponse, ApplicationError | Array<{ field: string; message: string }>>> {
     const validationResult = this.validateRequest(request, this.updateOrderValidator);
     if (validationResult.isFailure) {
       return Result.fail(validationResult.error);
@@ -219,8 +236,8 @@ describe('BaseApplicationService', () => {
       const validRequest: CreateOrderRequest = {
         customerId: 'CUST-123',
         items: [
-          { productId: 'PROD-1', quantity: 2, price: 10.50 },
-          { productId: 'PROD-2', quantity: 1, price: 25.00 },
+          { productId: 'PROD-1', quantity: 2, price: 10.5 },
+          { productId: 'PROD-2', quantity: 1, price: 25.0 },
         ],
         shippingAddress: {
           street: '123 Main St',
@@ -261,8 +278,8 @@ describe('BaseApplicationService', () => {
       const invalidRequest: CreateOrderRequest = {
         customerId: 'CUST-123',
         items: [
-          { productId: 'PROD-1', quantity: -1, price: 10.50 }, // Invalid quantity
-          { productId: 'PROD-2', quantity: 2, price: -5.00 }, // Invalid price
+          { productId: 'PROD-1', quantity: -1, price: 10.5 }, // Invalid quantity
+          { productId: 'PROD-2', quantity: 2, price: -5.0 }, // Invalid price
         ],
         shippingAddress: {
           street: '123 Main St',
@@ -429,8 +446,8 @@ describe('Integrated Application Service Scenarios', () => {
       const validRequest: CreateOrderRequest = {
         customerId: 'CUST-123',
         items: [
-          { productId: 'PROD-1', quantity: 2, price: 15.50 },
-          { productId: 'PROD-2', quantity: 1, price: 30.00 },
+          { productId: 'PROD-1', quantity: 2, price: 15.5 },
+          { productId: 'PROD-2', quantity: 1, price: 30.0 },
         ],
         shippingAddress: {
           street: '456 Oak Ave',
@@ -445,7 +462,7 @@ describe('Integrated Application Service Scenarios', () => {
       expect(result.value).toMatchObject({
         orderId: expect.stringMatching(/^ORDER-\d+$/),
         status: 'pending',
-        total: 61.00, // (2 * 15.50) + (1 * 30.00)
+        total: 61.0, // (2 * 15.50) + (1 * 30.00)
       });
       expect(createValidator.validate).toHaveBeenCalledWith(validRequest);
     });
@@ -476,9 +493,9 @@ describe('Integrated Application Service Scenarios', () => {
       const request: CreateOrderRequest = {
         customerId: 'CUST-456',
         items: [
-          { productId: 'PROD-1', quantity: 3, price: 10.00 },
-          { productId: 'PROD-2', quantity: 2, price: 25.50 },
-          { productId: 'PROD-3', quantity: 1, price: 100.00 },
+          { productId: 'PROD-1', quantity: 3, price: 10.0 },
+          { productId: 'PROD-2', quantity: 2, price: 25.5 },
+          { productId: 'PROD-3', quantity: 1, price: 100.0 },
         ],
         shippingAddress: {
           street: '789 Pine St',
@@ -490,7 +507,7 @@ describe('Integrated Application Service Scenarios', () => {
       const result = await service.createOrder(request);
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.total).toBe(181.00); // (3*10) + (2*25.50) + (1*100)
+      expect(result.value.total).toBe(181.0); // (3*10) + (2*25.50) + (1*100)
     });
   });
 
@@ -541,7 +558,9 @@ describe('Integrated Application Service Scenarios', () => {
 
       expect(result.isFailure).toBe(true);
       expect(result.error).toBeInstanceOf(ApplicationError);
-      expect((result.error as ApplicationError).message).toBe('Domain operation failed: Simulated domain error');
+      expect((result.error as ApplicationError).message).toBe(
+        'Domain operation failed: Simulated domain error'
+      );
     });
   });
 

@@ -20,7 +20,7 @@ export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
     contextInfo: ACLContextInfo,
     translator: IModelTranslator<TDomain, TExternal>,
     externalAPI: IExternalAPI<TExternal, TResult>,
-    operations: string[],
+    operations: string[]
   ) {
     super(contextInfo, translator, externalAPI, operations);
   }
@@ -28,7 +28,7 @@ export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
   async executeTyped<TInput, TOutput>(
     operation: TypedOperation<TInput, TOutput>,
     domainModel: TDomain,
-    options?: ExecuteOptions,
+    options?: ExecuteOptions
   ): Promise<Result<TOutput, ACLError>> {
     if (operation.validateBusinessRules) {
       const validation = operation.validateBusinessRules(domainModel as any);
@@ -37,8 +37,8 @@ export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
           new ACLError(
             `Business rule violation: ${validation.error.message}`,
             this.contextInfo.contextName,
-            operation.name,
-          ),
+            operation.name
+          )
         );
       }
     }
@@ -59,7 +59,7 @@ export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
     externalSystemName: string,
     translator: IModelTranslator<TDomain, TExternal>,
     externalAPI: IExternalAPI<TExternal, TResult>,
-    operations: string[],
+    operations: string[]
   ): EnhancedACLAdapter<TDomain, TExternal, TResult> {
     const contextInfo: ACLContextInfo = {
       contextName,
@@ -68,11 +68,6 @@ export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
       supportedOperations: operations,
     };
 
-    return new EnhancedACLAdapter(
-      contextInfo,
-      translator,
-      externalAPI,
-      operations,
-    );
+    return new EnhancedACLAdapter(contextInfo, translator, externalAPI, operations);
   }
 }

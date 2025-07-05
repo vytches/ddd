@@ -158,9 +158,7 @@ describe('EventAwareDomainService', () => {
     const service = new TestEventAwareService('event-service');
 
     // Act
-    const [error] = await safeRun(() =>
-      service.publishTestEvent('TestEvent', 'test-data'),
-    );
+    const [error] = await safeRun(() => service.publishTestEvent('TestEvent', 'test-data'));
 
     // Assert
     expect(error).toBeInstanceOf(Error);

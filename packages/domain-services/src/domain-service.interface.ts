@@ -104,6 +104,4 @@ export interface IEventBusAware {
  * @extends {IDomainService}
  * @extends {IUnitOfWorkAware}
  */
-export interface ITransactionalDomainService
-  extends IDomainService,
-    IUnitOfWorkAware {}
+export interface ITransactionalDomainService extends IDomainService, IUnitOfWorkAware {}

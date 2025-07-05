@@ -3,47 +3,34 @@ export {
   IBaseDomainService,
   EventAwareDomainService,
   UnitOfWorkAwareDomainService,
-  AsyncDomainService
+  AsyncDomainService,
 } from './base-domain-service';
 
-export {
-  DomainService,
-  getDomainServiceMetadata
-} from './domain-service.decorator';
+export { DomainService, getDomainServiceMetadata } from './domain-service.decorator';
 
-export {
-  DefaultDomainServiceRegistry
-} from './domain-service-registry';
+export { DefaultDomainServiceRegistry } from './domain-service-registry';
 
-export {
-  GlobalServiceRegistry
-} from './global-service-registry';
+export { GlobalServiceRegistry } from './global-service-registry';
 
-export {
-  ServiceBuilder
-} from './service-builder';
+export { ServiceBuilder } from './service-builder';
 
 // Types commonly used
 export type {
   IDomainService,
   IEventBusAware,
   IUnitOfWorkAware,
-  IAsyncDomainService
+  IAsyncDomainService,
 } from './domain-service.interface';
 
-export type {
-  DomainServiceOptions
-} from './domain-service.decorator';
+export type { DomainServiceOptions } from './domain-service.decorator';
 
-export type {
-  IDomainServiceRegistry
-} from './domain-service-registry.interface';
+export type { IDomainServiceRegistry } from './domain-service-registry.interface';
 
 // Errors
 export {
   ServiceDuplicateError,
   ServiceNotFoundError,
-  ServiceCircularError
+  ServiceCircularError,
 } from './service.errors';
 
 // For advanced usage - full exports

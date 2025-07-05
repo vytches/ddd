@@ -1,16 +1,20 @@
 # @vytches-ddd/logging
 
-Domain-Driven Design logging utilities with smart context detection, structured logging, and seamless ecosystem integration.
+Domain-Driven Design logging utilities with smart context detection, structured
+logging, and seamless ecosystem integration.
 
 ## Features
 
 - 🎯 **DDD-First Design** - Built specifically for Domain-Driven Design patterns
-- 🔍 **Smart Context Detection** - Automatically detects bounded context, class names, and method names
+- 🔍 **Smart Context Detection** - Automatically detects bounded context, class
+  names, and method names
 - 📊 **Structured Logging** - JSON-based logging with metadata support
 - 🔐 **Data Masking** - Automatic PII and sensitive data masking
 - 🔄 **CQRS Integration** - Decorators and middleware for commands and queries
-- 📦 **Result Pattern Integration** - Seamless integration with @vytches-ddd/utils Result pattern
-- 🎨 **Pluggable Providers** - Easy integration with Winston, Pino, or custom loggers
+- 📦 **Result Pattern Integration** - Seamless integration with
+  @vytches-ddd/utils Result pattern
+- 🎨 **Pluggable Providers** - Easy integration with Winston, Pino, or custom
+  loggers
 - 🚀 **Zero Configuration** - Works out of the box with sensible defaults
 
 ## Quick Start
@@ -34,9 +38,9 @@ userLogger.info('User operation completed', { userId: '123' });
 ```typescript
 class UserService {
   private logger = Logger.forContext(); // Automatically detects "UserService"
-  
+
   async registerUser(user: User) {
-    this.logger.info('Registering user', { email: user.email }); 
+    this.logger.info('Registering user', { email: user.email });
     // Output: [UserManagement] [UserService] Registering user { email: "[MASKED]" }
   }
 }
@@ -61,16 +65,16 @@ class CreateUserCommandHandler {
 ```typescript
 import { ResultLoggingExtensions } from '@vytches-ddd/logging/integration';
 
-const result = await userService.createUser(userData)
-  .then(result => ResultLoggingExtensions.tapLog(
-    result, 
-    'User creation completed', 
-    { includeValue: true }
-  ))
-  .then(result => ResultLoggingExtensions.tapLogError(
-    result, 
-    'User creation failed'
-  ));
+const result = await userService
+  .createUser(userData)
+  .then(result =>
+    ResultLoggingExtensions.tapLog(result, 'User creation completed', {
+      includeValue: true,
+    })
+  )
+  .then(result =>
+    ResultLoggingExtensions.tapLogError(result, 'User creation failed')
+  );
 ```
 
 ## Configuration
@@ -85,18 +89,18 @@ Logger.configure({
   provider: 'console', // or custom provider
   contextDetection: {
     enabled: true,
-    includeStackTrace: false
+    includeStackTrace: false,
   },
   formatting: {
     colorize: true,
     prettyPrint: true,
-    timestamp: true
+    timestamp: true,
   },
   masking: {
     enabled: true,
     patterns: [/custom-pattern/g],
-    replacement: '[REDACTED]'
-  }
+    replacement: '[REDACTED]',
+  },
 });
 ```
 
@@ -132,14 +136,14 @@ class WinstonAdapter implements LogProvider {
       context: event.context,
       logId: event.id,
       ...(event.data && { data: event.data }),
-      ...(event.error && { 
+      ...(event.error && {
         error: {
           name: event.error.name,
           message: event.error.message,
-          stack: event.error.stack
-        }
+          stack: event.error.stack,
+        },
       }),
-      ...(event.tags && { tags: event.tags })
+      ...(event.tags && { tags: event.tags }),
     };
 
     this.winston.log(event.level, event.message, meta);
@@ -150,11 +154,11 @@ class WinstonAdapter implements LogProvider {
 const winstonLogger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
-  transports: [new winston.transports.Console()]
+  transports: [new winston.transports.Console()],
 });
 
 Logger.configure({
-  provider: new WinstonAdapter(winstonLogger)
+  provider: new WinstonAdapter(winstonLogger),
 });
 ```
 
@@ -175,7 +179,7 @@ class PinoAdapter implements LogProvider {
       context: event.context,
       ...(event.data && { data: event.data }),
       ...(event.error && { err: event.error }),
-      ...(event.tags && { tags: event.tags })
+      ...(event.tags && { tags: event.tags }),
     };
 
     this.pino[event.level](obj, event.message);
@@ -186,7 +190,7 @@ class PinoAdapter implements LogProvider {
 const pinoLogger = pino({ level: 'info' });
 
 Logger.configure({
-  provider: new PinoAdapter(pinoLogger)
+  provider: new PinoAdapter(pinoLogger),
 });
 ```
 
@@ -212,7 +216,7 @@ class HttpLogProvider implements LogProvider {
 
   write(event: LogEvent): void {
     this.batch.push(event);
-    
+
     if (this.batch.length >= this.batchSize) {
       this.flush();
     }
@@ -228,7 +232,7 @@ class HttpLogProvider implements LogProvider {
       await fetch(this.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logs: logsToSend })
+        body: JSON.stringify({ logs: logsToSend }),
       });
     } catch (error) {
       console.error('Failed to send logs to HTTP endpoint:', error);
@@ -252,8 +256,8 @@ class HttpLogProvider implements LogProvider {
 Logger.configure({
   provider: new HttpLogProvider('https://api.example.com/logs', {
     batchSize: 50,
-    flushInterval: 10000
-  })
+    flushInterval: 10000,
+  }),
 });
 ```
 
@@ -269,8 +273,8 @@ class FileLogProvider implements LogProvider {
 
   constructor(
     private logPath: string,
-    private options: { 
-      maxFileSize?: number; 
+    private options: {
+      maxFileSize?: number;
       maxFiles?: number;
       rotateDaily?: boolean;
     } = {}
@@ -279,24 +283,25 @@ class FileLogProvider implements LogProvider {
   }
 
   async write(event: LogEvent): Promise<void> {
-    const logLine = JSON.stringify({
-      timestamp: event.timestamp.toISOString(),
-      level: event.level,
-      message: event.message,
-      context: event.context,
-      ...(event.data && { data: event.data }),
-      ...(event.error && { 
-        error: {
-          name: event.error.name,
-          message: event.error.message,
-          stack: event.error.stack
-        }
-      }),
-      ...(event.tags && { tags: event.tags })
-    }) + '\n';
+    const logLine =
+      JSON.stringify({
+        timestamp: event.timestamp.toISOString(),
+        level: event.level,
+        message: event.message,
+        context: event.context,
+        ...(event.data && { data: event.data }),
+        ...(event.error && {
+          error: {
+            name: event.error.name,
+            message: event.error.message,
+            stack: event.error.stack,
+          },
+        }),
+        ...(event.tags && { tags: event.tags }),
+      }) + '\n';
 
     const filePath = this.getCurrentLogFile();
-    
+
     try {
       await fs.appendFile(filePath, logLine);
       await this.checkRotation(filePath);
@@ -327,7 +332,7 @@ class FileLogProvider implements LogProvider {
 
   private async checkRotation(filePath: string): Promise<void> {
     const maxSize = this.options.maxFileSize || 10 * 1024 * 1024; // 10MB
-    
+
     try {
       const stats = await fs.stat(filePath);
       if (stats.size > maxSize) {
@@ -340,19 +345,19 @@ class FileLogProvider implements LogProvider {
 
   private async rotateFile(filePath: string): Promise<void> {
     const maxFiles = this.options.maxFiles || 5;
-    
+
     // Rotate existing files
     for (let i = maxFiles - 1; i >= 1; i--) {
       const oldFile = `${filePath}.${i}`;
       const newFile = `${filePath}.${i + 1}`;
-      
+
       try {
         await fs.rename(oldFile, newFile);
       } catch (error) {
         // File might not exist
       }
     }
-    
+
     // Move current file to .1
     try {
       await fs.rename(filePath, `${filePath}.1`);
@@ -367,8 +372,8 @@ Logger.configure({
   provider: new FileLogProvider('/var/log/app/application.log', {
     maxFileSize: 50 * 1024 * 1024, // 50MB
     maxFiles: 10,
-    rotateDaily: true
-  })
+    rotateDaily: true,
+  }),
 });
 ```
 
@@ -379,15 +384,14 @@ Logger.configure({
 ```typescript
 // Different log levels and providers per bounded context
 Logger.configure({
-  provider: 'console' // Default
+  provider: 'console', // Default
 });
 
 // Override for specific context
-const paymentLogger = Logger.forContext('PaymentService')
-  .withContext({ 
-    boundedContext: 'PaymentProcessing',
-    tenantId: 'tenant-123' 
-  });
+const paymentLogger = Logger.forContext('PaymentService').withContext({
+  boundedContext: 'PaymentProcessing',
+  tenantId: 'tenant-123',
+});
 ```
 
 ### Correlation and Tracing
@@ -417,21 +421,35 @@ Logger.configure({
     patterns: [
       /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, // Credit cards
       /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, // Emails
-      /\bpassword["\']?\s*[:=]\s*["\']?[^\s,"'}]+/gi // Passwords
+      /\bpassword["\']?\s*[:=]\s*["\']?[^\s,"'}]+/gi, // Passwords
     ],
     sensitiveKeys: [
-      'password', 'passwd', 'secret', 'token', 'key', 'authorization', 'auth',
-      'email', 'phone', 'ssn', 'credit', 'card', 'pin', 'cvv',
-      'personalId', 'creditCard'  // Add your domain-specific keys
+      'password',
+      'passwd',
+      'secret',
+      'token',
+      'key',
+      'authorization',
+      'auth',
+      'email',
+      'phone',
+      'ssn',
+      'credit',
+      'card',
+      'pin',
+      'cvv',
+      'personalId',
+      'creditCard', // Add your domain-specific keys
     ],
-    replacement: '[MASKED]'
-  }
+    replacement: '[MASKED]',
+  },
 });
 ```
 
 ## Integration with Observability
 
-The logging system is designed to work seamlessly with the existing observability infrastructure in `@vytches-ddd/resilience`:
+The logging system is designed to work seamlessly with the existing
+observability infrastructure in `@vytches-ddd/resilience`:
 
 ```typescript
 import { Logger } from '@vytches-ddd/logging';
@@ -461,13 +479,14 @@ const logger = Logger.forContext('UserService');
 logger.info('User created', {
   userId: user.id,
   eventType: 'UserCreated',
-  timestamp: new Date()
+  timestamp: new Date(),
 } satisfies Partial<UserCreatedEvent>);
 ```
 
 ## Best Practices
 
-1. **Use Context Detection**: Let the logger automatically detect context when possible
+1. **Use Context Detection**: Let the logger automatically detect context when
+   possible
 2. **Structured Data**: Always use the data parameter for structured information
 3. **Sensitive Data**: Configure masking patterns for your domain
 4. **Correlation IDs**: Use correlation tracking for request tracing
@@ -477,4 +496,5 @@ logger.info('User created', {
 
 ## Examples
 
-See the `/examples` directory for complete implementation examples and usage patterns.
+See the `/examples` directory for complete implementation examples and usage
+patterns.

@@ -12,22 +12,16 @@ import type {
 } from './acl.interfaces';
 import { ACLError } from './acl-errors';
 
-export abstract class BaseACLAdapter<
-  TDomainModel,
-  TExternalModel,
-  TResult = any,
-> implements IACLAdapter<TDomainModel, TExternalModel, TResult>
+export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any>
+  implements IACLAdapter<TDomainModel, TExternalModel, TResult>
 {
   private readonly supportedOps = new Set<string>();
   protected middlewares: ACLMiddleware[] = [];
 
   constructor(
     protected readonly contextInfo: ACLContextInfo,
-    protected readonly translator: IModelTranslator<
-      TDomainModel,
-      TExternalModel
-    >,
-    protected readonly externalAPI: IExternalAPI<TExternalModel, TResult>,
+    protected readonly translator: IModelTranslator<TDomainModel, TExternalModel>,
+    protected readonly externalAPI: IExternalAPI<TExternalModel, TResult>
   ) {
     // registerSupportedOperations() will be called by subclasses after initialization
   }
@@ -40,7 +34,7 @@ export abstract class BaseACLAdapter<
   async execute(
     operation: string,
     domainModel: TDomainModel,
-    options: ExecuteOptions = {},
+    options: ExecuteOptions = {}
   ): Promise<Result<TResult, ACLError>> {
     if (this.middlewares.length === 0) {
       return this.executeCore(operation, domainModel, options);
@@ -55,9 +49,7 @@ export abstract class BaseACLAdapter<
       const domainModel = this.translator.fromExternal(externalModel);
       return Result.ok(domainModel);
     } catch (error) {
-      return Result.fail(
-        this.createContextualError('FETCH', error as Error, {}),
-      );
+      return Result.fail(this.createContextualError('FETCH', error as Error, {}));
     }
   }
 
@@ -78,40 +70,29 @@ export abstract class BaseACLAdapter<
   protected async executeCore(
     operation: string,
     domainModel: TDomainModel,
-    options: ExecuteOptions,
+    options: ExecuteOptions
   ): Promise<Result<TResult, ACLError>> {
     try {
       if (!this.supportsOperation(operation)) {
-        return Result.fail(
-          ACLError.unsupportedOperation(
-            this.contextInfo.contextName,
-            operation,
-          ),
-        );
+        return Result.fail(ACLError.unsupportedOperation(this.contextInfo.contextName, operation));
       }
 
       const externalModel = this.translator.toExternal(domainModel);
 
       const result = options.timeout
-        ? await this.executeWithTimeout(
-            operation,
-            externalModel,
-            options.timeout,
-          )
+        ? await this.executeWithTimeout(operation, externalModel, options.timeout)
         : await this.externalAPI.execute(operation, externalModel);
 
       return Result.ok(result);
     } catch (error) {
-      return Result.fail(
-        this.createContextualError(operation, error as Error, options),
-      );
+      return Result.fail(this.createContextualError(operation, error as Error, options));
     }
   }
 
   private buildMiddlewarePipeline(
     operation: string,
     domainModel: TDomainModel,
-    options: ExecuteOptions,
+    options: ExecuteOptions
   ): Promise<Result<TResult, ACLError>> {
     let index = 0;
 
@@ -130,31 +111,21 @@ export abstract class BaseACLAdapter<
   private async executeWithTimeout(
     operation: string,
     externalModel: TExternalModel,
-    timeoutMs: number,
+    timeoutMs: number
   ): Promise<TResult> {
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error(`Request timeout after ${timeoutMs}ms`)),
-        timeoutMs,
-      ),
+      setTimeout(() => reject(new Error(`Request timeout after ${timeoutMs}ms`)), timeoutMs)
     );
 
-    return Promise.race([
-      this.externalAPI.execute(operation, externalModel),
-      timeoutPromise,
-    ]);
+    return Promise.race([this.externalAPI.execute(operation, externalModel), timeoutPromise]);
   }
 
   private createContextualError(
     operation: string,
     error: Error,
-    options: ExecuteOptions,
+    options: ExecuteOptions
   ): ACLError {
-    const aclError = ACLError.operationFailed(
-      this.contextInfo.contextName,
-      operation,
-      error,
-    );
+    const aclError = ACLError.operationFailed(this.contextInfo.contextName, operation, error);
 
     // Add correlation context
     if (options.correlationId) {
@@ -176,18 +147,18 @@ export abstract class BaseACLAdapter<
   }
 }
 
-export class SimpleACLAdapter<
+export class SimpleACLAdapter<TDomain, TExternal, TResult = any> extends BaseACLAdapter<
   TDomain,
   TExternal,
-  TResult = any,
-> extends BaseACLAdapter<TDomain, TExternal, TResult> {
+  TResult
+> {
   private operations: string[];
 
   constructor(
     contextInfo: ACLContextInfo,
     translator: IModelTranslator<TDomain, TExternal>,
     externalAPI: IExternalAPI<TExternal, TResult>,
-    operations: string[],
+    operations: string[]
   ) {
     super(contextInfo, translator, externalAPI);
     this.operations = operations;
@@ -197,7 +168,7 @@ export class SimpleACLAdapter<
 
   protected registerSupportedOperations(): void {
     if (this.operations) {
-      this.operations.forEach((op) => this.registerOperation(op));
+      this.operations.forEach(op => this.registerOperation(op));
     }
   }
 
@@ -206,7 +177,7 @@ export class SimpleACLAdapter<
     externalSystemName: string,
     translator: IModelTranslator<TDomain, TExternal>,
     externalAPI: IExternalAPI<TExternal, TResult>,
-    operations: string[],
+    operations: string[]
   ): SimpleACLAdapter<TDomain, TExternal, TResult> {
     const contextInfo: ACLContextInfo = {
       contextName,
@@ -215,11 +186,6 @@ export class SimpleACLAdapter<
       supportedOperations: operations,
     };
 
-    return new SimpleACLAdapter(
-      contextInfo,
-      translator,
-      externalAPI,
-      operations,
-    );
+    return new SimpleACLAdapter(contextInfo, translator, externalAPI, operations);
   }
 }

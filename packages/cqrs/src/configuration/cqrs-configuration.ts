@@ -1,10 +1,5 @@
 import type { ICommandBus, IQueryBus } from '../abstracts';
-import {
-  CommandBus,
-  QueryBus,
-  EnhancedCommandBus,
-  EnhancedQueryBus,
-} from '../implementations';
+import { CommandBus, QueryBus, EnhancedCommandBus, EnhancedQueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 
 export class CQRSConfiguration {
@@ -32,7 +27,7 @@ export class CQRSConfiguration {
         : new QueryBus(handlerResolver);
 
     // Apply middlewares
-    middlewares.forEach((middleware) => {
+    middlewares.forEach(middleware => {
       this.commandBus.use(middleware);
       this.queryBus.use(middleware);
     });

@@ -4,7 +4,7 @@ import {
   CompositeResilienceStrategy,
   CircuitBreakerStrategy,
   RetryStrategy,
-  TimeoutStrategy
+  TimeoutStrategy,
 } from '../patterns/resilience-strategy';
 import { DefaultResilienceContext, TimeoutError } from './resilience-context';
 
@@ -21,7 +21,7 @@ describe('ResilienceStrategy', () => {
         failureThreshold: 2,
         recoveryTimeout: 1000,
         successThreshold: 1,
-        timeout: 5000
+        timeout: 5000,
       });
 
       const operation = vi.fn().mockResolvedValue('success');
@@ -36,7 +36,7 @@ describe('ResilienceStrategy', () => {
         failureThreshold: 1,
         recoveryTimeout: 1000,
         successThreshold: 1,
-        timeout: 5000
+        timeout: 5000,
       });
 
       const metrics = strategy.getMetrics();
@@ -52,10 +52,11 @@ describe('ResilienceStrategy', () => {
         baseDelay: 100,
         maxDelay: 1000,
         backoffMultiplier: 2,
-        jitter: false
+        jitter: false,
       });
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -69,9 +70,9 @@ describe('ResilienceStrategy', () => {
   describe('TimeoutStrategy', () => {
     it('should apply timeout to operation', async () => {
       const strategy = new TimeoutStrategy(100);
-      const operation = vi.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 200))
-      );
+      const operation = vi
+        .fn()
+        .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
 
       await expect(strategy.execute(operation, context)).rejects.toThrow(TimeoutError);
     });
@@ -93,17 +94,15 @@ describe('ResilienceStrategy', () => {
         baseDelay: 1,
         maxDelay: 10,
         backoffMultiplier: 2,
-        jitter: false
+        jitter: false,
       });
 
       const timeoutStrategy = new TimeoutStrategy(5000);
 
-      const composite = CompositeResilienceStrategy.combine(
-        retryStrategy,
-        timeoutStrategy
-      );
+      const composite = CompositeResilienceStrategy.combine(retryStrategy, timeoutStrategy);
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 
@@ -122,7 +121,7 @@ describe('ResilienceStrategy', () => {
           const result = await op(ctx);
           executionOrder.push('strategy1-end');
           return result;
-        })
+        }),
       };
 
       const strategy2 = {
@@ -131,7 +130,7 @@ describe('ResilienceStrategy', () => {
           const result = await op(ctx);
           executionOrder.push('strategy2-end');
           return result;
-        })
+        }),
       };
 
       const composite = new CompositeResilienceStrategy([strategy1, strategy2]);
@@ -147,36 +146,32 @@ describe('ResilienceStrategy', () => {
         'strategy2-start',
         'operation',
         'strategy2-end',
-        'strategy1-end'
+        'strategy1-end',
       ]);
     });
   });
 
   describe('ResiliencePolicyBuilder', () => {
     it('should build single strategy', () => {
-      const policy = ResiliencePolicyBuilder
-        .create()
-        .withTimeout(5000)
-        .build();
+      const policy = ResiliencePolicyBuilder.create().withTimeout(5000).build();
 
       expect(policy).toBeInstanceOf(TimeoutStrategy);
     });
 
     it('should build composite strategy with multiple components', () => {
-      const policy = ResiliencePolicyBuilder
-        .create()
+      const policy = ResiliencePolicyBuilder.create()
         .withCircuitBreaker({
           failureThreshold: 3,
           recoveryTimeout: 1000,
           successThreshold: 2,
-          timeout: 5000
+          timeout: 5000,
         })
         .withRetry({
           maxAttempts: 3,
           baseDelay: 100,
           maxDelay: 1000,
           backoffMultiplier: 2,
-          jitter: false
+          jitter: false,
         })
         .withTimeout(10000)
         .build();
@@ -191,19 +186,19 @@ describe('ResilienceStrategy', () => {
     });
 
     it('should execute complete resilience policy', async () => {
-      const policy = ResiliencePolicyBuilder
-        .create()
+      const policy = ResiliencePolicyBuilder.create()
         .withRetry({
           maxAttempts: 3,
           baseDelay: 1,
           maxDelay: 10,
           backoffMultiplier: 2,
-          jitter: false
+          jitter: false,
         })
         .withTimeout(5000)
         .build();
 
-      const operation = vi.fn()
+      const operation = vi
+        .fn()
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValue('success');
 

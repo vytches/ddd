@@ -73,15 +73,17 @@ class ValidatingOrderTranslator extends BaseModelTranslator<OrderDomainModel, Or
     return Result.ok(undefined);
   });
 
-  public override validateExternal = vi.fn((externalModel: OrderExternalModel): Result<void, Error> => {
-    if (!externalModel.order_id) {
-      return Result.fail(new Error('External order_id is required'));
+  public override validateExternal = vi.fn(
+    (externalModel: OrderExternalModel): Result<void, Error> => {
+      if (!externalModel.order_id) {
+        return Result.fail(new Error('External order_id is required'));
+      }
+      if (isNaN(parseFloat(externalModel.total_amount))) {
+        return Result.fail(new Error('External total_amount must be a valid number'));
+      }
+      return Result.ok(undefined);
     }
-    if (isNaN(parseFloat(externalModel.total_amount))) {
-      return Result.fail(new Error('External total_amount must be a valid number'));
-    }
-    return Result.ok(undefined);
-  });
+  );
 
   protected performToExternalTranslation(domainModel: OrderDomainModel): OrderExternalModel {
     return {
@@ -165,7 +167,7 @@ describe('BaseModelTranslator', () => {
     it('should initialize with context name', () => {
       const contextName = 'TestOrderContext';
       const testTranslator = new OrderTranslator(contextName);
-      
+
       expect((testTranslator as any).contextName).toBe(contextName);
     });
 
@@ -186,9 +188,9 @@ describe('BaseModelTranslator', () => {
       const complexDomain: OrderDomainModel = {
         ...sampleDomainModel,
         items: [
-          { productId: 'PROD-1', quantity: 1, price: 10.50 },
+          { productId: 'PROD-1', quantity: 1, price: 10.5 },
           { productId: 'PROD-2', quantity: 3, price: 25.75 },
-          { productId: 'PROD-3', quantity: 2, price: 100.00 },
+          { productId: 'PROD-3', quantity: 2, price: 100.0 },
         ],
         totalAmount: 287.25,
       };
@@ -472,15 +474,20 @@ describe('BaseModelTranslator', () => {
     });
 
     it('should wrap unexpected errors in TranslationError', () => {
-      const translator = new class extends BaseModelTranslator<OrderDomainModel, OrderExternalModel> {
+      const translator = new (class extends BaseModelTranslator<
+        OrderDomainModel,
+        OrderExternalModel
+      > {
         protected performToExternalTranslation(_domainModel: OrderDomainModel): OrderExternalModel {
           throw new TypeError('Unexpected type error');
         }
 
-        protected performFromExternalTranslation(_externalModel: OrderExternalModel): OrderDomainModel {
+        protected performFromExternalTranslation(
+          _externalModel: OrderExternalModel
+        ): OrderDomainModel {
           throw new ReferenceError('Reference error');
         }
-      }('ErrorContext');
+      })('ErrorContext');
 
       // Test toExternal error wrapping
       try {

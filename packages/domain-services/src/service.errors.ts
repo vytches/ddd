@@ -3,10 +3,7 @@ import { IDomainError, DomainErrorCode } from '@vytches-ddd/core';
 import type { DomainErrorOptions } from '@vytches-ddd/core';
 
 export class ServiceDuplicateError extends IDomainError {
-  static withServiceId(
-    serviceId: string,
-    data?: DomainErrorOptions,
-  ): ServiceDuplicateError {
+  static withServiceId(serviceId: string, data?: DomainErrorOptions): ServiceDuplicateError {
     const message = `Service with id ${serviceId} already exists`;
     const options = {
       code: DomainErrorCode.DuplicateEntry,
@@ -17,10 +14,7 @@ export class ServiceDuplicateError extends IDomainError {
 }
 
 export class ServiceNotFoundError extends IDomainError {
-  static withServiceId(
-    serviceId: string,
-    data?: DomainErrorOptions,
-  ): ServiceNotFoundError {
+  static withServiceId(serviceId: string, data?: DomainErrorOptions): ServiceNotFoundError {
     const message = `Service with id ${serviceId} not found`;
     const options = {
       code: DomainErrorCode.NotFound,
@@ -31,10 +25,7 @@ export class ServiceNotFoundError extends IDomainError {
 }
 
 export class ServiceCircularError extends IDomainError {
-  static withServices(
-    services: string[],
-    data?: DomainErrorOptions,
-  ): ServiceNotFoundError {
+  static withServices(services: string[], data?: DomainErrorOptions): ServiceNotFoundError {
     const remaining = Array.from(services).join(', ');
     const message = `Circular dependency detected: ${remaining}`;
     const options = {

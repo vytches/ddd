@@ -17,7 +17,7 @@ export class EnhancedQueryBus extends QueryBus {
     this.use(new LoggingMiddleware());
   }
 
-   override async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
+  override async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
     const startTime = performance.now();
 
     try {

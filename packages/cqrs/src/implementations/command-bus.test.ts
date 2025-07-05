@@ -16,7 +16,7 @@ describe('CommandBus', () => {
 
     async validate(): Promise<void> {
       if (this.data === 'invalid') {
-        throw new Error('Validation failed');  
+        throw new Error('Validation failed');
       }
     }
   }
@@ -65,7 +65,7 @@ describe('CommandBus', () => {
   describe('registerFactory', () => {
     it('should register handler factory', () => {
       const factory = vi.fn().mockReturnValue(mockHandler);
-      
+
       expect(() => {
         commandBus.registerFactory(TestCommand, factory);
       }).not.toThrow();
@@ -137,14 +137,14 @@ describe('CommandBus', () => {
     it('should execute multiple middlewares in order', async () => {
       const command = new TestCommand('test');
       const calls: number[] = [];
-      
+
       const middleware1: ICQRSMiddleware = {
         handle: vi.fn().mockImplementation(async (context, next) => {
           calls.push(1);
           return next();
         }),
       };
-      
+
       const middleware2: ICQRSMiddleware = {
         handle: vi.fn().mockImplementation(async (context, next) => {
           calls.push(2);
@@ -179,7 +179,7 @@ describe('CommandBus', () => {
     it('should auto-register handlers using resolver', () => {
       const resolver = vi.fn().mockReturnValue(mockHandler);
       const bus = new CommandBus(resolver);
-      
+
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])
       );
@@ -191,10 +191,10 @@ describe('CommandBus', () => {
     it('should skip already registered handlers', () => {
       const resolver = vi.fn().mockReturnValue(mockHandler);
       const bus = new CommandBus(resolver);
-      
+
       // Pre-register handler
       bus.register(TestCommand, mockHandler);
-      
+
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])
       );
@@ -209,7 +209,7 @@ describe('CommandBus', () => {
         throw new Error('Resolution failed');
       });
       const bus = new CommandBus(resolver);
-      
+
       vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
         new Map([[TestCommand, TestCommandHandler]])
       );

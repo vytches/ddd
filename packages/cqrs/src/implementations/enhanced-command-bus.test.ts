@@ -81,7 +81,7 @@ describe('EnhancedCommandBus', () => {
       const errorHandler: ICommandHandler<TestCommand> = {
         execute: vi.fn().mockRejectedValue(new Error('Test error')),
       };
-      
+
       enhancedCommandBus.register(TestCommand, errorHandler);
 
       await expect(enhancedCommandBus.execute(command)).rejects.toThrow('Test error');
@@ -94,11 +94,9 @@ describe('EnhancedCommandBus', () => {
     it('should calculate average execution time correctly', async () => {
       const command = new TestCommand('test');
       const slowHandler: ICommandHandler<TestCommand> = {
-        execute: vi.fn().mockImplementation(() => 
-          new Promise(resolve => setTimeout(resolve, 10))
-        ),
+        execute: vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 10))),
       };
-      
+
       enhancedCommandBus.register(TestCommand, slowHandler);
 
       await enhancedCommandBus.execute(command);
@@ -114,7 +112,7 @@ describe('EnhancedCommandBus', () => {
   describe('getMetrics', () => {
     it('should return initial metrics', () => {
       const metrics = enhancedCommandBus.getMetrics();
-      
+
       expect(metrics).toEqual({
         executionCount: 0,
         totalExecutionTime: 0,
@@ -197,7 +195,7 @@ describe('EnhancedCommandBus', () => {
       const errorHandler: ICommandHandler<TestCommand> = {
         execute: vi.fn().mockRejectedValue(error),
       };
-      
+
       enhancedCommandBus.register(TestCommand, errorHandler);
 
       await expect(enhancedCommandBus.execute(command)).rejects.toThrow(error);
@@ -212,7 +210,7 @@ describe('EnhancedCommandBus', () => {
       const errorHandler: ICommandHandler<TestCommand> = {
         execute: vi.fn().mockRejectedValue(new Error('Test error')),
       };
-      
+
       enhancedCommandBus.register(TestCommand, errorHandler);
 
       await expect(enhancedCommandBus.execute(command)).rejects.toThrow();

@@ -212,7 +212,9 @@ describe('CompositePolicy', () => {
   describe('check - OR logic', () => {
     it('should return success when first policy passes', async () => {
       vi.mocked(mockPolicy1.check).mockResolvedValue(Result.ok(testEntity));
-      vi.mocked(mockPolicy2.check).mockResolvedValue(Result.fail(new PolicyViolation('FAIL', 'Failed')));
+      vi.mocked(mockPolicy2.check).mockResolvedValue(
+        Result.fail(new PolicyViolation('FAIL', 'Failed'))
+      );
 
       const composite = new CompositePolicy('OR', [mockPolicy1, mockPolicy2]);
       const result = await composite.check(testRequest);
@@ -252,7 +254,9 @@ describe('CompositePolicy', () => {
     it('should handle policy evaluation errors in OR logic', async () => {
       const error = new Error('Policy evaluation error');
       vi.mocked(mockPolicy1.check).mockRejectedValue(error);
-      vi.mocked(mockPolicy2.check).mockResolvedValue(Result.fail(new PolicyViolation('FAIL', 'Failed')));
+      vi.mocked(mockPolicy2.check).mockResolvedValue(
+        Result.fail(new PolicyViolation('FAIL', 'Failed'))
+      );
 
       const composite = new CompositePolicy('OR', [mockPolicy1, mockPolicy2]);
       const result = await composite.check(testRequest);
@@ -352,11 +356,7 @@ describe('ConditionalPolicy', () => {
     it('should create conditional policy with then and otherwise policies', () => {
       const condition = vi.fn().mockReturnValue(true);
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       expect(conditional.id).toBe('CONDITIONAL_POLICY');
       expect(conditional.domain).toBe('conditional');
@@ -369,11 +369,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockReturnValue(true);
       vi.mocked(mockThenPolicy.isSatisfiedBy).mockResolvedValue(true);
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.isSatisfiedBy(testRequest);
 
@@ -387,11 +383,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockReturnValue(false);
       vi.mocked(mockOtherwisePolicy.isSatisfiedBy).mockResolvedValue(true);
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.isSatisfiedBy(testRequest);
 
@@ -405,11 +397,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockResolvedValue(true);
       vi.mocked(mockThenPolicy.isSatisfiedBy).mockResolvedValue(true);
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.isSatisfiedBy(testRequest);
 
@@ -420,11 +408,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockReturnValue(true);
       vi.mocked(mockThenPolicy.isSatisfiedBy).mockResolvedValue(false);
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.isSatisfiedBy(testRequest);
 
@@ -437,11 +421,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockReturnValue(true);
       vi.mocked(mockThenPolicy.check).mockResolvedValue(Result.ok(testEntity));
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.check(testRequest);
 
@@ -454,11 +434,7 @@ describe('ConditionalPolicy', () => {
       const condition = vi.fn().mockReturnValue(false);
       vi.mocked(mockOtherwisePolicy.check).mockResolvedValue(Result.ok(testEntity));
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.check(testRequest);
 
@@ -472,11 +448,7 @@ describe('ConditionalPolicy', () => {
       const violation = new PolicyViolation('THEN_FAILED', 'Then policy failed');
       vi.mocked(mockThenPolicy.check).mockResolvedValue(Result.fail(violation));
 
-      const conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      const conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
 
       const result = await conditional.check(testRequest);
 
@@ -490,11 +462,7 @@ describe('ConditionalPolicy', () => {
 
     beforeEach(() => {
       const condition = vi.fn().mockReturnValue(true);
-      conditional = new ConditionalPolicy(
-        condition,
-        [mockThenPolicy],
-        [mockOtherwisePolicy]
-      );
+      conditional = new ConditionalPolicy(condition, [mockThenPolicy], [mockOtherwisePolicy]);
     });
 
     it('should support and() composition', () => {
@@ -588,10 +556,7 @@ describe('ConditionalPolicyBuilder', () => {
     it('should build conditional policy with then and otherwise clauses', () => {
       const builder = new ConditionalPolicyBuilder(mockBasePolicy, condition);
 
-      const policy = builder
-        .then(mockThenPolicy)
-        .otherwise(mockOtherwisePolicy)
-        .build();
+      const policy = builder.then(mockThenPolicy).otherwise(mockOtherwisePolicy).build();
 
       expect(policy).toBeDefined();
     });

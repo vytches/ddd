@@ -29,12 +29,12 @@ export class ContextDetector {
       const frame = this.parseStackFrame(stack, skipFrames);
 
       if (!frame) {
-        return { 
+        return {
           contextName: 'Unknown',
           boundedContext: undefined,
           fileName: undefined,
           className: undefined,
-          methodName: undefined
+          methodName: undefined,
         };
       }
 
@@ -50,12 +50,12 @@ export class ContextDetector {
       };
     } catch (error) {
       // If anything fails, return Unknown
-      return { 
+      return {
         contextName: 'Unknown',
         boundedContext: undefined,
         fileName: undefined,
         className: undefined,
-        methodName: undefined
+        methodName: undefined,
       };
     }
   }
@@ -75,7 +75,7 @@ export class ContextDetector {
       if (typeof stack === 'string') {
         return stack;
       }
-      
+
       if (Array.isArray(stack)) {
         return (stack as NodeJS.CallSite[])
           .map((frame: NodeJS.CallSite) => `    at ${frame.toString()}`)
@@ -104,12 +104,17 @@ export class ContextDetector {
       const match = line.match(/at\s+(?:([^.]+)\.)?([^.\s]+)\s+\((.+):(\d+):(\d+)\)/);
       if (match) {
         const [, className, methodName, filePath] = match;
-        
+
         // Skip if this is from vitest or test files
-        if (filePath && (filePath.includes('vitest') || filePath.includes('.test.') || filePath.includes('.spec.'))) {
+        if (
+          filePath &&
+          (filePath.includes('vitest') ||
+            filePath.includes('.test.') ||
+            filePath.includes('.spec.'))
+        ) {
           continue;
         }
-        
+
         return {
           className: className || (filePath ? this.extractClassNameFromFile(filePath) : undefined),
           methodName,
@@ -155,7 +160,12 @@ export class ContextDetector {
   }
 
   private static extractFileName(filePath: string): string {
-    return filePath.split('/').pop()?.replace(/\.(ts|js)$/, '') || 'unknown';
+    return (
+      filePath
+        .split('/')
+        .pop()
+        ?.replace(/\.(ts|js)$/, '') || 'unknown'
+    );
   }
 
   private static toPascalCase(str: string): string {

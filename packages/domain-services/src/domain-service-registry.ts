@@ -27,10 +27,7 @@ export class DefaultDomainServiceRegistry implements IDomainServiceRegistry {
    * @param {string} [serviceId] - Optional service identifier
    * @throws {Error} If service has no ID or service with the same ID is already registered
    */
-  public register<T extends IDomainService>(
-    service: T,
-    serviceId?: string,
-  ): void {
+  public register<T extends IDomainService>(service: T, serviceId?: string): void {
     const id = serviceId || service.serviceId;
 
     if (!id) {

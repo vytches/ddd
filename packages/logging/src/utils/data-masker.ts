@@ -27,9 +27,10 @@ export class DataMasker {
     };
 
     // Use default patterns only when no explicit patterns AND no sensitive keys provided
-    const shouldUseDefaultPatterns = this.options.patterns.length === 0 && this.options.sensitiveKeys.length === 0;
+    const shouldUseDefaultPatterns =
+      this.options.patterns.length === 0 && this.options.sensitiveKeys.length === 0;
     const defaultPatterns = shouldUseDefaultPatterns ? DataMasker.DEFAULT_PATTERNS : [];
-    
+
     this.compiledPatterns = [
       ...defaultPatterns,
       ...this.options.patterns.map(pattern => new RegExp(pattern, 'g')),
@@ -106,10 +107,9 @@ export class DataMasker {
     const lowerKey = key.toLowerCase();
     return this.options.sensitiveKeys.some(sensitiveKey => {
       const lowerSensitiveKey = sensitiveKey.toLowerCase();
-      // Contains the sensitive key but exclude plural forms 
+      // Contains the sensitive key but exclude plural forms
       // e.g. "token" matches "apiToken" and "userToken" but not "tokens"
-      return lowerKey.includes(lowerSensitiveKey) && 
-             !lowerKey.endsWith(lowerSensitiveKey + 's');
+      return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(lowerSensitiveKey + 's');
     });
   }
 }

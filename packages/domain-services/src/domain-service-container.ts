@@ -68,7 +68,7 @@ export class DomainServiceContainer {
   constructor(
     registry?: IDomainServiceRegistry,
     eventBus?: IEventBus,
-    unitOfWorkProvider?: () => IUnitOfWork,
+    unitOfWorkProvider?: () => IUnitOfWork
   ) {
     this.registry = registry || new DefaultDomainServiceRegistry();
     this.eventBus = eventBus;
@@ -91,7 +91,7 @@ export class DomainServiceContainer {
   public registerFactory(
     serviceId: string,
     factory: () => IDomainService,
-    dependencies: string[] = [],
+    dependencies: string[] = []
   ): void {
     this.factories.set(serviceId, factory);
     this.dependencies.set(serviceId, dependencies);
@@ -116,9 +116,7 @@ export class DomainServiceContainer {
    * @param {() => IUnitOfWork} provider - Function that provides Unit of Work instances
    * @returns {DomainServiceContainer} This container for method chaining
    */
-  public setUnitOfWorkProvider(
-    provider: () => IUnitOfWork,
-  ): DomainServiceContainer {
+  public setUnitOfWorkProvider(provider: () => IUnitOfWork): DomainServiceContainer {
     this.unitOfWorkProvider = provider;
     return this;
   }
@@ -143,7 +141,7 @@ export class DomainServiceContainer {
 
       for (const serviceId of pending) {
         const deps = this.dependencies.get(serviceId) || [];
-        const canInitialize = deps.every((dep) => initialized.has(dep));
+        const canInitialize = deps.every(dep => initialized.has(dep));
 
         if (canInitialize) {
           // Create the service
@@ -198,7 +196,7 @@ export class DomainServiceContainer {
     }
 
     // Initialize them in parallel
-    await Promise.all(asyncServices.map((service) => service.initialize?.()));
+    await Promise.all(asyncServices.map(service => service.initialize?.()));
   }
 
   /**
@@ -208,9 +206,7 @@ export class DomainServiceContainer {
    * @param {string} serviceId - Service identifier
    * @returns {T | undefined} The service instance or undefined if not found
    */
-  public getService<T extends IDomainService>(
-    serviceId: string,
-  ): T | undefined {
+  public getService<T extends IDomainService>(serviceId: string): T | undefined {
     return this.registry.get<T>(serviceId);
   }
 
@@ -234,7 +230,8 @@ export class DomainServiceContainer {
     return (
       service !== null &&
       typeof service === 'object' &&
-      'setEventBus' in service && typeof (service as { setEventBus?: unknown }).setEventBus === 'function'
+      'setEventBus' in service &&
+      typeof (service as { setEventBus?: unknown }).setEventBus === 'function'
     );
   }
 
@@ -249,7 +246,8 @@ export class DomainServiceContainer {
     return (
       service !== null &&
       typeof service === 'object' &&
-      'setUnitOfWork' in service && typeof (service as { setUnitOfWork?: unknown }).setUnitOfWork === 'function'
+      'setUnitOfWork' in service &&
+      typeof (service as { setUnitOfWork?: unknown }).setUnitOfWork === 'function'
     );
   }
 
@@ -264,7 +262,8 @@ export class DomainServiceContainer {
     return (
       service !== null &&
       typeof service === 'object' &&
-      'initialize' in service && typeof (service as { initialize?: unknown }).initialize === 'function'
+      'initialize' in service &&
+      typeof (service as { initialize?: unknown }).initialize === 'function'
     );
   }
 }

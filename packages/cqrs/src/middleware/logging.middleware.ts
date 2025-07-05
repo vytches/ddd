@@ -7,10 +7,7 @@ export class LoggingMiddleware implements ICQRSMiddleware {
     this.logger = logger || console;
   }
 
-  async handle(
-    context: ExecutionContext,
-    next: () => Promise<any>,
-  ): Promise<any> {
+  async handle(context: ExecutionContext, next: () => Promise<any>): Promise<any> {
     const { commandOrQuery, type } = context;
     const name = commandOrQuery.constructor.name;
 
@@ -24,9 +21,7 @@ export class LoggingMiddleware implements ICQRSMiddleware {
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger!.log(
-        `[CQRS] ${type} ${name} failed after ${duration}ms: ${error}`,
-      );
+      this.logger!.log(`[CQRS] ${type} ${name} failed after ${duration}ms: ${error}`);
       throw error;
     }
   }

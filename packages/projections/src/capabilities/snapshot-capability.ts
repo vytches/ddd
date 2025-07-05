@@ -18,7 +18,8 @@ export class SnapshotProjectionCapability<TReadModel> extends BaseIntervalCapabi
     this.ensureAttached();
 
     this.version++;
-    const position: number = typeof event.metadata?.position === 'number' ? event.metadata.position : 0;
+    const position: number =
+      typeof event.metadata?.position === 'number' ? event.metadata.position : 0;
 
     await this.snapshotStore.save(this.context!.getProjectionName(), {
       state,

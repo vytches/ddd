@@ -2,10 +2,10 @@
 
 /**
  * TypeScript `any` Type Monitor
- * 
+ *
  * Monitors and tracks TypeScript `any` types in the codebase with configurable thresholds.
  * Designed to prevent regression while allowing justified infrastructure patterns.
- * 
+ *
  * Features:
  * - Scans TypeScript files for `any` type usage
  * - Configurable thresholds per package and globally
@@ -24,31 +24,31 @@ const yargs = require('yargs');
 const CONFIG = {
   // Global thresholds
   globalThreshold: 70, // Current: 67 any types (as per IMPROVE.md)
-  
+
   // Per-package thresholds (can be customized per package)
   packageThresholds: {
-    'core': 0,           // Meta-package should have no any types
-    'domain-primitives': 5,  // Foundation packages should be strict
+    core: 0, // Meta-package should have no any types
+    'domain-primitives': 5, // Foundation packages should be strict
     'value-objects': 5,
-    'repositories': 5,
-    'aggregates': 10,
-    'events': 15,
-    'cqrs': 10,
-    'validation': 8,
-    'policies': 8,
-    'projections': 10,
-    'acl': 12,
-    'messaging': 10,
-    'resilience': 8,
-    'enterprise': 5,
-    'cli': 15,           // CLI tools can have more flexibility
-    'testing': 20,       // Testing utilities have more flexibility
-    'logging': 8,
-    'utils': 5,
-    'contracts': 10,
-    'domain-services': 8
+    repositories: 5,
+    aggregates: 10,
+    events: 15,
+    cqrs: 10,
+    validation: 8,
+    policies: 8,
+    projections: 10,
+    acl: 12,
+    messaging: 10,
+    resilience: 8,
+    enterprise: 5,
+    cli: 15, // CLI tools can have more flexibility
+    testing: 20, // Testing utilities have more flexibility
+    logging: 8,
+    utils: 5,
+    contracts: 10,
+    'domain-services': 8,
   },
-  
+
   // Patterns that are justified for using `any`
   justifiedPatterns: [
     // Decorator patterns
@@ -56,22 +56,22 @@ const CONFIG = {
     /propertyKey:\s*any/,
     /descriptor:\s*any/,
     /@.*\(\s*target:\s*any/,
-    
+
     // Event/Constructor patterns
     /constructor\(\.\.\.\s*args:\s*any\[\]/,
     /new\s*\(\.\.\.\s*args:\s*any\[\]/,
-    
+
     // Type utilities
     /Record<.*,\s*any>/,
     /\[\s*key:\s*string\s*\]:\s*any/,
-    
+
     // Infrastructure interfaces
     /interface.*\{[\s\S]*\[.*\]:\s*any/,
-    
+
     // Generic constraints
     /<.*extends.*any.*>/,
   ],
-  
+
   // Files to exclude from scanning
   excludePatterns: [
     '**/node_modules/**',
@@ -80,8 +80,8 @@ const CONFIG = {
     '**/*.spec.ts',
     '**/test/**',
     '**/tests/**',
-    '**/*.d.ts'
-  ]
+    '**/*.d.ts',
+  ],
 };
 
 class AnyTypeMonitor {
@@ -94,7 +94,7 @@ class AnyTypeMonitor {
       violations: [],
       justifiedAnyTypes: 0,
       unjustifiedAnyTypes: 0,
-      fileResults: new Map()
+      fileResults: new Map(),
     };
   }
 
@@ -103,7 +103,7 @@ class AnyTypeMonitor {
    */
   loadBaseline() {
     const baselinePath = path.join(process.cwd(), '.quality-gates', 'any-types-baseline.json');
-    
+
     try {
       if (fs.existsSync(baselinePath)) {
         return JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
@@ -111,11 +111,11 @@ class AnyTypeMonitor {
     } catch (error) {
       console.warn('Could not load baseline:', error.message);
     }
-    
+
     return {
       totalAnyTypes: this.config.globalThreshold,
       timestamp: new Date().toISOString(),
-      packages: {}
+      packages: {},
     };
   }
 
@@ -125,17 +125,17 @@ class AnyTypeMonitor {
   saveBaseline() {
     const baselineDir = path.join(process.cwd(), '.quality-gates');
     const baselinePath = path.join(baselineDir, 'any-types-baseline.json');
-    
+
     if (!fs.existsSync(baselineDir)) {
       fs.mkdirSync(baselineDir, { recursive: true });
     }
-    
+
     const baseline = {
       totalAnyTypes: this.results.totalAnyTypes,
       timestamp: new Date().toISOString(),
-      packages: Object.fromEntries(this.results.packageResults)
+      packages: Object.fromEntries(this.results.packageResults),
     };
-    
+
     fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2));
     console.log(`✅ Baseline saved to ${baselinePath}`);
   }
@@ -147,12 +147,12 @@ class AnyTypeMonitor {
     const packagesDir = path.join(process.cwd(), 'packages');
     const files = [];
 
-    const walkDir = (dir) => {
+    const walkDir = dir => {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
           // Skip excluded directories
           if (this.shouldExclude(fullPath)) continue;
@@ -199,19 +199,19 @@ class AnyTypeMonitor {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const lineNumber = i + 1;
-      
+
       // Look for `any` type usage
       const anyMatches = this.findAnyTypes(line);
-      
+
       for (const match of anyMatches) {
         const isJustified = this.isJustifiedAny(line, content, lineNumber);
-        
+
         anyTypes.push({
           line: lineNumber,
           content: line.trim(),
           position: match.index,
           match: match.match,
-          justified: isJustified
+          justified: isJustified,
         });
       }
     }
@@ -236,7 +236,7 @@ class AnyTypeMonitor {
 
       matches.push({
         index: match.index,
-        match: match[0]
+        match: match[0],
       });
     }
 
@@ -283,14 +283,14 @@ class AnyTypeMonitor {
 
       if (anyTypes.length > 0) {
         this.results.fileResults.set(filePath, anyTypes);
-        
+
         // Update package results
         if (!this.results.packageResults.has(packageName)) {
           this.results.packageResults.set(packageName, {
             totalAnyTypes: 0,
             justifiedAnyTypes: 0,
             unjustifiedAnyTypes: 0,
-            files: []
+            files: [],
           });
         }
 
@@ -301,7 +301,7 @@ class AnyTypeMonitor {
         packageResult.files.push({
           path: filePath,
           anyTypes: anyTypes.length,
-          unjustified: anyTypes.filter(a => !a.justified).length
+          unjustified: anyTypes.filter(a => !a.justified).length,
         });
       }
     }
@@ -327,14 +327,14 @@ class AnyTypeMonitor {
         message: `Total any types (${this.results.totalAnyTypes}) exceeds global threshold (${this.config.globalThreshold})`,
         current: this.results.totalAnyTypes,
         threshold: this.config.globalThreshold,
-        exceeded: this.results.totalAnyTypes - this.config.globalThreshold
+        exceeded: this.results.totalAnyTypes - this.config.globalThreshold,
       });
     }
 
     // Check package thresholds
     for (const [packageName, result] of this.results.packageResults) {
       const threshold = this.config.packageThresholds[packageName] || 20; // Default threshold
-      
+
       if (result.totalAnyTypes > threshold) {
         violations.push({
           type: 'package',
@@ -342,7 +342,7 @@ class AnyTypeMonitor {
           message: `Package '${packageName}' any types (${result.totalAnyTypes}) exceeds threshold (${threshold})`,
           current: result.totalAnyTypes,
           threshold: threshold,
-          exceeded: result.totalAnyTypes - threshold
+          exceeded: result.totalAnyTypes - threshold,
         });
       }
     }
@@ -354,7 +354,7 @@ class AnyTypeMonitor {
         message: `Total any types increased from baseline (${this.baseline.totalAnyTypes} → ${this.results.totalAnyTypes})`,
         baseline: this.baseline.totalAnyTypes,
         current: this.results.totalAnyTypes,
-        regression: this.results.totalAnyTypes - this.baseline.totalAnyTypes
+        regression: this.results.totalAnyTypes - this.baseline.totalAnyTypes,
       });
     }
 
@@ -373,7 +373,7 @@ class AnyTypeMonitor {
     }
 
     let report = '';
-    
+
     // Header
     report += '📊 TypeScript `any` Type Analysis Report\n';
     report += '='.repeat(50) + '\n\n';
@@ -384,7 +384,7 @@ class AnyTypeMonitor {
     report += `   Justified: ${this.results.justifiedAnyTypes}\n`;
     report += `   Unjustified: ${this.results.unjustifiedAnyTypes}\n`;
     report += `   Global threshold: ${this.config.globalThreshold}\n`;
-    
+
     if (this.baseline) {
       const change = this.results.totalAnyTypes - this.baseline.totalAnyTypes;
       const changeIcon = change > 0 ? '📈' : change < 0 ? '📉' : '📊';
@@ -398,9 +398,9 @@ class AnyTypeMonitor {
       for (const [packageName, result] of this.results.packageResults) {
         const threshold = this.config.packageThresholds[packageName] || 20;
         const status = result.totalAnyTypes <= threshold ? '✅' : '❌';
-        
+
         report += `   ${status} ${packageName}: ${result.totalAnyTypes} (threshold: ${threshold})\n`;
-        
+
         if (verbose && result.totalAnyTypes > 0) {
           report += `      - Justified: ${result.justifiedAnyTypes}\n`;
           report += `      - Unjustified: ${result.unjustifiedAnyTypes}\n`;
@@ -453,38 +453,37 @@ async function main() {
     .option('threshold', {
       type: 'number',
       description: 'Global threshold for any types',
-      default: CONFIG.globalThreshold
+      default: CONFIG.globalThreshold,
     })
     .option('package', {
       type: 'string',
-      description: 'Specific package to analyze'
+      description: 'Specific package to analyze',
     })
     .option('baseline', {
       type: 'boolean',
       description: 'Save current results as baseline',
-      default: false
+      default: false,
     })
     .option('verbose', {
       type: 'boolean',
       description: 'Show detailed file-by-file results',
-      default: false
+      default: false,
     })
     .option('format', {
       type: 'string',
       choices: ['console', 'json'],
       description: 'Output format',
-      default: 'console'
+      default: 'console',
     })
     .option('ci', {
       type: 'boolean',
       description: 'CI mode - exit with error code on violations',
-      default: false
+      default: false,
     })
-    .help()
-    .argv;
+    .help().argv;
 
   const monitor = new AnyTypeMonitor({
-    globalThreshold: argv.threshold
+    globalThreshold: argv.threshold,
   });
 
   try {
@@ -493,7 +492,7 @@ async function main() {
 
     const report = monitor.generateReport({
       verbose: argv.verbose,
-      format: argv.format
+      format: argv.format,
     });
 
     console.log(report);
@@ -510,7 +509,6 @@ async function main() {
     if (monitor.results.violations.length === 0) {
       console.log('🎉 All quality gates passed!');
     }
-
   } catch (error) {
     console.error('❌ Error during analysis:', error.message);
     if (argv.verbose) {

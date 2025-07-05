@@ -2,31 +2,25 @@
 export {
   CircuitBreaker,
   CircuitBreakerState,
-  CircuitBreakerOpenError
+  CircuitBreakerOpenError,
 } from './patterns/circuit-breaker';
 
-export {
-  RetryPolicy,
-  MaxRetriesExceededError
-} from './patterns/retry';
+export { RetryPolicy, MaxRetriesExceededError } from './patterns/retry';
 
-export {
-  Bulkhead,
-  BulkheadRejectedException
-} from './patterns/bulkhead';
+export { Bulkhead, BulkheadRejectedException } from './patterns/bulkhead';
 
 export {
   CircuitBreakerStrategy,
   RetryStrategy,
   BulkheadStrategy,
   CompositeResilienceStrategy,
-  ResiliencePolicyBuilder
+  ResiliencePolicyBuilder,
 } from './patterns/resilience-strategy';
 
 export {
   DefaultResilienceContext,
   TimeoutError,
-  OperationCancelledError
+  OperationCancelledError,
 } from './core/resilience-context';
 
 // Core functionality - full exports removed for better tree-shaking
@@ -45,7 +39,7 @@ export type {
   MetricExporter,
   ObservabilityEvent,
   ObservabilityEventListener,
-  ObservabilityEventBus
+  ObservabilityEventBus,
 } from './observability';
 
 export {
@@ -63,7 +57,7 @@ export {
   CsvMetricExporter,
   TextMetricExporter,
   CompositeMetricExporter,
-  MetricExporterFactory
+  MetricExporterFactory,
 } from './observability';
 
 // Decorators (re-exported with different names to avoid conflicts)
@@ -73,7 +67,7 @@ export {
   Bulkhead as BulkheadDecorator,
   Resilience as ResilienceDecorator,
   Timeout as TimeoutDecorator,
-  getResilienceMetrics
+  getResilienceMetrics,
 } from './decorators/resilience-decorators';
 
 export type {
@@ -82,5 +76,5 @@ export type {
   RetryDecoratorConfig,
   BulkheadDecoratorConfig,
   TimeoutDecoratorConfig,
-  CompositeResilienceConfig
+  CompositeResilienceConfig,
 } from './decorators/resilience-decorators';

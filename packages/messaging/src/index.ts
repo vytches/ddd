@@ -9,10 +9,7 @@ export type {
 } from './outbox';
 
 // Outbox Pattern - Enums
-export {
-  MessageStatus,
-  MessagePriority,
-} from './outbox';
+export { MessageStatus, MessagePriority } from './outbox';
 
 // Outbox Pattern - Classes
 export {
@@ -24,16 +21,10 @@ export {
 } from './outbox';
 
 // Sagas - Interfaces and Types
-export type {
-  ISaga,
-} from './sagas';
+export type { ISaga } from './sagas';
 
 // Sagas - Enums
-export {
-  SagaStatus,
-} from './sagas';
+export { SagaStatus } from './sagas';
 
 // Sagas - Classes
-export {
-  SagaManager,
-} from './sagas';
+export { SagaManager } from './sagas';

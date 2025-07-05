@@ -3,7 +3,7 @@ import type { Result } from '@vytches-ddd/utils';
 
 import type { ACLError } from './acl-errors';
 import type { ExecuteOptions, IACLAdapter } from './acl.interfaces';
-import type { ACLRegistrationMetadata} from './base-acl-registry';
+import type { ACLRegistrationMetadata } from './base-acl-registry';
 import { BaseACLRegistry } from './base-acl-registry';
 
 export interface ACLVersionMetadata extends ACLRegistrationMetadata {
@@ -15,10 +15,7 @@ export interface ACLVersionMetadata extends ACLRegistrationMetadata {
 }
 
 export class VersionedACLRegistry extends BaseACLRegistry {
-  private versionedAdapters = new Map<
-    string,
-    Map<string, IACLAdapter<any, any>>
-  >();
+  private versionedAdapters = new Map<string, Map<string, IACLAdapter<any, any>>>();
   private latestVersions = new Map<string, string>();
 
   protected getRegistryName(): string {
@@ -29,7 +26,7 @@ export class VersionedACLRegistry extends BaseACLRegistry {
     contextName: string,
     version: string,
     adapter: IACLAdapter<TDomain, TExternal>,
-    metadata?: Partial<ACLVersionMetadata>,
+    metadata?: Partial<ACLVersionMetadata>
   ): this {
     if (!this.isValidVersion(version)) {
       throw new Error(`Invalid version format: ${version}`);
@@ -57,7 +54,7 @@ export class VersionedACLRegistry extends BaseACLRegistry {
 
   override get<TDomain, TExternal>(
     contextName: string,
-    version?: string,
+    version?: string
   ): IACLAdapter<TDomain, TExternal> | undefined {
     const contextVersions = this.versionedAdapters.get(contextName);
     if (!contextVersions) return undefined;
@@ -68,9 +65,7 @@ export class VersionedACLRegistry extends BaseACLRegistry {
 
   getVersions(contextName: string): string[] {
     const contextVersions = this.versionedAdapters.get(contextName);
-    return contextVersions
-      ? Array.from(contextVersions.keys()).sort(this.compareVersions)
-      : [];
+    return contextVersions ? Array.from(contextVersions.keys()).sort(this.compareVersions) : [];
   }
 
   getLatestVersion(contextName: string): string | undefined {
@@ -86,8 +81,12 @@ export class VersionedACLRegistry extends BaseACLRegistry {
 
   private isValidVersion(version: string): boolean {
     const semverRegex = /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?$/;
-    return semverRegex.test(version) && !/^0\d/.test(version.split('.')[0] as string) &&
-      !/\.0\d/.test(version) && !version.endsWith('-');
+    return (
+      semverRegex.test(version) &&
+      !/^0\d/.test(version.split('.')[0] as string) &&
+      !/\.0\d/.test(version) &&
+      !version.endsWith('-')
+    );
   }
 
   private compareVersions(a: string, b: string): number {
@@ -125,13 +124,13 @@ export class VersionedACLRegistry extends BaseACLRegistry {
 export class VersionedACLAdapter<TDomain, TExternal, TResult = any> {
   constructor(
     private registry: VersionedACLRegistry,
-    private defaultContextName: string,
+    private defaultContextName: string
   ) {}
 
   async execute(
     operation: string,
     domainModel: TDomain,
-    options?: ExecuteOptions,
+    options?: ExecuteOptions
   ): Promise<Result<TResult, ACLError>> {
     const adapter = this.resolveAdapter(options?.version);
     return adapter.execute(operation, domainModel);
@@ -141,19 +140,13 @@ export class VersionedACLAdapter<TDomain, TExternal, TResult = any> {
     return this.registry.getVersions(this.defaultContextName);
   }
 
-  private resolveAdapter(
-    version?: string,
-  ): IACLAdapter<TDomain, TExternal, TResult> {
-    const targetVersion =
-      version || this.registry.getLatestVersion(this.defaultContextName);
-    const adapter = this.registry.get<TDomain, TExternal>(
-      this.defaultContextName,
-      targetVersion,
-    );
+  private resolveAdapter(version?: string): IACLAdapter<TDomain, TExternal, TResult> {
+    const targetVersion = version || this.registry.getLatestVersion(this.defaultContextName);
+    const adapter = this.registry.get<TDomain, TExternal>(this.defaultContextName, targetVersion);
 
     if (!adapter) {
       throw new Error(
-        `ACL adapter not found for context: ${this.defaultContextName}, version: ${targetVersion}`,
+        `ACL adapter not found for context: ${this.defaultContextName}, version: ${targetVersion}`
       );
     }
 

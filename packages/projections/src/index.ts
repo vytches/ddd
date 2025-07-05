@@ -1,15 +1,9 @@
 // Priority exports for better tree-shaking
-export {
-  ProjectionEngine
-} from './projection-engine';
+export { ProjectionEngine } from './projection-engine';
 
-export {
-  BaseProjection
-} from './projection-base';
+export { BaseProjection } from './projection-base';
 
-export {
-  ProjectionBuilder
-} from './projection.builder';
+export { ProjectionBuilder } from './projection.builder';
 
 export type {
   IProjection,
@@ -17,12 +11,10 @@ export type {
   IProjectionCapability,
   ICapabilityContext,
   IProjectionEngine,
-  ErrorProjectionState
+  ErrorProjectionState,
 } from './projection-interfaces';
 
-export {
-  ProjectionError
-} from './projection-errors';
+export { ProjectionError } from './projection-errors';
 
 // For advanced usage - full exports removed for better tree-shaking
 // Import specific exports from subpaths when needed

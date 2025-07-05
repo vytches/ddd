@@ -21,7 +21,9 @@ describe('PolicyContextBuilder', () => {
     it('should require environment', () => {
       const builder = PolicyContextBuilder.create().withUserId('user-123');
 
-      expect(() => builder.build()).toThrow('PolicyContext requires environment. Use .withEnvironment()');
+      expect(() => builder.build()).toThrow(
+        'PolicyContext requires environment. Use .withEnvironment()'
+      );
     });
 
     it('should build successfully with required fields', () => {
@@ -375,10 +377,7 @@ describe('PolicyRequestBuilder', () => {
       const request = PolicyRequestBuilder.create<TestEntity>()
         .withEntity(testEntity)
         .withContextBuilder(builder =>
-          builder
-            .withUserId('user-456')
-            .withEnvironment('staging')
-            .withFeature('testFeature', true)
+          builder.withUserId('user-456').withEnvironment('staging').withFeature('testFeature', true)
         )
         .build();
 

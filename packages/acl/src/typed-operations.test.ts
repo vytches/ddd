@@ -539,7 +539,7 @@ describe('ITypedOperationRegistry', () => {
   describe('integration scenarios', () => {
     it('should support operations with different input/output types', () => {
       registry.register(new CreateUserOperation()); // CreateUserInput -> CreateUserOutput
-      registry.register(new SimpleOperation());     // string -> number
+      registry.register(new SimpleOperation()); // string -> number
 
       const createOp = registry.get<CreateUserInput, CreateUserOutput>('CREATE_USER');
       const simpleOp = registry.get<string, number>('SIMPLE_OP');

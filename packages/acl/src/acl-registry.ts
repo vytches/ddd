@@ -20,7 +20,7 @@ export class ACLRegistry extends BaseACLRegistry {
 
   importFromContext(
     contextRegistry: ContextACLRegistry,
-    options: ImportOptions = {},
+    options: ImportOptions = {}
   ): ImportResult {
     const result: ImportResult = { imported: [], skipped: [], conflicts: [] };
     const sourceAdapters = contextRegistry.exportAdapters();
@@ -46,9 +46,12 @@ export class ACLRegistry extends BaseACLRegistry {
   registerDirect<TDomain, TExternal>(
     contextName: string,
     adapter: IACLAdapter<TDomain, TExternal>,
-    description?: string,
+    description?: string
   ): this {
-    const metadata: Partial<ACLRegistrationMetadata> = { source: 'direct' as const, version: '1.0.0' };
+    const metadata: Partial<ACLRegistrationMetadata> = {
+      source: 'direct' as const,
+      version: '1.0.0',
+    };
     if (description !== undefined) {
       metadata.description = description;
     }
@@ -58,9 +61,12 @@ export class ACLRegistry extends BaseACLRegistry {
   registerEnhanced<TDomain, TExternal>(
     contextName: string,
     adapter: IEnhancedACLAdapter<TDomain, TExternal>,
-    description?: string,
+    description?: string
   ): this {
-    const metadata: Partial<ACLRegistrationMetadata> = { source: 'enhanced' as const, version: '1.0.0' };
+    const metadata: Partial<ACLRegistrationMetadata> = {
+      source: 'enhanced' as const,
+      version: '1.0.0',
+    };
     if (description !== undefined) {
       metadata.description = description;
     }

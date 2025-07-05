@@ -107,11 +107,5 @@
   "branchPrefix": "renovate/",
   "gitIgnoredAuthors": ["renovate[bot]@users.noreply.github.com"],
   "platformAutomerge": false,
-  "requiredStatusChecks": [
-    "build",
-    "test",
-    "lint",
-    "type-check",
-    "quality-gates"
-  ]
+  "requiredStatusChecks": ["build", "test", "lint", "type-check", "quality-gates"]
 }

@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-  IOutboxMessage,
-  MessageStatus,
-  MessagePriority,
-} from './outbox-interfaces';
+import type { IOutboxMessage, MessageStatus, MessagePriority } from './outbox-interfaces';
 
 /**
  * Abstract class for outbox repository
@@ -32,7 +28,7 @@ export abstract class IOutboxRepository {
    */
   abstract getUnprocessedMessages(
     limit?: number,
-    priorityOrder?: MessagePriority[],
+    priorityOrder?: MessagePriority[]
   ): Promise<IOutboxMessage[]>;
 
   /**
@@ -48,21 +44,14 @@ export abstract class IOutboxRepository {
    * @param status New status
    * @param error Optional error information
    */
-  abstract updateStatus(
-    id: string,
-    status: MessageStatus,
-    error?: Error,
-  ): Promise<void>;
+  abstract updateStatus(id: string, status: MessageStatus, error?: Error): Promise<void>;
 
   /**
    * Updates message status for multiple messages
    * @param ids Message IDs
    * @param status New status
    */
-  abstract updateStatusBatch(
-    ids: string[],
-    status: MessageStatus,
-  ): Promise<void>;
+  abstract updateStatusBatch(ids: string[], status: MessageStatus): Promise<void>;
 
   /**
    * Increments attempt counter for a message
@@ -77,10 +66,7 @@ export abstract class IOutboxRepository {
    * @param status Status of messages to delete
    * @returns Number of deleted messages
    */
-  abstract deleteByStatusAndAge(
-    olderThan: Date,
-    status: MessageStatus,
-  ): Promise<number>;
+  abstract deleteByStatusAndAge(olderThan: Date, status: MessageStatus): Promise<number>;
 
   /**
    * Schedules a message for delayed processing
@@ -90,6 +76,6 @@ export abstract class IOutboxRepository {
    */
   abstract scheduleMessage<T = any>(
     message: IOutboxMessage<T>,
-    processAfter: Date,
+    processAfter: Date
   ): Promise<string>;
 }

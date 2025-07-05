@@ -135,8 +135,6 @@ export function DomainService(options: string | DomainServiceOptions) {
  *   // Configure with Unit of Work
  * }
  */
-export function getDomainServiceMetadata(
-  target: unknown,
-): DomainServiceOptions | undefined {
+export function getDomainServiceMetadata(target: unknown): DomainServiceOptions | undefined {
   return Reflect.getMetadata(DOMAIN_SERVICE_METADATA_KEY, target as object);
 }

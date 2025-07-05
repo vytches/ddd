@@ -48,9 +48,7 @@ describe('DefaultDomainServiceRegistry', () => {
 
       // Assert
       expect(error).toBeInstanceOf(ServiceNotFoundError);
-      expect(error?.message).toContain(
-        ServiceNotFoundError.withServiceId('undefined').message,
-      );
+      expect(error?.message).toContain(ServiceNotFoundError.withServiceId('undefined').message);
     });
 
     it('should throw error when registering duplicate ID', async () => {
@@ -61,15 +59,11 @@ describe('DefaultDomainServiceRegistry', () => {
       registry.register(service1, 'duplicate-id');
 
       // Act
-      const [error] = await safeRun(() =>
-        registry.register(service2, 'duplicate-id'),
-      );
+      const [error] = await safeRun(() => registry.register(service2, 'duplicate-id'));
 
       // Assert
       expect(error).toBeInstanceOf(ServiceDuplicateError);
-      expect(error?.message).toContain(
-        ServiceDuplicateError.withServiceId('duplicate-id').message,
-      );
+      expect(error?.message).toContain(ServiceDuplicateError.withServiceId('duplicate-id').message);
     });
   });
 

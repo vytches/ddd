@@ -35,7 +35,11 @@
               },
               {
                 "sourceTag": "scope:value-objects",
-                "onlyDependOnLibsWithTags": ["scope:utils", "scope:domain-primitives", "scope:value-objects"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:utils",
+                  "scope:domain-primitives",
+                  "scope:value-objects"
+                ]
               },
               {
                 "sourceTag": "scope:repositories",
@@ -78,7 +82,12 @@
               },
               {
                 "sourceTag": "scope:validation",
-                "onlyDependOnLibsWithTags": ["scope:utils", "scope:domain-primitives", "scope:validation", "scope:contracts"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:utils",
+                  "scope:domain-primitives",
+                  "scope:validation",
+                  "scope:contracts"
+                ]
               },
               {
                 "sourceTag": "scope:policies",
@@ -144,7 +153,13 @@
               },
               {
                 "sourceTag": "scope:resilience",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:domain-primitives", "scope:utils", "scope:resilience", "scope:logging"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:domain-primitives",
+                  "scope:utils",
+                  "scope:resilience",
+                  "scope:logging"
+                ]
               },
               {
                 "sourceTag": "scope:testing",
@@ -165,7 +180,13 @@
               },
               {
                 "sourceTag": "scope:cli",
-                "onlyDependOnLibsWithTags": ["scope:core", "scope:domain-primitives", "scope:utils", "scope:cli", "scope:logging"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:core",
+                  "scope:domain-primitives",
+                  "scope:utils",
+                  "scope:cli",
+                  "scope:logging"
+                ]
               },
               {
                 "sourceTag": "scope:contracts",

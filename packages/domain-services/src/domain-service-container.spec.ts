@@ -107,9 +107,7 @@ describe('DomainServiceContainer', () => {
       const container = new DomainServiceContainer();
 
       // Assert
-      expect(container.getRegistry()).toBeInstanceOf(
-        DefaultDomainServiceRegistry,
-      );
+      expect(container.getRegistry()).toBeInstanceOf(DefaultDomainServiceRegistry);
     });
 
     it('should use provided registry', () => {
@@ -144,15 +142,10 @@ describe('DomainServiceContainer', () => {
       const serviceId = 'dependent-service';
 
       // First, register the dependency
-      container.registerFactory(
-        dependencyId,
-        () => new SimpleService(dependencyId),
-      );
+      container.registerFactory(dependencyId, () => new SimpleService(dependencyId));
 
       // Then, register a service that depends on it
-      container.registerFactory(serviceId, () => new SimpleService(serviceId), [
-        dependencyId,
-      ]);
+      container.registerFactory(serviceId, () => new SimpleService(serviceId), [dependencyId]);
 
       // Act
       container.initializeServices();
@@ -180,10 +173,7 @@ describe('DomainServiceContainer', () => {
       const container = new DomainServiceContainer(registry);
       container.setEventBus(eventBus);
       const serviceId = 'event-aware-service';
-      container.registerFactory(
-        serviceId,
-        () => new EventAwareService(serviceId),
-      );
+      container.registerFactory(serviceId, () => new EventAwareService(serviceId));
 
       // Act
       container.initializeServices();
@@ -211,10 +201,7 @@ describe('DomainServiceContainer', () => {
       const container = new DomainServiceContainer(registry);
       container.setUnitOfWorkProvider(unitOfWorkProvider);
       const serviceId = 'uow-aware-service';
-      container.registerFactory(
-        serviceId,
-        () => new UnitOfWorkAwareService(serviceId),
-      );
+      container.registerFactory(serviceId, () => new UnitOfWorkAwareService(serviceId));
 
       // Act
       container.initializeServices();
@@ -231,20 +218,9 @@ describe('DomainServiceContainer', () => {
       const container = new DomainServiceContainer(registry);
 
       // Define a chain of dependencies: service1 <- service2 <- service3
-      container.registerFactory(
-        'service1',
-        () => new SimpleService('service1'),
-      );
-      container.registerFactory(
-        'service2',
-        () => new SimpleService('service2'),
-        ['service1'],
-      );
-      container.registerFactory(
-        'service3',
-        () => new SimpleService('service3'),
-        ['service2'],
-      );
+      container.registerFactory('service1', () => new SimpleService('service1'));
+      container.registerFactory('service2', () => new SimpleService('service2'), ['service1']);
+      container.registerFactory('service3', () => new SimpleService('service3'), ['service2']);
 
       // Act
       container.initializeServices();
@@ -260,21 +236,9 @@ describe('DomainServiceContainer', () => {
       const container = new DomainServiceContainer(registry);
 
       // Define circular dependencies: serviceA <- serviceB <- serviceC <- serviceA
-      container.registerFactory(
-        'serviceA',
-        () => new SimpleService('serviceA'),
-        ['serviceC'],
-      );
-      container.registerFactory(
-        'serviceB',
-        () => new SimpleService('serviceB'),
-        ['serviceA'],
-      );
-      container.registerFactory(
-        'serviceC',
-        () => new SimpleService('serviceC'),
-        ['serviceB'],
-      );
+      container.registerFactory('serviceA', () => new SimpleService('serviceA'), ['serviceC']);
+      container.registerFactory('serviceB', () => new SimpleService('serviceB'), ['serviceA']);
+      container.registerFactory('serviceC', () => new SimpleService('serviceC'), ['serviceB']);
 
       // Act
       const [error] = await safeRun(() => container.initializeServices());
@@ -293,7 +257,7 @@ describe('DomainServiceContainer', () => {
       // Act
       container.initializeServices();
       // Allow any pending promises to resolve
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       // Assert
       const service = registry.get<AsyncService>(serviceId);

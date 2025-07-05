@@ -13,9 +13,12 @@ export class ContextACLRegistry extends BaseACLRegistry {
   registerLocal<TDomain, TExternal>(
     targetContextName: string,
     adapter: IACLAdapter<TDomain, TExternal>,
-    description?: string,
+    description?: string
   ): this {
-    const metadata: Partial<ACLRegistrationMetadata> = { source: 'module' as const, version: '1.0.0' };
+    const metadata: Partial<ACLRegistrationMetadata> = {
+      source: 'module' as const,
+      version: '1.0.0',
+    };
     if (description !== undefined) {
       metadata.description = description;
     }

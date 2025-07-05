@@ -5,7 +5,7 @@ export { IBaseRepository, VersionError, type IRepositoryAggregate } from './base
 export type {
   IRepository,
   IRepositoryProvider,
-  IExtendedRepository
+  IExtendedRepository,
 } from './base-repository.interface';
 
 // Unit of work interface

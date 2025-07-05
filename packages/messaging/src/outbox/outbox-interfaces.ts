@@ -87,5 +87,5 @@ export interface IOutboxMessageHandler<T = any> {
  * Enables creation of processing pipelines for outbox messages
  */
 export type OutboxMiddleware = (
-  next: (message: IOutboxMessage) => Promise<void>,
+  next: (message: IOutboxMessage) => Promise<void>
 ) => (message: IOutboxMessage) => Promise<void>;

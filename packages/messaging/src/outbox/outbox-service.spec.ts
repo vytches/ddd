@@ -38,7 +38,7 @@ describe('OutboxService', () => {
           status: MessageStatus.PENDING,
           attempts: 0,
           priority: MessagePriority.NORMAL,
-        }),
+        })
       );
     });
 
@@ -58,7 +58,7 @@ describe('OutboxService', () => {
           payload,
           priority: MessagePriority.HIGH,
           metadata: expect.objectContaining({ correlationId: '123' }),
-        }),
+        })
       );
     });
   });
@@ -79,7 +79,7 @@ describe('OutboxService', () => {
           expect.objectContaining({ messageType: 'Message1' }),
           expect.objectContaining({ messageType: 'Message2' }),
           expect.objectContaining({ messageType: 'Message3' }),
-        ]),
+        ])
       );
     });
   });
@@ -90,11 +90,7 @@ describe('OutboxService', () => {
       const payload = { data: 'delayed' };
       const delayMs = 5000;
 
-      const messageId = await outboxService.scheduleMessage(
-        messageType,
-        payload,
-        delayMs,
-      );
+      const messageId = await outboxService.scheduleMessage(messageType, payload, delayMs);
 
       expect(messageId).toBe('scheduled-id-456');
       expect(mockRepository.scheduleMessage).toHaveBeenCalledWith(
@@ -103,7 +99,7 @@ describe('OutboxService', () => {
           payload,
           processAfter: expect.any(Date),
         }),
-        expect.any(Date),
+        expect.any(Date)
       );
     });
   });
@@ -120,7 +116,7 @@ describe('OutboxService', () => {
           messageType,
           payload,
           priority: MessagePriority.HIGH,
-        }),
+        })
       );
     });
   });
@@ -137,7 +133,7 @@ describe('OutboxService', () => {
           messageType,
           payload,
           priority: MessagePriority.CRITICAL,
-        }),
+        })
       );
     });
   });
@@ -165,7 +161,7 @@ describe('OutboxService', () => {
           metadata: expect.objectContaining({
             eventId: 'event-123',
           }),
-        }),
+        })
       );
     });
   });
@@ -218,7 +214,7 @@ describe('OutboxService', () => {
 
       expect(mockRepository.updateStatus).toHaveBeenCalledWith(
         'failed-message-id',
-        MessageStatus.PENDING,
+        MessageStatus.PENDING
       );
     });
   });
@@ -231,7 +227,7 @@ describe('OutboxService', () => {
 
       expect(mockRepository.updateStatusBatch).toHaveBeenCalledWith(
         messageIds,
-        MessageStatus.PENDING,
+        MessageStatus.PENDING
       );
     });
   });
@@ -243,7 +239,7 @@ describe('OutboxService', () => {
       expect(deletedCount).toBe(5);
       expect(mockRepository.deleteByStatusAndAge).toHaveBeenCalledWith(
         expect.any(Date),
-        MessageStatus.PROCESSED,
+        MessageStatus.PROCESSED
       );
     });
   });

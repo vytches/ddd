@@ -20,13 +20,15 @@ class MockACLAdapter implements IACLAdapter<TestDomainModel, TestExternalModel> 
   execute = vi.fn();
   fetch = vi.fn();
   supportsOperation = vi.fn(() => true);
-  
-  getContextInfo = vi.fn((): ACLContextInfo => ({
-    contextName: this.contextName,
-    externalSystemName: 'TestSystem',
-    version: '1.0.0',
-    supportedOperations: ['CREATE', 'UPDATE'],
-  }));
+
+  getContextInfo = vi.fn(
+    (): ACLContextInfo => ({
+      contextName: this.contextName,
+      externalSystemName: 'TestSystem',
+      version: '1.0.0',
+      supportedOperations: ['CREATE', 'UPDATE'],
+    })
+  );
 }
 
 describe('ContextACLRegistry', () => {
@@ -82,7 +84,7 @@ describe('ContextACLRegistry', () => {
       registry.registerLocal('InventoryService', adapter, description);
 
       expect(registry.hasContext('InventoryService')).toBe(true);
-      
+
       const metadata = (registry as any).metadata.get('InventoryService');
       expect(metadata.source).toBe('module');
       expect(metadata.version).toBe('1.0.0');
@@ -165,9 +167,7 @@ describe('ContextACLRegistry', () => {
       const adapter1 = new MockACLAdapter('Service1');
       const adapter2 = new MockACLAdapter('Service2');
 
-      registry
-        .registerLocal('Service1', adapter1)
-        .registerLocal('Service2', adapter2);
+      registry.registerLocal('Service1', adapter1).registerLocal('Service2', adapter2);
 
       const contexts = registry.getRegisteredContexts();
       expect(contexts).toHaveLength(2);
@@ -179,9 +179,7 @@ describe('ContextACLRegistry', () => {
       const adapter1 = new MockACLAdapter('Service1');
       const adapter2 = new MockACLAdapter('Service2');
 
-      registry
-        .registerLocal('Service1', adapter1)
-        .registerLocal('Service2', adapter2);
+      registry.registerLocal('Service1', adapter1).registerLocal('Service2', adapter2);
 
       const exported = registry.exportAdapters();
       expect(exported.size).toBe(2);
@@ -238,7 +236,9 @@ describe('ContextACLRegistry', () => {
 
     it('should handle special characters in context name', () => {
       const specialRegistry = new ContextACLRegistry('Context/With-Special_Characters.123');
-      expect(specialRegistry.getRegistryName()).toBe('ContextACLRegistry(Context/With-Special_Characters.123)');
+      expect(specialRegistry.getRegistryName()).toBe(
+        'ContextACLRegistry(Context/With-Special_Characters.123)'
+      );
 
       const adapter = new MockACLAdapter('TestService');
       specialRegistry.registerLocal('TestService', adapter);
@@ -309,12 +309,12 @@ describe('ContextACLRegistry', () => {
 
     it('should handle multiple registrations with same target context name', () => {
       vi.useFakeTimers();
-      
+
       const adapter1 = new MockACLAdapter('SameService');
       const adapter2 = new MockACLAdapter('SameService');
 
       registry.registerLocal('SameService', adapter1, 'First registration');
-      
+
       // Verify first registration
       expect(registry.get('SameService')).toBe(adapter1);
       const firstMetadata = (registry as any).metadata.get('SameService');
@@ -328,17 +328,17 @@ describe('ContextACLRegistry', () => {
       // Verify overwrite
       expect(registry.get('SameService')).toBe(adapter2);
       const secondMetadata = (registry as any).metadata.get('SameService');
-      
+
       expect(secondMetadata.description).toBe('Second registration');
       expect(secondMetadata.registeredAt.getTime()).toBeGreaterThan(firstTimestamp.getTime());
-      
+
       vi.useRealTimers();
     });
 
     it('should handle very long context and target names', () => {
       const longContextName = 'A'.repeat(1000);
       const longTargetName = 'B'.repeat(1000);
-      
+
       const longContextRegistry = new ContextACLRegistry(longContextName);
       const adapter = new MockACLAdapter(longTargetName);
 

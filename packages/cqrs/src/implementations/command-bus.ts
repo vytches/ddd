@@ -1,6 +1,6 @@
 import { ICommandBus } from '../abstracts';
 import type { ICommand, ICommandHandler } from '../interfaces';
-import type { ICQRSMiddleware} from '../middleware';
+import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
@@ -19,16 +19,13 @@ export class CommandBus extends ICommandBus {
     this.handlerResolver = handlerResolver ?? undefined;
   }
 
-  register<T extends ICommand>(
-    commandType: unknown,
-    handler: ICommandHandler<T>,
-  ): void {
+  register<T extends ICommand>(commandType: unknown, handler: ICommandHandler<T>): void {
     this.handlers.set(commandType, handler);
   }
 
   registerFactory<T extends ICommand>(
     commandType: unknown,
-    factory: () => ICommandHandler<T>,
+    factory: () => ICommandHandler<T>
   ): void {
     this.handlers.set(commandType, factory);
   }
@@ -48,7 +45,7 @@ export class CommandBus extends ICommandBus {
       if (!this.handlerResolver) {
         throw new CQRSConfigurationError(
           'Handler resolver required for auto-discovery',
-          'CommandBus',
+          'CommandBus'
         );
       }
 
@@ -58,7 +55,7 @@ export class CommandBus extends ICommandBus {
       } catch (error) {
         throw new CQRSConfigurationError(
           `Failed to resolve handler ${handlerClass.name}: ${error}`,
-          'CommandBus',
+          'CommandBus'
         );
       }
     });
@@ -70,10 +67,7 @@ export class CommandBus extends ICommandBus {
       throw new HandlerNotFoundError(command.constructor.name, 'command');
     }
 
-    const handler =
-      typeof handlerOrFactory === 'function'
-        ? handlerOrFactory()
-        : handlerOrFactory;
+    const handler = typeof handlerOrFactory === 'function' ? handlerOrFactory() : handlerOrFactory;
 
     // Optional validation
     if (this.isValidatable(command) && 'validate' in command) {
@@ -87,7 +81,7 @@ export class CommandBus extends ICommandBus {
 
   private async executeWithMiddleware(
     context: CQRSExecutionContext,
-    handlerExecution: () => Promise<unknown>,
+    handlerExecution: () => Promise<unknown>
   ): Promise<unknown> {
     if (this.middlewares.length === 0) {
       return handlerExecution();
@@ -108,6 +102,11 @@ export class CommandBus extends ICommandBus {
   }
 
   private isValidatable(obj: unknown): obj is ICqrsValidatable {
-    return obj != null && typeof obj === 'object' && 'validate' in obj && typeof (obj as Record<string, unknown>).validate === 'function';
+    return (
+      obj != null &&
+      typeof obj === 'object' &&
+      'validate' in obj &&
+      typeof (obj as Record<string, unknown>).validate === 'function'
+    );
   }
 }

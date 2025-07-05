@@ -42,30 +42,38 @@ interface CreateOrderOutput {
 
 // Mock implementations
 class MockTranslator implements IModelTranslator<TestDomainModel, TestExternalModel> {
-  toExternal = vi.fn((domain: TestDomainModel): TestExternalModel => ({
-    external_id: domain.id,
-    display_name: domain.name,
-    total_amount: domain.amount.toString(),
-  }));
+  toExternal = vi.fn(
+    (domain: TestDomainModel): TestExternalModel => ({
+      external_id: domain.id,
+      display_name: domain.name,
+      total_amount: domain.amount.toString(),
+    })
+  );
 
-  fromExternal = vi.fn((external: TestExternalModel): TestDomainModel => ({
-    id: external.external_id,
-    name: external.display_name,
-    amount: parseFloat(external.total_amount),
-  }));
+  fromExternal = vi.fn(
+    (external: TestExternalModel): TestDomainModel => ({
+      id: external.external_id,
+      name: external.display_name,
+      amount: parseFloat(external.total_amount),
+    })
+  );
 }
 
 class MockExternalAPI implements IExternalAPI<TestExternalModel, TestResult> {
-  execute = vi.fn(async (_operation: string, _model: TestExternalModel): Promise<TestResult> => ({
-    success: true,
-    message: 'Operation completed successfully',
-  }));
+  execute = vi.fn(
+    async (_operation: string, _model: TestExternalModel): Promise<TestResult> => ({
+      success: true,
+      message: 'Operation completed successfully',
+    })
+  );
 
-  fetch = vi.fn(async (identifier: string): Promise<TestExternalModel> => ({
-    external_id: identifier,
-    display_name: 'Test Item',
-    total_amount: '100.00',
-  }));
+  fetch = vi.fn(
+    async (identifier: string): Promise<TestExternalModel> => ({
+      external_id: identifier,
+      display_name: 'Test Item',
+      total_amount: '100.00',
+    })
+  );
 
   healthCheck = vi.fn(async (): Promise<boolean> => true);
 }
@@ -82,7 +90,9 @@ class TestTypedOperation implements TypedOperation<CreateOrderInput, CreateOrder
   });
 }
 
-class TestTypedOperationWithoutValidation implements TypedOperation<CreateOrderInput, CreateOrderOutput> {
+class TestTypedOperationWithoutValidation
+  implements TypedOperation<CreateOrderInput, CreateOrderOutput>
+{
   readonly name = 'CREATE_ORDER_SIMPLE';
   readonly description = 'Creates a new order without validation';
   // No validateBusinessRules method
@@ -104,12 +114,11 @@ describe('EnhancedACLAdapter', () => {
       supportedOperations: ['CREATE_ORDER', 'CREATE_ORDER_SIMPLE', 'UPDATE_ORDER'],
     };
 
-    adapter = new EnhancedACLAdapter(
-      contextInfo,
-      mockTranslator,
-      mockExternalAPI,
-      ['CREATE_ORDER', 'CREATE_ORDER_SIMPLE', 'UPDATE_ORDER']
-    );
+    adapter = new EnhancedACLAdapter(contextInfo, mockTranslator, mockExternalAPI, [
+      'CREATE_ORDER',
+      'CREATE_ORDER_SIMPLE',
+      'UPDATE_ORDER',
+    ]);
   });
 
   describe('construction', () => {
@@ -148,14 +157,11 @@ describe('EnhancedACLAdapter', () => {
 
       expect(result.isSuccess).toBe(true);
       expect(mockTranslator.toExternal).toHaveBeenCalledWith(testDomainModel);
-      expect(mockExternalAPI.execute).toHaveBeenCalledWith(
-        'CREATE_ORDER_SIMPLE',
-        {
-          external_id: 'order-123',
-          display_name: 'Test Order',
-          total_amount: '150',
-        }
-      );
+      expect(mockExternalAPI.execute).toHaveBeenCalledWith('CREATE_ORDER_SIMPLE', {
+        external_id: 'order-123',
+        display_name: 'Test Order',
+        total_amount: '150',
+      });
     });
 
     it('should execute typed operation successfully with valid business rules', async () => {

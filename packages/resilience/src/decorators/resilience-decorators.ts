@@ -13,13 +13,17 @@ export interface BaseResilienceDecoratorConfig {
 }
 
 // Individual pattern decorator configs
-export interface CircuitBreakerDecoratorConfig extends Omit<CircuitBreakerConfig, 'name'>, BaseResilienceDecoratorConfig {
+export interface CircuitBreakerDecoratorConfig
+  extends Omit<CircuitBreakerConfig, 'name'>,
+    BaseResilienceDecoratorConfig {
   name?: string;
 }
 
 export interface RetryDecoratorConfig extends RetryConfig, BaseResilienceDecoratorConfig {}
 
-export interface BulkheadDecoratorConfig extends Omit<BulkheadConfig, 'name'>, BaseResilienceDecoratorConfig {
+export interface BulkheadDecoratorConfig
+  extends Omit<BulkheadConfig, 'name'>,
+    BaseResilienceDecoratorConfig {
   name?: string;
 }
 
@@ -46,22 +50,20 @@ function createResilienceDecorator<T extends BaseResilienceDecoratorConfig>(
   defaultDecoratorName = 'resilience'
 ) {
   return function (config: T) {
-    return function (
-      target: unknown,
-      propertyKey: string,
-      descriptor: PropertyDescriptor
-    ) {
+    return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
       const policy = policyFactory(config);
 
       descriptor.value = async function (...args: unknown[]) {
-        const context = config.contextProvider?.() ?? DefaultResilienceContext.create({
-          metadata: {
-            className: (target as { constructor: { name: string } }).constructor.name,
-            methodName: propertyKey,
-            decoratorName: config.decoratorName ?? defaultDecoratorName
-          }
-        });
+        const context =
+          config.contextProvider?.() ??
+          DefaultResilienceContext.create({
+            metadata: {
+              className: (target as { constructor: { name: string } }).constructor.name,
+              methodName: propertyKey,
+              decoratorName: config.decoratorName ?? defaultDecoratorName,
+            },
+          });
 
         return policy.execute(
           (ctx: ResilienceContext) => originalMethod.apply(this, [...args, ctx]),
@@ -73,7 +75,7 @@ function createResilienceDecorator<T extends BaseResilienceDecoratorConfig>(
       Object.defineProperty(descriptor.value, 'resilienceConfig', {
         value: config,
         writable: false,
-        enumerable: false
+        enumerable: false,
       });
 
       return descriptor;
@@ -116,15 +118,16 @@ function createSimpleDecorator<T extends BaseResilienceDecoratorConfig>(
  * ```
  */
 export const CircuitBreaker = createSimpleDecorator<CircuitBreakerDecoratorConfig>(
-  (config) => ResiliencePolicyBuilder.create()
-    .withCircuitBreaker({
-      failureThreshold: config.failureThreshold,
-      recoveryTimeout: config.recoveryTimeout,
-      successThreshold: config.successThreshold,
-      timeout: config.timeout,
-      name: config.name ?? config.decoratorName ?? 'circuit-breaker'
-    })
-    .build(),
+  config =>
+    ResiliencePolicyBuilder.create()
+      .withCircuitBreaker({
+        failureThreshold: config.failureThreshold,
+        recoveryTimeout: config.recoveryTimeout,
+        successThreshold: config.successThreshold,
+        timeout: config.timeout,
+        name: config.name ?? config.decoratorName ?? 'circuit-breaker',
+      })
+      .build(),
   'circuit-breaker'
 );
 
@@ -149,16 +152,17 @@ export const CircuitBreaker = createSimpleDecorator<CircuitBreakerDecoratorConfi
  * ```
  */
 export const Retry = createSimpleDecorator<RetryDecoratorConfig>(
-  (config) => ResiliencePolicyBuilder.create()
-    .withRetry({
-      maxAttempts: config.maxAttempts,
-      baseDelay: config.baseDelay,
-      maxDelay: config.maxDelay,
-      backoffMultiplier: config.backoffMultiplier,
-      jitter: config.jitter,
-      ...(config.retryableErrors && { retryableErrors: config.retryableErrors })
-    })
-    .build(),
+  config =>
+    ResiliencePolicyBuilder.create()
+      .withRetry({
+        maxAttempts: config.maxAttempts,
+        baseDelay: config.baseDelay,
+        maxDelay: config.maxDelay,
+        backoffMultiplier: config.backoffMultiplier,
+        jitter: config.jitter,
+        ...(config.retryableErrors && { retryableErrors: config.retryableErrors }),
+      })
+      .build(),
   'retry'
 );
 
@@ -181,14 +185,15 @@ export const Retry = createSimpleDecorator<RetryDecoratorConfig>(
  * ```
  */
 export const Bulkhead = createSimpleDecorator<BulkheadDecoratorConfig>(
-  (config) => ResiliencePolicyBuilder.create()
-    .withBulkhead({
-      maxConcurrency: config.maxConcurrency,
-      queueCapacity: config.queueCapacity,
-      ...(config.timeout && { timeout: config.timeout }),
-      name: config.name ?? config.decoratorName ?? 'bulkhead'
-    })
-    .build(),
+  config =>
+    ResiliencePolicyBuilder.create()
+      .withBulkhead({
+        maxConcurrency: config.maxConcurrency,
+        queueCapacity: config.queueCapacity,
+        ...(config.timeout && { timeout: config.timeout }),
+        name: config.name ?? config.decoratorName ?? 'bulkhead',
+      })
+      .build(),
   'bulkhead'
 );
 
@@ -226,11 +231,7 @@ export const Bulkhead = createSimpleDecorator<BulkheadDecoratorConfig>(
  * ```
  */
 export const Resilience = function (config: CompositeResilienceConfig) {
-  return function (
-    target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     const policyBuilder = ResiliencePolicyBuilder.create();
@@ -238,14 +239,14 @@ export const Resilience = function (config: CompositeResilienceConfig) {
     if (config.bulkhead) {
       policyBuilder.withBulkhead({
         ...config.bulkhead,
-        name: config.decoratorName ? `${config.decoratorName}-bulkhead` : 'bulkhead'
+        name: config.decoratorName ? `${config.decoratorName}-bulkhead` : 'bulkhead',
       });
     }
 
     if (config.circuitBreaker) {
       policyBuilder.withCircuitBreaker({
         ...config.circuitBreaker,
-        name: config.decoratorName ? `${config.decoratorName}-circuit-breaker` : 'circuit-breaker'
+        name: config.decoratorName ? `${config.decoratorName}-circuit-breaker` : 'circuit-breaker',
       });
     }
 
@@ -260,13 +261,15 @@ export const Resilience = function (config: CompositeResilienceConfig) {
     const policy = policyBuilder.build();
 
     descriptor.value = async function (...args: unknown[]) {
-      const context = config.contextProvider?.() ?? DefaultResilienceContext.create({
-        metadata: {
-          className: (target as { constructor: { name: string } }).constructor.name,
-          methodName: propertyKey,
-          decoratorName: config.decoratorName ?? 'composite-resilience'
-        }
-      });
+      const context =
+        config.contextProvider?.() ??
+        DefaultResilienceContext.create({
+          metadata: {
+            className: (target as { constructor: { name: string } }).constructor.name,
+            methodName: propertyKey,
+            decoratorName: config.decoratorName ?? 'composite-resilience',
+          },
+        });
 
       return policy.execute(
         (ctx: ResilienceContext) => originalMethod.apply(this, [...args, ctx]),
@@ -278,7 +281,7 @@ export const Resilience = function (config: CompositeResilienceConfig) {
     Object.defineProperty(descriptor.value, 'resilienceConfig', {
       value: config,
       writable: false,
-      enumerable: false
+      enumerable: false,
     });
 
     return descriptor;
@@ -302,16 +305,17 @@ export const Resilience = function (config: CompositeResilienceConfig) {
  * ```
  */
 export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
-  (config) => ResiliencePolicyBuilder.create()
-    .withTimeout(config.timeout)
-    .build(),
+  config => ResiliencePolicyBuilder.create().withTimeout(config.timeout).build(),
   'timeout'
 );
 
 /**
  * Utility to extract resilience metrics from decorated methods
  */
-export function getResilienceMetrics(instance: Record<string, unknown>, methodName: string): {
+export function getResilienceMetrics(
+  instance: Record<string, unknown>,
+  methodName: string
+): {
   config: BaseResilienceDecoratorConfig;
   className: string;
   methodName: string;
@@ -329,6 +333,6 @@ export function getResilienceMetrics(instance: Record<string, unknown>, methodNa
     config,
     // metrics would come from the actual policy instance
     className: instance.constructor.name,
-    methodName
+    methodName,
   };
 }

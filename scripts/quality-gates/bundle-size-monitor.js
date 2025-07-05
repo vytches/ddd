@@ -2,10 +2,10 @@
 
 /**
  * Bundle Size Monitor
- * 
+ *
  * Monitors and protects against bundle size regression with configurable thresholds.
  * Tracks package sizes and prevents accidental bloat in production builds.
- * 
+ *
  * Features:
  * - Package size monitoring with size limits
  * - Baseline comparison and regression detection
@@ -25,51 +25,51 @@ const CONFIG = {
   // Size limits in KB (based on IMPROVE.md targets)
   sizeThresholds: {
     // Foundation packages (should be lightweight)
-    'core': 5,              // Meta-package: Target <5KB
-    'domain-primitives': 50,  // Foundation: <50KB
-    'value-objects': 50,    
-    'repositories': 50,     
-    'aggregates': 90,       // Slightly larger due to capabilities
-    'utils': 50,
-    'contracts': 90,
-    'logging': 50,
-    
+    core: 5, // Meta-package: Target <5KB
+    'domain-primitives': 50, // Foundation: <50KB
+    'value-objects': 50,
+    repositories: 50,
+    aggregates: 90, // Slightly larger due to capabilities
+    utils: 50,
+    contracts: 90,
+    logging: 50,
+
     // Pattern packages (medium size)
-    'validation': 100,
-    'policies': 80,
+    validation: 100,
+    policies: 80,
     'domain-services': 50,
-    
+
     // Architecture packages (can be larger)
-    'events': 70,
-    'cqrs': 100,           // Complex architecture patterns
-    'projections': 100,
-    
+    events: 70,
+    cqrs: 100, // Complex architecture patterns
+    projections: 100,
+
     // Integration packages
-    'acl': 90,
-    'messaging': 80,
-    
+    acl: 90,
+    messaging: 80,
+
     // Infrastructure packages
-    'resilience': 80,
-    'enterprise': 50,      // Should be lightweight coordination
-    
+    resilience: 80,
+    enterprise: 50, // Should be lightweight coordination
+
     // Tooling packages (more flexible)
-    'cli': 80,
-    'testing': 100         // Test utilities can be larger
+    cli: 80,
+    testing: 100, // Test utilities can be larger
   },
-  
+
   // Global thresholds
   globalLimits: {
-    totalSourceSize: 2000,    // Total source KB across all packages
-    averagePackageSize: 80,   // Average package size
-    maxPackageSize: 100       // No single package should exceed this
+    totalSourceSize: 2000, // Total source KB across all packages
+    averagePackageSize: 80, // Average package size
+    maxPackageSize: 100, // No single package should exceed this
   },
-  
+
   // Regression thresholds (percentage increase)
   regressionThresholds: {
-    package: 10,      // 10% increase per package
-    global: 5         // 5% total increase
+    package: 10, // 10% increase per package
+    global: 5, // 5% total increase
   },
-  
+
   // Files to include in size calculation
   includePatterns: [
     'dist/**/*.js',
@@ -78,17 +78,17 @@ const CONFIG = {
     'src/**/*.ts',
     '!**/*.test.ts',
     '!**/*.spec.ts',
-    '!**/*.d.ts'
+    '!**/*.d.ts',
   ],
-  
+
   // Directories to exclude
   excludePatterns: [
     '**/node_modules/**',
     '**/test/**',
     '**/tests/**',
     '**/__tests__/**',
-    '**/coverage/**'
-  ]
+    '**/coverage/**',
+  ],
 };
 
 class BundleSizeMonitor {
@@ -102,7 +102,7 @@ class BundleSizeMonitor {
       violations: [],
       regressions: [],
       improvements: [],
-      summary: {}
+      summary: {},
     };
   }
 
@@ -111,7 +111,7 @@ class BundleSizeMonitor {
    */
   loadBaseline() {
     const baselinePath = path.join(process.cwd(), '.quality-gates', 'bundle-size-baseline.json');
-    
+
     try {
       if (fs.existsSync(baselinePath)) {
         return JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
@@ -119,12 +119,12 @@ class BundleSizeMonitor {
     } catch (error) {
       console.warn('Could not load baseline:', error.message);
     }
-    
+
     return {
       packages: {},
       totalSourceSize: 0,
       totalBuiltSize: 0,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -134,18 +134,18 @@ class BundleSizeMonitor {
   saveBaseline() {
     const baselineDir = path.join(process.cwd(), '.quality-gates');
     const baselinePath = path.join(baselineDir, 'bundle-size-baseline.json');
-    
+
     if (!fs.existsSync(baselineDir)) {
       fs.mkdirSync(baselineDir, { recursive: true });
     }
-    
+
     const baseline = {
       packages: Object.fromEntries(this.results.packages),
       totalSourceSize: this.results.totalSourceSize,
       totalBuiltSize: this.results.totalBuiltSize,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2));
     console.log(`✅ Baseline saved to ${baselinePath}`);
   }
@@ -159,17 +159,17 @@ class BundleSizeMonitor {
 
     if (fs.existsSync(packagesDir)) {
       const entries = fs.readdirSync(packagesDir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         if (entry.isDirectory()) {
           const packagePath = path.join(packagesDir, entry.name);
           const packageJsonPath = path.join(packagePath, 'package.json');
-          
+
           if (fs.existsSync(packageJsonPath)) {
             packages.push({
               name: entry.name,
               path: packagePath,
-              packageJson: JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+              packageJson: JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')),
             });
           }
         }
@@ -190,13 +190,13 @@ class BundleSizeMonitor {
     let totalSize = 0;
     const files = [];
 
-    const walkDir = (currentPath) => {
+    const walkDir = currentPath => {
       const entries = fs.readdirSync(currentPath, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(currentPath, entry.name);
         const relativePath = path.relative(dirPath, fullPath);
-        
+
         if (entry.isDirectory()) {
           if (!this.shouldExcludeDirectory(relativePath)) {
             walkDir(fullPath);
@@ -206,7 +206,7 @@ class BundleSizeMonitor {
           totalSize += stats.size;
           files.push({
             path: relativePath,
-            size: stats.size
+            size: stats.size,
           });
         }
       }
@@ -217,7 +217,7 @@ class BundleSizeMonitor {
     return {
       totalSize,
       files,
-      sizeKB: Math.round(totalSize / 1024 * 100) / 100
+      sizeKB: Math.round((totalSize / 1024) * 100) / 100,
     };
   }
 
@@ -236,7 +236,7 @@ class BundleSizeMonitor {
    */
   shouldIncludeFile(relativePath, patterns = []) {
     const allPatterns = patterns.length > 0 ? patterns : this.config.includePatterns;
-    
+
     return allPatterns.some(pattern => {
       const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
       return regex.test(relativePath);
@@ -248,24 +248,27 @@ class BundleSizeMonitor {
    */
   analyzePackage(packageInfo) {
     const { name, path: packagePath, packageJson } = packageInfo;
-    
+
     // Calculate source size
-    const sourceSize = this.calculateDirectorySize(
-      path.join(packagePath, 'src'),
-      ['**/*.ts', '!**/*.test.ts', '!**/*.spec.ts']
-    );
-    
+    const sourceSize = this.calculateDirectorySize(path.join(packagePath, 'src'), [
+      '**/*.ts',
+      '!**/*.test.ts',
+      '!**/*.spec.ts',
+    ]);
+
     // Calculate built size
-    const builtSize = this.calculateDirectorySize(
-      path.join(packagePath, 'dist'),
-      ['**/*.js', '**/*.mjs', '**/*.cjs']
-    );
-    
+    const builtSize = this.calculateDirectorySize(path.join(packagePath, 'dist'), [
+      '**/*.js',
+      '**/*.mjs',
+      '**/*.cjs',
+    ]);
+
     // Calculate tree-shaking effectiveness
-    const treeshakingRatio = builtSize.sizeKB > 0 && sourceSize.sizeKB > 0 
-      ? Math.round((1 - builtSize.sizeKB / sourceSize.sizeKB) * 100)
-      : 0;
-    
+    const treeshakingRatio =
+      builtSize.sizeKB > 0 && sourceSize.sizeKB > 0
+        ? Math.round((1 - builtSize.sizeKB / sourceSize.sizeKB) * 100)
+        : 0;
+
     const result = {
       name,
       sourceSize: sourceSize.sizeKB,
@@ -276,7 +279,7 @@ class BundleSizeMonitor {
       packageJson: {
         version: packageJson.version,
         dependencies: Object.keys(packageJson.dependencies || {}).length,
-        devDependencies: Object.keys(packageJson.devDependencies || {}).length
+        devDependencies: Object.keys(packageJson.devDependencies || {}).length,
       },
       threshold: this.config.sizeThresholds[name] || 100,
       largestFiles: [...sourceSize.files, ...builtSize.files]
@@ -284,8 +287,8 @@ class BundleSizeMonitor {
         .slice(0, 5)
         .map(f => ({
           ...f,
-          sizeKB: Math.round(f.size / 1024 * 100) / 100
-        }))
+          sizeKB: Math.round((f.size / 1024) * 100) / 100,
+        })),
     };
 
     return result;
@@ -303,7 +306,7 @@ class BundleSizeMonitor {
     for (const packageInfo of packages) {
       const result = this.analyzePackage(packageInfo);
       this.results.packages.set(result.name, result);
-      
+
       this.results.totalSourceSize += result.sourceSize;
       this.results.totalBuiltSize += result.builtSize;
     }
@@ -311,11 +314,14 @@ class BundleSizeMonitor {
     // Calculate summary statistics
     this.results.summary = {
       packageCount: this.results.packages.size,
-      averageSourceSize: Math.round(this.results.totalSourceSize / this.results.packages.size * 100) / 100,
-      averageBuiltSize: Math.round(this.results.totalBuiltSize / this.results.packages.size * 100) / 100,
-      totalTreeshakingRatio: this.results.totalBuiltSize > 0 && this.results.totalSourceSize > 0
-        ? Math.round((1 - this.results.totalBuiltSize / this.results.totalSourceSize) * 100)
-        : 0
+      averageSourceSize:
+        Math.round((this.results.totalSourceSize / this.results.packages.size) * 100) / 100,
+      averageBuiltSize:
+        Math.round((this.results.totalBuiltSize / this.results.packages.size) * 100) / 100,
+      totalTreeshakingRatio:
+        this.results.totalBuiltSize > 0 && this.results.totalSourceSize > 0
+          ? Math.round((1 - this.results.totalBuiltSize / this.results.totalSourceSize) * 100)
+          : 0,
     };
   }
 
@@ -337,7 +343,7 @@ class BundleSizeMonitor {
           message: `Package '${packageName}' source size (${result.sourceSize}KB) exceeds threshold (${result.threshold}KB)`,
           current: result.sourceSize,
           threshold: result.threshold,
-          exceeded: Math.round((result.sourceSize - result.threshold) * 100) / 100
+          exceeded: Math.round((result.sourceSize - result.threshold) * 100) / 100,
         });
       }
 
@@ -345,7 +351,8 @@ class BundleSizeMonitor {
       if (this.baseline.packages[packageName]) {
         const baselineSize = this.baseline.packages[packageName].sourceSize;
         const change = result.sourceSize - baselineSize;
-        const changePercent = baselineSize > 0 ? Math.round((change / baselineSize) * 100 * 100) / 100 : 0;
+        const changePercent =
+          baselineSize > 0 ? Math.round((change / baselineSize) * 100 * 100) / 100 : 0;
 
         if (changePercent > this.config.regressionThresholds.package) {
           regressions.push({
@@ -355,9 +362,10 @@ class BundleSizeMonitor {
             baseline: baselineSize,
             current: result.sourceSize,
             change: Math.round(change * 100) / 100,
-            changePercent
+            changePercent,
           });
-        } else if (changePercent < -5) { // Improvement threshold
+        } else if (changePercent < -5) {
+          // Improvement threshold
           improvements.push({
             type: 'package_improvement',
             package: packageName,
@@ -365,7 +373,7 @@ class BundleSizeMonitor {
             baseline: baselineSize,
             current: result.sourceSize,
             change: Math.round(change * 100) / 100,
-            changePercent
+            changePercent,
           });
         }
       }
@@ -378,7 +386,10 @@ class BundleSizeMonitor {
         message: `Total source size (${this.results.totalSourceSize}KB) exceeds global limit (${this.config.globalLimits.totalSourceSize}KB)`,
         current: this.results.totalSourceSize,
         threshold: this.config.globalLimits.totalSourceSize,
-        exceeded: Math.round((this.results.totalSourceSize - this.config.globalLimits.totalSourceSize) * 100) / 100
+        exceeded:
+          Math.round(
+            (this.results.totalSourceSize - this.config.globalLimits.totalSourceSize) * 100
+          ) / 100,
       });
     }
 
@@ -388,7 +399,7 @@ class BundleSizeMonitor {
         type: 'average_size',
         message: `Average package size (${this.results.summary.averageSourceSize}KB) exceeds limit (${this.config.globalLimits.averagePackageSize}KB)`,
         current: this.results.summary.averageSourceSize,
-        threshold: this.config.globalLimits.averagePackageSize
+        threshold: this.config.globalLimits.averagePackageSize,
       });
     }
 
@@ -400,7 +411,7 @@ class BundleSizeMonitor {
           package: packageName,
           message: `Package '${packageName}' exceeds maximum size limit (${result.sourceSize}KB > ${this.config.globalLimits.maxPackageSize}KB)`,
           current: result.sourceSize,
-          threshold: this.config.globalLimits.maxPackageSize
+          threshold: this.config.globalLimits.maxPackageSize,
         });
       }
     }
@@ -408,7 +419,8 @@ class BundleSizeMonitor {
     // Check global regression
     if (this.baseline.totalSourceSize > 0) {
       const totalChange = this.results.totalSourceSize - this.baseline.totalSourceSize;
-      const totalChangePercent = Math.round((totalChange / this.baseline.totalSourceSize) * 100 * 100) / 100;
+      const totalChangePercent =
+        Math.round((totalChange / this.baseline.totalSourceSize) * 100 * 100) / 100;
 
       if (totalChangePercent > this.config.regressionThresholds.global) {
         regressions.push({
@@ -417,7 +429,7 @@ class BundleSizeMonitor {
           baseline: this.baseline.totalSourceSize,
           current: this.results.totalSourceSize,
           change: Math.round(totalChange * 100) / 100,
-          changePercent: totalChangePercent
+          changePercent: totalChangePercent,
         });
       }
     }
@@ -425,7 +437,7 @@ class BundleSizeMonitor {
     this.results.violations = violations;
     this.results.regressions = regressions;
     this.results.improvements = improvements;
-    
+
     return { violations, regressions, improvements };
   }
 
@@ -440,7 +452,7 @@ class BundleSizeMonitor {
     }
 
     let report = '';
-    
+
     // Header
     report += '📦 Bundle Size Analysis Report\n';
     report += '='.repeat(50) + '\n\n';
@@ -452,7 +464,7 @@ class BundleSizeMonitor {
     report += `   Total built size: ${this.results.totalBuiltSize}KB\n`;
     report += `   Average package size: ${this.results.summary.averageSourceSize}KB\n`;
     report += `   Tree-shaking effectiveness: ${this.results.summary.totalTreeshakingRatio}%\n`;
-    
+
     if (this.baseline.timestamp) {
       const baselineDate = new Date(this.baseline.timestamp).toLocaleDateString();
       report += `   Baseline date: ${baselineDate}\n`;
@@ -462,22 +474,24 @@ class BundleSizeMonitor {
     // Package breakdown
     if (this.results.packages.size > 0) {
       report += `📦 Package Breakdown:\n`;
-      
+
       // Sort packages by size
-      const sortedPackages = Array.from(this.results.packages.entries())
-        .sort(([,a], [,b]) => b.sourceSize - a.sourceSize);
-      
+      const sortedPackages = Array.from(this.results.packages.entries()).sort(
+        ([, a], [, b]) => b.sourceSize - a.sourceSize
+      );
+
       for (const [packageName, result] of sortedPackages) {
         const status = result.sourceSize <= result.threshold ? '✅' : '❌';
-        const treeshaking = result.treeshakingRatio > 0 ? ` (${result.treeshakingRatio}% tree-shaking)` : '';
-        
+        const treeshaking =
+          result.treeshakingRatio > 0 ? ` (${result.treeshakingRatio}% tree-shaking)` : '';
+
         report += `   ${status} ${packageName}: ${result.sourceSize}KB → ${result.builtSize}KB${treeshaking}\n`;
-        
+
         if (verbose) {
           report += `      - Threshold: ${result.threshold}KB\n`;
           report += `      - Source files: ${result.sourceFiles}\n`;
           report += `      - Built files: ${result.builtFiles}\n`;
-          
+
           if (result.largestFiles.length > 0) {
             report += `      - Largest files:\n`;
             for (const file of result.largestFiles.slice(0, 3)) {
@@ -527,7 +541,7 @@ class BundleSizeMonitor {
    * Get exit code based on results
    */
   getExitCode() {
-    return (this.results.violations.length > 0 || this.results.regressions.length > 0) ? 1 : 0;
+    return this.results.violations.length > 0 || this.results.regressions.length > 0 ? 1 : 0;
   }
 }
 
@@ -536,35 +550,34 @@ async function main() {
   const argv = yargs
     .option('package', {
       type: 'string',
-      description: 'Specific package to analyze'
+      description: 'Specific package to analyze',
     })
     .option('baseline', {
       type: 'boolean',
       description: 'Save current results as baseline',
-      default: false
+      default: false,
     })
     .option('verbose', {
       type: 'boolean',
       description: 'Show detailed breakdown',
-      default: false
+      default: false,
     })
     .option('format', {
       type: 'string',
       choices: ['console', 'json'],
       description: 'Output format',
-      default: 'console'
+      default: 'console',
     })
     .option('ci', {
       type: 'boolean',
       description: 'CI mode - exit with error code on violations',
-      default: false
+      default: false,
     })
     .option('threshold', {
       type: 'number',
-      description: 'Override global size threshold (KB)'
+      description: 'Override global size threshold (KB)',
     })
-    .help()
-    .argv;
+    .help().argv;
 
   const options = {};
   if (argv.threshold) {
@@ -579,7 +592,7 @@ async function main() {
 
     const report = monitor.generateReport({
       verbose: argv.verbose,
-      format: argv.format
+      format: argv.format,
     });
 
     console.log(report);
@@ -596,7 +609,6 @@ async function main() {
     if (monitor.results.violations.length === 0 && monitor.results.regressions.length === 0) {
       console.log('🎉 All bundle size quality gates passed!');
     }
-
   } catch (error) {
     console.error('❌ Error during analysis:', error.message);
     if (argv.verbose) {

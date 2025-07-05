@@ -1,13 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LibUtils } from '@vytches-ddd/utils';
 
-import type {
-  IOutboxMessage,
-  OutboxMessageOptions} from './outbox-interfaces';
-import {
-  MessageStatus,
-  MessagePriority
-} from './outbox-interfaces';
+import type { IOutboxMessage, OutboxMessageOptions } from './outbox-interfaces';
+import { MessageStatus, MessagePriority } from './outbox-interfaces';
 
 /**
  * Factory for creating outbox messages
@@ -24,7 +19,7 @@ export class OutboxMessageFactory {
   static createMessage<T = any>(
     messageType: string,
     payload: T,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     const message: IOutboxMessage<T> = {
       id: LibUtils.getUUID(),
@@ -56,7 +51,7 @@ export class OutboxMessageFactory {
     messageType: string,
     payload: T,
     delayMs: number,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     const processAfter = new Date(Date.now() + delayMs);
 
@@ -76,7 +71,7 @@ export class OutboxMessageFactory {
   static createHighPriorityMessage<T = any>(
     messageType: string,
     payload: T,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     return OutboxMessageFactory.createMessage(messageType, payload, {
       ...options,
@@ -92,7 +87,7 @@ export class OutboxMessageFactory {
    */
   static createFromIntegrationEvent<T = any>(
     event: { eventType: string; payload?: T; metadata?: Record<string, any> },
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     const mergedOptions: OutboxMessageOptions = {
       metadata: {
@@ -112,7 +107,7 @@ export class OutboxMessageFactory {
     return OutboxMessageFactory.createMessage(
       `integration_event:${event.eventType}`,
       event.payload as T,
-      mergedOptions,
+      mergedOptions
     );
   }
 }

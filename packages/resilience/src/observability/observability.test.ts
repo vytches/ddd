@@ -12,7 +12,7 @@ import {
   PrometheusMetricExporter,
   CsvMetricExporter,
   TextMetricExporter,
-  MetricExporterFactory
+  MetricExporterFactory,
 } from './index';
 
 describe('Observability System', () => {
@@ -44,7 +44,9 @@ describe('Observability System', () => {
       collector.recordStateChange('OPEN', 'HALF_OPEN');
 
       const metrics = collector.collect();
-      const transitionMetrics = metrics.filter(m => m.name === 'resilience_state_transitions_total');
+      const transitionMetrics = metrics.filter(
+        m => m.name === 'resilience_state_transitions_total'
+      );
 
       expect(transitionMetrics).toHaveLength(3);
     });
@@ -172,11 +174,15 @@ describe('Observability System', () => {
 
     it('should subscribe and emit events', async () => {
       const events: unknown[] = [];
-      const listener = (event: unknown) => { events.push(event); };
+      const listener = (event: unknown) => {
+        events.push(event);
+      };
 
       eventBus.subscribe('test.event', listener);
 
-      const event = ObservabilityEventFactory.createCustomEvent('test', 'test.event', { data: 'value' });
+      const event = ObservabilityEventFactory.createCustomEvent('test', 'test.event', {
+        data: 'value',
+      });
       await eventBus.emit(event);
 
       expect(events).toHaveLength(1);
@@ -185,7 +191,9 @@ describe('Observability System', () => {
 
     it('should support global listeners', async () => {
       const events: unknown[] = [];
-      const globalListener = (event: unknown) => { events.push(event); };
+      const globalListener = (event: unknown) => {
+        events.push(event);
+      };
 
       eventBus.subscribeAll(globalListener);
 
@@ -200,7 +208,9 @@ describe('Observability System', () => {
 
     it('should unsubscribe listeners', async () => {
       const events: unknown[] = [];
-      const listener = (event: unknown) => { events.push(event); };
+      const listener = (event: unknown) => {
+        events.push(event);
+      };
 
       eventBus.subscribe('test.event', listener);
       eventBus.unsubscribe('test.event', listener);
@@ -241,12 +251,7 @@ describe('Observability System', () => {
     });
 
     it('should create retry attempt events', () => {
-      const event = ObservabilityEventFactory.createRetryAttemptEvent(
-        'email-service',
-        2,
-        3,
-        1000
-      );
+      const event = ObservabilityEventFactory.createRetryAttemptEvent('email-service', 2, 3, 1000);
 
       expect(event.eventType).toBe('resilience.retry.attempt');
       expect(event.data.attempt).toBe(2);

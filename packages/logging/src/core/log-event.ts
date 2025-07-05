@@ -44,7 +44,7 @@ export class DefaultLogEventBuilder implements LogEventBuilder {
   withData(data: Record<string, unknown>): LogEventBuilder {
     this.event = {
       ...this.event,
-      data: { ...(this.event.data || {}), ...data }
+      data: { ...(this.event.data || {}), ...data },
     };
     return this;
   }
@@ -52,7 +52,7 @@ export class DefaultLogEventBuilder implements LogEventBuilder {
   withError(error: Error): LogEventBuilder {
     this.event = {
       ...this.event,
-      error
+      error,
     };
     return this;
   }
@@ -60,7 +60,7 @@ export class DefaultLogEventBuilder implements LogEventBuilder {
   withTags(...tags: string[]): LogEventBuilder {
     this.event = {
       ...this.event,
-      tags: [...(this.event.tags || []), ...tags]
+      tags: [...(this.event.tags || []), ...tags],
     };
     return this;
   }

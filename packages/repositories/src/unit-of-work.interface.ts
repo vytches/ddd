@@ -68,10 +68,7 @@ export interface IUnitOfWork {
    * @param {T} repository The repository instance to register
    * @memberof IUnitOfWork
    */
-  registerRepository<T extends IRepository<any>>(
-    name: string,
-    repository: T,
-  ): void;
+  registerRepository<T extends IRepository<any>>(name: string, repository: T): void;
 
   /**
    * Gets the domain event bus associated with this Unit of Work.

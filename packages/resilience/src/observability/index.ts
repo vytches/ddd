@@ -22,7 +22,7 @@ export type {
   CircuitBreakerMetrics,
   RetryMetrics,
   BulkheadMetrics,
-  TimeoutMetrics
+  TimeoutMetrics,
 } from './metrics-interfaces';
 
 // Metric collectors
@@ -30,7 +30,7 @@ export {
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
   BulkheadMetricCollector,
-  TimeoutMetricCollector
+  TimeoutMetricCollector,
 } from './metric-collectors';
 
 // Registry and event bus
@@ -39,7 +39,7 @@ export {
   DefaultObservabilityEventBus,
   GlobalMetricRegistry,
   GlobalObservabilityEventBus,
-  ObservabilityEventFactory
+  ObservabilityEventFactory,
 } from './metric-registry';
 
 // Exporters
@@ -49,5 +49,5 @@ export {
   CsvMetricExporter,
   TextMetricExporter,
   CompositeMetricExporter,
-  MetricExporterFactory
+  MetricExporterFactory,
 } from './metric-exporters';

@@ -49,10 +49,7 @@ export class Bulkhead {
 
     if (this.queue.length >= this.config.queueCapacity) {
       this.totalRejected++;
-      throw new BulkheadRejectedException(
-        this.config.name ?? 'unnamed',
-        'QUEUE_FULL'
-      );
+      throw new BulkheadRejectedException(this.config.name ?? 'unnamed', 'QUEUE_FULL');
     }
 
     return this.enqueue(operation, context);
@@ -94,7 +91,7 @@ export class Bulkhead {
         setTimeout(() => {
           reject(new Error(`Bulkhead operation timed out after ${this.config.timeout}ms`));
         }, this.config.timeout);
-      })
+      }),
     ]);
   }
 
@@ -108,7 +105,7 @@ export class Bulkhead {
         context,
         resolve: resolve as (value: unknown) => void,
         reject,
-        startTime: Date.now()
+        startTime: Date.now(),
       };
 
       this.queue.push(task);
@@ -160,9 +157,7 @@ export class Bulkhead {
       queuedTasks: this.queue.length,
       totalCompleted: this.totalCompleted,
       totalRejected: this.totalRejected,
-      avgExecutionTime: this.totalCompleted > 0
-        ? this.totalExecutionTime / this.totalCompleted
-        : 0
+      avgExecutionTime: this.totalCompleted > 0 ? this.totalExecutionTime / this.totalCompleted : 0,
     };
   }
 

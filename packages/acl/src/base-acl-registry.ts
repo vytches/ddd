@@ -16,7 +16,7 @@ export abstract class BaseACLRegistry {
   register<TDomain, TExternal>(
     contextName: string,
     adapter: IACLAdapter<TDomain, TExternal>,
-    metadata?: Partial<ACLRegistrationMetadata>,
+    metadata?: Partial<ACLRegistrationMetadata>
   ): this {
     this.adapters.set(contextName, adapter);
     this.metadata.set(contextName, {
@@ -28,15 +28,11 @@ export abstract class BaseACLRegistry {
     return this;
   }
 
-  get<TDomain, TExternal>(
-    contextName: string,
-  ): IACLAdapter<TDomain, TExternal> | undefined {
+  get<TDomain, TExternal>(contextName: string): IACLAdapter<TDomain, TExternal> | undefined {
     return this.adapters.get(contextName) as IACLAdapter<TDomain, TExternal> | undefined;
   }
 
-  getRequired<TDomain, TExternal>(
-    contextName: string,
-  ): IACLAdapter<TDomain, TExternal> {
+  getRequired<TDomain, TExternal>(contextName: string): IACLAdapter<TDomain, TExternal> {
     const adapter = this.adapters.get(contextName);
     if (!adapter) {
       throw new Error(`ACL adapter not found for context: ${contextName}`);

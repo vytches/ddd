@@ -36,10 +36,7 @@ export abstract class IBaseDomainService implements IDomainService {
  * @extends {IBaseDomainService}
  * @implements {IEventBusAware}
  */
-export abstract class EventAwareDomainService
-  extends IBaseDomainService
-  implements IEventBusAware
-{
+export abstract class EventAwareDomainService extends IBaseDomainService implements IEventBusAware {
   /**
    * Reference to the event bus for publishing domain events.
    *
@@ -79,7 +76,7 @@ export abstract class EventAwareDomainService
     if (this.eventBus) {
       this.eventBus.publish(event);
     } else {
-      throw new Error(`Event bus not set for service: ${  this.serviceId}`);
+      throw new Error(`Event bus not set for service: ${this.serviceId}`);
     }
   }
 }
@@ -164,11 +161,9 @@ export abstract class UnitOfWorkAwareDomainService
    * @throws {Error} If no Unit of Work has been set
    * @throws {Error} If the operation fails (after rolling back the transaction)
    */
-  protected async executeInTransaction<T>(
-    operation: () => Promise<T>,
-  ): Promise<T> {
+  protected async executeInTransaction<T>(operation: () => Promise<T>): Promise<T> {
     if (!this.unitOfWork) {
-      throw new Error(`Unit of Work not set for service: ${  this.serviceId}`);
+      throw new Error(`Unit of Work not set for service: ${this.serviceId}`);
     }
 
     await this.unitOfWork.begin();
@@ -194,10 +189,7 @@ export abstract class UnitOfWorkAwareDomainService
  * @extends {IBaseDomainService}
  * @implements {IAsyncDomainService}
  */
-export abstract class AsyncDomainService
-  extends IBaseDomainService
-  implements IAsyncDomainService
-{
+export abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDomainService {
   /**
    * Creates a new asynchronous domain service.
    *

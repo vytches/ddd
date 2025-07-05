@@ -3,7 +3,11 @@ import { safeRun } from '@vytches-ddd/utils';
 
 import { IBaseRepository, IRepositoryAggregate } from './base-repository';
 import { EntityId } from '@vytches-ddd/value-objects';
-import type { IDomainEvent, IAggregateWithEvents, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type {
+  IDomainEvent,
+  IAggregateWithEvents,
+  IExtendedDomainEvent,
+} from '@vytches-ddd/contracts';
 import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
 
 // Mock dla IEnhancedEventDispatcher
@@ -147,8 +151,8 @@ class TestAggregate implements IRepositoryAggregate {
         aggregateType: 'TestAggregate',
         aggregateVersion: this._version + this._events.length + 1,
         timestamp: new Date(),
-        correlationId: `corr-${Date.now()}`
-      }
+        correlationId: `corr-${Date.now()}`,
+      },
     };
     this._events.push(event);
   }

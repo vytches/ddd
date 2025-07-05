@@ -85,18 +85,15 @@ export class DefaultResilienceContext implements ResilienceContext {
     return this.fork(timeoutMs);
   }
 
-  static create(options: {
-    correlationId?: string;
-    metadata?: Record<string, unknown>;
-    timeout?: number;
-  } = {}): ResilienceContext {
+  static create(
+    options: {
+      correlationId?: string;
+      metadata?: Record<string, unknown>;
+      timeout?: number;
+    } = {}
+  ): ResilienceContext {
     const metadata = new Map(Object.entries(options.metadata ?? {}));
-    const context = new DefaultResilienceContext(
-      options.correlationId,
-      undefined,
-      1,
-      metadata
-    );
+    const context = new DefaultResilienceContext(options.correlationId, undefined, 1, metadata);
 
     return options.timeout ? context.withTimeout(options.timeout) : context;
   }

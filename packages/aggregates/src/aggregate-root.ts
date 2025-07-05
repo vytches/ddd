@@ -104,7 +104,14 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     const versioningCapability = this._capabilities.get('versioning');
 
     if (versioningCapability && 'handleVersionedEvent' in versioningCapability) {
-      (versioningCapability as { handleVersionedEvent: (event: IExtendedDomainEvent, handlers: Map<string, IAggregateEventHandler>) => void }).handleVersionedEvent(event, this._eventHandlers);
+      (
+        versioningCapability as {
+          handleVersionedEvent: (
+            event: IExtendedDomainEvent,
+            handlers: Map<string, IAggregateEventHandler>
+          ) => void;
+        }
+      ).handleVersionedEvent(event, this._eventHandlers);
     } else {
       // Standard event handling
       const handler = this._eventHandlers.get(event.eventType);

@@ -2,10 +2,10 @@
 
 /**
  * Pre-commit Quality Gates Hook
- * 
+ *
  * Lightweight quality validation that runs before commits.
  * Focuses on fast checks to prevent obvious quality regressions.
- * 
+ *
  * Features:
  * - Fast any type detection in changed files
  * - Bundle size estimation for modified packages
@@ -26,15 +26,15 @@ class PreCommitQualityGates {
       skipBundleCheck: false,
       allowBypass: true,
       verbose: false,
-      ...options
+      ...options,
     };
-    
+
     this.changedFiles = this.getStagedFiles();
     this.results = {
       anyTypeViolations: [],
       typeErrors: [],
       bundleWarnings: [],
-      passed: true
+      passed: true,
     };
   }
 
@@ -43,8 +43,13 @@ class PreCommitQualityGates {
    */
   getStagedFiles() {
     try {
-      const output = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' });
-      return output.trim().split('\n').filter(file => file.length > 0);
+      const output = execSync('git diff --cached --name-only --diff-filter=ACM', {
+        encoding: 'utf8',
+      });
+      return output
+        .trim()
+        .split('\n')
+        .filter(file => file.length > 0);
     } catch (error) {
       if (this.options.verbose) {
         console.warn('Could not get staged files:', error.message);
@@ -64,24 +69,19 @@ class PreCommitQualityGates {
     try {
       // Check if there's a commit message file (git hook context)
       const commitMsgFile = process.env.GIT_PARAMS || '.git/COMMIT_EDITMSG';
-      
+
       if (fs.existsSync(commitMsgFile)) {
         const commitMsg = fs.readFileSync(commitMsgFile, 'utf8');
-        
+
         // Look for bypass flags
-        const bypassFlags = [
-          '--skip-quality',
-          '--no-quality',
-          '[skip quality]',
-          '[quality skip]'
-        ];
-        
+        const bypassFlags = ['--skip-quality', '--no-quality', '[skip quality]', '[quality skip]'];
+
         return bypassFlags.some(flag => commitMsg.includes(flag));
       }
     } catch (error) {
       // Silently fail
     }
-    
+
     return false;
   }
 
@@ -93,11 +93,12 @@ class PreCommitQualityGates {
       return;
     }
 
-    const tsFiles = this.changedFiles.filter(file => 
-      file.endsWith('.ts') && 
-      !file.includes('.test.') && 
-      !file.includes('.spec.') &&
-      !file.includes('.d.ts')
+    const tsFiles = this.changedFiles.filter(
+      file =>
+        file.endsWith('.ts') &&
+        !file.includes('.test.') &&
+        !file.includes('.spec.') &&
+        !file.includes('.d.ts')
     );
 
     for (const file of tsFiles) {
@@ -108,14 +109,14 @@ class PreCommitQualityGates {
       try {
         const content = fs.readFileSync(file, 'utf8');
         const lines = content.split('\n');
-        
+
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           const lineNumber = i + 1;
-          
+
           // Look for any type usage (simple regex)
           const anyMatches = line.match(/\bany\b/g);
-          
+
           if (anyMatches && !this.isLineCommented(line)) {
             // Check if this might be justified
             if (!this.isJustifiedAnyUsage(line, file)) {
@@ -123,7 +124,7 @@ class PreCommitQualityGates {
                 file,
                 line: lineNumber,
                 content: line.trim(),
-                message: 'New `any` type usage detected'
+                message: 'New `any` type usage detected',
               });
             }
           }
@@ -179,10 +180,8 @@ class PreCommitQualityGates {
       return;
     }
 
-    const tsFiles = this.changedFiles.filter(file => 
-      file.endsWith('.ts') && 
-      !file.includes('.test.') && 
-      !file.includes('.spec.')
+    const tsFiles = this.changedFiles.filter(
+      file => file.endsWith('.ts') && !file.includes('.test.') && !file.includes('.spec.')
     );
 
     if (tsFiles.length === 0) {
@@ -192,19 +191,19 @@ class PreCommitQualityGates {
     try {
       // Run tsc on specific files for quick check
       const filesArg = tsFiles.join(' ');
-      execSync(`npx tsc --noEmit --skipLibCheck ${filesArg}`, { 
+      execSync(`npx tsc --noEmit --skipLibCheck ${filesArg}`, {
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
     } catch (error) {
       // Parse TypeScript errors
       const output = error.stdout || error.stderr || '';
       const errorLines = output.split('\n').filter(line => line.includes('error TS'));
-      
+
       for (const errorLine of errorLines) {
         this.results.typeErrors.push({
           message: errorLine.trim(),
-          type: 'typescript'
+          type: 'typescript',
         });
       }
     }
@@ -220,7 +219,7 @@ class PreCommitQualityGates {
 
     // Get modified packages
     const modifiedPackages = new Set();
-    
+
     for (const file of this.changedFiles) {
       const packageMatch = file.match(/^packages\/([^\/]+)/);
       if (packageMatch) {
@@ -237,12 +236,13 @@ class PreCommitQualityGates {
       try {
         const stats = fs.statSync(file);
         const sizeKB = Math.round(stats.size / 1024);
-        
-        if (sizeKB > 50) { // Files larger than 50KB
+
+        if (sizeKB > 50) {
+          // Files larger than 50KB
           this.results.bundleWarnings.push({
             file,
             size: sizeKB,
-            message: `Large file detected (${sizeKB}KB) - consider splitting`
+            message: `Large file detected (${sizeKB}KB) - consider splitting`,
           });
         }
       } catch (error) {
@@ -254,7 +254,7 @@ class PreCommitQualityGates {
     if (modifiedPackages.has('core')) {
       this.results.bundleWarnings.push({
         package: 'core',
-        message: 'Core package modified - ensure meta-package pattern is maintained'
+        message: 'Core package modified - ensure meta-package pattern is maintained',
       });
     }
   }
@@ -286,9 +286,8 @@ class PreCommitQualityGates {
     this.checkBundleImpact();
 
     // Determine overall result
-    this.results.passed = 
-      this.results.anyTypeViolations.length === 0 &&
-      this.results.typeErrors.length === 0;
+    this.results.passed =
+      this.results.anyTypeViolations.length === 0 && this.results.typeErrors.length === 0;
 
     return this.results.passed;
   }
@@ -318,7 +317,8 @@ class PreCommitQualityGates {
     // Type errors
     if (this.results.typeErrors.length > 0) {
       report += '🚨 TypeScript errors:\n';
-      for (const error of this.results.typeErrors.slice(0, 5)) { // Limit to first 5
+      for (const error of this.results.typeErrors.slice(0, 5)) {
+        // Limit to first 5
         report += `   ${error.message}\n`;
       }
       if (this.results.typeErrors.length > 5) {
@@ -363,19 +363,18 @@ async function main() {
     verbose,
     skipAnyCheck: skipAny,
     skipTypeCheck: skipType,
-    skipBundleCheck: skipBundle
+    skipBundleCheck: skipBundle,
   });
 
   try {
     const passed = await qualityGates.run();
     const report = qualityGates.generateReport();
-    
+
     console.log(report);
-    
+
     if (!passed) {
       process.exit(1);
     }
-
   } catch (error) {
     console.error('❌ Error in pre-commit quality gates:', error.message);
     if (verbose) {

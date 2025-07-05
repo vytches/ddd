@@ -20,7 +20,7 @@ class LoggingMiddleware extends BaseACLMiddleware {
     operation: string,
     _domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     this.executionLog.push({ operation, phase: 'before' });
 
@@ -44,12 +44,10 @@ class ValidationMiddleware extends BaseACLMiddleware {
     operation: string,
     _domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     if (this.validOperations.length > 0 && !this.validOperations.includes(operation)) {
-      return Result.fail(
-        ACLError.unsupportedOperation('ValidationMiddleware', operation)
-      );
+      return Result.fail(ACLError.unsupportedOperation('ValidationMiddleware', operation));
     }
 
     return await next();
@@ -63,7 +61,7 @@ class TimingMiddleware extends BaseACLMiddleware {
     _operation: string,
     _domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     const startTime = Date.now();
 
@@ -87,7 +85,7 @@ class ErrorHandlingMiddleware extends BaseACLMiddleware {
     operation: string,
     _domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     try {
       return await next();
@@ -111,7 +109,7 @@ class TransformingMiddleware extends BaseACLMiddleware {
     _operation: string,
     _domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     const result = await next();
 
@@ -136,10 +134,10 @@ class ConditionalMiddleware extends BaseACLMiddleware {
     operation: string,
     domainModel: any,
     _options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     if (this.condition(operation, domainModel)) {
-      return await this.onConditionMet() as Result<T, ACLError>;
+      return (await this.onConditionMet()) as Result<T, ACLError>;
     }
 
     return await next();
@@ -236,7 +234,12 @@ describe('Concrete Middleware Implementations', () => {
     it('should allow all operations when no restrictions set', async () => {
       const middleware = new ValidationMiddleware();
 
-      const result = await middleware.execute('ANY_OPERATION', testDomainModel, testOptions, mockNext);
+      const result = await middleware.execute(
+        'ANY_OPERATION',
+        testDomainModel,
+        testOptions,
+        mockNext
+      );
 
       expect(result.isSuccess).toBe(true);
       expect(mockNext).toHaveBeenCalledTimes(1);
@@ -245,8 +248,18 @@ describe('Concrete Middleware Implementations', () => {
     it('should allow valid operations', async () => {
       const middleware = new ValidationMiddleware(['CREATE', 'UPDATE']);
 
-      const createResult = await middleware.execute('CREATE', testDomainModel, testOptions, mockNext);
-      const updateResult = await middleware.execute('UPDATE', testDomainModel, testOptions, mockNext);
+      const createResult = await middleware.execute(
+        'CREATE',
+        testDomainModel,
+        testOptions,
+        mockNext
+      );
+      const updateResult = await middleware.execute(
+        'UPDATE',
+        testDomainModel,
+        testOptions,
+        mockNext
+      );
 
       expect(createResult.isSuccess).toBe(true);
       expect(updateResult.isSuccess).toBe(true);
@@ -390,9 +403,11 @@ describe('Concrete Middleware Implementations', () => {
     it('should not transform failed results', async () => {
       const transform = (result: any) => ({ ...result, transformed: true });
       const middleware = new TransformingMiddleware(transform);
-      const failingNext = vi.fn().mockResolvedValue(
-        Result.fail(ACLError.operationFailed('TestContext', 'CREATE', new Error('Test error')))
-      );
+      const failingNext = vi
+        .fn()
+        .mockResolvedValue(
+          Result.fail(ACLError.operationFailed('TestContext', 'CREATE', new Error('Test error')))
+        );
 
       const result = await middleware.execute('CREATE', testDomainModel, testOptions, failingNext);
 
@@ -460,9 +475,17 @@ describe('Concrete Middleware Implementations', () => {
 
     it('should handle conditional failures', async () => {
       const condition = (operation: string) => operation === 'FAILING_OP';
-      const onConditionMet = vi.fn().mockResolvedValue(
-        Result.fail(ACLError.operationFailed('ConditionalMiddleware', 'FAILING_OP', new Error('Condition failed')))
-      );
+      const onConditionMet = vi
+        .fn()
+        .mockResolvedValue(
+          Result.fail(
+            ACLError.operationFailed(
+              'ConditionalMiddleware',
+              'FAILING_OP',
+              new Error('Condition failed')
+            )
+          )
+        );
       const middleware = new ConditionalMiddleware(condition, onConditionMet);
 
       const result = await middleware.execute('FAILING_OP', testDomainModel, testOptions, mockNext);
@@ -483,17 +506,27 @@ describe('Concrete Middleware Implementations', () => {
 
       // Simulate middleware chain: logging -> timing -> validation -> next
       const chainedNext = async () => {
-        return await validationMiddleware.execute('CREATE', testDomainModel, testOptions, async () => {
-          vi.advanceTimersByTime(25);
-          return await mockNext();
-        });
+        return await validationMiddleware.execute(
+          'CREATE',
+          testDomainModel,
+          testOptions,
+          async () => {
+            vi.advanceTimersByTime(25);
+            return await mockNext();
+          }
+        );
       };
 
       const timedNext = async () => {
         return await timingMiddleware.execute('CREATE', testDomainModel, testOptions, chainedNext);
       };
 
-      const result = await loggingMiddleware.execute('CREATE', testDomainModel, testOptions, timedNext);
+      const result = await loggingMiddleware.execute(
+        'CREATE',
+        testDomainModel,
+        testOptions,
+        timedNext
+      );
 
       expect(result.isSuccess).toBe(true);
       expect(loggingMiddleware.executionLog).toEqual([
@@ -516,10 +549,20 @@ describe('Concrete Middleware Implementations', () => {
       };
 
       const validationNext = async () => {
-        return await validationMiddleware.execute('CREATE', testDomainModel, testOptions, chainedNext);
+        return await validationMiddleware.execute(
+          'CREATE',
+          testDomainModel,
+          testOptions,
+          chainedNext
+        );
       };
 
-      const result = await loggingMiddleware.execute('CREATE', testDomainModel, testOptions, validationNext);
+      const result = await loggingMiddleware.execute(
+        'CREATE',
+        testDomainModel,
+        testOptions,
+        validationNext
+      );
 
       expect(result.isFailure).toBe(true);
       expect(loggingMiddleware.executionLog).toEqual([

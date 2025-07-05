@@ -57,7 +57,9 @@ describe('ContextDetector', () => {
 
       // Just verify the structure exists, actual bounded context detection depends on runtime stack
       expect(result).toHaveProperty('boundedContext');
-      expect(typeof result.boundedContext === 'string' || result.boundedContext === undefined).toBe(true);
+      expect(typeof result.boundedContext === 'string' || result.boundedContext === undefined).toBe(
+        true
+      );
     });
   });
 

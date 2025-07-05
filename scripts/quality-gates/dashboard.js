@@ -2,10 +2,10 @@
 
 /**
  * Quality Gates Dashboard
- * 
+ *
  * Interactive dashboard for tracking quality metrics over time.
  * Provides historical analysis, trends, and actionable insights.
- * 
+ *
  * Features:
  * - Historical data tracking
  * - Trend analysis and visualization
@@ -38,7 +38,7 @@ class QualityDashboard {
     } catch (error) {
       console.warn('Could not load quality history:', error.message);
     }
-    
+
     return {
       entries: [],
       summary: {
@@ -46,8 +46,8 @@ class QualityDashboard {
         successRate: 0,
         averageAnyTypes: 0,
         averageBundleSize: 0,
-        averageBuildTime: 0
-      }
+        averageBuildTime: 0,
+      },
     };
   }
 
@@ -58,7 +58,7 @@ class QualityDashboard {
     if (!fs.existsSync(this.dataDir)) {
       fs.mkdirSync(this.dataDir, { recursive: true });
     }
-    
+
     fs.writeFileSync(this.historyFile, JSON.stringify(this.history, null, 2));
   }
 
@@ -70,35 +70,41 @@ class QualityDashboard {
       timestamp: results.timestamp || new Date().toISOString(),
       branch: this.getCurrentBranch(),
       commit: this.getCurrentCommit(),
-      anyTypes: results.anyTypes ? {
-        total: results.anyTypes.totalAnyTypes,
-        justified: results.anyTypes.justifiedAnyTypes,
-        unjustified: results.anyTypes.unjustifiedAnyTypes,
-        violations: results.anyTypes.violations.length,
-        passed: results.anyTypes.passed
-      } : null,
-      bundleSize: results.bundleSize ? {
-        totalSourceSize: results.bundleSize.totalSourceSize,
-        totalBuiltSize: results.bundleSize.totalBuiltSize,
-        violations: results.bundleSize.violations.length,
-        regressions: results.bundleSize.regressions.length,
-        improvements: results.bundleSize.improvements.length,
-        passed: results.bundleSize.passed
-      } : null,
-      performance: results.performance ? {
-        buildTime: results.performance.globalMetrics.summary?.totalBuildTime || 0,
-        testTime: results.performance.globalMetrics.summary?.totalTestTime || 0,
-        violations: results.performance.violations.length,
-        regressions: results.performance.regressions.length,
-        passed: results.performance.passed
-      } : null,
-      summary: results.summary
+      anyTypes: results.anyTypes
+        ? {
+            total: results.anyTypes.totalAnyTypes,
+            justified: results.anyTypes.justifiedAnyTypes,
+            unjustified: results.anyTypes.unjustifiedAnyTypes,
+            violations: results.anyTypes.violations.length,
+            passed: results.anyTypes.passed,
+          }
+        : null,
+      bundleSize: results.bundleSize
+        ? {
+            totalSourceSize: results.bundleSize.totalSourceSize,
+            totalBuiltSize: results.bundleSize.totalBuiltSize,
+            violations: results.bundleSize.violations.length,
+            regressions: results.bundleSize.regressions.length,
+            improvements: results.bundleSize.improvements.length,
+            passed: results.bundleSize.passed,
+          }
+        : null,
+      performance: results.performance
+        ? {
+            buildTime: results.performance.globalMetrics.summary?.totalBuildTime || 0,
+            testTime: results.performance.globalMetrics.summary?.totalTestTime || 0,
+            violations: results.performance.violations.length,
+            regressions: results.performance.regressions.length,
+            passed: results.performance.passed,
+          }
+        : null,
+      summary: results.summary,
     };
 
     this.history.entries.push(entry);
     this.updateSummary();
     this.saveHistory();
-    
+
     return entry;
   }
 
@@ -132,7 +138,7 @@ class QualityDashboard {
   updateSummary() {
     const entries = this.history.entries.filter(e => e.summary);
     const totalRuns = entries.length;
-    
+
     if (totalRuns === 0) {
       return;
     }
@@ -145,17 +151,32 @@ class QualityDashboard {
     const bundleSizeEntries = entries.filter(e => e.bundleSize);
     const performanceEntries = entries.filter(e => e.performance);
 
-    const averageAnyTypes = anyTypesEntries.length > 0 
-      ? Math.round(anyTypesEntries.reduce((sum, e) => sum + e.anyTypes.total, 0) / anyTypesEntries.length * 100) / 100
-      : 0;
+    const averageAnyTypes =
+      anyTypesEntries.length > 0
+        ? Math.round(
+            (anyTypesEntries.reduce((sum, e) => sum + e.anyTypes.total, 0) /
+              anyTypesEntries.length) *
+              100
+          ) / 100
+        : 0;
 
-    const averageBundleSize = bundleSizeEntries.length > 0
-      ? Math.round(bundleSizeEntries.reduce((sum, e) => sum + e.bundleSize.totalSourceSize, 0) / bundleSizeEntries.length * 100) / 100
-      : 0;
+    const averageBundleSize =
+      bundleSizeEntries.length > 0
+        ? Math.round(
+            (bundleSizeEntries.reduce((sum, e) => sum + e.bundleSize.totalSourceSize, 0) /
+              bundleSizeEntries.length) *
+              100
+          ) / 100
+        : 0;
 
-    const averageBuildTime = performanceEntries.length > 0
-      ? Math.round(performanceEntries.reduce((sum, e) => sum + e.performance.buildTime, 0) / performanceEntries.length * 100) / 100
-      : 0;
+    const averageBuildTime =
+      performanceEntries.length > 0
+        ? Math.round(
+            (performanceEntries.reduce((sum, e) => sum + e.performance.buildTime, 0) /
+              performanceEntries.length) *
+              100
+          ) / 100
+        : 0;
 
     this.history.summary = {
       totalRuns,
@@ -163,7 +184,7 @@ class QualityDashboard {
       averageAnyTypes,
       averageBundleSize,
       averageBuildTime,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
   }
 
@@ -174,8 +195,8 @@ class QualityDashboard {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const recentEntries = this.history.entries.filter(entry => 
-      new Date(entry.timestamp) >= cutoffDate
+    const recentEntries = this.history.entries.filter(
+      entry => new Date(entry.timestamp) >= cutoffDate
     );
 
     if (recentEntries.length < 2) {
@@ -183,7 +204,7 @@ class QualityDashboard {
         period: days,
         entries: recentEntries.length,
         trends: {},
-        message: 'Insufficient data for trend analysis'
+        message: 'Insufficient data for trend analysis',
       };
     }
 
@@ -198,47 +219,57 @@ class QualityDashboard {
       trends.anyTypes = {
         direction: last > first ? 'increasing' : last < first ? 'decreasing' : 'stable',
         change: last - first,
-        changePercent: first > 0 ? Math.round((last - first) / first * 100 * 100) / 100 : 0
+        changePercent: first > 0 ? Math.round(((last - first) / first) * 100 * 100) / 100 : 0,
       };
     }
 
     // Bundle size trend
-    const bundleSizeData = recentEntries.filter(e => e.bundleSize).map(e => e.bundleSize.totalSourceSize);
+    const bundleSizeData = recentEntries
+      .filter(e => e.bundleSize)
+      .map(e => e.bundleSize.totalSourceSize);
     if (bundleSizeData.length >= 2) {
       const first = bundleSizeData[0];
       const last = bundleSizeData[bundleSizeData.length - 1];
       trends.bundleSize = {
         direction: last > first ? 'increasing' : last < first ? 'decreasing' : 'stable',
         change: Math.round((last - first) * 100) / 100,
-        changePercent: first > 0 ? Math.round((last - first) / first * 100 * 100) / 100 : 0
+        changePercent: first > 0 ? Math.round(((last - first) / first) * 100 * 100) / 100 : 0,
       };
     }
 
     // Performance trend
-    const buildTimeData = recentEntries.filter(e => e.performance).map(e => e.performance.buildTime);
+    const buildTimeData = recentEntries
+      .filter(e => e.performance)
+      .map(e => e.performance.buildTime);
     if (buildTimeData.length >= 2) {
       const first = buildTimeData[0];
       const last = buildTimeData[buildTimeData.length - 1];
       trends.performance = {
         direction: last > first ? 'slower' : last < first ? 'faster' : 'stable',
         change: Math.round((last - first) * 100) / 100,
-        changePercent: first > 0 ? Math.round((last - first) / first * 100 * 100) / 100 : 0
+        changePercent: first > 0 ? Math.round(((last - first) / first) * 100 * 100) / 100 : 0,
       };
     }
 
     // Success rate trend
-    const successData = recentEntries.map(e => e.summary.overallStatus === 'passed' ? 1 : 0);
-    const recentSuccessRate = Math.round(successData.reduce((a, b) => a + b, 0) / successData.length * 100 * 100) / 100;
+    const successData = recentEntries.map(e => (e.summary.overallStatus === 'passed' ? 1 : 0));
+    const recentSuccessRate =
+      Math.round((successData.reduce((a, b) => a + b, 0) / successData.length) * 100 * 100) / 100;
     trends.successRate = {
       current: recentSuccessRate,
-      direction: recentSuccessRate >= 90 ? 'excellent' : recentSuccessRate >= 70 ? 'good' : 'needs_improvement'
+      direction:
+        recentSuccessRate >= 90
+          ? 'excellent'
+          : recentSuccessRate >= 70
+            ? 'good'
+            : 'needs_improvement',
     };
 
     return {
       period: days,
       entries: recentEntries.length,
       trends,
-      message: 'Trend analysis complete'
+      message: 'Trend analysis complete',
     };
   }
 
@@ -249,14 +280,18 @@ class QualityDashboard {
     const { format = 'console', days = 30, detailed = false } = options;
 
     if (format === 'json') {
-      return JSON.stringify({
-        history: this.history,
-        trends: this.getTrendAnalysis(days)
-      }, null, 2);
+      return JSON.stringify(
+        {
+          history: this.history,
+          trends: this.getTrendAnalysis(days),
+        },
+        null,
+        2
+      );
     }
 
     let report = '';
-    
+
     // Header
     report += '📊 Quality Gates Dashboard\n';
     report += '='.repeat(60) + '\n\n';
@@ -269,7 +304,7 @@ class QualityDashboard {
     report += `   Average Any Types: ${summary.averageAnyTypes}\n`;
     report += `   Average Bundle Size: ${summary.averageBundleSize}KB\n`;
     report += `   Average Build Time: ${summary.averageBuildTime}s\n`;
-    
+
     if (summary.lastUpdated) {
       const lastUpdate = new Date(summary.lastUpdated).toLocaleString();
       report += `   Last Updated: ${lastUpdate}\n`;
@@ -280,28 +315,31 @@ class QualityDashboard {
     const trends = this.getTrendAnalysis(days);
     report += `📊 Trend Analysis (Last ${days} days):\n`;
     report += `   Data Points: ${trends.entries}\n`;
-    
+
     if (trends.trends.anyTypes) {
       const trend = trends.trends.anyTypes;
-      const icon = trend.direction === 'decreasing' ? '📉' : trend.direction === 'increasing' ? '📈' : '📊';
+      const icon =
+        trend.direction === 'decreasing' ? '📉' : trend.direction === 'increasing' ? '📈' : '📊';
       report += `   ${icon} Any Types: ${trend.direction} (${trend.change > 0 ? '+' : ''}${trend.change}, ${trend.changePercent}%)\n`;
     }
-    
+
     if (trends.trends.bundleSize) {
       const trend = trends.trends.bundleSize;
-      const icon = trend.direction === 'decreasing' ? '📉' : trend.direction === 'increasing' ? '📈' : '📊';
+      const icon =
+        trend.direction === 'decreasing' ? '📉' : trend.direction === 'increasing' ? '📈' : '📊';
       report += `   ${icon} Bundle Size: ${trend.direction} (${trend.change > 0 ? '+' : ''}${trend.change}KB, ${trend.changePercent}%)\n`;
     }
-    
+
     if (trends.trends.performance) {
       const trend = trends.trends.performance;
       const icon = trend.direction === 'faster' ? '📉' : trend.direction === 'slower' ? '📈' : '📊';
       report += `   ${icon} Build Time: ${trend.direction} (${trend.change > 0 ? '+' : ''}${trend.change}s, ${trend.changePercent}%)\n`;
     }
-    
+
     if (trends.trends.successRate) {
       const trend = trends.trends.successRate;
-      const icon = trend.direction === 'excellent' ? '🟢' : trend.direction === 'good' ? '🟡' : '🔴';
+      const icon =
+        trend.direction === 'excellent' ? '🟢' : trend.direction === 'good' ? '🟡' : '🔴';
       report += `   ${icon} Success Rate: ${trend.current}% (${trend.direction})\n`;
     }
     report += '\n';
@@ -315,9 +353,9 @@ class QualityDashboard {
         const status = entry.summary.overallStatus === 'passed' ? '✅' : '❌';
         const violations = entry.summary.totalViolations;
         const branch = entry.branch !== 'unknown' ? ` (${entry.branch})` : '';
-        
+
         report += `   ${status} ${date}${branch}: ${violations} violations\n`;
-        
+
         if (detailed && violations > 0) {
           if (entry.anyTypes && entry.anyTypes.violations > 0) {
             report += `      • Any types: ${entry.anyTypes.violations} violations\n`;
@@ -335,27 +373,27 @@ class QualityDashboard {
 
     // Recommendations
     report += '💡 Recommendations:\n';
-    
+
     if (trends.trends.anyTypes?.direction === 'increasing') {
       report += '   • Focus on reducing `any` type usage - trend is increasing\n';
     }
-    
+
     if (trends.trends.bundleSize?.direction === 'increasing') {
       report += '   • Review bundle size optimizations - growth detected\n';
     }
-    
+
     if (trends.trends.performance?.direction === 'slower') {
       report += '   • Investigate build performance - times are increasing\n';
     }
-    
+
     if (trends.trends.successRate?.direction === 'needs_improvement') {
       report += '   • Address quality gate failures - success rate is low\n';
     }
-    
+
     if (summary.successRate >= 95) {
       report += '   • Excellent quality! Consider tightening thresholds\n';
     }
-    
+
     report += '\n';
 
     return report;
@@ -373,7 +411,7 @@ class QualityDashboard {
         data = {
           history: this.history,
           trends: this.getTrendAnalysis(30),
-          exported: new Date().toISOString()
+          exported: new Date().toISOString(),
         };
         content = JSON.stringify(data, null, 2);
         break;
@@ -404,11 +442,21 @@ class QualityDashboard {
    */
   generateCSV() {
     const headers = [
-      'timestamp', 'branch', 'commit', 'overallStatus',
-      'anyTypes_total', 'anyTypes_violations', 'anyTypes_passed',
-      'bundleSize_total', 'bundleSize_violations', 'bundleSize_passed',
-      'performance_buildTime', 'performance_violations', 'performance_passed',
-      'totalViolations', 'totalRegressions'
+      'timestamp',
+      'branch',
+      'commit',
+      'overallStatus',
+      'anyTypes_total',
+      'anyTypes_violations',
+      'anyTypes_passed',
+      'bundleSize_total',
+      'bundleSize_violations',
+      'bundleSize_passed',
+      'performance_buildTime',
+      'performance_violations',
+      'performance_passed',
+      'totalViolations',
+      'totalRegressions',
     ];
 
     let csv = headers.join(',') + '\n';
@@ -429,7 +477,7 @@ class QualityDashboard {
         entry.performance?.violations || '',
         entry.performance?.passed || '',
         entry.summary?.totalViolations || '',
-        entry.summary?.totalRegressions || ''
+        entry.summary?.totalRegressions || '',
       ];
 
       csv += row.join(',') + '\n';
@@ -443,7 +491,7 @@ class QualityDashboard {
    */
   generateHTML() {
     const trends = this.getTrendAnalysis(30);
-    
+
     return `
 <!DOCTYPE html>
 <html>
@@ -505,7 +553,11 @@ class QualityDashboard {
             </tr>
         </thead>
         <tbody>
-            ${this.history.entries.slice(-10).reverse().map(entry => `
+            ${this.history.entries
+              .slice(-10)
+              .reverse()
+              .map(
+                entry => `
                 <tr>
                     <td>${new Date(entry.timestamp).toLocaleString()}</td>
                     <td>${entry.branch}</td>
@@ -517,7 +569,9 @@ class QualityDashboard {
                     <td>${entry.performance?.buildTime || 'N/A'}</td>
                     <td>${entry.summary?.totalViolations || 0}</td>
                 </tr>
-            `).join('')}
+            `
+              )
+              .join('')}
         </tbody>
     </table>
 </body>
@@ -531,47 +585,46 @@ async function main() {
     .command('add <results-file>', 'Add quality gate results to history', {
       'results-file': {
         describe: 'Path to quality gate results JSON file',
-        type: 'string'
-      }
+        type: 'string',
+      },
     })
     .command('dashboard', 'Show quality dashboard', {
       days: {
         describe: 'Number of days for trend analysis',
         type: 'number',
-        default: 30
+        default: 30,
       },
       detailed: {
         describe: 'Show detailed information',
         type: 'boolean',
-        default: false
-      }
+        default: false,
+      },
     })
     .command('export <format> <file>', 'Export data', {
       format: {
         describe: 'Export format',
         choices: ['json', 'csv', 'html'],
-        type: 'string'
+        type: 'string',
       },
       file: {
         describe: 'Output file path',
-        type: 'string'
-      }
+        type: 'string',
+      },
     })
     .command('trends [days]', 'Show trend analysis', {
       days: {
         describe: 'Number of days to analyze',
         type: 'number',
-        default: 30
-      }
+        default: 30,
+      },
     })
     .option('format', {
       type: 'string',
       choices: ['console', 'json'],
       description: 'Output format',
-      default: 'console'
+      default: 'console',
     })
-    .help()
-    .argv;
+    .help().argv;
 
   const dashboard = new QualityDashboard();
 
@@ -581,29 +634,25 @@ async function main() {
       if (!fs.existsSync(resultsFile)) {
         throw new Error(`Results file not found: ${resultsFile}`);
       }
-      
+
       const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
       const entry = dashboard.addEntry(results);
       console.log('✅ Added quality gate results to history');
       console.log(`📊 Entry: ${entry.timestamp} - ${entry.summary.overallStatus}`);
-      
     } else if (argv._[0] === 'export') {
       dashboard.exportData(argv.format, argv.file);
-      
     } else if (argv._[0] === 'trends') {
       const trends = dashboard.getTrendAnalysis(argv.days);
       console.log(JSON.stringify(trends, null, 2));
-      
     } else {
       // Default dashboard command
       const report = dashboard.generateDashboard({
         format: argv.format,
         days: argv.days || 30,
-        detailed: argv.detailed
+        detailed: argv.detailed,
       });
       console.log(report);
     }
-
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

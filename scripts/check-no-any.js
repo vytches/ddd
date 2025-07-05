@@ -16,7 +16,9 @@ let stagedFiles;
 try {
   stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' })
     .split('\n')
-    .filter(file => file.endsWith('.ts') && !file.endsWith('.d.ts') && !file.includes('node_modules'))
+    .filter(
+      file => file.endsWith('.ts') && !file.endsWith('.d.ts') && !file.includes('node_modules')
+    )
     .filter(Boolean);
 } catch (error) {
   // If not in git repo, check all files
@@ -30,30 +32,32 @@ if (stagedFiles.length === 0) {
 
 let hasNewAnyTypes = false;
 const anyTypePatterns = [
-  /:\s*any\b/g,           // : any
-  /as\s+any\b/g,          // as any
-  /<any>/g,               // <any>
-  /Array<any>/g,          // Array<any>
+  /:\s*any\b/g, // : any
+  /as\s+any\b/g, // as any
+  /<any>/g, // <any>
+  /Array<any>/g, // Array<any>
   /Record<[^,>]+,\s*any>/g, // Record<string, any>
 ];
 
 for (const file of stagedFiles) {
   if (!fs.existsSync(file)) continue;
-  
+
   const content = fs.readFileSync(file, 'utf8');
   const lines = content.split('\n');
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     // Skip comments and test files
-    if (line.trim().startsWith('//') || 
-        line.trim().startsWith('*') || 
-        file.includes('.test.') || 
-        file.includes('.spec.')) {
+    if (
+      line.trim().startsWith('//') ||
+      line.trim().startsWith('*') ||
+      file.includes('.test.') ||
+      file.includes('.spec.')
+    ) {
       continue;
     }
-    
+
     for (const pattern of anyTypePatterns) {
       const matches = line.match(pattern);
       if (matches) {

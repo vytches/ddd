@@ -13,8 +13,8 @@ export default defineConfig({
         'dist/**',
         '**/*.test.ts',
         '**/*.config.ts',
-        'src/index.ts' // just exports
-      ]
-    }
-  }
+        'src/index.ts', // just exports
+      ],
+    },
+  },
 });

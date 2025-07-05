@@ -5,7 +5,7 @@ export {
   AggregateTestBuilder,
   LightweightAggregateBuilder,
   FullFeaturedAggregateBuilder,
-  createAggregateWithConfig
+  createAggregateWithConfig,
 } from './aggregate-root.builder';
 
 // Capabilities
@@ -17,20 +17,18 @@ export type {
   IAggregateCapability,
   IAggregateConstructorParams,
   IAggregateEventHandler,
-  IAggregateBuilder
+  IAggregateBuilder,
 } from './aggregate-interfaces';
 
 // Errors
-export {
-  AggregateError
-} from './aggregate-errors';
+export { AggregateError } from './aggregate-errors';
 
 // Utilities - type helpers and capability functions
 export type {
   AggregateWithSnapshotCapability,
   AggregateWithVersioningCapability,
   AggregateWithAuditCapability,
-  AggregateWithEventSourcingCapability
+  AggregateWithEventSourcingCapability,
 } from './aggregate-utilities';
 export {
   asSnapshotAggregate,
@@ -38,5 +36,5 @@ export {
   asAuditAggregate,
   asEventSourcingAggregate,
   getAggregateCapabilities,
-  hasAllCapabilities
+  hasAllCapabilities,
 } from './aggregate-utilities';

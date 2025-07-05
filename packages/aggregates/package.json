@@ -18,7 +18,9 @@
       "types": "./dist/capabilities/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "test": "vitest",
@@ -38,7 +40,7 @@
   },
   "keywords": [
     "ddd",
-    "domain-driven-design", 
+    "domain-driven-design",
     "aggregate",
     "aggregate-root",
     "event-sourcing",

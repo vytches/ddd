@@ -62,7 +62,10 @@ describe('LoggingMiddleware', () => {
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing command: TestCommand');
-        expect(mockLogger.log).toHaveBeenNthCalledWith(2, expect.stringMatching(/^\[CQRS\] command TestCommand completed in \d+ms$/));
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(/^\[CQRS\] command TestCommand completed in \d+ms$/)
+        );
         expect(result).toBe('next-result');
         expect(nextFunction).toHaveBeenCalledOnce();
       });
@@ -75,7 +78,10 @@ describe('LoggingMiddleware', () => {
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing query: TestQuery');
-        expect(mockLogger.log).toHaveBeenNthCalledWith(2, expect.stringMatching(/^\[CQRS\] query TestQuery completed in \d+ms$/));
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(/^\[CQRS\] query TestQuery completed in \d+ms$/)
+        );
         expect(result).toBe('next-result');
       });
 
@@ -84,8 +90,9 @@ describe('LoggingMiddleware', () => {
         const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
 
         const delay = 50;
-        nextFunction.mockImplementation(async () =>
-          new Promise<string>(resolve => setTimeout(() => resolve('delayed-result'), delay))
+        nextFunction.mockImplementation(
+          async () =>
+            new Promise<string>(resolve => setTimeout(() => resolve('delayed-result'), delay))
         );
 
         await middleware.handle(context, nextFunction);
@@ -111,7 +118,12 @@ describe('LoggingMiddleware', () => {
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing command: TestCommand');
-        expect(mockLogger.log).toHaveBeenNthCalledWith(2, expect.stringMatching(/^\[CQRS\] command TestCommand failed after \d+ms: Error: Test error$/));
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(
+            /^\[CQRS\] command TestCommand failed after \d+ms: Error: Test error$/
+          )
+        );
       });
 
       it('should log query execution error and rethrow', async () => {
@@ -125,7 +137,12 @@ describe('LoggingMiddleware', () => {
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing query: TestQuery');
-        expect(mockLogger.log).toHaveBeenNthCalledWith(2, expect.stringMatching(/^\[CQRS\] query TestQuery failed after \d+ms: Error: Query failed$/));
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(
+            /^\[CQRS\] query TestQuery failed after \d+ms: Error: Query failed$/
+          )
+        );
       });
 
       it('should measure execution time for failed operations', async () => {
@@ -133,10 +150,11 @@ describe('LoggingMiddleware', () => {
         const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
 
         const delay = 30;
-        nextFunction.mockImplementation(async () =>
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Delayed error')), delay)
-          )
+        nextFunction.mockImplementation(
+          async () =>
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Delayed error')), delay)
+            )
         );
 
         await expect(middleware.handle(context, nextFunction)).rejects.toThrow('Delayed error');
@@ -163,8 +181,16 @@ describe('LoggingMiddleware', () => {
         const createCommand = new CreateUserCommand({ name: 'John', email: 'john@example.com' });
         const deleteCommand = new DeleteOrderCommand('order-123');
 
-        const createContext = new CQRSExecutionContext(createCommand, mockCommandHandler, 'command');
-        const deleteContext = new CQRSExecutionContext(deleteCommand, mockCommandHandler, 'command');
+        const createContext = new CQRSExecutionContext(
+          createCommand,
+          mockCommandHandler,
+          'command'
+        );
+        const deleteContext = new CQRSExecutionContext(
+          deleteCommand,
+          mockCommandHandler,
+          'command'
+        );
 
         await middleware.handle(createContext, nextFunction);
         await middleware.handle(deleteContext, nextFunction);
@@ -208,7 +234,10 @@ describe('LoggingMiddleware', () => {
 
         expect(consoleSpy).toHaveBeenCalledTimes(2);
         expect(consoleSpy).toHaveBeenNthCalledWith(1, '[CQRS] Executing command: TestCommand');
-        expect(consoleSpy).toHaveBeenNthCalledWith(2, expect.stringMatching(/^\[CQRS\] command TestCommand completed in \d+ms$/));
+        expect(consoleSpy).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(/^\[CQRS\] command TestCommand completed in \d+ms$/)
+        );
 
         consoleSpy.mockRestore();
       });

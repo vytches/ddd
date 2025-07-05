@@ -9,7 +9,7 @@ describe('Bulkhead', () => {
     maxConcurrency: 2,
     queueCapacity: 3,
     timeout: 5000,
-    name: 'test-bulkhead'
+    name: 'test-bulkhead',
   };
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('Bulkhead', () => {
 
       const [result1, result2] = await Promise.all([
         bulkhead.execute(operation1, context),
-        bulkhead.execute(operation2, context)
+        bulkhead.execute(operation2, context),
       ]);
 
       expect(result1).toBe('result1');
@@ -37,9 +37,12 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       let resolveOperation1: (value: string) => void;
 
-      const operation1 = vi.fn(() => new Promise<string>(resolve => {
-        resolveOperation1 = resolve;
-      }));
+      const operation1 = vi.fn(
+        () =>
+          new Promise<string>(resolve => {
+            resolveOperation1 = resolve;
+          })
+      );
       const operation2 = vi.fn(() => new Promise<string>(resolve => setTimeout(resolve, 50)));
       const operation3 = vi.fn().mockResolvedValue('result3');
 
@@ -82,8 +85,9 @@ describe('Bulkhead', () => {
         promises.push(bulkhead.execute(longRunningOp, context));
       }
 
-      await expect(bulkhead.execute(longRunningOp, context))
-        .rejects.toThrow(BulkheadRejectedException);
+      await expect(bulkhead.execute(longRunningOp, context)).rejects.toThrow(
+        BulkheadRejectedException
+      );
 
       const metrics = bulkhead.getMetrics();
       expect(metrics.totalRejected).toBe(1);
@@ -94,20 +98,19 @@ describe('Bulkhead', () => {
     it('should apply timeout to operations', async () => {
       const bulkheadWithShortTimeout = new Bulkhead({
         ...defaultConfig,
-        timeout: 100
+        timeout: 100,
       });
 
       const context = DefaultResilienceContext.create();
       const slowOperation = () => new Promise(resolve => setTimeout(resolve, 200));
 
-      await expect(bulkheadWithShortTimeout.execute(slowOperation, context))
-        .rejects.toThrow();
+      await expect(bulkheadWithShortTimeout.execute(slowOperation, context)).rejects.toThrow();
     });
 
     it('should not apply timeout when not configured', async () => {
       const bulkheadWithoutTimeout = new Bulkhead({
         maxConcurrency: 1,
-        queueCapacity: 1
+        queueCapacity: 1,
       });
 
       const context = DefaultResilienceContext.create();
@@ -123,13 +126,21 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       const abortController = new AbortController();
       const abortableContext = new DefaultResilienceContext(
-        undefined, undefined, 1, new Map(), abortController
+        undefined,
+        undefined,
+        1,
+        new Map(),
+        abortController
       );
 
       const longRunningOp = () => new Promise(resolve => setTimeout(resolve, 1000));
 
-      bulkhead.execute(longRunningOp, context).catch(() => { /* Expected to timeout */ });
-      bulkhead.execute(longRunningOp, context).catch(() => { /* Expected to timeout */ });
+      bulkhead.execute(longRunningOp, context).catch(() => {
+        /* Expected to timeout */
+      });
+      bulkhead.execute(longRunningOp, context).catch(() => {
+        /* Expected to timeout */
+      });
 
       const queuedPromise = bulkhead.execute(longRunningOp, abortableContext);
 
@@ -145,12 +156,14 @@ describe('Bulkhead', () => {
       let resolveOp1: (value: string) => void;
       let resolveOp2: (value: string) => void;
 
-      const operation1 = () => new Promise<string>(resolve => {
-        resolveOp1 = resolve;
-      });
-      const operation2 = () => new Promise<string>(resolve => {
-        resolveOp2 = resolve;
-      });
+      const operation1 = () =>
+        new Promise<string>(resolve => {
+          resolveOp1 = resolve;
+        });
+      const operation2 = () =>
+        new Promise<string>(resolve => {
+          resolveOp2 = resolve;
+        });
       const operation3 = vi.fn().mockResolvedValue('fast');
 
       const promise1 = bulkhead.execute(operation1, context);
@@ -179,7 +192,9 @@ describe('Bulkhead', () => {
       const longRunningOp = () => new Promise(resolve => setTimeout(resolve, 1000));
 
       for (let i = 0; i < defaultConfig.maxConcurrency + defaultConfig.queueCapacity; i++) {
-        bulkhead.execute(longRunningOp, context).catch(() => { /* Expected to timeout */ });
+        bulkhead.execute(longRunningOp, context).catch(() => {
+          /* Expected to timeout */
+        });
       }
 
       try {
@@ -198,8 +213,7 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       const failingOperation = vi.fn().mockRejectedValue(new Error('operation failed'));
 
-      await expect(bulkhead.execute(failingOperation, context))
-        .rejects.toThrow('operation failed');
+      await expect(bulkhead.execute(failingOperation, context)).rejects.toThrow('operation failed');
 
       expect(failingOperation).toHaveBeenCalled();
     });
@@ -208,9 +222,10 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       let resolveOp1: (value: string) => void;
 
-      const operation1 = () => new Promise<string>(resolve => {
-        resolveOp1 = resolve;
-      });
+      const operation1 = () =>
+        new Promise<string>(resolve => {
+          resolveOp1 = resolve;
+        });
       const operation2 = () => new Promise<string>(resolve => setTimeout(() => resolve('op2'), 50));
       const failingOperation = vi.fn().mockRejectedValue(new Error('fail'));
       const successOperation = vi.fn().mockResolvedValue('success');
@@ -242,7 +257,7 @@ describe('Bulkhead', () => {
     it('should use default name when not provided', () => {
       const unnamedBulkhead = new Bulkhead({
         maxConcurrency: 1,
-        queueCapacity: 1
+        queueCapacity: 1,
       });
 
       expect(unnamedBulkhead.getName()).toBe('unnamed');

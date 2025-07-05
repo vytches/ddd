@@ -410,7 +410,10 @@ describe('AsyncBusinessPolicy', () => {
       const result = await policy.isSatisfiedBy(testRequest);
 
       expect(result).toBe(true);
-      expect(mockAsyncSpec.isSatisfiedByAsync).toHaveBeenCalledWith(testEntity, testRequest.context);
+      expect(mockAsyncSpec.isSatisfiedByAsync).toHaveBeenCalledWith(
+        testEntity,
+        testRequest.context
+      );
     });
 
     it('should return false when async specification fails', async () => {

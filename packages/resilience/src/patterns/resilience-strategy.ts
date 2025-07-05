@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ResilienceContext} from '../core/resilience-context';
+import type { ResilienceContext } from '../core/resilience-context';
 import { TimeoutError } from '../core/resilience-context';
 import type { CircuitBreakerConfig } from './circuit-breaker';
 import { CircuitBreaker } from './circuit-breaker';
@@ -28,8 +28,7 @@ export class CompositeResilienceStrategy implements ResilienceStrategy {
       const strategy = this.strategies[i];
       const currentOperation = wrappedOperation;
 
-      wrappedOperation = (ctx: ResilienceContext) =>
-        strategy!.execute(currentOperation, ctx);
+      wrappedOperation = (ctx: ResilienceContext) => strategy!.execute(currentOperation, ctx);
     }
 
     return wrappedOperation(context);

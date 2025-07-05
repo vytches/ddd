@@ -195,4 +195,3 @@ export class AggregateError extends IDomainError {
     return new AggregateError(message, options);
   }
 }
-

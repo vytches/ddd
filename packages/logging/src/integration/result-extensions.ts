@@ -72,11 +72,7 @@ export const ResultLoggingExtensions = {
     errorMessage: string,
     options: ResultLoggingOptions = {}
   ): ResultLike<TValue, TError> {
-    return this.tapLogError(
-      this.tapLog(result, successMessage, options),
-      errorMessage,
-      options
-    );
+    return this.tapLogError(this.tapLog(result, successMessage, options), errorMessage, options);
   },
 };
 

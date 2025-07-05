@@ -5,11 +5,7 @@ import type { IEventBus } from '@vytches-ddd/contracts';
 import { ServiceRegistryBuilder } from './service-registry-builder';
 import { DefaultDomainServiceRegistry } from './domain-service-registry';
 import { ServiceBuilder } from './service-builder';
-import type {
-  IDomainService,
-  IEventBusAware,
-  IUnitOfWorkAware,
-} from './domain-service.interface';
+import type { IDomainService, IEventBusAware, IUnitOfWorkAware } from './domain-service.interface';
 
 // Mock implementations for testing
 class MockEventBus implements IEventBus {
@@ -115,7 +111,7 @@ describe('ServiceRegistryBuilder', () => {
       // Act
       const serviceBuilder = builder.service(
         'event-service',
-        () => new EventAwareService('event-service'),
+        () => new EventAwareService('event-service')
       );
       const service = await serviceBuilder.build();
 
@@ -146,14 +142,12 @@ describe('ServiceRegistryBuilder', () => {
       // Act
       const serviceBuilder = builder.service(
         'uow-service',
-        () => new UnitOfWorkAwareService('uow-service'),
+        () => new UnitOfWorkAwareService('uow-service')
       );
       const service = await serviceBuilder.build();
 
       // Assert
-      expect((service as UnitOfWorkAwareService).getUnitOfWork()).toBe(
-        unitOfWork,
-      );
+      expect((service as UnitOfWorkAwareService).getUnitOfWork()).toBe(unitOfWork);
     });
   });
 
@@ -165,7 +159,7 @@ describe('ServiceRegistryBuilder', () => {
       // Act
       const serviceBuilder = builder.service(
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Assert
@@ -182,14 +176,8 @@ describe('ServiceRegistryBuilder', () => {
       builder.withUnitOfWork(unitOfWork);
 
       // Create spies on the ServiceBuilder prototype methods
-      const withEventBusSpy = vi.spyOn(
-        ServiceBuilder.prototype,
-        'withEventBus',
-      );
-      const withUnitOfWorkSpy = vi.spyOn(
-        ServiceBuilder.prototype,
-        'withUnitOfWork',
-      );
+      const withEventBusSpy = vi.spyOn(ServiceBuilder.prototype, 'withEventBus');
+      const withUnitOfWorkSpy = vi.spyOn(ServiceBuilder.prototype, 'withUnitOfWork');
 
       // Act
       builder.service('test-service', () => new SimpleService('test-service'));

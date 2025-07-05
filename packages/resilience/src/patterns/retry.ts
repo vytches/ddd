@@ -1,4 +1,4 @@
-import type { ResilienceContext} from '../core/resilience-context';
+import type { ResilienceContext } from '../core/resilience-context';
 import { DefaultResilienceContext } from '../core/resilience-context';
 
 export interface RetryConfig {
@@ -57,7 +57,10 @@ export class RetryPolicy {
       }
     }
 
-    throw new MaxRetriesExceededError(this.config.maxAttempts, lastError ?? new Error('Unknown error'));
+    throw new MaxRetriesExceededError(
+      this.config.maxAttempts,
+      lastError ?? new Error('Unknown error')
+    );
   }
 
   private shouldRetry(error: Error, _attempt: number): boolean {
@@ -69,7 +72,8 @@ export class RetryPolicy {
   }
 
   private calculateDelay(attempt: number): number {
-    const exponentialDelay = this.config.baseDelay * Math.pow(this.config.backoffMultiplier, attempt - 1);
+    const exponentialDelay =
+      this.config.baseDelay * Math.pow(this.config.backoffMultiplier, attempt - 1);
     let delay = Math.min(exponentialDelay, this.config.maxDelay);
 
     if (this.config.jitter) {
@@ -96,14 +100,14 @@ export class RetryPolicy {
       baseDelay: 1000,
       maxDelay: 30000,
       backoffMultiplier: 2,
-      jitter: true
+      jitter: true,
     };
   }
 
   static withConfig(overrides: Partial<RetryConfig>): RetryPolicy {
     return new RetryPolicy({
       ...RetryPolicy.defaultConfig(),
-      ...overrides
+      ...overrides,
     });
   }
 }

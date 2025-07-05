@@ -9,6 +9,6 @@ export abstract class BaseACLMiddleware implements ACLMiddleware {
     operation: string,
     domainModel: any,
     options: ExecuteOptions,
-    next: () => Promise<Result<T, ACLError>>,
+    next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>>;
 }

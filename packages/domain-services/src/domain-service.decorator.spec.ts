@@ -1,11 +1,7 @@
 import 'reflect-metadata';
 import { describe, it, expect } from 'vitest';
-import type {
-  DomainServiceOptions} from './domain-service.decorator';
-import {
-  DomainService,
-  getDomainServiceMetadata,
-} from './domain-service.decorator';
+import type { DomainServiceOptions } from './domain-service.decorator';
+import { DomainService, getDomainServiceMetadata } from './domain-service.decorator';
 import { IBaseDomainService } from './base-domain-service';
 
 describe('DomainService Decorator', () => {

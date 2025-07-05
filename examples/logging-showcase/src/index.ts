@@ -7,13 +7,13 @@ Logger.configure({
   level: 'debug',
   formatting: {
     colorize: true,
-    prettyPrint: true
+    prettyPrint: true,
   },
   masking: {
     enabled: true,
     sensitiveKeys: ['password', 'email', 'ssn'],
-    replacement: '[MASKED]'
-  }
+    replacement: '[MASKED]',
+  },
 });
 
 // Example 1: Basic logging with smart context detection
@@ -23,7 +23,7 @@ class UserService {
   async createUser(userData: { email: string; password: string }): Promise<Result<User, Error>> {
     this.logger.info('Creating user', {
       email: userData.email, // Will be masked
-      hasPassword: !!userData.password
+      hasPassword: !!userData.password,
     });
 
     try {
@@ -34,7 +34,7 @@ class UserService {
       return Result.ok(user);
     } catch (error) {
       this.logger.error('User creation failed', error as Error, {
-        email: userData.email
+        email: userData.email,
       });
       return Result.fail(error as Error);
     }
@@ -80,7 +80,7 @@ class UserAggregate {
     this.logger.info('Email changed', {
       userId: this.id,
       oldEmail, // Will be masked
-      newEmail  // Will be masked
+      newEmail, // Will be masked
     });
 
     return Result.ok();
@@ -100,7 +100,10 @@ class UserAggregate {
     return { email: this.email, isActive: this.isActive };
   }
 
-  hasStateChanged(before: { email: string; isActive: boolean }, after: { email: string; isActive: boolean }): boolean {
+  hasStateChanged(
+    before: { email: string; isActive: boolean },
+    after: { email: string; isActive: boolean }
+  ): boolean {
     return JSON.stringify(before) !== JSON.stringify(after);
   }
 }
@@ -126,7 +129,7 @@ class OrderService {
 
     this.logger.info('Order processed successfully', {
       orderId,
-      processingTime: '1.2s'
+      processingTime: '1.2s',
     });
   }
 }
@@ -141,7 +144,7 @@ async function demonstrateErrorHandling() {
     logger.error('Unexpected error occurred', error as Error, {
       operation: 'demonstration',
       severity: 'high',
-      shouldAlert: true
+      shouldAlert: true,
     });
   }
 }
@@ -149,7 +152,7 @@ async function demonstrateErrorHandling() {
 // Run examples
 async function runExamples() {
   const showcaseLogger = Logger.forContext('LoggingShowcase');
-  
+
   showcaseLogger.info('🚀 DDD Logging Showcase');
 
   // Example 1: Basic usage
@@ -157,7 +160,7 @@ async function runExamples() {
   const userService = new UserService();
   await userService.createUser({
     email: 'user@example.com',
-    password: 'secret123'
+    password: 'secret123',
   });
 
   // Example 2: CQRS integration
@@ -165,7 +168,7 @@ async function runExamples() {
   const commandHandler = new CreateUserCommandHandler();
   await commandHandler.handle({
     email: 'admin@example.com',
-    password: 'admin123'
+    password: 'admin123',
   });
 
   // Example 3: Aggregate state changes

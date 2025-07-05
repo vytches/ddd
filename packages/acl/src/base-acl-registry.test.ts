@@ -22,12 +22,14 @@ class MockACLAdapter implements IACLAdapter<TestDomainModel, TestExternalModel> 
   fetch = vi.fn();
   supportsOperation = vi.fn(() => true);
 
-  getContextInfo = vi.fn((): ACLContextInfo => ({
-    contextName: this.contextName,
-    externalSystemName: 'TestSystem',
-    version: '1.0.0',
-    supportedOperations: ['CREATE', 'UPDATE'],
-  }));
+  getContextInfo = vi.fn(
+    (): ACLContextInfo => ({
+      contextName: this.contextName,
+      externalSystemName: 'TestSystem',
+      version: '1.0.0',
+      supportedOperations: ['CREATE', 'UPDATE'],
+    })
+  );
 }
 
 // Concrete implementation for testing
@@ -124,9 +126,7 @@ describe('BaseACLRegistry', () => {
       const adapter1 = new MockACLAdapter('Context1');
       const adapter2 = new MockACLAdapter('Context2');
 
-      const result = registry
-        .register('Context1', adapter1)
-        .register('Context2', adapter2);
+      const result = registry.register('Context1', adapter1).register('Context2', adapter2);
 
       expect(result).toBe(registry);
       expect(registry.hasContext('Context1')).toBe(true);
@@ -247,9 +247,7 @@ describe('BaseACLRegistry', () => {
       const adapter1 = new MockACLAdapter('Context1');
       const adapter2 = new MockACLAdapter('Context2');
 
-      registry
-        .register('Context1', adapter1)
-        .register('Context2', adapter2);
+      registry.register('Context1', adapter1).register('Context2', adapter2);
 
       const exported = registry.exportAdapters();
 
@@ -313,7 +311,7 @@ describe('BaseACLRegistry', () => {
 
     it('should update metadata when adapter is re-registered', () => {
       vi.useFakeTimers();
-      
+
       const adapter = new MockACLAdapter('TestContext');
 
       registry.register('TestContext', adapter, { description: 'Initial description' });
@@ -326,8 +324,10 @@ describe('BaseACLRegistry', () => {
       const updatedMetadata = registry.getMetadata().get('TestContext');
 
       expect(updatedMetadata!.description).toBe('Updated description');
-      expect(updatedMetadata!.registeredAt.getTime()).toBeGreaterThan(initialMetadata!.registeredAt.getTime());
-      
+      expect(updatedMetadata!.registeredAt.getTime()).toBeGreaterThan(
+        initialMetadata!.registeredAt.getTime()
+      );
+
       vi.useRealTimers();
     });
   });

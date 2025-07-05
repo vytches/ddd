@@ -27,7 +27,7 @@ describe('DefaultLogger', () => {
       logger.info('test message', { key: 'value' });
 
       expect(writeSpy).toHaveBeenCalledTimes(1);
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
 
       expect(logEvent.level).toBe('info');
       expect(logEvent.message).toBe('test message');
@@ -42,7 +42,7 @@ describe('DefaultLogger', () => {
       logger.error('error occurred', error, { operation: 'test' });
 
       expect(writeSpy).toHaveBeenCalledTimes(1);
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
 
       expect(logEvent.level).toBe('error');
       expect(logEvent.message).toBe('error occurred');
@@ -86,7 +86,7 @@ describe('DefaultLogger', () => {
 
       child.info('child message');
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.context.name).toBe('Child');
       expect(logEvent.context.correlationId).toBe('corr-123');
       expect(logEvent.context.userId).toBe('user-456');
@@ -100,7 +100,7 @@ describe('DefaultLogger', () => {
 
       logger.info('test message');
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.context.correlationId).toBe('corr-123');
       expect(logEvent.context.userId).toBe('user-456');
       expect(logEvent.context.tenantId).toBe('tenant-789');
@@ -113,7 +113,7 @@ describe('DefaultLogger', () => {
 
       logger.info('test message');
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.context.userId).toBe('user-456'); // overridden
       expect(logEvent.context.requestId).toBe('req-789'); // added
     });
@@ -127,22 +127,22 @@ describe('DefaultLogger', () => {
         masking: {
           enabled: true,
           sensitiveKeys: ['password', 'email'],
-          replacement: '[MASKED]'
-        }
+          replacement: '[MASKED]',
+        },
       });
 
       const logger = DefaultLogger.create('TestContext');
       logger.info('user data', {
         username: 'john',
         password: 'secret123',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.data).toEqual({
         username: 'john',
         password: '[MASKED]',
-        email: '[MASKED]'
+        email: '[MASKED]',
       });
     });
 
@@ -150,19 +150,19 @@ describe('DefaultLogger', () => {
       DefaultLogger.configure({
         level: 'info',
         provider: mockProvider,
-        masking: { enabled: false }
+        masking: { enabled: false },
       });
 
       const logger = DefaultLogger.create('TestContext');
       logger.info('user data', {
         username: 'john',
-        password: 'secret123'
+        password: 'secret123',
       });
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.data).toEqual({
         username: 'john',
-        password: 'secret123'
+        password: 'secret123',
       });
     });
   });
@@ -171,7 +171,7 @@ describe('DefaultLogger', () => {
     it('should use global configuration', () => {
       DefaultLogger.configure({
         level: 'debug',
-        provider: mockProvider
+        provider: mockProvider,
       });
 
       const logger = DefaultLogger.create('TestContext');
@@ -184,10 +184,7 @@ describe('DefaultLogger', () => {
     it('should allow per-instance configuration override', () => {
       DefaultLogger.configure({ level: 'warn', provider: mockProvider });
 
-      const logger = new DefaultLogger(
-        { name: 'TestContext' },
-        { level: 'debug' }
-      );
+      const logger = new DefaultLogger({ name: 'TestContext' }, { level: 'debug' });
 
       expect(logger.level).toBe('debug');
 
@@ -218,7 +215,7 @@ describe('DefaultLogger', () => {
       logger.info('test message');
 
       const after = new Date();
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
 
       expect(logEvent.timestamp).toBeInstanceOf(Date);
       expect(logEvent.timestamp.getTime()).toBeGreaterThanOrEqual(before.getTime());
@@ -229,7 +226,7 @@ describe('DefaultLogger', () => {
       const logger = DefaultLogger.create('TestContext');
       logger.info('message without data');
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.data).toBeUndefined();
     });
 
@@ -237,7 +234,7 @@ describe('DefaultLogger', () => {
       const logger = DefaultLogger.create('TestContext');
       logger.info('message with data', { key: 'value' });
 
-      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
       expect(logEvent.data).toEqual({ key: 'value' });
     });
   });

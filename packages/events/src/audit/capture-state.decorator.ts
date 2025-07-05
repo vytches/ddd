@@ -14,7 +14,7 @@ export function captureState<T extends IAuditable>(
   conditionOrSpecification?: ISpecification<T> | ((instance: T, args: any[]) => boolean)
 ): MethodDecorator {
   const logger = Logger.create('CaptureStateDecorator');
-  
+
   return function (
     _target: object,
     _propertyKey: string | symbol,

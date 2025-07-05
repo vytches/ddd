@@ -6,7 +6,7 @@ import {
   Bulkhead,
   Resilience,
   Timeout,
-  getResilienceMetrics
+  getResilienceMetrics,
 } from './resilience-decorators';
 import { DefaultResilienceContext } from '../core/resilience-context';
 import { CircuitBreakerOpenError } from '../patterns/circuit-breaker';
@@ -21,7 +21,7 @@ describe('Resilience Decorators', () => {
         recoveryTimeout: 1000,
         successThreshold: 1,
         timeout: 5000,
-        name: 'test-circuit'
+        name: 'test-circuit',
       })
       async flakyMethod(shouldFail: boolean): Promise<string> {
         if (shouldFail) {
@@ -71,7 +71,7 @@ describe('Resilience Decorators', () => {
         maxDelay: 100,
         backoffMultiplier: 2,
         jitter: false,
-        decoratorName: 'test-retry'
+        decoratorName: 'test-retry',
       })
       async unreliableMethod(): Promise<string> {
         this.callCount++;
@@ -111,7 +111,7 @@ describe('Resilience Decorators', () => {
             baseDelay: 1,
             maxDelay: 10,
             backoffMultiplier: 2,
-            jitter: false
+            jitter: false,
           })
           async alwaysFailMethod(): Promise<string> {
             throw new Error('Always fails');
@@ -132,7 +132,7 @@ describe('Resilience Decorators', () => {
         maxConcurrency: 2,
         queueCapacity: 1,
         timeout: 5000,
-        name: 'test-bulkhead'
+        name: 'test-bulkhead',
       })
       async slowMethod(delay: number): Promise<string> {
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -143,10 +143,7 @@ describe('Resilience Decorators', () => {
     it('should allow concurrent operations within limit', async () => {
       const service = new TestService();
 
-      const promises = [
-        service.slowMethod(10),
-        service.slowMethod(10)
-      ];
+      const promises = [service.slowMethod(10), service.slowMethod(10)];
 
       const results = await Promise.all(promises);
       expect(results).toEqual(['completed', 'completed']);
@@ -189,21 +186,21 @@ describe('Resilience Decorators', () => {
         timeout: 10000,
         bulkhead: {
           maxConcurrency: 5,
-          queueCapacity: 10
+          queueCapacity: 10,
         },
         retry: {
           maxAttempts: 2,
           baseDelay: 10,
           maxDelay: 100,
           backoffMultiplier: 2,
-          jitter: false
+          jitter: false,
         },
         circuitBreaker: {
           failureThreshold: 3,
           recoveryTimeout: 5000,
           successThreshold: 2,
-          timeout: 5000
-        }
+          timeout: 5000,
+        },
       })
       async comprehensiveMethod(shouldFail: boolean): Promise<string> {
         this.callCount++;
@@ -270,7 +267,7 @@ describe('Resilience Decorators', () => {
         recoveryTimeout: 30000,
         successThreshold: 3,
         timeout: 10000,
-        name: 'metrics-test'
+        name: 'metrics-test',
       })
       async testMethod(): Promise<string> {
         return 'success';
@@ -280,7 +277,10 @@ describe('Resilience Decorators', () => {
     it('should extract resilience configuration', () => {
       const service = new TestService();
 
-      const metrics = getResilienceMetrics(service as unknown as Record<string, unknown>, 'testMethod');
+      const metrics = getResilienceMetrics(
+        service as unknown as Record<string, unknown>,
+        'testMethod'
+      );
 
       expect(metrics.config).toBeDefined();
       expect((metrics.config as any).name).toBe('metrics-test');
@@ -291,8 +291,9 @@ describe('Resilience Decorators', () => {
     it('should throw for non-decorated methods', () => {
       const service = new TestService();
 
-      expect(() => getResilienceMetrics(service as unknown as Record<string, unknown>, 'nonExistentMethod'))
-        .toThrow('Method nonExistentMethod is not decorated with resilience patterns');
+      expect(() =>
+        getResilienceMetrics(service as unknown as Record<string, unknown>, 'nonExistentMethod')
+      ).toThrow('Method nonExistentMethod is not decorated with resilience patterns');
     });
   });
 
@@ -303,10 +304,11 @@ describe('Resilience Decorators', () => {
         recoveryTimeout: 30000,
         successThreshold: 3,
         timeout: 10000,
-        contextProvider: () => DefaultResilienceContext.create({
-          correlationId: 'custom-correlation',
-          metadata: { source: 'test' }
-        })
+        contextProvider: () =>
+          DefaultResilienceContext.create({
+            correlationId: 'custom-correlation',
+            metadata: { source: 'test' },
+          }),
       })
       async methodWithCustomContext(): Promise<string> {
         return 'success';

@@ -32,13 +32,15 @@ export function LogStateChanges(options: StateChangeLoggingOptions = {}): Method
 
         // Handle both sync and async results
         if (result instanceof Promise) {
-          return result.then((asyncResult) => {
-            this.logStateChangeSuccess(logger, methodName, stateBefore, options);
-            return asyncResult;
-          }).catch((error) => {
-            this.logStateChangeError(logger, methodName, error);
-            throw error;
-          });
+          return result
+            .then(asyncResult => {
+              this.logStateChangeSuccess(logger, methodName, stateBefore, options);
+              return asyncResult;
+            })
+            .catch(error => {
+              this.logStateChangeError(logger, methodName, error);
+              throw error;
+            });
         } else {
           this.logStateChangeSuccess(logger, methodName, stateBefore, options);
           return result;
@@ -108,19 +110,15 @@ export const AggregateLoggingMixin = {
       aggregateType: this.constructor.name,
       method: methodName,
       success: true,
-      ...(stateBefore && stateAfter && {
-        stateChanged: this.hasStateChanged?.(stateBefore, stateAfter) ?? true
-      }),
+      ...(stateBefore &&
+        stateAfter && {
+          stateChanged: this.hasStateChanged?.(stateBefore, stateAfter) ?? true,
+        }),
       ...(stateAfter && { stateAfter }),
     });
   },
 
-  logStateChangeError(
-    this: any,
-    logger: Logger,
-    methodName: string,
-    error: any
-  ): void {
+  logStateChangeError(this: any, logger: Logger, methodName: string, error: any): void {
     logger.error(`[Aggregate] ${methodName} failed`, error, {
       aggregateId: this.id,
       aggregateType: this.constructor.name,

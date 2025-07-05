@@ -3,7 +3,7 @@ import type { ResilienceContext } from '../core/resilience-context';
 export enum CircuitBreakerState {
   CLOSED = 'CLOSED',
   OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN'
+  HALF_OPEN = 'HALF_OPEN',
 }
 
 export interface CircuitBreakerConfig {
@@ -25,7 +25,9 @@ export interface CircuitBreakerMetrics {
 
 export class CircuitBreakerOpenError extends Error {
   constructor(circuitName: string, nextAttemptTime: Date) {
-    super(`Circuit breaker '${circuitName}' is open. Next attempt at: ${nextAttemptTime.toISOString()}`);
+    super(
+      `Circuit breaker '${circuitName}' is open. Next attempt at: ${nextAttemptTime.toISOString()}`
+    );
     this.name = 'CircuitBreakerOpenError';
   }
 }
@@ -117,7 +119,7 @@ export class CircuitBreaker {
       successCount: this.successCount,
       lastFailureTime: this.lastFailureTime,
       lastSuccessTime: this.lastSuccessTime,
-      nextAttemptTime: this.nextAttemptTime
+      nextAttemptTime: this.nextAttemptTime,
     };
   }
 

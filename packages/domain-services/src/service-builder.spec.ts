@@ -34,7 +34,7 @@ class MockUnitOfWork implements IUnitOfWork {
 class SimpleService implements IDomainService {
   constructor(
     public readonly serviceId: string,
-    public readonly dependencies: any[] = [],
+    public readonly dependencies: any[] = []
   ) {}
 }
 
@@ -44,7 +44,7 @@ class EventAwareService implements IDomainService, IEventBusAware {
 
   constructor(
     serviceId: string,
-    public readonly dependencies: any[] = [],
+    public readonly dependencies: any[] = []
   ) {
     this.serviceId = serviceId;
   }
@@ -64,7 +64,7 @@ class UnitOfWorkAwareService implements IDomainService, IUnitOfWorkAware {
 
   constructor(
     serviceId: string,
-    public readonly dependencies: any[] = [],
+    public readonly dependencies: any[] = []
   ) {
     this.serviceId = serviceId;
   }
@@ -88,7 +88,7 @@ class AsyncService implements IDomainService, IAsyncDomainService {
 
   constructor(
     serviceId: string,
-    public readonly dependencies: any[] = [],
+    public readonly dependencies: any[] = []
   ) {
     this.serviceId = serviceId;
   }
@@ -119,7 +119,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Act
@@ -135,7 +135,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Act
@@ -155,7 +155,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService, [IDomainService]>(
         registry,
         'test-service',
-        (dep) => new SimpleService('test-service', [dep]),
+        dep => new SimpleService('test-service', [dep])
       ).dependsOn(dependencyId);
 
       // Act
@@ -173,7 +173,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Act
@@ -193,7 +193,7 @@ describe('ServiceBuilder', () => {
       const originalBuilder = new ServiceBuilder<SimpleService>(
         registry,
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Act
@@ -213,7 +213,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService, [IDomainService]>(
         registry,
         'test-service',
-        (dep) => new SimpleService('test-service', [dep]),
+        dep => new SimpleService('test-service', [dep])
       ).withDependency(dependency);
 
       // Act
@@ -230,7 +230,7 @@ describe('ServiceBuilder', () => {
       const originalBuilder = new ServiceBuilder<SimpleService>(
         registry,
         'test-service',
-        () => new SimpleService('test-service'),
+        () => new SimpleService('test-service')
       );
 
       // Act
@@ -249,7 +249,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<EventAwareService>(
         registry,
         'event-service',
-        () => new EventAwareService('event-service'),
+        () => new EventAwareService('event-service')
       ).withEventBus(eventBus);
 
       // Act
@@ -264,7 +264,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'simple-service',
-        () => new SimpleService('simple-service'),
+        () => new SimpleService('simple-service')
       ).withEventBus(eventBus);
 
       // Act
@@ -282,7 +282,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<UnitOfWorkAwareService>(
         registry,
         'uow-service',
-        () => new UnitOfWorkAwareService('uow-service'),
+        () => new UnitOfWorkAwareService('uow-service')
       ).withUnitOfWork(unitOfWork);
 
       // Act
@@ -297,7 +297,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'simple-service',
-        () => new SimpleService('simple-service'),
+        () => new SimpleService('simple-service')
       ).withUnitOfWork(unitOfWork);
 
       // Act
@@ -315,7 +315,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<AsyncService>(
         registry,
         'async-service',
-        () => new AsyncService('async-service'),
+        () => new AsyncService('async-service')
       ).withAsyncInitialization();
 
       // Act
@@ -330,7 +330,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         'simple-service',
-        () => new SimpleService('simple-service'),
+        () => new SimpleService('simple-service')
       ).withAsyncInitialization();
 
       // Act
@@ -349,7 +349,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService>(
         registry,
         serviceId,
-        () => new SimpleService(serviceId),
+        () => new SimpleService(serviceId)
       );
 
       // Act
@@ -370,7 +370,7 @@ describe('ServiceBuilder', () => {
       const builder = new ServiceBuilder<SimpleService, [IDomainService]>(
         registry,
         serviceId,
-        (dep) => new SimpleService(serviceId, [dep]),
+        dep => new SimpleService(serviceId, [dep])
       ).dependsOn(dependencyId);
 
       // Act

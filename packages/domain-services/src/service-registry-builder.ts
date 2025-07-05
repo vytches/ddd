@@ -83,7 +83,7 @@ export class ServiceRegistryBuilder {
    */
   public service<T extends IDomainService>(
     serviceId: string,
-    factory: (...args: any[]) => T,
+    factory: (...args: any[]) => T
   ): ServiceBuilder<T> {
     const builder = new ServiceBuilder<T>(this.registry, serviceId, factory);
 
@@ -113,7 +113,7 @@ export class ServiceRegistryBuilder {
    */
   public register<T extends IDomainService>(
     service: T,
-    serviceId?: string,
+    serviceId?: string
   ): ServiceRegistryBuilder {
     this.registry.register(service, serviceId);
     return this;

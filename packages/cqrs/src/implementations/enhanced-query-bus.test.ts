@@ -89,9 +89,11 @@ describe('EnhancedQueryBus', () => {
     it('should calculate average execution time correctly', async () => {
       const query = new TestQuery('test-id');
       const slowHandler: IQueryHandler<TestQuery, string> = {
-        execute: vi.fn().mockImplementation(() =>
-          new Promise(resolve => setTimeout(() => resolve('slow-result'), 10))
-        ),
+        execute: vi
+          .fn()
+          .mockImplementation(
+            () => new Promise(resolve => setTimeout(() => resolve('slow-result'), 10))
+          ),
       };
 
       enhancedQueryBus.register(TestQuery, slowHandler);

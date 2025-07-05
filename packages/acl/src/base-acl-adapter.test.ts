@@ -30,30 +30,38 @@ interface TestResult {
 
 // Mock implementations
 class MockTranslator implements IModelTranslator<TestDomainModel, TestExternalModel> {
-  toExternal = vi.fn((domain: TestDomainModel): TestExternalModel => ({
-    external_id: domain.id,
-    display_name: domain.name,
-    total_amount: domain.amount.toString(),
-  }));
+  toExternal = vi.fn(
+    (domain: TestDomainModel): TestExternalModel => ({
+      external_id: domain.id,
+      display_name: domain.name,
+      total_amount: domain.amount.toString(),
+    })
+  );
 
-  fromExternal = vi.fn((external: TestExternalModel): TestDomainModel => ({
-    id: external.external_id,
-    name: external.display_name,
-    amount: parseFloat(external.total_amount),
-  }));
+  fromExternal = vi.fn(
+    (external: TestExternalModel): TestDomainModel => ({
+      id: external.external_id,
+      name: external.display_name,
+      amount: parseFloat(external.total_amount),
+    })
+  );
 }
 
 class MockExternalAPI implements IExternalAPI<TestExternalModel, TestResult> {
-  execute = vi.fn(async (operation: string, model: TestExternalModel): Promise<TestResult> => ({
-    success: true,
-    message: `Executed ${operation} with ${model.external_id}`,
-  }));
+  execute = vi.fn(
+    async (operation: string, model: TestExternalModel): Promise<TestResult> => ({
+      success: true,
+      message: `Executed ${operation} with ${model.external_id}`,
+    })
+  );
 
-  fetch = vi.fn(async (identifier: string): Promise<TestExternalModel> => ({
-    external_id: identifier,
-    display_name: 'Test Item',
-    total_amount: '100.00',
-  }));
+  fetch = vi.fn(
+    async (identifier: string): Promise<TestExternalModel> => ({
+      external_id: identifier,
+      display_name: 'Test Item',
+      total_amount: '100.00',
+    })
+  );
 
   healthCheck = vi.fn(async (): Promise<boolean> => true);
 }
@@ -62,7 +70,7 @@ class TestACLAdapter extends BaseACLAdapter<TestDomainModel, TestExternalModel, 
   constructor(
     contextInfo: ACLContextInfo,
     translator: IModelTranslator<TestDomainModel, TestExternalModel>,
-    externalAPI: IExternalAPI<TestExternalModel, TestResult>,
+    externalAPI: IExternalAPI<TestExternalModel, TestResult>
   ) {
     super(contextInfo, translator, externalAPI);
     this.registerSupportedOperations();

@@ -7,16 +7,16 @@
     "sourceMap": false // Disable source maps for production builds
   },
   "include": [
-    "src/**/*", 
-    "../utils/src/**/*", 
-    "../contracts/src/**/*", 
-    "../events/src/**/*", 
+    "src/**/*",
+    "../utils/src/**/*",
+    "../contracts/src/**/*",
+    "../events/src/**/*",
     "../core/src/**/*",
     "../domain-primitives/src/**/*",
-    "../value-objects/src/**/*", 
+    "../value-objects/src/**/*",
     "../repositories/src/**/*",
     "../aggregates/src/**/*",
-    "../validation/src/**/*", 
+    "../validation/src/**/*",
     "../logging/src/**/*"
   ],
   "exclude": ["node_modules"]

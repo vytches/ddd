@@ -18,5 +18,7 @@ export function parseLogLevel(level: string): LogLevel {
   if (normalizedLevel in LOG_LEVELS) {
     return normalizedLevel;
   }
-  throw new Error(`Invalid log level: ${level}. Valid levels are: ${Object.keys(LOG_LEVELS).join(', ')}`);
+  throw new Error(
+    `Invalid log level: ${level}. Valid levels are: ${Object.keys(LOG_LEVELS).join(', ')}`
+  );
 }

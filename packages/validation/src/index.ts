@@ -4,25 +4,16 @@ export {
   CompositeSpecification,
   NotSpecification,
   AndSpecification,
-  OrSpecification
+  OrSpecification,
 } from './specifications';
 
-export {
-  BusinessRuleValidator
-} from './business-rules';
+export { BusinessRuleValidator } from './business-rules';
 
-export {
-  ValidationError,
-  ValidationErrors
-} from './validation-error';
+export { ValidationError, ValidationErrors } from './validation-error';
 
-export {
-  Validation as ValidationFacade
-} from './validation-facade';
+export { Validation as ValidationFacade } from './validation-facade';
 
-export {
-  RulesRegistry
-} from './rules-registry';
+export { RulesRegistry } from './rules-registry';
 
 // For advanced usage - full exports removed for better tree-shaking
 // Import specific exports from subpaths when needed

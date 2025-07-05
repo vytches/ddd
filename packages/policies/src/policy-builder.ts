@@ -458,7 +458,12 @@ export class PolicyBuilder<T> {
       );
     }
 
-    if (this.policies.length === 1 && this.id === 'GENERATED_POLICY' && this.domain === 'default' && this.version === '1.0.0') {
+    if (
+      this.policies.length === 1 &&
+      this.id === 'GENERATED_POLICY' &&
+      this.domain === 'default' &&
+      this.version === '1.0.0'
+    ) {
       // Return single policy only if no custom metadata was set
       return this.policies[0]!;
     }

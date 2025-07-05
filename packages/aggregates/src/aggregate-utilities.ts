@@ -195,7 +195,9 @@ export function getAuditLogIfCapable(aggregate: IAggregateRoot<unknown>): unknow
  */
 export function getAuditStatsIfCapable(aggregate: IAggregateRoot<unknown>): unknown | null {
   if (hasAuditCapability(aggregate)) {
-    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as { getAuditStatistics?(): unknown };
+    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as {
+      getAuditStatistics?(): unknown;
+    };
     return auditCap.getAuditStatistics?.() || null;
   }
   return null;

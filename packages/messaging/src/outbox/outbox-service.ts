@@ -1,13 +1,8 @@
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 
-import type {
-  IOutboxMessage,
-  OutboxMessageOptions} from './outbox-interfaces';
-import {
-  MessagePriority,
-  MessageStatus
-} from './outbox-interfaces';
+import type { IOutboxMessage, OutboxMessageOptions } from './outbox-interfaces';
+import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import { OutboxMessageFactory } from './outbox-message-factory';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
@@ -36,10 +31,7 @@ export class OutboxService {
   private readonly options: Required<OutboxServiceOptions>;
   private readonly logger = Logger.create('OutboxService');
 
-  constructor(
-    repository: IOutboxRepository,
-    options: OutboxServiceOptions = {},
-  ) {
+  constructor(repository: IOutboxRepository, options: OutboxServiceOptions = {}) {
     this.repository = repository;
     this.options = {
       defaultPriority: options.defaultPriority ?? MessagePriority.NORMAL,
@@ -56,7 +48,7 @@ export class OutboxService {
   async saveMessage<T = any>(
     messageType: string,
     payload: T,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): Promise<string> {
     const message = OutboxMessageFactory.createMessage(messageType, payload, {
       priority: this.options.defaultPriority,
@@ -77,14 +69,14 @@ export class OutboxService {
       messageType: string;
       payload: T;
       options?: OutboxMessageOptions;
-    }>,
+    }>
   ): Promise<string[]> {
     const outboxMessages = messages.map(({ messageType, payload, options }) =>
       OutboxMessageFactory.createMessage(messageType, payload, {
         priority: this.options.defaultPriority,
         metadata: { ...this.options.defaultMetadata, ...options?.metadata },
         ...options,
-      }),
+      })
     );
 
     const messageIds = await this.repository.saveBatch(outboxMessages);
@@ -99,22 +91,17 @@ export class OutboxService {
     messageType: string,
     payload: T,
     delayMs: number,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): Promise<string> {
-    const message = OutboxMessageFactory.createDelayedMessage(
-      messageType,
-      payload,
-      delayMs,
-      {
-        priority: this.options.defaultPriority,
-        metadata: { ...this.options.defaultMetadata, ...options?.metadata },
-        ...options,
-      },
-    );
+    const message = OutboxMessageFactory.createDelayedMessage(messageType, payload, delayMs, {
+      priority: this.options.defaultPriority,
+      metadata: { ...this.options.defaultMetadata, ...options?.metadata },
+      ...options,
+    });
 
     const messageId = await this.repository.scheduleMessage(message, message.processAfter as Date);
     this.logger.debug(
-      `Scheduled message ${messageId} of type ${messageType} for processing in ${delayMs}ms`,
+      `Scheduled message ${messageId} of type ${messageType} for processing in ${delayMs}ms`
     );
     return messageId;
   }
@@ -125,7 +112,7 @@ export class OutboxService {
   async saveHighPriorityMessage<T = any>(
     messageType: string,
     payload: T,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): Promise<string> {
     return this.saveMessage(messageType, payload, {
       ...options,
@@ -139,7 +126,7 @@ export class OutboxService {
   async saveCriticalMessage<T = any>(
     messageType: string,
     payload: T,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): Promise<string> {
     return this.saveMessage(messageType, payload, {
       ...options,
@@ -152,7 +139,7 @@ export class OutboxService {
    */
   async saveDomainEvent(
     event: IExtendedDomainEvent,
-    options?: OutboxMessageOptions,
+    options?: OutboxMessageOptions
   ): Promise<string> {
     const message = OutboxMessageFactory.createFromIntegrationEvent(
       {
@@ -168,7 +155,7 @@ export class OutboxService {
         priority: this.options.defaultPriority,
         metadata: { ...this.options.defaultMetadata, ...options?.metadata },
         ...options,
-      },
+      }
     );
 
     const messageId = await this.repository.saveMessage(message);
@@ -214,7 +201,10 @@ export class OutboxService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const deletedCount = await this.repository.deleteByStatusAndAge(cutoffDate, MessageStatus.PROCESSED);
+    const deletedCount = await this.repository.deleteByStatusAndAge(
+      cutoffDate,
+      MessageStatus.PROCESSED
+    );
     this.logger.info(`Cleaned up ${deletedCount} processed messages older than ${days} days`);
     return deletedCount;
   }

@@ -97,7 +97,11 @@ export class AuditCapability implements IAuditCapability {
       throw AggregateError.cannotInterceptApplyMethod(this.aggregate.getId().getValue().toString());
     }
 
-    aggregateWithApply.apply = (eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown) => {
+    aggregateWithApply.apply = (
+      eventTypeOrEvent: string | object,
+      payload?: unknown,
+      metadata?: unknown
+    ) => {
       // Call original apply
       const result = originalApply(eventTypeOrEvent, payload, metadata);
 
@@ -108,10 +112,15 @@ export class AuditCapability implements IAuditCapability {
     };
   }
 
-  private createAuditEntry(eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown): void {
-    const eventType = typeof eventTypeOrEvent === 'string'
-      ? eventTypeOrEvent
-      : (eventTypeOrEvent as { eventType?: string }).eventType || 'unknown';
+  private createAuditEntry(
+    eventTypeOrEvent: string | object,
+    payload?: unknown,
+    metadata?: unknown
+  ): void {
+    const eventType =
+      typeof eventTypeOrEvent === 'string'
+        ? eventTypeOrEvent
+        : (eventTypeOrEvent as { eventType?: string }).eventType || 'unknown';
 
     const auditEvent: IAuditEvent = {
       eventId: LibUtils.getUUID(),

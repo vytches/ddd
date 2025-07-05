@@ -26,7 +26,7 @@ describe('CQRS Decorators', () => {
       constructor(public readonly value: number) {}
     }
 
-it('should register command handler in metadata registry', () => {
+    it('should register command handler in metadata registry', () => {
       @CommandHandler(TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
@@ -36,10 +36,12 @@ it('should register command handler in metadata registry', () => {
 
       const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
       expect(commandHandlers.has(TestCommand as unknown as CommandConstructor)).toBe(true);
-      expect(commandHandlers.get(TestCommand as unknown as CommandConstructor)).toBe(TestCommandHandler);
+      expect(commandHandlers.get(TestCommand as unknown as CommandConstructor)).toBe(
+        TestCommandHandler
+      );
     });
 
-it('should return the original class unchanged', () => {
+    it('should return the original class unchanged', () => {
       @CommandHandler(TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         public testProperty = 'test';
@@ -60,7 +62,7 @@ it('should return the original class unchanged', () => {
       expect(typeof instance.execute).toBe('function');
     });
 
-it('should register multiple command handlers', () => {
+    it('should register multiple command handlers', () => {
       @CommandHandler(TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
@@ -81,18 +83,18 @@ it('should register multiple command handlers', () => {
       expect(commandHandlers.get(AnotherCommand)).toBe(AnotherCommandHandler);
     });
 
-it('should allow multiple handlers for the same command (last one wins)', () => {
+    it('should allow multiple handlers for the same command (last one wins)', () => {
       @CommandHandler(TestCommand)
       class FirstHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
-          return
+          return;
         }
       }
 
-@CommandHandler(TestCommand)
+      @CommandHandler(TestCommand)
       class SecondHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
-          return
+          return;
         }
       }
 
@@ -101,10 +103,10 @@ it('should allow multiple handlers for the same command (last one wins)', () => 
       expect(commandHandlers.get(TestCommand)).toBe(SecondHandler);
     });
 
-it('should work with class inheritance', () => {
+    it('should work with class inheritance', () => {
       class BaseHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
-          return
+          return;
         }
       }
 
@@ -133,7 +135,7 @@ it('should work with class inheritance', () => {
       constructor(public readonly value: string) {}
     }
 
-it('should register query handler in metadata registry', () => {
+    it('should register query handler in metadata registry', () => {
       @QueryHandler(TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
@@ -146,7 +148,7 @@ it('should register query handler in metadata registry', () => {
       expect(queryHandlers.get(TestQuery)).toBe(TestQueryHandler);
     });
 
-it('should return the original class unchanged', () => {
+    it('should return the original class unchanged', () => {
       @QueryHandler(TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         public testProperty = 'test';
@@ -167,7 +169,7 @@ it('should return the original class unchanged', () => {
       expect(typeof instance.execute).toBe('function');
     });
 
-it('should register multiple query handlers', () => {
+    it('should register multiple query handlers', () => {
       @QueryHandler(TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
@@ -188,7 +190,7 @@ it('should register multiple query handlers', () => {
       expect(queryHandlers.get(AnotherQuery)).toBe(AnotherQueryHandler);
     });
 
-it('should allow multiple handlers for the same query (last one wins)', () => {
+    it('should allow multiple handlers for the same query (last one wins)', () => {
       @QueryHandler(TestQuery)
       class FirstHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
@@ -236,7 +238,9 @@ it('should allow multiple handlers for the same query (last one wins)', () => {
       }
 
       @QueryHandler(ObjectQuery)
-      class ObjectQueryHandler implements IQueryHandler<ObjectQuery, { name: string; value: number }> {
+      class ObjectQueryHandler
+        implements IQueryHandler<ObjectQuery, { name: string; value: number }>
+      {
         async execute(_query: ObjectQuery): Promise<{ name: string; value: number }> {
           return { name: 'test', value: 123 };
         }

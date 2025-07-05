@@ -1,4 +1,8 @@
-import type { IEnhancedEventDispatcher, IEventPersistenceHandler, IAggregateWithEvents } from '@vytches-ddd/contracts';
+import type {
+  IEnhancedEventDispatcher,
+  IEventPersistenceHandler,
+  IAggregateWithEvents,
+} from '@vytches-ddd/contracts';
 import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
 import type { EntityId } from '@vytches-ddd/value-objects';
 
@@ -14,7 +18,7 @@ export class VersionError extends IDomainError {
     const message = `Version mismatch for entity with id ${id}: expected [${dbVersion}], got [${newVersion}]`;
     const options = {
       code: DomainErrorCode.ValidationFailed,
-      data: { id, dbVersion, newVersion }
+      data: { id, dbVersion, newVersion },
     };
     return new VersionError(message, options);
   }

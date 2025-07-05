@@ -1,15 +1,5 @@
-import type {
-  Logger,
-  LogProvider,
-  LoggerConfiguration,
-  LogLevel,
-  LogContext,
-} from './core';
-import {
-  isLogLevelEnabled,
-  DefaultLogContextBuilder,
-  DefaultLogEventBuilder
-} from './core/index';
+import type { Logger, LogProvider, LoggerConfiguration, LogLevel, LogContext } from './core';
+import { isLogLevelEnabled, DefaultLogContextBuilder, DefaultLogEventBuilder } from './core/index';
 import { ConsoleProvider } from './providers/console-provider';
 import { ContextDetector } from './utils/context-detector';
 import { DataMasker } from './utils/data-masker';
@@ -31,10 +21,7 @@ export class DefaultLogger implements Logger {
   private readonly provider: LogProvider;
   private readonly masker: DataMasker;
 
-  constructor(
-    context: LogContext,
-    config?: Partial<LoggerConfiguration>
-  ) {
+  constructor(context: LogContext, config?: Partial<LoggerConfiguration>) {
     const mergedConfig = { ...DefaultLogger.globalConfig, ...config };
 
     this.context = context;
@@ -100,7 +87,7 @@ export class DefaultLogger implements Logger {
       return;
     }
 
-    const maskedData = data ? this.masker.maskData(data) as Record<string, unknown> : undefined;
+    const maskedData = data ? (this.masker.maskData(data) as Record<string, unknown>) : undefined;
 
     const eventBuilder = new DefaultLogEventBuilder(level, message, this.context);
 
