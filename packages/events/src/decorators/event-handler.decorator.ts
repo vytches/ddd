@@ -24,10 +24,11 @@ export type { EventHandlerOptions };
  * }
  *
  * @example
- * // Phase 2: With DI integration
+ * // Phase 2: With DI integration and context filtering
  * @EventHandler(UserCreatedEvent, { 
  *   lifetime: 'singleton',
  *   context: 'user-management',
+ *   eventContext: 'user-context',  // Only handle events from user context
  *   tags: ['notification'],
  *   priority: 100
  * })
@@ -36,6 +37,26 @@ export type { EventHandlerOptions };
  *   
  *   handle(event: UserCreatedEvent): void {
  *     // Handler with injected dependencies
+ *   }
+ * }
+ *
+ * @example
+ * // Multiple context filtering
+ * @EventHandler(StockUpdatedEvent, { 
+ *   eventContext: ['order-context', 'inventory-context']  // Handle from multiple contexts
+ * })
+ * export class StockHandler implements IEventHandler<StockUpdatedEvent> {
+ *   handle(event: StockUpdatedEvent): void {
+ *     // Handles stock updates from both order and inventory contexts
+ *   }
+ * }
+ *
+ * @example
+ * // No context filter - handle all events
+ * @EventHandler(SystemAlertEvent)  // No eventContext = handle from all contexts
+ * export class SystemAlertHandler implements IEventHandler<SystemAlertEvent> {
+ *   handle(event: SystemAlertEvent): void {
+ *     // Handles alerts from any context
  *   }
  * }
  *
@@ -82,6 +103,11 @@ export function EventHandler<T extends IDomainEvent>(
       // Store enhanced metadata for auto-discovery
       Reflect.defineMetadata('di:event-handler', diMetadata, target);
       Reflect.defineMetadata('di:handler-type', 'event', target);
+      
+      // Store event context for unified event bus
+      if (options.eventContext !== undefined) {
+        Reflect.defineMetadata('event:context', options.eventContext, target);
+      }
       
       // Phase 2: Auto-register with DI container if available and enabled
       // Note: Registration is deferred to avoid circular dependencies

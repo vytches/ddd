@@ -8,7 +8,7 @@
   support
 - **Library**: DomainTS
 - **Language**: TypeScript
-- **Version**: 1.0.0
+- **Version**: 2.0.0
 
 ## Pattern Overview
 
@@ -18,15 +18,27 @@ The Event Bus is an infrastructure component that manages publication and
 subscription of domain events. It provides a decoupled way for different parts
 of the system to communicate through events.
 
+**Note**: The event system uses `UnifiedEventBus` which handles domain, integration, and audit events in a single implementation with context-aware routing. The old separate bus implementations have been removed.
+
 **Core Concept**:
 
 ```typescript
+import { UnifiedEventBus } from '@vytches-ddd/events';
+
+// Create a unified event bus
+const eventBus = new UnifiedEventBus();
+
 // Publish an event
 await eventBus.publish(new OrderPlacedEvent({ orderId: '123' }));
 
-// Subscribe to events
+// Subscribe to events (all contexts)
 eventBus.subscribe(OrderPlacedEvent, event => {
   console.log('Order placed:', event.payload.orderId);
+});
+
+// Subscribe with context filtering (NEW)
+eventBus.subscribe(OrderPlacedEvent, 'order-context', event => {
+  console.log('Order from order context:', event.payload.orderId);
 });
 ```
 
@@ -483,18 +495,91 @@ class DebuggableEventBus extends InMemoryEventBus {
 7. **Monitor Performance**: Add metrics middleware
 8. **Document Handler Dependencies**: Clear handler execution order
 
+## UnifiedEventBus (Recommended) ⭐
+
+### What is UnifiedEventBus?
+
+UnifiedEventBus is the new consolidated event bus that handles domain, integration, and audit events in a single implementation with advanced features:
+
+```typescript
+import { UnifiedEventBus } from '@vytches-ddd/events';
+
+const eventBus = new UnifiedEventBus({
+  enableLogging: true,
+  middlewares: [loggingMiddleware, validationMiddleware],
+  onError: (error, eventType) => {
+    console.error(`Error in ${eventType}:`, error);
+  }
+});
+```
+
+### Key Features
+
+#### 1. Context-Aware Subscriptions
+
+```typescript
+// Subscribe to specific context
+eventBus.subscribe(OrderPlaced, 'order-context', handler);
+
+// Subscribe to multiple contexts
+eventBus.subscribe(StockUpdated, ['order-context', 'inventory-context'], handler);
+
+// Subscribe to all contexts
+eventBus.subscribe(SystemAlert, handler);
+
+// Alternative syntax
+eventBus.subscribeToContext('user-context', UserRegistered, handler);
+```
+
+#### 2. Mixed Event Types
+
+```typescript
+// Handle domain events
+await eventBus.publish(new OrderCreatedEvent({ orderId: '123' }));
+
+// Handle integration events
+await eventBus.publish({
+  eventType: 'OrderCreatedIntegration',
+  payload: { orderId: '123', userId: '456' },
+  metadata: { sourceContext: 'order', targetContext: 'user' }
+});
+
+// Handle audit events
+await eventBus.publish({
+  eventType: 'UserAccessEvent',
+  payload: { userId: '456', action: 'LOGIN' },
+  metadata: { actionType: 'ACCESS', status: 'SUCCESS' }
+});
+```
+
+#### 3. DI Integration
+
+```typescript
+@EventHandler(OrderCreated, {
+  eventContext: 'order-context',
+  lifetime: 'singleton'
+})
+class OrderNotificationHandler {
+  constructor(private emailService: EmailService) {}
+  
+  async handle(event: OrderCreated): Promise<void> {
+    await this.emailService.sendConfirmation(event.payload);
+  }
+}
+```
+
+
 ## Conclusion
 
 DomainTS Event Bus provides:
 
-- **Decoupled Communication**: Loose coupling between components
-- **Middleware Pipeline**: Extensible event processing
-- **Flexible Handlers**: Function and class-based approaches
-- **Rich Metadata**: Decorators with configuration options
-- **Error Resilience**: Configurable error handling
-- **Dynamic Configuration**: Runtime middleware addition
-- **Debugging Support**: Tools for troubleshooting
+- **🆕 Unified Architecture**: Single bus for all event types
+- **🎯 Context-Aware Routing**: Smart event filtering by context
+- **🧹 Clean Implementation**: No legacy code or compatibility layers
+- **⚡ Advanced Features**: Middleware, DI integration, error handling
+- **📊 Type Safety**: Full TypeScript support
+- **🛠️ Developer Experience**: Rich tooling and debugging support
+
 
 The implementation supports simple event publishing as well as complex
-event-driven architectures with features like priority handling, conditional
-activation, and sophisticated middleware pipelines.
+event-driven architectures with features like context filtering, mixed event types, and sophisticated middleware pipelines.

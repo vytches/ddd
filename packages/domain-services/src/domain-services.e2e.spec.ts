@@ -14,7 +14,7 @@ import type { IUnitOfWork } from '@vytches-ddd/core';
 import { AggregateRoot, EntityId } from '@vytches-ddd/core';
 import type { IAggregateRoot, IRepository } from '@vytches-ddd/core';
 import { LibUtils, safeRun } from '@vytches-ddd/utils';
-import { InMemoryDomainEventBus } from '@vytches-ddd/events';
+import { UnifiedEventBus } from '@vytches-ddd/events';
 import { DomainServiceContainer } from './domain-service-container';
 import { ServiceRegistryBuilder } from './service-registry-builder';
 import { DomainService } from './domain-service.decorator';
@@ -700,7 +700,7 @@ describe('Domain Services - End-to-End Tests', () => {
 
   beforeEach(async () => {
     // Arrange: Inicjalizacja infrastruktury
-    eventBus = new InMemoryDomainEventBus();
+    eventBus = new UnifiedEventBus();
     unitOfWork = new InMemoryUnitOfWork(eventBus);
 
     // Arrange: Inicjalizacja repozytoriów

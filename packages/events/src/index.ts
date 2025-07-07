@@ -8,15 +8,17 @@ export type { EventHandlerOptions, DIHandlerMetadata } from './decorators';
 
 export { BaseEventBus, CUSTOM_MIDDLEWARE_SYMBOL } from './base-event-bus';
 
+export { UnifiedEventBus } from './unified-event-bus';
+export type { UnifiedEventHandler } from './unified-event-bus';
+
 export { EventBusRegistry } from './event-bus-registry';
 
 // Domain events
-export { DomainEvent, InMemoryDomainEventBus, type InMemoryDomainEventBusOptions } from './domain';
+export { DomainEvent } from './domain';
 
 // Integration events - commonly used
 export {
   IntegrationEvent,
-  InMemoryIntegrationEventBus,
   IntegrationEventProcessor,
   DomainToIntegrationTransformer,
 } from './integration';

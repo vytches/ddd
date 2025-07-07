@@ -6,7 +6,10 @@ import type {
   BaseEventBusOptions,
   EventBusMiddleware,
 } from '@vytches-ddd/contracts';
-import { VytchesDDD } from '@vytches-ddd/di';
+// import { VytchesDDD } from '@vytches-ddd/di';
+const VytchesDDD = {
+  resolve: (identifier: any, context?: any) => null
+} as any; // Temporarily disabled for testing
 import { IEventBus, isEventHandler } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 

@@ -1,50 +1,41 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { AggregateRoot } from '@vytches-ddd/core';
-
 import type {
   EventMiddleware,
   IDomainEvent,
-  IEnhancedEventDispatcher,
-  IEventBus,
+  IEventProcessor,
+  IAggregateWithEvents,
 } from '@vytches-ddd/contracts';
-import { EventBusRegistry } from './event-bus-registry';
-import type { IEventProcessor } from './event-processor';
+import { IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
+import { UnifiedEventBus } from './unified-event-bus';
+import { Logger } from '@vytches-ddd/logging';
 
 /**
- * Universal event dispatcher with middleware and processor support
- * Coordinates the dispatching of events across different buses
+ * Universal Event Dispatcher - Repository-compatible implementation
+ * 
+ * Integrates with IBaseRepository to provide complete event publishing pipeline:
+ * - Middleware support for cross-cutting concerns
+ * - Event processors for specialized handling
+ * - Automatic aggregate commit after successful dispatch
+ * - Integration with UnifiedEventBus for actual event routing
  */
-export class UniversalEventDispatcher implements IEnhancedEventDispatcher {
+export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   private middlewares: EventMiddleware[] = [];
   private processors: IEventProcessor[] = [];
-  private registry: EventBusRegistry;
+  private unifiedBus: UnifiedEventBus;
 
   /**
    * Create a new universal event dispatcher
+   * @param unifiedBus Optional unified event bus instance (creates new if not provided)
    */
-  constructor() {
-    this.registry = new EventBusRegistry();
+  constructor(unifiedBus?: UnifiedEventBus) {
+    super();
+    this.unifiedBus = unifiedBus || new UnifiedEventBus();
   }
 
   /**
-   * Register an additional event bus
-   */
-  registerEventBus<TEvent>(type: string, bus: IEventBus<TEvent>): this {
-    this.registry.register(type, bus);
-    return this;
-  }
-
-  /**
-   * Register an event processor
-   */
-  registerProcessor(processor: IEventProcessor): this {
-    this.processors.push(processor);
-    return this;
-  }
-
-  /**
-   * Add middleware to the event pipeline
+   * Add middleware to the event processing pipeline
+   * Middleware runs before events are published to the UnifiedEventBus
    */
   use(middleware: EventMiddleware): this {
     this.middlewares.push(middleware);
@@ -52,35 +43,64 @@ export class UniversalEventDispatcher implements IEnhancedEventDispatcher {
   }
 
   /**
-   * Get the event bus registry
+   * Register an event processor for specialized event handling
+   * Processors run after events are published but before aggregate commit
    */
-  getRegistry(): EventBusRegistry {
-    return this.registry;
+  registerProcessor(processor: IEventProcessor): this {
+    this.processors.push(processor);
+    return this;
   }
 
   /**
    * Dispatch all events from an aggregate and clear them
+   * This is the main method used by IBaseRepository.save()
    */
-  async dispatchEventsForAggregate(aggregate: AggregateRoot<any>): Promise<void> {
+  async dispatchEventsForAggregate(aggregate: IAggregateWithEvents): Promise<void> {
     const events = aggregate.getDomainEvents();
     if (events.length === 0) return;
 
-    // Dispatch all events
-    await this.dispatchEvents(...events);
+    const logger = Logger.forContext('UniversalEventDispatcher');
+    
+    // Try to get aggregate ID if available (for repository aggregates)
+    const aggregateId = (aggregate as any).getId ? 
+      (aggregate as any).getId()?.getValue() : 'unknown';
+    
+    logger.debug('Dispatching events for aggregate', {
+      aggregateId,
+      aggregateType: aggregate.constructor.name,
+      eventCount: events.length,
+      eventTypes: events.map(e => e.eventType)
+    });
 
-    // Clear events from aggregate
-    aggregate.commit();
+    try {
+      // Dispatch all events through the pipeline
+      await this.dispatchEvents(...events);
+
+      // Clear events from aggregate after successful dispatch
+      aggregate.commit();
+
+      logger.debug('Aggregate events dispatched and committed', {
+        aggregateId,
+        eventCount: events.length
+      });
+
+    } catch (error) {
+      logger.error('Failed to dispatch aggregate events', error instanceof Error ? error : undefined, {
+        aggregateId,
+        aggregateType: aggregate.constructor.name,
+        eventCount: events.length,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
   }
 
   /**
-   * Dispatch a single event
+   * Dispatch a single event through middleware pipeline
    */
   async dispatchEvent(event: IDomainEvent): Promise<void> {
-    // Build and execute the pipeline
     const pipeline = this.buildPipeline();
     await pipeline(event);
-
-    // Process the event through all processors
     await this.processEvent(event);
   }
 
@@ -94,25 +114,26 @@ export class UniversalEventDispatcher implements IEnhancedEventDispatcher {
   }
 
   /**
-   * Process an event through all registered processors
+   * Get direct access to UnifiedEventBus for advanced scenarios
    */
-  private async processEvent(event: IDomainEvent): Promise<void> {
-    // Process through all processors
-    for (const processor of this.processors) {
-      await processor.process(event, this.registry);
-    }
+  getUnifiedEventBus(): UnifiedEventBus {
+    return this.unifiedBus;
+  }
+
+  /**
+   * Replace the unified event bus (useful for testing)
+   */
+  setUnifiedEventBus(bus: UnifiedEventBus): void {
+    this.unifiedBus = bus;
   }
 
   /**
    * Build the middleware pipeline for event processing
    */
   private buildPipeline(): (event: IDomainEvent) => Promise<void> {
-    // Base function that publishes to domain event bus
+    // Base function that publishes to UnifiedEventBus
     let pipeline = async (event: IDomainEvent): Promise<void> => {
-      const domainBus = this.registry.get<IDomainEvent>('domain');
-      if (domainBus) {
-        await domainBus.publish(event);
-      }
+      await this.unifiedBus.publish(event);
     };
 
     // Apply middleware in reverse order (last added, first executed)
@@ -125,5 +146,16 @@ export class UniversalEventDispatcher implements IEnhancedEventDispatcher {
     }
 
     return pipeline;
+  }
+
+  /**
+   * Process an event through all registered processors
+   */
+  private async processEvent(event: IDomainEvent): Promise<void> {
+    for (const processor of this.processors) {
+      if (processor.canProcess(event)) {
+        await processor.process(event);
+      }
+    }
   }
 }

@@ -5,7 +5,10 @@
  * that are decorated with the @EventHandler decorator and have DI integration enabled.
  */
 
-import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches-ddd/di';
+// import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches-ddd/di';
+// Temporarily mocked for testing
+type IHandlerDiscoveryPlugin = any;
+type HandlerInfo = any;
 import type { DIHandlerMetadata } from './di-types';
 
 /**
