@@ -1,12 +1,12 @@
-# Domain Services in DomainTS
+# Domain Services in VytchesDDD
 
 ## Overview
 
 Domain Services are a crucial tactical pattern in Domain-Driven Design (DDD)
 that encapsulate domain logic which doesn't naturally fit within entities or
-value objects. The DomainTS library provides a comprehensive, modular
-implementation of domain services, allowing you to organize and manage complex
-business operations while maintaining clean separation of concerns.
+value objects. The VytchesDDD library provides a comprehensive, modern
+implementation of domain services using decorator-based auto-discovery through
+the VytchesDDD DI system.
 
 This guide will walk you through the Domain Services module, explaining its
 components, how they work together, and best practices for implementation.
@@ -16,14 +16,13 @@ components, how they work together, and best practices for implementation.
 1. [Core Concepts](#core-concepts)
 2. [Domain Service Interfaces](#domain-service-interfaces)
 3. [Base Implementations](#base-implementations)
-4. [Service Registration and Discovery](#service-registration-and-discovery)
-5. [Service Container and Dependency Injection](#service-container-and-dependency-injection)
-6. [Fluent API for Service Configuration](#fluent-api-for-service-configuration)
-7. [Event Integration](#event-integration)
-8. [Transactional Operations](#transactional-operations)
-9. [Async Initialization](#async-initialization)
-10. [Best Practices](#best-practices)
-11. [Complete Example](#complete-example)
+4. [Modern DI-Based Registration](#modern-di-based-registration)
+5. [Decorator-Based Auto-Discovery](#decorator-based-auto-discovery)
+6. [Event Integration](#event-integration)
+7. [Transactional Operations](#transactional-operations)
+8. [Context Isolation for DDD](#context-isolation-for-ddd)
+9. [Best Practices](#best-practices)
+10. [Complete Example](#complete-example)
 
 ## Concepts Overview
 
@@ -80,123 +79,34 @@ common functionality.
   consistency
 - Use `AsyncDomainService` for services with async initialization needs
 
-### 4. Service Registration and Discovery
+### 4. Modern DI-Based Registration
 
-**What**: Mechanisms for registering services and locating them by identifier.
+**What**: Decorator-based service registration through VytchesDDD DI system.
 
-**Why important**: Enables dependency resolution and service location without
-tight coupling.
+**Why important**: Eliminates manual registration boilerplate and provides
+auto-discovery.
 
-**When to use**: When organizing services and managing their lifecycle in your
-application.
-
-**Examples**:
-
-- Maintaining a catalog of all available services
-- Finding services by ID at runtime
-- Checking if a specific service is available
-- Managing service lifecycles (registration, retrieval, removal)
-
-### 5. Service Container and Dependency Injection
-
-**What**: Infrastructure for managing service dependencies and their
-initialization order.
-
-**Why important**: Automates the complex task of resolving dependencies and
-initializing services.
-
-**When to use**: In applications with multiple services that depend on each
-other.
+**When to use**: For all domain services in modern VytchesDDD applications.
 
 **Examples**:
 
-- Resolving a complex dependency graph of services
-- Automatic wiring of infrastructure components (event bus, unit of work)
-- Detecting circular dependencies
-- Ensuring services are initialized in the correct order
+- `@DomainService('userService')` for simple registration
+- `@DomainService({ serviceId, context, lifetime })` for advanced scenarios
+- Automatic dependency resolution and lifecycle management
 
-### 6. Fluent API for Service Configuration
+### 5. Decorator-Based Auto-Discovery
 
-**What**: Expressive builder pattern API for configuring services.
+**What**: Automatic service discovery and registration through decorators.
 
-**Why important**: Makes service configuration more readable and less
-error-prone.
+**Why important**: Zero-configuration service registration with type safety.
 
-**When to use**: When setting up services with complex configurations or
-dependencies.
+**When to use**: Instead of manual registry patterns for all services.
 
 **Examples**:
 
-- Building a service with multiple dependencies
-- Configuring a service with specific infrastructure
-- Creating and registering services in a single chain
-- Building a custom service registry
-
-### 7. Event Integration
-
-**What**: Infrastructure for domain services to publish and subscribe to domain
-events.
-
-**Why important**: Enables loose coupling through event-driven communication.
-
-**When to use**: When services need to communicate state changes or trigger
-processes.
-
-**Examples**:
-
-- Publishing events when important domain operations complete
-- Notifying other parts of the system about state changes
-- Implementing event sourcing patterns
-- Creating audit trails of domain operations
-
-### 8. Transactional Operations
-
-**What**: Support for executing operations in a transactional context.
-
-**Why important**: Ensures atomicity and consistency across aggregates.
-
-**When to use**: When operations affect multiple aggregates or require
-all-or-nothing semantics.
-
-**Examples**:
-
-- Transferring items between orders
-- Processing a payment and updating order status
-- Coordinating inventory adjustments across multiple products
-- Recording complex business operations that must succeed or fail as a unit
-
-### 9. Async Initialization
-
-**What**: Support for asynchronous service initialization and cleanup.
-
-**Why important**: Enables resources that require async setup/teardown to be
-properly managed.
-
-**When to use**: When services rely on external resources or need async
-configuration.
-
-**Examples**:
-
-- Connecting to external APIs or databases
-- Setting up event subscriptions
-- Loading cached data
-- Initializing complex resources that require async operations
-
-### 10. Best Practices
-
-**What**: Recommended patterns and approaches for domain service implementation.
-
-**Why important**: Helps avoid common pitfalls and ensures alignment with DDD
-principles.
-
-**When to use**: Throughout your domain service implementations.
-
-**Examples**:
-
-- Keeping services stateless
-- Properly defining transaction boundaries
-- Organizing services by bounded context
-- Effective error handling strategies
+- Services decorated with `@DomainService` are automatically discovered
+- `VytchesDDD.configure()` finds and registers all decorated services
+- Context-aware service resolution for bounded contexts
 
 ## Core Concepts
 
@@ -207,13 +117,14 @@ In DDD, Domain Services:
 - Encapsulate complex domain logic that doesn't belong to any specific entity
 - Coordinate activities across different parts of the domain
 
-The DomainTS implementation follows these principles while providing additional
+The VytchesDDD implementation follows these principles while providing modern
 infrastructure for:
 
-- Dependency injection and service location
+- Decorator-based auto-discovery through VytchesDDD DI
+- Context isolation for bounded contexts
 - Integration with domain events
 - Transactional consistency through Unit of Work pattern
-- Asynchronous initialization and resource management
+- Framework-agnostic DI container adapters
 
 ## Domain Service Interfaces
 
@@ -286,108 +197,121 @@ Choose the appropriate base class based on your service's needs. For example, if
 your service needs to publish events and perform transactions, extend
 `UnitOfWorkAwareDomainService`.
 
-## Service Registration and Discovery
+## Modern DI-Based Registration
 
-To make services available throughout your application, DomainTS provides a
-registry system:
+**NEW**: VytchesDDD uses a modern decorator-based approach instead of manual registries:
+
+### Basic Service Registration
 
 ```typescript
-interface IDomainServiceRegistry {
-  register<T extends IDomainService>(service: T, serviceId?: string): void;
-  get<T extends IDomainService>(serviceId: string): T | undefined;
-  has(serviceId: string): boolean;
-  remove(serviceId: string): boolean;
-  getAll(): Map<string, IDomainService>;
-  clear(): void;
+import { DomainService } from '@vytches-ddd/domain-services';
+
+// Simple auto-discovery
+@DomainService('userService')
+class UserService extends BaseDomainService {
+  constructor() {
+    super('userService');
+  }
+
+  async createUser(userData: UserData): Promise<User> {
+    return User.create(userData);
+  }
 }
 ```
 
-The library includes a default implementation (`DefaultDomainServiceRegistry`)
-and a singleton access point (`GlobalServiceRegistry`):
+### Advanced Service Registration
 
 ```typescript
-// Using the default registry
-const registry = new DefaultDomainServiceRegistry();
-registry.register(new MyDomainService('my-service'));
-const service = registry.get<MyDomainService>('my-service');
+import { DomainService, ServiceLifetime } from '@vytches-ddd/domain-services';
 
-// Using the global registry
-const globalRegistry = GlobalServiceRegistry.getInstance();
-globalRegistry.register(new MyDomainService('global-service'));
-const globalService = globalRegistry.get<MyDomainService>('global-service');
+@DomainService({
+  serviceId: 'orderService',
+  lifetime: ServiceLifetime.Singleton,
+  context: 'OrderManagement',
+  dependencies: ['paymentService', 'inventoryService'],
+  autoRegister: true
+})
+class OrderService extends EventAwareDomainService {
+  constructor() {
+    super('orderService');
+  }
+
+  async processOrder(order: Order): Promise<OrderResult> {
+    // Dependencies are automatically resolved
+    const paymentService = VytchesDDD.resolve<PaymentService>('paymentService');
+    return await paymentService.processPayment(order);
+  }
+}
 ```
 
-## Service Container and Dependency Injection
-
-For more complex scenarios with service dependencies, DomainTS provides a
-container:
+### System Setup
 
 ```typescript
-const container = new DomainServiceContainer();
+import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
 
-// Register services with dependencies
-container.registerFactory('orderService', () => new OrderService(), [
-  'productService',
-  'customerService',
-]);
+// One-time setup with auto-discovery
+const container = new SimpleContainer();
+VytchesDDD.configure(container); // Auto-discovers all decorated services
 
-container.registerFactory('productService', () => new ProductService());
-
-container.registerFactory('customerService', () => new CustomerService());
-
-// Initialize all services (resolving dependencies)
-container.initializeServices();
-
-// Retrieve a service
-const orderService = container.getService<OrderService>('orderService');
+// Services are automatically available
+const userService = VytchesDDD.resolve<UserService>('userService');
+const orderService = VytchesDDD.resolve<OrderService>('orderService');
 ```
 
-The container:
+## Decorator-Based Auto-Discovery
 
-- Tracks dependencies between services
-- Ensures initialization in the correct order
-- Detects circular dependencies
-- Configures services with infrastructure components
+The VytchesDDD DI system provides several decorators for service registration:
 
-## Fluent API for Service Configuration
-
-For a more expressive way to configure services, use the builder pattern:
+### Domain Service Decorator
 
 ```typescript
-// Using ServiceRegistryBuilder
-const registry = new ServiceRegistryBuilder()
-  .withEventBus(eventBus)
-  .withUnitOfWork(unitOfWork)
-  .register(new LoggingService())
-  .build();
+// Basic usage
+@DomainService('serviceId')
+class MyService extends BaseDomainService { }
 
-// Using ServiceBuilder
-const orderService = new ServiceBuilder<OrderService>(
-  registry,
-  'orderService',
-  (productRepo, customerRepo) => new OrderService(productRepo, customerRepo)
-)
-  .dependsOn('productRepository')
-  .dependsOn('customerRepository')
-  .withEventBus(eventBus)
-  .buildAndRegister();
+// Advanced usage with all options
+@DomainService({
+  serviceId: 'advanced-service',
+  lifetime: ServiceLifetime.Singleton,
+  context: 'BoundedContext',
+  dependencies: ['dependency1', 'dependency2'],
+  tags: ['business', 'core'],
+  autoRegister: true,
+  transactional: true,
+  publishesEvents: true,
+  async: false
+})
+class AdvancedService extends UnitOfWorkAwareDomainService { }
 ```
 
-This approach provides:
+### Integration with CQRS
 
-- Type-safe dependency injection
-- Fluent configuration of infrastructure components
-- Clear visualization of service dependencies
+```typescript
+import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
+
+// Command handlers are also auto-discovered
+@CommandHandler(CreateUserCommand, {
+  context: 'UserManagement',
+  timeout: 30000
+})
+class CreateUserHandler {
+  async execute(command: CreateUserCommand): Promise<void> {
+    // Services resolved automatically
+    const userService = VytchesDDD.resolve<UserService>('userService');
+    await userService.createUser(command);
+  }
+}
+```
 
 ## Event Integration
 
-Domain Services often need to publish domain events. The
-`EventAwareDomainService` base class makes this simple:
+Domain Services can easily publish domain events using the base classes:
 
 ```typescript
+@DomainService('orderProcessor')
 class OrderProcessingService extends EventAwareDomainService {
   constructor() {
-    super('order-processor');
+    super('orderProcessor');
   }
 
   processOrder(order: Order): void {
@@ -399,20 +323,21 @@ class OrderProcessingService extends EventAwareDomainService {
 }
 ```
 
-Services can be configured with an event bus:
-
-- Automatically by the service container
-- Explicitly through the builder API
-- Manually by calling `setEventBus()`
+Event buses are automatically configured by the VytchesDDD DI system when services
+implement `IEventBusAware`.
 
 ## Transactional Operations
 
 For operations that span multiple aggregates, use transactional domain services:
 
 ```typescript
+@DomainService({
+  serviceId: 'orderManager',
+  transactional: true
+})
 class OrderManagementService extends UnitOfWorkAwareDomainService {
   constructor() {
-    super('order-manager');
+    super('orderManager');
   }
 
   async transferOrderItems(
@@ -420,7 +345,7 @@ class OrderManagementService extends UnitOfWorkAwareDomainService {
     targetOrderId: string
   ): Promise<void> {
     return this.executeInTransaction(async () => {
-      const orderRepo = this.getRepository<OrderRepository>('orderRepository');
+      const orderRepo = VytchesDDD.resolve<OrderRepository>('orderRepository');
 
       const sourceOrder = await orderRepo.findById(sourceOrderId);
       const targetOrder = await orderRepo.findById(targetOrderId);
@@ -434,112 +359,102 @@ class OrderManagementService extends UnitOfWorkAwareDomainService {
 }
 ```
 
-The `executeInTransaction` method:
+## Context Isolation for DDD
 
-- Begins a transaction automatically
-- Commits on successful completion
-- Rolls back if an error occurs
-- Coordinates event publication after commit
-
-## Async Initialization
-
-Services that need asynchronous setup or cleanup can use the async lifecycle:
+VytchesDDD supports bounded context isolation for large domain models:
 
 ```typescript
+// Register services in specific contexts
 @DomainService({
-  serviceId: 'external-api-service',
-  async: true,
+  serviceId: 'orderService',
+  context: 'OrderManagement'
 })
-class ExternalApiService extends AsyncDomainService {
-  private client: ApiClient;
+class OrderService extends BaseDomainService { }
 
-  constructor() {
-    super('external-api-service');
-  }
+@DomainService({
+  serviceId: 'paymentService', 
+  context: 'PaymentProcessing'
+})
+class PaymentService extends BaseDomainService { }
 
-  async initialize(): Promise<void> {
-    this.client = await ApiClient.connect();
-    // Setup is complete, service is ready to use
-  }
+// Setup context-specific containers
+const orderContainer = new SimpleContainer();
+const paymentContainer = new SimpleContainer();
 
-  async dispose(): Promise<void> {
-    await this.client.disconnect();
-    // Resources are released
-  }
+VytchesDDD.configureContext('OrderManagement', orderContainer);
+VytchesDDD.configureContext('PaymentProcessing', paymentContainer);
 
-  async fetchData(id: string): Promise<Data> {
-    return this.client.getData(id);
-  }
-}
+// Context-aware service resolution
+const orderService = VytchesDDD.resolve<OrderService>('orderService', 'OrderManagement');
+const paymentService = VytchesDDD.resolve<PaymentService>('paymentService', 'PaymentProcessing');
 ```
-
-Async services:
-
-- Are initialized by the container during `initializeServices()`
-- Can be explicitly initialized using the builder API
-- Should be awaited before use
 
 ## Best Practices
 
-When implementing domain services with DomainTS:
+When implementing domain services with VytchesDDD:
 
-1. **Use the right base class**: Choose the appropriate base class based on your
-   service's needs.
+1. **Use decorators**: Always use `@DomainService` decorator for automatic discovery
+   instead of manual registration.
 
-2. **Keep services stateless**: Domain services should not maintain state
+2. **Choose the right base class**: Select the appropriate base class based on your
+   service's needs (events, transactions, async lifecycle).
+
+3. **Keep services stateless**: Domain services should not maintain state
    between operations. Use aggregates for stateful domain concepts.
 
-3. **Service ID conventions**: Use consistent naming for service IDs, like
-   'order-processor' or 'customer-manager'.
+4. **Service ID conventions**: Use consistent naming for service IDs, like
+   'userService' or 'orderProcessor'.
 
-4. **Avoid circular dependencies**: Design your services to avoid circular
-   dependencies, which will cause initialization failures.
+5. **Context isolation**: Use bounded context isolation for large applications
+   with multiple domains.
 
-5. **Transactional boundaries**: Place transaction boundaries at the highest
-   appropriate level - typically within domain service methods.
+6. **Dependency resolution**: Use `VytchesDDD.resolve()` for service dependencies
+   rather than constructor injection (which is handled automatically).
 
-6. **Service responsibilities**: Each service should have a single, focused
-   responsibility within the domain.
+7. **Transactional boundaries**: Use `UnitOfWorkAwareDomainService` and
+   `executeInTransaction()` for cross-aggregate operations.
 
-7. **Use dependency injection**: Prefer constructor injection via the container
-   or builder rather than manual service location.
+8. **Event publication**: Use `EventAwareDomainService` base class for services
+   that need to publish domain events.
 
-8. **Domain event publication**: Publish domain events to communicate important
-   domain changes to other parts of the system.
+9. **Async services**: Mark services with `async: true` in decorator options
+   if they need asynchronous initialization.
 
-9. **Error handling**: Use the Result pattern or exceptions consistently within
-   your services.
+10. **Framework integration**: Use adapter patterns for integration with existing
+    DI frameworks like NestJS or InversifyJS.
 
 ## Complete Example
 
-Here's a complete example of defining, registering, and using domain services:
+Here's a complete example using the modern VytchesDDD DI approach:
 
 ```typescript
-// Define domain service
+// Define domain service with decorator
 @DomainService({
-  serviceId: 'order-processor',
-  dependencies: ['order-repository', 'payment-service'],
+  serviceId: 'orderProcessor',
+  context: 'OrderManagement',
+  dependencies: ['orderRepository', 'paymentService'],
   transactional: true,
   publishesEvents: true,
 })
 class OrderProcessingService extends UnitOfWorkAwareDomainService {
-  constructor(
-    private orderRepository: OrderRepository,
-    private paymentService: PaymentService
-  ) {
-    super('order-processor');
+  constructor() {
+    super('orderProcessor');
   }
 
   async processOrder(orderId: string): Promise<Result<Order, Error>> {
     return this.executeInTransaction(async () => {
+      // Resolve dependencies automatically
+      const orderRepository = VytchesDDD.resolve<OrderRepository>('orderRepository');
+      const paymentService = VytchesDDD.resolve<PaymentService>('paymentService');
+
       // Retrieve order from repository
-      const order = await this.orderRepository.findById(orderId);
+      const order = await orderRepository.findById(orderId);
       if (!order) {
         return Result.failure(new Error(`Order ${orderId} not found`));
       }
 
       // Process payment
-      const paymentResult = await this.paymentService.processPayment(
+      const paymentResult = await paymentService.processPayment(
         order.customerId,
         order.totalAmount
       );
@@ -550,47 +465,35 @@ class OrderProcessingService extends UnitOfWorkAwareDomainService {
 
       // Update order status
       order.markAsPaid(paymentResult.value.transactionId);
-      await this.orderRepository.save(order);
+      await orderRepository.save(order);
+
+      // Event published automatically by EventAwareDomainService
+      this.publishEvent(new OrderProcessedEvent(order.id));
 
       return Result.success(order);
     });
   }
 }
 
-// Register and configure services
-const eventBus = new InMemoryEventBus();
-const unitOfWork = new DatabaseUnitOfWork(eventBus);
+// Register supporting services
+@DomainService('paymentService')
+class PaymentService extends BaseDomainService {
+  constructor() {
+    super('paymentService');
+  }
 
-// Setup repositories
-const orderRepo = new SqlOrderRepository();
-unitOfWork.registerRepository('order-repository', orderRepo);
+  async processPayment(customerId: string, amount: number): Promise<Result<Payment, Error>> {
+    // Payment processing logic...
+    return Result.success(new Payment(customerId, amount));
+  }
+}
 
-// Configure service container
-const container = new DomainServiceContainer(
-  undefined, // Use default registry
-  eventBus,
-  () => unitOfWork
-);
+// One-time application setup
+const container = new SimpleContainer();
+VytchesDDD.configure(container); // Auto-discovers all decorated services
 
-// Register services
-container.registerFactory('payment-service', () => new PaymentService());
-
-container.registerFactory(
-  'order-processor',
-  () =>
-    new OrderProcessingService(
-      container.getService<OrderRepository>('order-repository')!,
-      container.getService<PaymentService>('payment-service')!
-    ),
-  ['order-repository', 'payment-service']
-);
-
-// Initialize all services
-container.initializeServices();
-
-// Use the service
-const orderProcessor =
-  container.getService<OrderProcessingService>('order-processor')!;
+// Services are immediately available
+const orderProcessor = VytchesDDD.resolve<OrderProcessingService>('orderProcessor');
 const result = await orderProcessor.processOrder('order-123');
 
 if (result.isSuccess()) {
@@ -600,17 +503,47 @@ if (result.isSuccess()) {
 }
 ```
 
+## Migration from Legacy Patterns
+
+If you're migrating from legacy registry patterns, here's the transformation:
+
+### Old Pattern (Removed)
+```typescript
+// ❌ OLD: Manual registry patterns
+const registry = new DefaultDomainServiceRegistry();
+const globalRegistry = GlobalServiceRegistry.getInstance();
+const builder = new ServiceRegistryBuilder()
+  .register(new UserService(), 'userService')
+  .build();
+
+const container = new DomainServiceContainer(registry);
+container.initializeServices();
+```
+
+### New Pattern (Current)
+```typescript
+// ✅ NEW: Decorator-based auto-discovery
+@DomainService('userService')
+class UserService extends BaseDomainService { }
+
+// Zero configuration
+VytchesDDD.configure(container);
+const userService = VytchesDDD.resolve<UserService>('userService');
+```
+
 ## Conclusion
 
-Domain Services in DomainTS provide a powerful, flexible implementation of this
-important DDD pattern. By leveraging the provided interfaces, base classes, and
-infrastructure components, you can create domain services that are:
+Domain Services in VytchesDDD provide a modern, decorator-based implementation of this
+important DDD pattern. By leveraging the VytchesDDD DI system, you can create domain 
+services that are:
 
-- Focused on domain logic
-- Properly integrated with domain events
-- Transaction-aware
-- Easily testable
-- Well-organized with clear dependencies
+- Automatically discovered and registered
+- Properly integrated with domain events  
+- Transaction-aware with Unit of Work support
+- Context-isolated for bounded contexts
+- Framework-agnostic with adapter support
+- Zero-configuration with excellent developer experience
 
 This enables you to implement complex domain processes while maintaining a
-clean, maintainable codebase aligned with DDD principles.
+clean, maintainable codebase aligned with DDD principles and modern TypeScript
+development practices.

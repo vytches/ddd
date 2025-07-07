@@ -1,5 +1,5 @@
 import type { IDomainEvent } from '@vytches-ddd/contracts';
-import type { EventBusRegistry } from './event-bus-registry';
+import type { UnifiedEventBus } from './unified-event-bus';
 
 /**
  * Interface for event processors
@@ -11,7 +11,7 @@ export interface IEventProcessor {
    * May result in publishing events to other buses
    *
    * @param event - The domain event to process
-   * @param registry - Registry containing access to all event buses
+   * @param eventBus - Unified event bus for publishing events
    */
-  process(event: IDomainEvent, registry?: EventBusRegistry): Promise<void>;
+  process(event: IDomainEvent, eventBus?: UnifiedEventBus): Promise<void>;
 }

@@ -13,11 +13,7 @@ export {
   isDomainServicePendingDIRegistration 
 } from './domain-service.decorator';
 
-export { DefaultDomainServiceRegistry } from './domain-service-registry';
-
-export { GlobalServiceRegistry } from './global-service-registry';
-
-export { ServiceBuilder } from './service-builder';
+// Legacy registries and builders removed - use VytchesDDD DI system instead
 
 // Types commonly used
 export type {
@@ -30,7 +26,7 @@ export type {
 export type { DomainServiceOptions } from './domain-service.decorator';
 export type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
 
-export type { IDomainServiceRegistry } from './domain-service-registry.interface';
+// IDomainServiceRegistry interface removed - use VytchesDDD DI system instead
 
 // Errors
 export {
@@ -43,12 +39,7 @@ export {
 export * from './domain-service.interface';
 export * from './base-domain-service';
 export * from './domain-service.decorator';
-export * from './domain-service-registry.interface';
-export * from './domain-service-registry';
-export * from './domain-service-container';
-export * from './service-builder';
-export * from './service-registry-builder';
-export * from './global-service-registry';
+// Legacy implementations removed - use VytchesDDD DI system instead
 export * from './service.errors';
 
 // DI Integration

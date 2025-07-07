@@ -1,7 +1,6 @@
 import type { IDomainEvent } from '@vytches-ddd/contracts';
-import type { EventBusRegistry } from '../event-bus-registry';
 import type { IEventProcessor } from '../event-processor';
-import type { IIntegrationEvent } from './integration-event-interfaces';
+import type { UnifiedEventBus } from '../unified-event-bus';
 import type { IntegrationEventTransformerRegistry } from './integration-event-transformer-registry';
 
 /**
@@ -14,21 +13,17 @@ export class IntegrationEventProcessor implements IEventProcessor {
    * Process a domain event by transforming it to an integration event
    * if a suitable transformer is registered
    */
-  async process(event: IDomainEvent, registry: EventBusRegistry): Promise<void> {
-    // Get integration event bus if registered
-    const integrationBus = registry.get<IIntegrationEvent>('integration');
-    if (!integrationBus) return;
+  async process(event: IDomainEvent, eventBus?: UnifiedEventBus): Promise<void> {
+    if (!eventBus) return;
 
     // Find transformer for this event type
     const transformer = this.transformerRegistry.find(event.eventType);
     if (!transformer) return;
 
-    // Użycie transformToMultipleTargets zamiast transform
+    // Transform to multiple integration events
     const integrationEvents = transformer.transformToMultipleTargets(event);
 
-    // Publikacja wszystkich wygenerowanych eventów
-    for (const integrationEvent of integrationEvents) {
-      await integrationBus.publish(integrationEvent);
-    }
+    // Publish all generated integration events
+    await eventBus.publishMany(integrationEvents);
   }
 }

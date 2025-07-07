@@ -47,30 +47,6 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
   abstract publishMany(events: TEvent[]): Promise<void>;
 }
 
-/**
- * Registry interface for managing event buses
- */
-export interface IEventBusRegistry {
-  /**
-   * Register an event bus for a specific context
-   */
-  register(name: string, bus: IEventBus): void;
-
-  /**
-   * Get an event bus by name
-   */
-  get(name: string): IEventBus | undefined;
-
-  /**
-   * Check if a bus is registered
-   */
-  has(name: string): boolean;
-
-  /**
-   * Remove a bus from registry
-   */
-  remove(name: string): boolean;
-}
 
 /**
  * Base options for all event bus implementations

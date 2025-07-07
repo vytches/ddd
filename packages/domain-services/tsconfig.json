@@ -17,6 +17,7 @@
     "../events/src/**/*",
     "../validation/src/**/*",
     "../utils/src/**/*",
+    "../di/src/**/*",
     "../logging/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]

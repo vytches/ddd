@@ -1,7 +1,7 @@
 import 'reflect-metadata';
+import { ServiceLifetime } from '@vytches-ddd/di';
 import type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
 import { DIDomainServiceMetadataRegistry } from './di-types';
-import { ServiceLifetime } from '@vytches-ddd/di';
 
 /**
  * Metadata key for storing domain service information.
@@ -120,7 +120,7 @@ export interface DomainServiceOptions {
  *   publishesEvents: true
  * })
  * class OrderService extends UnitOfWorkAwareDomainService {...}
- * 
+ *
  * // DI Enhanced usage (new)
  * @DomainService({
  *   serviceId: 'orderService',
@@ -144,12 +144,12 @@ export function DomainService(options: string | DomainServiceOptions | EnhancedD
     Reflect.defineMetadata(DOMAIN_SERVICE_METADATA_KEY, metadata, target);
 
     // Check if this is DI-enhanced options (has DI-specific properties)
-    const isDIEnhanced = typeof options === 'object' && options !== null && 
+    const isDIEnhanced = typeof options === 'object' && options !== null &&
       ('lifetime' in options || 'context' in options || 'autoRegister' in options || 'tags' in options);
 
     if (isDIEnhanced) {
       const enhancedOptions = options as EnhancedDomainServiceOptions;
-      
+
       // Create DI metadata
       const diMetadata: DIServiceMetadata = {
         serviceType: target,

@@ -11,8 +11,6 @@ export { BaseEventBus, CUSTOM_MIDDLEWARE_SYMBOL } from './base-event-bus';
 export { UnifiedEventBus } from './unified-event-bus';
 export type { UnifiedEventHandler } from './unified-event-bus';
 
-export { EventBusRegistry } from './event-bus-registry';
-
 // Domain events
 export { DomainEvent } from './domain';
 

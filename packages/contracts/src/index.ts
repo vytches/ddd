@@ -3,7 +3,6 @@ export type {
   IEventMetadata,
   IDomainEvent,
   IExtendedDomainEvent,
-  IEventBusRegistry,
   BaseEventBusOptions,
   IEventProcessor,
   IEventHandler,
