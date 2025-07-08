@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import type { ICommand, ICommandHandler } from '../interfaces';
-import { CQRSMetadataRegistry } from '../registry';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
 /**
- * Enhanced CommandHandler decorator with DI integration
- * Maintains backward compatibility while adding Phase 2 DI features
+ * CommandHandler decorator - pure metadata, no registry
+ * Framework agnostic - works with any DI container
  */
 export function CommandHandler<T extends ICommand>(
   commandType: new (...args: any[]) => T,
   options?: CommandHandlerOptions
 ) {
   return function <K extends ICommandHandler<T>>(target: new (...args: any[]) => K) {
-    // Phase 1: Maintain existing functionality
-    CQRSMetadataRegistry.registerCommandHandler(commandType, target);
-    
-    // Phase 2: Enhanced DI integration
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'command',
@@ -27,16 +22,18 @@ export function CommandHandler<T extends ICommand>(
       registeredWithDI: false
     };
     
-    // Store enhanced metadata for auto-discovery
-    Reflect.defineMetadata('di:command-handler', metadata, target);
+    // Store metadata in command class (for resolution)
+    Reflect.defineMetadata('di:command-handler', {
+      ...metadata,
+      serviceId: diOptions.serviceId || target.name
+    }, commandType);
+    
+    // Store metadata in handler class (for auto-discovery)
+    Reflect.defineMetadata('di:handler-metadata', metadata, target);
     Reflect.defineMetadata('di:handler-type', 'command', target);
     
-    // Phase 2: Auto-register with DI container if available and enabled
-    // Note: Registration is deferred to avoid circular dependencies
-    // Actual DI registration happens during VytchesDDD.discoverAndRegisterHandlers()
+    // Mark for DI auto-registration
     if (diOptions.autoRegister !== false) {
-      // Mark as pending DI registration for auto-discovery
-      metadata.registeredWithDI = false; // Will be updated by auto-discovery
       Reflect.defineMetadata('di:registration-pending', true, target);
     }
     

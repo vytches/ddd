@@ -1,8 +1,7 @@
-import type { IQuery, IQueryHandler } from '../interfaces';
+import type { IDependencyContainer } from '@vytches-ddd/di';
+import type { IQuery } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { QueryBus } from './query-bus';
-
-type HandlerResolver = (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>;
 
 export class EnhancedQueryBus extends QueryBus {
   private metrics = {
@@ -11,8 +10,8 @@ export class EnhancedQueryBus extends QueryBus {
     errors: 0,
   };
 
-  constructor(handlerResolver?: HandlerResolver) {
-    super(handlerResolver);
+  constructor(container: IDependencyContainer) {
+    super(container);
 
     this.use(new LoggingMiddleware());
   }

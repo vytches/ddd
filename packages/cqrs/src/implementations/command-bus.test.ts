@@ -1,246 +1,382 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import 'reflect-metadata';
+import type { IDependencyContainer } from '@vytches-ddd/di';
 import { CommandBus } from './command-bus';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
-import { CQRSExecutionContext } from '../middleware';
+import type { CQRSExecutionContext } from '../middleware';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
-import { CQRSMetadataRegistry } from '../registry';
+
+// Test command implementation
+class TestCommand implements ICommand {
+  constructor(public readonly data: string) {}
+}
+
+// Test validatable command
+class ValidatableCommand implements ICommand {
+  constructor(public readonly data: string) {}
+
+  async validate(): Promise<void> {
+    if (!this.data) {
+      throw new Error('Data is required');
+    }
+  }
+}
+
+// Test command handler
+class TestCommandHandler implements ICommandHandler<TestCommand> {
+  async execute(command: TestCommand): Promise<void> {
+    // Mock implementation
+  }
+}
+
+// Shared execution order tracker
+let globalExecutionOrder: number[] = [];
+
+// Test middleware
+class TestMiddleware implements ICQRSMiddleware {
+  public executionOrder: number[] = [];
+
+  constructor(private order: number) {}
+
+  async handle(context: CQRSExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+    this.executionOrder.push(this.order);
+    globalExecutionOrder.push(this.order);
+    const result = await next();
+    // Copy the global execution order to this middleware
+    this.executionOrder = [...globalExecutionOrder];
+    return result;
+  }
+}
 
 describe('CommandBus', () => {
-  class TestCommand implements ICommand {
-    constructor(public readonly data: string) {}
-  }
-
-  class TestValidatableCommand implements ICommand {
-    constructor(public readonly data: string) {}
-
-    async validate(): Promise<void> {
-      if (this.data === 'invalid') {
-        throw new Error('Validation failed');
-      }
-    }
-  }
-
-  class TestCommandHandler implements ICommandHandler<TestCommand> {
-    async execute(_command: TestCommand): Promise<void> {
-      // Mock implementation
-    }
-  }
-
   let commandBus: CommandBus;
-  let mockHandler: ICommandHandler<TestCommand>;
-  let mockMiddleware: ICQRSMiddleware;
+  let mockContainer: IDependencyContainer;
+  let mockHandler: TestCommandHandler;
 
   beforeEach(() => {
-    commandBus = new CommandBus();
-    mockHandler = {
-      execute: vi.fn().mockResolvedValue(undefined),
+    // Reset global execution order
+    globalExecutionOrder = [];
+    
+    mockContainer = {
+      resolve: vi.fn(),
+      register: vi.fn(),
+      registerInstance: vi.fn(),
+      registerFactory: vi.fn(),
+      isRegistered: vi.fn(),
+      dispose: vi.fn(),
+      getServices: vi.fn(),
+      createScope: vi.fn(),
+      getServicesByTag: vi.fn(),
     };
-    mockMiddleware = {
-      handle: vi.fn().mockImplementation(async (context, next) => next()),
-    };
+
+    mockHandler = new TestCommandHandler();
+    commandBus = new CommandBus(mockContainer);
   });
 
   describe('constructor', () => {
-    it('should create command bus without handler resolver', () => {
-      const bus = new CommandBus();
-      expect(bus).toBeInstanceOf(CommandBus);
+    it('should initialize with empty middlewares', () => {
+      expect(commandBus).toBeInstanceOf(CommandBus);
     });
 
-    it('should create command bus with handler resolver', () => {
-      const resolver = vi.fn();
-      const bus = new CommandBus(resolver);
-      expect(bus).toBeInstanceOf(CommandBus);
+    it('should store container reference', () => {
+      expect(commandBus['container']).toBe(mockContainer);
     });
   });
 
   describe('register', () => {
-    it('should register command handler', () => {
+    it('should throw CQRSConfigurationError for manual registration', () => {
       expect(() => {
         commandBus.register(TestCommand, mockHandler);
-      }).not.toThrow();
+      }).toThrow(CQRSConfigurationError);
+    });
+
+    it('should throw with deprecation message', () => {
+      expect(() => {
+        commandBus.register(TestCommand, mockHandler);
+      }).toThrow('Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.');
     });
   });
 
   describe('registerFactory', () => {
-    it('should register handler factory', () => {
-      const factory = vi.fn().mockReturnValue(mockHandler);
+    it('should throw CQRSConfigurationError for manual factory registration', () => {
+      const factory = () => mockHandler;
 
       expect(() => {
         commandBus.registerFactory(TestCommand, factory);
-      }).not.toThrow();
+      }).toThrow(CQRSConfigurationError);
+    });
+
+    it('should throw with deprecation message', () => {
+      const factory = () => mockHandler;
+
+      expect(() => {
+        commandBus.registerFactory(TestCommand, factory);
+      }).toThrow('Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.');
     });
   });
 
   describe('use', () => {
-    it('should add middleware to pipeline', () => {
-      const result = commandBus.use(mockMiddleware);
+    it('should add middleware to the pipeline', () => {
+      const middleware = new TestMiddleware(1);
+      const result = commandBus.use(middleware);
+
+      expect(result).toBe(commandBus);
+      expect(commandBus['middlewares']).toHaveLength(1);
+      expect(commandBus['middlewares'][0]).toBe(middleware);
+    });
+
+    it('should add multiple middlewares in order', () => {
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
+
+      commandBus.use(middleware1).use(middleware2);
+
+      expect(commandBus['middlewares']).toHaveLength(2);
+      expect(commandBus['middlewares'][0]).toBe(middleware1);
+      expect(commandBus['middlewares'][1]).toBe(middleware2);
+    });
+
+    it('should return this for chaining', () => {
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
+
+      const result = commandBus.use(middleware1).use(middleware2);
+
       expect(result).toBe(commandBus);
     });
   });
 
+  describe('discoverHandlers', () => {
+    it('should log deprecation warning', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return
+      });
+
+      commandBus.discoverHandlers();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
+
   describe('execute', () => {
-    it('should execute command with registered handler', async () => {
-      const command = new TestCommand('test');
-      commandBus.register(TestCommand, mockHandler);
+    beforeEach(() => {
+      // Mock Reflect.getMetadata
+      vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === 'di:command-handler') {
+          return {
+            serviceId: 'testHandler',
+            handlerType: TestCommandHandler,
+          };
+        }
+        return undefined;
+      });
+    });
+
+    it('should successfully execute a command', async () => {
+      const command = new TestCommand('test-data');
+      const executeSpy = vi.spyOn(mockHandler, 'execute').mockResolvedValue(undefined);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await commandBus.execute(command);
 
-      expect(mockHandler.execute).toHaveBeenCalledWith(command);
+      expect(mockContainer.resolve).toHaveBeenCalledWith('testHandler');
+      expect(executeSpy).toHaveBeenCalledWith(command);
     });
 
-    it('should execute command from factory', async () => {
-      const command = new TestCommand('test');
-      const factory = vi.fn().mockReturnValue(mockHandler);
-      commandBus.registerFactory(TestCommand, factory);
+    it('should throw HandlerNotFoundError when handler is not found', async () => {
+      const command = new TestCommand('test-data');
 
-      await commandBus.execute(command);
-
-      expect(factory).toHaveBeenCalled();
-      expect(mockHandler.execute).toHaveBeenCalledWith(command);
-    });
-
-    it('should throw error when handler not found', async () => {
-      const command = new TestCommand('test');
+      (mockContainer.resolve as Mock).mockImplementation(() => {
+        throw new Error('Handler not found');
+      });
 
       await expect(commandBus.execute(command)).rejects.toThrow(HandlerNotFoundError);
     });
 
-    it('should validate command if validatable', async () => {
-      const command = new TestValidatableCommand('valid');
-      const validateSpy = vi.spyOn(command, 'validate');
-      commandBus.register(TestValidatableCommand, mockHandler);
+    it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
+      const command = new TestCommand('test-data');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
+
+      await expect(commandBus.execute(command)).rejects.toThrow(CQRSConfigurationError);
+      await expect(commandBus.execute(command)).rejects.toThrow(
+        'No handler registered for command TestCommand. Did you forget @CommandHandler decorator?'
+      );
+    });
+
+    it('should validate command when validatable', async () => {
+      const command = new ValidatableCommand('test-data');
+      const validateSpy = vi.spyOn(command, 'validate').mockResolvedValue(undefined);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await commandBus.execute(command);
 
       expect(validateSpy).toHaveBeenCalled();
     });
 
-    it('should throw validation error for invalid command', async () => {
-      const command = new TestValidatableCommand('invalid');
-      commandBus.register(TestValidatableCommand, mockHandler);
+    it('should throw validation error when validation fails', async () => {
+      const command = new ValidatableCommand('');
 
-      await expect(commandBus.execute(command)).rejects.toThrow('Validation failed');
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(commandBus.execute(command)).rejects.toThrow('Data is required');
     });
 
-    it('should execute with middleware pipeline', async () => {
-      const command = new TestCommand('test');
-      commandBus.register(TestCommand, mockHandler);
-      commandBus.use(mockMiddleware);
+    it('should execute middleware in correct order', async () => {
+      const command = new TestCommand('test-data');
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
+
+      commandBus.use(middleware1).use(middleware2);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await commandBus.execute(command);
 
-      expect(mockMiddleware.handle).toHaveBeenCalled();
-      expect(mockHandler.execute).toHaveBeenCalledWith(command);
+      expect(middleware1.executionOrder).toEqual([1, 2]);
     });
 
-    it('should execute multiple middlewares in order', async () => {
-      const command = new TestCommand('test');
-      const calls: number[] = [];
+    it('should execute without middleware when none are registered', async () => {
+      const command = new TestCommand('test-data');
+      const executeSpy = vi.spyOn(mockHandler, 'execute').mockResolvedValue(undefined);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await commandBus.execute(command);
+
+      expect(executeSpy).toHaveBeenCalledWith(command);
+    });
+
+    it('should handle handler execution errors', async () => {
+      const command = new TestCommand('test-data');
+      const error = new Error('Handler execution failed');
+
+      vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(commandBus.execute(command)).rejects.toThrow('Handler execution failed');
+    });
+
+    it('should create proper execution context', async () => {
+      const command = new TestCommand('test-data');
+      let capturedContext: CQRSExecutionContext;
+
+      const middleware: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          capturedContext = context;
+          return next();
+        }
+      };
+
+      commandBus.use(middleware);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await commandBus.execute(command);
+
+      expect(capturedContext!.commandOrQuery).toBe(command);
+      expect(capturedContext!.handler).toBe(mockHandler);
+      expect(capturedContext!.type).toBe('command');
+    });
+
+    it('should use service ID from metadata when available', async () => {
+      const command = new TestCommand('test-data');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'customServiceId',
+        handlerType: TestCommandHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await commandBus.execute(command);
+
+      expect(mockContainer.resolve).toHaveBeenCalledWith('customServiceId');
+    });
+
+    it('should use handler type name when no service ID in metadata', async () => {
+      const command = new TestCommand('test-data');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        handlerType: TestCommandHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await commandBus.execute(command);
+
+      expect(mockContainer.resolve).toHaveBeenCalledWith('TestCommandHandler');
+    });
+  });
+
+  describe('isValidatable', () => {
+    it('should return true for objects with validate method', () => {
+      const validatable = { validate: () => {
+        return;
+      } };
+      expect(commandBus['isValidatable'](validatable)).toBe(true);
+    });
+
+    it('should return false for null', () => {
+      expect(commandBus['isValidatable'](null)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      expect(commandBus['isValidatable'](undefined)).toBe(false);
+    });
+
+    it('should return false for objects without validate method', () => {
+      const nonValidatable = { data: 'test' };
+      expect(commandBus['isValidatable'](nonValidatable)).toBe(false);
+    });
+
+    it('should return false for primitive values', () => {
+      expect(commandBus['isValidatable']('string')).toBe(false);
+      expect(commandBus['isValidatable'](123)).toBe(false);
+      expect(commandBus['isValidatable'](true)).toBe(false);
+    });
+
+    it('should return false when validate is not a function', () => {
+      const invalidValidatable = { validate: 'not-a-function' };
+      expect(commandBus['isValidatable'](invalidValidatable)).toBe(false);
+    });
+  });
+
+  describe('middleware execution order', () => {
+    it('should execute middleware in FIFO order', async () => {
+      const command = new TestCommand('test-data');
+      const executionOrder: number[] = [];
 
       const middleware1: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          calls.push(1);
-          return next();
-        }),
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          executionOrder.push(1);
+          const result = await next();
+          executionOrder.push(4);
+          return result;
+        }
       };
 
       const middleware2: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          calls.push(2);
-          return next();
-        }),
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          executionOrder.push(2);
+          const result = await next();
+          executionOrder.push(3);
+          return result;
+        }
       };
 
-      commandBus.register(TestCommand, mockHandler);
-      commandBus.use(middleware1);
-      commandBus.use(middleware2);
+      commandBus.use(middleware1).use(middleware2);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await commandBus.execute(command);
 
-      expect(calls).toEqual([1, 2]);
-    });
-  });
-
-  describe('discoverHandlers', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
-    it('should use direct instantiation when no handler resolver provided', () => {
-      const bus = new CommandBus(undefined, false); // Disable DI for this test
-      vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
-        new Map([[TestCommand, TestCommandHandler]])
-      );
-
-      expect(() => bus.discoverHandlers()).not.toThrow();
-      // Should register handler via direct instantiation
-      expect(bus['handlers'].has(TestCommand)).toBe(true);
-    });
-
-    it('should auto-register handlers using resolver', () => {
-      const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new CommandBus(resolver, false); // Disable DI to force resolver usage
-
-      vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
-        new Map([[TestCommand, TestCommandHandler]])
-      );
-
-      expect(() => bus.discoverHandlers()).not.toThrow();
-      expect(resolver).toHaveBeenCalledWith(TestCommandHandler);
-    });
-
-    it('should skip already registered handlers', () => {
-      const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new CommandBus(resolver);
-
-      // Pre-register handler
-      bus.register(TestCommand, mockHandler);
-
-      vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
-        new Map([[TestCommand, TestCommandHandler]])
-      );
-
-      bus.discoverHandlers();
-
-      expect(resolver).not.toHaveBeenCalled();
-    });
-
-    it('should throw configuration error when resolver fails', () => {
-      const resolver = vi.fn().mockImplementation(() => {
-        throw new Error('Resolution failed');
-      });
-      const bus = new CommandBus(resolver, false); // Disable DI to force resolver usage
-
-      vi.spyOn(CQRSMetadataRegistry, 'getCommandHandlers').mockReturnValue(
-        new Map([[TestCommand, TestCommandHandler]])
-      );
-
-      expect(() => bus.discoverHandlers()).toThrow(CQRSConfigurationError);
-    });
-  });
-
-  describe('middleware execution context', () => {
-    it('should pass correct context to middleware', async () => {
-      const command = new TestCommand('test');
-      let capturedContext: CQRSExecutionContext | undefined;
-
-      const contextCapturingMiddleware: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          capturedContext = context;
-          return next();
-        }),
-      };
-
-      commandBus.register(TestCommand, mockHandler);
-      commandBus.use(contextCapturingMiddleware);
-
-      await commandBus.execute(command);
-
-      expect(capturedContext).toBeInstanceOf(CQRSExecutionContext);
-      expect(capturedContext?.commandOrQuery).toBe(command);
-      expect(capturedContext?.handler).toBe(mockHandler);
-      expect(capturedContext?.type).toBe('command');
+      expect(executionOrder).toEqual([1, 2, 3, 4]);
     });
   });
 });

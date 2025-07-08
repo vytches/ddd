@@ -1,20 +1,21 @@
 import { CQRSConfiguration } from './cqrs-configuration';
 import type { CQRSOptions } from './cqrs-options.interface';
+import type { IDependencyContainer } from '@vytches-ddd/di';
 
 export class CQRSModule {
-  static create(options: CQRSOptions = {}): CQRSConfiguration {
-    return new CQRSConfiguration(options);
+  static create(container: IDependencyContainer, options: CQRSOptions = {}): CQRSConfiguration {
+    return new CQRSConfiguration(container, options);
   }
 
-  static createBasic(): CQRSConfiguration {
-    return new CQRSConfiguration({
+  static createBasic(container: IDependencyContainer): CQRSConfiguration {
+    return new CQRSConfiguration(container, {
       commandBusType: 'basic',
       queryBusType: 'basic',
     });
   }
 
-  static createEnhanced(): CQRSConfiguration {
-    return new CQRSConfiguration({
+  static createEnhanced(container: IDependencyContainer): CQRSConfiguration {
+    return new CQRSConfiguration(container, {
       commandBusType: 'enhanced',
       queryBusType: 'enhanced',
     });

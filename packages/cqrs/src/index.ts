@@ -14,8 +14,7 @@ export { CommandHandler, QueryHandler } from './decorators';
 export type { ICQRSMiddleware, ExecutionContext } from './middleware';
 export { CQRSExecutionContext, LoggingMiddleware } from './middleware';
 
-// Metadata registry
-export { CQRSMetadataRegistry } from './registry';
+// Registry removed - now using pure metadata approach with DI container auto-discovery
 
 // Validation
 export type { ICqrsValidatable } from './validation';

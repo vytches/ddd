@@ -1,6 +1,6 @@
 /**
  * Domain Service Discovery Plugin for VytchesDDD DI System
- * 
+ *
  * This plugin enables automatic discovery and registration of domain services
  * that are decorated with the @DomainService decorator and have DI integration enabled.
  */
@@ -31,7 +31,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Discover all domain services that are ready for DI registration.
-   * 
+   *
    * @param assemblies - Optional list of modules/assemblies to scan
    * @returns Promise<HandlerInfo[]> List of discovered domain services
    */
@@ -82,7 +82,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Scan a specific assembly/module for domain services.
-   * 
+   *
    * @param assembly - Module or assembly to scan
    * @returns Promise<HandlerInfo[]> Domain services found in the assembly
    */
@@ -95,11 +95,11 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
     // Scan all exports in the assembly
     const exports = Object.values(assembly);
-    
+
     for (const exportedValue of exports) {
       if (this.isDomainServiceClass(exportedValue)) {
         const diMetadata = getDIDomainServiceMetadata(exportedValue);
-        
+
         if (diMetadata && diMetadata.autoRegister) {
           const handlerInfo: HandlerInfo = {
             type: 'domain-service' as any,
@@ -132,7 +132,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Check if a value is a domain service class.
-   * 
+   *
    * @param value - Value to check
    * @returns boolean True if the value is a domain service class
    */

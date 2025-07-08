@@ -1,3 +1,4 @@
+import type { IDependencyContainer } from '@vytches-ddd/di';
 import type { ICommandBus, IQueryBus } from '../abstracts';
 import { CommandBus, QueryBus, EnhancedCommandBus, EnhancedQueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
@@ -6,25 +7,24 @@ export class CQRSConfiguration {
   public readonly commandBus: ICommandBus;
   public readonly queryBus: IQueryBus;
 
-  constructor(options: CQRSOptions = {}) {
+  constructor(container: IDependencyContainer, options: CQRSOptions = {}) {
     const {
       commandBusType = 'basic',
       queryBusType = 'basic',
-      handlerResolver,
       autoDiscovery = false,
       middlewares = [],
     } = options;
 
-    // Create buses
+    // Create buses with DI container
     this.commandBus =
       commandBusType === 'enhanced'
-        ? new EnhancedCommandBus(handlerResolver)
-        : new CommandBus(handlerResolver);
+        ? new EnhancedCommandBus(container)
+        : new CommandBus(container);
 
     this.queryBus =
       queryBusType === 'enhanced'
-        ? new EnhancedQueryBus(handlerResolver)
-        : new QueryBus(handlerResolver);
+        ? new EnhancedQueryBus(container)
+        : new QueryBus(container);
 
     // Apply middlewares
     middlewares.forEach(middleware => {
@@ -32,8 +32,9 @@ export class CQRSConfiguration {
       this.queryBus.use(middleware);
     });
 
-    // Auto-discovery if enabled
+    // Auto-discovery if enabled (deprecated - DI container handles this)
     if (autoDiscovery) {
+      console.warn('autoDiscovery option is deprecated. Use DI container auto-discovery instead.');
       this.commandBus.discoverHandlers();
       this.queryBus.discoverHandlers();
     }

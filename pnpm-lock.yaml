@@ -557,21 +557,39 @@ importers:
 
   packages/testing:
     dependencies:
+      '@vytches-ddd/aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
       '@vytches-ddd/cqrs':
         specifier: workspace:*
         version: link:../cqrs
+      '@vytches-ddd/domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
       '@vytches-ddd/events':
         specifier: workspace:*
         version: link:../events
+      '@vytches-ddd/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
       '@vytches-ddd/validation':
         specifier: workspace:*
         version: link:../validation
+      '@vytches-ddd/value-objects':
+        specifier: workspace:*
+        version: link:../value-objects
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
 
   packages/utils: {}
 

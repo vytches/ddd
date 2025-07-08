@@ -1,41 +1,36 @@
-import { VytchesDDD } from '@vytches-ddd/di';
+import 'reflect-metadata';
+import type { IDependencyContainer, ServiceToken } from '@vytches-ddd/di';
 import { IQueryBus } from '../abstracts';
 import type { IQuery, IQueryHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
-import { CQRSMetadataRegistry } from '../registry';
 
 export class QueryBus extends IQueryBus {
-  private handlers = new Map<
-    unknown,
-    IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
-  >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver:
-    | ((handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>)
-    | undefined;
-  private useDI: boolean;
 
-  constructor(
-    handlerResolver?: (handlerClass: unknown) => IQueryHandler<IQuery<unknown>, unknown>,
-    useDI = true
-  ) {
+  constructor(private container: IDependencyContainer) {
     super();
-    this.handlerResolver = handlerResolver ?? undefined;
-    this.useDI = useDI && !!VytchesDDD;
   }
 
-  register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
-    this.handlers.set(queryType, handler);
+  register<T extends IQuery<R>, R>(_queryType: unknown, _handler: IQueryHandler<T, R>): void {
+    // Legacy method - deprecated in favor of DI container registration
+    throw new CQRSConfigurationError(
+      'Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.',
+      'QueryBus'
+    );
   }
 
   registerFactory<T extends IQuery<R>, R>(
-    queryType: unknown,
-    factory: () => IQueryHandler<T, R>
+    _queryType: unknown,
+    _factory: () => IQueryHandler<T, R>
   ): void {
-    this.handlers.set(queryType, factory);
+    // Legacy method - deprecated in favor of DI container registration
+    throw new CQRSConfigurationError(
+      'Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.',
+      'QueryBus'
+    );
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -44,49 +39,21 @@ export class QueryBus extends IQueryBus {
   }
 
   discoverHandlers(): void {
-    const metadata = CQRSMetadataRegistry.getQueryHandlers();
-
-    metadata.forEach((handlerClass, queryClass) => {
-      // Skip if already manually registered
-      if (this.handlers.has(queryClass)) return;
-
-      try {
-        if (this.useDI && VytchesDDD) {
-          // Phase 2: Use DI container for handler resolution
-          this.registerFactory(queryClass, () => {
-            try {
-              // Try to resolve from DI container first
-              return VytchesDDD.resolve(handlerClass);
-            } catch {
-              // Fallback to direct instantiation if not registered in DI
-              return new handlerClass();
-            }
-          });
-        } else if (this.handlerResolver) {
-          // Phase 1: Use provided handler resolver
-          const handler = this.handlerResolver(handlerClass);
-          this.register(queryClass, handler);
-        } else {
-          // Fallback: Direct instantiation
-          const handler = new handlerClass();
-          this.register(queryClass, handler);
-        }
-      } catch (error) {
-        throw new CQRSConfigurationError(
-          `Failed to resolve handler ${handlerClass.name}: ${error}`,
-          'QueryBus'
-        );
-      }
-    });
+    // Legacy method - discovery is now handled by DI container auto-discovery
+    // This method is kept for backward compatibility but does nothing
+    console.warn('QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.');
   }
 
   async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
-    const handlerOrFactory = this.handlers.get(query.constructor);
-    if (!handlerOrFactory) {
+    // Direct resolution through DI container using metadata
+    const handlerToken = this.getHandlerToken(query.constructor);
+
+    let handler: IQueryHandler<T, R>;
+    try {
+      handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
+    } catch (error) {
       throw new HandlerNotFoundError(query.constructor.name, 'query');
     }
-
-    const handler = typeof handlerOrFactory === 'function' ? handlerOrFactory() : handlerOrFactory;
 
     // Optional validation
     if (this.isValidatable(query) && 'validate' in query) {
@@ -96,8 +63,21 @@ export class QueryBus extends IQueryBus {
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
     return this.executeWithMiddleware(context, () =>
-      (handler as IQueryHandler<T, R>).execute(query)
+      handler.execute(query)
     ) as Promise<R>;
+  }
+
+  private getHandlerToken(queryClass: any): ServiceToken {
+    // Get handler metadata from query class
+    const handlerMetadata = Reflect.getMetadata('di:query-handler', queryClass);
+    if (!handlerMetadata) {
+      throw new CQRSConfigurationError(
+        `No handler registered for query ${queryClass.name}. Did you forget @QueryHandler decorator?`,
+        'QueryBus'
+      );
+    }
+
+    return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
   }
 
   private async executeWithMiddleware(

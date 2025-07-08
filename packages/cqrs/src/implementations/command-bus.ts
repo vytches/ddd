@@ -1,4 +1,5 @@
-import { VytchesDDD } from '@vytches-ddd/di';
+import 'reflect-metadata';
+import type { IDependencyContainer, ServiceToken } from '@vytches-ddd/di';
 
 import { ICommandBus } from '../abstracts';
 import type { ICommand, ICommandHandler } from '../interfaces';
@@ -6,32 +7,31 @@ import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
-import { CQRSMetadataRegistry } from '../registry';
 
 export class CommandBus extends ICommandBus {
-  private handlers = new Map<
-    unknown,
-    ICommandHandler<ICommand> | (() => ICommandHandler<ICommand>)
-  >();
   private middlewares: ICQRSMiddleware[] = [];
-  private handlerResolver: ((handlerClass: unknown) => ICommandHandler<ICommand>) | undefined;
-  private useDI: boolean;
 
-  constructor(handlerResolver?: (handlerClass: unknown) => ICommandHandler<ICommand>, useDI = true) {
+  constructor(private container: IDependencyContainer) {
     super();
-    this.handlerResolver = handlerResolver ?? undefined;
-    this.useDI = useDI && !!VytchesDDD;
   }
 
-  register<T extends ICommand>(commandType: unknown, handler: ICommandHandler<T>): void {
-    this.handlers.set(commandType, handler);
+  register<T extends ICommand>(_commandType: unknown, _handler: ICommandHandler<T>): void {
+    // Legacy method - deprecated in favor of DI container registration
+    throw new CQRSConfigurationError(
+      'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.',
+      'CommandBus'
+    );
   }
 
   registerFactory<T extends ICommand>(
-    commandType: unknown,
-    factory: () => ICommandHandler<T>
+    _commandType: unknown,
+    _factory: () => ICommandHandler<T>
   ): void {
-    this.handlers.set(commandType, factory);
+    // Legacy method - deprecated in favor of DI container registration
+    throw new CQRSConfigurationError(
+      'Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.',
+      'CommandBus'
+    );
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -40,50 +40,21 @@ export class CommandBus extends ICommandBus {
   }
 
   discoverHandlers(): void {
-    const metadata = CQRSMetadataRegistry.getCommandHandlers();
-
-    metadata.forEach((handlerClass, commandClass) => {
-      // Skip if already manually registered
-      if (this.handlers.has(commandClass)) return;
-
-      try {
-        const DI = VytchesDDD;
-        if (this.useDI && DI) {
-          // Phase 2: Use DI container for handler resolution
-          this.registerFactory(commandClass, () => {
-            try {
-              // Try to resolve from DI container first
-              return DI.resolve(handlerClass);
-            } catch {
-              // Fallback to direct instantiation if not registered in DI
-              return new handlerClass();
-            }
-          });
-        } else if (this.handlerResolver) {
-          // Phase 1: Use provided handler resolver
-          const handler = this.handlerResolver(handlerClass);
-          this.register(commandClass, handler);
-        } else {
-          // Fallback: Direct instantiation
-          const handler = new handlerClass();
-          this.register(commandClass, handler);
-        }
-      } catch (error) {
-        throw new CQRSConfigurationError(
-          `Failed to resolve handler ${handlerClass.name}: ${error}`,
-          'CommandBus'
-        );
-      }
-    });
+    // Legacy method - discovery is now handled by DI container auto-discovery
+    // This method is kept for backward compatibility but does nothing
+    console.warn('CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.');
   }
 
   async execute<T extends ICommand>(command: T): Promise<void> {
-    const handlerOrFactory = this.handlers.get(command.constructor);
-    if (!handlerOrFactory) {
+    // Direct resolution through DI container using metadata
+    const handlerToken = this.getHandlerToken(command.constructor);
+
+    let handler: ICommandHandler<T>;
+    try {
+      handler = this.container.resolve<ICommandHandler<T>>(handlerToken);
+    } catch (_error) {
       throw new HandlerNotFoundError(command.constructor.name, 'command');
     }
-
-    const handler = typeof handlerOrFactory === 'function' ? handlerOrFactory() : handlerOrFactory;
 
     // Optional validation
     if (this.isValidatable(command) && 'validate' in command) {
@@ -93,6 +64,19 @@ export class CommandBus extends ICommandBus {
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(command, handler, 'command');
     await this.executeWithMiddleware(context, () => handler.execute(command));
+  }
+
+  private getHandlerToken(commandClass: any): ServiceToken {
+    // Get handler metadata from command class
+    const handlerMetadata = Reflect.getMetadata('di:command-handler', commandClass);
+    if (!handlerMetadata) {
+      throw new CQRSConfigurationError(
+        `No handler registered for command ${commandClass.name}. Did you forget @CommandHandler decorator?`,
+        'CommandBus'
+      );
+    }
+
+    return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
   }
 
   private async executeWithMiddleware(

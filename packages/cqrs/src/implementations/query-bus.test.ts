@@ -1,263 +1,522 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import 'reflect-metadata';
+import type { IDependencyContainer } from '@vytches-ddd/di';
 import { QueryBus } from './query-bus';
 import type { IQuery, IQueryHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
-import { CQRSExecutionContext } from '../middleware';
+import type { CQRSExecutionContext } from '../middleware';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
-import { CQRSMetadataRegistry } from '../registry';
+
+// Test query implementation
+class TestQuery implements IQuery<string> {
+  constructor(public readonly id: string) {}
+}
+
+// Test validatable query
+class ValidatableQuery implements IQuery<string> {
+  constructor(public readonly id: string) {}
+
+  async validate(): Promise<void> {
+    if (!this.id) {
+      throw new Error('ID is required');
+    }
+  }
+}
+
+// Test query handler
+class TestQueryHandler implements IQueryHandler<TestQuery, string> {
+  async execute(query: TestQuery): Promise<string> {
+    return `Result for ${query.id}`;
+  }
+}
+
+// Shared execution order tracker
+let globalExecutionOrder: number[] = [];
+
+// Test middleware
+class TestMiddleware implements ICQRSMiddleware {
+  public executionOrder: number[] = [];
+
+  constructor(private order: number) {}
+
+  async handle(context: CQRSExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+    this.executionOrder.push(this.order);
+    globalExecutionOrder.push(this.order);
+    const result = await next();
+    // Copy the global execution order to this middleware
+    this.executionOrder = [...globalExecutionOrder];
+    return result;
+  }
+}
 
 describe('QueryBus', () => {
-  class TestQuery implements IQuery<string> {
-    constructor(public readonly id: string) {}
-  }
-
-  class TestValidatableQuery implements IQuery<string> {
-    constructor(public readonly id: string) {}
-
-    async validate(): Promise<void> {
-      if (this.id === 'invalid') {
-        throw new Error('Validation failed');
-      }
-    }
-  }
-
-  class TestQueryHandler implements IQueryHandler<TestQuery, string> {
-    async execute(_query: TestQuery): Promise<string> {
-      return 'test-result';
-    }
-  }
-
   let queryBus: QueryBus;
-  let mockHandler: IQueryHandler<TestQuery, string>;
-  let mockMiddleware: ICQRSMiddleware;
+  let mockContainer: IDependencyContainer;
+  let mockHandler: TestQueryHandler;
 
   beforeEach(() => {
-    queryBus = new QueryBus();
-    mockHandler = {
-      execute: vi.fn().mockResolvedValue('mocked-result'),
+    // Reset global execution order
+    globalExecutionOrder = [];
+    
+    mockContainer = {
+      resolve: vi.fn(),
+      register: vi.fn(),
+      registerInstance: vi.fn(),
+      registerFactory: vi.fn(),
+      isRegistered: vi.fn(),
+      dispose: vi.fn(),
+      getServices: vi.fn(),
+      createScope: vi.fn(),
+      getServicesByTag: vi.fn(),
     };
-    mockMiddleware = {
-      handle: vi.fn().mockImplementation(async (context, next) => next()),
-    };
+
+    mockHandler = new TestQueryHandler();
+    queryBus = new QueryBus(mockContainer);
   });
 
   describe('constructor', () => {
-    it('should create query bus without handler resolver', () => {
-      const bus = new QueryBus();
-      expect(bus).toBeInstanceOf(QueryBus);
+    it('should initialize with empty middlewares', () => {
+      expect(queryBus).toBeInstanceOf(QueryBus);
     });
 
-    it('should create query bus with handler resolver', () => {
-      const resolver = vi.fn();
-      const bus = new QueryBus(resolver);
-      expect(bus).toBeInstanceOf(QueryBus);
+    it('should store container reference', () => {
+      expect(queryBus['container']).toBe(mockContainer);
     });
   });
 
   describe('register', () => {
-    it('should register query handler', () => {
+    it('should throw CQRSConfigurationError for manual registration', () => {
       expect(() => {
         queryBus.register(TestQuery, mockHandler);
-      }).not.toThrow();
+      }).toThrow(CQRSConfigurationError);
+    });
+
+    it('should throw with deprecation message', () => {
+      expect(() => {
+        queryBus.register(TestQuery, mockHandler);
+      }).toThrow('Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.');
     });
   });
 
   describe('registerFactory', () => {
-    it('should register handler factory', () => {
-      const factory = vi.fn().mockReturnValue(mockHandler);
+    it('should throw CQRSConfigurationError for manual factory registration', () => {
+      const factory = () => mockHandler;
 
       expect(() => {
         queryBus.registerFactory(TestQuery, factory);
-      }).not.toThrow();
+      }).toThrow(CQRSConfigurationError);
+    });
+
+    it('should throw with deprecation message', () => {
+      const factory = () => mockHandler;
+
+      expect(() => {
+        queryBus.registerFactory(TestQuery, factory);
+      }).toThrow('Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.');
     });
   });
 
   describe('use', () => {
-    it('should add middleware to pipeline', () => {
-      const result = queryBus.use(mockMiddleware);
+    it('should add middleware to the pipeline', () => {
+      const middleware = new TestMiddleware(1);
+      const result = queryBus.use(middleware);
+
+      expect(result).toBe(queryBus);
+      expect(queryBus['middlewares']).toHaveLength(1);
+      expect(queryBus['middlewares'][0]).toBe(middleware);
+    });
+
+    it('should add multiple middlewares in order', () => {
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
+
+      queryBus.use(middleware1).use(middleware2);
+
+      expect(queryBus['middlewares']).toHaveLength(2);
+      expect(queryBus['middlewares'][0]).toBe(middleware1);
+      expect(queryBus['middlewares'][1]).toBe(middleware2);
+    });
+
+    it('should return this for chaining', () => {
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
+
+      const result = queryBus.use(middleware1).use(middleware2);
+
       expect(result).toBe(queryBus);
     });
   });
 
+  describe('discoverHandlers', () => {
+    it('should log deprecation warning', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
+
+      queryBus.discoverHandlers();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
+
   describe('execute', () => {
-    it('should execute query with registered handler', async () => {
+    beforeEach(() => {
+      // Mock Reflect.getMetadata
+      vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === 'di:query-handler') {
+          return {
+            serviceId: 'testHandler',
+            handlerType: TestQueryHandler,
+          };
+        }
+        return undefined;
+      });
+    });
+
+    it('should successfully execute a query and return result', async () => {
       const query = new TestQuery('test-id');
-      queryBus.register(TestQuery, mockHandler);
+      const expectedResult = 'Result for test-id';
+      const executeSpy = vi.spyOn(mockHandler, 'execute').mockResolvedValue(expectedResult);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       const result = await queryBus.execute(query);
 
-      expect(mockHandler.execute).toHaveBeenCalledWith(query);
-      expect(result).toBe('mocked-result');
+      expect(mockContainer.resolve).toHaveBeenCalledWith('testHandler');
+      expect(executeSpy).toHaveBeenCalledWith(query);
+      expect(result).toBe(expectedResult);
     });
 
-    it('should execute query from factory', async () => {
+    it('should throw HandlerNotFoundError when handler is not found', async () => {
       const query = new TestQuery('test-id');
-      const factory = vi.fn().mockReturnValue(mockHandler);
-      queryBus.registerFactory(TestQuery, factory);
 
-      const result = await queryBus.execute(query);
-
-      expect(factory).toHaveBeenCalled();
-      expect(mockHandler.execute).toHaveBeenCalledWith(query);
-      expect(result).toBe('mocked-result');
-    });
-
-    it('should throw error when handler not found', async () => {
-      const query = new TestQuery('test-id');
+      (mockContainer.resolve as Mock).mockImplementation(() => {
+        throw new Error('Handler not found');
+      });
 
       await expect(queryBus.execute(query)).rejects.toThrow(HandlerNotFoundError);
     });
 
-    it('should validate query if validatable', async () => {
-      const query = new TestValidatableQuery('valid-id');
-      const validateSpy = vi.spyOn(query, 'validate');
-      queryBus.register(TestValidatableQuery, mockHandler);
+    it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
+      const query = new TestQuery('test-id');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
+
+      await expect(queryBus.execute(query)).rejects.toThrow(CQRSConfigurationError);
+      await expect(queryBus.execute(query)).rejects.toThrow(
+        'No handler registered for query TestQuery. Did you forget @QueryHandler decorator?'
+      );
+    });
+
+    it('should validate query when validatable', async () => {
+      const query = new ValidatableQuery('test-id');
+      const validateSpy = vi.spyOn(query, 'validate').mockResolvedValue(undefined);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await queryBus.execute(query);
 
       expect(validateSpy).toHaveBeenCalled();
     });
 
-    it('should throw validation error for invalid query', async () => {
-      const query = new TestValidatableQuery('invalid');
-      queryBus.register(TestValidatableQuery, mockHandler);
+    it('should throw validation error when validation fails', async () => {
+      const query = new ValidatableQuery('');
 
-      await expect(queryBus.execute(query)).rejects.toThrow('Validation failed');
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(queryBus.execute(query)).rejects.toThrow('ID is required');
     });
 
-    it('should execute with middleware pipeline', async () => {
+    it('should execute middleware in correct order', async () => {
       const query = new TestQuery('test-id');
-      queryBus.register(TestQuery, mockHandler);
-      queryBus.use(mockMiddleware);
+      const middleware1 = new TestMiddleware(1);
+      const middleware2 = new TestMiddleware(2);
 
-      const result = await queryBus.execute(query);
+      queryBus.use(middleware1).use(middleware2);
 
-      expect(mockMiddleware.handle).toHaveBeenCalled();
-      expect(mockHandler.execute).toHaveBeenCalledWith(query);
-      expect(result).toBe('mocked-result');
-    });
-
-    it('should execute multiple middlewares in order', async () => {
-      const query = new TestQuery('test-id');
-      const calls: number[] = [];
-
-      const middleware1: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          calls.push(1);
-          return next();
-        }),
-      };
-
-      const middleware2: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          calls.push(2);
-          return next();
-        }),
-      };
-
-      queryBus.register(TestQuery, mockHandler);
-      queryBus.use(middleware1);
-      queryBus.use(middleware2);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await queryBus.execute(query);
 
-      expect(calls).toEqual([1, 2]);
+      expect(middleware1.executionOrder).toEqual([1, 2]);
     });
 
-    it('should return result from handler', async () => {
+    it('should execute without middleware when none are registered', async () => {
       const query = new TestQuery('test-id');
-      const expectedResult = 'expected-result';
-      const handler: IQueryHandler<TestQuery, string> = {
-        execute: vi.fn().mockResolvedValue(expectedResult),
+      const expectedResult = 'Result for test-id';
+      const executeSpy = vi.spyOn(mockHandler, 'execute').mockResolvedValue(expectedResult);
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      const result = await queryBus.execute(query);
+
+      expect(executeSpy).toHaveBeenCalledWith(query);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should handle handler execution errors', async () => {
+      const query = new TestQuery('test-id');
+      const error = new Error('Handler execution failed');
+
+      vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(queryBus.execute(query)).rejects.toThrow('Handler execution failed');
+    });
+
+    it('should create proper execution context', async () => {
+      const query = new TestQuery('test-id');
+      let capturedContext: CQRSExecutionContext;
+
+      const middleware: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          capturedContext = context;
+          return next();
+        }
       };
 
-      queryBus.register(TestQuery, handler);
+      queryBus.use(middleware);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await queryBus.execute(query);
+
+      expect(capturedContext!.commandOrQuery).toBe(query);
+      expect(capturedContext!.handler).toBe(mockHandler);
+      expect(capturedContext!.type).toBe('query');
+    });
+
+    it('should use service ID from metadata when available', async () => {
+      const query = new TestQuery('test-id');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'customServiceId',
+        handlerType: TestQueryHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await queryBus.execute(query);
+
+      expect(mockContainer.resolve).toHaveBeenCalledWith('customServiceId');
+    });
+
+    it('should use handler type name when no service ID in metadata', async () => {
+      const query = new TestQuery('test-id');
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        handlerType: TestQueryHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await queryBus.execute(query);
+
+      expect(mockContainer.resolve).toHaveBeenCalledWith('TestQueryHandler');
+    });
+
+    it('should return correct result type', async () => {
+      const query = new TestQuery('test-id');
+      const expectedResult = 'Custom result';
+
+      vi.spyOn(mockHandler, 'execute').mockResolvedValue(expectedResult);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       const result = await queryBus.execute(query);
 
       expect(result).toBe(expectedResult);
-    });
-  });
-
-  describe('discoverHandlers', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
+      expect(typeof result).toBe('string');
     });
 
-    it('should use direct instantiation when no handler resolver provided', () => {
-      const bus = new QueryBus(undefined, false); // Disable DI for this test
-      vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
-        new Map([[TestQuery, TestQueryHandler]])
-      );
+    it('should handle different result types', async () => {
+      class NumberQuery implements IQuery<number> {
+        constructor(public readonly value: number) {}
+      }
 
-      expect(() => bus.discoverHandlers()).not.toThrow();
-      // Should register handler via direct instantiation
-      expect(bus['handlers'].has(TestQuery)).toBe(true);
-    });
+      class NumberQueryHandler implements IQueryHandler<NumberQuery, number> {
+        async execute(query: NumberQuery): Promise<number> {
+          return query.value * 2;
+        }
+      }
 
-    it('should auto-register handlers using resolver', () => {
-      const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new QueryBus(resolver, false); // Disable DI to force resolver usage
+      const numberQuery = new NumberQuery(5);
+      const numberHandler = new NumberQueryHandler();
 
-      vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
-        new Map([[TestQuery, TestQueryHandler]])
-      );
-
-      expect(() => bus.discoverHandlers()).not.toThrow();
-      expect(resolver).toHaveBeenCalledWith(TestQueryHandler);
-    });
-
-    it('should skip already registered handlers', () => {
-      const resolver = vi.fn().mockReturnValue(mockHandler);
-      const bus = new QueryBus(resolver);
-
-      // Pre-register handler
-      bus.register(TestQuery, mockHandler);
-
-      vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
-        new Map([[TestQuery, TestQueryHandler]])
-      );
-
-      bus.discoverHandlers();
-
-      expect(resolver).not.toHaveBeenCalled();
-    });
-
-    it('should throw configuration error when resolver fails', () => {
-      const resolver = vi.fn().mockImplementation(() => {
-        throw new Error('Resolution failed');
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'numberHandler',
+        handlerType: NumberQueryHandler,
       });
-      const bus = new QueryBus(resolver, false); // Disable DI to force resolver usage
 
-      vi.spyOn(CQRSMetadataRegistry, 'getQueryHandlers').mockReturnValue(
-        new Map([[TestQuery, TestQueryHandler]])
-      );
+      (mockContainer.resolve as Mock).mockReturnValue(numberHandler);
 
-      expect(() => bus.discoverHandlers()).toThrow(CQRSConfigurationError);
+      const result = await queryBus.execute(numberQuery);
+
+      expect(result).toBe(10);
+      expect(typeof result).toBe('number');
+    });
+
+    it('should handle complex object results', async () => {
+      interface User {
+        id: string;
+        name: string;
+      }
+
+      class UserQuery implements IQuery<User> {
+        constructor(public readonly id: string) {}
+      }
+
+      class UserQueryHandler implements IQueryHandler<UserQuery, User> {
+        async execute(query: UserQuery): Promise<User> {
+          return { id: query.id, name: `User ${query.id}` };
+        }
+      }
+
+      const userQuery = new UserQuery('123');
+      const userHandler = new UserQueryHandler();
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'userHandler',
+        handlerType: UserQueryHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(userHandler);
+
+      const result = await queryBus.execute(userQuery);
+
+      expect(result).toEqual({ id: '123', name: 'User 123' });
     });
   });
 
-  describe('middleware execution context', () => {
-    it('should pass correct context to middleware', async () => {
-      const query = new TestQuery('test-id');
-      let capturedContext: CQRSExecutionContext | undefined;
+  describe('isValidatable', () => {
+    it('should return true for objects with validate method', () => {
+      const validatable = { validate: () => {
+        return;
+      } };
+      expect(queryBus['isValidatable'](validatable)).toBe(true);
+    });
 
-      const contextCapturingMiddleware: ICQRSMiddleware = {
-        handle: vi.fn().mockImplementation(async (context, next) => {
-          capturedContext = context;
-          return next();
-        }),
+    it('should return false for null', () => {
+      expect(queryBus['isValidatable'](null)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      expect(queryBus['isValidatable'](undefined)).toBe(false);
+    });
+
+    it('should return false for objects without validate method', () => {
+      const nonValidatable = { data: 'test' };
+      expect(queryBus['isValidatable'](nonValidatable)).toBe(false);
+    });
+
+    it('should return false for primitive values', () => {
+      expect(queryBus['isValidatable']('string')).toBe(false);
+      expect(queryBus['isValidatable'](123)).toBe(false);
+      expect(queryBus['isValidatable'](true)).toBe(false);
+    });
+
+    it('should return false when validate is not a function', () => {
+      const invalidValidatable = { validate: 'not-a-function' };
+      expect(queryBus['isValidatable'](invalidValidatable)).toBe(false);
+    });
+  });
+
+  describe('middleware execution order', () => {
+    it('should execute middleware in FIFO order', async () => {
+      const query = new TestQuery('test-id');
+      const executionOrder: number[] = [];
+
+      const middleware1: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          executionOrder.push(1);
+          const result = await next();
+          executionOrder.push(4);
+          return result;
+        }
       };
 
-      queryBus.register(TestQuery, mockHandler);
-      queryBus.use(contextCapturingMiddleware);
+      const middleware2: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          executionOrder.push(2);
+          const result = await next();
+          executionOrder.push(3);
+          return result;
+        }
+      };
+
+      queryBus.use(middleware1).use(middleware2);
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'testHandler',
+        handlerType: TestQueryHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
       await queryBus.execute(query);
 
-      expect(capturedContext).toBeInstanceOf(CQRSExecutionContext);
-      expect(capturedContext?.commandOrQuery).toBe(query);
-      expect(capturedContext?.handler).toBe(mockHandler);
-      expect(capturedContext?.type).toBe('query');
+      expect(executionOrder).toEqual([1, 2, 3, 4]);
+    });
+
+    it('should allow middleware to modify result', async () => {
+      const query = new TestQuery('test-id');
+
+      const transformMiddleware: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          const result = await next();
+          return `Modified: ${result}`;
+        }
+      };
+
+      queryBus.use(transformMiddleware);
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'testHandler',
+        handlerType: TestQueryHandler,
+      });
+
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      const result = await queryBus.execute(query);
+
+      expect(result).toBe('Modified: Result for test-id');
+    });
+  });
+
+  describe('error handling', () => {
+    beforeEach(() => {
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue({
+        serviceId: 'testHandler',
+        handlerType: TestQueryHandler,
+      });
+    });
+
+    it('should propagate handler errors', async () => {
+      const query = new TestQuery('test-id');
+      const error = new Error('Custom handler error');
+
+      vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(queryBus.execute(query)).rejects.toThrow('Custom handler error');
+    });
+
+    it('should handle middleware errors', async () => {
+      const query = new TestQuery('test-id');
+      const error = new Error('Middleware error');
+
+      const errorMiddleware: ICQRSMiddleware = {
+        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+          throw error;
+        }
+      };
+
+      queryBus.use(errorMiddleware);
+      (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
+
+      await expect(queryBus.execute(query)).rejects.toThrow('Middleware error');
     });
   });
 });

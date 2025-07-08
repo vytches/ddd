@@ -4,7 +4,7 @@ import type { ICQRSMiddleware } from '../middleware';
 export interface CQRSOptions {
   commandBusType?: 'basic' | 'enhanced';
   queryBusType?: 'basic' | 'enhanced';
-  handlerResolver?: (handlerClass: any) => any;
+  /** @deprecated Use DI container auto-discovery instead */
   autoDiscovery?: boolean;
   middlewares?: ICQRSMiddleware[];
 }

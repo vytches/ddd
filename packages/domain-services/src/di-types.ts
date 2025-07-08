@@ -1,17 +1,17 @@
 /**
  * DI-specific types and interfaces for domain services integration
- * 
- * This module provides TypeScript types that enable domain services 
+ *
+ * This module provides TypeScript types that enable domain services
  * to integrate with the VytchesDDD dependency injection system.
  */
 
-import { ServiceLifetime } from '@vytches-ddd/di';
+import type { ServiceLifetime } from '@vytches-ddd/di';
 
 /**
  * Context resolution strategy for domain services.
  * Determines how bounded context should be resolved for service registration.
  */
-export type ContextResolutionStrategy = 
+export type ContextResolutionStrategy =
   | 'auto'           // Auto-detect from call stack or class location
   | 'explicit'       // Use explicitly provided context
   | 'global'         // Always use global container
@@ -25,7 +25,7 @@ export interface DIDecoratorOptions {
   /**
    * Service lifetime in the DI container.
    * Controls how instances are created and shared.
-   * 
+   *
    * @default 'transient'
    */
   lifetime?: ServiceLifetime;
@@ -39,7 +39,7 @@ export interface DIDecoratorOptions {
   /**
    * Whether to automatically register this service with the DI container.
    * If false, service must be manually registered.
-   * 
+   *
    * @default true
    */
   autoRegister?: boolean;
@@ -59,7 +59,7 @@ export interface DIDecoratorOptions {
   /**
    * Context resolution strategy for this service.
    * Determines how bounded context should be resolved.
-   * 
+   *
    * @default 'auto'
    */
   contextResolver?: ContextResolutionStrategy;
@@ -67,7 +67,7 @@ export interface DIDecoratorOptions {
   /**
    * Whether to fallback to global container if service not found in context.
    * Only applies when context is specified.
-   * 
+   *
    * @default true
    */
   fallbackToGlobal?: boolean;
@@ -93,7 +93,7 @@ export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   /**
    * Whether this service requires transactional consistency.
    * If true, the service will be configured with a Unit of Work.
-   * 
+   *
    * @default false
    */
   transactional: boolean;
@@ -101,7 +101,7 @@ export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   /**
    * Whether this service has an asynchronous lifecycle.
    * If true, initialize() will be called after creation.
-   * 
+   *
    * @default false
    */
   async: boolean;
@@ -109,7 +109,7 @@ export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   /**
    * Whether this service publishes domain events.
    * If true, an event bus will be provided to the service.
-   * 
+   *
    * @default false
    */
   publishesEvents: boolean;
@@ -192,7 +192,7 @@ export class DIDomainServiceMetadataRegistry {
    * Get services by tag.
    */
   static getServicesByTag(tag: string): DIServiceMetadata[] {
-    return this.getAllServices().filter(service => 
+    return this.getAllServices().filter(service =>
       service.tags?.includes(tag)
     );
   }

@@ -12,6 +12,9 @@ export type ServiceToken<T = any> = string | symbol | (new (...args: any[]) => T
  * Enhances existing decorator functionality without breaking changes
  */
 export interface DIDecoratorOptions {
+  /** Service ID for DI container registration */
+  serviceId?: string;
+  
   /** Service lifetime for DI container registration */
   lifetime?: ServiceLifetime;
   

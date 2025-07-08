@@ -1,8 +1,7 @@
-import type { ICommand, ICommandHandler } from '../interfaces';
+import type { IDependencyContainer } from '@vytches-ddd/di';
+import type { ICommand } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { CommandBus } from './command-bus';
-
-type HandlerResolver = (handlerClass: unknown) => ICommandHandler<ICommand>;
 
 export class EnhancedCommandBus extends CommandBus {
   private metrics = {
@@ -11,8 +10,8 @@ export class EnhancedCommandBus extends CommandBus {
     errors: 0,
   };
 
-  constructor(handlerResolver?: HandlerResolver) {
-    super(handlerResolver);
+  constructor(container: IDependencyContainer) {
+    super(container);
 
     this.use(new LoggingMiddleware());
   }

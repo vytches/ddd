@@ -35,5 +35,15 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
+    alias: {
+      '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src'),
+      '@vytches-ddd/core': resolve(__dirname, '../core/src'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
+      '@vytches-ddd/events': resolve(__dirname, '../events/src'),
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
+      '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src'),
+      '@vytches-ddd/value-objects': resolve(__dirname, '../value-objects/src'),
+    },
   },
 });

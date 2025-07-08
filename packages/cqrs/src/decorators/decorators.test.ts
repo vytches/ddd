@@ -1,32 +1,37 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import 'reflect-metadata';
 import { CommandHandler } from './command-handler.decorator';
 import { QueryHandler } from './query-handler.decorator';
 import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../interfaces';
-import { CQRSMetadataRegistry } from '../registry';
-
-// Type aliases for test readability
-type CommandConstructor<T extends ICommand = ICommand> = new (...args: any[]) => T;
-type _QueryConstructor<T extends IQuery<unknown> = IQuery<unknown>> = new (...args: any[]) => T;
 
 describe('CQRS Decorators', () => {
-  beforeEach(() => {
-    CQRSMetadataRegistry.clearAll();
-  });
+  // Test classes
+  class TestCommand implements ICommand {
+    constructor(public readonly data: string) {}
+  }
 
-  afterEach(() => {
-    CQRSMetadataRegistry.clearAll();
+  class AnotherCommand implements ICommand {
+    constructor(public readonly value: number) {}
+  }
+
+  class TestQuery implements IQuery<string> {
+    constructor(public readonly id: string) {}
+  }
+
+  class AnotherQuery implements IQuery<number> {
+    constructor(public readonly count: number) {}
+  }
+
+  beforeEach(() => {
+    // Clear any existing metadata
+    Reflect.deleteMetadata('di:command-handler', TestCommand);
+    Reflect.deleteMetadata('di:command-handler', AnotherCommand);
+    Reflect.deleteMetadata('di:query-handler', TestQuery);
+    Reflect.deleteMetadata('di:query-handler', AnotherQuery);
   });
 
   describe('CommandHandler decorator', () => {
-    class TestCommand implements ICommand {
-      constructor(public readonly data: string) {}
-    }
-
-    class AnotherCommand implements ICommand {
-      constructor(public readonly value: number) {}
-    }
-
-    it('should register command handler in metadata registry', () => {
+    it('should register command handler metadata', () => {
       @CommandHandler(TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
@@ -34,11 +39,17 @@ describe('CQRS Decorators', () => {
         }
       }
 
-      const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
-      expect(commandHandlers.has(TestCommand as unknown as CommandConstructor)).toBe(true);
-      expect(commandHandlers.get(TestCommand as unknown as CommandConstructor)).toBe(
-        TestCommandHandler
-      );
+      // Check metadata is stored in command class
+      const commandMetadata = Reflect.getMetadata('di:command-handler', TestCommand);
+      expect(commandMetadata).toBeDefined();
+      expect(commandMetadata.handlerType).toBe(TestCommandHandler);
+      expect(commandMetadata.serviceId).toBe('TestCommandHandler');
+
+      // Check metadata is stored in handler class
+      const handlerMetadata = Reflect.getMetadata('di:handler-metadata', TestCommandHandler);
+      expect(handlerMetadata).toBeDefined();
+      expect(handlerMetadata.type).toBe('command');
+      expect(handlerMetadata.messageType).toBe(TestCommand);
     });
 
     it('should return the original class unchanged', () => {
@@ -77,65 +88,47 @@ describe('CQRS Decorators', () => {
         }
       }
 
-      const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
-      expect(commandHandlers.size).toBe(2);
-      expect(commandHandlers.get(TestCommand)).toBe(TestCommandHandler);
-      expect(commandHandlers.get(AnotherCommand)).toBe(AnotherCommandHandler);
+      const testMetadata = Reflect.getMetadata('di:command-handler', TestCommand);
+      const anotherMetadata = Reflect.getMetadata('di:command-handler', AnotherCommand);
+
+      expect(testMetadata).toBeDefined();
+      expect(testMetadata.handlerType).toBe(TestCommandHandler);
+      expect(anotherMetadata).toBeDefined();
+      expect(anotherMetadata.handlerType).toBe(AnotherCommandHandler);
     });
 
-    it('should allow multiple handlers for the same command (last one wins)', () => {
-      @CommandHandler(TestCommand)
-      class _FirstHandler implements ICommandHandler<TestCommand> {
+    it('should allow custom service ID', () => {
+      @CommandHandler(TestCommand, { serviceId: 'customTestHandler' })
+      class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
-          return;
+          // Implementation
         }
       }
 
-      @CommandHandler(TestCommand)
-      class SecondHandler implements ICommandHandler<TestCommand> {
-        async execute(_command: TestCommand): Promise<void> {
-          return;
-        }
-      }
-
-      const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
-      expect(commandHandlers.size).toBe(1);
-      expect(commandHandlers.get(TestCommand)).toBe(SecondHandler);
+      const metadata = Reflect.getMetadata('di:command-handler', TestCommand);
+      expect(metadata.serviceId).toBe('customTestHandler');
     });
 
     it('should work with class inheritance', () => {
-      class BaseHandler implements ICommandHandler<TestCommand> {
+      abstract class BaseHandler<T extends ICommand> implements ICommandHandler<T> {
+        abstract execute(command: T): Promise<void>;
+      }
+
+      @CommandHandler(TestCommand)
+      class TestCommandHandler extends BaseHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
         }
       }
 
-      @CommandHandler(TestCommand)
-      class ExtendedHandler extends BaseHandler {
-        public extraMethod(): string {
-          return 'extra';
-        }
-      }
-
-      const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
-      expect(commandHandlers.get(TestCommand)).toBe(ExtendedHandler);
-
-      const instance = new ExtendedHandler();
-      expect(instance.extraMethod()).toBe('extra');
-      expect(typeof instance.execute).toBe('function');
+      const metadata = Reflect.getMetadata('di:command-handler', TestCommand);
+      expect(metadata).toBeDefined();
+      expect(metadata.handlerType).toBe(TestCommandHandler);
     });
   });
 
   describe('QueryHandler decorator', () => {
-    class TestQuery implements IQuery<string> {
-      constructor(public readonly id: string) {}
-    }
-
-    class AnotherQuery implements IQuery<number> {
-      constructor(public readonly value: string) {}
-    }
-
-    it('should register query handler in metadata registry', () => {
+    it('should register query handler metadata', () => {
       @QueryHandler(TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
@@ -143,9 +136,17 @@ describe('CQRS Decorators', () => {
         }
       }
 
-      const queryHandlers = CQRSMetadataRegistry.getQueryHandlers();
-      expect(queryHandlers.has(TestQuery)).toBe(true);
-      expect(queryHandlers.get(TestQuery)).toBe(TestQueryHandler);
+      // Check metadata is stored in query class
+      const queryMetadata = Reflect.getMetadata('di:query-handler', TestQuery);
+      expect(queryMetadata).toBeDefined();
+      expect(queryMetadata.handlerType).toBe(TestQueryHandler);
+      expect(queryMetadata.serviceId).toBe('TestQueryHandler');
+
+      // Check metadata is stored in handler class
+      const handlerMetadata = Reflect.getMetadata('di:handler-metadata', TestQueryHandler);
+      expect(handlerMetadata).toBeDefined();
+      expect(handlerMetadata.type).toBe('query');
+      expect(handlerMetadata.messageType).toBe(TestQuery);
     });
 
     it('should return the original class unchanged', () => {
@@ -173,7 +174,7 @@ describe('CQRS Decorators', () => {
       @QueryHandler(TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
-          return 'test';
+          return 'test result';
         }
       }
 
@@ -184,141 +185,134 @@ describe('CQRS Decorators', () => {
         }
       }
 
-      const queryHandlers = CQRSMetadataRegistry.getQueryHandlers();
-      expect(queryHandlers.size).toBe(2);
-      expect(queryHandlers.get(TestQuery)).toBe(TestQueryHandler);
-      expect(queryHandlers.get(AnotherQuery)).toBe(AnotherQueryHandler);
+      const testMetadata = Reflect.getMetadata('di:query-handler', TestQuery);
+      const anotherMetadata = Reflect.getMetadata('di:query-handler', AnotherQuery);
+
+      expect(testMetadata).toBeDefined();
+      expect(testMetadata.handlerType).toBe(TestQueryHandler);
+      expect(anotherMetadata).toBeDefined();
+      expect(anotherMetadata.handlerType).toBe(AnotherQueryHandler);
     });
 
-    it('should allow multiple handlers for the same query (last one wins)', () => {
-      @QueryHandler(TestQuery)
-      class _FirstHandler implements IQueryHandler<TestQuery, string> {
-        async execute(_query: TestQuery): Promise<string> {
-          return 'first';
-        }
-      }
-
-      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
-      class SecondHandler implements IQueryHandler<TestQuery, string> {
-        async execute(_query: TestQuery): Promise<string> {
-          return 'second';
-        }
-      }
-
-      const queryHandlers = CQRSMetadataRegistry.getQueryHandlers();
-      expect(queryHandlers.size).toBe(1);
-      expect(queryHandlers.get(TestQuery)).toBe(SecondHandler);
-    });
-
-    it('should work with different return types', () => {
-      class StringQuery implements IQuery<string> {
-        constructor(public readonly id: string) {}
-      }
-
-      class NumberQuery implements IQuery<number> {
-        constructor(public readonly id: string) {}
-      }
-
-      class ObjectQuery implements IQuery<{ name: string; value: number }> {
-        constructor(public readonly id: string) {}
-      }
-
-      @QueryHandler(StringQuery)
-      class StringQueryHandler implements IQueryHandler<StringQuery, string> {
-        async execute(_query: StringQuery): Promise<string> {
-          return 'string';
-        }
-      }
-
-      @QueryHandler(NumberQuery)
-      class NumberQueryHandler implements IQueryHandler<NumberQuery, number> {
-        async execute(_query: NumberQuery): Promise<number> {
-          return 42;
-        }
-      }
-
-      @QueryHandler(ObjectQuery)
-      class ObjectQueryHandler
-        implements IQueryHandler<ObjectQuery, { name: string; value: number }>
-      {
-        async execute(_query: ObjectQuery): Promise<{ name: string; value: number }> {
-          return { name: 'test', value: 123 };
-        }
-      }
-
-      const queryHandlers = CQRSMetadataRegistry.getQueryHandlers();
-      expect(queryHandlers.size).toBe(3);
-      expect(queryHandlers.get(StringQuery)).toBe(StringQueryHandler);
-      expect(queryHandlers.get(NumberQuery)).toBe(NumberQueryHandler);
-      expect(queryHandlers.get(ObjectQuery)).toBe(ObjectQueryHandler);
-    });
-  });
-
-  describe('Decorator integration', () => {
-    it('should register both command and query handlers independently', () => {
-      class TestCommand implements ICommand {
-        constructor(public readonly data: string) {}
-      }
-
-      class TestQuery implements IQuery<string> {
-        constructor(public readonly id: string) {}
-      }
-
-      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
-      class TestCommandHandler implements ICommandHandler<TestCommand> {
-        async execute(_command: TestCommand): Promise<void> {
-          return;
-        }
-      }
-
-      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
+    it('should allow custom service ID', () => {
+      @QueryHandler(TestQuery, { serviceId: 'customTestQueryHandler' })
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'result';
         }
       }
 
-      const commandHandlers = CQRSMetadataRegistry.getCommandHandlers();
-      const queryHandlers = CQRSMetadataRegistry.getQueryHandlers();
+      const metadata = Reflect.getMetadata('di:query-handler', TestQuery);
+      expect(metadata.serviceId).toBe('customTestQueryHandler');
+    });
 
-      expect(commandHandlers.size).toBe(1);
-      expect(queryHandlers.size).toBe(1);
-      expect(commandHandlers.get(TestCommand)).toBe(TestCommandHandler);
-      expect(queryHandlers.get(TestQuery)).toBe(TestQueryHandler);
+    it('should work with different return types', () => {
+      @QueryHandler(TestQuery)
+      class StringHandler implements IQueryHandler<TestQuery, string> {
+        async execute(_query: TestQuery): Promise<string> {
+          return 'string result';
+        }
+      }
+
+      @QueryHandler(AnotherQuery)
+      class NumberHandler implements IQueryHandler<AnotherQuery, number> {
+        async execute(_query: AnotherQuery): Promise<number> {
+          return 123;
+        }
+      }
+
+      const stringMetadata = Reflect.getMetadata('di:query-handler', TestQuery);
+      const numberMetadata = Reflect.getMetadata('di:query-handler', AnotherQuery);
+
+      expect(stringMetadata.handlerType).toBe(StringHandler);
+      expect(numberMetadata.handlerType).toBe(NumberHandler);
+    });
+  });
+
+  describe('Decorator integration', () => {
+    it('should register both command and query handlers independently', () => {
+      @CommandHandler(TestCommand)
+      class TestCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {
+          return;
+        }
+      }
+
+      @QueryHandler(TestQuery)
+      class TestQueryHandler implements IQueryHandler<TestQuery, string> {
+        async execute(_query: TestQuery): Promise<string> {
+          return 'result';
+        }
+      }
+
+      const commandMetadata = Reflect.getMetadata('di:command-handler', TestCommand);
+      const queryMetadata = Reflect.getMetadata('di:query-handler', TestQuery);
+
+      expect(commandMetadata).toBeDefined();
+      expect(commandMetadata.handlerType).toBe(TestCommandHandler);
+      expect(queryMetadata).toBeDefined();
+      expect(queryMetadata.handlerType).toBe(TestQueryHandler);
     });
 
     it('should work with complex command and query types', () => {
-      interface UserData {
-        name: string;
-        email: string;
-        age: number;
+      interface ComplexData {
+        id: string;
+        items: Array<{ name: string; value: number }>;
       }
 
-      class CreateUserCommand implements ICommand {
-        constructor(public readonly userData: UserData) {}
+      class ComplexCommand implements ICommand {
+        constructor(public readonly data: ComplexData) {}
       }
 
-      class GetUserQuery implements IQuery<UserData | null> {
-        constructor(public readonly userId: string) {}
+      class ComplexQuery implements IQuery<ComplexData> {
+        constructor(public readonly filter: string) {}
       }
 
-      @CommandHandler(CreateUserCommand)
-      class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-        async execute(_command: CreateUserCommand): Promise<void> {
-          // Create user logic
+      @CommandHandler(ComplexCommand)
+      class ComplexCommandHandler implements ICommandHandler<ComplexCommand> {
+        async execute(_command: ComplexCommand): Promise<void> {
+          return;
         }
       }
 
-      @QueryHandler(GetUserQuery)
-      class GetUserHandler implements IQueryHandler<GetUserQuery, UserData | null> {
-        async execute(_query: GetUserQuery): Promise<UserData | null> {
-          return { name: 'John', email: 'john@example.com', age: 30 };
+      @QueryHandler(ComplexQuery)
+      class ComplexQueryHandler implements IQueryHandler<ComplexQuery, ComplexData> {
+        async execute(_query: ComplexQuery): Promise<ComplexData> {
+          return { id: 'test', items: [] };
         }
       }
 
-      const allHandlers = CQRSMetadataRegistry.getAllHandlers();
-      expect(allHandlers.commands.get(CreateUserCommand)).toBe(CreateUserHandler);
-      expect(allHandlers.queries.get(GetUserQuery)).toBe(GetUserHandler);
+      const commandMetadata = Reflect.getMetadata('di:command-handler', ComplexCommand);
+      const queryMetadata = Reflect.getMetadata('di:query-handler', ComplexQuery);
+
+      expect(commandMetadata.handlerType).toBe(ComplexCommandHandler);
+      expect(queryMetadata.handlerType).toBe(ComplexQueryHandler);
+    });
+  });
+
+  describe('Registration flags', () => {
+    it('should mark handlers for DI registration by default', () => {
+      @CommandHandler(TestCommand)
+      class TestCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {
+          return;
+        }
+      }
+
+      const isPending = Reflect.getMetadata('di:registration-pending', TestCommandHandler);
+      expect(isPending).toBe(true);
+    });
+
+    it('should respect autoRegister false option', () => {
+      @CommandHandler(TestCommand, { autoRegister: false })
+      class TestCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {
+          return;
+        }
+      }
+
+      const isPending = Reflect.getMetadata('di:registration-pending', TestCommandHandler);
+      expect(isPending).toBeUndefined();
     });
   });
 });
