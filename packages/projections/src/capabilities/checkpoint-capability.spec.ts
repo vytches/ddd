@@ -84,7 +84,7 @@ describe('CheckpointCapability', () => {
 
   describe('initialization', () => {
     it('should initialize with correct name and interval', () => {
-      expect(capability.name).toBe('checkpoint');
+      expect(capability.type).toBe('checkpoint');
     });
 
     it('should throw error for invalid interval', () => {
@@ -98,7 +98,7 @@ describe('CheckpointCapability', () => {
 
     it('should use default interval when not specified', () => {
       const defaultCapability = new CheckpointCapability(store);
-      expect(defaultCapability.name).toBe('checkpoint');
+      expect(defaultCapability.type).toBe('checkpoint');
     });
   });
 

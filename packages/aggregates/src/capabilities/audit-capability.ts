@@ -1,148 +1,153 @@
-import { LibUtils } from '@vytches-ddd/utils';
-
-import type { IAggregateRoot, IAuditCapability } from '../aggregate-interfaces';
-import type { IAuditEvent, IEventMetadata } from '@vytches-ddd/contracts';
-import { CAPABILITY_NAMES } from '../aggregate-interfaces';
-import { AggregateError } from '../aggregate-errors';
+import { Capability } from '@vytches-ddd/contracts';
+import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Audit capability implementation
- * Tracks all changes to the aggregate for audit purposes
+ * Type-safe audit capability implementation
+ * Tracks all events applied to an aggregate for auditing purposes
  */
-export class AuditCapability implements IAuditCapability {
-  private aggregate!: IAggregateRoot;
-  private _auditLog: IAuditEvent[] = [];
+export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
+  override readonly type = 'audit' as const;
 
-  attach(aggregate: IAggregateRoot): void {
-    this.aggregate = aggregate;
-    // Hook into apply method to capture audit info
-    this.interceptApplyMethod();
+  static override get capabilityType(): string {
+    return 'audit';
+  }
+  private aggregate!: IAggregateRoot;
+  private auditLog: IAuditEvent[] = [];
+  private originalApply?: ((...args: unknown[]) => void) | undefined;
+
+  attach(aggregate: unknown): void {
+    this.aggregate = aggregate as IAggregateRoot;
+
+    // Store original apply method for restoration
+    this.originalApply = (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply;
+    
+    // Intercept the apply method to capture events as they're added
+    if (this.originalApply) {
+      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = (...args: unknown[]) => {
+        // Call original apply method first
+        const result = this.originalApply!.call(this.aggregate, ...args);
+        
+        // Then record the audit event for the newly added event
+        this.recordAuditEvent();
+        
+        return result;
+      };
+    }
   }
 
   detach?(): void {
-    // Clear reference safely
-    this.aggregate = {} as IAggregateRoot;
-    this._auditLog = [];
+    // Restore original apply method
+    if (this.aggregate && this.originalApply) {
+      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = this.originalApply;
+    }
+    
+    this.aggregate = undefined!;
+    this.auditLog = [];
+    this.originalApply = undefined;
   }
 
-  getAuditLog(): ReadonlyArray<IAuditEvent> {
-    return [...this._auditLog];
+  getAuditLog(): IAuditEvent[] {
+    return [...this.auditLog];
   }
 
   clearAuditLog(): void {
-    this._auditLog = [];
+    this.auditLog = [];
   }
 
-  /**
-   * Gets audit entries for a specific event type
-   */
-  getAuditLogByEventType(eventType: string): ReadonlyArray<IAuditEvent> {
-    return this._auditLog.filter(entry => entry.eventType === eventType);
-  }
-
-  /**
-   * Gets audit entries by actor
-   */
-  getAuditLogByActor(actorId: string): ReadonlyArray<IAuditEvent> {
-    return this._auditLog.filter(entry => entry.actor?.id === actorId);
-  }
-
-  /**
-   * Gets audit entries within a date range
-   */
-  getAuditLogByDateRange(startDate: Date, endDate: Date): ReadonlyArray<IAuditEvent> {
-    return this._auditLog.filter(
-      entry => entry.timestamp >= startDate && entry.timestamp <= endDate
-    );
-  }
-
-  /**
-   * Gets the last audit entry
-   */
-  getLastAuditEntry(): IAuditEvent | undefined {
-    return this._auditLog[this._auditLog.length - 1];
-  }
-
-  /**
-   * Gets audit statistics
-   */
   getAuditStatistics(): {
-    totalEntries: number;
-    eventTypes: string[];
-    actors: string[];
-    firstEntry?: Date | undefined;
-    lastEntry?: Date | undefined;
+    totalEvents: number;
+    eventsByType: Record<string, number>;
+    averageTimeBetweenEvents: number;
   } {
-    const eventTypes = [...new Set(this._auditLog.map(entry => entry.eventType))];
-    const actors = [...new Set(this._auditLog.map(entry => entry.actor?.id).filter(Boolean))];
+    const eventsByType: Record<string, number> = {};
+    let totalTime = 0;
+
+    this.auditLog.forEach((auditEvent, index) => {
+      eventsByType[auditEvent.eventType] = (eventsByType[auditEvent.eventType] || 0) + 1;
+
+      if (index > 0) {
+        const prevEvent = this.auditLog[index - 1];
+        if (prevEvent) {
+          const prevTimestamp = new Date(prevEvent.timestamp).getTime();
+          const currTimestamp = new Date(auditEvent.timestamp).getTime();
+          totalTime += currTimestamp - prevTimestamp;
+        }
+      }
+    });
+
+    const averageTimeBetweenEvents =
+      this.auditLog.length > 1 ? totalTime / (this.auditLog.length - 1) : 0;
 
     return {
-      totalEntries: this._auditLog.length,
-      eventTypes,
-      actors,
-      firstEntry: this._auditLog[0]?.timestamp,
-      lastEntry: this._auditLog[this._auditLog.length - 1]?.timestamp,
+      totalEvents: this.auditLog.length,
+      eventsByType,
+      averageTimeBetweenEvents,
     };
   }
 
-  private interceptApplyMethod(): void {
-    // Type-safe method interception using known interface
-    const aggregateWithApply = this.aggregate as IAggregateRoot & {
-      apply?: (eventTypeOrEvent: string | object, payload?: unknown, metadata?: unknown) => unknown;
-    };
+  /**
+   * Record an audit event when domain events are added
+   */
+  private recordAuditEvent(): void {
+    const events = this.aggregate.getDomainEvents();
+    const lastEvent = events[events.length - 1];
 
-    const originalApply = aggregateWithApply.apply?.bind(this.aggregate);
-
-    if (!originalApply) {
-      throw AggregateError.cannotInterceptApplyMethod(this.aggregate.getId().getValue().toString());
+    if (lastEvent) {
+      this.recordEvent(lastEvent);
     }
-
-    aggregateWithApply.apply = (
-      eventTypeOrEvent: string | object,
-      payload?: unknown,
-      metadata?: unknown
-    ) => {
-      // Call original apply
-      const result = originalApply(eventTypeOrEvent, payload, metadata);
-
-      // Create audit log entry
-      this.createAuditEntry(eventTypeOrEvent, payload, metadata);
-
-      return result;
-    };
   }
 
-  private createAuditEntry(
-    eventTypeOrEvent: string | object,
-    payload?: unknown,
-    metadata?: unknown
-  ): void {
-    const eventType =
-      typeof eventTypeOrEvent === 'string'
-        ? eventTypeOrEvent
-        : (eventTypeOrEvent as { eventType?: string }).eventType || 'unknown';
-
+  /**
+   * Manually record a domain event for auditing
+   */
+  recordEvent(event: IExtendedDomainEvent): void {
     const auditEvent: IAuditEvent = {
-      eventId: LibUtils.getUUID(),
-      timestamp: new Date(),
+      eventId: event.metadata?.eventId || `audit-${Date.now()}-${Math.random()}`,
+      eventType: event.eventType,
       aggregateId: this.aggregate.getId().getValue(),
       aggregateType: this.aggregate.constructor.name,
       aggregateVersion: this.aggregate.getVersion(),
-      eventType,
-      payload,
-      metadata: (metadata || {}) as IEventMetadata,
-      actor: (metadata as { actor?: unknown })?.actor,
-      previousState: this.getPreviousStateFromSnapshot(),
+      timestamp: new Date(),
+      payload: event.payload,
+      metadata: {
+        ...event.metadata,
+        auditCapability: true,
+      },
+      actor: event.metadata?.userId,
     };
 
-    this._auditLog.push(auditEvent);
+    this.auditLog.push(auditEvent);
   }
 
-  private getPreviousStateFromSnapshot(): unknown | null {
-    const snapshotCapability = this.aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT);
-    if (snapshotCapability && 'getPreviousState' in snapshotCapability) {
-      return (snapshotCapability as { getPreviousState(): unknown }).getPreviousState();
-    }
-    return null;
+  /**
+   * Get audit events by type
+   */
+  getEventsByType(eventType: string): IAuditEvent[] {
+    return this.auditLog.filter(event => event.eventType === eventType);
+  }
+
+  /**
+   * Get audit events within a time range
+   */
+  getEventsByTimeRange(startDate: Date, endDate: Date): IAuditEvent[] {
+    return this.auditLog.filter(event => {
+      const eventTime = new Date(event.timestamp).getTime();
+      return eventTime >= startDate.getTime() && eventTime <= endDate.getTime();
+    });
+  }
+
+  /**
+   * Get the first audit event
+   */
+  getFirstEvent(): IAuditEvent | null {
+    return this.auditLog[0] || null;
+  }
+
+  /**
+   * Get the last audit event
+   */
+  getLastEvent(): IAuditEvent | null {
+    return this.auditLog[this.auditLog.length - 1] || null;
   }
 }

@@ -1,185 +1,140 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-  IAggregateRoot,
-  IAggregateBuilder,
-  IAggregateConstructorParams,
-  IAggregateCapability,
-} from './aggregate-interfaces';
 import type { IEventStore } from '@vytches-ddd/contracts';
-import { CAPABILITY_NAMES } from './aggregate-interfaces';
+import { EntityId } from '@vytches-ddd/value-objects';
 
 import { AggregateRoot } from './aggregate-root';
+import type { IAggregateConstructorParams } from './aggregate-interfaces';
 
-import type { EntityId } from '@vytches-ddd/value-objects';
-import {
-  AuditCapability,
-  EventSourcingCapability,
-  SnapshotCapability,
-  VersioningCapability,
-} from './capabilities';
+// Import capability classes
+import { SnapshotCapability } from './capabilities/snapshot-capability';
+import { VersioningCapability } from './capabilities/versioning-capability';
+import { EventSourcingCapability } from './capabilities/event-sourcing-capability';
+import { AuditCapability } from './capabilities/audit-capability';
 
 /**
- * Builder for creating aggregates with specific capabilities
- * Provides a fluent API for configuring aggregate capabilities
+ * Type-safe builder for creating aggregates with capabilities
  */
-export class AggregateBuilder<TId> implements IAggregateBuilder<TId> {
-  private aggregate: IAggregateRoot<TId>;
+export class AggregateBuilder<TId = string> {
+  private params: IAggregateConstructorParams<TId>;
+  private capabilities: Array<{
+    capability: any;
+    configure?: ((cap: any) => void) | undefined;
+  }> = [];
+  private eventStore?: IEventStore;
 
-  constructor(params: IAggregateConstructorParams<TId>) {
-    this.aggregate = new AggregateRoot(params);
+  private constructor(params: IAggregateConstructorParams<TId>) {
+    this.params = params;
   }
 
-  static create<TId>(params: IAggregateConstructorParams<TId>): AggregateBuilder<TId> {
-    return new AggregateBuilder(params);
+  /**
+   * Create a new builder instance
+   */
+  static create<TId = string>(params: { id: TId | EntityId<TId>; version?: number }): AggregateBuilder<TId> {
+    const constructorParams: IAggregateConstructorParams<TId> = {
+      id: params.id instanceof EntityId ? params.id : new EntityId(params.id, 'text'),
+      version: params.version || 0,
+    };
+    return new AggregateBuilder(constructorParams);
   }
 
-  withSnapshots<TState = any, TMeta = any>(): this {
-    this.aggregate.addCapability(
-      CAPABILITY_NAMES.SNAPSHOT,
-      new SnapshotCapability<TState, TMeta>()
-    );
+  /**
+   * Add snapshot capability
+   */
+  withSnapshots(): this {
+    this.capabilities.push({ capability: new SnapshotCapability() });
     return this;
   }
 
+  /**
+   * Add versioning capability
+   */
   withVersioning(): this {
-    this.aggregate.addCapability(CAPABILITY_NAMES.VERSIONING, new VersioningCapability());
+    this.capabilities.push({ capability: new VersioningCapability() });
     return this;
   }
 
-  withEventSourcing(eventStore?: IEventStore): this {
-    this.aggregate.addCapability(
-      CAPABILITY_NAMES.EVENT_SOURCING,
-      new EventSourcingCapability(eventStore)
-    );
-    return this;
-  }
-
+  /**
+   * Add audit capability
+   */
   withAudit(): this {
-    this.aggregate.addCapability(CAPABILITY_NAMES.AUDIT, new AuditCapability());
+    this.capabilities.push({ capability: new AuditCapability() });
     return this;
   }
 
-  withCustomCapability<T extends IAggregateCapability>(name: string, capability: T): this {
-    this.aggregate.addCapability(name, capability);
+  /**
+   * Add event sourcing capability
+   */
+  withEventSourcing(eventStore?: IEventStore): this {
+    const capability = new EventSourcingCapability();
+    this.capabilities.push({
+      capability,
+      configure: (cap: EventSourcingCapability) => {
+        if (eventStore) {
+          cap.setEventStore(eventStore);
+        } else if (this.eventStore) {
+          cap.setEventStore(this.eventStore);
+        }
+      },
+    });
     return this;
   }
 
-  build(): IAggregateRoot<TId> {
-    return this.aggregate;
-  }
-}
-
-// ==========================================
-// SPECIALIZED BUILDERS
-// ==========================================
-
-/**
- * Test utility for creating aggregates with specific capabilities
- */
-export class AggregateTestBuilder<TId> {
-  private builder: AggregateBuilder<TId>;
-
-  constructor(params: IAggregateConstructorParams<TId>) {
-    this.builder = AggregateBuilder.create(params);
-  }
-
-  static forTesting<TId>(id: EntityId<TId>): AggregateTestBuilder<TId> {
-    return new AggregateTestBuilder({ id, version: 0 });
-  }
-
-  withAllCapabilities(): this {
-    this.builder.withSnapshots().withVersioning().withEventSourcing().withAudit();
+  /**
+   * Add a custom capability
+   */
+  withCapability<T>(capability: T, configure?: (cap: T) => void): this {
+    this.capabilities.push({ capability, configure });
     return this;
   }
 
-  withTestingCapabilities(): this {
-    this.builder.withAudit();
+  /**
+   * Set event store for event sourcing
+   */
+  setEventStore(eventStore: IEventStore): this {
+    this.eventStore = eventStore;
     return this;
   }
 
-  build(): IAggregateRoot<TId> {
-    return this.builder.build();
+  /**
+   * Build the aggregate with all configured capabilities
+   */
+  build<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
+    AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
+  ): TAgg {
+    const AggCtor = AggregateClass || AggregateRoot;
+    const aggregate = new AggCtor(this.params) as TAgg;
+
+    // Add all capabilities
+    for (const { capability, configure } of this.capabilities) {
+      aggregate.addCapability(capability);
+      if (configure) {
+        configure(capability);
+      }
+    }
+
+    return aggregate;
   }
-}
 
-// ==========================================
-// PERFORMANCE OPTIMIZED BUILDERS
-// ==========================================
-
-/**
- * Builder for lightweight aggregates (high-performance scenarios)
- */
-export class LightweightAggregateBuilder<TTId> {
-  static create<TId>(params: IAggregateConstructorParams<TId>): IAggregateRoot<TId> {
-    return new AggregateRoot(params);
-  }
-}
-
-/**
- * Builder for full-featured aggregates (complex business scenarios)
- */
-export class FullFeaturedAggregateBuilder<TId> {
-  static create<TId>(params: IAggregateConstructorParams<TId>): IAggregateRoot<TId> {
-    return AggregateBuilder.create(params)
+  /**
+   * Build with all standard capabilities
+   */
+  buildWithAllCapabilities<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
+    AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
+  ): TAgg {
+    return this
       .withSnapshots()
       .withVersioning()
       .withAudit()
       .withEventSourcing()
-      .build();
+      .build(AggregateClass);
   }
 }
 
-// ==========================================
-// CONFIGURATION-DRIVEN BUILDER
-// ==========================================
-
 /**
- * Capability configuration object
+ * Convenience function to create a builder
  */
-export interface CapabilityConfig {
-  snapshot?: {
-    enabled: boolean;
-    autoSnapshot?: boolean;
-    snapshotFrequency?: number;
-  };
-  versioning?: {
-    enabled: boolean;
-    strictVersioning?: boolean;
-  };
-  audit?: {
-    enabled: boolean;
-    captureSnapshots?: boolean;
-  };
-  eventSourcing?: {
-    enabled: boolean;
-    eventStore?: IEventStore;
-  };
-}
-
-/**
- * Factory function that creates aggregates based on configuration
- */
-export function createAggregateWithConfig<TId>(
-  params: IAggregateConstructorParams<TId>,
-  config: CapabilityConfig
-): IAggregateRoot<TId> {
-  const builder = AggregateBuilder.create(params);
-
-  if (config.snapshot?.enabled) {
-    builder.withSnapshots();
-  }
-
-  if (config.versioning?.enabled) {
-    builder.withVersioning();
-  }
-
-  if (config.audit?.enabled) {
-    builder.withAudit();
-  }
-
-  if (config.eventSourcing?.enabled) {
-    builder.withEventSourcing(config.eventSourcing.eventStore);
-  }
-
-  return builder.build();
+export function aggregateBuilder<TId = string>(params: {
+  id: TId | EntityId<TId>;
+  version?: number;
+}): AggregateBuilder<TId> {
+  return AggregateBuilder.create(params);
 }

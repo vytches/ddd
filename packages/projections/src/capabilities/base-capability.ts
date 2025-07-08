@@ -1,23 +1,29 @@
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches-ddd/contracts';
 
 import type { ICapabilityContext, IProjectionLifecycleCapability } from '../projection-interfaces';
 import { ProjectionError } from '../projection-errors';
 
 // base-capability.ts
-export abstract class BaseIntervalCapability<TReadModel>
-  implements IProjectionLifecycleCapability<TReadModel>
+export abstract class BaseIntervalCapability<T extends string, TReadModel>
+  extends Capability<T>
+  implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>
 {
   protected eventCounter = 0;
   protected context?: ICapabilityContext<TReadModel> | undefined;
 
   constructor(
-    public readonly name: string,
+    protected readonly capabilityType: T,
     protected readonly interval = 100
   ) {
+    super();
     if (interval <= 0) {
-      throw new Error(`${name} capability: interval must be positive`);
+      throw new Error(`${capabilityType} capability: interval must be positive`);
     }
   }
+
+  abstract override readonly type: T;
+
 
   attach(context: ICapabilityContext<TReadModel>): void {
     this.context = context;
@@ -40,7 +46,7 @@ export abstract class BaseIntervalCapability<TReadModel>
 
   protected ensureAttached(): void {
     if (!this.context) {
-      throw ProjectionError.capabilityNotAttached(this.name);
+      throw ProjectionError.capabilityNotAttached(this.capabilityType);
     }
   }
 }

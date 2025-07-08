@@ -1,20 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from '@vytches-ddd/logging';
+import type { CapabilityConstructor, Capability, IAggregateCapability } from '@vytches-ddd/contracts';
 import { AggregateError } from './aggregate-errors';
-import type {
-  IAggregateRoot,
-  ISnapshotCapability,
-  IVersioningCapability,
-  IEventSourcingCapability,
-  IAuditCapability,
-} from './aggregate-interfaces';
-import {
-  CAPABILITY_NAMES,
-  hasSnapshotCapability,
-  hasVersioningCapability,
-  hasEventSourcingCapability,
-  hasAuditCapability,
-} from './aggregate-interfaces';
+import type { IAggregateRoot } from './aggregate-interfaces';
+
+// Import concrete capability classes
+import { SnapshotCapability } from './capabilities/snapshot-capability';
+import { VersioningCapability } from './capabilities/versioning-capability';
+import { EventSourcingCapability } from './capabilities/event-sourcing-capability';
+import { AuditCapability } from './capabilities/audit-capability';
+
+// Import new type-safe aggregate
+import { AggregateRoot } from './aggregate-root';
 
 // ==========================================
 // TYPE UTILITIES
@@ -23,21 +20,54 @@ import {
 /**
  * Helper type to extract aggregate with specific capabilities
  */
-export type AggregateWithSnapshotCapability<TId> = IAggregateRoot<TId> & {
-  getCapability(name: 'snapshot'): ISnapshotCapability;
+export type AggregateWithCapability<TId, TCap extends Capability> = AggregateRoot<TId> & {
+  getCapability<T extends TCap>(CapabilityClass: CapabilityConstructor<T>): T;
 };
 
-export type AggregateWithVersioningCapability<TId> = IAggregateRoot<TId> & {
-  getCapability(name: 'versioning'): IVersioningCapability;
-};
+export type AggregateWithSnapshotCapability<TId> = AggregateWithCapability<TId, SnapshotCapability>;
+export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<TId, VersioningCapability>;
+export type AggregateWithAuditCapability<TId> = AggregateWithCapability<TId, AuditCapability>;
+export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<TId, EventSourcingCapability>;
 
-export type AggregateWithAuditCapability<TId> = IAggregateRoot<TId> & {
-  getCapability(name: 'audit'): IAuditCapability;
-};
+// ==========================================
+// TYPE GUARDS
+// ==========================================
 
-export type AggregateWithEventSourcingCapability<TId> = IAggregateRoot<TId> & {
-  getCapability(name: 'eventSourcing'): IEventSourcingCapability;
-};
+/**
+ * Type guard to check if aggregate has snapshot capability
+ */
+export function hasSnapshotCapability<TId>(
+  aggregate: AggregateRoot<TId>
+): aggregate is AggregateWithSnapshotCapability<TId> {
+  return aggregate.hasCapability(SnapshotCapability);
+}
+
+/**
+ * Type guard to check if aggregate has versioning capability
+ */
+export function hasVersioningCapability<TId>(
+  aggregate: AggregateRoot<TId>
+): aggregate is AggregateWithVersioningCapability<TId> {
+  return aggregate.hasCapability(VersioningCapability);
+}
+
+/**
+ * Type guard to check if aggregate has audit capability
+ */
+export function hasAuditCapability<TId>(
+  aggregate: AggregateRoot<TId>
+): aggregate is AggregateWithAuditCapability<TId> {
+  return aggregate.hasCapability(AuditCapability);
+}
+
+/**
+ * Type guard to check if aggregate has event sourcing capability
+ */
+export function hasEventSourcingCapability<TId>(
+  aggregate: AggregateRoot<TId>
+): aggregate is AggregateWithEventSourcingCapability<TId> {
+  return aggregate.hasCapability(EventSourcingCapability);
+}
 
 // ==========================================
 // CASTING UTILITIES
@@ -47,39 +77,39 @@ export type AggregateWithEventSourcingCapability<TId> = IAggregateRoot<TId> & {
  * Helper function to cast aggregate to specific capability type
  */
 export function asSnapshotAggregate<TId>(
-  aggregate: IAggregateRoot<TId>
+  aggregate: AggregateRoot<TId>
 ): AggregateWithSnapshotCapability<TId> {
   if (!hasSnapshotCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('snapshot');
   }
-  return aggregate as AggregateWithSnapshotCapability<TId>;
+  return aggregate;
 }
 
 export function asVersioningAggregate<TId>(
-  aggregate: IAggregateRoot<TId>
+  aggregate: AggregateRoot<TId>
 ): AggregateWithVersioningCapability<TId> {
   if (!hasVersioningCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('versioning');
   }
-  return aggregate as AggregateWithVersioningCapability<TId>;
+  return aggregate;
 }
 
 export function asAuditAggregate<TId>(
-  aggregate: IAggregateRoot<TId>
+  aggregate: AggregateRoot<TId>
 ): AggregateWithAuditCapability<TId> {
   if (!hasAuditCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('audit');
   }
-  return aggregate as AggregateWithAuditCapability<TId>;
+  return aggregate;
 }
 
 export function asEventSourcingAggregate<TId>(
-  aggregate: IAggregateRoot<TId>
+  aggregate: AggregateRoot<TId>
 ): AggregateWithEventSourcingCapability<TId> {
   if (!hasEventSourcingCapability(aggregate)) {
     throw AggregateError.featureNotEnabled('eventSourcing');
   }
-  return aggregate as AggregateWithEventSourcingCapability<TId>;
+  return aggregate;
 }
 
 // ==========================================
@@ -89,39 +119,34 @@ export function asEventSourcingAggregate<TId>(
 /**
  * Gets a list of all capabilities attached to an aggregate
  */
-export function getAggregateCapabilities(aggregate: IAggregateRoot<any>): string[] {
-  const capabilities: string[] = [];
-
-  for (const capabilityName of Object.values(CAPABILITY_NAMES)) {
-    if (aggregate.hasCapability(capabilityName)) {
-      capabilities.push(capabilityName);
-    }
-  }
-
-  return capabilities;
+export function getAggregateCapabilities(aggregate: AggregateRoot<any>): string[] {
+  return aggregate.getCapabilityTypes();
 }
 
 /**
  * Checks if aggregate has all specified capabilities
  */
-export function hasAllCapabilities(
-  aggregate: IAggregateRoot<any>,
-  capabilities: string[]
+export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
+  aggregate: AggregateRoot<any>,
+  capabilities: CapabilityConstructor<T>[]
 ): boolean {
-  return capabilities.every(capability => aggregate.hasCapability(capability));
+  return capabilities.every(CapabilityClass => aggregate.hasCapability(CapabilityClass));
 }
 
 /**
  * Checks if aggregate has any of the specified capabilities
  */
-export function hasAnyCapability(aggregate: IAggregateRoot<any>, capabilities: string[]): boolean {
-  return capabilities.some(capability => aggregate.hasCapability(capability));
+export function hasAnyCapability<T extends Capability & IAggregateCapability>(
+  aggregate: AggregateRoot<any>,
+  capabilities: CapabilityConstructor<T>[]
+): boolean {
+  return capabilities.some(CapabilityClass => aggregate.hasCapability(CapabilityClass));
 }
 
 /**
  * Gets detailed information about aggregate capabilities
  */
-export function getAggregateInfo(aggregate: IAggregateRoot<unknown>): {
+export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
   id: unknown;
   type: string;
   version: number;
@@ -147,13 +172,13 @@ export function getAggregateInfo(aggregate: IAggregateRoot<unknown>): {
  * Creates a snapshot if the aggregate has snapshot capability
  */
 export function createSnapshotIfCapable<TState>(
-  aggregate: IAggregateRoot<any>,
+  aggregate: AggregateRoot<any>,
   serializer: () => TState,
   metadataCreator?: () => any
 ): any | null {
   if (hasSnapshotCapability(aggregate)) {
-    const snapshotCap = aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT) as ISnapshotCapability;
-    return snapshotCap.createSnapshot(serializer, metadataCreator);
+    const snapshotCap = aggregate.getCapability(SnapshotCapability);
+    return snapshotCap?.createSnapshot(serializer as () => unknown, metadataCreator) || null;
   }
   return null;
 }
@@ -161,15 +186,15 @@ export function createSnapshotIfCapable<TState>(
 /**
  * Restores from snapshot if the aggregate has snapshot capability
  */
-export function restoreFromSnapshotIfCapable<TState>(
-  aggregate: IAggregateRoot<any>,
+export function restoreFromSnapshotIfCapable<TState = unknown>(
+  aggregate: AggregateRoot<any>,
   snapshot: any,
   deserializer: (state: TState) => void,
   metadataRestorer?: (metadata: any) => void
 ): boolean {
   if (hasSnapshotCapability(aggregate)) {
-    const snapshotCap = aggregate.getCapability(CAPABILITY_NAMES.SNAPSHOT) as ISnapshotCapability;
-    snapshotCap.restoreFromSnapshot(snapshot, deserializer, metadataRestorer);
+    const snapshotCap = aggregate.getCapability(SnapshotCapability);
+    snapshotCap?.restoreFromSnapshot(snapshot, deserializer as (state: unknown) => void, metadataRestorer);
     return true;
   }
   return false;
@@ -182,10 +207,10 @@ export function restoreFromSnapshotIfCapable<TState>(
 /**
  * Gets audit log if the aggregate has audit capability
  */
-export function getAuditLogIfCapable(aggregate: IAggregateRoot<unknown>): unknown[] {
+export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown[] {
   if (hasAuditCapability(aggregate)) {
-    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as IAuditCapability;
-    return auditCap.getAuditLog() as unknown[];
+    const auditCap = aggregate.getCapability(AuditCapability);
+    return (auditCap?.getAuditLog() || []) as unknown[];
   }
   return [];
 }
@@ -193,12 +218,10 @@ export function getAuditLogIfCapable(aggregate: IAggregateRoot<unknown>): unknow
 /**
  * Gets audit statistics if the aggregate has audit capability
  */
-export function getAuditStatsIfCapable(aggregate: IAggregateRoot<unknown>): unknown | null {
+export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasAuditCapability(aggregate)) {
-    const auditCap = aggregate.getCapability(CAPABILITY_NAMES.AUDIT) as {
-      getAuditStatistics?(): unknown;
-    };
-    return auditCap.getAuditStatistics?.() || null;
+    const auditCap = aggregate.getCapability(AuditCapability);
+    return auditCap?.getAuditStatistics() || null;
   }
   return null;
 }
@@ -211,15 +234,15 @@ export function getAuditStatsIfCapable(aggregate: IAggregateRoot<unknown>): unkn
  * Loads from event store if the aggregate has event sourcing capability
  */
 export async function loadFromEventStoreIfCapable(
-  aggregate: IAggregateRoot<any>,
+  aggregate: AggregateRoot<any>,
   aggregateId: any
 ): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
-    const eventSourcingCap = aggregate.getCapability(
-      CAPABILITY_NAMES.EVENT_SOURCING
-    ) as IEventSourcingCapability;
-    await eventSourcingCap.loadFromEventStore(aggregateId);
-    return true;
+    const eventSourcingCap = aggregate.getCapability(EventSourcingCapability);
+    if (eventSourcingCap) {
+      await eventSourcingCap.loadFromEventStore(aggregateId);
+      return true;
+    }
   }
   return false;
 }
@@ -227,13 +250,15 @@ export async function loadFromEventStoreIfCapable(
 /**
  * Saves to event store if the aggregate has event sourcing capability
  */
-export async function saveToEventStoreIfCapable(aggregate: IAggregateRoot<any>): Promise<boolean> {
+export async function saveToEventStoreIfCapable(
+  aggregate: AggregateRoot<any>
+): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
-    const eventSourcingCap = aggregate.getCapability(
-      CAPABILITY_NAMES.EVENT_SOURCING
-    ) as IEventSourcingCapability;
-    await eventSourcingCap.saveToEventStore();
-    return true;
+    const eventSourcingCap = aggregate.getCapability(EventSourcingCapability);
+    if (eventSourcingCap) {
+      await eventSourcingCap.saveToEventStore();
+      return true;
+    }
   }
   return false;
 }
@@ -246,16 +271,14 @@ export async function saveToEventStoreIfCapable(aggregate: IAggregateRoot<any>):
  * Registers an upcaster if the aggregate has versioning capability
  */
 export function registerUpcasterIfCapable<TFrom, TTo>(
-  aggregate: IAggregateRoot<any>,
+  aggregate: AggregateRoot<any>,
   eventType: string,
   sourceVersion: number,
   upcaster: { upcast(payload: TFrom, metadata?: any): TTo }
 ): boolean {
   if (hasVersioningCapability(aggregate)) {
-    const versioningCap = aggregate.getCapability(
-      CAPABILITY_NAMES.VERSIONING
-    ) as IVersioningCapability;
-    versioningCap.registerUpcaster(eventType, sourceVersion, upcaster);
+    const versioningCap = aggregate.getCapability(VersioningCapability);
+    versioningCap?.registerUpcaster(eventType, sourceVersion, upcaster);
     return true;
   }
   return false;
@@ -264,14 +287,14 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 /**
  * Gets versioning information if the aggregate has versioning capability
  */
-export function getVersioningInfoIfCapable(aggregate: IAggregateRoot<any>): any | null {
+export function getVersioningInfoIfCapable(aggregate: AggregateRoot<any>): any | null {
   if (hasVersioningCapability(aggregate)) {
-    const versioningCap = aggregate.getCapability(CAPABILITY_NAMES.VERSIONING) as any;
-    return {
-      registeredEventTypes: versioningCap.getRegisteredEventTypes?.() || [],
+    const versioningCap = aggregate.getCapability(VersioningCapability);
+    return versioningCap ? {
+      registeredEventTypes: versioningCap.getRegisteredEventTypes(),
       hasUpcaster: (eventType: string, version: number) =>
-        versioningCap.hasUpcaster?.(eventType, version) || false,
-    };
+        versioningCap.hasUpcaster(eventType, version),
+    } : null;
   }
   return null;
 }
@@ -284,7 +307,7 @@ export function getVersioningInfoIfCapable(aggregate: IAggregateRoot<any>): any 
  * Processes multiple aggregates with type-safe capability checking
  */
 export async function processAggregatesWithCapabilities<TId>(
-  aggregates: IAggregateRoot<TId>[],
+  aggregates: AggregateRoot<TId>[],
   processors: {
     snapshot?: (aggregate: AggregateWithSnapshotCapability<TId>) => void;
     audit?: (aggregate: AggregateWithAuditCapability<TId>) => void;
@@ -313,15 +336,14 @@ export async function processAggregatesWithCapabilities<TId>(
   }
 
   await Promise.all(promises);
-  return;
 }
 
 /**
- * Clones an aggregate's configuration to another aggregate
+ * Clones capabilities from one aggregate to another
  */
 export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
-  sourceAggregate: IAggregateRoot<TIdFrom>,
-  targetAggregate: IAggregateRoot<TIdTo>,
+  sourceAggregate: AggregateRoot<TIdFrom>,
+  targetAggregate: AggregateRoot<TIdTo>,
   options: {
     includeSnapshot?: boolean;
     includeVersioning?: boolean;
@@ -337,9 +359,23 @@ export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
   } = options;
 
   if (includeSnapshot && hasSnapshotCapability(sourceAggregate)) {
-    // Note: This would require more sophisticated capability cloning
-    // For now, just indicate that the capability exists
-    const logger = Logger.create('AggregateUtilities');
-    logger.info('Source has snapshot capability - consider adding to target');
+    targetAggregate.addCapability(new SnapshotCapability());
+  }
+
+  if (includeVersioning && hasVersioningCapability(sourceAggregate)) {
+    targetAggregate.addCapability(new VersioningCapability());
+  }
+
+  if (includeAudit && hasAuditCapability(sourceAggregate)) {
+    targetAggregate.addCapability(new AuditCapability());
+  }
+
+  if (includeEventSourcing && hasEventSourcingCapability(sourceAggregate)) {
+    const sourceCap = sourceAggregate.getCapability(EventSourcingCapability);
+    const newCap = new EventSourcingCapability();
+    if (sourceCap?.getEventStore()) {
+      newCap.setEventStore(sourceCap.getEventStore()!);
+    }
+    targetAggregate.addCapability(newCap);
   }
 }

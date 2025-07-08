@@ -261,13 +261,15 @@ export class EventBusOutboxHandler implements IOutboxMessageHandler {
       ? message.messageType.replace('integration_event:', '')
       : message.messageType;
 
-    await this.eventBus.publish({
+    const eventData = {
       eventType,
       eventId: message.id,
       occurredOn: message.createdAt,
       version: 1,
-      ...message.payload,
+      ...(message.payload as Record<string, unknown>),
       ...message.metadata,
-    });
+    };
+    
+    await this.eventBus.publish(eventData);
   }
 }

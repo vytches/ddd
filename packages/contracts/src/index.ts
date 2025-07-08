@@ -37,3 +37,26 @@ export type {
   IValidationRule,
   ISpecification,
 } from './validation';
+
+// Capabilities
+export {
+  Capability,
+  CapabilityRegistry,
+  createCapabilityRegistry,
+} from './capabilities';
+
+export type {
+  IAggregateCapability,
+  IProjectionCapability,
+  CapabilityType,
+  CapabilityConstructor,
+  CapabilityMap,
+  ISnapshotCapability,
+  IVersioningCapability,
+  IEventSourcingCapability,
+  IAuditCapability,
+  ICheckpointCapability,
+  ICircuitBreakerCapability,
+  IDeadLetterCapability,
+  IAggregateSnapshot,
+} from './capabilities';

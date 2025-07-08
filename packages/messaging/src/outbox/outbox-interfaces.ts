@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Processing status of outbox messages
  * Used to track message processing state
@@ -25,7 +24,7 @@ export enum MessagePriority {
  * Base interface for outbox messages
  * Represents a message that can be stored in the outbox
  */
-export interface IOutboxMessage<T = any> {
+export interface IOutboxMessage<T = unknown> {
   /** Unique identifier for the message */
   id: string;
 
@@ -36,7 +35,7 @@ export interface IOutboxMessage<T = any> {
   payload: T;
 
   /** Additional metadata */
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 
   /** Processing status */
   status: MessageStatus;
@@ -68,13 +67,13 @@ export interface OutboxMessageOptions {
   priority?: MessagePriority;
 
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * Interface for outbox message handlers
  */
-export interface IOutboxMessageHandler<T = any> {
+export interface IOutboxMessageHandler<T = unknown> {
   /**
    * Handles a message from the outbox
    * @param message Message to handle

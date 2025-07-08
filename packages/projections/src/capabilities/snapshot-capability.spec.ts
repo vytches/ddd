@@ -109,7 +109,7 @@ describe('SnapshotProjectionCapability', () => {
 
   describe('initialization', () => {
     it('should initialize with correct name and interval', () => {
-      expect(capability.name).toBe('snapshot');
+      expect(capability.type).toBe('snapshot');
     });
 
     it('should throw error for invalid interval', () => {
@@ -123,7 +123,7 @@ describe('SnapshotProjectionCapability', () => {
 
     it('should use default interval when not specified', () => {
       const defaultCapability = new SnapshotProjectionCapability(store);
-      expect(defaultCapability.name).toBe('snapshot');
+      expect(defaultCapability.type).toBe('snapshot');
     });
   });
 

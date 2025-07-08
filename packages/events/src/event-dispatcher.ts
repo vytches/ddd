@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   EventMiddleware,
   IDomainEvent,
@@ -62,8 +61,9 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
     const logger = Logger.forContext('UniversalEventDispatcher');
     
     // Try to get aggregate ID if available (for repository aggregates)
-    const aggregateId = (aggregate as any).getId ? 
-      (aggregate as any).getId()?.getValue() : 'unknown';
+    const aggregateWithId = aggregate as { getId?: () => { getValue(): string | number } };
+    const aggregateId = aggregateWithId.getId ? 
+      aggregateWithId.getId()?.getValue() : 'unknown';
     
     logger.debug('Dispatching events for aggregate', {
       aggregateId,

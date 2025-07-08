@@ -1,110 +1,115 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IAggregateRoot, IEventSourcingCapability } from '../aggregate-interfaces';
-import type { IExtendedDomainEvent, IEventStore } from '@vytches-ddd/contracts';
-
+import { Capability } from '@vytches-ddd/contracts';
+import type { IEventSourcingCapability, IEventStore } from '@vytches-ddd/contracts';
 import { AggregateError } from '../aggregate-errors';
+import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Event sourcing capability implementation
- * Handles loading and saving aggregates from/to event stores
+ * Type-safe event sourcing capability implementation
+ * Handles loading and saving aggregates from/to event store
  */
-export class EventSourcingCapability implements IEventSourcingCapability {
-  private aggregate!: IAggregateRoot<any>;
-  private _eventStore?: IEventStore | undefined;
+export class EventSourcingCapability extends Capability<'eventSourcing'> implements IEventSourcingCapability {
+  override readonly type = 'eventSourcing' as const;
 
-  constructor(eventStore?: IEventStore) {
-    this._eventStore = eventStore;
+  static override get capabilityType(): string {
+    return 'eventSourcing';
   }
+  private aggregate!: IAggregateRoot;
+  private eventStore: IEventStore | null = null;
 
-  attach(aggregate: IAggregateRoot): void {
-    this.aggregate = aggregate;
+  attach(aggregate: unknown): void {
+    this.aggregate = aggregate as IAggregateRoot;
   }
 
   detach?(): void {
     this.aggregate = undefined!;
+    this.eventStore = null;
+  }
+
+  setEventStore(eventStore: IEventStore): void {
+    this.eventStore = eventStore;
+  }
+
+  getEventStore(): IEventStore | null {
+    return this.eventStore;
   }
 
   async loadFromEventStore(aggregateId: string | number): Promise<void> {
-    if (!this._eventStore) {
-      throw AggregateError.eventStoreNotConfigured();
+    if (!this.eventStore) {
+      throw AggregateError.configurationError(
+        this.aggregate.constructor.name,
+        'Event store not configured'
+      );
     }
 
-    const events = await this._eventStore.getEvents(aggregateId);
-    if (events.length > 0) {
-      this.replayEvents(events);
+    const events = await this.eventStore.getEvents(aggregateId);
+
+    if (events.length === 0) {
+      return;
+    }
+
+    // Load events into aggregate using internal method
+    const aggregateWithLoader = this.aggregate as IAggregateRoot & {
+      loadFromHistory?: (events: unknown[]) => void;
+    };
+
+    if (aggregateWithLoader.loadFromHistory) {
+      aggregateWithLoader.loadFromHistory(events);
     }
   }
 
   async saveToEventStore(): Promise<void> {
-    if (!this._eventStore) {
-      throw AggregateError.eventStoreNotConfigured();
+    if (!this.eventStore) {
+      throw AggregateError.configurationError(
+        this.aggregate.constructor.name,
+        'Event store not configured'
+      );
     }
 
     const events = this.aggregate.getDomainEvents();
-    if (events.length === 0) return;
+    if (events.length === 0) {
+      return;
+    }
 
-    await this._eventStore.saveEvents(
+    await this.eventStore.saveEvents(
       this.aggregate.getId().getValue(),
       [...events],
-      this.aggregate.getVersion()
+      this.aggregate.getInitialVersion()
     );
-
-    this.aggregate.commit();
-  }
-
-  replayEvents(events: IExtendedDomainEvent[]): void {
-    // Use the protected method if available
-    const aggregateWithHistory = this.aggregate as IAggregateRoot & {
-      loadFromHistory?: (events: IExtendedDomainEvent[]) => void;
-    };
-
-    if (typeof aggregateWithHistory.loadFromHistory === 'function') {
-      aggregateWithHistory.loadFromHistory(events);
-    } else {
-      throw AggregateError.aggregateDoesNotSupportReplay(this.aggregate.constructor.name);
-    }
   }
 
   /**
-   * Sets or updates the event store
-   */
-  setEventStore(eventStore: IEventStore): void {
-    this._eventStore = eventStore;
-  }
-
-  /**
-   * Gets the current event store
-   */
-  getEventStore(): IEventStore | undefined {
-    return this._eventStore;
-  }
-
-  /**
-   * Checks if event store is configured
+   * Check if event store is configured
    */
   hasEventStore(): boolean {
-    return this._eventStore !== undefined;
+    return this.eventStore !== null;
   }
 
   /**
-   * Loads events from a specific version onwards
+   * Get aggregate stream name for event store
    */
-  async loadEventsFromVersion(
-    aggregateId: string | number,
-    fromVersion: number
-  ): Promise<IExtendedDomainEvent[]> {
-    if (!this._eventStore) {
-      throw AggregateError.eventStoreNotConfigured();
+  getStreamName(): string {
+    return `${this.aggregate.constructor.name}-${this.aggregate.getId().getValue()}`;
+  }
+
+  /**
+   * Load events from a specific version
+   */
+  async loadFromVersion(aggregateId: string | number, fromVersion: number): Promise<void> {
+    if (!this.eventStore) {
+      throw AggregateError.configurationError(
+        this.aggregate.constructor.name,
+        'Event store not configured'
+      );
     }
 
-    return await this._eventStore.getEventsAfterVersion(aggregateId, fromVersion);
-  }
+    const events = await this.eventStore.getEventsAfterVersion(aggregateId, fromVersion);
 
-  /**
-   * Rebuilds aggregate from a specific point in time
-   */
-  async rebuildFromVersion(aggregateId: string | number, fromVersion: number): Promise<void> {
-    const events = await this.loadEventsFromVersion(aggregateId, fromVersion);
-    this.replayEvents(events);
+    const aggregateWithLoader = this.aggregate as IAggregateRoot & {
+      loadFromHistory?: (events: unknown[]) => void;
+    };
+
+    if (aggregateWithLoader.loadFromHistory && events.length > 0) {
+      aggregateWithLoader.loadFromHistory(events);
+    }
   }
 }

@@ -4,7 +4,12 @@ import type { IProjectionSnapshotStore } from '../projection-interfaces';
 
 import { BaseIntervalCapability } from './base-capability';
 
-export class SnapshotProjectionCapability<TReadModel> extends BaseIntervalCapability<TReadModel> {
+export class SnapshotProjectionCapability<TReadModel> extends BaseIntervalCapability<'snapshot', TReadModel> {
+  override readonly type = 'snapshot' as const;
+
+  static override get capabilityType(): string {
+    return 'snapshot';
+  }
   private version = 0;
 
   constructor(

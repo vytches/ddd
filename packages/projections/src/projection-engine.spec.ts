@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches-ddd/contracts';
 import { ProjectionEngine, EnhancedProjectionEngine } from './projection-engine';
 import type { IProjection, IProjectionStore, IProjectionCapability } from './projection-interfaces';
 import { ProjectionError } from './projection-errors';
@@ -97,11 +98,15 @@ class MockUserProjection implements IProjection<UserReadModel> {
 }
 
 // Mock Capability
-class MockCapability implements IProjectionCapability<UserReadModel> {
-  readonly name = 'MockCapability';
+class MockCapability extends Capability<'mockCapability'> implements IProjectionCapability {
+  readonly type = 'mockCapability' as const;
   private attachedContext: any = null;
   public onAttachCalled = false;
   public onDetachCalled = false;
+
+  constructor() {
+    super();
+  }
 
   attach(context: any): void {
     this.attachedContext = context;

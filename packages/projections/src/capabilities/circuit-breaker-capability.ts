@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches-ddd/contracts';
 
 import { ProjectionError } from '../projection-errors';
 import type {
@@ -10,15 +11,23 @@ import type {
 import { CircuitState } from '../projection-interfaces';
 
 export class CircuitBreakerCapability<TReadModel>
-  implements IProjectionLifecycleCapability<TReadModel>
+  extends Capability<'circuitBreaker'>
+  implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>
 {
+  override readonly type = 'circuitBreaker' as const;
+
+  static override get capabilityType(): string {
+    return 'circuitBreaker';
+  }
   private state = CircuitState.CLOSED;
   private failureCount = 0;
   private lastFailureTime?: Date;
   private halfOpenAttempts = 0;
   private readonly context?: ICapabilityContext<TReadModel>;
 
-  constructor(private readonly config: ICircuitBreakerConfig) {}
+  constructor(private readonly config: ICircuitBreakerConfig) {
+    super();
+  }
 
   attach(context: ICapabilityContext<TReadModel>): void {
     (this as any).context = context;
@@ -28,7 +37,7 @@ export class CircuitBreakerCapability<TReadModel>
     (this as any).context = undefined;
   }
 
-  readonly name = 'circuit-breaker';
+  // readonly name = 'circuit-breaker'; // Replaced by type property
 
   async onBeforeApply(_state: TReadModel, _event: IExtendedDomainEvent): Promise<void> {
     if (this.state === CircuitState.OPEN) {

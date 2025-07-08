@@ -132,6 +132,7 @@ export interface DIServiceMetadata extends EnhancedDomainServiceOptions {
   /**
    * The domain service class/constructor.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   serviceType: new (...args: any[]) => any;
 
   /**

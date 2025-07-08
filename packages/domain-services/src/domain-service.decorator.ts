@@ -135,6 +135,7 @@ export interface DomainServiceOptions {
  * class OrderService extends UnitOfWorkAwareDomainService {...}
  */
 export function DomainService(options: string | DomainServiceOptions | EnhancedDomainServiceOptions) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function <T extends new (...args: any[]) => any>(target: T): T {
     // Convert string service ID to full options object
     const metadata: DomainServiceOptions =

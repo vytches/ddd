@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // projection-interfaces.ts
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
 import type { ProjectionError } from './projection-errors';
 
 /**
@@ -22,22 +22,17 @@ export interface IProjectionStore<TReadModel> {
   exists(projectionName: string): Promise<boolean>;
 }
 
-// Capability system - simplified
-export interface IProjectionCapability<TReadModel> {
-  readonly name: string;
-  attach(context: ICapabilityContext<TReadModel>): void;
-  detach?(): void;
-}
+// Re-export from contracts for convenience
+export type { IProjectionCapability } from '@vytches-ddd/contracts';
 
 export interface ICapabilityContext<TReadModel> {
   getProjectionName(): string;
   getStore(): IProjectionStore<TReadModel>;
-  executeHooks(hookName: string, ...args: any[]): Promise<void>;
+  executeHooks(hookName: string, ...args: unknown[]): Promise<void>;
 }
 
 // Lifecycle hooks
-export interface IProjectionLifecycleCapability<TReadModel>
-  extends IProjectionCapability<TReadModel> {
+export interface IProjectionLifecycleCapability<TReadModel> {
   onBeforeApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
   onAfterApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
   onError?(error: ProjectionError, event?: IExtendedDomainEvent): Promise<void> | void;
@@ -49,7 +44,16 @@ export interface IProjectionEngine<TReadModel> {
   isInterestedIn(event: IExtendedDomainEvent): boolean;
   getState(): Promise<TReadModel | null>;
   reset(): Promise<void>;
-  addCapability(capability: IProjectionCapability<TReadModel>): this;
+  addCapability<T extends Capability & IProjectionCapability>(capability: T): this;
+  getCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): T | undefined;
+  hasCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): boolean;
+  removeCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): this;
   rebuild(events: AsyncIterable<IExtendedDomainEvent>): Promise<void>;
 }
 
@@ -88,13 +92,13 @@ export interface IProjectionCheckpointStore {
   delete(projectionName: string): Promise<void>;
 }
 
-export interface IProjectionSnapshot<TState = any> {
+export interface IProjectionSnapshot<TState = unknown> {
   projectionName: string;
   position: number;
   state: TState;
   timestamp: Date;
   version?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface IProjectionSnapshotStore {
@@ -118,7 +122,7 @@ export interface IProjectionSnapshotStore {
 export interface IProjectionBuilder<TReadModel> {
   withCheckpoints(store: IProjectionCheckpointStore, options?: CheckpointProjectionOptions): this;
   withSnapshots(store: IProjectionSnapshotStore, options?: SnapshotProjectionOptions): this;
-  withCustomCapability<T extends IProjectionCapability<TReadModel>>(capability: T): this;
+  withCustomCapability<T extends Capability & IProjectionCapability>(capability: T): this;
   build(): IProjectionEngine<TReadModel>;
 }
 

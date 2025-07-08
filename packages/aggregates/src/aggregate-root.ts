@@ -5,13 +5,13 @@ import type {
   IAggregateEventHandler,
 } from './aggregate-interfaces';
 
-import type { IExtendedDomainEvent, IEventMetadata } from '@vytches-ddd/contracts';
-import { createDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IEventMetadata, Capability, CapabilityConstructor } from '@vytches-ddd/contracts';
+import { createDomainEvent, CapabilityRegistry } from '@vytches-ddd/contracts';
 
 import type { EntityId } from '@vytches-ddd/value-objects';
 
 /**
- * Core AggregateRoot implementation with capability management
+ * Type-safe AggregateRoot implementation with capability management
  * Provides basic aggregate functionality with composition-based extensions
  */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
@@ -20,7 +20,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private _initialVersion = 0;
   private _domainEvents: IExtendedDomainEvent[] = [];
   private _eventHandlers = new Map<string, IAggregateEventHandler>();
-  private _capabilities = new Map<string, IAggregateCapability>();
+  private _capabilities = new CapabilityRegistry();
 
   constructor(params: IAggregateConstructorParams<TId>) {
     this._id = params.id;
@@ -62,11 +62,11 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   protected registerEventHandler<T>(eventType: string, handler: IAggregateEventHandler<T>): this {
-    this._eventHandlers.set(eventType, handler);
+    this._eventHandlers.set(eventType, handler as IAggregateEventHandler);
     return this;
   }
 
-  protected apply<P = any>(
+  protected apply<P = unknown>(
     eventTypeOrEvent: string | IExtendedDomainEvent<P>,
     payload?: P,
     metadata?: Partial<IEventMetadata>
@@ -74,7 +74,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     let event: IExtendedDomainEvent<P | undefined>;
 
     if (typeof eventTypeOrEvent === 'string') {
-      event = createDomainEvent(eventTypeOrEvent, payload, metadata);
+      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IExtendedDomainEvent<P>;
     } else {
       event = eventTypeOrEvent;
       if (metadata) {
@@ -100,18 +100,10 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   private handleEvent(event: IExtendedDomainEvent): void {
-    // Check if versioning capability is attached
-    const versioningCapability = this._capabilities.get('versioning');
-
-    if (versioningCapability && 'handleVersionedEvent' in versioningCapability) {
-      (
-        versioningCapability as {
-          handleVersionedEvent: (
-            event: IExtendedDomainEvent,
-            handlers: Map<string, IAggregateEventHandler>
-          ) => void;
-        }
-      ).handleVersionedEvent(event, this._eventHandlers);
+    // Check if we have versioning capability for upcasting
+    const versioningCapability = this.getCapability(VersioningCapability);
+    if (versioningCapability) {
+      versioningCapability.handleVersionedEvent(event, this._eventHandlers);
     } else {
       // Standard event handling
       const handler = this._eventHandlers.get(event.eventType);
@@ -134,30 +126,64 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   // ==========================================
-  // CAPABILITY MANAGEMENT
+  // TYPE-SAFE CAPABILITY MANAGEMENT
   // ==========================================
 
-  addCapability<T extends IAggregateCapability>(name: string, capability: T): this {
-    capability.attach(this);
-    this._capabilities.set(name, capability);
+  /**
+   * Add a capability using its instance
+   */
+  addCapability<T extends Capability & IAggregateCapability>(capability: T): this {
+    if ('attach' in capability && typeof capability.attach === 'function') {
+      capability.attach(this);
+    }
+    this._capabilities.register(capability);
     return this;
   }
 
-  getCapability<T extends IAggregateCapability>(name: string): T | undefined {
-    return this._capabilities.get(name) as T;
+  /**
+   * Get a capability by its constructor
+   */
+  getCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): T | undefined {
+    return this._capabilities.get(CapabilityClass) as T | undefined;
   }
 
-  hasCapability(name: string): boolean {
-    return this._capabilities.has(name);
+  /**
+   * Check if aggregate has a capability by its constructor
+   */
+  hasCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): boolean {
+    return this._capabilities.has(CapabilityClass);
   }
 
-  removeCapability(name: string): this {
-    const capability = this._capabilities.get(name);
-    if (capability?.detach) {
+  /**
+   * Remove a capability by its constructor
+   */
+  removeCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): this {
+    const capability = this._capabilities.get(CapabilityClass);
+    if (capability && 'detach' in capability && typeof capability.detach === 'function') {
       capability.detach();
     }
-    this._capabilities.delete(name);
+    this._capabilities.remove(CapabilityClass);
     return this;
+  }
+
+  /**
+   * Get all capabilities
+   */
+  getAllCapabilities(): Capability[] {
+    return this._capabilities.getAll();
+  }
+
+  /**
+   * Get capability types
+   */
+  getCapabilityTypes(): string[] {
+    return this._capabilities.getTypes();
   }
 
   // ==========================================
@@ -168,28 +194,16 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
    * Internal method for capabilities to access private state
    * Should only be used by capabilities, not directly by domain code
    */
-  private _internal_setState(
-    updates: Partial<{
-      version: number;
-      initialVersion: number;
-      domainEvents: IExtendedDomainEvent[];
-    }>
-  ): void {
-    if (updates.version !== undefined) {
-      this._version = updates.version;
-    }
-    if (updates.initialVersion !== undefined) {
-      this._initialVersion = updates.initialVersion;
-    }
-    if (updates.domainEvents !== undefined) {
-      this._domainEvents = updates.domainEvents;
-    }
-  }
-
-  /**
-   * Internal method for capabilities to get event handlers
-   */
-  private _internal_getEventHandlers(): Map<string, IAggregateEventHandler> {
-    return this._eventHandlers;
+  _internal_setState(state: {
+    version: number;
+    initialVersion: number;
+    domainEvents: IExtendedDomainEvent[];
+  }): void {
+    this._version = state.version;
+    this._initialVersion = state.initialVersion;
+    this._domainEvents = state.domainEvents;
   }
 }
+
+// Import capability classes for type checking
+import { VersioningCapability } from './capabilities/versioning-capability';

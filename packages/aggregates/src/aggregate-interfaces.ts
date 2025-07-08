@@ -4,6 +4,8 @@ import type {
   IEventUpcaster,
   IAuditEvent,
   IEventStore,
+  Capability,
+  CapabilityConstructor,
 } from '@vytches-ddd/contracts';
 
 import type { EntityId } from '@vytches-ddd/value-objects';
@@ -49,22 +51,28 @@ export interface IAggregateRoot<TId = string> {
   /**
    * Adds a capability to the aggregate
    */
-  addCapability<T extends IAggregateCapability>(name: string, capability: T): this;
+  addCapability<T extends Capability & IAggregateCapability>(capability: T): this;
 
   /**
    * Gets a specific capability
    */
-  getCapability<T extends IAggregateCapability>(name: string): T | undefined;
+  getCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): T | undefined;
 
   /**
    * Checks if aggregate has a specific capability
    */
-  hasCapability(name: string): boolean;
+  hasCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): boolean;
 
   /**
    * Removes a capability from the aggregate
    */
-  removeCapability(name: string): this;
+  removeCapability<T extends Capability & IAggregateCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): this;
 }
 
 /**
@@ -239,7 +247,7 @@ export interface IAggregateBuilder<TId> {
 /**
  * Event handler function signature
  */
-export interface IAggregateEventHandler<T = any> {
+export interface IAggregateEventHandler<T = unknown> {
   (payload: T, metadata?: IEventMetadata): void;
 }
 
@@ -281,67 +289,15 @@ export interface IAggregateSnapshot<TState = any, TMeta = any> {
 // TYPE GUARDS
 // ==========================================
 
-/**
- * Type guard to check if aggregate has snapshot capability
- */
-export function hasSnapshotCapability<TId>(
-  aggregate: IAggregateRoot<TId>
-): aggregate is IAggregateRoot<TId> & {
-  getCapability(name: 'snapshot'): ISnapshotCapability;
-} {
-  return aggregate.hasCapability('snapshot');
-}
-
-/**
- * Type guard to check if aggregate has versioning capability
- */
-export function hasVersioningCapability<TId>(
-  aggregate: IAggregateRoot<TId>
-): aggregate is IAggregateRoot<TId> & {
-  getCapability(name: 'versioning'): IVersioningCapability;
-} {
-  return aggregate.hasCapability('versioning');
-}
-
-/**
- * Type guard to check if aggregate has event sourcing capability
- */
-export function hasEventSourcingCapability<TId>(
-  aggregate: IAggregateRoot<TId>
-): aggregate is IAggregateRoot<TId> & {
-  getCapability(name: 'eventSourcing'): IEventSourcingCapability;
-} {
-  return aggregate.hasCapability('eventSourcing');
-}
-
-/**
- * Type guard to check if aggregate has audit capability
- */
-export function hasAuditCapability<TId>(
-  aggregate: IAggregateRoot<TId>
-): aggregate is IAggregateRoot<TId> & {
-  getCapability(name: 'audit'): IAuditCapability;
-} {
-  return aggregate.hasCapability('audit');
-}
-
-/**
- * Type guard to check if aggregate has middleware capability
- */
-export function hasMiddlewareCapability<TId>(
-  aggregate: IAggregateRoot<TId>
-): aggregate is IAggregateRoot<TId> & {
-  getCapability(name: 'middleware'): IMiddlewareCapability;
-} {
-  return aggregate.hasCapability('middleware');
-}
+// Note: Type guards are now implemented in aggregate-utilities.ts with type-safe capability constructors
 
 // ==========================================
-// CAPABILITY CONSTANTS
+// CAPABILITY CONSTANTS (DEPRECATED)
 // ==========================================
 
 /**
- * Standard capability names
+ * Standard capability names (deprecated - use constructor-based access)
+ * @deprecated Use constructor-based capability access instead
  */
 export const CAPABILITY_NAMES = {
   SNAPSHOT: 'snapshot',
@@ -352,7 +308,8 @@ export const CAPABILITY_NAMES = {
 } as const;
 
 /**
- * Type for capability names
+ * Type for capability names (deprecated - use constructor-based access)
+ * @deprecated Use constructor-based capability access instead
  */
 export type CapabilityName = (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_NAMES];
 
@@ -366,7 +323,8 @@ export type CapabilityName = (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_N
 export type AggregateIdType<T> = T extends IAggregateRoot<infer TId> ? TId : never;
 
 /**
- * Type for aggregates with specific capabilities
+ * Type for aggregates with specific capabilities (deprecated - use constructor-based types)
+ * @deprecated Use AggregateWithCapability from aggregate-utilities.ts instead
  */
 export type AggregateWithCapabilities<
   TId,

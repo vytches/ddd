@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IDomainEvent, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IDomainEvent, IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
 import { ProjectionProcessor } from './projection-processor';
 import { ProjectionEngineRegistry } from './projection-registry';
-import type { IProjectionCapability, IProjectionEngine } from './projection-interfaces';
+import type { IProjectionEngine } from './projection-interfaces';
 
 // Mock implementation of IProjectionEngine
 class MockProjectionEngine implements IProjectionEngine<any> {
@@ -11,6 +11,28 @@ class MockProjectionEngine implements IProjectionEngine<any> {
     private eventTypes: string[] = [],
     private shouldThrow = false
   ) {}
+
+  addCapability<T extends Capability & IProjectionCapability>(capability: T): this {
+    return this;
+  }
+
+  getCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): T | undefined {
+    return undefined;
+  }
+
+  hasCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): boolean {
+    return false;
+  }
+
+  removeCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): this {
+    return this;
+  }
 
   getProjectionName(): string {
     return this.name;
@@ -31,10 +53,6 @@ class MockProjectionEngine implements IProjectionEngine<any> {
     // Mock reset
   }
 
-  addCapability(capability: IProjectionCapability<any>): this {
-    // Mock add capability
-    return this;
-  }
 
   async rebuild(events: AsyncIterable<IExtendedDomainEvent>): Promise<void> {
     // Mock rebuild

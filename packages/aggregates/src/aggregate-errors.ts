@@ -148,6 +148,21 @@ export class AggregateError extends IDomainError {
   }
 
   /**
+   * Error for configuration problems
+   */
+  static configurationError(aggregateType: string, message: string): AggregateError {
+    const fullMessage = `Configuration error in ${aggregateType}: ${message}`;
+    const options = {
+      code: DomainErrorCode.ValidationFailed,
+      data: {
+        aggregateType,
+        configurationError: message,
+      },
+    };
+    return new AggregateError(fullMessage, options);
+  }
+
+  /**
    * Error for when apply method interception fails (e.g. method not found)
    */
   static cannotInterceptApplyMethod(

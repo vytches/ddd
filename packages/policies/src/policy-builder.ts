@@ -238,10 +238,10 @@ export class GroupBuilder<T> {
       {
         getDomain: () => this.groupId,
         addPolicy: (policy: IBusinessPolicy<T>) => this.policies.push(policy),
-        and: () => this as any,
-        or: () => this as any,
+        and: () => this as unknown as PolicyBuilder<T>,
+        or: () => this as unknown as PolicyBuilder<T>,
         build: () => this.build(),
-      } as any,
+      } as unknown as PolicyBuilder<T>,
       specification
     );
   }
@@ -254,10 +254,10 @@ export class GroupBuilder<T> {
       {
         getDomain: () => this.groupId,
         addPolicy: (policy: IBusinessPolicy<T>) => this.policies.push(policy),
-        and: () => this as any,
-        or: () => this as any,
+        and: () => this as unknown as PolicyBuilder<T>,
+        or: () => this as unknown as PolicyBuilder<T>,
         build: () => this.build(),
-      } as any,
+      } as unknown as PolicyBuilder<T>,
       specification
     );
   }
@@ -527,12 +527,12 @@ export class PolicyBuilder<T> {
     specification: ISpecification<T>,
     violationCode: string,
     violationMessage: string
-  ): PolicyBuilder<T> {
+  ): IBusinessPolicy<T> {
     return PolicyBuilder.create<T>()
       .must(specification)
       .withCode(violationCode)
       .withMessage(violationMessage)
-      .build() as any; // Will fix typing
+      .build();
   }
 }
 

@@ -1,138 +1,113 @@
+import { Capability } from '@vytches-ddd/contracts';
 import type {
-  IAggregateRoot,
   IVersioningCapability,
-  IAggregateEventHandler,
-} from '../aggregate-interfaces';
-import type { IExtendedDomainEvent, IEventUpcaster } from '@vytches-ddd/contracts';
-
-import { AggregateError } from '../aggregate-errors';
+  IExtendedDomainEvent,
+  IEventUpcaster,
+} from '@vytches-ddd/contracts';
+import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
 /**
- * Versioning capability implementation
- * Handles event versioning and upcasting for backward compatibility
+ * Type-safe versioning capability implementation
+ * Handles event versioning and upcasting for evolving domain events
  */
-export class VersioningCapability implements IVersioningCapability {
-  private aggregate?: IAggregateRoot | undefined;
-  private _eventUpcasters = new Map<string, Map<number, IEventUpcaster>>();
+export class VersioningCapability extends Capability<'versioning'> implements IVersioningCapability {
+  override readonly type = 'versioning' as const;
 
-  attach(aggregate: IAggregateRoot): void {
-    this.aggregate = aggregate;
+  static override get capabilityType(): string {
+    return 'versioning';
+  }
+  private aggregate!: IAggregateRoot;
+  private upcasters = new Map<string, Map<number, IEventUpcaster>>();
+
+  attach(aggregate: unknown): void {
+    this.aggregate = aggregate as IAggregateRoot;
   }
 
   detach?(): void {
-    this.aggregate = undefined;
-    this._eventUpcasters.clear();
+    this.aggregate = undefined!;
+    this.upcasters.clear();
   }
 
   registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
     sourceVersion: number,
     upcaster: IEventUpcaster<TFrom, TTo>
-  ): this {
-    if (!this._eventUpcasters.has(eventType)) {
-      this._eventUpcasters.set(eventType, new Map());
+  ): void {
+    if (!this.upcasters.has(eventType)) {
+      this.upcasters.set(eventType, new Map());
     }
-
-    const typeUpcasters = this._eventUpcasters.get(eventType)!;
-
-    if (typeUpcasters.has(sourceVersion)) {
-      throw AggregateError.duplicateUpcaster(eventType, sourceVersion);
-    }
-
-    typeUpcasters.set(sourceVersion, upcaster);
-    return this;
+    this.upcasters.get(eventType)!.set(sourceVersion, upcaster);
   }
 
   handleVersionedEvent(
     event: IExtendedDomainEvent,
     handlers: Map<string, IAggregateEventHandler>
   ): void {
-    // Upcast event if needed
-    const upcastedEvent = this.upcastEvent(event);
+    const eventVersion = (event.metadata?.version as number) || 1;
+    const currentVersion = (event.metadata as { targetVersion?: number })?.targetVersion || eventVersion;
 
-    // Try version-specific handler first
-    const eventVersion = upcastedEvent.metadata?.eventVersion;
-    if (eventVersion) {
-      const versionedHandlerName = `${upcastedEvent.eventType}_v${eventVersion}`;
-      const versionedHandler = handlers.get(versionedHandlerName);
-      if (versionedHandler) {
-        versionedHandler(upcastedEvent.payload, upcastedEvent.metadata);
-        return;
+    let processedEvent = event;
+
+    // Apply upcasters in sequence if needed
+    if (eventVersion < currentVersion && this.upcasters.has(event.eventType)) {
+      const eventUpcasters = this.upcasters.get(event.eventType)!;
+
+      for (let version = eventVersion; version < currentVersion; version++) {
+        const upcaster = eventUpcasters.get(version);
+        if (upcaster) {
+          const upcastedPayload = upcaster.upcast(
+            processedEvent.payload,
+            processedEvent.metadata
+          );
+          processedEvent = {
+            ...processedEvent,
+            payload: upcastedPayload,
+            metadata: {
+              ...processedEvent.metadata,
+              version: version + 1,
+            },
+          };
+        }
       }
     }
 
-    // Fall back to default handler
-    const defaultHandler = handlers.get(upcastedEvent.eventType);
-    if (defaultHandler) {
-      defaultHandler(upcastedEvent.payload, upcastedEvent.metadata);
+    // Call the appropriate handler
+    const handler = handlers.get(processedEvent.eventType);
+    if (handler) {
+      handler(processedEvent.payload, processedEvent.metadata);
     }
   }
 
-  private upcastEvent(event: IExtendedDomainEvent): IExtendedDomainEvent {
-    const eventType = event.eventType;
-    const typeUpcasters = this._eventUpcasters.get(eventType);
-
-    if (!typeUpcasters || typeUpcasters.size === 0) {
-      return event;
-    }
-
-    const sourceVersion = event.metadata?.eventVersion || 1;
-    const latestVersion = this.getLatestEventVersion(eventType);
-
-    if (sourceVersion >= latestVersion) {
-      return event;
-    }
-
-    // Perform sequential upcasting
-    let currentPayload = event.payload;
-    const currentMetadata = { ...event.metadata };
-    let currentVersion = sourceVersion;
-
-    while (currentVersion < latestVersion) {
-      const upcaster = typeUpcasters.get(currentVersion);
-      if (!upcaster) {
-        throw AggregateError.missingUpcaster(eventType, currentVersion, currentVersion + 1);
-      }
-
-      currentPayload = upcaster.upcast(currentPayload, currentMetadata);
-      currentVersion++;
-      currentMetadata.eventVersion = currentVersion;
-    }
-
-    return {
-      ...event,
-      payload: currentPayload,
-      metadata: currentMetadata,
-    };
-  }
-
-  private getLatestEventVersion(eventType: string): number {
-    const typeUpcasters = this._eventUpcasters.get(eventType);
-    if (!typeUpcasters || typeUpcasters.size === 0) {
-      return 1;
-    }
-    return Math.max(...Array.from(typeUpcasters.keys())) + 1;
-  }
-
-  /**
-   * Gets all registered event types for this capability
-   */
   getRegisteredEventTypes(): string[] {
-    return Array.from(this._eventUpcasters.keys());
+    return Array.from(this.upcasters.keys());
   }
 
-  /**
-   * Gets the latest version for a specific event type
-   */
-  getLatestVersionForEventType(eventType: string): number {
-    return this.getLatestEventVersion(eventType);
-  }
-
-  /**
-   * Checks if an upcaster exists for a specific event type and version
-   */
   hasUpcaster(eventType: string, version: number): boolean {
-    const typeUpcasters = this._eventUpcasters.get(eventType);
-    return typeUpcasters?.has(version) || false;
+    return this.upcasters.get(eventType)?.has(version) || false;
+  }
+
+  /**
+   * Get all upcasters for an event type
+   */
+  getUpcastersForType(eventType: string): Map<number, IEventUpcaster> | undefined {
+    return this.upcasters.get(eventType);
+  }
+
+  /**
+   * Clear all upcasters for an event type
+   */
+  clearUpcastersForType(eventType: string): void {
+    this.upcasters.delete(eventType);
+  }
+
+  /**
+   * Get total number of registered upcasters
+   */
+  getTotalUpcasterCount(): number {
+    let count = 0;
+    for (const eventUpcasters of this.upcasters.values()) {
+      count += eventUpcasters.size;
+    }
+    return count;
   }
 }

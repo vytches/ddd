@@ -83,18 +83,18 @@ describe('DeadLetterCapability', () => {
 
   describe('initialization', () => {
     it('should initialize with correct name', () => {
-      expect(capability.name).toBe('dead-letter');
+      expect(capability.type).toBe('deadLetter');
     });
 
     it('should accept custom shouldDeadLetter function', () => {
       const customShouldDeadLetter = (_error: Error, attempts: number) => attempts >= 5;
       const customCapability = new DeadLetterCapability(store, customShouldDeadLetter);
-      expect(customCapability.name).toBe('dead-letter');
+      expect(customCapability.type).toBe('deadLetter');
     });
 
     it('should use default shouldDeadLetter function when not provided', () => {
       const defaultCapability = new DeadLetterCapability(store);
-      expect(defaultCapability.name).toBe('dead-letter');
+      expect(defaultCapability.type).toBe('deadLetter');
     });
   });
 
@@ -252,7 +252,7 @@ describe('DeadLetterCapability', () => {
       newCapability.attach(newContext);
 
       // Assert - should work with attached context
-      expect(newCapability.name).toBe('dead-letter');
+      expect(newCapability.type).toBe('deadLetter');
 
       // Note: DeadLetterCapability doesn't implement detach method
       // but it should handle the undefined context gracefully
@@ -268,7 +268,7 @@ describe('DeadLetterCapability', () => {
       capability.attach(context2); // Should overwrite previous context
 
       // Assert - should use the latest context
-      expect(capability.name).toBe('dead-letter');
+      expect(capability.type).toBe('deadLetter');
     });
   });
 

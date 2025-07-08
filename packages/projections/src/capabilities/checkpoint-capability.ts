@@ -4,7 +4,13 @@ import type { IProjectionCheckpointStore } from '../projection-interfaces';
 
 import { BaseIntervalCapability } from './base-capability';
 
-export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<TReadModel> {
+export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<'checkpoint', TReadModel> {
+  override readonly type = 'checkpoint' as const;
+
+  static override get capabilityType(): string {
+    return 'checkpoint';
+  }
+
   constructor(
     private readonly checkpointStore: IProjectionCheckpointStore,
     interval = 100

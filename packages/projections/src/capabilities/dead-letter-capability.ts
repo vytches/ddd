@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';
 
 import type { ProjectionError } from '../projection-errors';
@@ -10,8 +11,14 @@ import type {
 } from '../projection-interfaces';
 
 export class DeadLetterCapability<TReadModel>
-  implements IProjectionLifecycleCapability<TReadModel>
+  extends Capability<'deadLetter'>
+  implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>
 {
+  override readonly type = 'deadLetter' as const;
+
+  static override get capabilityType(): string {
+    return 'deadLetter';
+  }
   private context?: ICapabilityContext<TReadModel>;
 
   constructor(
@@ -20,9 +27,11 @@ export class DeadLetterCapability<TReadModel>
       error,
       attempts
     ) => attempts >= 3
-  ) {}
+  ) {
+    super();
+  }
 
-  readonly name = 'dead-letter';
+  // readonly name = 'dead-letter'; // Replaced by type property
 
   attach(context: ICapabilityContext<TReadModel>): void {
     this.context = context;

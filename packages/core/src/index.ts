@@ -2,7 +2,6 @@
 export {
   AggregateRoot,
   AggregateBuilder,
-  AggregateTestBuilder,
   AggregateError,
 } from '@vytches-ddd/aggregates';
 

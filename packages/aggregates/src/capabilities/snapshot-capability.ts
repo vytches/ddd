@@ -1,22 +1,26 @@
+import { Capability } from '@vytches-ddd/contracts';
+import type { ISnapshotCapability, IAggregateSnapshot } from '@vytches-ddd/contracts';
 import { AggregateError } from '../aggregate-errors';
-import type {
-  IAggregateRoot,
-  ISnapshotCapability,
-  IAggregateSnapshot,
-} from '../aggregate-interfaces';
+import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Snapshot capability implementation
+ * Type-safe snapshot capability implementation
  * Handles aggregate state snapshots for audit and performance optimization
  */
 export class SnapshotCapability<TState = unknown, TMeta = unknown>
+  extends Capability<'snapshot'>
   implements ISnapshotCapability<TState, TMeta>
 {
+  override readonly type = 'snapshot' as const;
+
+  static override get capabilityType(): string {
+    return 'snapshot';
+  }
   private aggregate!: IAggregateRoot;
   private _snapshot: IAggregateSnapshot<TState, TMeta> | null = null;
 
-  attach(aggregate: IAggregateRoot): void {
-    this.aggregate = aggregate;
+  attach(aggregate: unknown): void {
+    this.aggregate = aggregate as IAggregateRoot;
   }
 
   detach?(): void {
@@ -32,7 +36,7 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     const lastEvent = events.length > 0 ? events[events.length - 1] : null;
 
     const snapshot: IAggregateSnapshot<TState, TMeta> = {
-      id: this.aggregate.getId().getValue(),
+      aggregateId: this.aggregate.getId().getValue(),
       version: this.aggregate.getVersion(),
       aggregateType: this.aggregate.constructor.name,
       state: serializer(),
@@ -56,9 +60,9 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
       throw AggregateError.invalidSnapshot(this.aggregate.constructor.name, 'Invalid snapshot');
     }
 
-    if (snapshot.id !== this.aggregate.getId().getValue()) {
+    if (snapshot.aggregateId !== this.aggregate.getId().getValue()) {
       throw AggregateError.idMismatch(
-        snapshot.id as string | number,
+        snapshot.aggregateId as string | number,
         this.aggregate.getId().getValue() as string | number
       );
     }
@@ -91,10 +95,24 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     }
   }
 
+  saveTemporaryState?(state: TState): void {
+    this._snapshot = this.createSnapshot(() => state);
+  }
+
+  getLastSnapshotTimestamp?(): Date | null {
+    return this._snapshot?.timestamp || null;
+  }
+
+  /**
+   * Helper method to save a snapshot
+   */
   saveSnapshot(serializer: () => TState, metadataCreator?: () => TMeta): void {
     this._snapshot = this.createSnapshot(serializer, metadataCreator);
   }
 
+  /**
+   * Helper method to get previous state
+   */
   getPreviousState(): IAggregateSnapshot<TState, TMeta> | null {
     const snapshot = this._snapshot;
     this._snapshot = null;

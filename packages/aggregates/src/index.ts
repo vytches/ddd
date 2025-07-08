@@ -1,15 +1,10 @@
 // Core classes - most commonly used
 export { AggregateRoot } from './aggregate-root';
-export {
-  AggregateBuilder,
-  AggregateTestBuilder,
-  LightweightAggregateBuilder,
-  FullFeaturedAggregateBuilder,
-  createAggregateWithConfig,
-} from './aggregate-root.builder';
+export { AggregateBuilder, aggregateBuilder } from './aggregate-root.builder';
 
 // Capabilities
 export * from './capabilities';
+
 
 // Interfaces and utilities - explicit exports to reduce bundle size
 export type {
@@ -38,3 +33,4 @@ export {
   getAggregateCapabilities,
   hasAllCapabilities,
 } from './aggregate-utilities';
+

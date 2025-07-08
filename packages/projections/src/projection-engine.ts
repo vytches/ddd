@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
+import { CapabilityRegistry } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';
 
 import { ProjectionError } from './projection-errors';
 import type {
   ICapabilityContext,
   IProjection,
-  IProjectionCapability,
   IProjectionEngine,
   IProjectionErrorStrategy,
   IProjectionLifecycleCapability,
@@ -16,14 +15,14 @@ import type {
 import { ExponentialBackoffStrategy } from './error-strategy';
 
 export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadModel> {
-  private capabilities = new Map<string, IProjectionCapability<TReadModel>>();
+  private capabilities = new CapabilityRegistry();
   protected projection: IProjection<TReadModel>;
   protected store: IProjectionStore<TReadModel>;
 
   constructor(
     projection: IProjection<TReadModel>,
     store: IProjectionStore<TReadModel>,
-    capabilities?: IProjectionCapability<TReadModel>[]
+    capabilities?: (Capability & IProjectionCapability)[]
   ) {
     this.projection = projection;
     this.store = store;
@@ -126,7 +125,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     }
   }
 
-  addCapability<T extends IProjectionCapability<TReadModel>>(capability: T): this {
+  addCapability<T extends Capability & IProjectionCapability>(capability: T): this {
     const context: ICapabilityContext<TReadModel> = {
       getProjectionName: () => this.projection.name,
       getStore: () => this.store,
@@ -134,18 +133,41 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     };
 
     capability.attach(context);
-    this.capabilities.set(capability.name, capability);
+    this.capabilities.register(capability);
     return this;
   }
 
-  protected async executeHooks(hookName: string, ...args: any[]): Promise<void> {
-    const capabilities = Array.from(this.capabilities.values());
+  getCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): T | undefined {
+    return this.capabilities.get(CapabilityClass) as T | undefined;
+  }
+
+  hasCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): boolean {
+    return this.capabilities.has(CapabilityClass);
+  }
+
+  removeCapability<T extends Capability & IProjectionCapability>(
+    CapabilityClass: CapabilityConstructor<T>
+  ): this {
+    const capability = this.capabilities.get(CapabilityClass);
+    if (capability && 'detach' in capability && typeof capability.detach === 'function') {
+      capability.detach();
+    }
+    this.capabilities.remove(CapabilityClass);
+    return this;
+  }
+
+  protected async executeHooks(hookName: string, ...args: unknown[]): Promise<void> {
+    const capabilities = this.capabilities.getAll();
 
     // Execute hooks sequentially for critical operations
     if (hookName === 'onBeforeApply' || hookName === 'onError') {
       for (const capability of capabilities) {
         const lifecycleCapability = capability as IProjectionLifecycleCapability<TReadModel>;
-        const hook = (lifecycleCapability as any)[hookName];
+        const hook = (lifecycleCapability as Record<string, unknown>)[hookName];
 
         if (typeof hook === 'function') {
           await Promise.resolve(hook.apply(lifecycleCapability, args));
@@ -158,7 +180,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     const promises: Promise<void>[] = [];
     for (const capability of capabilities) {
       const lifecycleCapability = capability as IProjectionLifecycleCapability<TReadModel>;
-      const hook = (lifecycleCapability as any)[hookName];
+      const hook = (lifecycleCapability as Record<string, unknown>)[hookName];
 
       if (typeof hook === 'function') {
         const result = hook.apply(lifecycleCapability, args);
@@ -178,7 +200,7 @@ export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TRead
   constructor(
     projection: IProjection<TReadModel>,
     store: IProjectionStore<TReadModel>,
-    retryConfigOrCapabilities: IProjectionRetryConfig | IProjectionCapability<TReadModel>[],
+    retryConfigOrCapabilities: IProjectionRetryConfig | (Capability & IProjectionCapability)[],
     private readonly errorStrategy: IProjectionErrorStrategy = new ExponentialBackoffStrategy()
   ) {
     super(projection, store);

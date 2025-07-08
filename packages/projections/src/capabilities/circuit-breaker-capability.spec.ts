@@ -54,7 +54,7 @@ describe('CircuitBreakerCapability', () => {
   describe('initialization', () => {
     it('should initialize with CLOSED state', () => {
       expect(capability.getState()).toBe(CircuitState.CLOSED);
-      expect(capability.name).toBe('circuit-breaker');
+      expect(capability.type).toBe('circuitBreaker');
     });
 
     it('should accept configuration', () => {
@@ -65,7 +65,7 @@ describe('CircuitBreakerCapability', () => {
       };
 
       const customCapability = new CircuitBreakerCapability(customConfig);
-      expect(customCapability.name).toBe('circuit-breaker');
+      expect(customCapability.type).toBe('circuitBreaker');
     });
   });
 
@@ -313,13 +313,13 @@ describe('CircuitBreakerCapability', () => {
       newCapability.attach(newContext);
 
       // Assert - should work with attached context
-      expect(newCapability.name).toBe('circuit-breaker');
+      expect(newCapability.type).toBe('circuitBreaker');
 
       // Act
       newCapability.detach?.();
 
       // Assert - should handle detachment
-      expect(newCapability.name).toBe('circuit-breaker');
+      expect(newCapability.type).toBe('circuitBreaker');
     });
 
     it('should handle context without projection name', async () => {
