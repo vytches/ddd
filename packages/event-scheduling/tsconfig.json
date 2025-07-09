@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "composite": true,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/**/*",
+    "../contracts/src/**/*",
+    "../core/src/**/*",
+    "../events/src/**/*",
+    "../utils/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../value-objects/src/**/*",
+    "../repositories/src/**/*",
+    "../aggregates/src/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

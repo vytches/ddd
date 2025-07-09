@@ -60,3 +60,22 @@ export type {
   IDeadLetterCapability,
   IAggregateSnapshot,
 } from './capabilities';
+
+// Scheduling
+export type {
+  IScheduledEvent,
+  IScheduleOptions,
+  IScheduledJob,
+  IJobFilter,
+  IJobQueryResult,
+  IEventScheduler,
+  ISchedulerConfig,
+  ISchedulerLifecycle,
+  IRecurringPattern,
+} from './scheduling';
+
+export {
+  JobStatus,
+  SchedulePriority,
+  BackoffStrategy,
+} from './scheduling';
