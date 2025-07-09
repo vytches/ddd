@@ -41,6 +41,7 @@
     "@vytches-ddd/acl": "workspace:*",
     "@vytches-ddd/projections": "workspace:*",
     "@vytches-ddd/messaging": "workspace:*",
-    "@vytches-ddd/resilience": "workspace:*"
+    "@vytches-ddd/resilience": "workspace:*",
+    "@vytches-ddd/di": "workspace:*"
   }
 }

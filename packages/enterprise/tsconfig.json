@@ -18,7 +18,16 @@
     "../core/src/**/*",
     "../repositories/src/**/*",
     "../testing/src/**/*",
-    "../validation/src/**/*"
+    "../validation/src/**/*",
+    "../acl/src/**/*",
+    "../messaging/src/**/*",
+    "../policies/src/**/*",
+    "../resilience/src/**/*",
+    "../projections/src/**/*",
+    "../cqrs/src/**/*",
+    "../di/src/**/*",
+    "../domain-services/src/**/*",
+    "../cli/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

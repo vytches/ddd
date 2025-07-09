@@ -422,6 +422,9 @@ importers:
       '@vytches-ddd/cqrs':
         specifier: workspace:*
         version: link:../cqrs
+      '@vytches-ddd/di':
+        specifier: workspace:*
+        version: link:../di
       '@vytches-ddd/events':
         specifier: workspace:*
         version: link:../events
