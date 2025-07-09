@@ -5,10 +5,8 @@ import type {
   IAggregateEventHandler,
 } from './aggregate-interfaces';
 
-import type { IExtendedDomainEvent, IEventMetadata, Capability, CapabilityConstructor } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IEventMetadata, Capability, CapabilityConstructor, EntityId } from '@vytches-ddd/contracts';
 import { createDomainEvent, CapabilityRegistry } from '@vytches-ddd/contracts';
-
-import type { EntityId } from '@vytches-ddd/value-objects';
 
 /**
  * Type-safe AggregateRoot implementation with capability management

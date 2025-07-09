@@ -32,6 +32,9 @@
     "@vytches-ddd/logging": "workspace:*",
     "@vytches-ddd/validation": "workspace:*"
   },
+  "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*"
+  },
   "nx": {
     "tags": [
       "scope:acl",

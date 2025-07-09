@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VersionedACLRegistry } from './versioned-acl-registry';
 import type { IACLAdapter, ACLContextInfo } from './acl.interfaces';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 
 // Test models
 interface TestDomainModel {

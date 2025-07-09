@@ -1,5 +1,5 @@
 import type { IEventBus } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 import { Logger } from '@vytches-ddd/logging';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessageStatus, MessagePriority } from './outbox-interfaces';

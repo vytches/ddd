@@ -8,16 +8,17 @@
   },
   "include": [
     "src/**/*",
-    "../core/src/**/*",
-    "../domain-primitives/src/**/*",
-    "../value-objects/src/**/*",
-    "../repositories/src/**/*",
-    "../aggregates/src/**/*",
-    "../validation/src/**/*",
     "../contracts/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../events/src/**/*",
+    "../aggregates/src/**/*",
+    "../value-objects/src/**/*",
     "../utils/src/**/*",
-    "../di/src/**/*",
-    "../logging/src/**/*"
+    "../logging/src/**/*",
+    "../core/src/**/*",
+    "../repositories/src/**/*",
+    "../testing/src/**/*",
+    "../validation/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

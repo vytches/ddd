@@ -1,7 +1,6 @@
 import { TestDataBuilder, type TestDataBuilderOptions } from '../core/test-data-builder';
 import type { IAggregateRoot, IAggregateConstructorParams } from '@vytches-ddd/aggregates';
-import type { EntityId } from '@vytches-ddd/value-objects';
-import type { IExtendedDomainEvent, IEventMetadata } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IEventMetadata, EntityId } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 
 /**
@@ -309,7 +308,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
    */
   createSnapshot(aggregate: T, name?: string): AggregateStateSnapshot<T> {
     const snapshot: AggregateStateSnapshot<T> = {
-      id: aggregate.getId(),
+      id: aggregate.getId() as EntityId,
       version: aggregate.getVersion(),
       initialVersion: aggregate.getInitialVersion(),
       domainEvents: aggregate.getDomainEvents(),
@@ -342,7 +341,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     });
 
     const aggregate = new this.aggregateClass({
-      id: snapshot.id as EntityId<unknown>,
+      id: snapshot.id as unknown,
       version: snapshot.initialVersion
     } as IAggregateConstructorParams<unknown>) as T;
 
@@ -509,7 +508,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     const idValue = (data as unknown as { id?: EntityId<unknown> }).id || ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>);
 
     const constructorParams = {
-      id: idValue,
+      id: idValue as unknown,
       version: this.aggregateOptions.initialVersion || 0
     } as IAggregateConstructorParams<unknown>;
 
@@ -636,9 +635,9 @@ export class EventSourcedAggregateTestBuilder<T extends IAggregateRoot> extends 
    */
   buildFromEventHistory(): T {
     const aggregate = new (this as unknown as { aggregateClass: new (params: IAggregateConstructorParams<unknown>) => T }).aggregateClass({
-      id: (this.data as unknown as { id?: EntityId<unknown> }).id || ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>),
+      id: (this.data as unknown as { id?: EntityId<unknown> }).id || ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>) as unknown,
       version: 0
-    });
+    } as IAggregateConstructorParams<unknown>);
 
     // Replay event history
     if (this.eventHistory.length > 0) {

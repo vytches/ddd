@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 
 import { IBaseRepository, IRepositoryAggregate } from './base-repository';
-import { EntityId } from '@vytches-ddd/value-objects';
+import { EntityId } from '@vytches-ddd/contracts';
 import type {
   IDomainEvent,
   IAggregateWithEvents,

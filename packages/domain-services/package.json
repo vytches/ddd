@@ -34,6 +34,9 @@
     "@vytches-ddd/utils": "workspace:*",
     "tslib": "^2.6.0"
   },
+  "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*"
+  },
   "nx": {
     "tags": [
       "scope:domain-services",

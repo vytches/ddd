@@ -17,6 +17,7 @@
     "../repositories/src/**/*",
     "../aggregates/src/**/*",
     "../validation/src/**/*",
+    "../testing/src/**/*",
     "../logging/src/**/*"
   ],
   "exclude": ["node_modules"]

@@ -152,7 +152,7 @@ importers:
         version: link:../../packages/cqrs
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../../packages/logging
+        version: link:../../packages/logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -221,13 +221,17 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
       '@vytches-ddd/validation':
         specifier: workspace:*
         version: link:../validation
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
 
   packages/aggregates:
     dependencies:
@@ -239,14 +243,14 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
-      '@vytches-ddd/value-objects':
-        specifier: workspace:*
-        version: link:../value-objects
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -264,7 +268,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -285,7 +289,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -327,7 +331,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -402,6 +406,10 @@ importers:
       tslib:
         specifier: ^2.6.0
         version: 2.8.1
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
 
   packages/enterprise:
     dependencies:
@@ -436,6 +444,33 @@ importers:
         specifier: workspace:*
         version: link:../validation
 
+  packages/event-scheduling:
+    dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches-ddd/domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
+      '@vytches-ddd/events':
+        specifier: workspace:*
+        version: link:../events
+      '@vytches-ddd/logging':
+        specifier: workspace:*
+        version: link:../logging/dist
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@vytches-ddd/validation':
+        specifier: workspace:*
+        version: link:../validation
+      '@vytches-ddd/value-objects':
+        specifier: workspace:*
+        version: link:../value-objects
+
   packages/events:
     dependencies:
       '@vytches-ddd/contracts':
@@ -449,7 +484,7 @@ importers:
         version: link:../di
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -458,6 +493,15 @@ importers:
         version: 2.8.1
 
   packages/logging:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@1.6.1)
+
+  packages/logging/dist:
     devDependencies:
       typescript:
         specifier: ^5.0.0
@@ -476,13 +520,17 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/policies':
         specifier: workspace:*
         version: link:../policies
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
 
   packages/policies:
     dependencies:
@@ -506,7 +554,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -526,6 +574,9 @@ importers:
         specifier: '*'
         version: link:../value-objects
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -546,11 +597,14 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -577,16 +631,13 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging
+        version: link:../logging/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
       '@vytches-ddd/validation':
         specifier: workspace:*
         version: link:../validation
-      '@vytches-ddd/value-objects':
-        specifier: workspace:*
-        version: link:../value-objects
       tslib:
         specifier: ^2.6.0
         version: 2.8.1
@@ -601,9 +652,16 @@ importers:
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
 
   packages/value-objects:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: '*'
+        version: link:../contracts
       '@vytches-ddd/domain-primitives':
         specifier: '*'
         version: link:../domain-primitives
@@ -611,6 +669,9 @@ importers:
         specifier: '*'
         version: link:../utils
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3

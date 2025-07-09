@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 import { CircuitBreaker, CircuitBreakerState, CircuitBreakerOpenError } from './circuit-breaker';
 import { DefaultResilienceContext } from '../core/resilience-context';
 

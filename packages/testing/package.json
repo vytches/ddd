@@ -26,17 +26,18 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/domain-primitives": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*",
+    "tslib": "^2.6.0"
+  },
+  "peerDependencies": {
+    "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
     "@vytches-ddd/cqrs": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/logging": "workspace:*",
-    "@vytches-ddd/aggregates": "workspace:*",
-    "@vytches-ddd/value-objects": "workspace:*",
-    "tslib": "^2.6.0"
+    "@vytches-ddd/aggregates": "workspace:*"
   },
   "nx": {
     "tags": [

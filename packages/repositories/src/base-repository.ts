@@ -2,9 +2,9 @@ import type {
   IEnhancedEventDispatcher,
   IEventPersistenceHandler,
   IAggregateWithEvents,
+  EntityId,
 } from '@vytches-ddd/contracts';
 import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
-import type { EntityId } from '@vytches-ddd/value-objects';
 
 /**
  * Version error for repository operations

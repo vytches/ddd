@@ -1,5 +1,6 @@
 import { it, expect, describe } from 'vitest';
-import { LibUtils, safeRun } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 
 import { InvalidParameterError, MissingValueError } from '@vytches-ddd/domain-primitives';
 import { EntityId } from './id.value-object';

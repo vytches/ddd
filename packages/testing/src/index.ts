@@ -35,9 +35,6 @@ export {
   type RandomOptions,
   type TestUser,
   type TestDomainEvent,
-
-  // Version
-  coreTestingVersion
 } from './core';
 
 // Phase 2: Domain Layer - Domain-specific testing utilities
@@ -58,9 +55,6 @@ export {
   type AggregateTestOptions,
   type AggregateEventScenario,
   type AggregateStateSnapshot,
-
-  // Version
-  domainTestingVersion
 } from './domain';
 
 // Testing framework version

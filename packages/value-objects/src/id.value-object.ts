@@ -1,23 +1,18 @@
 import { LibUtils } from '@vytches-ddd/utils';
-
 import { InvalidParameterError, MissingValueError } from '@vytches-ddd/domain-primitives';
-import { BaseValueObject } from './base-value-object';
+import { EntityId as BaseEntityId, type IEntityIdFactory, type IdType } from '@vytches-ddd/contracts';
 
-export type IdType = 'uuid' | 'integer' | 'text' | 'bigint';
-
-export class EntityId<T = string> extends BaseValueObject<T> {
-  private readonly type: IdType;
-
-  constructor(
-    override readonly value: T,
-    type: IdType
-  ) {
-    super(value);
-    this.type = type;
+/**
+ * Enhanced EntityId implementation with additional validation and utilities
+ * Extends the base EntityId from contracts with framework-specific functionality
+ */
+export class EntityId<T = string> extends BaseEntityId<T> {
+  constructor(value: T, type: IdType) {
+    super(value, type);
   }
 
-  validate(value: T): boolean {
-    switch (this.type) {
+  override validate(value: T): boolean {
+    switch (this.getType()) {
       case 'uuid':
         return LibUtils.isValidUUID(value as unknown as string);
       case 'integer':
@@ -27,15 +22,18 @@ export class EntityId<T = string> extends BaseValueObject<T> {
       case 'text':
         return LibUtils.isValidTextId(value as unknown as string);
       default:
-        throw new InvalidParameterError(`Unsupported IdType: ${this.type}`);
+        throw new InvalidParameterError(`Unsupported IdType: ${this.getType()}`);
     }
   }
 
-  static createWithRandomUUID(): EntityId {
+  /**
+   * Enhanced factory methods with strict validation
+   */
+  static override createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
 
-  static fromUUID(value: string): EntityId {
+  static override fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
     }
@@ -47,7 +45,7 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     return new EntityId(value, 'uuid');
   }
 
-  static fromInteger(value: number): EntityId {
+  static override fromInteger(value: number): EntityId<string> {
     if (!LibUtils.isValidInteger(value)) {
       throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
     }
@@ -55,7 +53,7 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     return new EntityId(value.toString(), 'integer');
   }
 
-  static fromBigInt(value: string | bigint): EntityId {
+  static override fromBigInt(value: string | bigint): EntityId<string> {
     const stringValue = LibUtils.normalizeIdToString(value);
 
     if (!LibUtils.isValidBigInt(stringValue)) {
@@ -65,7 +63,59 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     return new EntityId(stringValue, 'bigint');
   }
 
-  static fromText(value: string): EntityId {
+  static override fromText(value: string): EntityId<string> {
+    if (!LibUtils.hasValue(value)) {
+      throw MissingValueError.withValue('entity identifier');
+    }
+
+    if (!LibUtils.isValidTextId(value)) {
+      throw InvalidParameterError.withParameter('entity identifier contains invalid characters');
+    }
+
+    return new EntityId(value, 'text');
+  }
+}
+
+/**
+ * Factory class for creating Entity IDs
+ * Implements the IEntityIdFactory interface from contracts
+ */
+export class EntityIdFactory implements IEntityIdFactory {
+  static createWithRandomUUID(): EntityId<string> {
+    return new EntityId(LibUtils.getUUID(), 'uuid');
+  }
+
+  static fromUUID(value: string): EntityId<string> {
+    if (!LibUtils.hasValue(value)) {
+      throw MissingValueError.withValue('entity identifier');
+    }
+
+    if (!LibUtils.isValidUUID(value)) {
+      throw InvalidParameterError.withParameter('entity identifier');
+    }
+
+    return new EntityId(value, 'uuid');
+  }
+
+  static fromInteger(value: number): EntityId<string> {
+    if (!LibUtils.isValidInteger(value)) {
+      throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
+    }
+
+    return new EntityId(value.toString(), 'integer');
+  }
+
+  static fromBigInt(value: string | bigint): EntityId<string> {
+    const stringValue = LibUtils.normalizeIdToString(value);
+
+    if (!LibUtils.isValidBigInt(stringValue)) {
+      throw InvalidParameterError.withParameter('entity identifier must be a valid bigint');
+    }
+
+    return new EntityId(stringValue, 'bigint');
+  }
+
+  static fromText(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
     }
@@ -77,22 +127,24 @@ export class EntityId<T = string> extends BaseValueObject<T> {
     return new EntityId(value, 'text');
   }
 
-  override equals(entityId: EntityId<T>): boolean {
-    return entityId.getValue() === this.value && entityId.getType() === this.type;
+  // Instance methods implementing IEntityIdFactory
+  createWithRandomUUID(): EntityId<string> {
+    return EntityIdFactory.createWithRandomUUID();
   }
 
-  getType(): IdType {
-    return this.type;
+  fromUUID(value: string): EntityId<string> {
+    return EntityIdFactory.fromUUID(value);
   }
 
-  override toJSON(): string {
-    return JSON.stringify({
-      value: this.value,
-      type: this.type,
-    });
+  fromInteger(value: number): EntityId<string> {
+    return EntityIdFactory.fromInteger(value);
   }
 
-  isType(type: IdType): boolean {
-    return this.type === type;
+  fromBigInt(value: string | bigint): EntityId<string> {
+    return EntityIdFactory.fromBigInt(value);
+  }
+
+  fromText(value: string): EntityId<string> {
+    return EntityIdFactory.fromText(value);
   }
 }

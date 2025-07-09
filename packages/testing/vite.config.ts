@@ -43,7 +43,6 @@ export default defineConfig({
       '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
       '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
       '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src'),
-      '@vytches-ddd/value-objects': resolve(__dirname, '../value-objects/src'),
     },
   },
 });

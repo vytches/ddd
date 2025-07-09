@@ -37,6 +37,7 @@
     ]
   },
   "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*",
     "tslib": "^2.8.1"
   }
 }

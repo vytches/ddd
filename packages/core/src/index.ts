@@ -13,9 +13,13 @@ export type {
 } from '@vytches-ddd/aggregates';
 
 // Value objects - re-exported from value-objects package
-export { BaseValueObject, EntityId } from '@vytches-ddd/value-objects';
+export { BaseValueObject } from '@vytches-ddd/value-objects';
 
-export type { ValueObjectValidator, IdType } from '@vytches-ddd/value-objects';
+export type { ValueObjectValidator } from '@vytches-ddd/value-objects';
+
+// Entity IDs - re-exported from contracts (enterprise-level fundamental types)
+export { EntityId } from '@vytches-ddd/contracts';
+export type { IdType } from '@vytches-ddd/contracts';
 
 // Errors - re-exported from domain-primitives
 export {

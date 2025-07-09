@@ -1,5 +1,5 @@
 import type { IEventStore } from '@vytches-ddd/contracts';
-import { EntityId } from '@vytches-ddd/value-objects';
+import { EntityId } from '@vytches-ddd/contracts';
 
 import { AggregateRoot } from './aggregate-root';
 import type { IAggregateConstructorParams } from './aggregate-interfaces';

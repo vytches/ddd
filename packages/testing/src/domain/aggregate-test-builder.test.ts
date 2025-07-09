@@ -8,7 +8,7 @@ import {
 } from './aggregate-test-builder';
 import { AggregateRoot } from '@vytches-ddd/aggregates';
 import type { IAggregateConstructorParams } from '@vytches-ddd/aggregates';
-import type { EntityId } from '@vytches-ddd/value-objects';
+import type { EntityId } from '@vytches-ddd/contracts';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 
 // Test aggregate implementation

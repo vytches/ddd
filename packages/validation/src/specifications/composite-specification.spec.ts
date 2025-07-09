@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { CompositeSpecification } from './composite-specification';
 import { Specification } from './specification-operators';
 import type { ISpecification } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 
 // Enhanced specification that includes name, description and failure explanation
 class NamedSpecification<T> extends CompositeSpecification<T> {

@@ -61,6 +61,16 @@ export type {
   IAggregateSnapshot,
 } from './capabilities';
 
+// Domain
+export type {
+  IEntityId,
+  IEntityIdConstructorParams,
+  IEntityIdFactory,
+  IdType,
+} from './domain';
+
+export { EntityId } from './domain';
+
 // Scheduling
 export type {
   IScheduledEvent,

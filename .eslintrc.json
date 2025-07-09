@@ -37,6 +37,7 @@
                 "sourceTag": "scope:value-objects",
                 "onlyDependOnLibsWithTags": [
                   "scope:utils",
+                  "scope:contracts",
                   "scope:domain-primitives",
                   "scope:value-objects"
                 ]

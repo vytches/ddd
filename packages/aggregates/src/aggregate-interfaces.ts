@@ -6,9 +6,8 @@ import type {
   IEventStore,
   Capability,
   CapabilityConstructor,
+  EntityId,
 } from '@vytches-ddd/contracts';
-
-import type { EntityId } from '@vytches-ddd/value-objects';
 
 // ==========================================
 // CORE AGGREGATE INTERFACES

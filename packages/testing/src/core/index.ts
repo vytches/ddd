@@ -38,6 +38,3 @@ export {
   type TestUser,
   type TestDomainEvent
 } from './test-data-builder';
-
-// Export version for foundation layer
-export const coreTestingVersion = '1.0.0';

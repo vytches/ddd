@@ -141,14 +141,14 @@ ADRs are stored in `docs/adr/` and automatically indexed. See existing ADRs for 
 
 ```
 Foundation Layer:
+├── @vytches-ddd/contracts (Enterprise-grade contracts & fundamental types - EntityId, interfaces)
 ├── @vytches-ddd/core (Meta-package: Enterprise API stability, 1.4KB)
 │   ├── @vytches-ddd/domain-primitives (Base classes, errors, interfaces)
-│   ├── @vytches-ddd/value-objects (Value object implementations, EntityId)
+│   ├── @vytches-ddd/value-objects (Enhanced value objects, extended EntityId)
 │   ├── @vytches-ddd/repositories (Repository patterns, UnitOfWork)
 │   └── @vytches-ddd/aggregates (Aggregate root + capabilities)
 ├── @vytches-ddd/di (Enterprise dependency injection with auto-discovery)
 ├── @vytches-ddd/utils (Common utilities)
-├── @vytches-ddd/contracts (Shared interfaces and contracts)
 └── @vytches-ddd/logging (Enterprise logging, structured logging, DDD-first design)
 
 Patterns Layer:
@@ -221,7 +221,8 @@ aggregates):
 ```typescript
 // ✅ Direct imports to prevent circular dependencies
 import { IActor } from '@vytches-ddd/domain-primitives';
-import { EntityId } from '@vytches-ddd/value-objects';
+import type { EntityId } from '@vytches-ddd/contracts'; // EntityId interfaces from contracts
+import { EntityId } from '@vytches-ddd/value-objects'; // Enhanced EntityId implementation
 ```
 
 **Higher-Level Packages** (events, cqrs, domain-services, etc.):
@@ -236,17 +237,20 @@ import { AggregateRoot, EntityId } from '@vytches-ddd/core';
 ```typescript
 // ✅ Can import directly for development/testing
 import { AggregateRoot } from '@vytches-ddd/aggregates';
+import type { EntityId } from '@vytches-ddd/contracts'; // For type definitions
 // OR through stable API
 import { AggregateRoot } from '@vytches-ddd/core';
 ```
 
 #### **Module Boundary Rules:**
 
-- **Core building blocks**: Minimal direct dependencies between each other
+- **Contracts package**: Foundation layer providing core interfaces (EntityId, domain contracts)
+- **Core building blocks**: Import EntityId from contracts, minimal other dependencies
 - **Higher-level packages**: Must import through `@vytches-ddd/core`
-- **Testing package**: Can depend on all packages
+- **Testing package**: Can depend on all packages, uses contracts for EntityId
 - **Examples**: Can use any import pattern
 - **ESLint enforcement**: Prevents inappropriate cross-dependencies
+- **Circular dependency prevention**: Contracts package breaks circular dependencies
 
 ## Development Workflow
 
@@ -364,8 +368,27 @@ packages/<package-name>/
   all packages
 - **API Stability**: Meta-package pattern provides enterprise-grade API
   stability
+- **Circular Dependency Resolution**: Enterprise-grade architecture with contracts foundation
+- **TypeScript Configuration**: Standardized across all packages with proper include paths
 
 ### Recently Implemented Features
+
+#### NEW: Enterprise Circular Dependency Resolution - COMPLETED
+
+**BREAKING CHANGE**: EntityId moved to contracts package for enterprise-grade architecture
+
+- **Contracts Foundation**: EntityId interfaces moved to `@vytches-ddd/contracts` as fundamental building block
+- **Circular Dependency Elimination**: Resolved circular dependencies between testing and value-objects packages
+- **Enterprise Architecture**: Two-layer EntityId pattern with base implementation in contracts and enhanced validation in value-objects
+- **Type Safety**: Full TypeScript compliance with IEntityId interface contracts
+- **Factory Methods**: Built-in UUID, text, integer, and bigint factory methods in base EntityId
+- **Enhanced Validation**: Value-objects package provides enhanced EntityId with LibUtils integration
+- **Testing Integration**: Testing package now uses contracts EntityId, eliminating circular dependencies
+- **Backward Compatibility**: All existing APIs maintained while improving architecture
+- **Import Strategy**: Clear separation between base EntityId (contracts) and enhanced EntityId (value-objects)
+- **Enterprise Grade**: No shortcuts, comprehensive solution following DDD principles
+- **TypeScript Configuration**: Standardized tsconfig.json across all 22 packages for proper dependency resolution
+- **ADR Documentation**: Architectural decision recorded for future reference
 
 #### NEW: Unified Event System (@vytches-ddd/events) - MAJOR REFACTOR COMPLETED
 
@@ -454,10 +477,15 @@ packages/<package-name>/
 
 #### Shared Contracts Package (@vytches-ddd/contracts)
 
+- **Foundation Layer**: Core interfaces and contracts for entire library
+- **EntityId Foundation**: Base EntityId interface and implementation breaking circular dependencies
 - **Domain Event Interfaces**: Standardized event contracts across packages
 - **Aggregate Interfaces**: Common aggregate behavior contracts
 - **Validation Interfaces**: Specification and validator contracts
 - **Event Infrastructure**: Event bus, dispatcher, and store interfaces
+- **Factory Methods**: Built-in UUID, text, integer, and bigint EntityId factories
+- **Type Safety**: Full TypeScript interface contracts with IEntityId
+- **Enterprise Architecture**: Prevents circular dependencies while maintaining functionality
 
 #### Enhanced Validation Package (@vytches-ddd/validation)
 
@@ -864,6 +892,11 @@ pnpm playground
   - Repository-integrated automatic event publishing
   - Industry-standard patterns (MediatR, Spring, Axon alignment)
   - Enterprise transaction safety and optimistic concurrency
+- **🔥 COMPLETED**: **Enterprise Circular Dependency Resolution** - EntityId moved to contracts package
+  - Enterprise-grade architecture with contracts foundation layer
+  - Circular dependency elimination between testing and value-objects packages
+  - TypeScript configuration standardization across all 22 packages
+  - Two-layer EntityId pattern with enhanced validation
 - **NEW**: Enterprise dependency injection system with auto-discovery and context isolation
 - **NEW**: Global service locator pattern following MediatR architecture
 - **NEW**: Enhanced decorators (@DomainService, @CommandHandler, @QueryHandler) with DI options

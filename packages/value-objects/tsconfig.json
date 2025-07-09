@@ -7,6 +7,19 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "../utils/src/**/*", "../domain-primitives/src/**/*"],
+  "include": [
+    "src/**/*",
+    "../contracts/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../events/src/**/*",
+    "../aggregates/src/**/*",
+    "../value-objects/src/**/*",
+    "../utils/src/**/*",
+    "../logging/src/**/*",
+    "../core/src/**/*",
+    "../repositories/src/**/*",
+    "../testing/src/**/*",
+    "../validation/src/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

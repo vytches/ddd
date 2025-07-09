@@ -29,6 +29,9 @@
     "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/utils": "workspace:*"
   },
+  "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*"
+  },
   "nx": {
     "tags": [
       "scope:validation",

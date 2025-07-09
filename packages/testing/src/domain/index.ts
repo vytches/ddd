@@ -19,6 +19,3 @@ export {
   type AggregateEventScenario,
   type AggregateStateSnapshot
 } from './aggregate-test-builder';
-
-// Export version for domain layer
-export const domainTestingVersion = '1.0.0';

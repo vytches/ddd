@@ -16,7 +16,9 @@
     "../utils/src/**/*",
     "../logging/src/**/*",
     "../core/src/**/*",
-    "../repositories/src/**/*"
+    "../repositories/src/**/*",
+    "../testing/src/**/*",
+    "../validation/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

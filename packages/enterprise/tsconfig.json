@@ -2,11 +2,23 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "composite": true,
     "declarationMap": false, // Disable .d.ts.map files for smaller bundles
     "sourceMap": false // Disable source maps for production builds
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "include": [
+    "src/**/*",
+    "../contracts/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../events/src/**/*",
+    "../aggregates/src/**/*",
+    "../value-objects/src/**/*",
+    "../utils/src/**/*",
+    "../logging/src/**/*",
+    "../core/src/**/*",
+    "../repositories/src/**/*",
+    "../testing/src/**/*",
+    "../validation/src/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

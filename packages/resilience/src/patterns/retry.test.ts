@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches-ddd/testing';
 import { RetryPolicy, MaxRetriesExceededError } from './retry';
 import { DefaultResilienceContext } from '../core/resilience-context';
 
@@ -49,7 +49,7 @@ describe('RetryPolicy', () => {
       const error = new Error('persistent failure');
       const operation = vi.fn().mockRejectedValue(error);
 
-      const [retryError, result] = await safeRun(() => retryPolicy.execute(operation, context));
+      const [retryError, result] = await safeRun(async () => retryPolicy.execute(operation, context));
 
       expect(result).toBeUndefined();
       expect(retryError).toBeInstanceOf(MaxRetriesExceededError);
