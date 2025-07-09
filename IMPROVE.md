@@ -11,7 +11,7 @@
 6. **DEPENDENCY INJECTION SYSTEM** - enterprise-grade DI z auto-discovery ✅
 7. **TYPE-SAFE CAPABILITY SYSTEM** - string-based → constructor-based type safety ✅
 8. **ENTERPRISE CIRCULAR DEPENDENCY RESOLUTION** - EntityId → contracts foundation ✅
-9. **EVENT STORE IMPLEMENTATION** - Enterprise Event Sourcing foundation ✅
+9. **EVENT STORE IMPLEMENTATION** - Enterprise Event Sourcing z NestJS/TypeORM production examples ✅
 
 🏆 **PRZEŁOMOWE OSIĄGNIĘCIE - CORE PACKAGE DECOMPOSITION UKOŃCZONE!**
 
@@ -1084,6 +1084,7 @@ Updated all 22 packages with standardized tsconfig.json include paths:
 3. **Storage Adapter Pattern** - ready for PostgreSQL, MongoDB, EventStore DB adapters
 4. **Rich Features** - global event log, stream management, event serialization
 5. **Enterprise Integration** - seamless z UnifiedEventBus i IBaseRepository
+6. **Production-Ready Documentation** - comprehensive NestJS/TypeORM examples
 
 ### **Rezultaty:**
 - **🏗️ Architecture**: Enterprise-grade Event Store foundation ready
@@ -1093,6 +1094,9 @@ Updated all 22 packages with standardized tsconfig.json include paths:
 - **🧪 Testing**: 25 comprehensive tests covering all scenarios
 - **🔧 Extensibility**: Adapter pattern for multiple storage backends
 - **⚡ Type Safety**: Full TypeScript support z generics
+- **📚 Documentation**: Complete NestJS integration guide with TypeORM entities
+- **🛡️ Security**: Encryption, checksums, audit logging examples
+- **⚙️ Performance**: Connection pooling, caching, indexing strategies
 
 ### **Nowa architektura:**
 ```typescript
@@ -1120,14 +1124,45 @@ const allEvents = await eventStore.readAll({
 });
 ```
 
+### **Production Integration:**
+```typescript
+// NestJS Module Setup
+@Module({
+  imports: [TypeOrmModule.forFeature([EventEntity, StreamEntity, SnapshotEntity])],
+  providers: [
+    {
+      provide: 'EVENT_STORE',
+      useFactory: async (dataSource: DataSource) => {
+        const eventStore = new PostgreSQLEventStore({
+          dataSource,
+          schema: 'event_store',
+          enableSnapshots: true,
+          snapshotFrequency: 100,
+          enableOptimisticConcurrency: true,
+        });
+        await eventStore.connect();
+        return eventStore;
+      },
+      inject: [DataSource],
+    },
+  ],
+})
+export class EventStoreModule {}
+```
+
 ### **Implementation Details:**
 - **BaseEventStore**: Abstract class z common functionality
 - **InMemoryEventStore**: Complete in-memory implementation
 - **JsonEventSerializer**: Default serialization strategy
 - **Error Handling**: Dedicated errors (ConcurrencyError, StreamNotFoundError)
 - **Logging Integration**: Full structured logging support
+- **TypeORM Entities**: EventEntity, StreamEntity, SnapshotEntity
+- **Database Migrations**: Complete PostgreSQL schema setup
+- **Security Layer**: Encryption, checksums, audit logging
+- **Performance Optimization**: Connection pooling, caching, indexing
+- **Health Checks**: NestJS Terminus integration
 
-**Event Store transformation: z basic interface do enterprise-grade Event Sourcing foundation! 🚀**
+**Event Store transformation: z basic interface do enterprise-grade Event Sourcing foundation z production-ready NestJS integration! 🚀**
 
 ---
 
@@ -1585,6 +1620,7 @@ pnpm quality:performance  # Performance monitoring
 - **Test Coverage**: >95% maintained (1460 tests)
 - **CI/CD Quality Gates**: automated monitoring + Renovate Bot
 - **Dependency Injection System**: enterprise-grade DI z auto-discovery + context isolation
+- **Event Store Implementation**: enterprise-grade Event Sourcing z production-ready NestJS/TypeORM examples
 
 ### 🎯 **POZOSTAŁE PRIORYTETY:**
 1. ✅ **Type Safety Advanced** - **UKOŃCZONE!** (67 any types, krytyczne naprawione)
@@ -1601,7 +1637,7 @@ pnpm quality:performance  # Performance monitoring
 - ✅ **Type Safety**: Excellent (67 any types - infrastructure patterns only)
 - ✅ **Quality Assurance**: Automated (CI/CD gates + dependency management)
 - ✅ **Dependency Injection**: Enterprise-grade (auto-discovery + context isolation)
-- ✅ **Event Sourcing**: Enterprise Event Store with snapshots and optimistic concurrency
+- ✅ **Event Sourcing**: Enterprise Event Store with snapshots, optimistic concurrency, and production-ready NestJS/TypeORM integration
 
 **VytchesDDD DDD Framework osiągnął pełny enterprise-grade standard z doskonałą modularizacją, unified DI system, Event Sourcing support, backward compatibility i pełną automatyzacją CI/CD! 🚀**
 

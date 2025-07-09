@@ -30,6 +30,7 @@ pnpm dev:enterprise
 pnpm dev:cli
 pnpm dev:testing
 pnpm dev:logging
+pnpm dev:event-store
 ```
 
 ### Testing
@@ -500,6 +501,21 @@ packages/<package-name>/
 - **Logging Integration**: All validation operations now include structured
   logging
 
+#### Event Store Package (@vytches-ddd/event-store)
+
+- **Stream-based Storage**: Organize events by aggregate streams with version control
+- **Optimistic Concurrency Control**: Version-based conflict detection and resolution
+- **Snapshot Support**: Performance optimization for large aggregates with configurable frequency
+- **Global Event Log**: Read all events across streams with filtering and pagination
+- **Event Serialization**: Pluggable serialization strategies with JSON default
+- **Storage Adapters**: In-memory implementation with pattern for PostgreSQL, MongoDB adapters
+- **Rich Metadata**: Correlation, causation, and custom metadata support for events
+- **Error Handling**: Comprehensive error hierarchy with domain-specific exceptions
+- **NestJS Integration**: Production-ready TypeORM entities and module configuration
+- **Security Features**: Encryption, checksums, and audit logging for sensitive events
+- **Performance Optimization**: Connection pooling, caching, and indexing strategies
+- **Testing Support**: Complete test coverage with event store test harness utilities
+
 #### Enhanced CQRS Package (@vytches-ddd/cqrs)
 
 - **Advanced Middleware System**: Enhanced execution context and logging
@@ -866,14 +882,14 @@ pnpm playground
 
 ## Library Status Summary
 
-### Package Count: 20 Packages
+### Package Count: 21 Packages
 
 - **Foundation**: core (meta-package), domain-primitives, value-objects,
   repositories, aggregates, di, utils, contracts, logging
 - **Patterns**: validation, policies, domain-services
 - **Architecture**: events, cqrs, projections
 - **Integration**: acl, messaging
-- **Infrastructure**: resilience, enterprise
+- **Infrastructure**: resilience, enterprise, event-store
 - **Tooling**: cli, testing
 
 ### Development Readiness
