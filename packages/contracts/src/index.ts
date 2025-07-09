@@ -13,6 +13,19 @@ export type {
   EventBusMiddleware,
   EventMiddleware,
   EventHandlerFn,
+  // Advanced Event Store interfaces
+  IAdvancedEventStore,
+  IEventStoreConfig,
+  IAppendResult,
+  IStoredEvent,
+  IStoredDomainEvent,
+  IEventStream,
+  IGlobalEventStream,
+  IReadStreamOptions,
+  IReadAllOptions,
+  IStreamMetadata,
+  IEventSerializer,
+  IEventStoreAdapter,
 } from './events';
 
 export {

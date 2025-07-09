@@ -5,3 +5,4 @@ export * from './event-dispatcher.interface';
 export * from './event-handler-interface';
 export * from './event-persistence-handler.interface';
 export * from './event-store.interfaces';
+export * from './event-store-advanced.interfaces';

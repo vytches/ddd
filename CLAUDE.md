@@ -167,7 +167,8 @@ Integration Layer:
 
 Infrastructure Layer:
 ├── @vytches-ddd/resilience (Circuit breakers, retry patterns)
-└── @vytches-ddd/enterprise (Health checks, monitoring)
+├── @vytches-ddd/enterprise (Health checks, monitoring)
+└── @vytches-ddd/event-store (Event sourcing, event streams, snapshots)
 
 Tooling Layer:
 ├── @vytches-ddd/testing (Test utilities)
@@ -186,6 +187,7 @@ This project implements enterprise-grade Domain-Driven Design patterns:
 - **Dependency Injection**: Global service locator with auto-discovery and context isolation
 - **Anti-Corruption Layer**: External system integration patterns
 - **Event Projections**: Read model generation from events with capabilities
+- **Event Sourcing**: Enterprise Event Store with streams, snapshots, and optimistic concurrency
 - **Business Policies**: Fluent policy builder with specifications and
   validations
 - **Validation Specifications**: Composite specifications and business rules

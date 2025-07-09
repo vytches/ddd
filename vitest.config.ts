@@ -110,6 +110,7 @@ export default defineConfig({
       ).pathname,
       '@vytches-ddd/logging': new URL('./packages/logging/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/di': new URL('./packages/di/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/event-store': new URL('./packages/event-store/src/index.ts', import.meta.url).pathname,
     },
   },
 });

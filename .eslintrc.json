@@ -227,6 +227,16 @@
                 ]
               },
               {
+                "sourceTag": "scope:event-store",
+                "onlyDependOnLibsWithTags": [
+                  "scope:contracts",
+                  "scope:core",
+                  "scope:events",
+                  "scope:logging",
+                  "scope:event-store"
+                ]
+              },
+              {
                 "sourceTag": "scope:examples",
                 "onlyDependOnLibsWithTags": ["*"]
               }
