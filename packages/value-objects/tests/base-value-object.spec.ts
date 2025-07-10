@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches-ddd/utils';
 
 import { BaseValueObject } from '../src/base-value-object';
 

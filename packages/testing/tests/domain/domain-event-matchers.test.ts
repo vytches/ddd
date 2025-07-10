@@ -1,14 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  DomainEventMatchers,
-  createDomainEventMatchers,
-  assertEvent,
-  assertEventWithPayload,
-  assertEventSequence,
-  type EventPattern,
-  type EventMatchingContext
-} from '../../src';
+
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { EventMatchingContext, EventPattern } from '../../src/domain';
+import { DomainEventMatchers, assertEvent, assertEventSequence, assertEventWithPayload, createDomainEventMatchers } from '../../src/domain';
 
 describe('DomainEventMatchers', () => {
   let matcher: DomainEventMatchers;

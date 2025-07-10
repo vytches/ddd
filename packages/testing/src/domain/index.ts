@@ -19,3 +19,14 @@ export {
   type AggregateEventScenario,
   type AggregateStateSnapshot
 } from './aggregate-test-builder';
+
+export {
+  DomainEventMatchers,
+  assertEvent,
+  assertEventWithPayload,
+  assertEventSequence,
+  type EventPattern,
+  type EventMatchResult,
+  type EventMatchingContext,
+  createDomainEventMatchers
+} from './domain-event-matchers';

@@ -55,4 +55,10 @@ export {
   type AggregateTestOptions,
   type AggregateEventScenario,
   type AggregateStateSnapshot,
+  DomainEventMatchers,
+  assertEvent,
+  assertEventWithPayload,
+  assertEventSequence,
+  type EventPattern,
+  type EventMatchResult,
 } from './domain';

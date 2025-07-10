@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches-ddd/utils';
 import {
-  CircuitBreaker,
-  Retry,
-  Bulkhead,
-  Resilience,
-  Timeout,
+  CircuitBreakerDecorator as CircuitBreaker,
+  RetryDecorator as Retry,
+  BulkheadDecorator as Bulkhead,
+  ResilienceDecorator as Resilience,
+  TimeoutDecorator as Timeout,
   getResilienceMetrics,
-} from '../../src/resilience-decorators';
+} from '../../src';
 import { DefaultResilienceContext } from '../../src/core/resilience-context';
 import { CircuitBreakerOpenError } from '../../src/patterns/circuit-breaker';
 import { MaxRetriesExceededError } from '../../src/patterns/retry';

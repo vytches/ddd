@@ -1,7 +1,7 @@
 import type { ISpecification } from '@vytches-ddd/contracts';
 import { describe, it, expect } from 'vitest';
-import { BusinessRuleValidator } from '../../src/business-rule-validator';
-import './business-rule-validator-extension'; // Import extension to add methods to prototype
+import { BusinessRuleValidator } from '../../src';
+import '../../src/business-rules/business-rule-validator-extension'; // Import extension to add methods to prototype
 
 // Create a test specification
 class TestSpecification<T> implements ISpecification<T> {

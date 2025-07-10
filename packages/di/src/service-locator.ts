@@ -278,7 +278,7 @@ export class ServiceLocator implements IServiceLocator {
 
     // Phase 2: Auto-discovery through registered plugins
     const discoveredHandlers = await this.discoveryRegistry.discoverAllHandlers(assemblies);
-    
+
     // Discovered handlers for registration
 
     for (const handler of discoveredHandlers) {
@@ -336,13 +336,13 @@ export class ServiceLocator implements IServiceLocator {
 
     const { handlerType, messageType, metadata } = handler;
     const options = metadata.options || metadata; // Support both formats
-    
+
     try {
       // Determine target container (context-specific or global)
       const targetContainer = options.context
         ? this.contextContainers.get(options.context) || this.globalContainer
         : this.globalContainer;
-      
+
       // For domain services, register by serviceId if available
       if (handler.type === 'domain-service' && options.serviceId) {
         // Check if already registered to avoid duplicates
@@ -357,7 +357,7 @@ export class ServiceLocator implements IServiceLocator {
             }
           );
         }
-        
+
         // If this is a context-specific service but fallbackToGlobal is true, also register in global
         if (options.context && options.fallbackToGlobal && this.globalContainer !== targetContainer) {
           if (!this.globalContainer.isRegistered(options.serviceId)) {

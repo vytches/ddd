@@ -11,6 +11,7 @@
     "src/**/*",
     "tests/**/*",
     "../contracts/src/**/*",
+    "../value-objects/src/**/*",
     "../domain-primitives/src/**/*",
     "../utils/src/**/*"
   ],

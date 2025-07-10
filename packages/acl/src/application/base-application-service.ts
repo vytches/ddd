@@ -1,6 +1,6 @@
 import { IDomainError } from '@vytches-ddd/core';
 import { Result } from '@vytches-ddd/utils';
-import type { BusinessRuleValidator, ValidationErrors } from '@vytches-ddd/validation';
+import type { BusinessRuleValidator } from '@vytches-ddd/validation';
 
 export interface IApplicationService {
   readonly serviceName: string;

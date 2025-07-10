@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Result } from '@vytches-ddd/utils';
-import { BaseACLAdapter, SimpleACLAdapter } from '../src/base-acl-adapter';
-import { ACLError } from '../src/acl-errors';
+import { ACLError, BaseACLAdapter, SimpleACLAdapter } from '../src';
 import type {
   IModelTranslator,
   IExternalAPI,
   ACLContextInfo,
   ExecuteOptions,
   ACLMiddleware,
-} from '../src/acl.interfaces';
+} from '../src';
 
 // Test domain and external models
 interface TestDomainModel {

@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { ImportOptions } from '../src/acl-registry';
-import { ACLRegistry } from '../src/acl-registry';
-import { ContextACLRegistry } from '../src/context-acl-registry';
-import type { IACLAdapter, ACLContextInfo, IEnhancedACLAdapter } from '../src/acl.interfaces';
+import type { ImportOptions, IACLAdapter, ACLContextInfo, IEnhancedACLAdapter } from '../src';
+import { ACLRegistry, ContextACLRegistry } from '../src';
+
 
 // Test models
 interface TestDomainModel {

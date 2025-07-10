@@ -1,11 +1,13 @@
-// Priority exports for better tree-shaking
-export { EnhancedACLAdapter } from './enhanced-acl-adapter';
+export { ApplicationError, BaseApplicationService, type IApplicationService } from './application';
 
-export { SimpleACLAdapter as BaseACLAdapter } from './base-acl-adapter';
+export { ACLError, TranslationError, AdapterNotFoundError } from './acl-errors';
 
-export { ACLRegistry } from './acl-registry';
+export { BaseACLMiddleware } from './acl-middleware';
+
+export { ACLRegistry, type ImportOptions } from './acl-registry';
 
 export type {
+  IExternalAPI,
   IACLAdapter,
   IModelTranslator,
   IEnhancedACLAdapter,
@@ -14,7 +16,10 @@ export type {
   ACLMiddleware,
 } from './acl.interfaces';
 
-export { ACLError, TranslationError, AdapterNotFoundError } from './acl-errors';
-
-// For advanced usage - full exports removed for better tree-shaking
-// Import specific exports from subpaths when needed
+export { SimpleACLAdapter , BaseACLAdapter } from './base-acl-adapter';
+export { BaseACLRegistry, type ACLRegistrationMetadata } from './base-acl-registry';
+export { BaseModelTranslator } from './base-translator';
+export { ContextACLRegistry } from './context-acl-registry';
+export { EnhancedACLAdapter } from './enhanced-acl-adapter';
+export { TypedOperation } from './typed-operations';
+export { VersionedACLAdapter, VersionedACLRegistry } from './versioned-acl-registry';

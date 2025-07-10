@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Result } from '@vytches-ddd/utils';
+import { BusinessRuleValidator } from '@vytches-ddd/validation';
+import { ValidationError, ValidationErrors } from '@vytches-ddd/validation';
 import {
   BaseApplicationService,
   ApplicationError,
   type IApplicationService,
-} from '../../src/base-application-service';
-import { BusinessRuleValidator } from '@vytches-ddd/validation';
-import { ValidationError, ValidationErrors } from '@vytches-ddd/validation';
+} from '../../src';
 
 // Test request/response types
 interface CreateOrderRequest {

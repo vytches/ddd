@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { EventTestHarness, type EventTestHarnessOptions, type EventTestScenario } from '../../src/event-test-harness';
+import { EventTestHarness, type EventTestHarnessOptions, type EventTestScenario } from '../../src';
 import { DomainEvent } from '@vytches-ddd/events';
 import type { IDomainEvent } from '@vytches-ddd/contracts';
 
 // Re-export IIntegrationEvent interface from event-test-harness
-type IIntegrationEvent = import('./event-test-harness').IIntegrationEvent;
+type IIntegrationEvent = import('../../src/domain/event-test-harness').IIntegrationEvent;
 
 // Test event implementations
 class TestOrderCreatedEvent extends DomainEvent<{ orderId: string; customerId: string }> {

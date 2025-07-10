@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { IValidator, IValidationErrors } from '@vytches-ddd/contracts';
 import { Result } from '@vytches-ddd/utils';
-import { BaseValidationAdapter, AdapterUtils } from '../../src/base-adapter';
-import { ValidationError, ValidationErrors } from '../../src/validation-error';
+import { ValidationError, ValidationErrors, BaseValidationAdapter, AdapterUtils } from '../../src';
 import { Validation } from '../../src/validation-facade';
 
 // Mock implementations representing different validation libraries

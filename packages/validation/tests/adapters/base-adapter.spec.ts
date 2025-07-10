@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { IValidationErrors } from '@vytches-ddd/contracts';
 import type { Result } from '@vytches-ddd/utils';
-import { BaseValidationAdapter, AdapterUtils } from '../../src/base-adapter';
-import { ValidationError, ValidationErrors } from '../../src/validation-error';
+import { ValidationError, ValidationErrors, BaseValidationAdapter, AdapterUtils } from '../../src';
 
 // Test concrete implementation of BaseValidationAdapter
 class TestValidationAdapter<T> extends BaseValidationAdapter<T, any> {

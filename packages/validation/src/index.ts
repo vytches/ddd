@@ -21,3 +21,5 @@ export { ValidationError, ValidationErrors } from './validation-error';
 export { Validation as ValidationFacade } from './validation-facade';
 
 export { RulesRegistry } from './rules-registry';
+
+export { BaseValidationAdapter, AdapterUtils } from './adapters';

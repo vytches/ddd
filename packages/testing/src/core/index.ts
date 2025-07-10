@@ -19,6 +19,10 @@ export {
 } from './test-clock';
 
 export {
+  TestClockSimple,
+} from './test-clock-simple';
+
+export {
   TestHarness,
   SimpleTestHarness,
   TestResourceBuilder,

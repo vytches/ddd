@@ -10,6 +10,7 @@ export type {
   IAggregateRoot,
   IAggregateCapability,
   IAggregateBuilder,
+  IAggregateConstructorParams,
 } from '@vytches-ddd/aggregates';
 
 // Value objects - re-exported from value-objects package

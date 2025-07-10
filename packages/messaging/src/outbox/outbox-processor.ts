@@ -1,5 +1,5 @@
 import type { IEventBus } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessageStatus, MessagePriority } from './outbox-interfaces';
@@ -269,7 +269,7 @@ export class EventBusOutboxHandler implements IOutboxMessageHandler {
       ...(message.payload as Record<string, unknown>),
       ...message.metadata,
     };
-    
+
     await this.eventBus.publish(eventData);
   }
 }

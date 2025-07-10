@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from 'vitest';
 import type { ISpecification } from '@vytches-ddd/contracts';
-import { BusinessRuleValidator } from '../../src/business-rule-validator';
+import { BusinessRuleValidator } from '../../src';
 
 // Create a test specification for use in tests
 class TestSpecification<T> implements ISpecification<T> {

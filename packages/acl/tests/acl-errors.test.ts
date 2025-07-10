@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ACLError, TranslationError } from '../src/acl-errors';
+import { ACLError, TranslationError } from '../src';
 
 describe('ACLError', () => {
   describe('constructor', () => {

@@ -15,6 +15,7 @@
     "../aggregates/src/**/*",
     "../value-objects/src/**/*",
     "../utils/src/**/*",
+    "../repositories/src/**/*",
     "../logging/src/**/*",
     "../core/src/**/*",
     "../testing/src/**/*",

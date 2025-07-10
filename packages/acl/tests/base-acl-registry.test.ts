@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { ACLRegistrationMetadata } from '../src/base-acl-registry';
+import type { ACLRegistrationMetadata, IACLAdapter, ACLContextInfo } from '../src';
 import { BaseACLRegistry } from '../src/base-acl-registry';
-import type { IACLAdapter, ACLContextInfo } from '../src/acl.interfaces';
 
 // Test models
 interface TestDomainModel {

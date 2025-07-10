@@ -16,6 +16,7 @@
     "../value-objects/src/**/*",
     "../utils/src/**/*",
     "../logging/src/**/*",
+    "../di/src/**/*",
     "../core/src/**/*",
     "../repositories/src/**/*",
     "../testing/src/**/*",

@@ -4,21 +4,9 @@
  * Provides time control for testing without complex global state management.
  */
 
-export interface TimeAdvanceOptions {
-  milliseconds?: number;
-  seconds?: number;
-  minutes?: number;
-  hours?: number;
-  days?: number;
-}
+import type { TestClockState, TimeAdvanceOptions } from "./test-clock";
 
-export interface TestClockState {
-  readonly isFrozen: boolean;
-  readonly frozenTime: Date | null;
-  readonly totalAdvanced: number;
-}
-
-export class TestClock {
+export class TestClockSimple {
   private _isFrozen = false;
   private _frozenTime: Date | null = null;
   private _totalAdvanced = 0;
@@ -168,7 +156,7 @@ export class TestClock {
   static runWithFrozenTime<T>(date: Date, fn: () => T): T;
   static runWithFrozenTime<T>(date: Date, fn: () => Promise<T>): Promise<T>;
   static runWithFrozenTime<T>(date: Date, fn: () => T | Promise<T>): T | Promise<T> {
-    const clock = new TestClock();
+    const clock = new TestClockSimple();
     clock.freeze(date);
 
     try {
@@ -193,7 +181,7 @@ export class TestClock {
     startDate: Date,
     steps: { advance: TimeAdvanceOptions; execute: () => T | Promise<T> }[]
   ): Promise<T[]> {
-    const clock = new TestClock();
+    const clock = new TestClockSimple();
     const results: T[] = [];
 
     try {

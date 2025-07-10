@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Result } from '@vytches-ddd/utils';
-import { BaseACLMiddleware } from '../src/acl-middleware';
-import { ACLError } from '../src/acl-errors';
-import type { ACLMiddleware, ExecuteOptions } from '../src/acl.interfaces';
+import { ACLError, BaseACLMiddleware } from '../src';
+import type { ACLMiddleware, ExecuteOptions } from '../src';
 
 // Test domain model
 interface TestDomainModel {

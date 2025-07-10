@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches-ddd/utils';
 
-import type { IRepositoryAggregate } from '../src';
-import { IBaseRepository } from '../src';
 import { EntityId } from '@vytches-ddd/contracts';
 import type {
   IDomainEvent,
@@ -10,6 +8,8 @@ import type {
   IExtendedDomainEvent,
 } from '@vytches-ddd/contracts';
 import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
+import type { IRepositoryAggregate } from '../src';
+import { IBaseRepository } from '../src';
 
 // Mock dla IEnhancedEventDispatcher
 class MockEnhancedEventDispatcher extends IEnhancedEventDispatcher {

@@ -32,9 +32,7 @@
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/logging": "workspace:*"
   },
-  "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*"
-  },
+  "devDependencies": {},
   "nx": {
     "tags": [
       "scope:messaging",

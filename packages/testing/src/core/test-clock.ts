@@ -80,6 +80,7 @@ export class TestClock {
     this._totalAdvanced = 0;
 
     // Store reference to this instance
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const instance = this;
 
     // Mock Date constructor and Date.now together

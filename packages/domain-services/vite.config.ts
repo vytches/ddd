@@ -42,6 +42,7 @@ export default defineConfig({
       '@vytches-ddd/events': new URL('../events/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/di': new URL('../di/src/index.ts', import.meta.url).pathname,
     },
   },
 });
