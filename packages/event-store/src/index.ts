@@ -4,6 +4,10 @@ export { BaseEventStore } from './base-event-store';
 // In-Memory implementation
 export { InMemoryEventStore } from './in-memory-event-store';
 
+// Event Replay
+export { EventReplayEngine } from './event-replay-engine';
+export { EventReplayFactory, createEventReplayFactory, createEventReplay, createAdvancedEventReplay } from './event-replay-factory';
+
 // Serializers
 export { JsonEventSerializer } from './serializers/json-event-serializer';
 

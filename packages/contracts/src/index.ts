@@ -26,6 +26,18 @@ export type {
   IStreamMetadata,
   IEventSerializer,
   IEventStoreAdapter,
+  // Event Replay interfaces
+  IEventReplay,
+  IAdvancedEventReplay,
+  IEventReplayFactory,
+  IReplaySession,
+  IReplayFilter,
+  IReplayConfig,
+  IReplayResult,
+  IReplayProgress,
+  ReplayEventHandler,
+  ReplayProgressHandler,
+  ReplayErrorHandler,
 } from './events';
 
 export {

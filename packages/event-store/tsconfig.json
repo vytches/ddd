@@ -12,7 +12,12 @@
     "../contracts/src/**/*",
     "../core/src/**/*",
     "../events/src/**/*",
-    "../logging/src/**/*"
+    "../logging/src/**/*",
+    "../utils/src/**/*",
+    "../domain-primitives/src/**/*",
+    "../aggregates/src/**/*",
+    "../value-objects/src/**/*",
+    "../repositories/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

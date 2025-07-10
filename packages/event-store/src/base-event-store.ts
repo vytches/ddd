@@ -11,9 +11,13 @@ import type {
   IEventSerializer,
   IStoredDomainEvent,
   IAggregateSnapshot,
+  IEventReplay,
+  IAdvancedEventReplay,
+  IEventReplayFactory,
 } from '@vytches-ddd/contracts';
 
 import { EventStoreConcurrencyError } from './errors';
+import { EventReplayFactory } from './event-replay-factory';
 
 import { Logger } from '@vytches-ddd/logging';
 import type { ILogger } from '@vytches-ddd/logging';
@@ -25,6 +29,7 @@ import type { ILogger } from '@vytches-ddd/logging';
 export abstract class BaseEventStore implements IAdvancedEventStore {
   protected readonly logger: ILogger;
   protected readonly config: Required<IEventStoreConfig>;
+  private _replayFactory: IEventReplayFactory | null = null;
 
   constructor(config: IEventStoreConfig = {}) {
     this.logger = Logger.forContext('EventStore');
@@ -178,5 +183,75 @@ export abstract class BaseEventStore implements IAdvancedEventStore {
       eventCount,
       options,
     });
+  }
+
+  // ==========================================
+  // EVENT REPLAY CAPABILITIES
+  // ==========================================
+
+  /**
+   * Get event replay factory for this event store
+   */
+  getReplayFactory(): IEventReplayFactory {
+    if (!this._replayFactory) {
+      this._replayFactory = new EventReplayFactory(this);
+    }
+    return this._replayFactory;
+  }
+
+  /**
+   * Create a basic event replay instance
+   */
+  createEventReplay(): IEventReplay {
+    return this.getReplayFactory().createBasicReplay();
+  }
+
+  /**
+   * Create an advanced event replay instance with session control
+   */
+  createAdvancedEventReplay(): IAdvancedEventReplay {
+    return this.getReplayFactory().createAdvancedReplay();
+  }
+
+  /**
+   * Quick utility to replay events from a stream
+   */
+  async replayStream(
+    streamId: string,
+    handler: (event: IStoredEvent) => Promise<void>
+  ): Promise<void> {
+    const replay = this.createEventReplay();
+    const result = await replay.replayFromStream(streamId, handler);
+    
+    this.logger.info('Stream replay completed', {
+      streamId,
+      eventsReplayed: result.eventsReplayed,
+      duration: result.duration,
+      success: result.success,
+    });
+
+    if (!result.success) {
+      throw new Error(`Stream replay failed with ${result.eventsFailed} errors`);
+    }
+  }
+
+  /**
+   * Quick utility to replay all events
+   */
+  async replayAll(
+    handler: (event: IStoredEvent) => Promise<void>
+  ): Promise<void> {
+    const replay = this.createEventReplay();
+    const result = await replay.replayAll(handler);
+    
+    this.logger.info('Full replay completed', {
+      eventsReplayed: result.eventsReplayed,
+      duration: result.duration,
+      success: result.success,
+    });
+
+    if (!result.success) {
+      throw new Error(`Full replay failed with ${result.eventsFailed} errors`);
+    }
   }
 }
