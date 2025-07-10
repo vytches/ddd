@@ -13,6 +13,15 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
+      '@vytches-ddd/core': resolve(__dirname, '../core/src'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
+      '@vytches-ddd/di': resolve(__dirname, '../di/src'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
@@ -33,7 +42,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
   },
 });

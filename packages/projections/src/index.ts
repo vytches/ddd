@@ -16,5 +16,13 @@ export type {
 
 export { ProjectionError } from './projection-errors';
 
+export {
+  BaseIntervalCapability,
+  SnapshotProjectionCapability,
+  CheckpointCapability,
+  CircuitBreakerCapability,
+  DeadLetterCapability,
+} from './capabilities';
+
 // For advanced usage - full exports removed for better tree-shaking
 // Import specific exports from subpaths when needed

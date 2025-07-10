@@ -56,6 +56,3 @@ export {
   type AggregateEventScenario,
   type AggregateStateSnapshot,
 } from './domain';
-
-// Testing framework version
-export const testingVersion = '1.0.0';

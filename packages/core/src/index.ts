@@ -48,7 +48,3 @@ export type {
 
 // Actor - re-exported from domain-primitives
 export type { IActor } from '@vytches-ddd/domain-primitives';
-
-// For advanced usage - import from specific subpaths
-// e.g., import { IAggregateCapability } from '@vytches-ddd/core/aggregates'
-// Note: Full exports removed for better tree-shaking

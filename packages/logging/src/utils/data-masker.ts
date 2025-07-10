@@ -109,7 +109,7 @@ export class DataMasker {
       const lowerSensitiveKey = sensitiveKey.toLowerCase();
       // Contains the sensitive key but exclude plural forms
       // e.g. "token" matches "apiToken" and "userToken" but not "tokens"
-      return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(lowerSensitiveKey + 's');
+      return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(`${lowerSensitiveKey  }s`);
     });
   }
 }

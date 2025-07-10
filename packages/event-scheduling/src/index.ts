@@ -1,12 +1,12 @@
 // Types and interfaces
-export type * from './types/index.js';
+export type * from './types/index';
 
 // Core implementations
-export { ScheduledEvent } from './core/ScheduledEvent.js';
+export { ScheduledEvent } from './core/ScheduledEvent';
 
 // Adapters
-export { BaseSchedulerAdapter } from './adapters/BaseSchedulerAdapter.js';
-export { InMemorySchedulerAdapter } from './adapters/InMemorySchedulerAdapter.js';
+export { BaseSchedulerAdapter } from './adapters/BaseSchedulerAdapter';
+export { InMemorySchedulerAdapter } from './adapters/InMemorySchedulerAdapter';
 
 // Re-export essential types from contracts for convenience
 export type {
@@ -23,3 +23,10 @@ export {
   BackoffStrategy,
   JobStatus,
 } from '@vytches-ddd/contracts';
+
+export {
+  FailingScheduledEvent,
+  SlowScheduledEvent,
+  TestScheduledEvent,
+  TestEventFactory,
+} from './test-utils/TestScheduledEvent';

@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '../events/domain-event-interfaces.js';
+import type { IExtendedDomainEvent } from '../events/domain-event-interfaces';
 
 /**
  * Priority levels for scheduled events

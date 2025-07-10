@@ -7,13 +7,8 @@ export type {
   IJobFilter,
   IJobQueryResult,
   IEventScheduler,
-  IBulkEventScheduler,
   ISchedulerLifecycle,
   ISchedulerConfig,
-  ISchedulerFactory,
-  IScheduledEventStore,
-  ITransactionalScheduledEventStore,
-  ISchedulerMetrics,
 } from '@vytches-ddd/contracts';
 
 export {

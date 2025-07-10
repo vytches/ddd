@@ -6,13 +6,13 @@ export type {
   IScheduledJob,
   IJobFilter,
   IJobQueryResult,
-} from './scheduled-event.interfaces.js';
+} from './scheduled-event.interfaces';
 
 export {
   SchedulePriority,
   BackoffStrategy,
   JobStatus,
-} from './scheduled-event.interfaces.js';
+} from './scheduled-event.interfaces';
 
 // Scheduler Interfaces
 export type {
@@ -21,11 +21,11 @@ export type {
   ISchedulerLifecycle,
   ISchedulerConfig,
   ISchedulerFactory,
-} from './scheduler.interfaces.js';
+} from './scheduler.interfaces';
 
 // Store Interfaces
 export type {
   IScheduledEventStore,
   ITransactionalScheduledEventStore,
   ISchedulerMetrics,
-} from './scheduling-store.interfaces.js';
+} from './scheduling-store.interfaces';

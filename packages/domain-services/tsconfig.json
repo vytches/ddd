@@ -8,6 +8,7 @@
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
     "../contracts/src/**/*",
     "../core/src/**/*",
     "../domain-primitives/src/**/*",

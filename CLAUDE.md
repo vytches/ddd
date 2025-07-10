@@ -3,6 +3,15 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with
 code in this repository.
 
+## CRITICAL: Test Files Location
+
+**When generating or creating test files, ALWAYS place them in the `tests/` directory, NOT in `src/`.**
+
+- ✅ CORRECT: `packages/[package]/tests/my-component.test.ts`
+- ❌ WRONG: `packages/[package]/src/my-component.test.ts`
+
+This is essential to prevent circular dependencies where foundation packages would depend on the testing package.
+
 ## Development Commands
 
 ### Primary Development Workflow
@@ -280,18 +289,26 @@ packages/<package-name>/
 │   ├── index.ts           # Main export file
 │   ├── <domain>/          # Domain-specific code
 │   └── types/             # Type definitions
+├── tests/                 # Test files (OUTSIDE of src/)
+│   ├── *.test.ts          # Unit tests
+│   ├── *.spec.ts          # Spec tests
+│   └── <domain>/          # Tests organized by domain
 ├── package.json           # Package configuration
 ├── project.json           # Nx project configuration
-└── tsconfig.json          # TypeScript configuration
+├── tsconfig.json          # TypeScript configuration
+└── vite.config.ts         # Vite/Vitest configuration
 ```
+
+**IMPORTANT**: Test files MUST be placed in the `tests/` directory, NOT in `src/`. This prevents circular dependencies where foundation packages would import from the testing package.
 
 ## Testing Strategy
 
 ### Test Organization
 
-- Unit tests: `*.test.ts` files alongside source code
+- Unit tests: `*.test.ts` and `*.spec.ts` files in `tests/` directory (NOT in `src/`)
 - Integration tests: In `examples/` directory
-- API surface tests: `api-surface.test.ts` files
+- API surface tests: `api-surface.test.ts` files in `tests/` directory
+- Test file structure mirrors source structure: `src/domain/entity.ts` → `tests/domain/entity.test.ts`
 
 ### Test Utilities
 
@@ -373,8 +390,23 @@ packages/<package-name>/
   stability
 - **Circular Dependency Resolution**: Enterprise-grade architecture with contracts foundation
 - **TypeScript Configuration**: Standardized across all packages with proper include paths
+- **Test File Organization**: All test files moved to `tests/` directories to prevent circular dependencies
 
 ### Recently Implemented Features
+
+#### NEW: Test Files Migration to Prevent Circular Dependencies - COMPLETED
+
+**IMPORTANT ARCHITECTURAL CHANGE**: All test files moved from `src/` to `tests/` directories
+
+- **Problem Solved**: Foundation packages (value-objects, repositories) were importing from @vytches-ddd/testing in their test files
+- **Solution**: Moved all `*.test.ts` and `*.spec.ts` files to dedicated `tests/` directories
+- **Scope**: 16 packages updated with ~80 test files migrated
+- **Configuration Updates**: 
+  - All `vite.config.ts` updated to look for tests in `tests/` directory
+  - All `tsconfig.json` updated to include `tests/**/*` in compilation
+  - Import paths in test files updated to reference `../src/` appropriately
+- **Result**: Foundation layers now have zero runtime dependencies on testing package
+- **ESLint Compliance**: Relative imports used within packages as enforced by module boundary rules
 
 #### NEW: Enterprise Circular Dependency Resolution - COMPLETED
 

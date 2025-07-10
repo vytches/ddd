@@ -8,6 +8,7 @@
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
     "../contracts/src/**/*",
     "../domain-primitives/src/**/*",
     "../events/src/**/*",
@@ -16,7 +17,6 @@
     "../utils/src/**/*",
     "../logging/src/**/*",
     "../core/src/**/*",
-    "../repositories/src/**/*",
     "../testing/src/**/*",
     "../validation/src/**/*"
   ],

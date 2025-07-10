@@ -1,2 +1,2 @@
-export { BaseSchedulerAdapter } from './BaseSchedulerAdapter.js';
-export { InMemorySchedulerAdapter } from './InMemorySchedulerAdapter.js';
+export { BaseSchedulerAdapter } from './BaseSchedulerAdapter';
+export { InMemorySchedulerAdapter } from './InMemorySchedulerAdapter';

@@ -9,17 +9,10 @@
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
     "../contracts/src/**/*",
     "../domain-primitives/src/**/*",
-    "../events/src/**/*",
-    "../aggregates/src/**/*",
-    "../value-objects/src/**/*",
-    "../utils/src/**/*",
-    "../logging/src/**/*",
-    "../core/src/**/*",
-    "../repositories/src/**/*",
-    "../testing/src/**/*",
-    "../validation/src/**/*"
+    "../utils/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

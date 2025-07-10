@@ -1,4 +1,4 @@
-import { BaseSchedulerAdapter } from './BaseSchedulerAdapter.js';
+import { BaseSchedulerAdapter } from './BaseSchedulerAdapter';
 import type {
   IScheduledEvent,
   IScheduleOptions,
@@ -260,7 +260,7 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
   protected async doProcessJob(job: IScheduledJob): Promise<void> {
     // This is the actual processing logic for the job
     // This method is called by processJob in the base class after lifecycle hooks
-    
+
     // For InMemorySchedulerAdapter, we don't need to do anything here
     // The lifecycle hooks handle the actual processing
     // This is just a placeholder for the abstract method

@@ -1,4 +1,4 @@
-import { ScheduledEvent } from '../core/ScheduledEvent.js';
+import { ScheduledEvent } from '../core/ScheduledEvent';
 import type { IScheduleOptions } from '@vytches-ddd/contracts';
 import { BackoffStrategy } from '@vytches-ddd/contracts';
 

@@ -182,7 +182,7 @@ importers:
         version: link:../../packages/cqrs
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../../packages/logging/dist
+        version: link:../../packages/logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -251,7 +251,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -267,13 +267,13 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -298,7 +298,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -309,17 +309,29 @@ importers:
         specifier: workspace:*
         version: link:../utils
 
+  packages/contracts/dist:
+    dependencies:
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../../utils
+
   packages/core:
     dependencies:
+      '@vytches-ddd/aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
+      '@vytches-ddd/repositories':
+        specifier: workspace:*
+        version: link:../repositories
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -331,7 +343,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -361,7 +373,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -417,7 +429,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -481,7 +493,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -493,7 +505,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -506,6 +518,18 @@ importers:
 
   packages/event-store:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts/dist
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches-ddd/events':
+        specifier: workspace:*
+        version: link:../events
+      '@vytches-ddd/logging':
+        specifier: workspace:*
+        version: link:../logging
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
@@ -514,7 +538,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -523,7 +547,7 @@ importers:
         version: link:../di
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -532,15 +556,6 @@ importers:
         version: 2.8.1
 
   packages/logging:
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@1.6.1)
-
-  packages/logging/dist:
     devDependencies:
       typescript:
         specifier: ^5.0.0
@@ -559,7 +574,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/policies':
         specifier: workspace:*
         version: link:../policies
@@ -575,7 +590,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -587,13 +602,13 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -602,7 +617,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: '*'
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/domain-primitives':
         specifier: '*'
         version: link:../domain-primitives
@@ -636,7 +651,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -655,7 +670,7 @@ importers:
         version: link:../aggregates
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -670,7 +685,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -687,7 +702,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -700,7 +715,7 @@ importers:
     dependencies:
       '@vytches-ddd/contracts':
         specifier: '*'
-        version: link:../contracts
+        version: link:../contracts/dist
       '@vytches-ddd/domain-primitives':
         specifier: '*'
         version: link:../domain-primitives

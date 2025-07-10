@@ -224,7 +224,7 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
     baseDelay = 1000
   ): number {
     const safeAttempt = Math.max(1, attempt);
-    
+
     switch (strategy) {
       case 'fixed':
         return baseDelay;
@@ -295,8 +295,8 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
    * Sort jobs by specified field and direction
    */
   protected sortJobs(
-    jobs: IScheduledJob[], 
-    sortBy?: string, 
+    jobs: IScheduledJob[],
+    sortBy?: string,
     sortDirection?: 'asc' | 'desc'
   ): IScheduledJob[] {
     if (!sortBy) {
@@ -304,7 +304,7 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
     }
 
     const direction = sortDirection || 'asc';
-    
+
     return jobs.sort((a, b) => {
       let aValue: number;
       let bValue: number;
@@ -340,9 +340,9 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
   ): IJobQueryResult {
     const actualOffset = offset || 0;
     const actualLimit = limit || jobs.length;
-    
+
     const paginatedJobs = jobs.slice(actualOffset, actualOffset + actualLimit);
-    
+
     return {
       jobs: paginatedJobs,
       total: jobs.length,

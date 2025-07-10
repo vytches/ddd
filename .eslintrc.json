@@ -49,6 +49,7 @@
                   "scope:domain-primitives",
                   "scope:value-objects",
                   "scope:contracts",
+                  "scope:testing",
                   "scope:repositories"
                 ]
               },
@@ -130,6 +131,7 @@
                   "scope:events",
                   "scope:utils",
                   "scope:acl",
+                  "scope:testing",
                   "scope:logging",
                   "scope:validation"
                 ]
@@ -204,6 +206,7 @@
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
+                  "scope:testing",
                   "scope:di",
                   "scope:domain-services"
                 ]
@@ -234,6 +237,14 @@
                   "scope:events",
                   "scope:logging",
                   "scope:event-store"
+                ]
+              },
+              {
+                "sourceTag": "scope:event-scheduling",
+                "onlyDependOnLibsWithTags": [
+                  "scope:contracts",
+                  "scope:testing",
+                  "scope:events"
                 ]
               },
               {

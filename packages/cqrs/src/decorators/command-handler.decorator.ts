@@ -21,22 +21,22 @@ export function CommandHandler<T extends ICommand>(
       registeredAt: new Date(),
       registeredWithDI: false
     };
-    
+
     // Store metadata in command class (for resolution)
     Reflect.defineMetadata('di:command-handler', {
       ...metadata,
       serviceId: diOptions.serviceId || target.name
     }, commandType);
-    
+
     // Store metadata in handler class (for auto-discovery)
     Reflect.defineMetadata('di:handler-metadata', metadata, target);
     Reflect.defineMetadata('di:handler-type', 'command', target);
-    
+
     // Mark for DI auto-registration
     if (diOptions.autoRegister !== false) {
       Reflect.defineMetadata('di:registration-pending', true, target);
     }
-    
+
     return target;
   };
 }

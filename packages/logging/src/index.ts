@@ -26,8 +26,8 @@ export { ConsoleProvider } from './providers';
 export type { ConsoleProviderOptions } from './providers';
 
 // Utils
-export { ContextDetector } from './utils';
-export type { ContextDetectionResult, DataMasker, MaskingOptions } from './utils';
+export { ContextDetector, DataMasker } from './utils';
+export type { ContextDetectionResult,  MaskingOptions } from './utils';
 
 // Integration
 export {

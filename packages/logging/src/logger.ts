@@ -1,5 +1,5 @@
 import type { Logger, LogProvider, LoggerConfiguration, LogLevel, LogContext } from './core';
-import { isLogLevelEnabled, DefaultLogContextBuilder, DefaultLogEventBuilder } from './core/index';
+import { isLogLevelEnabled, DefaultLogContextBuilder, DefaultLogEventBuilder } from './core';
 import { ConsoleProvider } from './providers/console-provider';
 import { ContextDetector } from './utils/context-detector';
 import { DataMasker } from './utils/data-masker';
