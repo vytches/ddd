@@ -43,19 +43,13 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "e2e": {
+      "cache": true
     }
   },
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "extends": "@nx/workspace/presets/npm.json",
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "test", "lint", "type-check", "e2e"],
-        "parallel": 3
-      }
-    }
-  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -109,9 +103,6 @@
       }
     }
   },
-  "affected": {
-    "defaultBase": "main"
-  },
   "implicitDependencies": {
     "examples/*": []
   },
@@ -128,5 +119,7 @@
         "targetName": "test"
       }
     }
-  ]
+  ],
+  "parallel": 3,
+  "defaultBase": "main"
 }

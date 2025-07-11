@@ -6,6 +6,13 @@
       "options": {
         "lintFilePatterns": ["packages/enterprise/**/*.ts"]
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true
+      }
     }
   }
 }

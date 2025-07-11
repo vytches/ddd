@@ -6,6 +6,13 @@
       "options": {
         "lintFilePatterns": ["packages/resilience/**/*.ts"]
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true
+      }
     }
   }
 }

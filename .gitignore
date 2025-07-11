@@ -91,6 +91,7 @@ $RECYCLE.BIN/
 
 # Nx generated files
 .nx/cache
+.nx/workspace-data
 
 # Rush temporary files
 common/temp/
@@ -108,3 +109,5 @@ packages/*/src/**/*.d.ts
 examples/*/src/**/*.js
 examples/*/src/**/*.js.map
 examples/*/src/**/*.d.ts
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
