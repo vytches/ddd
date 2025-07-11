@@ -20,10 +20,9 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true
+        "command": "pnpm vitest run packages/event-scheduling/tests --reporter=verbose"
       }
     }
   }

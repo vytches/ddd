@@ -14,11 +14,9 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true,
-        "reportsDirectory": "coverage/packages/logging"
+        "command": "pnpm vitest run packages/logging/tests --reporter=verbose"
       }
     }
   },

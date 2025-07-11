@@ -9,7 +9,6 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
-      declarationMap: false,
     }),
   ],
   build: {
