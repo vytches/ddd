@@ -43,5 +43,9 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
+    // Disable coverage for individual package tests to prevent ENOENT errors
+    coverage: {
+      enabled: false,
+    },
   },
 });

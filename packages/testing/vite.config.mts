@@ -44,5 +44,8 @@ export default defineConfig({
       '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
       '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src'),
     },
+    coverage: {
+      enabled: false,
+    },
   },
 });

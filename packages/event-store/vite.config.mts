@@ -41,5 +41,8 @@ export default defineConfig({
       '@vytches-ddd/events': new URL('../events/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
     },
+    coverage: {
+      enabled: false,
+    },
   },
 });

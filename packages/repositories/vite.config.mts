@@ -42,5 +42,8 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
+    coverage: {
+      enabled: false,
+    },
   },
 });

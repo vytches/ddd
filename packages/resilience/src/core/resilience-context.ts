@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { LibUtils } from '@vytches-ddd/utils';
+
 /**
  * Context for resilience operations - inspired by Go's context package
  */
@@ -20,7 +22,7 @@ export class DefaultResilienceContext implements ResilienceContext {
   private _metadata: Map<string, unknown>;
 
   constructor(
-    public readonly correlationId: string = crypto.randomUUID(),
+    public readonly correlationId: string = LibUtils.getUUID(),
     public readonly startTime: Date = new Date(),
     public readonly attempt = 1,
     metadata: Map<string, unknown> = new Map(),
