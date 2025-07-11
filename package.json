@@ -65,6 +65,7 @@
     "test:bundle": "node scripts/test-bundle-sizes.js",
     "test:exports": "node scripts/test-exports.js",
     "test:affected": "nx affected --target=test --parallel=3",
+    "test:ci": "nx run-many --target=test --all --parallel=3",
     "test:changed": "node scripts/test.js --changed",
     "test:all": "vitest packages/**/*.{test,spec}.ts examples/**/*.{test,spec}.ts --passWithNoTests",
     "test:package": "bash scripts/test-package.sh",

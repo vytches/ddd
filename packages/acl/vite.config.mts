@@ -13,6 +13,15 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
+      '@vytches-ddd/testing': resolve(__dirname, '../testing/src/index.ts'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
@@ -37,6 +46,13 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       enabled: false,
+    },
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
+      '@vytches-ddd/testing': resolve(__dirname, '../testing/src/index.ts'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
     },
   },
 });

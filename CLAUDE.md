@@ -59,6 +59,14 @@ pnpm test:coverage
 # Test specific areas
 pnpm test:affected
 pnpm test:package <package-name>
+
+# Test individual packages (CI-style with proper aliases)
+pnpm nx run @vytches-ddd/domain-services:test
+pnpm nx run @vytches-ddd/cqrs:test
+pnpm nx run @vytches-ddd/event-store:test
+
+# Test all packages through Nx (recommended for CI parity)
+pnpm nx run-many --target=test --all --parallel=3
 ```
 
 ### Build & Validation

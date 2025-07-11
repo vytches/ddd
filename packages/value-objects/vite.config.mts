@@ -43,6 +43,15 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
+    alias: {
+      '@vytches-ddd/testing': new URL('../testing/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/utils': new URL('../utils/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/domain-primitives': new URL(
+        '../domain-primitives/src/index.ts',
+        import.meta.url
+      ).pathname,
+      '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
+    },
     // Disable coverage for individual package tests to prevent ENOENT errors
     coverage: {
       enabled: false,

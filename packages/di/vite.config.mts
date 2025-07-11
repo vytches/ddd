@@ -40,4 +40,21 @@ export default defineConfig({
       '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
     },
   },
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    passWithNoTests: true,
+    alias: {
+      '@vytches-ddd/domain-primitives': new URL(
+        '../domain-primitives/src/index.ts',
+        import.meta.url
+      ).pathname,
+      '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/utils': new URL('../utils/src/index.ts', import.meta.url).pathname,
+    },
+    coverage: {
+      enabled: false,
+    },
+  },
 });

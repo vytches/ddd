@@ -42,6 +42,11 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
+    alias: {
+      '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/utils': new URL('../utils/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
+    },
     coverage: {
       enabled: false,
     },

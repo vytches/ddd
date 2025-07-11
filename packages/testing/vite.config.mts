@@ -13,6 +13,17 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src'),
+      '@vytches-ddd/core': resolve(__dirname, '../core/src'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
+      '@vytches-ddd/events': resolve(__dirname, '../events/src'),
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
+      '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
