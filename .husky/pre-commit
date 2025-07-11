@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-pnpm lint-staged
-pnpm nx affected --target=test --uncommitted --parallel=3
+pnpm lint-staged --verbose
+NX_DAEMON=false pnpm nx affected --target=test --uncommitted --parallel=3
