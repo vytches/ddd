@@ -13,6 +13,13 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {

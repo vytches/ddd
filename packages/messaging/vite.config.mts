@@ -18,6 +18,8 @@ export default defineConfig({
       '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
       '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
       '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+      '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
     },
   },
   build: {

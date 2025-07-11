@@ -13,6 +13,13 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
@@ -38,7 +45,6 @@ export default defineConfig({
     alias: {
       '@vytches-ddd/core': new URL('../core/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/events': new URL('../events/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
     },
     coverage: {

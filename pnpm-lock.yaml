@@ -271,9 +271,6 @@ importers:
 
   packages/cqrs:
     dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -332,6 +329,9 @@ importers:
 
   packages/domain-services:
     dependencies:
+      '@vytches-ddd/aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
       '@vytches-ddd/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -432,9 +432,6 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
-        specifier: workspace:*
-        version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
         version: link:../logging
@@ -474,9 +471,9 @@ importers:
 
   packages/messaging:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../core
+        version: link:../contracts
       '@vytches-ddd/di':
         specifier: workspace:*
         version: link:../di
@@ -486,9 +483,6 @@ importers:
       '@vytches-ddd/logging':
         specifier: workspace:*
         version: link:../logging
-      '@vytches-ddd/policies':
-        specifier: workspace:*
-        version: link:../policies
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils

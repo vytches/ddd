@@ -22,13 +22,20 @@
     "typescript"
   ],
   "license": "MIT",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
     "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/events": "workspace:*",
     "@vytches-ddd/logging": "workspace:*"
   }
 }

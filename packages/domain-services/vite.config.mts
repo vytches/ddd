@@ -13,6 +13,20 @@ export default defineConfig({
       declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
+      '@vytches-ddd/events': resolve(__dirname, '../events/src/index.ts'),
+      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
+      '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src/index.ts'),
+      '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+      '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
+      '@vytches-ddd/testing': resolve(__dirname, '../testing/src/index.ts'),
+      '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
@@ -41,6 +55,7 @@ export default defineConfig({
       '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/events': new URL('../events/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/aggregates': new URL('../aggregates/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/di': new URL('../di/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/testing': new URL('../testing/src/index.ts', import.meta.url).pathname,

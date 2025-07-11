@@ -27,8 +27,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/policies": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/domain-primitives": "workspace:*",
     "@vytches-ddd/logging": "workspace:*",

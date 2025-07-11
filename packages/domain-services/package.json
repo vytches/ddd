@@ -31,6 +31,7 @@
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/di": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
+    "@vytches-ddd/aggregates": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
     "@vytches-ddd/domain-primitives": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",

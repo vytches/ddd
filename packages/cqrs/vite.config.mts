@@ -10,9 +10,17 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
-      declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/events': resolve(__dirname, '../events/src/index.ts'),
+      '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
+      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     lib: {
