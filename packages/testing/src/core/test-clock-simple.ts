@@ -4,7 +4,7 @@
  * Provides time control for testing without complex global state management.
  */
 
-import type { TestClockState, TimeAdvanceOptions } from "./test-clock";
+import type { TestClockState, TimeAdvanceOptions } from './test-clock';
 
 export class TestClockSimple {
   private _isFrozen = false;
@@ -78,11 +78,12 @@ export class TestClockSimple {
       totalMs = optionsOrMs;
     } else {
       const options = optionsOrMs;
-      totalMs = (options.milliseconds || 0) +
-                (options.seconds || 0) * 1000 +
-                (options.minutes || 0) * 60 * 1000 +
-                (options.hours || 0) * 60 * 60 * 1000 +
-                (options.days || 0) * 24 * 60 * 60 * 1000;
+      totalMs =
+        (options.milliseconds || 0) +
+        (options.seconds || 0) * 1000 +
+        (options.minutes || 0) * 60 * 1000 +
+        (options.hours || 0) * 60 * 60 * 1000 +
+        (options.days || 0) * 24 * 60 * 60 * 1000;
     }
 
     if (this._frozenTime) {
@@ -111,9 +112,7 @@ export class TestClockSimple {
    * Gets the current time (frozen or real)
    */
   now(): Date {
-    return this._isFrozen && this._frozenTime
-      ? new Date(this._frozenTime)
-      : new Date();
+    return this._isFrozen && this._frozenTime ? new Date(this._frozenTime) : new Date();
   }
 
   /**
@@ -137,7 +136,7 @@ export class TestClockSimple {
     return {
       isFrozen: this._isFrozen,
       frozenTime: this._frozenTime ? new Date(this._frozenTime) : null,
-      totalAdvanced: this._totalAdvanced
+      totalAdvanced: this._totalAdvanced,
     };
   }
 

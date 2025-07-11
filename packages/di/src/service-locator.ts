@@ -4,7 +4,7 @@ import type { IDependencyContainer, ServiceToken } from './types';
 import {
   ServiceNotFoundError,
   ContainerConfigurationError,
-  ContainerDisposedError
+  ContainerDisposedError,
 } from './errors';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { IHandlerDiscoveryPlugin, HandlerInfo } from './discovery/handler-discovery.interface';
@@ -318,7 +318,7 @@ export class ServiceLocator implements IServiceLocator {
               type: handlerType as 'command' | 'query' | 'event',
               messageType: handlerType === 'event' ? metadata.eventType : metadata.messageType,
               handlerType: value as any, // Cast to any to handle Function -> Constructor conversion
-              metadata
+              metadata,
             });
           }
         }
@@ -353,13 +353,17 @@ export class ServiceLocator implements IServiceLocator {
             {
               lifetime: options.lifetime || 'transient',
               context: options.context,
-              tags: [`${handler.type}-service`, ...(options.tags || [])]
+              tags: [`${handler.type}-service`, ...(options.tags || [])],
             }
           );
         }
 
         // If this is a context-specific service but fallbackToGlobal is true, also register in global
-        if (options.context && options.fallbackToGlobal && this.globalContainer !== targetContainer) {
+        if (
+          options.context &&
+          options.fallbackToGlobal &&
+          this.globalContainer !== targetContainer
+        ) {
           if (!this.globalContainer.isRegistered(options.serviceId)) {
             this.globalContainer.register(
               options.serviceId, // Use serviceId as service token
@@ -367,7 +371,7 @@ export class ServiceLocator implements IServiceLocator {
               {
                 lifetime: options.lifetime || 'transient',
                 context: options.context,
-                tags: [`${handler.type}-service`, 'fallback', ...(options.tags || [])]
+                tags: [`${handler.type}-service`, 'fallback', ...(options.tags || [])],
               }
             );
           }
@@ -382,7 +386,7 @@ export class ServiceLocator implements IServiceLocator {
           {
             lifetime: options.lifetime || 'transient',
             context: options.context,
-            tags: [`${handler.type}-handler`, ...(options.tags || [])]
+            tags: [`${handler.type}-handler`, ...(options.tags || [])],
           }
         );
       }
@@ -395,7 +399,7 @@ export class ServiceLocator implements IServiceLocator {
           {
             lifetime: options.lifetime || 'transient',
             context: options.context,
-            tags: [`${handler.type}-mapping`, ...(options.tags || [])]
+            tags: [`${handler.type}-mapping`, ...(options.tags || [])],
           }
         );
       }
@@ -404,7 +408,6 @@ export class ServiceLocator implements IServiceLocator {
       metadata.registeredWithDI = true;
       Reflect.defineMetadata(`di:${handler.type}-handler`, metadata, handlerType);
       // Don't delete 'di:registration-pending' - keep it for future discoveries
-
     } catch (error) {
       console.warn(`Failed to register ${handler.type} handler:`, error);
     }
@@ -479,7 +482,6 @@ export class ServiceLocator implements IServiceLocator {
       return undefined;
     }
   }
-
 
   /**
    * Ensure service locator is not disposed

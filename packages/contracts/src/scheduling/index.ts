@@ -8,11 +8,7 @@ export type {
   IJobQueryResult,
 } from './scheduled-event.interfaces';
 
-export {
-  SchedulePriority,
-  BackoffStrategy,
-  JobStatus,
-} from './scheduled-event.interfaces';
+export { SchedulePriority, BackoffStrategy, JobStatus } from './scheduled-event.interfaces';
 
 // Scheduler Interfaces
 export type {

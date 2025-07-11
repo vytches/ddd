@@ -302,7 +302,7 @@ describe('EnhancedCommandBus', () => {
           const result = await next();
           executionOrder.push('custom-end');
           return result;
-        }
+        },
       };
 
       // Mock LoggingMiddleware to track execution
@@ -339,7 +339,7 @@ describe('EnhancedCommandBus', () => {
         'custom-start',
         'handler',
         'custom-end',
-        'logging-end'
+        'logging-end',
       ]);
     });
   });

@@ -78,7 +78,7 @@ export class TestDataBuilder<T> {
       defaults: options.defaults || {},
       factory: options.factory || ((data: Partial<T>) => data as T),
       validator: options.validator || (() => true),
-      deepMerge: options.deepMerge ?? true
+      deepMerge: options.deepMerge ?? true,
     };
 
     // Apply defaults
@@ -120,16 +120,8 @@ export class TestDataBuilder<T> {
   /**
    * Set a property to a sequenced value
    */
-  withSequence<K extends keyof T>(
-    property: K,
-    options: SequenceOptions = {}
-  ): this {
-    const {
-      start = 1,
-      step = 1,
-      prefix = '',
-      suffix = ''
-    } = options;
+  withSequence<K extends keyof T>(property: K, options: SequenceOptions = {}): this {
+    const { start = 1, step = 1, prefix = '', suffix = '' } = options;
 
     // Create unique sequence key that includes prefix to avoid conflicts
     const sequenceKey = `${String(property)}_${prefix}_sequence`;
@@ -172,11 +164,7 @@ export class TestDataBuilder<T> {
   /**
    * Set a property based on a condition
    */
-  withIf<K extends keyof T>(
-    condition: boolean | (() => boolean),
-    property: K,
-    value: T[K]
-  ): this {
+  withIf<K extends keyof T>(condition: boolean | (() => boolean), property: K, value: T[K]): this {
     const shouldApply = typeof condition === 'function' ? condition() : condition;
     if (shouldApply) {
       this.data[property] = value;
@@ -197,9 +185,7 @@ export class TestDataBuilder<T> {
    */
   clone(): this {
     const cloned = new (this.constructor as any)(this.options);
-    cloned.data = this.options.deepMerge
-      ? this.deepMerge({}, this.data)
-      : { ...this.data };
+    cloned.data = this.options.deepMerge ? this.deepMerge({}, this.data) : { ...this.data };
     return cloned;
   }
 
@@ -209,9 +195,8 @@ export class TestDataBuilder<T> {
   build(): T {
     const validationResult = this.options.validator(this.data);
     if (validationResult !== true) {
-      const errorMessage = typeof validationResult === 'string'
-        ? validationResult
-        : 'Data validation failed';
+      const errorMessage =
+        typeof validationResult === 'string' ? validationResult : 'Data validation failed';
       throw new Error(`TestDataBuilder validation failed: ${errorMessage}`);
     }
 
@@ -317,7 +302,7 @@ export class TestDataBuilder<T> {
   private generateRandomString(options: RandomOptions): string {
     const {
       length = 10,
-      charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+      charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
     } = options;
 
     let result = '';
@@ -353,8 +338,8 @@ export class EntityIdBuilder extends TestDataBuilder<{ id: string }> {
   constructor(options?: TestDataBuilderOptions<{ id: string }>) {
     super({
       defaults: { id: 'entity-id' },
-      factory: (data) => ({ id: data.id! }),
-      ...options
+      factory: data => ({ id: data.id! }),
+      ...options,
     });
   }
 
@@ -368,9 +353,9 @@ export class EntityIdBuilder extends TestDataBuilder<{ id: string }> {
   }
 
   private generateUuid(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }
@@ -397,21 +382,21 @@ export class UserBuilder extends TestDataBuilder<TestUser> {
         age: 25,
         isActive: true,
         createdAt: new Date(),
-        roles: ['user']
+        roles: ['user'],
       },
-      validator: (data) => {
+      validator: data => {
         if (data.age && data.age < 0) return 'Age cannot be negative';
         if (data.email && !data.email.includes('@')) return 'Invalid email format';
         return true;
       },
-      ...options
+      ...options,
     });
   }
 
   withUniqueEmail(): this {
     return this.withSequence('email', {
       prefix: 'user',
-      suffix: '@example.com'
+      suffix: '@example.com',
     });
   }
 
@@ -449,9 +434,9 @@ export class DomainEventBuilder extends TestDataBuilder<TestDomainEvent> {
         aggregateId: 'aggregate-1',
         version: 1,
         timestamp: new Date(),
-        data: {}
+        data: {},
       },
-      ...options
+      ...options,
     });
   }
 
@@ -460,15 +445,14 @@ export class DomainEventBuilder extends TestDataBuilder<TestDomainEvent> {
   }
 
   withAggregateInfo(aggregateId: string, version: number): this {
-    return this
-      .with('aggregateId', aggregateId)
-      .with('version', version);
+    return this.with('aggregateId', aggregateId).with('version', version);
   }
 
   withCorrelation(correlationId: string, causationId?: string): this {
-    return this
-      .with('correlationId', correlationId)
-      .with('causationId', causationId || correlationId);
+    return this.with('correlationId', correlationId).with(
+      'causationId',
+      causationId || correlationId
+    );
   }
 
   withData(data: Record<string, any>): this {

@@ -5,7 +5,7 @@ import type {
   ServiceToken,
   Constructor,
   ServiceFactory,
-  ServiceRegistrationOptions
+  ServiceRegistrationOptions,
 } from '../types';
 import { SimpleContainer } from './simple-container';
 

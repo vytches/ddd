@@ -10,7 +10,10 @@ import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interf
  * Type-safe versioning capability implementation
  * Handles event versioning and upcasting for evolving domain events
  */
-export class VersioningCapability extends Capability<'versioning'> implements IVersioningCapability {
+export class VersioningCapability
+  extends Capability<'versioning'>
+  implements IVersioningCapability
+{
   override readonly type = 'versioning' as const;
 
   static override get capabilityType(): string {
@@ -44,7 +47,8 @@ export class VersioningCapability extends Capability<'versioning'> implements IV
     handlers: Map<string, IAggregateEventHandler>
   ): void {
     const eventVersion = (event.metadata?.version as number) || 1;
-    const currentVersion = (event.metadata as { targetVersion?: number })?.targetVersion || eventVersion;
+    const currentVersion =
+      (event.metadata as { targetVersion?: number })?.targetVersion || eventVersion;
 
     let processedEvent = event;
 
@@ -55,10 +59,7 @@ export class VersioningCapability extends Capability<'versioning'> implements IV
       for (let version = eventVersion; version < currentVersion; version++) {
         const upcaster = eventUpcasters.get(version);
         if (upcaster) {
-          const upcastedPayload = upcaster.upcast(
-            processedEvent.payload,
-            processedEvent.metadata
-          );
+          const upcastedPayload = upcaster.upcast(processedEvent.payload, processedEvent.metadata);
           processedEvent = {
             ...processedEvent,
             payload: upcastedPayload,

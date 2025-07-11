@@ -19,24 +19,28 @@ export function QueryHandler<T extends IQuery<R>, R>(
       handlerType: target,
       options: diOptions,
       registeredAt: new Date(),
-      registeredWithDI: false
+      registeredWithDI: false,
     };
-    
+
     // Store metadata in query class (for resolution)
-    Reflect.defineMetadata('di:query-handler', {
-      ...metadata,
-      serviceId: diOptions.serviceId || target.name
-    }, queryType);
-    
+    Reflect.defineMetadata(
+      'di:query-handler',
+      {
+        ...metadata,
+        serviceId: diOptions.serviceId || target.name,
+      },
+      queryType
+    );
+
     // Store metadata in handler class (for auto-discovery)
     Reflect.defineMetadata('di:handler-metadata', metadata, target);
     Reflect.defineMetadata('di:handler-type', 'query', target);
-    
+
     // Mark for DI auto-registration
     if (diOptions.autoRegister !== false) {
       Reflect.defineMetadata('di:registration-pending', true, target);
     }
-    
+
     return target;
   };
 }

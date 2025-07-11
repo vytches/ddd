@@ -8,20 +8,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'dist/',
-        '**/*.test.ts',
-        '**/*.spec.ts',
-        '**/examples/**'
-      ]
-    }
+      exclude: ['node_modules/', 'dist/', '**/*.test.ts', '**/*.spec.ts', '**/examples/**'],
+    },
   },
   resolve: {
     alias: {
       '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src'),
       '@vytches-ddd/logging': resolve(__dirname, '../logging/src'),
-      '@vytches-ddd/utils': resolve(__dirname, '../utils/src')
-    }
-  }
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
+    },
+  },
 });

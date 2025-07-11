@@ -23,10 +23,7 @@ export interface SagaStepConfig {
     state: ISagaState,
     context: ISagaExecutionContext
   ) => Promise<ISagaActionResult>;
-  compensate?: (
-    state: ISagaState,
-    context: ISagaExecutionContext
-  ) => Promise<ISagaActionResult>;
+  compensate?: (state: ISagaState, context: ISagaExecutionContext) => Promise<ISagaActionResult>;
   canExecute?: (event: IExtendedDomainEvent, state: ISagaState) => boolean;
 }
 
@@ -74,10 +71,7 @@ export class ConcreteSagaStep implements ISagaStep {
     return await this.executeImpl(event, state, context);
   }
 
-  async compensate(
-    state: ISagaState,
-    context: ISagaExecutionContext
-  ): Promise<ISagaActionResult> {
+  async compensate(state: ISagaState, context: ISagaExecutionContext): Promise<ISagaActionResult> {
     if (!this.compensatable) {
       return { success: true };
     }

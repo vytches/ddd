@@ -122,13 +122,13 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       initialVersion,
       capabilities,
       autoApplyEvents,
-      generateEventMetadata
+      generateEventMetadata,
     };
 
     this.logger = Logger.forContext('AggregateTestBuilder');
 
     // Set up default aggregate factory
-    this.withFactory((data) => this.createAggregateInstance(data));
+    this.withFactory(data => this.createAggregateInstance(data));
   }
 
   // ==========================================
@@ -184,11 +184,13 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     const events: IExtendedDomainEvent[] = [];
 
     for (let i = 0; i < count; i++) {
-      events.push(this.generateTestEvent(`${eventTypePrefix}${i + 1}`, {
-        sequenceNumber: ++this.eventSequence,
-        generatedAt: new Date(),
-        testData: `auto-generated-${i + 1}`
-      }));
+      events.push(
+        this.generateTestEvent(`${eventTypePrefix}${i + 1}`, {
+          sequenceNumber: ++this.eventSequence,
+          generatedAt: new Date(),
+          testData: `auto-generated-${i + 1}`,
+        })
+      );
     }
 
     return this.withDomainEvents(events);
@@ -198,7 +200,10 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
    * Add capabilities to the aggregate
    */
   withCapabilities(capabilities: unknown[]): this {
-    this.aggregateOptions.capabilities = [...(this.aggregateOptions.capabilities || []), ...capabilities];
+    this.aggregateOptions.capabilities = [
+      ...(this.aggregateOptions.capabilities || []),
+      ...capabilities,
+    ];
     return this;
   }
 
@@ -229,7 +234,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     this.logger.info('Building aggregate with scenario', {
       scenarioName: scenario.name,
       eventCount: scenario.events.length,
-      expectedVersion: scenario.expectedVersion
+      expectedVersion: scenario.expectedVersion,
     });
 
     // Create base aggregate
@@ -248,7 +253,10 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
         (aggregate as unknown as { apply: (event: IExtendedDomainEvent) => void }).apply(event);
       } else {
         // For non-auto-apply, manually add to domain events array and increment version
-        const aggregateWithEvents = aggregate as unknown as { _domainEvents: IExtendedDomainEvent[]; _version: number };
+        const aggregateWithEvents = aggregate as unknown as {
+          _domainEvents: IExtendedDomainEvent[];
+          _version: number;
+        };
         if (!aggregateWithEvents._domainEvents) {
           aggregateWithEvents._domainEvents = [];
         }
@@ -279,7 +287,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     this.logger.info('Aggregate scenario completed successfully', {
       scenarioName: scenario.name,
       finalVersion: aggregate.getVersion(),
-      eventCount: aggregate.getDomainEvents().length
+      eventCount: aggregate.getDomainEvents().length,
     });
 
     return aggregate;
@@ -314,7 +322,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       domainEvents: aggregate.getDomainEvents(),
       hasChanges: aggregate.hasChanges(),
       capabilities: (aggregate as any).getCapabilityTypes?.() || [],
-      customState: this.extractCustomState(aggregate)
+      customState: this.extractCustomState(aggregate),
     };
 
     if (name) {
@@ -323,7 +331,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
         snapshotName: name,
         aggregateId: snapshot.id.getValue(),
         version: snapshot.version,
-        eventCount: snapshot.domainEvents.length
+        eventCount: snapshot.domainEvents.length,
       });
     }
 
@@ -337,12 +345,12 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     this.logger.debug('Building aggregate from snapshot', {
       aggregateId: snapshot.id.getValue(),
       version: snapshot.version,
-      eventCount: snapshot.domainEvents.length
+      eventCount: snapshot.domainEvents.length,
     });
 
     const aggregate = new this.aggregateClass({
       id: snapshot.id as unknown,
-      version: snapshot.initialVersion
+      version: snapshot.initialVersion,
     } as IAggregateConstructorParams<unknown>) as T;
 
     // Restore domain events
@@ -402,7 +410,9 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     }
 
     if (snapshot1.domainEvents.length !== snapshot2.domainEvents.length) {
-      differences.push(`Event count differs: ${snapshot1.domainEvents.length} vs ${snapshot2.domainEvents.length}`);
+      differences.push(
+        `Event count differs: ${snapshot1.domainEvents.length} vs ${snapshot2.domainEvents.length}`
+      );
     }
 
     if (snapshot1.hasChanges !== snapshot2.hasChanges) {
@@ -411,7 +421,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
 
     return {
       identical: differences.length === 0,
-      differences
+      differences,
     };
   }
 
@@ -434,13 +444,13 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       correlationId: `test-correlation-${Date.now()}`,
       causationId: `test-causation-${Date.now()}`,
       ...(this.aggregateOptions.generateEventMetadata ? this.generateRealisticMetadata() : {}),
-      ...metadata
+      ...metadata,
     };
 
     return {
       eventType,
       payload: payload || this.generateTestPayload(eventType),
-      metadata: baseMetadata
+      metadata: baseMetadata,
     };
   }
 
@@ -454,7 +464,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       requestId: `req-${Math.random().toString(36).substring(2, 11)}`,
       tenantId: `tenant-${Math.random().toString(36).substring(2, 11)}`,
       source: 'AggregateTestBuilder',
-      environment: 'test'
+      environment: 'test',
     };
   }
 
@@ -467,7 +477,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       return {
         id: `test-id-${++this.eventSequence}`,
         createdAt: new Date(),
-        createdBy: 'test-user'
+        createdBy: 'test-user',
       };
     }
 
@@ -476,7 +486,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
         updatedAt: new Date(),
         updatedBy: 'test-user',
         previousValue: 'old-value',
-        newValue: 'new-value'
+        newValue: 'new-value',
       };
     }
 
@@ -484,7 +494,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       return {
         deletedAt: new Date(),
         deletedBy: 'test-user',
-        reason: 'test-deletion'
+        reason: 'test-deletion',
       };
     }
 
@@ -492,7 +502,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     return {
       testData: `generated-for-${eventType}`,
       timestamp: new Date(),
-      sequenceNumber: this.eventSequence
+      sequenceNumber: this.eventSequence,
     };
   }
 
@@ -505,11 +515,13 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
    */
   private createAggregateInstance(data: Partial<T>): T {
     // Extract ID for aggregate constructor
-    const idValue = (data as unknown as { id?: EntityId<unknown> }).id || ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>);
+    const idValue =
+      (data as unknown as { id?: EntityId<unknown> }).id ||
+      ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>);
 
     const constructorParams = {
       id: idValue as unknown,
-      version: this.aggregateOptions.initialVersion || 0
+      version: this.aggregateOptions.initialVersion || 0,
     } as IAggregateConstructorParams<unknown>;
 
     const aggregate = new this.aggregateClass(constructorParams);
@@ -521,7 +533,10 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
           (aggregate as unknown as { apply: (event: IExtendedDomainEvent) => void }).apply(event);
         } else {
           // Access private _domainEvents array directly for testing
-          const aggregateWithEvents = aggregate as unknown as { _domainEvents: IExtendedDomainEvent[]; _version: number };
+          const aggregateWithEvents = aggregate as unknown as {
+            _domainEvents: IExtendedDomainEvent[];
+            _version: number;
+          };
           if (!aggregateWithEvents._domainEvents) {
             aggregateWithEvents._domainEvents = [];
           }
@@ -539,7 +554,9 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
     // Add capabilities
     if (this.aggregateOptions.capabilities && this.aggregateOptions.capabilities.length > 0) {
       for (const capability of this.aggregateOptions.capabilities) {
-        (aggregate as unknown as { addCapability?: (capability: unknown) => void }).addCapability?.(capability);
+        (aggregate as unknown as { addCapability?: (capability: unknown) => void }).addCapability?.(
+          capability
+        );
       }
     }
 
@@ -551,7 +568,7 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       id: aggregate.getId().getValue(),
       version: aggregate.getVersion(),
       eventCount: aggregate.getDomainEvents().length,
-      capabilityCount: this.aggregateOptions.capabilities?.length || 0
+      capabilityCount: this.aggregateOptions.capabilities?.length || 0,
     });
 
     return aggregate;
@@ -593,13 +610,15 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
       options?: TestDataBuilderOptions<T> & AggregateTestOptions<T>
     ) => this)(this.aggregateClass, {
       ...this.options,
-      ...this.aggregateOptions
+      ...this.aggregateOptions,
     });
 
     // Copy internal state
     cloned.data = { ...this.data };
     (cloned as unknown as { eventSequence: number }).eventSequence = this.eventSequence;
-    (cloned as unknown as { stateSnapshots: Map<string, AggregateStateSnapshot<T>> }).stateSnapshots = new Map(this.stateSnapshots);
+    (
+      cloned as unknown as { stateSnapshots: Map<string, AggregateStateSnapshot<T>> }
+    ).stateSnapshots = new Map(this.stateSnapshots);
 
     return cloned;
   }
@@ -612,7 +631,9 @@ export class AggregateTestBuilder<T extends IAggregateRoot> extends TestDataBuil
 /**
  * Specialized builder for testing aggregates with event sourcing
  */
-export class EventSourcedAggregateTestBuilder<T extends IAggregateRoot> extends AggregateTestBuilder<T> {
+export class EventSourcedAggregateTestBuilder<
+  T extends IAggregateRoot,
+> extends AggregateTestBuilder<T> {
   private eventHistory: IExtendedDomainEvent[] = [];
 
   constructor(
@@ -634,14 +655,20 @@ export class EventSourcedAggregateTestBuilder<T extends IAggregateRoot> extends 
    * Build aggregate by replaying event history
    */
   buildFromEventHistory(): T {
-    const aggregate = new (this as unknown as { aggregateClass: new (params: IAggregateConstructorParams<unknown>) => T }).aggregateClass({
-      id: (this.data as unknown as { id?: EntityId<unknown> }).id || ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown>) as unknown,
-      version: 0
+    const aggregate = new (
+      this as unknown as { aggregateClass: new (params: IAggregateConstructorParams<unknown>) => T }
+    ).aggregateClass({
+      id:
+        (this.data as unknown as { id?: EntityId<unknown> }).id ||
+        ({ getValue: () => `test-aggregate-${Date.now()}` } as EntityId<unknown> as unknown),
+      version: 0,
     } as IAggregateConstructorParams<unknown>);
 
     // Replay event history
     if (this.eventHistory.length > 0) {
-      (aggregate as unknown as { loadFromHistory: (events: IExtendedDomainEvent[]) => void }).loadFromHistory(this.eventHistory);
+      (
+        aggregate as unknown as { loadFromHistory: (events: IExtendedDomainEvent[]) => void }
+      ).loadFromHistory(this.eventHistory);
     }
 
     return aggregate;
@@ -650,11 +677,13 @@ export class EventSourcedAggregateTestBuilder<T extends IAggregateRoot> extends 
   /**
    * Create event sourcing scenario
    */
-  async buildEventSourcingScenario(events: Array<{
-    eventType: string;
-    payload?: unknown;
-    delay?: number;
-  }>): Promise<{
+  async buildEventSourcingScenario(
+    events: Array<{
+      eventType: string;
+      payload?: unknown;
+      delay?: number;
+    }>
+  ): Promise<{
     aggregate: T;
     eventHistory: IExtendedDomainEvent[];
   }> {
@@ -674,7 +703,7 @@ export class EventSourcedAggregateTestBuilder<T extends IAggregateRoot> extends 
 
     return {
       aggregate,
-      eventHistory: this.eventHistory
+      eventHistory: this.eventHistory,
     };
   }
 }

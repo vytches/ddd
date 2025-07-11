@@ -1,7 +1,7 @@
 /**
  * @vytches-ddd/di
  * Global Service Locator with Optional Context Isolation for Dependency Injection
- * 
+ *
  * Phase 1: Core Infrastructure
  * - Framework-agnostic container abstraction
  * - Global service locator with context support

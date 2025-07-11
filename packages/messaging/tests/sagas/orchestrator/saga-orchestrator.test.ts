@@ -29,15 +29,18 @@ vi.mock('@vytches-ddd/logging', () => ({
 }));
 
 // Mock implementations
-const createMockEvent = (eventType = 'TestEvent', aggregateId = 'agg-123'): IExtendedDomainEvent => ({
+const createMockEvent = (
+  eventType = 'TestEvent',
+  aggregateId = 'agg-123'
+): IExtendedDomainEvent => ({
   eventType,
   payload: { test: true },
-  metadata: { 
+  metadata: {
     eventId: 'evt-123',
     aggregateId,
     aggregateVersion: 1,
     timestamp: new Date(),
-    correlationId: 'corr-123'
+    correlationId: 'corr-123',
   },
 });
 
@@ -159,10 +162,10 @@ describe('SagaOrchestrator', () => {
         validate: vi.fn().mockReturnValue(['Invalid configuration']),
       });
 
-      expect(() => orchestrator.registerSagaDefinition(definition))
-        .toThrow(SagaConfigurationError);
-      expect(() => orchestrator.registerSagaDefinition(definition))
-        .toThrow('Invalid saga definition');
+      expect(() => orchestrator.registerSagaDefinition(definition)).toThrow(SagaConfigurationError);
+      expect(() => orchestrator.registerSagaDefinition(definition)).toThrow(
+        'Invalid saga definition'
+      );
     });
 
     it('should update start event mappings', () => {
@@ -211,8 +214,9 @@ describe('SagaOrchestrator', () => {
       const event = createMockEvent('UnknownEvent');
       const context = createMockContext();
 
-      await expect(orchestrator.startSaga(event, context))
-        .rejects.toThrow(SagaDefinitionNotFoundError);
+      await expect(orchestrator.startSaga(event, context)).rejects.toThrow(
+        SagaDefinitionNotFoundError
+      );
     });
 
     it('should check instance limits', async () => {
@@ -226,8 +230,9 @@ describe('SagaOrchestrator', () => {
       const event = createMockEvent('OrderCreated');
       const context = createMockContext();
 
-      await expect(orchestrator.startSaga(event, context))
-        .rejects.toThrow(SagaInstanceLimitExceededError);
+      await expect(orchestrator.startSaga(event, context)).rejects.toThrow(
+        SagaInstanceLimitExceededError
+      );
     });
 
     it('should update statistics on success', async () => {
@@ -377,10 +382,9 @@ describe('SagaOrchestrator', () => {
 
       await orchestrator.completeSaga('non-existent', context);
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Saga not found for completion',
-        { sagaId: 'non-existent' }
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith('Saga not found for completion', {
+        sagaId: 'non-existent',
+      });
       expect(mockRepository.updateState).not.toHaveBeenCalled();
     });
   });
@@ -421,12 +425,14 @@ describe('SagaOrchestrator', () => {
       await orchestrator.compensateSaga('saga-123', context);
 
       expect(mockRepository.updateState).toHaveBeenCalledTimes(2);
-      expect(mockRepository.updateState).toHaveBeenNthCalledWith(1,
+      expect(mockRepository.updateState).toHaveBeenNthCalledWith(
+        1,
         'saga-123',
         expect.objectContaining({ status: SagaStatus.COMPENSATING }),
         1
       );
-      expect(mockRepository.updateState).toHaveBeenNthCalledWith(2,
+      expect(mockRepository.updateState).toHaveBeenNthCalledWith(
+        2,
         'saga-123',
         expect.objectContaining({ status: SagaStatus.COMPENSATED }),
         2
@@ -442,7 +448,8 @@ describe('SagaOrchestrator', () => {
 
       await orchestrator.compensateSaga('saga-123', context);
 
-      expect(mockRepository.updateState).toHaveBeenNthCalledWith(2,
+      expect(mockRepository.updateState).toHaveBeenNthCalledWith(
+        2,
         'saga-123',
         expect.objectContaining({ status: SagaStatus.FAILED }),
         2
@@ -488,7 +495,7 @@ describe('SagaOrchestrator', () => {
       (mockRepository.findById as any)
         .mockResolvedValueOnce(timedOutSagas[0]) // handleTimeout call
         .mockResolvedValueOnce(timedOutSagas[0]) // compensateSaga call
-        .mockResolvedValueOnce(timedOutSagas[1]) // handleTimeout call  
+        .mockResolvedValueOnce(timedOutSagas[1]) // handleTimeout call
         .mockResolvedValueOnce(timedOutSagas[1]); // compensateSaga call
 
       const processedCount = await orchestrator.processTimedOutSagas(context);

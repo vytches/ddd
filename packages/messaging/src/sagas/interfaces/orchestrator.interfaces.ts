@@ -20,7 +20,10 @@ export interface ISagaOrchestrator {
    * @param context - Execution context
    * @returns Array of processing results
    */
-  processEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaProcessingResult[]>;
+  processEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaProcessingResult[]>;
 
   /**
    * Complete a saga successfully

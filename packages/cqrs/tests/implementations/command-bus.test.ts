@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
 import type { IDependencyContainer } from '@vytches-ddd/di';
-import { CommandBus, HandlerNotFoundError, CQRSConfigurationError  } from '../../src';
+import { CommandBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
 import type { CQRSExecutionContext, ICQRSMiddleware, ICommand, ICommandHandler } from '../../src/';
 
 // Test command implementation
@@ -91,7 +91,9 @@ describe('CommandBus', () => {
     it('should throw with deprecation message', () => {
       expect(() => {
         commandBus.register(TestCommand, mockHandler);
-      }).toThrow('Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.');
+      }).toThrow(
+        'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.'
+      );
     });
   });
 
@@ -109,7 +111,9 @@ describe('CommandBus', () => {
 
       expect(() => {
         commandBus.registerFactory(TestCommand, factory);
-      }).toThrow('Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.');
+      }).toThrow(
+        'Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.'
+      );
     });
   });
 
@@ -147,7 +151,7 @@ describe('CommandBus', () => {
   describe('discoverHandlers', () => {
     it('should log deprecation warning', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-        return
+        return;
       });
 
       commandBus.discoverHandlers();
@@ -269,7 +273,7 @@ describe('CommandBus', () => {
         async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
           capturedContext = context;
           return next();
-        }
+        },
       };
 
       commandBus.use(middleware);
@@ -314,9 +318,11 @@ describe('CommandBus', () => {
 
   describe('isValidatable', () => {
     it('should return true for objects with validate method', () => {
-      const validatable = { validate: () => {
-        return;
-      } };
+      const validatable = {
+        validate: () => {
+          return;
+        },
+      };
       expect(commandBus['isValidatable'](validatable)).toBe(true);
     });
 
@@ -356,7 +362,7 @@ describe('CommandBus', () => {
           const result = await next();
           executionOrder.push(4);
           return result;
-        }
+        },
       };
 
       const middleware2: ICQRSMiddleware = {
@@ -365,7 +371,7 @@ describe('CommandBus', () => {
           const result = await next();
           executionOrder.push(3);
           return result;
-        }
+        },
       };
 
       commandBus.use(middleware1).use(middleware2);

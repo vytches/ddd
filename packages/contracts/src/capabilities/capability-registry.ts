@@ -4,7 +4,9 @@ import type { Capability, CapabilityConstructor, CapabilityType } from './capabi
  * Type-safe capability registry
  * Provides compile-time type safety for capability operations
  */
-export class CapabilityRegistry<TCapabilities extends Record<string, Capability> = Record<string, Capability>> {
+export class CapabilityRegistry<
+  TCapabilities extends Record<string, Capability> = Record<string, Capability>,
+> {
   private readonly capabilities = new Map<string, Capability>();
 
   /**
@@ -18,9 +20,7 @@ export class CapabilityRegistry<TCapabilities extends Record<string, Capability>
   /**
    * Get a capability by its constructor
    */
-  get<T extends Capability>(
-    CapabilityClass: CapabilityConstructor<T>
-  ): T | undefined {
+  get<T extends Capability>(CapabilityClass: CapabilityConstructor<T>): T | undefined {
     // Use static capabilityType getter to avoid temporary instance creation
     const capabilityType = CapabilityClass.capabilityType;
     return this.capabilities.get(capabilityType) as T | undefined;
@@ -97,6 +97,8 @@ export class CapabilityRegistry<TCapabilities extends Record<string, Capability>
 /**
  * Create a typed capability registry
  */
-export function createCapabilityRegistry<T extends Record<string, Capability>>(): CapabilityRegistry<T> {
+export function createCapabilityRegistry<
+  T extends Record<string, Capability>,
+>(): CapabilityRegistry<T> {
   return new CapabilityRegistry<T>();
 }

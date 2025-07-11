@@ -184,9 +184,7 @@ export interface IEventReplay {
   /**
    * Get events as async iterable for custom replay logic
    */
-  getEventsAsIterable(
-    filter?: IReplayFilter
-  ): AsyncIterable<IStoredEvent>;
+  getEventsAsIterable(filter?: IReplayFilter): AsyncIterable<IStoredEvent>;
 
   /**
    * Count events that would be replayed with given filter
@@ -196,10 +194,7 @@ export interface IEventReplay {
   /**
    * Estimate replay duration based on filter and config
    */
-  estimateReplayDuration(
-    filter?: IReplayFilter,
-    config?: IReplayConfig
-  ): Promise<number>;
+  estimateReplayDuration(filter?: IReplayFilter, config?: IReplayConfig): Promise<number>;
 }
 
 /**
@@ -265,7 +260,5 @@ export interface IEventReplayFactory {
   /**
    * Create a replay with custom strategy
    */
-  createCustomReplay<T extends IEventReplay>(
-    strategy: new () => T
-  ): T;
+  createCustomReplay<T extends IEventReplay>(strategy: new () => T): T;
 }

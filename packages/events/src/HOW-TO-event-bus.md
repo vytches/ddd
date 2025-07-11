@@ -18,7 +18,9 @@ The Event Bus is an infrastructure component that manages publication and
 subscription of domain events. It provides a decoupled way for different parts
 of the system to communicate through events.
 
-**Note**: The event system uses `UnifiedEventBus` which handles domain, integration, and audit events in a single implementation with context-aware routing. The old separate bus implementations have been removed.
+**Note**: The event system uses `UnifiedEventBus` which handles domain,
+integration, and audit events in a single implementation with context-aware
+routing. The old separate bus implementations have been removed.
 
 **Core Concept**:
 
@@ -499,7 +501,8 @@ class DebuggableEventBus extends InMemoryEventBus {
 
 ### What is UnifiedEventBus?
 
-UnifiedEventBus is the new consolidated event bus that handles domain, integration, and audit events in a single implementation with advanced features:
+UnifiedEventBus is the new consolidated event bus that handles domain,
+integration, and audit events in a single implementation with advanced features:
 
 ```typescript
 import { UnifiedEventBus } from '@vytches-ddd/events';
@@ -509,7 +512,7 @@ const eventBus = new UnifiedEventBus({
   middlewares: [loggingMiddleware, validationMiddleware],
   onError: (error, eventType) => {
     console.error(`Error in ${eventType}:`, error);
-  }
+  },
 });
 ```
 
@@ -522,7 +525,11 @@ const eventBus = new UnifiedEventBus({
 eventBus.subscribe(OrderPlaced, 'order-context', handler);
 
 // Subscribe to multiple contexts
-eventBus.subscribe(StockUpdated, ['order-context', 'inventory-context'], handler);
+eventBus.subscribe(
+  StockUpdated,
+  ['order-context', 'inventory-context'],
+  handler
+);
 
 // Subscribe to all contexts
 eventBus.subscribe(SystemAlert, handler);
@@ -541,14 +548,14 @@ await eventBus.publish(new OrderCreatedEvent({ orderId: '123' }));
 await eventBus.publish({
   eventType: 'OrderCreatedIntegration',
   payload: { orderId: '123', userId: '456' },
-  metadata: { sourceContext: 'order', targetContext: 'user' }
+  metadata: { sourceContext: 'order', targetContext: 'user' },
 });
 
 // Handle audit events
 await eventBus.publish({
   eventType: 'UserAccessEvent',
   payload: { userId: '456', action: 'LOGIN' },
-  metadata: { actionType: 'ACCESS', status: 'SUCCESS' }
+  metadata: { actionType: 'ACCESS', status: 'SUCCESS' },
 });
 ```
 
@@ -557,17 +564,16 @@ await eventBus.publish({
 ```typescript
 @EventHandler(OrderCreated, {
   eventContext: 'order-context',
-  lifetime: 'singleton'
+  lifetime: 'singleton',
 })
 class OrderNotificationHandler {
   constructor(private emailService: EmailService) {}
-  
+
   async handle(event: OrderCreated): Promise<void> {
     await this.emailService.sendConfirmation(event.payload);
   }
 }
 ```
-
 
 ## Conclusion
 
@@ -580,6 +586,6 @@ DomainTS Event Bus provides:
 - **📊 Type Safety**: Full TypeScript support
 - **🛠️ Developer Experience**: Rich tooling and debugging support
 
-
 The implementation supports simple event publishing as well as complex
-event-driven architectures with features like context filtering, mixed event types, and sophisticated middleware pipelines.
+event-driven architectures with features like context filtering, mixed event
+types, and sophisticated middleware pipelines.

@@ -915,7 +915,6 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
         .withAsyncInitialization()
         .buildAndRegister();
       */
-
       /*
       // Act: Execute business flow
       const laptop = await productServiceB.createProduct('Test Laptop', 999.99);

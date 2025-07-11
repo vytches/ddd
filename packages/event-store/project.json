@@ -5,9 +5,7 @@
   "projectType": "library",
   "release": {
     "version": {
-      "manifestRootsToUpdate": [
-        "dist/{projectRoot}"
-      ],
+      "manifestRootsToUpdate": ["dist/{projectRoot}"],
       "currentVersionResolver": "git-tag",
       "fallbackCurrentVersionResolver": "disk"
     }
@@ -16,23 +14,17 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/event-store",
         "main": "packages/event-store/src/index.ts",
         "tsConfig": "packages/event-store/tsconfig.lib.json",
-        "assets": [
-          "packages/event-store/*.md"
-        ]
+        "assets": ["packages/event-store/*.md"]
       }
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": [
-        "{options.reportsDirectory}"
-      ],
+      "outputs": ["{options.reportsDirectory}"],
       "options": {
         "passWithNoTests": true,
         "reportsDirectory": "../../coverage/packages/event-store"
@@ -40,13 +32,9 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/event-store/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/event-store/**/*.ts"]
       }
     },
     "nx-release-publish": {

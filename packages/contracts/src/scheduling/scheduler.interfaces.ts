@@ -1,4 +1,10 @@
-import type { IScheduledEvent, IScheduleOptions, IScheduledJob, IJobFilter, IJobQueryResult } from './scheduled-event.interfaces';
+import type {
+  IScheduledEvent,
+  IScheduleOptions,
+  IScheduledJob,
+  IJobFilter,
+  IJobQueryResult,
+} from './scheduled-event.interfaces';
 
 /**
  * Core interface for event scheduling

@@ -46,9 +46,7 @@ describe('ContainerBuilder', () => {
 
       const originalInstance = new TestService();
 
-      const container = builder
-        .registerInstance('TestService', originalInstance)
-        .build();
+      const container = builder.registerInstance('TestService', originalInstance).build();
 
       const resolvedInstance = container.resolve<TestService>('TestService');
 
@@ -89,7 +87,7 @@ describe('ContainerBuilder', () => {
         .register('TestService', TestService, {
           lifetime: ServiceLifetime.Singleton,
           tags: ['test', 'service'],
-          context: 'TestContext'
+          context: 'TestContext',
         })
         .build();
 
@@ -108,9 +106,7 @@ describe('ContainerBuilder', () => {
     it('should return a functional container', () => {
       class TestService {}
 
-      const container = builder
-        .register('TestService', TestService)
-        .build();
+      const container = builder.register('TestService', TestService).build();
 
       expect(container).toBeDefined();
       expect(typeof container.resolve).toBe('function');

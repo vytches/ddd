@@ -5,7 +5,6 @@ export { AggregateBuilder, aggregateBuilder } from './aggregate-root.builder';
 // Capabilities
 export * from './capabilities';
 
-
 // Interfaces and utilities - explicit exports to reduce bundle size
 export type {
   IAggregateRoot,
@@ -33,4 +32,3 @@ export {
   getAggregateCapabilities,
   hasAllCapabilities,
 } from './aggregate-utilities';
-

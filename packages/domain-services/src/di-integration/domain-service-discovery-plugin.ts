@@ -7,7 +7,10 @@
 
 import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches-ddd/di';
 import { DIDomainServiceMetadataRegistry } from '../di-types';
-import { isDomainServicePendingDIRegistration, getDIDomainServiceMetadata } from '../domain-service.decorator';
+import {
+  isDomainServicePendingDIRegistration,
+  getDIDomainServiceMetadata,
+} from '../domain-service.decorator';
 
 /**
  * Discovery plugin for domain services with DI integration.
@@ -43,7 +46,10 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
     for (const serviceMetadata of allServices) {
       // Check if this service is pending DI registration
-      if (serviceMetadata.autoRegister && isDomainServicePendingDIRegistration(serviceMetadata.serviceType)) {
+      if (
+        serviceMetadata.autoRegister &&
+        isDomainServicePendingDIRegistration(serviceMetadata.serviceType)
+      ) {
         const handlerInfo: HandlerInfo = {
           type: 'domain-service' as any, // Extend HandlerInfo type for domain services
           messageType: serviceMetadata.serviceType, // Use service class as "message type"
@@ -61,8 +67,8 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
             contextResolver: serviceMetadata.contextResolver,
             fallbackToGlobal: serviceMetadata.fallbackToGlobal,
             autoRegister: serviceMetadata.autoRegister,
-            createdAt: serviceMetadata.createdAt
-          }
+            createdAt: serviceMetadata.createdAt,
+          },
         };
 
         discoveredServices.push(handlerInfo);
@@ -118,8 +124,8 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
               contextResolver: diMetadata.contextResolver,
               fallbackToGlobal: diMetadata.fallbackToGlobal,
               autoRegister: diMetadata.autoRegister,
-              createdAt: diMetadata.createdAt
-            }
+              createdAt: diMetadata.createdAt,
+            },
           };
 
           services.push(handlerInfo);
@@ -138,9 +144,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    */
   private isDomainServiceClass(value: unknown): value is new (...args: any[]) => any {
     return (
-      typeof value === 'function' &&
-      value.prototype &&
-      isDomainServicePendingDIRegistration(value)
+      typeof value === 'function' && value.prototype && isDomainServicePendingDIRegistration(value)
     );
   }
 }

@@ -8,34 +8,42 @@ Date: 2025-07-09
 
 ## Context
 
-The VytchesDDD framework currently lacks event scheduling capabilities, which are essential for enterprise applications. Common use cases include:
+The VytchesDDD framework currently lacks event scheduling capabilities, which
+are essential for enterprise applications. Common use cases include:
 
 - Delayed event processing (e.g., send reminder after 24 hours)
 - Scheduled recurring events (e.g., daily aggregation tasks)
 - Time-based saga orchestration (e.g., timeout handling)
 - Deferred integration events (e.g., batch processing at specific times)
 
-Currently, the UnifiedEventBus publishes events immediately with no built-in mechanism for scheduling or delaying event processing. While the messaging package has an outbox pattern with `processAfter` support, this is limited to message delivery and not integrated with the event system.
+Currently, the UnifiedEventBus publishes events immediately with no built-in
+mechanism for scheduling or delaying event processing. While the messaging
+package has an outbox pattern with `processAfter` support, this is limited to
+message delivery and not integrated with the event system.
 
 ### Requirements
 
-1. **Flexibility**: Support multiple scheduling backends (pg-boss, BullMQ, bee-queue, etc.)
+1. **Flexibility**: Support multiple scheduling backends (pg-boss, BullMQ,
+   bee-queue, etc.)
 2. **Testability**: Provide in-memory scheduler for development and testing
 3. **Type Safety**: Full TypeScript support with compile-time guarantees
 4. **Integration**: Seamless integration with existing UnifiedEventBus
-5. **Framework Agnostic**: Core interfaces should not depend on specific implementations
+5. **Framework Agnostic**: Core interfaces should not depend on specific
+   implementations
 6. **Performance**: Minimal overhead for immediate events
 7. **Reliability**: Support for job persistence, retries, and failure handling
 
 ### Current State Analysis
 
 Strengths:
+
 - UnifiedEventBus already supports metadata for extensibility
 - Middleware pipeline can intercept events for scheduling
 - DI system provides excellent adapter pattern example
 - Outbox pattern demonstrates delayed processing concepts
 
 Gaps:
+
 - No scheduling interfaces or contracts
 - No persistence layer for scheduled events
 - No time-based event processing
@@ -43,7 +51,8 @@ Gaps:
 
 ## Decision
 
-We will implement a flexible event scheduling system using the adapter pattern, following the same principles as our successful DI system implementation.
+We will implement a flexible event scheduling system using the adapter pattern,
+following the same principles as our successful DI system implementation.
 
 ### Architecture
 
@@ -92,7 +101,7 @@ interface IScheduledEvent extends IDomainEvent {
 // Seamless integration via middleware
 class SchedulingMiddleware implements IEventMiddleware {
   constructor(private scheduler: IEventScheduler) {}
-  
+
   async execute(event: IDomainEvent, next: Next): Promise<void> {
     if (isScheduledEvent(event)) {
       const jobId = await this.scheduler.schedule(event);
@@ -121,15 +130,18 @@ class PgBossAdapter extends BaseSchedulerAdapter {
   constructor(private pgBoss: PgBoss) {
     super();
   }
-  
-  async schedule(event: IScheduledEvent, options?: IScheduleOptions): Promise<string> {
+
+  async schedule(
+    event: IScheduledEvent,
+    options?: IScheduleOptions
+  ): Promise<string> {
     const jobOptions = {
       startAfter: event.scheduleAt,
       priority: options?.priority || 0,
       retryLimit: options?.maxRetries || 3,
       retryBackoff: options?.backoff === 'exponential',
     };
-    
+
     return await this.pgBoss.send(
       `event:${event.type}`,
       { event: this.serializeEvent(event) },
@@ -143,8 +155,11 @@ class BullMQAdapter extends BaseSchedulerAdapter {
   constructor(private queue: Queue) {
     super();
   }
-  
-  async schedule(event: IScheduledEvent, options?: IScheduleOptions): Promise<string> {
+
+  async schedule(
+    event: IScheduledEvent,
+    options?: IScheduleOptions
+  ): Promise<string> {
     const job = await this.queue.add(
       event.type,
       { event: this.serializeEvent(event) },
@@ -166,17 +181,17 @@ class BullMQAdapter extends BaseSchedulerAdapter {
 // Similar to VytchesDDD.configure()
 class EventScheduling {
   private static scheduler: IEventScheduler;
-  
+
   static configure(scheduler: IEventScheduler): void {
     this.scheduler = scheduler;
-    
+
     // Auto-register with UnifiedEventBus if available
     const eventBus = VytchesDDD.resolve<UnifiedEventBus>('UnifiedEventBus');
     if (eventBus) {
       eventBus.use(new SchedulingMiddleware(this.scheduler));
     }
   }
-  
+
   static getScheduler(): IEventScheduler {
     if (!this.scheduler) {
       throw new Error('Event scheduler not configured');
@@ -190,13 +205,17 @@ class EventScheduling {
 
 ### Positive
 
-1. **Flexibility**: Easy to integrate any job queue library (pg-boss, BullMQ, etc.)
+1. **Flexibility**: Easy to integrate any job queue library (pg-boss, BullMQ,
+   etc.)
 2. **Testability**: In-memory adapter enables fast, reliable tests
 3. **Type Safety**: Full TypeScript support with compile-time checks
-4. **Minimal Breaking Changes**: Extends existing event system without modifications
-5. **Enterprise Ready**: Supports advanced patterns like recurring events, priorities, retries
+4. **Minimal Breaking Changes**: Extends existing event system without
+   modifications
+5. **Enterprise Ready**: Supports advanced patterns like recurring events,
+   priorities, retries
 6. **Framework Agnostic**: Can work with any DI container and event bus
-7. **Performance**: Zero overhead for immediate events (middleware short-circuits)
+7. **Performance**: Zero overhead for immediate events (middleware
+   short-circuits)
 
 ### Negative
 
@@ -214,6 +233,7 @@ class EventScheduling {
 ## Implementation Plan
 
 ### Phase 1: Core Implementation (Week 1)
+
 - Create event-scheduling package structure
 - Implement core interfaces in contracts
 - Build BaseSchedulerAdapter
@@ -221,12 +241,14 @@ class EventScheduling {
 - Add SchedulingMiddleware
 
 ### Phase 2: Adapter Implementation (Week 2)
+
 - Implement PgBossAdapter
 - Implement BullMQAdapter
 - Create adapter examples
 - Add comprehensive tests
 
 ### Phase 3: Integration & Polish (Week 3)
+
 - Integrate with UnifiedEventBus
 - Add recurring event support
 - Create documentation

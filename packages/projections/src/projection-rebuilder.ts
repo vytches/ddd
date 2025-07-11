@@ -3,7 +3,7 @@ import type {
   IReplayFilter,
   IReplayConfig,
   IReplayResult,
-  IExtendedDomainEvent
+  IExtendedDomainEvent,
 } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
@@ -58,7 +58,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
   async rebuild(filter?: IReplayFilter, config?: IProjectionRebuildConfig): Promise<IReplayResult> {
     const context = {
       projectionName: this.projectionEngine.getProjectionName(),
-      eventTypes: this.projectionEngine.getEventTypes()
+      eventTypes: this.projectionEngine.getEventTypes(),
     };
 
     this.logger.info('Starting projection rebuild', context);
@@ -70,9 +70,10 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
       }
 
       // Get event replay from event store
-      const replay = (this.eventStore as any).createEventReplay?.() || 
-                     (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
-                     
+      const replay =
+        (this.eventStore as any).createEventReplay?.() ||
+        (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
+
       if (!replay) {
         throw new ProjectionError('Event store does not support event replay');
       }
@@ -82,11 +83,15 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         try {
           await this.projectionEngine.processEvent(event);
         } catch (error) {
-          this.logger.error('Error processing event in projection', error instanceof Error ? error : new Error(String(error)), {
-            ...context,
-            eventType: event.eventType,
-            eventId: (event as any).eventId || 'unknown'
-          });
+          this.logger.error(
+            'Error processing event in projection',
+            error instanceof Error ? error : new Error(String(error)),
+            {
+              ...context,
+              eventType: event.eventType,
+              eventId: (event as any).eventId || 'unknown',
+            }
+          );
 
           if (!config?.skipErrors) {
             throw error;
@@ -97,7 +102,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
       // Apply projection-specific filters
       const projectionFilter: IReplayFilter = {
         ...filter,
-        eventTypes: filter?.eventTypes || this.projectionEngine.getEventTypes()
+        eventTypes: filter?.eventTypes || this.projectionEngine.getEventTypes(),
       };
 
       // Start replay
@@ -107,14 +112,18 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         ...context,
         eventsProcessed: result.eventsProcessed,
         eventsFailed: result.eventsFailed,
-        duration: result.duration
+        duration: result.duration,
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Projection rebuild failed', error instanceof Error ? error : new Error(String(error)), {
-        ...context
-      });
+      this.logger.error(
+        'Projection rebuild failed',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          ...context,
+        }
+      );
       throw new ProjectionError(
         `Failed to rebuild projection ${this.projectionEngine.getProjectionName()}`,
         error instanceof Error ? error : new Error(String(error))
@@ -129,15 +138,16 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
   ): Promise<IReplayResult> {
     const context = {
       projectionName: this.projectionEngine.getProjectionName(),
-      streamId
+      streamId,
     };
 
     this.logger.info('Starting projection rebuild from stream', context);
 
     try {
-      const replay = (this.eventStore as any).createEventReplay?.() || 
-                     (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
-                     
+      const replay =
+        (this.eventStore as any).createEventReplay?.() ||
+        (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
+
       if (!replay) {
         throw new ProjectionError('Event store does not support event replay');
       }
@@ -146,11 +156,15 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         try {
           await this.projectionEngine.processEvent(event);
         } catch (error) {
-          this.logger.error('Error processing event in projection', error instanceof Error ? error : new Error(String(error)), {
-            ...context,
-            eventType: event.eventType,
-            eventId: (event as any).eventId || 'unknown'
-          });
+          this.logger.error(
+            'Error processing event in projection',
+            error instanceof Error ? error : new Error(String(error)),
+            {
+              ...context,
+              eventType: event.eventType,
+              eventId: (event as any).eventId || 'unknown',
+            }
+          );
 
           if (!config?.skipErrors) {
             throw error;
@@ -164,14 +178,18 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         ...context,
         eventsProcessed: result.eventsProcessed,
         eventsFailed: result.eventsFailed,
-        duration: result.duration
+        duration: result.duration,
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Projection rebuild from stream failed', error instanceof Error ? error : new Error(String(error)), {
-        ...context
-      });
+      this.logger.error(
+        'Projection rebuild from stream failed',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          ...context,
+        }
+      );
       throw new ProjectionError(
         `Failed to rebuild projection ${this.projectionEngine.getProjectionName()} from stream ${streamId}`,
         error instanceof Error ? error : new Error(String(error))
@@ -186,7 +204,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
   ): Promise<IReplayResult[]> {
     const context = {
       projectionCount: projections.length,
-      projectionNames: projections.map(p => p.getProjectionName())
+      projectionNames: projections.map(p => p.getProjectionName()),
     };
 
     this.logger.info('Starting rebuild of multiple projections', context);
@@ -204,9 +222,13 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         const result = await rebuilder.rebuild(filter, config);
         results.push(result);
       } catch (error) {
-        this.logger.error('Failed to rebuild projection', error instanceof Error ? error : new Error(String(error)), {
-          projectionName: projection.getProjectionName()
-        });
+        this.logger.error(
+          'Failed to rebuild projection',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            projectionName: projection.getProjectionName(),
+          }
+        );
 
         if (!config?.skipErrors) {
           throw error;
@@ -230,9 +252,9 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
             percentComplete: 0,
             eventsPerSecond: 0,
             startTime: now,
-            lastUpdate: now
+            lastUpdate: now,
           },
-          success: false
+          success: false,
         });
       }
     }
@@ -255,9 +277,13 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
 
       this.logger.info('Projection state cleared', { projectionName });
     } catch (error) {
-      this.logger.error('Failed to clear projection state', error instanceof Error ? error : new Error(String(error)), {
-        projectionName
-      });
+      this.logger.error(
+        'Failed to clear projection state',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          projectionName,
+        }
+      );
       throw new ProjectionError(
         `Failed to clear state for projection ${projectionName}`,
         error instanceof Error ? error : new Error(String(error))

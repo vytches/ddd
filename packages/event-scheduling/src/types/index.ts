@@ -11,11 +11,7 @@ export type {
   ISchedulerConfig,
 } from '@vytches-ddd/contracts';
 
-export {
-  SchedulePriority,
-  BackoffStrategy,
-  JobStatus,
-} from '@vytches-ddd/contracts';
+export { SchedulePriority, BackoffStrategy, JobStatus } from '@vytches-ddd/contracts';
 
 // Internal types
 export interface ISchedulerAdapter {

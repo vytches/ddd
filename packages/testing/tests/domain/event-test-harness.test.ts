@@ -41,17 +41,21 @@ class TestOrderAggregate {
   constructor(private orderId: string) {}
 
   createOrder(customerId: string): void {
-    this.events.push(new TestOrderCreatedEvent({
-      orderId: this.orderId,
-      customerId
-    }));
+    this.events.push(
+      new TestOrderCreatedEvent({
+        orderId: this.orderId,
+        customerId,
+      })
+    );
   }
 
   processPayment(paymentId: string, amount: number): void {
-    this.events.push(new TestPaymentProcessedEvent({
-      paymentId,
-      amount
-    }));
+    this.events.push(
+      new TestPaymentProcessedEvent({
+        paymentId,
+        amount,
+      })
+    );
   }
 
   getDomainEvents(): IDomainEvent[] {
@@ -72,7 +76,7 @@ describe('EventTestHarness', () => {
       captureAllEvents: true,
       contextId: 'test-context',
       maxCapturedEvents: 100,
-      enableEventLogging: false
+      enableEventLogging: false,
     };
 
     harness = new EventTestHarness(options);
@@ -88,7 +92,7 @@ describe('EventTestHarness', () => {
       // Arrange
       const event = new TestOrderCreatedEvent({
         orderId: 'order-123',
-        customerId: 'customer-456'
+        customerId: 'customer-456',
       });
 
       // Act
@@ -104,7 +108,7 @@ describe('EventTestHarness', () => {
       const events = [
         new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' }),
         new TestPaymentProcessedEvent({ paymentId: 'payment-789', amount: 100 }),
-        new TestOrderShippedEvent({ orderId: 'order-123', trackingNumber: 'track-123' })
+        new TestOrderShippedEvent({ orderId: 'order-123', trackingNumber: 'track-123' }),
       ];
 
       // Act
@@ -137,14 +141,16 @@ describe('EventTestHarness', () => {
       // Arrange
       const event = new TestOrderCreatedEvent({
         orderId: 'order-123',
-        customerId: 'customer-456'
+        customerId: 'customer-456',
       });
 
       // Act
       await harness.publishEvent(event);
 
       // Assert
-      expect(harness.assertions.eventWasPublishedInContext('TestOrderCreatedEvent', 'test-context')).toBe(true);
+      expect(
+        harness.assertions.eventWasPublishedInContext('TestOrderCreatedEvent', 'test-context')
+      ).toBe(true);
     });
 
     it('should handle integration events correctly', async () => {
@@ -171,10 +177,12 @@ describe('EventTestHarness', () => {
       harness.subscribeToEvent('TestOrderCreatedEvent', handler);
 
       // Act
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       // Assert
       expect(handlerCalled).toBe(true);
@@ -203,10 +211,12 @@ describe('EventTestHarness', () => {
       harness.subscribeToEvent('TestOrderCreatedEvent', allHandler);
 
       // Act
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       // Assert
       expect(contextHandlerCalled).toBe(true);
@@ -220,16 +230,18 @@ describe('EventTestHarness', () => {
       const handler = {
         handle: vi.fn(async (_event: TestOrderCreatedEvent) => {
           // Handler logic
-        })
+        }),
       };
 
       harness.registerHandler('TestOrderCreatedEvent', handler);
 
       // Act
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       // Assert
       expect(handler.handle).toHaveBeenCalledTimes(1);
@@ -245,10 +257,12 @@ describe('EventTestHarness', () => {
       harness.subscribeToEvent('TestOrderCreatedEvent', handler2);
 
       // Act
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       // Assert
       expect(handler1).toHaveBeenCalledTimes(1);
@@ -260,15 +274,19 @@ describe('EventTestHarness', () => {
   describe('Event Assertions', () => {
     beforeEach(async () => {
       // Publish some test events
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
-      await harness.publishEvent(new TestPaymentProcessedEvent({
-        paymentId: 'payment-789',
-        amount: 100
-      }));
+      await harness.publishEvent(
+        new TestPaymentProcessedEvent({
+          paymentId: 'payment-789',
+          amount: 100,
+        })
+      );
     });
 
     it('should correctly identify published events', () => {
@@ -279,10 +297,14 @@ describe('EventTestHarness', () => {
 
     it('should correctly identify events with specific payload', () => {
       const payload = { orderId: 'order-123', customerId: 'customer-456' };
-      expect(harness.assertions.eventWasPublishedWithPayload('TestOrderCreatedEvent', payload)).toBe(true);
+      expect(
+        harness.assertions.eventWasPublishedWithPayload('TestOrderCreatedEvent', payload)
+      ).toBe(true);
 
       const wrongPayload = { orderId: 'order-999', customerId: 'customer-999' };
-      expect(harness.assertions.eventWasPublishedWithPayload('TestOrderCreatedEvent', wrongPayload)).toBe(false);
+      expect(
+        harness.assertions.eventWasPublishedWithPayload('TestOrderCreatedEvent', wrongPayload)
+      ).toBe(false);
     });
 
     it('should filter events by type correctly', () => {
@@ -332,10 +354,10 @@ describe('EventTestHarness', () => {
         name: 'Order Processing Flow',
         events: [
           new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' }),
-          new TestPaymentProcessedEvent({ paymentId: 'payment-789', amount: 100 })
+          new TestPaymentProcessedEvent({ paymentId: 'payment-789', amount: 100 }),
         ],
         expectedHandlerCalls: 2,
-        expectedEventTypes: ['TestOrderCreatedEvent', 'TestPaymentProcessedEvent']
+        expectedEventTypes: ['TestOrderCreatedEvent', 'TestPaymentProcessedEvent'],
       };
 
       // Act
@@ -351,11 +373,9 @@ describe('EventTestHarness', () => {
       // Arrange
       const scenario: EventTestScenario = {
         name: 'Incomplete Flow',
-        events: [
-          new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' })
-        ],
+        events: [new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' })],
         expectedHandlerCalls: 1,
-        expectedEventTypes: ['TestOrderCreatedEvent', 'TestPaymentProcessedEvent'] // This event won't be published
+        expectedEventTypes: ['TestOrderCreatedEvent', 'TestPaymentProcessedEvent'], // This event won't be published
       };
 
       // Act & Assert
@@ -371,11 +391,9 @@ describe('EventTestHarness', () => {
 
       const scenario: EventTestScenario = {
         name: 'Wrong Handler Count',
-        events: [
-          new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' })
-        ],
+        events: [new TestOrderCreatedEvent({ orderId: 'order-123', customerId: 'customer-456' })],
         expectedHandlerCalls: 5, // Wrong count
-        expectedEventTypes: ['TestOrderCreatedEvent']
+        expectedEventTypes: ['TestOrderCreatedEvent'],
       };
 
       // Act & Assert
@@ -391,7 +409,7 @@ describe('EventTestHarness', () => {
         events: [],
         expectedHandlerCalls: 0,
         expectedEventTypes: [],
-        timeout: 50 // Very short timeout
+        timeout: 50, // Very short timeout
       };
 
       // Mock a long-running operation
@@ -417,16 +435,18 @@ describe('EventTestHarness', () => {
 
       const limitedHarness = new EventTestHarness({
         captureAllEvents: true,
-        maxCapturedEvents: 2
+        maxCapturedEvents: 2,
       });
       await limitedHarness.initialize();
 
       // Act
       for (let i = 0; i < 5; i++) {
-        await limitedHarness.publishEvent(new TestOrderCreatedEvent({
-          orderId: `order-${i}`,
-          customerId: 'customer-456'
-        }));
+        await limitedHarness.publishEvent(
+          new TestOrderCreatedEvent({
+            orderId: `order-${i}`,
+            customerId: 'customer-456',
+          })
+        );
       }
 
       // Assert
@@ -440,15 +460,17 @@ describe('EventTestHarness', () => {
       await harness.teardown();
 
       const noCaptureHarness = new EventTestHarness({
-        captureAllEvents: false
+        captureAllEvents: false,
       });
       await noCaptureHarness.initialize();
 
       // Act
-      await noCaptureHarness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await noCaptureHarness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       // Assert
       expect(noCaptureHarness.assertions.getEventCount()).toBe(0); // No auto-capture
@@ -460,10 +482,12 @@ describe('EventTestHarness', () => {
   describe('Utility Methods', () => {
     it('should clear captured events', async () => {
       // Arrange
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
       expect(harness.assertions.getEventCount()).toBe(1);
 
       // Act
@@ -478,10 +502,12 @@ describe('EventTestHarness', () => {
       const handler = vi.fn();
       harness.subscribeToEvent('TestOrderCreatedEvent', handler);
 
-      await harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }));
+      await harness.publishEvent(
+        new TestOrderCreatedEvent({
+          orderId: 'order-123',
+          customerId: 'customer-456',
+        })
+      );
 
       expect(harness.assertions.getHandlerCallCount('TestOrderCreatedEvent')).toBe(1);
 
@@ -513,10 +539,14 @@ describe('EventTestHarness', () => {
       harness.subscribeToEvent('TestOrderCreatedEvent', errorHandler);
 
       // Act & Assert
-      await expect(harness.publishEvent(new TestOrderCreatedEvent({
-        orderId: 'order-123',
-        customerId: 'customer-456'
-      }))).rejects.toThrow('Handler error');
+      await expect(
+        harness.publishEvent(
+          new TestOrderCreatedEvent({
+            orderId: 'order-123',
+            customerId: 'customer-456',
+          })
+        )
+      ).rejects.toThrow('Handler error');
 
       // Handler call should still be tracked
       expect(harness.assertions.hasHandlerBeenCalled('TestOrderCreatedEvent')).toBe(true);

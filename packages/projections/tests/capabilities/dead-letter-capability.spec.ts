@@ -3,7 +3,11 @@ import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { DomainErrorCode } from '@vytches-ddd/core';
 import { DeadLetterCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
-import type { ICapabilityContext, IDeadLetterStore, IDeadLetter } from '../../src/projection-interfaces';
+import type {
+  ICapabilityContext,
+  IDeadLetterStore,
+  IDeadLetter,
+} from '../../src/projection-interfaces';
 
 // Mock store implementation
 class MockDeadLetterStore implements IDeadLetterStore {

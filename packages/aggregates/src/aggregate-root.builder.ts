@@ -28,7 +28,10 @@ export class AggregateBuilder<TId = string> {
   /**
    * Create a new builder instance
    */
-  static create<TId = string>(params: { id: TId | EntityId<TId>; version?: number }): AggregateBuilder<TId> {
+  static create<TId = string>(params: {
+    id: TId | EntityId<TId>;
+    version?: number;
+  }): AggregateBuilder<TId> {
     const constructorParams: IAggregateConstructorParams<TId> = {
       id: params.id instanceof EntityId ? params.id : new EntityId(params.id, 'text'),
       version: params.version || 0,
@@ -120,8 +123,7 @@ export class AggregateBuilder<TId = string> {
   buildWithAllCapabilities<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
     AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
   ): TAgg {
-    return this
-      .withSnapshots()
+    return this.withSnapshots()
       .withVersioning()
       .withAudit()
       .withEventSourcing()

@@ -268,7 +268,7 @@ describe('InMemorySchedulerAdapter', () => {
       const events = [
         TestEventFactory.delayed(1000),
         TestEventFactory.delayed(2000),
-        TestEventFactory.delayed(3000)
+        TestEventFactory.delayed(3000),
       ];
 
       for (const event of events) {
@@ -477,11 +477,7 @@ describe('InMemorySchedulerAdapter', () => {
 
     it('should handle very distant future events', async () => {
       const distantFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year
-      const futureEvent = new TestScheduledEvent(
-        'test-123',
-        distantFuture,
-        'Future event'
-      );
+      const futureEvent = new TestScheduledEvent('test-123', distantFuture, 'Future event');
 
       const jobId = await adapter.schedule(futureEvent);
 

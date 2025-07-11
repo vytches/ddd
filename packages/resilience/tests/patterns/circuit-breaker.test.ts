@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import { DefaultResilienceContext, CircuitBreaker, CircuitBreakerState, CircuitBreakerOpenError } from '../../src';
+import {
+  DefaultResilienceContext,
+  CircuitBreaker,
+  CircuitBreakerState,
+  CircuitBreakerOpenError,
+} from '../../src';
 
 describe('CircuitBreaker', () => {
   let circuitBreaker: CircuitBreaker;

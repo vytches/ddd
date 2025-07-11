@@ -16,9 +16,8 @@ export function CompensationHandler(
 ): MethodDecorator {
   return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
     // Normalize options
-    const options: CompensationHandlerOptions = typeof optionsOrStepName === 'string'
-      ? { stepName: optionsOrStepName }
-      : optionsOrStepName;
+    const options: CompensationHandlerOptions =
+      typeof optionsOrStepName === 'string' ? { stepName: optionsOrStepName } : optionsOrStepName;
 
     // Validate required options
     if (!options.stepName || options.stepName.trim() === '') {
@@ -26,7 +25,7 @@ export function CompensationHandler(
         'unknown',
         '@CompensationHandler decorator requires stepName',
         ['stepName is required'],
-        { usage: '@CompensationHandler(\'processPayment\')' }
+        { usage: "@CompensationHandler('processPayment')" }
       );
     }
 
@@ -40,7 +39,8 @@ export function CompensationHandler(
     };
 
     // Get existing metadata or create new
-    const existingMetadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
+    const existingMetadata: SagaMetadata =
+      Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
 
     // Initialize compensation handlers map if it doesn't exist
     if (!existingMetadata.compensationHandlers) {
@@ -66,7 +66,10 @@ export function CompensationHandler(
  * @param target - Target class
  * @param methodName - Method name
  */
-export function getCompensationHandlerMetadata(target: any, methodName: string): CompensationHandlerOptions | undefined {
+export function getCompensationHandlerMetadata(
+  target: any,
+  methodName: string
+): CompensationHandlerOptions | undefined {
   const methodMetadataKey = `saga:compensationHandler:${methodName}`;
   return Reflect.getMetadata(methodMetadataKey, target);
 }
@@ -75,7 +78,9 @@ export function getCompensationHandlerMetadata(target: any, methodName: string):
  * Get all compensation handler methods from a class
  * @param target - Target class
  */
-export function getCompensationHandlerMethods(target: any): Map<string, CompensationHandlerOptions> {
+export function getCompensationHandlerMethods(
+  target: any
+): Map<string, CompensationHandlerOptions> {
   const metadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target) || {};
   return metadata.compensationHandlers || new Map();
 }
@@ -95,10 +100,15 @@ export function isCompensationHandlerMethod(target: any, methodName: string): bo
  * @param target - Target class
  * @param stepName - Step name to find compensation handler for
  */
-export function getCompensationHandlerForStep(target: any, stepName: string): {
-  methodName: string;
-  options: CompensationHandlerOptions;
-} | undefined {
+export function getCompensationHandlerForStep(
+  target: any,
+  stepName: string
+):
+  | {
+      methodName: string;
+      options: CompensationHandlerOptions;
+    }
+  | undefined {
   const compensationHandlers = getCompensationHandlerMethods(target);
 
   for (const [methodName, options] of compensationHandlers.entries()) {

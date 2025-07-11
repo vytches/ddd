@@ -1,6 +1,6 @@
 /**
  * Event Handler Discovery Plugin for VytchesDDD DI System
- * 
+ *
  * This plugin enables automatic discovery and registration of event handlers
  * that are decorated with the @EventHandler decorator and have DI integration enabled.
  */
@@ -33,7 +33,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Discover all event handlers that are ready for DI registration.
-   * 
+   *
    * @param assemblies - Optional list of modules/assemblies to scan
    * @returns Promise<HandlerInfo[]> List of discovered event handlers
    */
@@ -57,7 +57,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Scan a specific assembly/module for event handlers.
-   * 
+   *
    * @param assembly - Module or assembly to scan
    * @returns Promise<HandlerInfo[]> Event handlers found in the assembly
    */
@@ -70,11 +70,11 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
     // Scan all exports in the assembly
     const exports = Object.values(assembly);
-    
+
     for (const exportedValue of exports) {
       if (this.isEventHandlerClass(exportedValue)) {
         const diMetadata = this.getEventHandlerDIMetadata(exportedValue);
-        
+
         if (diMetadata && diMetadata.options.autoRegister !== false) {
           const handlerInfo: HandlerInfo = {
             type: 'event',
@@ -90,8 +90,8 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
               active: diMetadata.options.active !== false,
               autoRegister: diMetadata.options.autoRegister ?? true,
               registeredAt: diMetadata.registeredAt,
-              availableFrom: diMetadata.options.availableFrom
-            }
+              availableFrom: diMetadata.options.availableFrom,
+            },
           };
 
           handlers.push(handlerInfo);
@@ -104,7 +104,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Check if a value is an event handler class.
-   * 
+   *
    * @param value - Value to check
    * @returns boolean True if the value is an event handler class
    */
@@ -118,7 +118,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Check if a class is marked for DI auto-registration.
-   * 
+   *
    * @param target - The handler class to inspect
    * @returns boolean True if the handler is pending DI registration
    */
@@ -132,7 +132,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
   /**
    * Get DI metadata from an event handler class.
-   * 
+   *
    * @param target - The handler class to inspect
    * @returns DIHandlerMetadata | undefined The DI metadata, or undefined if none exists
    */

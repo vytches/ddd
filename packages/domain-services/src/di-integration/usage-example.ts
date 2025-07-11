@@ -1,6 +1,6 @@
 /**
  * Example usage of Domain Services with DI integration
- * 
+ *
  * This file demonstrates how to use the enhanced @DomainService decorator
  * with VytchesDDD dependency injection system.
  */
@@ -15,7 +15,7 @@ import { DomainServiceDiscoveryPlugin } from './domain-service-discovery-plugin'
   serviceId: 'userValidationService',
   lifetime: ServiceLifetime.Singleton,
   autoRegister: true,
-  tags: ['validation', 'user']
+  tags: ['validation', 'user'],
 })
 export class UserValidationService extends IBaseDomainService {
   constructor() {
@@ -37,7 +37,7 @@ export class UserValidationService extends IBaseDomainService {
   tags: ['order', 'business'],
   dependencies: ['orderRepository', 'paymentService'],
   transactional: true,
-  publishesEvents: true
+  publishesEvents: true,
 })
 export class OrderProcessingService extends IBaseDomainService {
   constructor() {
@@ -49,13 +49,12 @@ export class OrderProcessingService extends IBaseDomainService {
     try {
       const repository = VytchesDDD.resolve<any>('orderRepository', 'OrderManagement');
       const paymentService = VytchesDDD.resolve<any>('paymentService');
-      
+
       console.log(`Processing order ${orderId} with repository and payment service`);
-      
+
       // Business logic here
       await repository.findById(orderId);
       await paymentService.processPayment(orderId);
-      
     } catch (error) {
       console.error('Failed to resolve dependencies:', error);
       throw error;
@@ -82,16 +81,16 @@ export class LegacyInventoryService extends IBaseDomainService {
 export async function setupDomainServicesWithDI() {
   // Create and configure container
   const container = new SimpleContainer();
-  
+
   // Register dependencies manually (these would come from your app's DI setup)
   container.registerInstance('orderRepository', {
-    findById: async (id: string) => ({ id, status: 'pending' })
+    findById: async (id: string) => ({ id, status: 'pending' }),
   });
-  
+
   container.registerInstance('paymentService', {
     processPayment: async (orderId: string) => {
       console.log(`Payment processed for order ${orderId}`);
-    }
+    },
   });
 
   // Configure VytchesDDD with container
@@ -100,7 +99,7 @@ export async function setupDomainServicesWithDI() {
   // Optional: Setup context-specific container
   const orderContainer = new SimpleContainer();
   orderContainer.registerInstance('orderRepository', {
-    findById: async (id: string) => ({ id, status: 'priority' })
+    findById: async (id: string) => ({ id, status: 'priority' }),
   });
   VytchesDDD.configureContext('OrderManagement', orderContainer);
 
@@ -130,7 +129,7 @@ export async function exampleUsage() {
   console.log('User is valid:', isValid);
 
   await orderService.processOrder('order-123');
-  
+
   const stock = legacyService.checkStock('product-456');
   console.log('Stock level:', stock);
 }

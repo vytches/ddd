@@ -11,7 +11,7 @@ export {
   PredicateSpecification,
   PropertyBetweenSpecification,
   PropertyInSpecification,
-  PropertyEqualsSpecification
+  PropertyEqualsSpecification,
 } from './specifications';
 
 export { BusinessRuleValidator } from './business-rules';

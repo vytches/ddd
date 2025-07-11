@@ -9,14 +9,22 @@ interface ILogger {
 }
 
 class MockLogger implements ILogger {
-  info(message: string, ...args: any[]): void { /* no-op */ }
-  error(message: string, ...args: any[]): void { /* no-op */ }
-  warn(message: string, ...args: any[]): void { /* no-op */ }
-  debug(message: string, ...args: any[]): void { /* no-op */ }
+  info(message: string, ...args: any[]): void {
+    /* no-op */
+  }
+  error(message: string, ...args: any[]): void {
+    /* no-op */
+  }
+  warn(message: string, ...args: any[]): void {
+    /* no-op */
+  }
+  debug(message: string, ...args: any[]): void {
+    /* no-op */
+  }
 }
 
 const Logger = {
-  forContext: () => new MockLogger()
+  forContext: () => new MockLogger(),
 };
 import type {
   IEventScheduler,
@@ -89,10 +97,7 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
   /**
    * Create a scheduled job from an event
    */
-  protected createJob(
-    event: IScheduledEvent,
-    _options?: IScheduleOptions
-  ): IScheduledJob {
+  protected createJob(event: IScheduledEvent, _options?: IScheduleOptions): IScheduledJob {
     const now = new Date();
 
     return {
@@ -196,10 +201,7 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
   }
 
   // Abstract methods to be implemented by concrete adapters
-  abstract schedule(
-    event: IScheduledEvent,
-    options?: IScheduleOptions
-  ): Promise<string>;
+  abstract schedule(event: IScheduledEvent, options?: IScheduleOptions): Promise<string>;
 
   abstract cancel(jobId: string): Promise<void>;
 
@@ -266,7 +268,9 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
 
     // Filter by event type
     if (filter.eventType) {
-      const eventTypeFilter = Array.isArray(filter.eventType) ? filter.eventType : [filter.eventType];
+      const eventTypeFilter = Array.isArray(filter.eventType)
+        ? filter.eventType
+        : [filter.eventType];
       filteredJobs = filteredJobs.filter(job => eventTypeFilter.includes(job.event.type));
     }
 
@@ -333,11 +337,7 @@ export abstract class BaseSchedulerAdapter implements IEventScheduler {
   /**
    * Paginate jobs with limit and offset
    */
-  protected paginateJobs(
-    jobs: IScheduledJob[],
-    limit?: number,
-    offset?: number
-  ): IJobQueryResult {
+  protected paginateJobs(jobs: IScheduledJob[], limit?: number, offset?: number): IJobQueryResult {
     const actualOffset = offset || 0;
     const actualLimit = limit || jobs.length;
 

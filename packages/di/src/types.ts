@@ -7,7 +7,7 @@ export enum ServiceLifetime {
   /** Single instance shared across all resolutions */
   Singleton = 'singleton',
   /** Instance scoped to a specific context or request */
-  Scoped = 'scoped'
+  Scoped = 'scoped',
 }
 
 /**
@@ -190,4 +190,3 @@ export interface IContainerBuilder {
    */
   build(): IDependencyContainer;
 }
-

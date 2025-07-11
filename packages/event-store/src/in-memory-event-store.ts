@@ -74,12 +74,7 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
       const streamVersion = fromVersion + i;
       const position = this.globalPosition++;
 
-      const storedEvent = this.createStoredEvent(
-        event,
-        streamId,
-        streamVersion,
-        position
-      );
+      const storedEvent = this.createStoredEvent(event, streamId, streamVersion, position);
 
       stream.events.push(storedEvent);
       this.globalEvents.push(storedEvent);
@@ -126,11 +121,7 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
       throw new StreamNotFoundError(streamId);
     }
 
-    const {
-      fromVersion = 0,
-      maxCount = 1000,
-      direction = 'forward',
-    } = options;
+    const { fromVersion = 0, maxCount = 1000, direction = 'forward' } = options;
 
     let events = stream.events.filter(e => e.streamVersion >= fromVersion);
 
@@ -146,9 +137,10 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
       streamId,
       events: events as IStoredEvent<T>[],
       fromVersion,
-      lastVersion: events.length > 0 ? events[events.length - 1]?.streamVersion ?? -1 : -1,
+      lastVersion: events.length > 0 ? (events[events.length - 1]?.streamVersion ?? -1) : -1,
       isEndOfStream: events.length < maxCount,
-      nextVersion: events.length > 0 ? (events[events.length - 1]?.streamVersion ?? -1) + 1 : fromVersion,
+      nextVersion:
+        events.length > 0 ? (events[events.length - 1]?.streamVersion ?? -1) + 1 : fromVersion,
     };
 
     this.logRead(streamId, events.length, options);
@@ -158,9 +150,7 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
   /**
    * Read all events globally
    */
-  async readAll<T = unknown>(
-    options: IReadAllOptions = {}
-  ): Promise<IGlobalEventStream<T>> {
+  async readAll<T = unknown>(options: IReadAllOptions = {}): Promise<IGlobalEventStream<T>> {
     if (!this.connected) {
       throw new Error('Event store is not connected');
     }
@@ -195,7 +185,8 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
     const result: IGlobalEventStream<T> = {
       events: events as IStoredEvent<T>[],
       fromPosition,
-      nextPosition: events.length > 0 ? (events[events.length - 1]?.position ?? 0n) + 1n : fromPosition,
+      nextPosition:
+        events.length > 0 ? (events[events.length - 1]?.position ?? 0n) + 1n : fromPosition,
       isEndOfStream: events.length < maxCount,
     };
 
@@ -219,10 +210,7 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
   /**
    * Set stream metadata
    */
-  async setStreamMetadata(
-    streamId: string,
-    metadata: Partial<IStreamMetadata>
-  ): Promise<void> {
+  async setStreamMetadata(streamId: string, metadata: Partial<IStreamMetadata>): Promise<void> {
     let stream = this.streams.get(streamId);
     if (!stream) {
       stream = this.createStream(streamId);
@@ -348,7 +336,8 @@ export class InMemoryEventStore extends BaseEventStore implements IEventStoreAda
     }
 
     const eventsSinceSnapshot = stream.snapshot
-      ? stream.events.length - stream.events.findIndex(e => e.streamVersion === stream.snapshot?.version)
+      ? stream.events.length -
+        stream.events.findIndex(e => e.streamVersion === stream.snapshot?.version)
       : stream.events.length;
 
     return eventsSinceSnapshot >= this.config.snapshotFrequency;

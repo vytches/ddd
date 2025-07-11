@@ -243,11 +243,7 @@
               },
               {
                 "sourceTag": "scope:event-scheduling",
-                "onlyDependOnLibsWithTags": [
-                  "scope:contracts",
-                  "scope:testing",
-                  "scope:events"
-                ]
+                "onlyDependOnLibsWithTags": ["scope:contracts", "scope:testing", "scope:events"]
               },
               {
                 "sourceTag": "scope:examples",

@@ -30,7 +30,7 @@ describe('Event Handler DI Integration', () => {
         context: 'TestContext',
         tags: ['test', 'event'],
         autoRegister: true,
-        priority: 100
+        priority: 100,
       })
       class TestEventHandlerWithDI extends TestEventHandler<TestEvent> {
         handle(event: TestEvent): void {
@@ -122,7 +122,7 @@ describe('Event Handler DI Integration', () => {
         context: 'DiscoveryContext',
         tags: ['discoverable'],
         autoRegister: true,
-        priority: 200
+        priority: 200,
       })
       class DiscoverableEventHandler extends TestEventHandler<TestEvent> {
         handle(event: TestEvent): void {
@@ -133,7 +133,7 @@ describe('Event Handler DI Integration', () => {
       // Create mock assembly
       const assembly = {
         DiscoverableEventHandler,
-        someOtherExport: 'not a handler'
+        someOtherExport: 'not a handler',
       };
 
       const handlers = await plugin.discoverHandlers([assembly]);
@@ -170,7 +170,7 @@ describe('Event Handler DI Integration', () => {
           // Empty test function
         },
         someValue: 42,
-        someObject: { prop: 'value' }
+        someObject: { prop: 'value' },
       };
 
       const handlers = await plugin.discoverHandlers([assembly]);
@@ -197,7 +197,7 @@ describe('Event Handler DI Integration', () => {
         priority: 500,
         active: true,
         availableFrom: '1.0.0',
-        customProperty: 'custom-value'
+        customProperty: 'custom-value',
       })
       class CompleteMetadataHandler extends TestEventHandler<TestEvent> {
         handle(event: TestEvent): void {
@@ -226,7 +226,7 @@ describe('Event Handler DI Integration', () => {
     it('should handle multiple handlers in single assembly', async () => {
       @EventHandler(TestEvent, {
         tags: ['handler1'],
-        autoRegister: true
+        autoRegister: true,
       })
       class Handler1 extends TestEventHandler<TestEvent> {
         handle(_event: TestEvent): void {
@@ -236,7 +236,7 @@ describe('Event Handler DI Integration', () => {
 
       @EventHandler(TestEvent, {
         tags: ['handler2'],
-        autoRegister: true
+        autoRegister: true,
       })
       class Handler2 extends TestEventHandler<TestEvent> {
         handle(_event: TestEvent): void {
@@ -245,7 +245,7 @@ describe('Event Handler DI Integration', () => {
       }
 
       @EventHandler(TestEvent, {
-        autoRegister: false  // This one should not be discovered
+        autoRegister: false, // This one should not be discovered
       })
       class Handler3 extends TestEventHandler<TestEvent> {
         handle(_event: TestEvent): void {

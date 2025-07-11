@@ -71,9 +71,9 @@ export class EntityId<T = string> implements IEntityId<T> {
   // Compatibility methods for existing code
   static createWithRandomUUID(): EntityId<string> {
     // Simple UUID generation without external dependencies
-    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
     return new EntityId(uuid, 'uuid');

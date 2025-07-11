@@ -5,7 +5,11 @@ import { aggregateBuilder } from '../src/aggregate-root.builder';
 import { SnapshotCapability } from '../src/capabilities/snapshot-capability';
 import { VersioningCapability } from '../src/capabilities/versioning-capability';
 import { AuditCapability } from '../src/capabilities/audit-capability';
-import { hasSnapshotCapability, hasVersioningCapability, hasAuditCapability } from '../src/aggregate-utilities';
+import {
+  hasSnapshotCapability,
+  hasVersioningCapability,
+  hasAuditCapability,
+} from '../src/aggregate-utilities';
 
 class TestAggregate extends AggregateRoot<string> {
   private value = '';
@@ -61,9 +65,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should work with snapshot capability', () => {
-    const aggregate = aggregateBuilder({ id: 'test-789' })
-      .withSnapshots()
-      .build(TestAggregate);
+    const aggregate = aggregateBuilder({ id: 'test-789' }).withSnapshots().build(TestAggregate);
 
     aggregate.setValue('hello world');
 
@@ -103,9 +105,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should work with audit capability', () => {
-    const aggregate = aggregateBuilder({ id: 'test-audit' })
-      .withAudit()
-      .build(TestAggregate);
+    const aggregate = aggregateBuilder({ id: 'test-audit' }).withAudit().build(TestAggregate);
 
     // Make some changes to generate audit events
     aggregate.setValue('first value');

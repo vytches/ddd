@@ -20,10 +20,7 @@ export type {
   ISagaRepositoryFactory,
 } from './repository.interfaces';
 
-export {
-  SagaConcurrencyError,
-  SagaNotFoundError,
-} from './repository.interfaces';
+export { SagaConcurrencyError, SagaNotFoundError } from './repository.interfaces';
 
 // Orchestrator interfaces
 export type {

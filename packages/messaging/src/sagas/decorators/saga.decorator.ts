@@ -20,9 +20,8 @@ export function Saga(
 ): <T extends Constructor>(target: T) => T {
   return function <T extends Constructor>(target: T): T {
     // Normalize options
-    const options: SagaDecoratorOptions = typeof optionsOrType === 'string'
-      ? { sagaType: optionsOrType }
-      : optionsOrType;
+    const options: SagaDecoratorOptions =
+      typeof optionsOrType === 'string' ? { sagaType: optionsOrType } : optionsOrType;
 
     // Validate required options
     if (!options.sagaType || options.sagaType.trim() === '') {
@@ -30,7 +29,7 @@ export function Saga(
         'unknown',
         '@Saga decorator requires a sagaType',
         ['sagaType is required'],
-        { usage: '@Saga(\'OrderProcessingSaga\')' }
+        { usage: "@Saga('OrderProcessingSaga')" }
       );
     }
 
@@ -81,7 +80,9 @@ export function Saga(
           }
         } catch (error) {
           // DI system not available - this is fine, manual registration can be used
-          console.debug(`Saga auto-registration skipped for ${sagaOptions.sagaType}: DI system not available`);
+          console.debug(
+            `Saga auto-registration skipped for ${sagaOptions.sagaType}: DI system not available`
+          );
         }
       }, 0);
     }
@@ -119,8 +120,5 @@ export function isSagaClass(target: Constructor): boolean {
  * @param target - Target class
  */
 export function getAllSagaTypes(targets: Constructor[]): string[] {
-  return targets
-    .filter(isSagaClass)
-    .map(getSagaType)
-    .filter(Boolean) as string[];
+  return targets.filter(isSagaClass).map(getSagaType).filter(Boolean) as string[];
 }

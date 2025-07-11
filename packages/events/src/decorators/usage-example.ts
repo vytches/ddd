@@ -1,6 +1,6 @@
 /**
  * Example usage of Event Handlers with DI integration
- * 
+ *
  * This file demonstrates how to use the enhanced @EventHandler decorator
  * with VytchesDDD dependency injection system.
  */
@@ -11,7 +11,7 @@ import { EventHandler } from './event-handler.decorator';
 // Example domain events
 export class UserRegisteredEvent implements IDomainEvent {
   public readonly eventType = 'UserRegisteredEvent';
-  
+
   constructor(
     public readonly id: string,
     public readonly userId: string,
@@ -23,7 +23,7 @@ export class UserRegisteredEvent implements IDomainEvent {
 
 export class OrderCreatedEvent implements IDomainEvent {
   public readonly eventType = 'OrderCreatedEvent';
-  
+
   constructor(
     public readonly id: string,
     public readonly orderId: string,
@@ -36,7 +36,7 @@ export class OrderCreatedEvent implements IDomainEvent {
 
 export class PaymentProcessedEvent implements IDomainEvent {
   public readonly eventType = 'PaymentProcessedEvent';
-  
+
   constructor(
     public readonly id: string,
     public readonly paymentId: string,
@@ -52,13 +52,13 @@ export class PaymentProcessedEvent implements IDomainEvent {
   lifetime: 'singleton',
   autoRegister: true,
   tags: ['user', 'notification'],
-  priority: 100
+  priority: 100,
 })
 export class UserRegistrationNotificationHandler implements IEventHandler<UserRegisteredEvent> {
   async handle(event: UserRegisteredEvent): Promise<void> {
     // In real implementation, you would use VytchesDDD.resolve() to get dependencies
     console.log(`Sending welcome email to user ${event.userId} at ${event.email}`);
-    
+
     // Example of using service locator (would need import in real usage)
     // const emailService = VytchesDDD.resolve<EmailService>('EmailService');
     // await emailService.sendWelcomeEmail(event.email);
@@ -71,12 +71,12 @@ export class UserRegistrationNotificationHandler implements IEventHandler<UserRe
   context: 'OrderManagement',
   autoRegister: true,
   tags: ['order', 'inventory'],
-  priority: 200
+  priority: 200,
 })
 export class OrderInventoryUpdateHandler implements IEventHandler<OrderCreatedEvent> {
   async handle(event: OrderCreatedEvent): Promise<void> {
     console.log(`Updating inventory for order ${event.orderId}`);
-    
+
     // Example of context-aware dependency resolution
     // const inventoryService = VytchesDDD.resolve<InventoryService>('InventoryService', 'OrderManagement');
     // await inventoryService.reserveItems(event.orderId);
@@ -89,12 +89,12 @@ export class OrderInventoryUpdateHandler implements IEventHandler<OrderCreatedEv
   autoRegister: true,
   tags: ['payment', 'notification', 'high-priority'],
   priority: 500,
-  active: true
+  active: true,
 })
 export class PaymentConfirmationHandler implements IEventHandler<PaymentProcessedEvent> {
   async handle(event: PaymentProcessedEvent): Promise<void> {
     console.log(`Processing payment confirmation for ${event.paymentId}`);
-    
+
     // High priority handler for immediate payment confirmations
     // const notificationService = VytchesDDD.resolve<NotificationService>('NotificationService');
     // await notificationService.sendPaymentConfirmation(event.paymentId);
@@ -106,12 +106,12 @@ export class PaymentConfirmationHandler implements IEventHandler<PaymentProcesse
   lifetime: 'singleton',
   autoRegister: true,
   tags: ['order', 'analytics'],
-  priority: 50  // Lower priority than inventory handler
+  priority: 50, // Lower priority than inventory handler
 })
 export class OrderAnalyticsHandler implements IEventHandler<OrderCreatedEvent> {
   async handle(event: OrderCreatedEvent): Promise<void> {
     console.log(`Recording analytics for order ${event.orderId}`);
-    
+
     // const analyticsService = VytchesDDD.resolve<AnalyticsService>('AnalyticsService');
     // await analyticsService.recordOrderCreated(event);
   }
@@ -140,23 +140,23 @@ export class ManualPaymentHandler implements IEventHandler<PaymentProcessedEvent
  */
 export function setupEventHandlersExample() {
   // This function would be called during application startup
-  
+
   // Register event discovery plugin
   // VytchesDDD.registerDiscoveryPlugin(new EventDiscoveryPlugin());
-  
+
   // Discover and register all event handlers
   // await VytchesDDD.discoverAndRegisterHandlers();
-  
+
   // The following handlers would be auto-registered:
   // - UserRegistrationNotificationHandler
-  // - OrderInventoryUpdateHandler  
+  // - OrderInventoryUpdateHandler
   // - PaymentConfirmationHandler
   // - OrderAnalyticsHandler
   // - LegacyUserHandler
-  
+
   // ManualPaymentHandler would need to be registered manually:
   // container.register('ManualPaymentHandler', ManualPaymentHandler);
-  
+
   console.log('Event handlers configured with DI integration');
 }
 
@@ -171,13 +171,13 @@ export async function exampleEventHandling() {
 
   // In a real application, events would be dispatched through the event bus
   // and handlers would be resolved automatically by the DI system
-  
+
   // Example of what happens internally:
   // 1. Event is published to event bus
   // 2. Event bus finds all handlers for the event type
   // 3. Handlers are resolved from DI container
   // 4. Handlers are executed according to their priority
-  
+
   console.log('Events:', { userEvent, orderEvent, paymentEvent });
   console.log('Handlers would be resolved and executed automatically');
 }

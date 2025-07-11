@@ -1,9 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Result } from '@vytches-ddd/utils';
-import { CompositePolicy, ConditionalPolicy, ConditionalPolicyBuilder } from '../src/composite-policy';
+import {
+  CompositePolicy,
+  ConditionalPolicy,
+  ConditionalPolicyBuilder,
+} from '../src/composite-policy';
 import { PolicyViolation } from '../src/policy-violation';
 import { PolicyContextBuilder, PolicyRequestBuilder } from '../src/policy-context';
-import type { IBusinessPolicy, PolicyRequest, PolicyCondition } from '../src/business-policy-interface';
+import type {
+  IBusinessPolicy,
+  PolicyRequest,
+  PolicyCondition,
+} from '../src/business-policy-interface';
 
 describe('CompositePolicy', () => {
   interface TestEntity {

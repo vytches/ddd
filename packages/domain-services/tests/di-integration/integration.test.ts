@@ -11,7 +11,7 @@ import { IBaseDomainService, DomainServiceDiscoveryPlugin, DomainService } from 
   serviceId: 'testIntegrationService',
   lifetime: ServiceLifetime.Singleton,
   autoRegister: true,
-  tags: ['integration', 'test']
+  tags: ['integration', 'test'],
 })
 class TestIntegrationService extends IBaseDomainService {
   constructor() {
@@ -28,7 +28,7 @@ class TestIntegrationService extends IBaseDomainService {
   lifetime: ServiceLifetime.Singleton,
   context: 'TestContext',
   autoRegister: true,
-  dependencies: ['contextDependency']
+  dependencies: ['contextDependency'],
 })
 class ContextSpecificService extends IBaseDomainService {
   constructor() {
@@ -132,7 +132,10 @@ describe('Domain Services DI Integration', () => {
     });
 
     it('should resolve context-specific services with context parameter', () => {
-      const service = VytchesDDD.resolve<ContextSpecificService>('contextSpecificService', 'TestContext');
+      const service = VytchesDDD.resolve<ContextSpecificService>(
+        'contextSpecificService',
+        'TestContext'
+      );
 
       expect(service).toBeInstanceOf(ContextSpecificService);
     });
@@ -158,7 +161,9 @@ describe('Domain Services DI Integration', () => {
       const plugin = new DomainServiceDiscoveryPlugin();
       const handlers = await plugin.discoverHandlers();
 
-      const testServiceHandler = handlers.find(h => h.metadata.serviceId === 'testIntegrationService');
+      const testServiceHandler = handlers.find(
+        h => h.metadata.serviceId === 'testIntegrationService'
+      );
       expect(testServiceHandler).toBeDefined();
       expect(testServiceHandler?.metadata.lifetime).toBe('singleton');
       expect(testServiceHandler?.metadata.tags).toEqual(['integration', 'test']);
@@ -178,7 +183,7 @@ describe('Domain Services DI Integration', () => {
       @DomainService({
         serviceId: 'missingContextService',
         context: 'NonExistentContext',
-        autoRegister: false // Don't auto-register to avoid conflicts
+        autoRegister: false, // Don't auto-register to avoid conflicts
       })
       class MissingContextService extends IBaseDomainService {
         constructor() {

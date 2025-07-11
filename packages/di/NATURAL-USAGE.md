@@ -1,6 +1,7 @@
 # Natural Framework Integration
 
-This document shows how to use VytchesDDD naturally with existing DI frameworks, preserving their patterns while enabling VytchesDDD capabilities.
+This document shows how to use VytchesDDD naturally with existing DI frameworks,
+preserving their patterns while enabling VytchesDDD capabilities.
 
 ## The Right Way: Natural Constructor Injection
 
@@ -13,24 +14,26 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailService: EmailService,
-    private readonly commandBus: ICommandBus  // VytchesDDD component
+    private readonly commandBus: ICommandBus // VytchesDDD component
   ) {}
 
   async createUser(userData: CreateUserDto): Promise<User> {
     // Natural dependency injection - no service locator needed
     const user = await this.userRepository.save(new User(userData));
     await this.emailService.sendWelcomeEmail(user.email);
-    
+
     // VytchesDDD command bus can use service locator internally
     await this.commandBus.execute(new UserCreatedCommand(user.id));
-    
+
     return user;
   }
 }
 
 // VytchesDDD Command Handler - this can use service locator internally
 @CommandHandler(CreateUserCommand)
-export class CreateUserCommandHandler implements ICommandHandler<CreateUserCommand> {
+export class CreateUserCommandHandler
+  implements ICommandHandler<CreateUserCommand>
+{
   // Option 1: Natural NestJS injection (preferred)
   constructor(
     private readonly userService: UserService,
@@ -39,7 +42,7 @@ export class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
 
   async handle(command: CreateUserCommand): Promise<void> {
     const user = await this.userService.createUser(command.userData);
-    
+
     // Publish domain event
     await this.eventBus.publish(new UserCreatedEvent(user));
   }
@@ -47,12 +50,14 @@ export class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
 
 // Alternative: VytchesDDD can resolve dependencies internally when needed
 @CommandHandler(ProcessOrderCommand)
-export class ProcessOrderCommandHandler implements ICommandHandler<ProcessOrderCommand> {
+export class ProcessOrderCommandHandler
+  implements ICommandHandler<ProcessOrderCommand>
+{
   async handle(command: ProcessOrderCommand): Promise<void> {
     // VytchesDDD resolves these internally, not in user code
     const orderService = VytchesDDD.resolve<OrderService>('OrderService');
     const paymentService = VytchesDDD.resolve<PaymentService>('PaymentService');
-    
+
     await orderService.process(command.orderId);
     await paymentService.charge(command.amount);
   }
@@ -67,11 +72,11 @@ export class ProcessOrderCommandHandler implements ICommandHandler<ProcessOrderC
   imports: [
     // Import VytchesDDD integration
     VytchesDDDModule,
-    
+
     // Your domain modules
     UserModule,
-    OrderModule
-  ]
+    OrderModule,
+  ],
 })
 export class AppModule {}
 
@@ -81,35 +86,35 @@ export class AppModule {}
     UserService,
     UserRepository,
     EmailService,
-    
+
     // Phase 1: Manual handler registration required
     CreateUserCommandHandler,
-    
+
     // Register VytchesDDD components with NestJS
     {
       provide: 'ICommandBus',
-      useClass: CommandBus
+      useClass: CommandBus,
     },
     {
-      provide: 'IEventBus', 
-      useClass: EventBus
+      provide: 'IEventBus',
+      useClass: EventBus,
     },
-    
+
     // Phase 1: Manual token registration for service locator
     {
       provide: 'CreateUserCommandHandler',
-      useClass: CreateUserCommandHandler
+      useClass: CreateUserCommandHandler,
     },
     {
       provide: 'OrderService',
-      useExisting: OrderService  // Reference existing NestJS service
+      useExisting: OrderService, // Reference existing NestJS service
     },
     {
-      provide: 'PaymentService', 
-      useExisting: PaymentService
-    }
+      provide: 'PaymentService',
+      useExisting: PaymentService,
+    },
   ],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {
   constructor() {
@@ -121,10 +126,13 @@ export class UserModule {
     // In Phase 1, CommandBus needs manual handler registration
     // Phase 2 will auto-discover through @CommandHandler decorator scanning
     const commandBus = VytchesDDD.resolve<ICommandBus>('ICommandBus');
-    
+
     // Manual registration - Phase 2 will automate this
     commandBus.registerHandler('CreateUserCommand', 'CreateUserCommandHandler');
-    commandBus.registerHandler('ProcessOrderCommand', 'ProcessOrderCommandHandler');
+    commandBus.registerHandler(
+      'ProcessOrderCommand',
+      'ProcessOrderCommandHandler'
+    );
   }
 }
 ```
@@ -132,12 +140,14 @@ export class UserModule {
 ## ⚠️ Phase 1 vs Phase 2 Reality
 
 ### Current State (Phase 1)
+
 - ❌ **No auto-discovery** - handlers must be manually registered
 - ✅ **Manual registration** - explicit provider registration required
 - ✅ **Service locator works** - VytchesDDD.resolve() functional
 - ✅ **Context isolation works** - configureContext() functional
 
 ### Coming in Phase 2
+
 - ✅ **Auto-discovery** - @CommandHandler decorator scanning
 - ✅ **Metadata-based registration** - automatic handler registration
 - ✅ **Enhanced decorators** - options for context, timeout, middleware
@@ -148,12 +158,12 @@ export class UserModule {
 // Phase 1: You must manually register everything
 @Module({
   providers: [
-    CreateUserCommandHandler,  // 1. Register with NestJS
+    CreateUserCommandHandler, // 1. Register with NestJS
     {
-      provide: 'CreateUserCommandHandler',  // 2. Register token for service locator
-      useClass: CreateUserCommandHandler
-    }
-  ]
+      provide: 'CreateUserCommandHandler', // 2. Register token for service locator
+      useClass: CreateUserCommandHandler,
+    },
+  ],
 })
 export class UserModule {
   constructor() {
@@ -175,8 +185,8 @@ export class CreateUserCommandHandler {
 
 @Module({
   providers: [
-    CreateUserCommandHandler  // Only NestJS registration needed
-  ]
+    CreateUserCommandHandler, // Only NestJS registration needed
+  ],
 })
 export class UserModule {
   // No manual setup required - auto-discovery handles everything!
@@ -186,6 +196,7 @@ export class UserModule {
 ## Key Principles
 
 ### 1. Application Services: Natural DI
+
 Your application services should use the framework's natural DI patterns:
 
 ```typescript
@@ -200,7 +211,7 @@ export class OrderService {
 }
 
 // ❌ Bad: Service locator in application code
-@Injectable() 
+@Injectable()
 export class OrderService {
   async processOrder() {
     const repository = VytchesDDD.resolve<OrderRepository>('OrderRepository');
@@ -210,7 +221,9 @@ export class OrderService {
 ```
 
 ### 2. VytchesDDD Components: Can Use Service Locator
-VytchesDDD's internal components (handlers, domain services) can use service locator when it makes sense:
+
+VytchesDDD's internal components (handlers, domain services) can use service
+locator when it makes sense:
 
 ```typescript
 // ✅ Acceptable: VytchesDDD command handler using service locator
@@ -221,7 +234,7 @@ export class ComplexBusinessCommandHandler {
     const serviceA = VytchesDDD.resolve<ServiceA>('ServiceA');
     const serviceB = VytchesDDD.resolve<ServiceB>('ServiceB');
     const serviceC = VytchesDDD.resolve<ServiceC>('ServiceC');
-    
+
     // Complex business logic...
   }
 }
@@ -233,7 +246,7 @@ export class SimpleBusinessCommandHandler {
     private readonly domainService: DomainService,
     private readonly repository: Repository
   ) {}
-  
+
   async handle(command: SimpleBusinessCommand): Promise<void> {
     // Simple business logic
   }
@@ -248,43 +261,49 @@ export class SimpleBusinessCommandHandler {
   providers: [
     OrderService,
     OrderRepository,
-    
+
     // Order-specific implementations
     {
       provide: 'PaymentProcessor',
-      useClass: StripePaymentProcessor // Order context uses Stripe
-    }
-  ]
+      useClass: StripePaymentProcessor, // Order context uses Stripe
+    },
+  ],
 })
 export class OrderModule {
   constructor() {
     // Configure order context container
     const orderContainer = new SimpleContainer();
-    orderContainer.registerInstance('PaymentProcessor', new StripePaymentProcessor());
-    
+    orderContainer.registerInstance(
+      'PaymentProcessor',
+      new StripePaymentProcessor()
+    );
+
     VytchesDDD.configureContext('OrderManagement', orderContainer);
   }
 }
 
-// User Context Module  
+// User Context Module
 @Module({
   providers: [
     UserService,
     UserRepository,
-    
+
     // User-specific implementations
     {
-      provide: 'PaymentProcessor', 
-      useClass: PayPalPaymentProcessor // User context uses PayPal
-    }
-  ]
+      provide: 'PaymentProcessor',
+      useClass: PayPalPaymentProcessor, // User context uses PayPal
+    },
+  ],
 })
 export class UserModule {
   constructor() {
     // Configure user context container
     const userContainer = new SimpleContainer();
-    userContainer.registerInstance('PaymentProcessor', new PayPalPaymentProcessor());
-    
+    userContainer.registerInstance(
+      'PaymentProcessor',
+      new PayPalPaymentProcessor()
+    );
+
     VytchesDDD.configureContext('UserManagement', userContainer);
   }
 }
@@ -294,7 +313,10 @@ export class UserModule {
 export class ProcessPaymentCommandHandler {
   async handle(command: ProcessPaymentCommand): Promise<void> {
     // This will resolve StripePaymentProcessor because we're in OrderManagement context
-    const processor = VytchesDDD.resolve<PaymentProcessor>('PaymentProcessor', 'OrderManagement');
+    const processor = VytchesDDD.resolve<PaymentProcessor>(
+      'PaymentProcessor',
+      'OrderManagement'
+    );
     await processor.process(command.amount);
   }
 }
@@ -355,7 +377,7 @@ export class UserController {
     @inject('UserService') private userService: UserService,
     @inject('ICommandBus') private commandBus: ICommandBus
   ) {}
-  
+
   async createUser(req: Request, res: Response): Promise<void> {
     const user = await this.userService.createUser(req.body);
     await this.commandBus.execute(new UserCreatedCommand(user.id));
@@ -369,7 +391,7 @@ export class UserController {
 ### ✅ Do This
 
 1. **Use framework's natural DI for application services**
-2. **Register VytchesDDD components with your DI container** 
+2. **Register VytchesDDD components with your DI container**
 3. **Let VytchesDDD use service locator internally for its components**
 4. **Use context isolation for true domain boundaries**
 5. **Prefer constructor injection over service locator in your code**
@@ -384,33 +406,35 @@ export class UserController {
 ## Migration Strategy
 
 ### Phase 1: Add VytchesDDD Components
+
 ```typescript
 // Keep existing services unchanged
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository, // Keep natural DI
-    private readonly emailService: EmailService      // Keep natural DI  
+    private readonly emailService: EmailService // Keep natural DI
   ) {}
 }
 
 // Add VytchesDDD command bus
-@Injectable() 
+@Injectable()
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly commandBus: ICommandBus  // Add VytchesDDD component
+    private readonly commandBus: ICommandBus // Add VytchesDDD component
   ) {}
 }
 ```
 
 ### Phase 2: Move Complex Logic to Handlers
+
 ```typescript
 // Extract complex business logic to command handlers
 @CommandHandler(CreateUserCommand)
 export class CreateUserCommandHandler {
   constructor(private readonly userService: UserService) {}
-  
+
   async handle(command: CreateUserCommand): Promise<void> {
     // Business logic here
   }
@@ -420,11 +444,12 @@ export class CreateUserCommandHandler {
 @Controller()
 export class UserController {
   constructor(private readonly commandBus: ICommandBus) {}
-  
+
   async createUser(req: Request): Promise<void> {
     await this.commandBus.execute(new CreateUserCommand(req.body));
   }
 }
 ```
 
-This approach preserves the natural patterns of each framework while enabling VytchesDDD's advanced capabilities where they add value.
+This approach preserves the natural patterns of each framework while enabling
+VytchesDDD's advanced capabilities where they add value.

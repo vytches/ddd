@@ -24,9 +24,9 @@ describe('ProjectionRebuilder', () => {
       percentComplete: 100,
       eventsPerSecond: 100,
       startTime: new Date(),
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     },
-    success: true
+    success: true,
   };
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('ProjectionRebuilder', () => {
       replayFromStream: vi.fn().mockResolvedValue(mockReplayResult),
       replayAll: vi.fn().mockResolvedValue(mockReplayResult),
       replayWithFilter: vi.fn().mockResolvedValue(mockReplayResult),
-      getEventsAsIterable: vi.fn()
+      getEventsAsIterable: vi.fn(),
     };
 
     // Mock event store
@@ -51,7 +51,7 @@ describe('ProjectionRebuilder', () => {
       createSnapshot: vi.fn(),
       loadSnapshot: vi.fn(),
       connect: vi.fn(),
-      disconnect: vi.fn()
+      disconnect: vi.fn(),
     } as any;
 
     // Mock projection engine
@@ -66,7 +66,7 @@ describe('ProjectionRebuilder', () => {
       getCapability: vi.fn(),
       hasCapability: vi.fn(),
       removeCapability: vi.fn(),
-      rebuild: vi.fn()
+      rebuild: vi.fn(),
     };
 
     // Mock projection store
@@ -75,7 +75,7 @@ describe('ProjectionRebuilder', () => {
       save: vi.fn(),
       delete: vi.fn(),
       deleteAll: vi.fn().mockResolvedValue(undefined),
-      exists: vi.fn()
+      exists: vi.fn(),
     };
 
     rebuilder = new ProjectionRebuilder(eventStore, projectionEngine, projectionStore);
@@ -120,7 +120,7 @@ describe('ProjectionRebuilder', () => {
         eventTimestamp: new Date(),
         eventVersion: 1,
         payload: {},
-        metadata: {}
+        metadata: {},
       };
 
       await rebuilder.rebuild(undefined, { skipErrors: true });
@@ -140,7 +140,7 @@ describe('ProjectionRebuilder', () => {
         eventTimestamp: new Date(),
         eventVersion: 1,
         payload: {},
-        metadata: {}
+        metadata: {},
       };
 
       await rebuilder.rebuild(undefined, { skipErrors: false });
@@ -171,7 +171,10 @@ describe('ProjectionRebuilder', () => {
 
   describe('rebuildMany', () => {
     it('should rebuild multiple projections', async () => {
-      const projection2 = { ...projectionEngine, getProjectionName: vi.fn().mockReturnValue('Projection2') };
+      const projection2 = {
+        ...projectionEngine,
+        getProjectionName: vi.fn().mockReturnValue('Projection2'),
+      };
       const projections = [projectionEngine, projection2];
 
       const results = await rebuilder.rebuildMany(projections);
@@ -182,11 +185,15 @@ describe('ProjectionRebuilder', () => {
     });
 
     it('should continue on error when skipErrors is true', async () => {
-      const projection2 = { ...projectionEngine, getProjectionName: vi.fn().mockReturnValue('Projection2') };
+      const projection2 = {
+        ...projectionEngine,
+        getProjectionName: vi.fn().mockReturnValue('Projection2'),
+      };
       const projections = [projectionEngine, projection2];
 
       // Make first rebuild fail
-      eventReplay.replayAll = vi.fn()
+      eventReplay.replayAll = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Failed'))
         .mockResolvedValueOnce(mockReplayResult);
 
@@ -198,14 +205,18 @@ describe('ProjectionRebuilder', () => {
     });
 
     it('should stop on error when skipErrors is false', async () => {
-      const projection2 = { ...projectionEngine, getProjectionName: vi.fn().mockReturnValue('Projection2') };
+      const projection2 = {
+        ...projectionEngine,
+        getProjectionName: vi.fn().mockReturnValue('Projection2'),
+      };
       const projections = [projectionEngine, projection2];
 
       const error = new Error('Failed to rebuild projection TestProjection');
       eventReplay.replayAll = vi.fn().mockRejectedValueOnce(error);
 
-      await expect(rebuilder.rebuildMany(projections, undefined, { skipErrors: false }))
-        .rejects.toThrow(error);
+      await expect(
+        rebuilder.rebuildMany(projections, undefined, { skipErrors: false })
+      ).rejects.toThrow(error);
     });
   });
 
@@ -220,7 +231,9 @@ describe('ProjectionRebuilder', () => {
       const error = new Error('Clear failed');
       projectionStore.deleteAll = vi.fn().mockRejectedValue(error);
 
-      await expect(rebuilder.clearProjectionState()).rejects.toThrow('Failed to clear state for projection TestProjection');
+      await expect(rebuilder.clearProjectionState()).rejects.toThrow(
+        'Failed to clear state for projection TestProjection'
+      );
     });
   });
 });

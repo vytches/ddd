@@ -6,11 +6,7 @@ import type {
   ISagaQuery,
   ISagaRepositoryConfig,
 } from '../../../src/sagas/interfaces';
-import {
-  SagaStatus,
-  SagaConcurrencyError,
-  SagaNotFoundError,
-} from '../../../src/sagas/interfaces';
+import { SagaStatus, SagaConcurrencyError, SagaNotFoundError } from '../../../src/sagas/interfaces';
 
 // Mock logger
 vi.mock('@vytches-ddd/logging', () => ({
@@ -125,8 +121,7 @@ describe('InMemorySagaRepository', () => {
         state: { ...saga1.state, version: 1 },
       });
 
-      await expect(repository.save(saga2))
-        .rejects.toThrow(SagaConcurrencyError);
+      await expect(repository.save(saga2)).rejects.toThrow(SagaConcurrencyError);
     });
 
     it('should allow save when optimistic locking disabled', async () => {
@@ -242,7 +237,10 @@ describe('InMemorySagaRepository', () => {
       expect(foundByType).toContain(saga1);
       expect(foundByType).toContain(saga2);
 
-      const foundByTypeAndStatus = await repository.findByTypeAndStatus('TestSaga', SagaStatus.STARTED);
+      const foundByTypeAndStatus = await repository.findByTypeAndStatus(
+        'TestSaga',
+        SagaStatus.STARTED
+      );
       expect(foundByTypeAndStatus).toHaveLength(1);
       expect(foundByTypeAndStatus).toContain(saga1);
     });
@@ -342,8 +340,7 @@ describe('InMemorySagaRepository', () => {
     });
 
     it('should throw error when saga not found', async () => {
-      await expect(repository.remove('non-existent'))
-        .rejects.toThrow(SagaNotFoundError);
+      await expect(repository.remove('non-existent')).rejects.toThrow(SagaNotFoundError);
     });
   });
 
@@ -405,30 +402,26 @@ describe('InMemorySagaRepository', () => {
       const saga = createMockSaga();
       await repository.save(saga);
 
-      await expect(repository.updateState(
-        'saga-123',
-        { status: SagaStatus.EXECUTING },
-        0 // Wrong version
-      )).rejects.toThrow(SagaConcurrencyError);
+      await expect(
+        repository.updateState(
+          'saga-123',
+          { status: SagaStatus.EXECUTING },
+          0 // Wrong version
+        )
+      ).rejects.toThrow(SagaConcurrencyError);
     });
 
     it('should throw error when saga not found', async () => {
-      await expect(repository.updateState(
-        'non-existent',
-        { status: SagaStatus.EXECUTING },
-        1
-      )).rejects.toThrow(SagaNotFoundError);
+      await expect(
+        repository.updateState('non-existent', { status: SagaStatus.EXECUTING }, 1)
+      ).rejects.toThrow(SagaNotFoundError);
     });
 
     it('should update indexes after state change', async () => {
       const saga = createMockSaga();
       await repository.save(saga);
 
-      await repository.updateState(
-        'saga-123',
-        { status: SagaStatus.COMPLETED },
-        1
-      );
+      await repository.updateState('saga-123', { status: SagaStatus.COMPLETED }, 1);
 
       const foundStarted = await repository.findByTypeAndStatus('TestSaga', SagaStatus.STARTED);
       expect(foundStarted).toHaveLength(0);

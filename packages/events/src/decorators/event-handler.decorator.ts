@@ -25,7 +25,7 @@ export type { EventHandlerOptions };
  *
  * @example
  * // Phase 2: With DI integration and context filtering
- * @EventHandler(UserCreatedEvent, { 
+ * @EventHandler(UserCreatedEvent, {
  *   lifetime: 'singleton',
  *   context: 'user-management',
  *   eventContext: 'user-context',  // Only handle events from user context
@@ -34,7 +34,7 @@ export type { EventHandlerOptions };
  * })
  * export class UserNotificationHandler implements IEventHandler<UserCreatedEvent> {
  *   constructor(private emailService: EmailService) {}
- *   
+ *
  *   handle(event: UserCreatedEvent): void {
  *     // Handler with injected dependencies
  *   }
@@ -42,7 +42,7 @@ export type { EventHandlerOptions };
  *
  * @example
  * // Multiple context filtering
- * @EventHandler(StockUpdatedEvent, { 
+ * @EventHandler(StockUpdatedEvent, {
  *   eventContext: ['order-context', 'inventory-context']  // Handle from multiple contexts
  * })
  * export class StockHandler implements IEventHandler<StockUpdatedEvent> {
@@ -97,18 +97,18 @@ export function EventHandler<T extends IDomainEvent>(
         handlerType: target,
         options: diOptions,
         registeredAt: new Date(),
-        registeredWithDI: false
+        registeredWithDI: false,
       };
-      
+
       // Store enhanced metadata for auto-discovery
       Reflect.defineMetadata('di:event-handler', diMetadata, target);
       Reflect.defineMetadata('di:handler-type', 'event', target);
-      
+
       // Store event context for unified event bus
       if (options.eventContext !== undefined) {
         Reflect.defineMetadata('event:context', options.eventContext, target);
       }
-      
+
       // Phase 2: Auto-register with DI container if available and enabled
       // Note: Registration is deferred to avoid circular dependencies
       // Actual DI registration happens during VytchesDDD.discoverAndRegisterHandlers()

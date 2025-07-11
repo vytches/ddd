@@ -250,12 +250,15 @@ export class RetryMiddleware extends BaseSagaMiddleware {
  * Implements circuit breaker pattern for saga processing
  */
 export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
-  private readonly circuitStates: Map<string, {
-    isOpen: boolean;
-    failures: number;
-    lastFailureTime: number;
-    successCount: number;
-  }> = new Map();
+  private readonly circuitStates: Map<
+    string,
+    {
+      isOpen: boolean;
+      failures: number;
+      lastFailureTime: number;
+      successCount: number;
+    }
+  > = new Map();
 
   constructor(
     private readonly failureThreshold = 5,
@@ -375,9 +378,7 @@ export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
  * Provides authorization and security checks for saga operations
  */
 export class SecurityMiddleware extends BaseSagaMiddleware {
-  constructor(private readonly authorizer?: (
-    context: ISagaMiddlewareContext
-  ) => Promise<boolean>) {
+  constructor(private readonly authorizer?: (context: ISagaMiddlewareContext) => Promise<boolean>) {
     super('Security');
   }
 
@@ -416,7 +417,10 @@ export class SecurityMiddleware extends BaseSagaMiddleware {
  */
 export class SagaMiddlewarePipeline {
   private readonly logger: ReturnType<typeof Logger.forContext>;
-  private readonly middlewares: (ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean })[] = [];
+  private readonly middlewares: (ISagaMiddleware & {
+    getName?(): string;
+    shouldApply?(context: any): boolean;
+  })[] = [];
 
   constructor() {
     this.logger = Logger.forContext('SagaMiddlewarePipeline');
@@ -426,7 +430,9 @@ export class SagaMiddlewarePipeline {
    * Add middleware to the pipeline
    * @param middleware - Middleware to add
    */
-  use(middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }): void {
+  use(
+    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }
+  ): void {
     this.middlewares.push(middleware);
     this.logger.debug('Middleware added to pipeline', {
       middlewareName: middleware.getName ? middleware.getName() : 'Unknown',
@@ -461,8 +467,8 @@ export class SagaMiddlewarePipeline {
     };
 
     // Filter applicable middlewares
-    const applicableMiddlewares = this.middlewares.filter(middleware =>
-      !middleware.shouldApply || middleware.shouldApply(middlewareContext)
+    const applicableMiddlewares = this.middlewares.filter(
+      middleware => !middleware.shouldApply || middleware.shouldApply(middlewareContext)
     );
 
     this.logger.debug('Executing middleware pipeline', {
@@ -470,9 +476,7 @@ export class SagaMiddlewarePipeline {
       stepName,
       totalMiddlewares: this.middlewares.length,
       applicableMiddlewares: applicableMiddlewares.length,
-      middlewareNames: applicableMiddlewares.map(m =>
-        m.getName ? m.getName() : 'Unknown'
-      ),
+      middlewareNames: applicableMiddlewares.map(m => (m.getName ? m.getName() : 'Unknown')),
     });
 
     try {
@@ -512,7 +516,7 @@ export class SagaMiddlewarePipeline {
    * Get list of registered middleware names
    */
   getMiddlewareNames(): string[] {
-    return this.middlewares.map(m => m.getName ? m.getName() : 'Unknown');
+    return this.middlewares.map(m => (m.getName ? m.getName() : 'Unknown'));
   }
 
   /**

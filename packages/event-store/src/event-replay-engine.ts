@@ -1,5 +1,5 @@
 import type {
-   IAdvancedEventReplay,
+  IAdvancedEventReplay,
   IReplaySession,
   IReplayFilter,
   IReplayConfig,
@@ -126,7 +126,7 @@ export class EventReplayEngine implements IAdvancedEventReplay {
       });
 
       return result;
-    } catch (error: Error | any)  {
+    } catch (error: Error | any) {
       this.logger.error('Filtered replay failed', error);
       throw error;
     }
@@ -135,7 +135,7 @@ export class EventReplayEngine implements IAdvancedEventReplay {
   /**
    * Get events as async iterable
    */
-  async* getEventsAsIterable(filter?: IReplayFilter): AsyncIterable<IStoredEvent> {
+  async *getEventsAsIterable(filter?: IReplayFilter): AsyncIterable<IStoredEvent> {
     this.logger.debug('Creating events iterable', { filter });
 
     const readOptions = this.buildReadOptions(filter);
@@ -184,10 +184,7 @@ export class EventReplayEngine implements IAdvancedEventReplay {
   /**
    * Estimate replay duration
    */
-  async estimateReplayDuration(
-    filter?: IReplayFilter,
-    config?: IReplayConfig
-  ): Promise<number> {
+  async estimateReplayDuration(filter?: IReplayFilter, config?: IReplayConfig): Promise<number> {
     const mergedConfig = { ...DEFAULT_REPLAY_CONFIG, ...config };
     const eventCount = await this.countEvents(filter);
 
@@ -316,7 +313,7 @@ export class EventReplayEngine implements IAdvancedEventReplay {
             totalEvents: progress.totalEvents,
             processedEvents: progress.processedEvents,
             percentComplete: progress.percentComplete,
-            eventsPerSecond: progress.eventsPerSecond
+            eventsPerSecond: progress.eventsPerSecond,
           });
           lastProgressUpdate = Date.now();
         }
@@ -526,7 +523,7 @@ class ReplaySession implements IReplaySession {
 
     try {
       const result = await replayEngine.replayWithFilter(
-        async (event) => {
+        async event => {
           // Check for pause/cancellation
           while (this.isPaused && !this.isCancelled) {
             await this.delay(100);
@@ -554,9 +551,10 @@ class ReplaySession implements IReplaySession {
 
           // Update progress
           this._progress.lastUpdate = new Date();
-          this._progress.percentComplete = this._progress.totalEvents > 0
-            ? (this._progress.processedEvents / this._progress.totalEvents) * 100
-            : 0;
+          this._progress.percentComplete =
+            this._progress.totalEvents > 0
+              ? (this._progress.processedEvents / this._progress.totalEvents) * 100
+              : 0;
 
           // Notify progress handlers
           for (const progressHandler of this.progressHandlers) {

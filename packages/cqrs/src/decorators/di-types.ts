@@ -14,25 +14,25 @@ export type ServiceToken<T = any> = string | symbol | (new (...args: any[]) => T
 export interface DIDecoratorOptions {
   /** Service ID for DI container registration */
   serviceId?: string;
-  
+
   /** Service lifetime for DI container registration */
   lifetime?: ServiceLifetime;
-  
+
   /** Bounded context for context-aware DI resolution */
   context?: string;
-  
+
   /** Auto-register handler with DI container (default: true) */
   autoRegister?: boolean;
-  
+
   /** Explicit dependencies for documentation and validation */
   dependencies?: ServiceToken[];
-  
+
   /** Service tags for organization and discovery */
   tags?: string[];
-  
+
   /** Context resolution strategy */
   contextResolver?: 'auto' | 'explicit' | 'none';
-  
+
   /** Fallback to global container if not found in context */
   fallbackToGlobal?: boolean;
 }
@@ -48,7 +48,7 @@ export interface CommandHandlerOptions extends DIDecoratorOptions {
 }
 
 /**
- * Enhanced options for QueryHandler decorator  
+ * Enhanced options for QueryHandler decorator
  */
 export interface QueryHandlerOptions extends DIDecoratorOptions {
   /** Enable caching for query results */
@@ -65,19 +65,19 @@ export interface QueryHandlerOptions extends DIDecoratorOptions {
 export interface DIHandlerMetadata {
   /** Handler type (command/query/event) */
   type: 'command' | 'query' | 'event';
-  
+
   /** Message type constructor */
   messageType: new (...args: any[]) => any;
-  
+
   /** Handler constructor */
   handlerType: new (...args: any[]) => any;
-  
+
   /** DI options */
   options: DIDecoratorOptions;
-  
+
   /** Registration timestamp */
   registeredAt: Date;
-  
+
   /** Auto-registration status */
   registeredWithDI: boolean;
 }

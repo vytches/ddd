@@ -1,11 +1,11 @@
 // Removed logging dependency for Phase 1 simplification
-import type { 
-  IDependencyContainer, 
-  ServiceToken, 
-  Constructor, 
-  ServiceFactory, 
-  ServiceDescriptor, 
-  ServiceRegistrationOptions 
+import type {
+  IDependencyContainer,
+  ServiceToken,
+  Constructor,
+  ServiceFactory,
+  ServiceDescriptor,
+  ServiceRegistrationOptions,
 } from '../types';
 
 /**
@@ -80,11 +80,11 @@ export abstract class BaseContainerAdapter implements IDependencyContainer {
     if (typeof token === 'string') {
       return token;
     }
-    
+
     if (typeof token === 'symbol') {
       return token.toString();
     }
-    
+
     return token.name || token.toString();
   }
 

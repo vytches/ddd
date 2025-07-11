@@ -10,9 +10,7 @@ import { IDomainError } from '@vytches-ddd/domain-primitives';
 export type SafeRunResult<T, E extends Error = Error> = readonly [E | undefined, T | undefined];
 
 // Synchronous version
-export function safeRun<T, E extends Error = Error>(
-  fn: () => T
-): SafeRunResult<T, E>;
+export function safeRun<T, E extends Error = Error>(fn: () => T): SafeRunResult<T, E>;
 
 // Asynchronous version
 export function safeRun<T, E extends Error = Error>(
@@ -81,11 +79,15 @@ export function expectError<E extends Error>(
     const [error, value] = result;
 
     if (!error) {
-      throw new Error(`Expected error of type ${errorType.name}, but operation succeeded with value: ${value}`);
+      throw new Error(
+        `Expected error of type ${errorType.name}, but operation succeeded with value: ${value}`
+      );
     }
 
     if (!(error instanceof errorType)) {
-      throw new Error(`Expected error of type ${errorType.name}, but got ${error.constructor.name}: ${error.message}`);
+      throw new Error(
+        `Expected error of type ${errorType.name}, but got ${error.constructor.name}: ${error.message}`
+      );
     }
 
     return error;
@@ -121,12 +123,13 @@ export async function safeRunWithTimeout<T, E extends Error = Error>(
 ): Promise<SafeRunResult<T, E | Error>> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
-      reject(new Error(`Operation timed out after ${timeoutMs}ms${context ? ` in context: ${context}` : ''}`));
+      reject(
+        new Error(
+          `Operation timed out after ${timeoutMs}ms${context ? ` in context: ${context}` : ''}`
+        )
+      );
     }, timeoutMs);
   });
 
-  return safeRunTest<T, E>(
-    () => Promise.race([fn(), timeoutPromise]),
-    context
-  );
+  return safeRunTest<T, E>(() => Promise.race([fn(), timeoutPromise]), context);
 }

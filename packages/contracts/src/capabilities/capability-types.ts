@@ -184,20 +184,18 @@ export interface IDeadLetterCapability<TReadModel = any>
   /**
    * Send event to dead letter queue
    */
-  sendToDeadLetter(
-    event: IExtendedDomainEvent,
-    error: Error,
-    projectionId: string
-  ): Promise<void>;
+  sendToDeadLetter(event: IExtendedDomainEvent, error: Error, projectionId: string): Promise<void>;
 
   /**
    * Get dead letter events
    */
-  getDeadLetterEvents(projectionId: string): Promise<Array<{
-    event: IExtendedDomainEvent;
-    error: string;
-    timestamp: Date;
-  }>>;
+  getDeadLetterEvents(projectionId: string): Promise<
+    Array<{
+      event: IExtendedDomainEvent;
+      error: string;
+      timestamp: Date;
+    }>
+  >;
 
   /**
    * Retry a dead letter event

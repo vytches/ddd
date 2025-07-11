@@ -24,7 +24,6 @@ export abstract class BaseIntervalCapability<T extends string, TReadModel>
 
   abstract override readonly type: T;
 
-
   attach(context: ICapabilityContext<TReadModel>): void {
     this.context = context;
   }

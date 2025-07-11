@@ -1,11 +1,7 @@
 import type { Constructor } from '@vytches-ddd/di';
 import { Logger } from '@vytches-ddd/logging';
 import type { SagaMetadata } from '../interfaces';
-import {
-  isSagaClass,
-  getSagaMetadata,
-  getSagaType,
-} from '../decorators';
+import { isSagaClass, getSagaMetadata, getSagaType } from '../decorators';
 import { SagaDiscoveryError } from '../errors';
 
 /**
@@ -307,9 +303,7 @@ export class SagaDiscoveryPlugin {
    * @param value - Value to check
    */
   private isConstructor(value: any): boolean {
-    return typeof value === 'function' &&
-           value.prototype &&
-           value.prototype.constructor === value;
+    return typeof value === 'function' && value.prototype && value.prototype.constructor === value;
   }
 }
 

@@ -1,6 +1,7 @@
 # @vytches-ddd/event-store
 
-Enterprise-grade Event Store implementation for Domain-Driven Design applications with full Event Sourcing support.
+Enterprise-grade Event Store implementation for Domain-Driven Design
+applications with full Event Sourcing support.
 
 ## Features
 
@@ -9,7 +10,8 @@ Enterprise-grade Event Store implementation for Domain-Driven Design application
 - 📸 **Snapshot Support** - Performance optimization for large aggregates
 - 🌍 **Global Event Log** - Read all events across streams
 - 🔄 **Event Replay** - Foundation for projection rebuilding
-- 🏭 **Multiple Storage Adapters** - In-memory, file system, and database backends
+- 🏭 **Multiple Storage Adapters** - In-memory, file system, and database
+  backends
 - 📊 **Rich Metadata** - Correlation, causation, and custom metadata support
 - 🧪 **Testing Ready** - In-memory implementation for tests
 
@@ -68,8 +70,8 @@ Events are organized into streams, typically one stream per aggregate:
 ```typescript
 // Append with optimistic concurrency control
 await eventStore.appendToStream(
-  'order-123', 
-  events, 
+  'order-123',
+  events,
   expectedVersion // Current version of the stream
 );
 
@@ -150,16 +152,20 @@ await eventStore.setStreamMetadata('order-123', {
 ### Error Handling
 
 ```typescript
-import { 
-  EventStoreConcurrencyError, 
-  StreamNotFoundError 
+import {
+  EventStoreConcurrencyError,
+  StreamNotFoundError,
 } from '@vytches-ddd/event-store';
 
 try {
   await eventStore.appendToStream('order-123', events, 5);
 } catch (error) {
   if (error instanceof EventStoreConcurrencyError) {
-    console.error('Version conflict:', error.expectedVersion, error.actualVersion);
+    console.error(
+      'Version conflict:',
+      error.expectedVersion,
+      error.actualVersion
+    );
   } else if (error instanceof StreamNotFoundError) {
     console.error('Stream not found:', error.streamId);
   }
@@ -219,7 +225,13 @@ const eventStore = new PostgreSQLEventStore({
 
 ```typescript
 // entities/event.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Index,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('events')
 @Index(['streamId', 'streamVersion'], { unique: true })
@@ -274,7 +286,13 @@ export class EventEntity {
 }
 
 // entities/stream.entity.ts
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('streams')
 export class StreamEntity {
@@ -437,7 +455,7 @@ import { JsonEventSerializer } from '@vytches-ddd/event-store';
           enableOptimisticConcurrency: true,
           enableChecksums: true,
         });
-        
+
         await eventStore.connect();
         return eventStore;
       },
@@ -462,12 +480,12 @@ import { OrderCreatedEvent, OrderShippedEvent } from '../domain/events';
 export class OrderEventStoreService {
   constructor(
     @Inject('EVENT_STORE')
-    private readonly eventStore: IAdvancedEventStore,
+    private readonly eventStore: IAdvancedEventStore
   ) {}
 
   async saveOrder(order: Order): Promise<void> {
     const events = order.getUncommittedEvents();
-    
+
     if (events.length === 0) {
       return;
     }
@@ -487,7 +505,7 @@ export class OrderEventStoreService {
     await this.eventStore.appendToStream(
       order.id,
       storedEvents,
-      order.version - events.length, // Expected version before new events
+      order.version - events.length // Expected version before new events
     );
 
     // Save snapshot every 100 events
@@ -508,7 +526,7 @@ export class OrderEventStoreService {
     try {
       // Try to load from snapshot first
       const snapshot = await this.eventStore.getSnapshot<OrderState>(orderId);
-      
+
       // Load events after snapshot
       const fromVersion = snapshot ? snapshot.version + 1 : 0;
       const stream = await this.eventStore.readStream(orderId, { fromVersion });
@@ -518,7 +536,7 @@ export class OrderEventStoreService {
       }
 
       // Reconstruct aggregate
-      const order = snapshot 
+      const order = snapshot
         ? Order.fromSnapshot(snapshot)
         : Order.create(orderId);
 
@@ -564,32 +582,32 @@ import { EventStoreConcurrencyError } from '@vytches-ddd/event-store';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private readonly orderEventStore: OrderEventStoreService,
-  ) {}
+  constructor(private readonly orderEventStore: OrderEventStoreService) {}
 
   async createOrder(command: CreateOrderCommand): Promise<void> {
     const order = Order.create(command.orderId);
     order.initialize(command.customerId, command.items);
-    
+
     await this.orderEventStore.saveOrder(order);
   }
 
   async shipOrder(command: ShipOrderCommand): Promise<void> {
     const order = await this.orderEventStore.loadOrder(command.orderId);
-    
+
     if (!order) {
       throw new Error(`Order ${command.orderId} not found`);
     }
 
     order.ship(command.trackingNumber, command.carrier);
-    
+
     try {
       await this.orderEventStore.saveOrder(order);
     } catch (error) {
       if (error instanceof EventStoreConcurrencyError) {
         // Reload and retry
-        const freshOrder = await this.orderEventStore.loadOrder(command.orderId);
+        const freshOrder = await this.orderEventStore.loadOrder(
+          command.orderId
+        );
         if (freshOrder) {
           freshOrder.ship(command.trackingNumber, command.carrier);
           await this.orderEventStore.saveOrder(freshOrder);
@@ -622,7 +640,7 @@ export class Order extends AggregateRoot {
     private items: OrderItem[] = [],
     private status: OrderStatus = OrderStatus.Created,
     private trackingNumber?: string,
-    private carrier?: string,
+    private carrier?: string
   ) {
     super(id);
   }
@@ -638,7 +656,7 @@ export class Order extends AggregateRoot {
       snapshot.state.items,
       snapshot.state.status,
       snapshot.state.trackingNumber,
-      snapshot.state.carrier,
+      snapshot.state.carrier
     );
     order.version = snapshot.version;
     return order;
@@ -653,12 +671,14 @@ export class Order extends AggregateRoot {
     this.items = items;
     this.status = OrderStatus.Created;
 
-    this.addDomainEvent(new OrderCreatedEvent({
-      orderId: this.id,
-      customerId,
-      items,
-      total: this.calculateTotal(),
-    }));
+    this.addDomainEvent(
+      new OrderCreatedEvent({
+        orderId: this.id,
+        customerId,
+        items,
+        total: this.calculateTotal(),
+      })
+    );
   }
 
   ship(trackingNumber: string, carrier: string): void {
@@ -670,11 +690,13 @@ export class Order extends AggregateRoot {
     this.carrier = carrier;
     this.status = OrderStatus.Shipped;
 
-    this.addDomainEvent(new OrderShippedEvent({
-      orderId: this.id,
-      trackingNumber,
-      carrier,
-    }));
+    this.addDomainEvent(
+      new OrderShippedEvent({
+        orderId: this.id,
+        trackingNumber,
+        carrier,
+      })
+    );
   }
 
   loadFromHistory(events: IStoredEvent[]): void {
@@ -735,7 +757,10 @@ export class Order extends AggregateRoot {
   }
 
   private calculateTotal(): number {
-    return this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return this.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
   }
 }
 
@@ -770,28 +795,32 @@ enum OrderStatus {
 ```typescript
 // health/event-store.health.ts
 import { Injectable } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from '@nestjs/terminus';
 import { IAdvancedEventStore } from '@vytches-ddd/event-store';
 
 @Injectable()
 export class EventStoreHealthIndicator extends HealthIndicator {
   constructor(
     @Inject('EVENT_STORE')
-    private readonly eventStore: IAdvancedEventStore,
+    private readonly eventStore: IAdvancedEventStore
   ) {
     super();
   }
 
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     const isHealthy = this.eventStore.isConnected();
-    
+
     if (isHealthy) {
       return this.getStatus(key, true);
     }
 
     throw new HealthCheckError(
       'Event Store health check failed',
-      this.getStatus(key, false),
+      this.getStatus(key, false)
     );
   }
 }
@@ -804,28 +833,28 @@ export class EventStoreHealthIndicator extends HealthIndicator {
 export const eventStoreConfig = {
   // Connection pooling
   connectionPoolSize: 20,
-  
+
   // Batch processing
   batchSize: 100,
   flushInterval: 1000, // ms
-  
+
   // Caching
   enableMetadataCache: true,
   metadataCacheTtl: 300000, // 5 minutes
-  
+
   // Compression
   enableCompression: true,
   compressionLevel: 6,
-  
+
   // Indexing strategy
   enableEventTypeIndex: true,
   enableTimestampIndex: true,
   enableAggregateIndex: true,
-  
+
   // Snapshot optimization
   snapshotFrequency: 100,
   enableSnapshotCompression: true,
-  
+
   // Query optimization
   defaultPageSize: 100,
   maxPageSize: 1000,
@@ -837,13 +866,13 @@ const eventStore = new PostgreSQLEventStore({
   dataSource,
   schema: 'event_store',
   ...eventStoreConfig,
-  
+
   // Read replicas for queries
   readReplicas: [
     { host: 'replica1.db.com', port: 5432 },
     { host: 'replica2.db.com', port: 5432 },
   ],
-  
+
   // Connection pooling
   pool: {
     min: 5,
@@ -904,7 +933,7 @@ export class EventStoreSecurityService {
     action: string,
     streamId: string,
     userId: string,
-    metadata?: any,
+    metadata?: any
   ): AuditEntry {
     return {
       id: crypto.randomUUID(),
@@ -924,19 +953,19 @@ export class SecureEventStoreService {
   constructor(
     @Inject('EVENT_STORE')
     private readonly eventStore: IAdvancedEventStore,
-    private readonly securityService: EventStoreSecurityService,
+    private readonly securityService: EventStoreSecurityService
   ) {}
 
   async appendToStreamSecure(
     streamId: string,
     events: IStoredDomainEvent[],
     userId: string,
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<IAppendResult> {
     // Encrypt sensitive data
     const secureEvents = events.map(event => ({
       ...event,
-      payload: this.shouldEncryptEvent(event.eventType) 
+      payload: this.shouldEncryptEvent(event.eventType)
         ? this.securityService.encryptEventData(event.payload)
         : event.payload,
       checksum: this.securityService.calculateChecksum(event),
@@ -951,7 +980,7 @@ export class SecureEventStoreService {
     const result = await this.eventStore.appendToStream(
       streamId,
       secureEvents,
-      expectedVersion,
+      expectedVersion
     );
 
     // Create audit entry
@@ -959,7 +988,7 @@ export class SecureEventStoreService {
       'APPEND_EVENTS',
       streamId,
       userId,
-      { eventCount: events.length, version: result.toVersion },
+      { eventCount: events.length, version: result.toVersion }
     );
 
     // Log audit entry (implement your audit logging)
@@ -1026,7 +1055,7 @@ class OrderRepository extends BaseRepository<Order> {
   async findById(id: string): Promise<Order | null> {
     // Try to load from snapshot
     const snapshot = await this.eventStore.getSnapshot<OrderState>(id);
-    
+
     // Load events after snapshot
     const fromVersion = snapshot ? snapshot.version + 1 : 0;
     const stream = await this.eventStore.readStream(id, { fromVersion });
@@ -1036,9 +1065,7 @@ class OrderRepository extends BaseRepository<Order> {
     }
 
     // Reconstruct aggregate from snapshot + events
-    const order = snapshot 
-      ? Order.fromSnapshot(snapshot)
-      : new Order(id);
+    const order = snapshot ? Order.fromSnapshot(snapshot) : new Order(id);
 
     order.loadFromHistory(stream.events);
     return order;
@@ -1079,15 +1106,19 @@ class Order extends AggregateRoot {
 
 ## Best Practices
 
-1. **One Stream Per Aggregate** - Keep events for each aggregate in its own stream
+1. **One Stream Per Aggregate** - Keep events for each aggregate in its own
+   stream
 2. **Use Snapshots Wisely** - Balance between performance and storage
-3. **Version Everything** - Always use optimistic concurrency control in production
+3. **Version Everything** - Always use optimistic concurrency control in
+   production
 4. **Event Immutability** - Never modify events after they're stored
-5. **Metadata Standards** - Establish consistent metadata patterns across your domain
+5. **Metadata Standards** - Establish consistent metadata patterns across your
+   domain
 
 ## API Reference
 
-See the [API documentation](https://vytches-ddd.dev/api/event-store) for detailed interface definitions.
+See the [API documentation](https://vytches-ddd.dev/api/event-store) for
+detailed interface definitions.
 
 ## License
 

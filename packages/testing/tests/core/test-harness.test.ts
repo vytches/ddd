@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  TestHarness,
-  SimpleTestHarness,
-  TestResourceBuilder,
-} from '../../src';
+import { TestHarness, SimpleTestHarness, TestResourceBuilder } from '../../src';
 
 describe('TestHarness', () => {
   describe('SimpleTestHarness', () => {
@@ -143,8 +139,7 @@ describe('TestHarness', () => {
 
       it('should register and dispose resources automatically', async () => {
         const disposeFn = vi.fn();
-        const resource = TestResourceBuilder
-          .create('test-resource')
+        const resource = TestResourceBuilder.create('test-resource')
           .withDisposal(disposeFn)
           .build();
 
@@ -160,9 +155,7 @@ describe('TestHarness', () => {
       });
 
       it('should unregister resources manually', async () => {
-        const resource = TestResourceBuilder
-          .create('test-resource', 'manual-resource')
-          .build();
+        const resource = TestResourceBuilder.create('test-resource', 'manual-resource').build();
 
         (harness as any).registerResource(resource);
         expect(harness.getState().resourceCount).toBe(1);
@@ -174,8 +167,7 @@ describe('TestHarness', () => {
 
       it('should handle resource disposal errors gracefully', async () => {
         const disposeFn = vi.fn().mockRejectedValue(new Error('Disposal failed'));
-        const resource = TestResourceBuilder
-          .create('failing-resource')
+        const resource = TestResourceBuilder.create('failing-resource')
           .withDisposal(disposeFn)
           .build();
 
@@ -316,8 +308,7 @@ describe('TestHarness', () => {
 
       it('should dispose all resources during disposal', async () => {
         const disposeFn = vi.fn();
-        const resource = TestResourceBuilder
-          .create('disposal-test')
+        const resource = TestResourceBuilder.create('disposal-test')
           .withDisposal(disposeFn)
           .build();
 
@@ -374,10 +365,7 @@ describe('TestHarness', () => {
     });
 
     it('should create resource with custom ID', () => {
-      const resource = TestResourceBuilder
-        .create('test-type')
-        .withId('custom-id')
-        .build();
+      const resource = TestResourceBuilder.create('test-type').withId('custom-id').build();
 
       expect(resource.id).toBe('custom-id');
       expect(resource.type).toBe('test-type');
@@ -385,10 +373,7 @@ describe('TestHarness', () => {
 
     it('should create resource with custom disposal function', async () => {
       const disposeFn = vi.fn();
-      const resource = TestResourceBuilder
-        .create('test-type')
-        .withDisposal(disposeFn)
-        .build();
+      const resource = TestResourceBuilder.create('test-type').withDisposal(disposeFn).build();
 
       await resource.dispose();
       expect(disposeFn).toHaveBeenCalledTimes(1);
@@ -402,8 +387,7 @@ describe('TestHarness', () => {
 
     it('should support fluent builder pattern', () => {
       const disposeFn = vi.fn();
-      const resource = TestResourceBuilder
-        .create('fluent-type')
+      const resource = TestResourceBuilder.create('fluent-type')
         .withId('fluent-id')
         .withDisposal(disposeFn)
         .build();
@@ -449,7 +433,7 @@ describe('TestHarness', () => {
           setup: this.setupCalled,
           teardown: this.teardownCalled,
           reset: this.resetCalled,
-          disposal: this.disposalCalled
+          disposal: this.disposalCalled,
         };
       }
     }

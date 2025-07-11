@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 import { QueryBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
-import type { ICQRSMiddleware, IQuery, IQueryHandler , CQRSExecutionContext} from '../../src';
+import type { ICQRSMiddleware, IQuery, IQueryHandler, CQRSExecutionContext } from '../../src';
 
 // Test query implementation
 class TestQuery implements IQuery<string> {
@@ -91,7 +91,9 @@ describe('QueryBus', () => {
     it('should throw with deprecation message', () => {
       expect(() => {
         queryBus.register(TestQuery, mockHandler);
-      }).toThrow('Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.');
+      }).toThrow(
+        'Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.'
+      );
     });
   });
 
@@ -109,7 +111,9 @@ describe('QueryBus', () => {
 
       expect(() => {
         queryBus.registerFactory(TestQuery, factory);
-      }).toThrow('Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.');
+      }).toThrow(
+        'Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.'
+      );
     });
   });
 
@@ -273,7 +277,7 @@ describe('QueryBus', () => {
         async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
           capturedContext = context;
           return next();
-        }
+        },
       };
 
       queryBus.use(middleware);
@@ -389,9 +393,11 @@ describe('QueryBus', () => {
 
   describe('isValidatable', () => {
     it('should return true for objects with validate method', () => {
-      const validatable = { validate: () => {
-        return;
-      } };
+      const validatable = {
+        validate: () => {
+          return;
+        },
+      };
       expect(queryBus['isValidatable'](validatable)).toBe(true);
     });
 
@@ -431,7 +437,7 @@ describe('QueryBus', () => {
           const result = await next();
           executionOrder.push(4);
           return result;
-        }
+        },
       };
 
       const middleware2: ICQRSMiddleware = {
@@ -440,7 +446,7 @@ describe('QueryBus', () => {
           const result = await next();
           executionOrder.push(3);
           return result;
-        }
+        },
       };
 
       queryBus.use(middleware1).use(middleware2);
@@ -464,7 +470,7 @@ describe('QueryBus', () => {
         async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
           const result = await next();
           return `Modified: ${result}`;
-        }
+        },
       };
 
       queryBus.use(transformMiddleware);
@@ -507,7 +513,7 @@ describe('QueryBus', () => {
       const errorMiddleware: ICQRSMiddleware = {
         async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
           throw error;
-        }
+        },
       };
 
       queryBus.use(errorMiddleware);

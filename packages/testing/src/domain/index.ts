@@ -7,7 +7,7 @@ export {
   type EventCapture,
   type EventSubscription,
   type EventTestScenario,
-  type EventAssertions
+  type EventAssertions,
 } from './event-test-harness';
 
 export {
@@ -17,7 +17,7 @@ export {
   createEventSourcedAggregateTestBuilder,
   type AggregateTestOptions,
   type AggregateEventScenario,
-  type AggregateStateSnapshot
+  type AggregateStateSnapshot,
 } from './aggregate-test-builder';
 
 export {
@@ -28,5 +28,5 @@ export {
   type EventPattern,
   type EventMatchResult,
   type EventMatchingContext,
-  createDomainEventMatchers
+  createDomainEventMatchers,
 } from './domain-event-matchers';

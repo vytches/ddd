@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestScheduledEvent, TestEventFactory, BaseSchedulerAdapter } from '../../src';
 import { JobStatus, BackoffStrategy } from '@vytches-ddd/contracts';
-import type { IScheduledEvent, IScheduledJob, IJobQueryResult, IJobFilter, IScheduleOptions } from '@vytches-ddd/contracts';
+import type {
+  IScheduledEvent,
+  IScheduledJob,
+  IJobQueryResult,
+  IJobFilter,
+  IScheduleOptions,
+} from '@vytches-ddd/contracts';
 
 // Create a concrete implementation for testing
 class TestSchedulerAdapter extends BaseSchedulerAdapter {
@@ -78,7 +84,11 @@ class TestSchedulerAdapter extends BaseSchedulerAdapter {
     return this.generateJobId();
   }
 
-  public calculateRetryDelayPublic(attempt: number, strategy: 'fixed' | 'linear' | 'exponential', baseDelay?: number): number {
+  public calculateRetryDelayPublic(
+    attempt: number,
+    strategy: 'fixed' | 'linear' | 'exponential',
+    baseDelay?: number
+  ): number {
     return this.calculateRetryDelay(attempt, strategy, baseDelay);
   }
 
@@ -90,11 +100,19 @@ class TestSchedulerAdapter extends BaseSchedulerAdapter {
     return this.filterJobs(jobs, filter);
   }
 
-  public sortJobsPublic(jobs: IScheduledJob[], sortBy?: string, sortDirection?: 'asc' | 'desc'): IScheduledJob[] {
+  public sortJobsPublic(
+    jobs: IScheduledJob[],
+    sortBy?: string,
+    sortDirection?: 'asc' | 'desc'
+  ): IScheduledJob[] {
     return this.sortJobs(jobs, sortBy, sortDirection);
   }
 
-  public paginateJobsPublic(jobs: IScheduledJob[], limit?: number, offset?: number): IJobQueryResult {
+  public paginateJobsPublic(
+    jobs: IScheduledJob[],
+    limit?: number,
+    offset?: number
+  ): IJobQueryResult {
     return this.paginateJobs(jobs, limit, offset);
   }
 
@@ -243,12 +261,10 @@ describe('BaseSchedulerAdapter', () => {
       });
 
       it('should return false when maxRetries is negative', () => {
-        const event = new TestScheduledEvent(
-          'test-123',
-          new Date(),
-          'Test',
-          { maxRetries: -1, backoff: BackoffStrategy.EXPONENTIAL }
-        );
+        const event = new TestScheduledEvent('test-123', new Date(), 'Test', {
+          maxRetries: -1,
+          backoff: BackoffStrategy.EXPONENTIAL,
+        });
 
         expect(adapter.shouldRetryPublic(event, 0)).toBe(false);
       });
@@ -294,7 +310,7 @@ describe('BaseSchedulerAdapter', () => {
         jobs = [
           adapter.createJobPublic(event1),
           adapter.createJobPublic(event2),
-          adapter.createJobPublic(event3)
+          adapter.createJobPublic(event3),
         ];
 
         // Simulate different statuses
@@ -337,7 +353,7 @@ describe('BaseSchedulerAdapter', () => {
         const now = new Date();
         const filter: IJobFilter = {
           scheduledAfter: new Date(now.getTime() - 1000),
-          scheduledBefore: new Date(now.getTime() + 2000)
+          scheduledBefore: new Date(now.getTime() + 2000),
         };
         const filtered = adapter.filterJobsPublic(jobs, filter);
 
@@ -371,7 +387,7 @@ describe('BaseSchedulerAdapter', () => {
         jobs = [
           adapter.createJobPublic(event1),
           adapter.createJobPublic(event2),
-          adapter.createJobPublic(event3)
+          adapter.createJobPublic(event3),
         ];
 
         // Set different timestamps

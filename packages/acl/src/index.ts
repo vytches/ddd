@@ -16,7 +16,7 @@ export type {
   ACLMiddleware,
 } from './acl.interfaces';
 
-export { SimpleACLAdapter , BaseACLAdapter } from './base-acl-adapter';
+export { SimpleACLAdapter, BaseACLAdapter } from './base-acl-adapter';
 export { BaseACLRegistry, type ACLRegistrationMetadata } from './base-acl-registry';
 export { BaseModelTranslator } from './base-translator';
 export { ContextACLRegistry } from './context-acl-registry';

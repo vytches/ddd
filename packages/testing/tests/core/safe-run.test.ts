@@ -5,9 +5,13 @@ import {
   expectError,
   expectSuccess,
   safeRunWithTimeout,
-  type SafeRunResult
+  type SafeRunResult,
 } from '../../src';
-import { IDomainError, type DomainErrorOptions, DomainErrorCode } from '@vytches-ddd/domain-primitives';
+import {
+  IDomainError,
+  type DomainErrorOptions,
+  DomainErrorCode,
+} from '@vytches-ddd/domain-primitives';
 
 class TestDomainError extends IDomainError {
   constructor(message: string) {
@@ -127,20 +131,24 @@ describe('safeRunTest', () => {
     const [error, value] = result;
     expect(error).toBeInstanceOf(TestDomainError);
     expect((error as TestDomainError).data).toBeDefined();
-    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(testContext);
+    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(
+      testContext
+    );
     expect(value).toBeUndefined();
   });
 
   it('should add test context to BaseError instances in async operations', async () => {
     const testContext = 'OrderService.processOrder test';
-    const result = await safeRunTest(async () => {
+    const result = (await safeRunTest(async () => {
       throw new TestDomainError('async domain error');
-    }, testContext) as SafeRunResult<never, TestDomainError>;
+    }, testContext)) as SafeRunResult<never, TestDomainError>;
 
     const [error, value] = result;
     expect(error).toBeInstanceOf(TestDomainError);
     expect((error as TestDomainError).data).toBeDefined();
-    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(testContext);
+    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(
+      testContext
+    );
     expect(value).toBeUndefined();
   });
 
@@ -253,10 +261,7 @@ describe('expectSuccess', () => {
 
 describe('safeRunWithTimeout', () => {
   it('should return success result for fast operations', async () => {
-    const result = await safeRunWithTimeout(
-      async () => 'fast operation',
-      1000
-    );
+    const result = await safeRunWithTimeout(async () => 'fast operation', 1000);
     const [error, value] = result;
 
     expect(error).toBeUndefined();
@@ -264,13 +269,10 @@ describe('safeRunWithTimeout', () => {
   });
 
   it('should return timeout error for slow operations', async () => {
-    const result = await safeRunWithTimeout(
-      async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        return 'slow operation';
-      },
-      50
-    );
+    const result = await safeRunWithTimeout(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return 'slow operation';
+    }, 50);
     const [error, value] = result;
 
     expect(error).toBeInstanceOf(Error);
@@ -295,12 +297,9 @@ describe('safeRunWithTimeout', () => {
 
   it('should return original error when operation fails before timeout', async () => {
     const originalError = new TestDomainError('operation failed');
-    const result = await safeRunWithTimeout(
-      async () => {
-        throw originalError;
-      },
-      1000
-    );
+    const result = await safeRunWithTimeout(async () => {
+      throw originalError;
+    }, 1000);
     const [error, value] = result;
 
     expect(error).toBe(originalError);
@@ -320,7 +319,9 @@ describe('safeRunWithTimeout', () => {
     const [error, value] = result;
     expect(error).toBeInstanceOf(TestDomainError);
     expect((error as TestDomainError).data).toBeDefined();
-    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(testContext);
+    expect(((error as TestDomainError).data as { testContext?: string })?.testContext).toBe(
+      testContext
+    );
   });
 });
 
@@ -361,10 +362,15 @@ describe('integration with existing testing patterns', () => {
       return { id: 1, state: 'valid' };
     };
 
-    const result = safeRunTest(aggregateOperation, 'AggregateRoot.businessOperation') as SafeRunResult<{ id: number; state: string; }, TestDomainError>;
+    const result = safeRunTest(
+      aggregateOperation,
+      'AggregateRoot.businessOperation'
+    ) as SafeRunResult<{ id: number; state: string }, TestDomainError>;
     const error = expectError(TestDomainError)(result);
 
     expect(error.code).toBe(DomainErrorCode.Default);
-    expect((error.data as { testContext?: string })?.testContext).toBe('AggregateRoot.businessOperation');
+    expect((error.data as { testContext?: string })?.testContext).toBe(
+      'AggregateRoot.businessOperation'
+    );
   });
 });

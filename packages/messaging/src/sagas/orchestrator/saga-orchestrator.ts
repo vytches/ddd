@@ -113,7 +113,10 @@ export class SagaOrchestrator implements ISagaOrchestrator {
 
       // Check instance limits
       if (definition.maxInstances) {
-        const existingCount = await this.sagaRepository.count(definition.sagaType, SagaStatus.STARTED);
+        const existingCount = await this.sagaRepository.count(
+          definition.sagaType,
+          SagaStatus.STARTED
+        );
         if (existingCount >= definition.maxInstances) {
           this.logger.warn('Maximum instances reached for saga type', {
             sagaType: definition.sagaType,
@@ -148,7 +151,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
       });
 
       return saga;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -174,7 +176,10 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @param context - Execution context
    * @returns Array of processing results
    */
-  async processEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaProcessingResult[]> {
+  async processEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaProcessingResult[]> {
     this.logger.debug('Processing event against sagas', {
       eventType: event.eventType,
       correlationId: context.correlationId,
@@ -247,7 +252,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
       }
 
       return results;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -302,7 +306,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
         sagaType: saga.sagaType,
         totalDuration: Date.now() - saga.state.createdAt.getTime(),
       });
-
     } catch (error) {
       this.logger.error('Failed to complete saga', error instanceof Error ? error : undefined, {
         saga_id: sagaId,
@@ -352,7 +355,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
         sagaType: saga.sagaType,
         reason,
       });
-
     } catch (error) {
       this.logger.error('Failed to cancel saga', error instanceof Error ? error : undefined, {
         saga_id: sagaId,
@@ -369,7 +371,10 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @param context - Execution context
    */
   async compensateSaga(sagaId: string, context: ISagaExecutionContext): Promise<void> {
-    this.logger.info('Starting saga compensation', { sagaId, correlationId: context.correlationId });
+    this.logger.info('Starting saga compensation', {
+      sagaId,
+      correlationId: context.correlationId,
+    });
 
     try {
       const saga = await this.sagaRepository.findById(sagaId);
@@ -414,7 +419,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
         success: compensationResult.success,
         finalStatus,
       });
-
     } catch (error) {
       this.logger.error('Failed to compensate saga', error instanceof Error ? error : undefined, {
         saga_id: sagaId,
@@ -465,12 +469,15 @@ export class SagaOrchestrator implements ISagaOrchestrator {
         sagaId,
         sagaType: saga.sagaType,
       });
-
     } catch (error) {
-      this.logger.error('Failed to handle saga timeout', error instanceof Error ? error : undefined, {
-        saga_id: sagaId,
-        error_message: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        'Failed to handle saga timeout',
+        error instanceof Error ? error : undefined,
+        {
+          saga_id: sagaId,
+          error_message: error instanceof Error ? error.message : String(error),
+        }
+      );
       throw error;
     }
   }
@@ -571,11 +578,14 @@ export class SagaOrchestrator implements ISagaOrchestrator {
       });
 
       return processedCount;
-
     } catch (error) {
-      this.logger.error('Failed to process timed out sagas', error instanceof Error ? error : undefined, {
-        error_message: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        'Failed to process timed out sagas',
+        error instanceof Error ? error : undefined,
+        {
+          error_message: error instanceof Error ? error.message : String(error),
+        }
+      );
       throw error;
     }
   }
@@ -611,7 +621,10 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @param event - Domain event
    * @param context - Execution context
    */
-  private async findSagasForEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISaga[]> {
+  private async findSagasForEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISaga[]> {
     // This is a simplified approach - in a real implementation,
     // we would use more sophisticated correlation logic
 
@@ -655,13 +668,15 @@ export class SagaOrchestrator implements ISagaOrchestrator {
         sagaId: saga.sagaId,
         sagaType: saga.sagaType,
         success: result.success,
-        ...(result.error ? {
-          error: {
-            message: result.error.message,
-            code: result.error.code,
-            ...(result.error.details ? { details: result.error.details } : {}),
-          }
-        } : {}),
+        ...(result.error
+          ? {
+              error: {
+                message: result.error.message,
+                code: result.error.code,
+                ...(result.error.details ? { details: result.error.details } : {}),
+              },
+            }
+          : {}),
         commands: result.commands || [],
         events: result.events || [],
         sagaCompleted: result.completesSaga || false,
@@ -674,7 +689,6 @@ export class SagaOrchestrator implements ISagaOrchestrator {
       };
 
       return processResult;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
@@ -764,10 +778,16 @@ export class SagaOrchestrator implements ISagaOrchestrator {
 
     // Update performance metrics
     if (duration > 0) {
-      if (this.statistics.performance.slowestOperationMs === 0 || duration > this.statistics.performance.slowestOperationMs) {
+      if (
+        this.statistics.performance.slowestOperationMs === 0 ||
+        duration > this.statistics.performance.slowestOperationMs
+      ) {
         this.statistics.performance.slowestOperationMs = duration;
       }
-      if (this.statistics.performance.fastestOperationMs === 0 || duration < this.statistics.performance.fastestOperationMs) {
+      if (
+        this.statistics.performance.fastestOperationMs === 0 ||
+        duration < this.statistics.performance.fastestOperationMs
+      ) {
         this.statistics.performance.fastestOperationMs = duration;
       }
 

@@ -6,5 +6,5 @@ export type {
   CommandHandlerOptions,
   QueryHandlerOptions,
   DIDecoratorOptions,
-  DIHandlerMetadata
+  DIHandlerMetadata,
 } from './di-types';

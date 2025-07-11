@@ -1,4 +1,4 @@
-import { BaseError } from "@vytches-ddd/domain-primitives";
+import { BaseError } from '@vytches-ddd/domain-primitives';
 
 /**
  * Base error class for saga-related errors
@@ -82,15 +82,10 @@ export class SagaStepError extends SagaError {
     sagaType?: string,
     public readonly stepData?: Record<string, unknown>
   ) {
-    super(
-      message,
-      sagaId,
-      sagaType,
-      {
-        stepName,
-        stepData,
-      }
-    );
+    super(message, sagaId, sagaType, {
+      stepName,
+      stepData,
+    });
     this.name = 'SagaStepError';
   }
 }
@@ -143,16 +138,11 @@ export class SagaEventProcessingError extends SagaError {
     public readonly eventData?: Record<string, unknown>,
     public readonly processingContext?: Record<string, unknown>
   ) {
-    super(
-      `Event processing failed for ${eventType}: ${message}`,
-      sagaId,
-      sagaType,
-      {
-        eventType,
-        eventData,
-        processingContext,
-      }
-    );
+    super(`Event processing failed for ${eventType}: ${message}`, sagaId, sagaType, {
+      eventType,
+      eventData,
+      processingContext,
+    });
     this.name = 'SagaEventProcessingError';
   }
 }
@@ -229,15 +219,10 @@ export class SagaOrchestrationError extends SagaError {
     public readonly operation?: string,
     public readonly orchestrationContext?: Record<string, unknown>
   ) {
-    super(
-      message,
-      sagaId,
-      sagaType,
-      {
-        operation,
-        orchestrationContext,
-      }
-    );
+    super(message, sagaId, sagaType, {
+      operation,
+      orchestrationContext,
+    });
     this.name = 'SagaOrchestrationError';
   }
 }
@@ -251,15 +236,10 @@ export class SagaInstanceLimitExceededError extends SagaError {
     public readonly maxInstances: number,
     public readonly currentCount: number
   ) {
-    super(
-      `Maximum instances reached for saga type: ${sagaType}`,
-      'N/A',
-      sagaType,
-      {
-        maxInstances,
-        currentCount,
-      }
-    );
+    super(`Maximum instances reached for saga type: ${sagaType}`, 'N/A', sagaType, {
+      maxInstances,
+      currentCount,
+    });
     this.name = 'SagaInstanceLimitExceededError';
   }
 }

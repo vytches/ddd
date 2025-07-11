@@ -63,11 +63,7 @@ export class TestEventFactory {
     aggregateId = 'test-aggregate',
     message = 'Delayed test message'
   ): TestScheduledEvent {
-    return new TestScheduledEvent(
-      aggregateId,
-      new Date(Date.now() + delayMs),
-      message
-    );
+    return new TestScheduledEvent(aggregateId, new Date(Date.now() + delayMs), message);
   }
 
   /**
@@ -78,12 +74,10 @@ export class TestEventFactory {
     maxRetries = 3,
     backoff: BackoffStrategy = BackoffStrategy.EXPONENTIAL
   ): TestScheduledEvent {
-    return new TestScheduledEvent(
-      aggregateId,
-      new Date(),
-      'Test with retry',
-      { maxRetries, backoff }
-    );
+    return new TestScheduledEvent(aggregateId, new Date(), 'Test with retry', {
+      maxRetries,
+      backoff,
+    });
   }
 
   /**
@@ -96,10 +90,7 @@ export class TestEventFactory {
   /**
    * Create a slow test event
    */
-  static slow(
-    delayMs = 1000,
-    aggregateId = 'test-aggregate'
-  ): SlowScheduledEvent {
+  static slow(delayMs = 1000, aggregateId = 'test-aggregate'): SlowScheduledEvent {
     return new SlowScheduledEvent(aggregateId, new Date(), delayMs);
   }
 }

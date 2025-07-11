@@ -5,7 +5,7 @@ import type {
   IProjectionCapability,
   IEventStore,
   IReplayFilter,
-  IReplayResult
+  IReplayResult,
 } from '@vytches-ddd/contracts';
 import { CapabilityRegistry } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';

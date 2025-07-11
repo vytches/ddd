@@ -91,11 +91,15 @@ describe('CQRSDiscoveryPlugin', () => {
     it('should discover command handlers with proper metadata', async () => {
       // Setup metadata for command handler
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-        serviceId: 'testCommandHandler'
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+          serviceId: 'testCommandHandler',
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
@@ -103,7 +107,7 @@ describe('CQRSDiscoveryPlugin', () => {
         TestCommandHandler,
         RegularClass,
         primitiveValue,
-        plainObject
+        plainObject,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -116,24 +120,28 @@ describe('CQRSDiscoveryPlugin', () => {
         metadata: {
           messageType: TestCommand,
           handlerType: TestCommandHandler,
-          serviceId: 'testCommandHandler'
-        }
+          serviceId: 'testCommandHandler',
+        },
       });
     });
 
     it('should discover query handlers with proper metadata', async () => {
       // Setup metadata for query handler
       Reflect.defineMetadata('di:handler-type', 'query', TestQueryHandler);
-      Reflect.defineMetadata('di:query-handler', {
-        messageType: TestQuery,
-        handlerType: TestQueryHandler,
-        serviceId: 'testQueryHandler'
-      }, TestQueryHandler);
+      Reflect.defineMetadata(
+        'di:query-handler',
+        {
+          messageType: TestQuery,
+          handlerType: TestQueryHandler,
+          serviceId: 'testQueryHandler',
+        },
+        TestQueryHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestQueryHandler);
 
       const module = {
         TestQuery,
-        TestQueryHandler
+        TestQueryHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -146,35 +154,43 @@ describe('CQRSDiscoveryPlugin', () => {
         metadata: {
           messageType: TestQuery,
           handlerType: TestQueryHandler,
-          serviceId: 'testQueryHandler'
-        }
+          serviceId: 'testQueryHandler',
+        },
       });
     });
 
     it('should discover both command and query handlers', async () => {
       // Setup metadata for command handler
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-        serviceId: 'testCommandHandler'
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+          serviceId: 'testCommandHandler',
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       // Setup metadata for query handler
       Reflect.defineMetadata('di:handler-type', 'query', TestQueryHandler);
-      Reflect.defineMetadata('di:query-handler', {
-        messageType: TestQuery,
-        handlerType: TestQueryHandler,
-        serviceId: 'testQueryHandler'
-      }, TestQueryHandler);
+      Reflect.defineMetadata(
+        'di:query-handler',
+        {
+          messageType: TestQuery,
+          handlerType: TestQueryHandler,
+          serviceId: 'testQueryHandler',
+        },
+        TestQueryHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestQueryHandler);
 
       const module = {
         TestCommand,
         TestCommandHandler,
         TestQuery,
-        TestQueryHandler
+        TestQueryHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -196,7 +212,7 @@ describe('CQRSDiscoveryPlugin', () => {
       const module = {
         TestCommandHandler,
         RegularClass,
-        primitiveValue
+        primitiveValue,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -206,14 +222,18 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should ignore classes with wrong handler-type metadata', async () => {
       Reflect.defineMetadata('di:handler-type', 'event', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -227,7 +247,7 @@ describe('CQRSDiscoveryPlugin', () => {
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -237,14 +257,18 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should ignore classes without registration-pending metadata', async () => {
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       // Missing registration-pending metadata
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -260,7 +284,7 @@ describe('CQRSDiscoveryPlugin', () => {
         nullValue: null,
         undefinedValue: undefined,
         arrayValue: [1, 2, 3],
-        plainObject: { key: 'value' }
+        plainObject: { key: 'value' },
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -270,15 +294,15 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should ignore functions without prototype', async () => {
       const arrowFunction = () => {
-        return
+        return;
       };
-      const regularFunction = function() {
-        return
+      const regularFunction = function () {
+        return;
       };
 
       const module = {
         arrowFunction,
-        regularFunction
+        regularFunction,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -289,26 +313,34 @@ describe('CQRSDiscoveryPlugin', () => {
     it('should handle multiple assemblies', async () => {
       // Setup command handler in first module
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       // Setup query handler in second module
       Reflect.defineMetadata('di:handler-type', 'query', TestQueryHandler);
-      Reflect.defineMetadata('di:query-handler', {
-        messageType: TestQuery,
-        handlerType: TestQueryHandler,
-      }, TestQueryHandler);
+      Reflect.defineMetadata(
+        'di:query-handler',
+        {
+          messageType: TestQuery,
+          handlerType: TestQueryHandler,
+        },
+        TestQueryHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestQueryHandler);
 
       const module1 = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const module2 = {
-        TestQueryHandler
+        TestQueryHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module1, module2]);
@@ -326,7 +358,7 @@ describe('CQRSDiscoveryPlugin', () => {
         context: 'TestContext',
         timeout: 5000,
         middleware: ['ValidationMiddleware', 'LoggingMiddleware'],
-        dependencies: ['service1', 'service2']
+        dependencies: ['service1', 'service2'],
       };
 
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
@@ -334,7 +366,7 @@ describe('CQRSDiscoveryPlugin', () => {
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -354,10 +386,14 @@ describe('CQRSDiscoveryPlugin', () => {
     it('should handle modules with mixed content', async () => {
       // Only the handler with proper metadata should be discovered
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const mixedModule = {
@@ -369,8 +405,8 @@ describe('CQRSDiscoveryPlugin', () => {
         arrayValue: [1, 2, 3],
         objectValue: { key: 'value' },
         functionValue: () => {
-          return
-        }
+          return;
+        },
       };
 
       const handlers = await plugin.discoverHandlers([mixedModule]);
@@ -388,8 +424,8 @@ describe('CQRSDiscoveryPlugin', () => {
         customProperty: 'customValue',
         nestedObject: {
           prop1: 'value1',
-          prop2: 123
-        }
+          prop2: 123,
+        },
       };
 
       Reflect.defineMetadata('di:handler-type', 'query', TestQueryHandler);
@@ -397,7 +433,7 @@ describe('CQRSDiscoveryPlugin', () => {
       Reflect.defineMetadata('di:registration-pending', true, TestQueryHandler);
 
       const module = {
-        TestQueryHandler
+        TestQueryHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -414,15 +450,19 @@ describe('CQRSDiscoveryPlugin', () => {
 
       // Setup metadata
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
         TestCommandHandler,
-        RegularClass
+        RegularClass,
       };
 
       await plugin.discoverHandlers([module]);
@@ -465,16 +505,20 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should handle modules with circular references', async () => {
       const circularModule: any = {
-        TestCommandHandler
+        TestCommandHandler,
       };
       circularModule.self = circularModule;
 
       // Setup metadata
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const handlers = await plugin.discoverHandlers([circularModule]);
@@ -485,14 +529,18 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should handle handlers with false registration-pending', async () => {
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', false, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -502,14 +550,18 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should handle handlers with truthy registration-pending values', async () => {
       Reflect.defineMetadata('di:handler-type', 'command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', 'truthy-string', TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -522,14 +574,18 @@ describe('CQRSDiscoveryPlugin', () => {
     it('should require exact handler-type match', async () => {
       // Test case insensitive rejection
       Reflect.defineMetadata('di:handler-type', 'Command', TestCommandHandler);
-      Reflect.defineMetadata('di:command-handler', {
-        messageType: TestCommand,
-        handlerType: TestCommandHandler,
-      }, TestCommandHandler);
+      Reflect.defineMetadata(
+        'di:command-handler',
+        {
+          messageType: TestCommand,
+          handlerType: TestCommandHandler,
+        },
+        TestCommandHandler
+      );
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -539,7 +595,7 @@ describe('CQRSDiscoveryPlugin', () => {
 
     it('should handle missing metadata gracefully', async () => {
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);
@@ -553,7 +609,7 @@ describe('CQRSDiscoveryPlugin', () => {
       Reflect.defineMetadata('di:registration-pending', true, TestCommandHandler);
 
       const module = {
-        TestCommandHandler
+        TestCommandHandler,
       };
 
       const handlers = await plugin.discoverHandlers([module]);

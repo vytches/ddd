@@ -142,7 +142,11 @@ export class DomainEventMatchers {
   /**
    * Check if events contain an event of specific type
    */
-  hasEvent(events: IExtendedDomainEvent[], eventType: string, options: EventMatchOptions = {}): boolean {
+  hasEvent(
+    events: IExtendedDomainEvent[],
+    eventType: string,
+    options: EventMatchOptions = {}
+  ): boolean {
     const result = this.findEvent(events, eventType, options);
     return result.matches;
   }
@@ -150,11 +154,15 @@ export class DomainEventMatchers {
   /**
    * Find first event matching the criteria
    */
-  findEvent(events: IExtendedDomainEvent[], eventType: string, options: EventMatchOptions = {}): EventMatchResult {
+  findEvent(
+    events: IExtendedDomainEvent[],
+    eventType: string,
+    options: EventMatchOptions = {}
+  ): EventMatchResult {
     this.logger.debug('Finding event', {
       eventType,
       eventCount: events.length,
-      options
+      options,
     });
 
     for (let i = 0; i < events.length; i++) {
@@ -166,13 +174,13 @@ export class DomainEventMatchers {
         this.logger.debug('Event found', {
           eventType: event.eventType,
           eventId: (event as any).eventId || 'unknown',
-          index: i
+          index: i,
         });
 
         return {
           ...result,
           matchedEvent: event,
-          context: { index: i, totalEvents: events.length }
+          context: { index: i, totalEvents: events.length },
         };
       }
     }
@@ -180,14 +188,18 @@ export class DomainEventMatchers {
     return {
       matches: false,
       reason: `No event of type '${eventType}' found in ${events.length} events`,
-      score: 0
+      score: 0,
     };
   }
 
   /**
    * Find all events matching the criteria
    */
-  findAllEvents(events: IExtendedDomainEvent[], eventType: string, options: EventMatchOptions = {}): IExtendedDomainEvent[] {
+  findAllEvents(
+    events: IExtendedDomainEvent[],
+    eventType: string,
+    options: EventMatchOptions = {}
+  ): IExtendedDomainEvent[] {
     const matchedEvents: IExtendedDomainEvent[] = [];
 
     for (const event of events) {
@@ -200,7 +212,7 @@ export class DomainEventMatchers {
     this.logger.debug('Found multiple events', {
       eventType,
       matchedCount: matchedEvents.length,
-      totalEvents: events.length
+      totalEvents: events.length,
     });
 
     return matchedEvents;
@@ -209,7 +221,11 @@ export class DomainEventMatchers {
   /**
    * Count events of specific type
    */
-  countEvents(events: IExtendedDomainEvent[], eventType: string, options: EventMatchOptions = {}): number {
+  countEvents(
+    events: IExtendedDomainEvent[],
+    eventType: string,
+    options: EventMatchOptions = {}
+  ): number {
     return this.findAllEvents(events, eventType, options).length;
   }
 
@@ -242,7 +258,7 @@ export class DomainEventMatchers {
     this.logger.debug('Finding event with payload', {
       eventType,
       expectedPayload,
-      eventCount: events.length
+      eventCount: events.length,
     });
 
     for (let i = 0; i < events.length; i++) {
@@ -254,7 +270,7 @@ export class DomainEventMatchers {
         return {
           ...result,
           matchedEvent: event,
-          context: { index: i, totalEvents: events.length }
+          context: { index: i, totalEvents: events.length },
         };
       }
     }
@@ -262,26 +278,30 @@ export class DomainEventMatchers {
     return {
       matches: false,
       reason: `No event of type '${eventType}' with matching payload found`,
-      score: 0
+      score: 0,
     };
   }
 
   /**
    * Validate payload structure against expected shape
    */
-  validatePayloadStructure(actualPayload: any, expectedStructure: any, options: EventMatchOptions = {}): EventMatchResult {
+  validatePayloadStructure(
+    actualPayload: any,
+    expectedStructure: any,
+    options: EventMatchOptions = {}
+  ): EventMatchResult {
     try {
       const matches = this.comparePayloads(actualPayload, expectedStructure, options);
       return {
         matches,
         score: matches ? 1 : 0,
-        reason: matches ? undefined : 'Payload structure mismatch'
+        reason: matches ? undefined : 'Payload structure mismatch',
       };
     } catch (error) {
       return {
         matches: false,
         score: 0,
-        reason: `Payload validation error: ${error instanceof Error ? error.message : String(error)}`
+        reason: `Payload validation error: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -296,13 +316,13 @@ export class DomainEventMatchers {
   matchesPattern(events: IExtendedDomainEvent[], pattern: EventPattern): EventMatchResult {
     this.logger.debug('Matching event pattern', {
       patternName: pattern.name,
-      eventCount: events.length
+      eventCount: events.length,
     });
 
     const context: EventMatchingContext = {
       allEvents: events,
       currentIndex: 0,
-      matchedEvents: []
+      matchedEvents: [],
     };
 
     for (let i = 0; i < events.length; i++) {
@@ -315,7 +335,7 @@ export class DomainEventMatchers {
         return {
           ...result,
           matchedEvent: event,
-          context: { index: i, pattern: pattern.name }
+          context: { index: i, pattern: pattern.name },
         };
       }
     }
@@ -323,19 +343,22 @@ export class DomainEventMatchers {
     return {
       matches: false,
       reason: `No event matching pattern '${pattern.name}' found`,
-      score: 0
+      score: 0,
     };
   }
 
   /**
    * Find all events matching a pattern
    */
-  findEventsByPattern(events: IExtendedDomainEvent[], pattern: EventPattern): IExtendedDomainEvent[] {
+  findEventsByPattern(
+    events: IExtendedDomainEvent[],
+    pattern: EventPattern
+  ): IExtendedDomainEvent[] {
     const matchedEvents: IExtendedDomainEvent[] = [];
     const context: EventMatchingContext = {
       allEvents: events,
       currentIndex: 0,
-      matchedEvents: []
+      matchedEvents: [],
     };
 
     for (let i = 0; i < events.length; i++) {
@@ -360,7 +383,11 @@ export class DomainEventMatchers {
   /**
    * Check if events contain a specific sequence of event types
    */
-  hasEventSequence(events: IExtendedDomainEvent[], expectedSequence: string[], strict = false): boolean {
+  hasEventSequence(
+    events: IExtendedDomainEvent[],
+    expectedSequence: string[],
+    strict = false
+  ): boolean {
     const result = this.findEventSequence(events, expectedSequence, strict);
     return result.matches;
   }
@@ -368,11 +395,15 @@ export class DomainEventMatchers {
   /**
    * Find event sequence in the events array
    */
-  findEventSequence(events: IExtendedDomainEvent[], expectedSequence: string[], strict = false): EventMatchResult {
+  findEventSequence(
+    events: IExtendedDomainEvent[],
+    expectedSequence: string[],
+    strict = false
+  ): EventMatchResult {
     this.logger.debug('Finding event sequence', {
       expectedSequence,
       eventCount: events.length,
-      strict
+      strict,
     });
 
     if (expectedSequence.length === 0) {
@@ -383,7 +414,7 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: `Not enough events: expected ${expectedSequence.length}, got ${events.length}`,
-        score: 0
+        score: 0,
       };
     }
 
@@ -404,7 +435,7 @@ export class DomainEventMatchers {
         return {
           matches: false,
           reason: `Sequence broken at index ${i}: expected '${expectedType}', got '${event.eventType}'`,
-          score: sequenceIndex / expectedSequence.length
+          score: sequenceIndex / expectedSequence.length,
         };
       }
     }
@@ -413,8 +444,10 @@ export class DomainEventMatchers {
     return {
       matches,
       score: sequenceIndex / expectedSequence.length,
-      reason: matches ? undefined : `Incomplete sequence: found ${sequenceIndex}/${expectedSequence.length} events`,
-      context: { matchedIndices, strict }
+      reason: matches
+        ? undefined
+        : `Incomplete sequence: found ${sequenceIndex}/${expectedSequence.length} events`,
+      context: { matchedIndices, strict },
     };
   }
 
@@ -424,7 +457,7 @@ export class DomainEventMatchers {
   validateEventFlow(events: IExtendedDomainEvent[], patterns: EventPattern[]): EventMatchResult {
     this.logger.debug('Validating event flow', {
       patternCount: patterns.length,
-      eventCount: events.length
+      eventCount: events.length,
     });
 
     const results: EventMatchResult[] = [];
@@ -443,7 +476,7 @@ export class DomainEventMatchers {
       matches: allMatched,
       score: averageScore,
       reason: allMatched ? undefined : 'One or more patterns failed to match',
-      context: { results, patterns: patterns.map(p => p.name) }
+      context: { results, patterns: patterns.map(p => p.name) },
     };
   }
 
@@ -454,7 +487,11 @@ export class DomainEventMatchers {
   /**
    * Check if events occurred within specified time window
    */
-  eventsWithinTimeWindow(events: IExtendedDomainEvent[], startTime: Date, endTime: Date): IExtendedDomainEvent[] {
+  eventsWithinTimeWindow(
+    events: IExtendedDomainEvent[],
+    startTime: Date,
+    endTime: Date
+  ): IExtendedDomainEvent[] {
     return events.filter(event => {
       const eventTime = event.metadata?.timestamp;
       return eventTime ? eventTime >= startTime && eventTime <= endTime : false;
@@ -468,21 +505,31 @@ export class DomainEventMatchers {
     totalDuration: number;
     averageInterval: number;
     eventIntervals: number[];
-    timeline: Array<{ event: IExtendedDomainEvent; timestamp: Date; intervalFromPrevious?: number | undefined }>;
+    timeline: Array<{
+      event: IExtendedDomainEvent;
+      timestamp: Date;
+      intervalFromPrevious?: number | undefined;
+    }>;
   } {
     if (events.length === 0) {
       return {
         totalDuration: 0,
         averageInterval: 0,
         eventIntervals: [],
-        timeline: []
+        timeline: [],
       };
     }
 
     // Sort events by occurrence time
-    const sortedEvents = [...events].sort((a, b) => (a.metadata?.timestamp?.getTime() || 0) - (b.metadata?.timestamp?.getTime() || 0));
+    const sortedEvents = [...events].sort(
+      (a, b) => (a.metadata?.timestamp?.getTime() || 0) - (b.metadata?.timestamp?.getTime() || 0)
+    );
 
-    const timeline: Array<{ event: IExtendedDomainEvent; timestamp: Date; intervalFromPrevious?: number | undefined }> = [];
+    const timeline: Array<{
+      event: IExtendedDomainEvent;
+      timestamp: Date;
+      intervalFromPrevious?: number | undefined;
+    }> = [];
     const intervals: number[] = [];
 
     for (let i = 0; i < sortedEvents.length; i++) {
@@ -494,34 +541,45 @@ export class DomainEventMatchers {
       let intervalFromPrevious: number | undefined;
       if (i > 0) {
         const prevEvent = sortedEvents[i - 1];
-        intervalFromPrevious = prevEvent?.metadata?.timestamp ? timestamp.getTime() - prevEvent.metadata.timestamp.getTime() : 0;
+        intervalFromPrevious = prevEvent?.metadata?.timestamp
+          ? timestamp.getTime() - prevEvent.metadata.timestamp.getTime()
+          : 0;
         intervals.push(intervalFromPrevious);
       }
 
       timeline.push({ event, timestamp, intervalFromPrevious });
     }
 
-    const totalDuration = sortedEvents.length > 1
-      ? (sortedEvents[sortedEvents.length - 1]?.metadata?.timestamp?.getTime() || 0) - (sortedEvents[0]?.metadata?.timestamp?.getTime() || 0)
-      : 0;
+    const totalDuration =
+      sortedEvents.length > 1
+        ? (sortedEvents[sortedEvents.length - 1]?.metadata?.timestamp?.getTime() || 0) -
+          (sortedEvents[0]?.metadata?.timestamp?.getTime() || 0)
+        : 0;
 
-    const averageInterval = intervals.length > 0
-      ? intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length
-      : 0;
+    const averageInterval =
+      intervals.length > 0
+        ? intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length
+        : 0;
 
     return {
       totalDuration,
       averageInterval,
       eventIntervals: intervals,
-      timeline
+      timeline,
     };
   }
 
   /**
    * Check if two events occurred within specified time difference
    */
-  eventsWithinTimeDifference(event1: IExtendedDomainEvent, event2: IExtendedDomainEvent, maxDifference: number): boolean {
-    const timeDiff = Math.abs((event1.metadata?.timestamp?.getTime() || 0) - (event2.metadata?.timestamp?.getTime() || 0));
+  eventsWithinTimeDifference(
+    event1: IExtendedDomainEvent,
+    event2: IExtendedDomainEvent,
+    maxDifference: number
+  ): boolean {
+    const timeDiff = Math.abs(
+      (event1.metadata?.timestamp?.getTime() || 0) - (event2.metadata?.timestamp?.getTime() || 0)
+    );
     return timeDiff <= maxDifference;
   }
 
@@ -532,7 +590,10 @@ export class DomainEventMatchers {
   /**
    * Find events with specific metadata
    */
-  findEventsByMetadata(events: IExtendedDomainEvent[], metadataQuery: Partial<IEventMetadata>): IExtendedDomainEvent[] {
+  findEventsByMetadata(
+    events: IExtendedDomainEvent[],
+    metadataQuery: Partial<IEventMetadata>
+  ): IExtendedDomainEvent[] {
     return events.filter(event => {
       if (!event.metadata) return false;
       return this.matchesMetadata(event.metadata, metadataQuery);
@@ -608,7 +669,7 @@ export class DomainEventMatchers {
     return {
       correlationGroups,
       causationChains,
-      orphanedEvents
+      orphanedEvents,
     };
   }
 
@@ -619,7 +680,10 @@ export class DomainEventMatchers {
   /**
    * Find events for specific aggregate
    */
-  findEventsForAggregate(events: IExtendedDomainEvent[], aggregateId: string): IExtendedDomainEvent[] {
+  findEventsForAggregate(
+    events: IExtendedDomainEvent[],
+    aggregateId: string
+  ): IExtendedDomainEvent[] {
     return events.filter(event => {
       const eventAggregateId = event.metadata?.aggregateId;
       return eventAggregateId === aggregateId;
@@ -641,14 +705,18 @@ export class DomainEventMatchers {
   /**
    * Analyze aggregate version progression
    */
-  analyzeAggregateVersions(events: IExtendedDomainEvent[], aggregateId: string): {
+  analyzeAggregateVersions(
+    events: IExtendedDomainEvent[],
+    aggregateId: string
+  ): {
     versions: number[];
     isSequential: boolean;
     gaps: number[];
     duplicates: number[];
   } {
-    const aggregateEvents = this.findEventsForAggregate(events, aggregateId)
-      .sort((a, b) => (a.metadata?.timestamp?.getTime() || 0) - (b.metadata?.timestamp?.getTime() || 0));
+    const aggregateEvents = this.findEventsForAggregate(events, aggregateId).sort(
+      (a, b) => (a.metadata?.timestamp?.getTime() || 0) - (b.metadata?.timestamp?.getTime() || 0)
+    );
 
     const versions = aggregateEvents
       .map(event => event.metadata?.aggregateVersion)
@@ -683,7 +751,7 @@ export class DomainEventMatchers {
       versions,
       isSequential,
       gaps,
-      duplicates
+      duplicates,
     };
   }
 
@@ -710,7 +778,7 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: `Event type mismatch: expected '${expectedType}', got '${event.eventType}'`,
-        score: score / maxScore
+        score: score / maxScore,
       };
     }
 
@@ -722,7 +790,7 @@ export class DomainEventMatchers {
         return {
           matches: false,
           reason: 'Metadata mismatch',
-          score: score / maxScore
+          score: score / maxScore,
         };
       }
     } else {
@@ -737,7 +805,7 @@ export class DomainEventMatchers {
         return {
           matches: false,
           reason: 'Payload mismatch',
-          score: score / maxScore
+          score: score / maxScore,
         };
       }
     }
@@ -747,13 +815,13 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: 'Custom matcher failed',
-        score: score / maxScore
+        score: score / maxScore,
       };
     }
 
     return {
       matches: score === maxScore,
-      score: score / maxScore
+      score: score / maxScore,
     };
   }
 
@@ -770,16 +838,19 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: `Event type '${event.eventType}' doesn't match pattern '${pattern.eventType}'`,
-        score: 0
+        score: 0,
       };
     }
 
     // Check payload if specified
-    if (pattern.payload && !this.comparePayloads(event.payload, pattern.payload, { partialPayload: true })) {
+    if (
+      pattern.payload &&
+      !this.comparePayloads(event.payload, pattern.payload, { partialPayload: true })
+    ) {
       return {
         matches: false,
-        reason: 'Payload doesn\'t match pattern',
-        score: 0.3
+        reason: "Payload doesn't match pattern",
+        score: 0.3,
       };
     }
 
@@ -787,8 +858,8 @@ export class DomainEventMatchers {
     if (pattern.metadata && !this.matchesMetadata(event.metadata, pattern.metadata)) {
       return {
         matches: false,
-        reason: 'Metadata doesn\'t match pattern',
-        score: 0.5
+        reason: "Metadata doesn't match pattern",
+        score: 0.5,
       };
     }
 
@@ -797,7 +868,7 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: 'Order constraints not satisfied',
-        score: 0.7
+        score: 0.7,
       };
     }
 
@@ -806,7 +877,7 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: 'Timing constraints not satisfied',
-        score: 0.8
+        score: 0.8,
       };
     }
 
@@ -815,20 +886,24 @@ export class DomainEventMatchers {
       return {
         matches: false,
         reason: 'Custom validator failed',
-        score: 0.9
+        score: 0.9,
       };
     }
 
     return {
       matches: true,
-      score: 1
+      score: 1,
     };
   }
 
   /**
    * Match event type with support for exact and partial matching
    */
-  private matchEventType(actualType: string, expectedType: string, options: EventMatchOptions = {}): boolean {
+  private matchEventType(
+    actualType: string,
+    expectedType: string,
+    options: EventMatchOptions = {}
+  ): boolean {
     if (options.exactType !== false) {
       return options.caseSensitive !== false
         ? actualType === expectedType
@@ -860,7 +935,12 @@ export class DomainEventMatchers {
     if (expected == null || actual == null) return expected === actual;
 
     // Handle Jest expect.any() matchers
-    if (expected && typeof expected === 'object' && expected.constructor && expected.constructor.name === 'AsymmetricMatcher') {
+    if (
+      expected &&
+      typeof expected === 'object' &&
+      expected.constructor &&
+      expected.constructor.name === 'AsymmetricMatcher'
+    ) {
       return true; // For expect.any() matchers in tests
     }
 

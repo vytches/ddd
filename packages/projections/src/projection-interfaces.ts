@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // projection-interfaces.ts
-import type { IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
+import type {
+  IExtendedDomainEvent,
+  Capability,
+  CapabilityConstructor,
+  IProjectionCapability,
+} from '@vytches-ddd/contracts';
 import type { ProjectionError } from './projection-errors';
 
 /**

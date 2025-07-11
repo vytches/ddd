@@ -1,9 +1,5 @@
 // Core aggregates - re-exported from aggregates package
-export {
-  AggregateRoot,
-  AggregateBuilder,
-  AggregateError,
-} from '@vytches-ddd/aggregates';
+export { AggregateRoot, AggregateBuilder, AggregateError } from '@vytches-ddd/aggregates';
 
 // Aggregate interfaces
 export type {

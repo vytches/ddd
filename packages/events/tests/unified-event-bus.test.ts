@@ -14,7 +14,7 @@ class TestIntegrationEvent implements IIntegrationEvent {
   readonly metadata = {
     eventId: 'test-id',
     timestamp: new Date(),
-    version: '1.0'
+    version: '1.0',
   };
 
   constructor(readonly payload: any) {}
@@ -25,7 +25,7 @@ describe('UnifiedEventBus', () => {
 
   beforeEach(() => {
     eventBus = new UnifiedEventBus({
-      enableLogging: false
+      enableLogging: false,
     });
   });
 
@@ -79,19 +79,27 @@ describe('UnifiedEventBus', () => {
 
       expect(orderHandler).toHaveBeenCalledTimes(1);
       expect(userHandler).toHaveBeenCalledTimes(1);
-      expect(orderHandler).toHaveBeenCalledWith(expect.objectContaining({
-        payload: { id: 'order-1' }
-      }));
-      expect(userHandler).toHaveBeenCalledWith(expect.objectContaining({
-        payload: { id: 'user-1' }
-      }));
+      expect(orderHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { id: 'order-1' },
+        })
+      );
+      expect(userHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { id: 'user-1' },
+        })
+      );
     });
 
     it('should filter events by multiple contexts', async () => {
       const multiContextHandler = vi.fn();
 
       // Subscribe to multiple contexts
-      eventBus.subscribe(TestDomainEvent, ['order-context', 'inventory-context'], multiContextHandler);
+      eventBus.subscribe(
+        TestDomainEvent,
+        ['order-context', 'inventory-context'],
+        multiContextHandler
+      );
 
       // Publish events with different contexts
       await eventBus.publish(new TestDomainEvent({ id: 'order-1' }, 'order-context'));
@@ -99,9 +107,11 @@ describe('UnifiedEventBus', () => {
       await eventBus.publish(new TestDomainEvent({ id: 'user-1' }, 'user-context'));
 
       expect(multiContextHandler).toHaveBeenCalledTimes(2);
-      expect(multiContextHandler).not.toHaveBeenCalledWith(expect.objectContaining({
-        payload: { id: 'user-1' }
-      }));
+      expect(multiContextHandler).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { id: 'user-1' },
+        })
+      );
     });
 
     it('should handle events from all contexts when no filter is specified', async () => {
@@ -127,24 +137,28 @@ describe('UnifiedEventBus', () => {
       await eventBus.publish(new TestDomainEvent({ id: 'test-2' }, 'other-context'));
 
       expect(contextHandler).toHaveBeenCalledTimes(1);
-      expect(contextHandler).toHaveBeenCalledWith(expect.objectContaining({
-        payload: { id: 'test-1' }
-      }));
+      expect(contextHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { id: 'test-1' },
+        })
+      );
     });
   });
 
   describe('Class-based Handlers', () => {
     it('should register class-based handlers', async () => {
       const handler = {
-        handle: vi.fn()
+        handle: vi.fn(),
       };
 
       eventBus.registerHandler(TestDomainEvent, handler);
       await eventBus.publish(new TestDomainEvent({ id: 'test-1' }));
 
-      expect(handler.handle).toHaveBeenCalledWith(expect.objectContaining({
-        payload: { id: 'test-1' }
-      }));
+      expect(handler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: { id: 'test-1' },
+        })
+      );
     });
   });
 
@@ -164,7 +178,7 @@ describe('UnifiedEventBus', () => {
 
     it('should unsubscribe class-based handlers', async () => {
       const handler = {
-        handle: vi.fn()
+        handle: vi.fn(),
       };
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
@@ -184,7 +198,7 @@ describe('UnifiedEventBus', () => {
       const events = [
         new TestDomainEvent({ id: 'test-1' }),
         new TestDomainEvent({ id: 'test-2' }),
-        new TestDomainEvent({ id: 'test-3' })
+        new TestDomainEvent({ id: 'test-3' }),
       ];
 
       eventBus.subscribe(TestDomainEvent, handler);
@@ -201,7 +215,7 @@ describe('UnifiedEventBus', () => {
 
       const eventBus = new UnifiedEventBus({
         enableLogging: false,
-        onError
+        onError,
       });
 
       eventBus.subscribe(TestDomainEvent, () => {
@@ -212,10 +226,7 @@ describe('UnifiedEventBus', () => {
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
       await expect(eventBus.publish(testEvent)).rejects.toThrow('Handler error');
-      expect(onError).toHaveBeenCalledWith(
-        expect.any(Error),
-        'TestDomainEvent'
-      );
+      expect(onError).toHaveBeenCalledWith(expect.any(Error), 'TestDomainEvent');
       expect(workingHandler).toHaveBeenCalled(); // Should still be called
     });
 
@@ -228,7 +239,7 @@ describe('UnifiedEventBus', () => {
 
       const eventBus = new UnifiedEventBus({
         enableLogging: false,
-        onError
+        onError,
       });
 
       eventBus.subscribe(TestDomainEvent, handler1);
@@ -245,12 +256,12 @@ describe('UnifiedEventBus', () => {
 
   describe('Middleware Support', () => {
     it('should execute middleware pipeline', async () => {
-      const middleware1 = vi.fn((next) => async (event: any) => {
+      const middleware1 = vi.fn(next => async (event: any) => {
         event.middlewareOrder = ['middleware1'];
         await next(event);
       });
 
-      const middleware2 = vi.fn((next) => async (event: any) => {
+      const middleware2 = vi.fn(next => async (event: any) => {
         event.middlewareOrder.push('middleware2');
         await next(event);
       });
@@ -259,7 +270,7 @@ describe('UnifiedEventBus', () => {
 
       const eventBus = new UnifiedEventBus({
         enableLogging: false,
-        middlewares: [middleware1, middleware2]
+        middlewares: [middleware1, middleware2],
       });
 
       eventBus.subscribe(TestDomainEvent, handler);

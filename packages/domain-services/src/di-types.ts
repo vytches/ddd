@@ -12,10 +12,10 @@ import type { ServiceLifetime } from '@vytches-ddd/di';
  * Determines how bounded context should be resolved for service registration.
  */
 export type ContextResolutionStrategy =
-  | 'auto'           // Auto-detect from call stack or class location
-  | 'explicit'       // Use explicitly provided context
-  | 'global'         // Always use global container
-  | 'inherit';       // Inherit context from parent service
+  | 'auto' // Auto-detect from call stack or class location
+  | 'explicit' // Use explicitly provided context
+  | 'global' // Always use global container
+  | 'inherit'; // Inherit context from parent service
 
 /**
  * Extended DI options for domain service decorators.
@@ -192,9 +192,7 @@ export class DIDomainServiceMetadataRegistry {
    * Get services by tag.
    */
   static getServicesByTag(tag: string): DIServiceMetadata[] {
-    return this.getAllServices().filter(service =>
-      service.tags?.includes(tag)
-    );
+    return this.getAllServices().filter(service => service.tags?.includes(tag));
   }
 
   /**

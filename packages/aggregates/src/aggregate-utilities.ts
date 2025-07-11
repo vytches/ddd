@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from '@vytches-ddd/logging';
-import type { CapabilityConstructor, Capability, IAggregateCapability } from '@vytches-ddd/contracts';
+import type {
+  CapabilityConstructor,
+  Capability,
+  IAggregateCapability,
+} from '@vytches-ddd/contracts';
 import { AggregateError } from './aggregate-errors';
 import type { IAggregateRoot } from './aggregate-interfaces';
 
@@ -11,7 +15,7 @@ import { EventSourcingCapability } from './capabilities/event-sourcing-capabilit
 import { AuditCapability } from './capabilities/audit-capability';
 
 // Import new type-safe aggregate
-import { AggregateRoot } from './aggregate-root';
+import type { AggregateRoot } from './aggregate-root';
 
 // ==========================================
 // TYPE UTILITIES
@@ -25,9 +29,15 @@ export type AggregateWithCapability<TId, TCap extends Capability> = AggregateRoo
 };
 
 export type AggregateWithSnapshotCapability<TId> = AggregateWithCapability<TId, SnapshotCapability>;
-export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<TId, VersioningCapability>;
+export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<
+  TId,
+  VersioningCapability
+>;
 export type AggregateWithAuditCapability<TId> = AggregateWithCapability<TId, AuditCapability>;
-export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<TId, EventSourcingCapability>;
+export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
+  TId,
+  EventSourcingCapability
+>;
 
 // ==========================================
 // TYPE GUARDS
@@ -194,7 +204,11 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
 ): boolean {
   if (hasSnapshotCapability(aggregate)) {
     const snapshotCap = aggregate.getCapability(SnapshotCapability);
-    snapshotCap?.restoreFromSnapshot(snapshot, deserializer as (state: unknown) => void, metadataRestorer);
+    snapshotCap?.restoreFromSnapshot(
+      snapshot,
+      deserializer as (state: unknown) => void,
+      metadataRestorer
+    );
     return true;
   }
   return false;
@@ -250,9 +264,7 @@ export async function loadFromEventStoreIfCapable(
 /**
  * Saves to event store if the aggregate has event sourcing capability
  */
-export async function saveToEventStoreIfCapable(
-  aggregate: AggregateRoot<any>
-): Promise<boolean> {
+export async function saveToEventStoreIfCapable(aggregate: AggregateRoot<any>): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
     const eventSourcingCap = aggregate.getCapability(EventSourcingCapability);
     if (eventSourcingCap) {
@@ -290,11 +302,13 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 export function getVersioningInfoIfCapable(aggregate: AggregateRoot<any>): any | null {
   if (hasVersioningCapability(aggregate)) {
     const versioningCap = aggregate.getCapability(VersioningCapability);
-    return versioningCap ? {
-      registeredEventTypes: versioningCap.getRegisteredEventTypes(),
-      hasUpcaster: (eventType: string, version: number) =>
-        versioningCap.hasUpcaster(eventType, version),
-    } : null;
+    return versioningCap
+      ? {
+          registeredEventTypes: versioningCap.getRegisteredEventTypes(),
+          hasUpcaster: (eventType: string, version: number) =>
+            versioningCap.hasUpcaster(eventType, version),
+        }
+      : null;
   }
   return null;
 }

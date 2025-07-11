@@ -122,28 +122,19 @@ export interface IAdvancedEventStore {
     expectedVersion?: number
   ): Promise<IAppendResult>;
 
-  readStream<T = unknown>(
-    streamId: string,
-    options?: IReadStreamOptions
-  ): Promise<IEventStream<T>>;
+  readStream<T = unknown>(streamId: string, options?: IReadStreamOptions): Promise<IEventStream<T>>;
 
   // Global event log
   readAll<T = unknown>(options?: IReadAllOptions): Promise<IGlobalEventStream<T>>;
 
   // Snapshots
   getSnapshot<T = unknown>(streamId: string): Promise<IAggregateSnapshot<T> | null>;
-  saveSnapshot<T = unknown>(
-    streamId: string,
-    snapshot: IAggregateSnapshot<T>
-  ): Promise<void>;
+  saveSnapshot<T = unknown>(streamId: string, snapshot: IAggregateSnapshot<T>): Promise<void>;
 
   // Stream management
   deleteStream(streamId: string, expectedVersion?: number): Promise<void>;
   getStreamMetadata(streamId: string): Promise<IStreamMetadata | null>;
-  setStreamMetadata(
-    streamId: string,
-    metadata: Partial<IStreamMetadata>
-  ): Promise<void>;
+  setStreamMetadata(streamId: string, metadata: Partial<IStreamMetadata>): Promise<void>;
 
   // Subscriptions (for future event store subscriptions)
   subscribeToStream?(

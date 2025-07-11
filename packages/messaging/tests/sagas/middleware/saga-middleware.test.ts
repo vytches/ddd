@@ -246,7 +246,7 @@ describe('RetryMiddleware', () => {
 
     // First attempt - should start the retry process without calling next
     const firstAttempt = middleware.onError(context, error, nextWithError);
-    
+
     // Check that it logged the retry intent
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Saga step failed, retrying',
@@ -504,7 +504,9 @@ describe('SecurityMiddleware', () => {
     // @ts-expect-error expected
     contextWithoutAuth.executionContext.userId = undefined;
 
-    await expect(middleware.before(contextWithoutAuth, next)).rejects.toThrow('Unauthorized operation');
+    await expect(middleware.before(contextWithoutAuth, next)).rejects.toThrow(
+      'Unauthorized operation'
+    );
     expect(next).not.toHaveBeenCalled();
 
     // With sessionId only - should allow
@@ -631,9 +633,9 @@ describe('SagaMiddlewarePipeline', () => {
     const context = createMockContext();
     const operation = vi.fn().mockRejectedValue(testError);
 
-    await expect(
-      pipeline.execute(saga, event, context, 'testStep', operation)
-    ).rejects.toThrow('Operation failed');
+    await expect(pipeline.execute(saga, event, context, 'testStep', operation)).rejects.toThrow(
+      'Operation failed'
+    );
 
     expect(errorOrder).toEqual(['Second:error', 'First:error']);
   });

@@ -4,7 +4,8 @@ Global Service Locator with Optional Context Isolation for Dependency Injection.
 
 ## Overview
 
-The `@vytches-ddd/di` package implements a **hybrid dependency injection architecture** that provides:
+The `@vytches-ddd/di` package implements a **hybrid dependency injection
+architecture** that provides:
 
 1. **Global service locator by default** (following MediatR pattern)
 2. **Optional context isolation** for DDD bounded context scenarios
@@ -12,7 +13,8 @@ The `@vytches-ddd/di` package implements a **hybrid dependency injection archite
 4. **Plugin-based handler discovery** for CQRS, Events, and custom handlers
 5. **Progressive enhancement** from simple to complex scenarios
 
-This implementation follows **ADR-0006: Adopt Global Service Locator with Optional Context Isolation for Dependency Injection**.
+This implementation follows **ADR-0006: Adopt Global Service Locator with
+Optional Context Isolation for Dependency Injection**.
 
 ## Installation
 
@@ -22,7 +24,10 @@ pnpm add @vytches-ddd/di
 
 ## Philosophy: Natural Framework Integration
 
-VytchesDDD DI **enhances** your existing DI framework rather than replacing it. Your application code continues to use natural dependency injection patterns, while VytchesDDD components can leverage service location internally when beneficial.
+VytchesDDD DI **enhances** your existing DI framework rather than replacing it.
+Your application code continues to use natural dependency injection patterns,
+while VytchesDDD components can leverage service location internally when
+beneficial.
 
 ## Quick Start
 
@@ -33,18 +38,18 @@ VytchesDDD DI **enhances** your existing DI framework rather than replacing it. 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: UserRepository,    // Natural DI
-    private readonly emailService: EmailService,        // Natural DI
-    private readonly commandBus: ICommandBus           // VytchesDDD component
+    private readonly userRepository: UserRepository, // Natural DI
+    private readonly emailService: EmailService, // Natural DI
+    private readonly commandBus: ICommandBus // VytchesDDD component
   ) {}
 
   async createUser(userData: CreateUserDto): Promise<User> {
     const user = await this.userRepository.save(new User(userData));
     await this.emailService.sendWelcomeEmail(user.email);
-    
+
     // VytchesDDD handles complex routing internally
     await this.commandBus.execute(new UserCreatedCommand(user.id));
-    
+
     return user;
   }
 }
@@ -80,7 +85,10 @@ VytchesDDD.configureContext('OrderManagement', orderContainer);
 
 // Smart resolution - context-aware when available, global otherwise
 const emailService = VytchesDDD.resolve<EmailService>('EmailService'); // From global
-const orderService = VytchesDDD.resolve<SpecialOrderService>('SpecialOrderService', 'OrderManagement'); // From context
+const orderService = VytchesDDD.resolve<SpecialOrderService>(
+  'SpecialOrderService',
+  'OrderManagement'
+); // From context
 ```
 
 ## Core Components
@@ -92,9 +100,21 @@ Framework-agnostic container interface that all adapters implement:
 ```typescript
 interface IDependencyContainer {
   resolve<T>(token: ServiceToken<T>): T;
-  register<T>(token: ServiceToken<T>, implementation: Constructor<T>, options?: ServiceRegistrationOptions): void;
-  registerFactory<T>(token: ServiceToken<T>, factory: ServiceFactory<T>, options?: ServiceRegistrationOptions): void;
-  registerInstance<T>(token: ServiceToken<T>, instance: T, options?: ServiceRegistrationOptions): void;
+  register<T>(
+    token: ServiceToken<T>,
+    implementation: Constructor<T>,
+    options?: ServiceRegistrationOptions
+  ): void;
+  registerFactory<T>(
+    token: ServiceToken<T>,
+    factory: ServiceFactory<T>,
+    options?: ServiceRegistrationOptions
+  ): void;
+  registerInstance<T>(
+    token: ServiceToken<T>,
+    instance: T,
+    options?: ServiceRegistrationOptions
+  ): void;
   isRegistered<T>(token: ServiceToken<T>): boolean;
   getServices(): ServiceDescriptor[];
   createScope?(context?: string): IDependencyContainer;
@@ -107,8 +127,8 @@ interface IDependencyContainer {
 ```typescript
 enum ServiceLifetime {
   Transient = 'transient', // New instance each time
-  Singleton = 'singleton',  // Single instance shared
-  Scoped = 'scoped'        // Instance scoped to context
+  Singleton = 'singleton', // Single instance shared
+  Scoped = 'scoped', // Instance scoped to context
 }
 ```
 
@@ -119,14 +139,17 @@ Global facade providing enterprise-grade service resolution:
 ```typescript
 class VytchesDDD {
   static configure(container: IDependencyContainer): void;
-  static configureContext(contextName: string, container: IDependencyContainer): void;
+  static configureContext(
+    contextName: string,
+    container: IDependencyContainer
+  ): void;
   static resolve<T>(token: ServiceToken<T>, context?: string): T;
   static isRegistered<T>(token: ServiceToken<T>, context?: string): boolean;
-  
+
   // Plugin-based handler discovery
   static registerDiscoveryPlugin(plugin: IHandlerDiscoveryPlugin): void;
   static discoverAndRegisterHandlers(assemblies?: any[]): Promise<void>;
-  
+
   static reset(): void; // For testing
   static dispose(): void;
 }
@@ -147,12 +170,12 @@ const container = new SimpleContainer();
 container.register('UserService', UserService);
 
 // Register singleton service
-container.register('EmailService', EmailService, { 
-  lifetime: ServiceLifetime.Singleton 
+container.register('EmailService', EmailService, {
+  lifetime: ServiceLifetime.Singleton,
 });
 
 // Register with factory
-container.registerFactory('DatabaseService', (c) => {
+container.registerFactory('DatabaseService', c => {
   const config = c.resolve<Config>('Config');
   return new DatabaseService(config.connectionString);
 });
@@ -167,38 +190,45 @@ container.registerInstance('Config', { connectionString: 'localhost' });
 import { ContainerBuilder, ServiceLifetime } from '@vytches-ddd/di';
 
 const container = new ContainerBuilder()
-  .register('UserRepository', UserRepository, { 
+  .register('UserRepository', UserRepository, {
     lifetime: ServiceLifetime.Singleton,
-    tags: ['repository', 'domain']
+    tags: ['repository', 'domain'],
   })
-  .register('EmailService', EmailService, { 
+  .register('EmailService', EmailService, {
     lifetime: ServiceLifetime.Singleton,
-    tags: ['service', 'infrastructure']
+    tags: ['service', 'infrastructure'],
   })
-  .registerFactory('UserService', (c) => {
-    const userRepo = c.resolve<UserRepository>('UserRepository');
-    const emailService = c.resolve<EmailService>('EmailService');
-    return new UserService(userRepo, emailService);
-  }, { 
-    tags: ['service', 'application']
-  })
+  .registerFactory(
+    'UserService',
+    c => {
+      const userRepo = c.resolve<UserRepository>('UserRepository');
+      const emailService = c.resolve<EmailService>('EmailService');
+      return new UserService(userRepo, emailService);
+    },
+    {
+      tags: ['service', 'application'],
+    }
+  )
   .build();
 ```
 
 ## Framework Integration Adapters
 
-**Note**: Framework adapters are documented as conceptual examples in separate .md files. The DI package provides the `BaseContainerAdapter` foundation without installing external dependencies.
+**Note**: Framework adapters are documented as conceptual examples in separate
+.md files. The DI package provides the `BaseContainerAdapter` foundation without
+installing external dependencies.
 
 ### Available Adapter Documentation
 
 See the following documentation files for framework integration patterns:
 
 - `docs/INVERSIFY-INTEGRATION.md` - InversifyJS integration patterns
-- `docs/TSYRINGE-INTEGRATION.md` - TSyringe integration patterns  
+- `docs/TSYRINGE-INTEGRATION.md` - TSyringe integration patterns
 - `docs/NESTJS-INTEGRATION.md` - NestJS integration patterns
 - `docs/CUSTOM-ADAPTER.md` - Creating custom framework adapters
 
-These documents provide implementation guidance without requiring external framework installations.
+These documents provide implementation guidance without requiring external
+framework installations.
 
 ## Advanced Features
 
@@ -210,7 +240,10 @@ container.register('EmailService', EmailService);
 
 // Create request-scoped container
 const requestScope = container.createScope('request');
-requestScope.registerInstance('RequestContext', new RequestContext(userId, requestId));
+requestScope.registerInstance(
+  'RequestContext',
+  new RequestContext(userId, requestId)
+);
 
 // Services in scope can access both scoped and parent services
 const requestService = requestScope.resolve<RequestService>('RequestService');
@@ -221,7 +254,7 @@ const requestService = requestScope.resolve<RequestService>('RequestService');
 ```typescript
 container.register('UserRepository', UserRepository, {
   tags: ['repository', 'domain', 'user-context'],
-  context: 'UserManagement'
+  context: 'UserManagement',
 });
 
 // Query by tag
@@ -231,7 +264,8 @@ const domainServices = container.getServicesByTag('domain');
 
 ## Plugin-Based Handler Discovery
 
-The DI package uses a clean plugin architecture to discover handlers from different packages **without creating circular dependencies**:
+The DI package uses a clean plugin architecture to discover handlers from
+different packages **without creating circular dependencies**:
 
 ### Core Architecture
 
@@ -268,11 +302,11 @@ await VytchesDDD.discoverAndRegisterHandlers();
 
 ```typescript
 // Enhanced existing decorators with DI options
-@CommandHandler(CreateOrderCommand, { 
-  lifetime: 'singleton',        // DI service lifetime
-  context: 'OrderManagement',   // DI context isolation
-  tags: ['order', 'business'],  // Service tags
-  autoRegister: true            // Auto-register with DI (default)
+@CommandHandler(CreateOrderCommand, {
+  lifetime: 'singleton', // DI service lifetime
+  context: 'OrderManagement', // DI context isolation
+  tags: ['order', 'business'], // Service tags
+  autoRegister: true, // Auto-register with DI (default)
 })
 export class CreateOrderCommandHandler {
   async handle(command: CreateOrderCommand): Promise<void> {
@@ -280,7 +314,7 @@ export class CreateOrderCommandHandler {
     // Dependencies can be injected via constructor or service locator
     const orderService = VytchesDDD.resolve<OrderService>('OrderService');
     const paymentService = VytchesDDD.resolve<PaymentService>('PaymentService');
-    
+
     // Business logic with automatic DI resolution
     await orderService.validateOrder(command.orderId);
     await paymentService.processPayment(command.paymentDetails);
@@ -288,10 +322,10 @@ export class CreateOrderCommandHandler {
 }
 
 // Query handlers also support DI options
-@QueryHandler(GetOrderQuery, { 
+@QueryHandler(GetOrderQuery, {
   lifetime: 'transient',
   context: 'OrderManagement',
-  tags: ['query', 'order']
+  tags: ['query', 'order'],
 })
 export class GetOrderQueryHandler {
   async handle(query: GetOrderQuery): Promise<Order> {
@@ -306,12 +340,12 @@ export class GetOrderQueryHandler {
 The package provides specific error types for different failure scenarios:
 
 ```typescript
-import { 
+import {
   ServiceNotFoundError,
   CircularDependencyError,
   ServiceAlreadyRegisteredError,
   ContainerConfigurationError,
-  ContainerDisposedError 
+  ContainerDisposedError,
 } from '@vytches-ddd/di';
 
 try {
@@ -335,11 +369,11 @@ describe('UserService', () => {
 
   beforeEach(() => {
     container = new SimpleContainer();
-    
+
     // Register mocks
     container.registerInstance('UserRepository', mockUserRepository);
     container.registerInstance('EmailService', mockEmailService);
-    
+
     VytchesDDD.configure(container);
   });
 
@@ -360,7 +394,7 @@ describe('UserService', () => {
 ```typescript
 const mockRepository = {
   findById: vi.fn().mockResolvedValue({ id: '1', name: 'Test User' }),
-  save: vi.fn().mockResolvedValue(true)
+  save: vi.fn().mockResolvedValue(true),
 };
 
 container.registerInstance('UserRepository', mockRepository);
@@ -368,37 +402,41 @@ container.registerInstance('UserRepository', mockRepository);
 
 ## Package Integration Strategy
 
-This package implements a **unified dependency injection system** that replaces legacy registry patterns with decorator-based auto-discovery:
+This package implements a **unified dependency injection system** that replaces
+legacy registry patterns with decorator-based auto-discovery:
 
 ### Registry Pattern Replacements
 
-| Legacy Pattern | New DI Approach | Status |
-|----------------|-----------------|---------|
-| **CQRSMetadataRegistry** | Enhanced `@CommandHandler`/`@QueryHandler` decorators | ✅ Complete |
-| **EventBusRegistry** | `@EventHandler` decorator with auto-discovery | 🚧 In Progress |
-| **DefaultDomainServiceRegistry** | `@DomainService` decorator | 🚧 Planned |
-| **PolicyRegistry** | `@Policy` decorator with domain scoping | 🚧 Planned |
-| **ACLRegistry** | `@ACLAdapter` decorator | 🚧 Planned |
-| **ProjectionRegistry** | `@ProjectionEngine` decorator | 🚧 Planned |
-| **MetricRegistry** | `@MetricCollector` decorator | 🚧 Planned |
+| Legacy Pattern                   | New DI Approach                                       | Status         |
+| -------------------------------- | ----------------------------------------------------- | -------------- |
+| **CQRSMetadataRegistry**         | Enhanced `@CommandHandler`/`@QueryHandler` decorators | ✅ Complete    |
+| **EventBusRegistry**             | `@EventHandler` decorator with auto-discovery         | 🚧 In Progress |
+| **DefaultDomainServiceRegistry** | `@DomainService` decorator                            | 🚧 Planned     |
+| **PolicyRegistry**               | `@Policy` decorator with domain scoping               | 🚧 Planned     |
+| **ACLRegistry**                  | `@ACLAdapter` decorator                               | 🚧 Planned     |
+| **ProjectionRegistry**           | `@ProjectionEngine` decorator                         | 🚧 Planned     |
+| **MetricRegistry**               | `@MetricCollector` decorator                          | 🚧 Planned     |
 
 ### Implementation Example
 
 **New DI Approach (✅ Implemented for CQRS):**
+
 ```typescript
 // Enhanced decorator-based system with auto-discovery
-@CommandHandler(CreateOrderCommand, { 
+@CommandHandler(CreateOrderCommand, {
   context: 'orders',
   lifetime: 'singleton',
   autoRegister: true,
-  tags: ['order', 'business']
+  tags: ['order', 'business'],
 })
 export class CreateOrderCommandHandler {
   async handle(command: CreateOrderCommand): Promise<void> {
     // Automatic service resolution via DI service locator
-    const policy = VytchesDDD.resolve<CanCreateOrderPolicy>('CanCreateOrderPolicy');
+    const policy = VytchesDDD.resolve<CanCreateOrderPolicy>(
+      'CanCreateOrderPolicy'
+    );
     const eventBus = VytchesDDD.resolve<OrderEventBus>('OrderEventBus');
-    
+
     // Business logic with automatic DI resolution
     await policy.validate(command);
     const order = new Order(command.orderData);
@@ -408,7 +446,9 @@ export class CreateOrderCommandHandler {
 
 // One-time setup with auto-discovery
 const container = new SimpleContainer();
-container.register('CanCreateOrderPolicy', CanCreateOrderPolicy, { context: 'orders' });
+container.register('CanCreateOrderPolicy', CanCreateOrderPolicy, {
+  context: 'orders',
+});
 container.register('OrderEventBus', OrderEventBus, { context: 'OrderContext' });
 
 VytchesDDD.configure(container);
@@ -440,14 +480,14 @@ await VytchesDDD.discoverAndRegisterHandlers(); // All decorated handlers auto-r
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly orderRepository: OrderRepository,  // Framework DI
-    private readonly paymentService: PaymentService,   // Framework DI
-    private readonly commandBus: ICommandBus           // VytchesDDD component
+    private readonly orderRepository: OrderRepository, // Framework DI
+    private readonly paymentService: PaymentService, // Framework DI
+    private readonly commandBus: ICommandBus // VytchesDDD component
   ) {}
 }
 
 // ❌ Bad: Service locator in application code
-@Injectable() 
+@Injectable()
 export class OrderService {
   async processOrder() {
     const repository = VytchesDDD.resolve<OrderRepository>('OrderRepository');
@@ -483,7 +523,7 @@ export class SimpleBusinessCommandHandler {
 ### 3. Use Contexts for True Domain Boundaries
 
 ```typescript
-// ✅ Good: Context isolation for bounded contexts  
+// ✅ Good: Context isolation for bounded contexts
 VytchesDDD.configureContext('OrderManagement', orderContainer);
 VytchesDDD.configureContext('UserManagement', userContainer);
 
@@ -502,15 +542,15 @@ export class OrderPaymentHandler {
 ```typescript
 // ✅ Good: Enhance existing DI, don't replace it
 @Module({
-  imports: [VytchesDDDModule],  // Add VytchesDDD capabilities
+  imports: [VytchesDDDModule], // Add VytchesDDD capabilities
   providers: [
-    UserService,               // Keep natural NestJS patterns
-    UserRepository,            // Keep natural NestJS patterns
+    UserService, // Keep natural NestJS patterns
+    UserRepository, // Keep natural NestJS patterns
     {
-      provide: 'ICommandBus',   // Register VytchesDDD components
-      useClass: CommandBus
-    }
-  ]
+      provide: 'ICommandBus', // Register VytchesDDD components
+      useClass: CommandBus,
+    },
+  ],
 })
 export class UserModule {}
 ```
@@ -534,6 +574,7 @@ container.registerFactory<IDatabaseService>('IDatabaseService', createDatabase);
 ### ✅ Use Constructor Injection (Preferred)
 
 **Application Services, Controllers, Infrastructure:**
+
 ```typescript
 @Injectable()
 export class UserService {
@@ -545,6 +586,7 @@ export class UserService {
 ```
 
 **Simple VytchesDDD Handlers:**
+
 ```typescript
 @CommandHandler(CreateUserCommand)
 export class CreateUserCommandHandler {
@@ -558,6 +600,7 @@ export class CreateUserCommandHandler {
 ### ✅ Use Service Locator (When Beneficial)
 
 **Complex Handlers with Many Dependencies:**
+
 ```typescript
 @CommandHandler(ComplexBusinessProcessCommand)
 export class ComplexBusinessProcessHandler {
@@ -572,13 +615,14 @@ export class ComplexBusinessProcessHandler {
 ```
 
 **Context-Dependent Resolution:**
+
 ```typescript
 @CommandHandler(ProcessPaymentCommand)
 export class ProcessPaymentHandler {
   async handle(command: ProcessPaymentCommand): Promise<void> {
     // Different payment processor per context
     const processor = VytchesDDD.resolve<PaymentProcessor>(
-      'PaymentProcessor', 
+      'PaymentProcessor',
       command.context
     );
   }
@@ -586,12 +630,13 @@ export class ProcessPaymentHandler {
 ```
 
 **Conditional Dependencies:**
+
 ```typescript
 @CommandHandler(ProcessOrderCommand)
 export class ProcessOrderHandler {
   async handle(command: ProcessOrderCommand): Promise<void> {
     // Resolve different services based on business logic
-    const processor = command.isExpress 
+    const processor = command.isExpress
       ? VytchesDDD.resolve<ExpressProcessor>('ExpressProcessor')
       : VytchesDDD.resolve<StandardProcessor>('StandardProcessor');
   }
@@ -602,15 +647,20 @@ export class ProcessOrderHandler {
 
 The DI package integrates seamlessly with other VytchesDDD packages:
 
-- **@vytches-ddd/cqrs**: Command/Query handlers use service locator internally for routing
-- **@vytches-ddd/events**: Event bus and handler registration with context awareness  
-- **@vytches-ddd/domain-services**: Domain service registration and context-aware resolution
+- **@vytches-ddd/cqrs**: Command/Query handlers use service locator internally
+  for routing
+- **@vytches-ddd/events**: Event bus and handler registration with context
+  awareness
+- **@vytches-ddd/domain-services**: Domain service registration and
+  context-aware resolution
 - **@vytches-ddd/logging**: Structured logging throughout DI operations
-- **@vytches-ddd/validation**: Validator service registration with context support
+- **@vytches-ddd/validation**: Validator service registration with context
+  support
 
 ## Roadmap
 
 ### ✅ Phase 1: Core Infrastructure (Complete)
+
 - ✅ IDependencyContainer interface and adapter pattern
 - ✅ VytchesDDD service locator with global and context support
 - ✅ Simple container implementation
@@ -618,15 +668,17 @@ The DI package integrates seamlessly with other VytchesDDD packages:
 - ✅ **Automatic handler discovery** - CQRSDiscoveryPlugin implemented
 
 ### ✅ Phase 2: CQRS Integration (Complete)
-- ✅ Integration with existing @CommandHandler/@QueryHandler/@EventHandler decorators
+
+- ✅ Integration with existing @CommandHandler/@QueryHandler/@EventHandler
+  decorators
 - ✅ Enhanced decorator options for DI context and dependency specification
 - ✅ Metadata-based handler registration with existing CQRS infrastructure
 - ✅ Automatic service resolution within handlers
 - ✅ CQRSDiscoveryPlugin for automatic handler discovery
 - ✅ CommandBus/QueryBus DI container integration
 
-
 ### ✅ Phase 3: Framework Component Refactoring (Complete)
+
 - ✅ CommandBus refactoring to use service locator
 - ✅ QueryBus and EventBus integration
 - ✅ Domain service registration migration
@@ -635,6 +687,7 @@ The DI package integrates seamlessly with other VytchesDDD packages:
 - ✅ Automatic handler registration with DI containers
 
 ### 🚧 Phase 4: Enhanced Documentation and Examples (In Progress)
+
 - ✅ Framework integration guides as .md documentation files
 - ✅ Conceptual examples for each integration pattern
 - ✅ Migration guide from legacy registries
@@ -645,29 +698,34 @@ The DI package integrates seamlessly with other VytchesDDD packages:
 ### 🚧 Next Implementation Phases
 
 #### Phase 4A: Complete Event System Integration
+
 - **EventDiscoveryPlugin**: Auto-discovery for `@EventHandler` decorators
 - **Event Bus DI Integration**: Full service locator integration in event system
 - **Event Context Routing**: Context-aware event handler resolution
 
-#### Phase 4B: Domain Services Integration  
+#### Phase 4B: Domain Services Integration
+
 - **@DomainService Decorator**: Enhanced decorator with DI options
 - **Domain Service Discovery**: Auto-discovery plugin for domain services
 - **Context-Aware Domain Logic**: Bounded context isolation for domain services
 
 #### Phase 4C: Business Policies Integration
+
 - **@Policy Decorator**: Domain-scoped policy registration
-- **Policy Discovery Plugin**: Auto-discovery for business policies  
+- **Policy Discovery Plugin**: Auto-discovery for business policies
 - **Policy Context Resolution**: Context-specific policy resolution
 
 #### Phase 4D: Infrastructure Integration
+
 - **@ProjectionEngine Decorator**: Projection engine auto-discovery
 - **@RuleProvider Decorator**: Validation rule auto-discovery
 - **@MetricCollector Decorator**: Observability metrics auto-discovery
 - **@ACLAdapter Decorator**: Anti-corruption layer adapter discovery
 
 ### 🔮 Future Enhancements
+
 - **Advanced Scoping**: Request-scoped services and transient contexts
-- **Performance Optimization**: Lazy loading and caching strategies  
+- **Performance Optimization**: Lazy loading and caching strategies
 - **Monitoring Integration**: DI container metrics and health checks
 - **Multi-Tenant Support**: Tenant-aware service resolution
 

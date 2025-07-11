@@ -134,7 +134,9 @@ export interface DomainServiceOptions {
  * })
  * class OrderService extends UnitOfWorkAwareDomainService {...}
  */
-export function DomainService(options: string | DomainServiceOptions | EnhancedDomainServiceOptions) {
+export function DomainService(
+  options: string | DomainServiceOptions | EnhancedDomainServiceOptions
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function <T extends new (...args: any[]) => any>(target: T): T {
     // Convert string service ID to full options object
@@ -145,8 +147,13 @@ export function DomainService(options: string | DomainServiceOptions | EnhancedD
     Reflect.defineMetadata(DOMAIN_SERVICE_METADATA_KEY, metadata, target);
 
     // Check if this is DI-enhanced options (has DI-specific properties)
-    const isDIEnhanced = typeof options === 'object' && options !== null &&
-      ('lifetime' in options || 'context' in options || 'autoRegister' in options || 'tags' in options);
+    const isDIEnhanced =
+      typeof options === 'object' &&
+      options !== null &&
+      ('lifetime' in options ||
+        'context' in options ||
+        'autoRegister' in options ||
+        'tags' in options);
 
     if (isDIEnhanced) {
       const enhancedOptions = options as EnhancedDomainServiceOptions;
@@ -166,7 +173,7 @@ export function DomainService(options: string | DomainServiceOptions | EnhancedD
         async: enhancedOptions.async || false,
         publishesEvents: enhancedOptions.publishesEvents || false,
         caching: enhancedOptions.caching || { enabled: false },
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Store DI metadata on the class

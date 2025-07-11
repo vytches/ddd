@@ -83,11 +83,7 @@ export class InMemorySagaRepository implements ISagaRepository {
       if (this.config.enableOptimisticLocking) {
         const existingSaga = this.sagas.get(sagaId);
         if (existingSaga && existingSaga.state.version >= currentState.version) {
-          throw new SagaConcurrencyError(
-            sagaId,
-            currentState.version,
-            existingSaga.state.version
-          );
+          throw new SagaConcurrencyError(sagaId, currentState.version, existingSaga.state.version);
         }
       }
 
@@ -111,7 +107,6 @@ export class InMemorySagaRepository implements ISagaRepository {
           correlationId: currentState.correlationId,
         });
       }
-
     } catch (error) {
       this.logger.error('Failed to save saga', error instanceof Error ? error : undefined, {
         saga_id: sagaId,
@@ -217,9 +212,11 @@ export class InMemorySagaRepository implements ISagaRepository {
       const state = saga.state;
       if (state.timeoutAt && state.timeoutAt < beforeDate) {
         // Only consider active sagas as timed out
-        if (state.status === SagaStatus.STARTED ||
-            state.status === SagaStatus.EXECUTING ||
-            state.status === SagaStatus.WAITING) {
+        if (
+          state.status === SagaStatus.STARTED ||
+          state.status === SagaStatus.EXECUTING ||
+          state.status === SagaStatus.WAITING
+        ) {
           timedOutSagas.push(saga);
         }
       }
@@ -368,15 +365,15 @@ export class InMemorySagaRepository implements ISagaRepository {
 
     if (query.createdBetween) {
       const { start, end } = query.createdBetween;
-      matchingSagas = matchingSagas.filter(saga =>
-        saga.state.createdAt >= start && saga.state.createdAt <= end
+      matchingSagas = matchingSagas.filter(
+        saga => saga.state.createdAt >= start && saga.state.createdAt <= end
       );
     }
 
     if (query.updatedBetween) {
       const { start, end } = query.updatedBetween;
-      matchingSagas = matchingSagas.filter(saga =>
-        saga.state.updatedAt >= start && saga.state.updatedAt <= end
+      matchingSagas = matchingSagas.filter(
+        saga => saga.state.updatedAt >= start && saga.state.updatedAt <= end
       );
     }
 
@@ -387,9 +384,7 @@ export class InMemorySagaRepository implements ISagaRepository {
     }
 
     if (query.metadata) {
-      matchingSagas = matchingSagas.filter(saga =>
-        this.matchesMetadata(saga, query.metadata!)
-      );
+      matchingSagas = matchingSagas.filter(saga => this.matchesMetadata(saga, query.metadata!));
     }
 
     const totalCount = matchingSagas.length;

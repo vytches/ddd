@@ -17,14 +17,10 @@ export class CQRSConfiguration {
 
     // Create buses with DI container
     this.commandBus =
-      commandBusType === 'enhanced'
-        ? new EnhancedCommandBus(container)
-        : new CommandBus(container);
+      commandBusType === 'enhanced' ? new EnhancedCommandBus(container) : new CommandBus(container);
 
     this.queryBus =
-      queryBusType === 'enhanced'
-        ? new EnhancedQueryBus(container)
-        : new QueryBus(container);
+      queryBusType === 'enhanced' ? new EnhancedQueryBus(container) : new QueryBus(container);
 
     // Apply middlewares
     middlewares.forEach(middleware => {

@@ -65,7 +65,7 @@ describe('TestClock', () => {
       const time1 = Date.now();
       // Simulate some time passing
       setTimeout(() => {
-        return
+        return;
       }, 1);
       const time2 = Date.now();
 
@@ -108,12 +108,13 @@ describe('TestClock', () => {
         seconds: 30,
         minutes: 2,
         hours: 1,
-        days: 1
+        days: 1,
       };
 
       testClock.advance(options);
 
-      const expectedAdvancement = 500 + (30 * 1000) + (2 * 60 * 1000) + (1 * 60 * 60 * 1000) + (1 * 24 * 60 * 60 * 1000);
+      const expectedAdvancement =
+        500 + 30 * 1000 + 2 * 60 * 1000 + 1 * 60 * 60 * 1000 + 1 * 24 * 60 * 60 * 1000;
       expect(testClock.now().getTime()).toBe(initialTime + expectedAdvancement);
     });
 
@@ -288,28 +289,30 @@ describe('TestClock', () => {
           execute: () => {
             capturedTimes.push(Date.now());
             return 'step1';
-          }
+          },
         },
         {
           advance: { hours: 1 },
           execute: () => {
             capturedTimes.push(Date.now());
             return 'step2';
-          }
+          },
         },
         {
           advance: { days: 1 },
           execute: async () => {
             capturedTimes.push(Date.now());
             return 'step3';
-          }
-        }
+          },
+        },
       ]);
 
       expect(results).toEqual(['step1', 'step2', 'step3']);
-      expect(capturedTimes[0]).toBe(startDate.getTime() + (5 * 60 * 1000));
-      expect(capturedTimes[1]).toBe(startDate.getTime() + (5 * 60 * 1000) + (1 * 60 * 60 * 1000));
-      expect(capturedTimes[2]).toBe(startDate.getTime() + (5 * 60 * 1000) + (1 * 60 * 60 * 1000) + (24 * 60 * 60 * 1000));
+      expect(capturedTimes[0]).toBe(startDate.getTime() + 5 * 60 * 1000);
+      expect(capturedTimes[1]).toBe(startDate.getTime() + 5 * 60 * 1000 + 1 * 60 * 60 * 1000);
+      expect(capturedTimes[2]).toBe(
+        startDate.getTime() + 5 * 60 * 1000 + 1 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000
+      );
     });
   });
 
@@ -338,8 +341,8 @@ describe('TestClock', () => {
 
       expect(results).toEqual(['initial', 'after 30min', 'after 5sec']);
       expect(capturedTimes[0]).toBe(startDate.getTime());
-      expect(capturedTimes[1]).toBe(startDate.getTime() + (30 * 60 * 1000));
-      expect(capturedTimes[2]).toBe(startDate.getTime() + (30 * 60 * 1000) + 5000);
+      expect(capturedTimes[1]).toBe(startDate.getTime() + 30 * 60 * 1000);
+      expect(capturedTimes[2]).toBe(startDate.getTime() + 30 * 60 * 1000 + 5000);
     });
 
     it('should restore time after scenario completion', async () => {
@@ -369,7 +372,7 @@ describe('TestClock', () => {
       const createEvent = (type: string, data: any): DomainEvent => ({
         timestamp: new Date(),
         type,
-        data
+        data,
       });
 
       const event1 = createEvent('UserCreated', { id: 1 });
@@ -377,7 +380,7 @@ describe('TestClock', () => {
       const event2 = createEvent('UserUpdated', { id: 1 });
 
       expect(event1.timestamp.getTime()).toBe(eventTime.getTime());
-      expect(event2.timestamp.getTime()).toBe(eventTime.getTime() + (5 * 60 * 1000));
+      expect(event2.timestamp.getTime()).toBe(eventTime.getTime() + 5 * 60 * 1000);
     });
 
     it('should work with timeout testing', async () => {

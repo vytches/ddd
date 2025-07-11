@@ -117,7 +117,10 @@ export class EventStoreConcurrencyError extends EventStoreError {
   ): EventStoreConcurrencyError {
     const error = new EventStoreConcurrencyError(streamId, expectedVersion, actualVersion);
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -137,7 +140,10 @@ export class StreamNotFoundError extends EventStoreError {
   static withStreamId(streamId: string, additionalData?: unknown): StreamNotFoundError {
     const error = new StreamNotFoundError(streamId);
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -157,7 +163,10 @@ export class StreamDeletedError extends EventStoreError {
   static withStreamId(streamId: string, additionalData?: unknown): StreamDeletedError {
     const error = new StreamDeletedError(streamId);
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -172,11 +181,14 @@ export class EventSerializationError extends EventStoreError {
     public override readonly eventType?: string | undefined,
     public readonly originalError?: Error | undefined
   ) {
-    super(message, createOptions({
-      eventType,
-      error: originalError,
-      data: { code: EventStoreErrorCode.SerializationError },
-    }));
+    super(
+      message,
+      createOptions({
+        eventType,
+        error: originalError,
+        data: { code: EventStoreErrorCode.SerializationError },
+      })
+    );
   }
 
   static withEvent(
@@ -190,7 +202,10 @@ export class EventSerializationError extends EventStoreError {
       originalError
     );
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -205,10 +220,13 @@ export class EventDeserializationError extends EventStoreError {
     public readonly dataLength?: number,
     public readonly originalError?: Error
   ) {
-    super(message, createOptions({
-      error: originalError,
-      data: { code: EventStoreErrorCode.DeserializationError },
-    }));
+    super(
+      message,
+      createOptions({
+        error: originalError,
+        data: { code: EventStoreErrorCode.DeserializationError },
+      })
+    );
   }
 
   static withData(
@@ -222,7 +240,10 @@ export class EventDeserializationError extends EventStoreError {
       originalError
     );
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -232,11 +253,17 @@ export class EventDeserializationError extends EventStoreError {
  * Event Store connection error
  */
 export class EventStoreConnectionError extends EventStoreError {
-  constructor(message: string, public readonly originalError?: Error) {
-    super(message, createOptions({
-      error: originalError,
-      data: { code: EventStoreErrorCode.ConnectionError },
-    }));
+  constructor(
+    message: string,
+    public readonly originalError?: Error
+  ) {
+    super(
+      message,
+      createOptions({
+        error: originalError,
+        data: { code: EventStoreErrorCode.ConnectionError },
+      })
+    );
   }
 
   static withError(originalError: Error, additionalData?: unknown): EventStoreConnectionError {
@@ -245,7 +272,10 @@ export class EventStoreConnectionError extends EventStoreError {
       originalError
     );
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }
@@ -260,14 +290,11 @@ export class InvalidStreamVersionError extends EventStoreError {
     public readonly version: number,
     message?: string
   ) {
-    super(
-      message ?? `Invalid version ${version} for stream ${streamId}`,
-      {
-        streamId,
-        expectedVersion: version,
-        data: { code: EventStoreErrorCode.InvalidStreamVersion },
-      }
-    );
+    super(message ?? `Invalid version ${version} for stream ${streamId}`, {
+      streamId,
+      expectedVersion: version,
+      data: { code: EventStoreErrorCode.InvalidStreamVersion },
+    });
   }
 
   static withVersion(
@@ -277,7 +304,10 @@ export class InvalidStreamVersionError extends EventStoreError {
   ): InvalidStreamVersionError {
     const error = new InvalidStreamVersionError(streamId, version);
     if (additionalData) {
-      error.data = { ...(typeof error.data === 'object' && error.data !== null ? error.data : {}), ...additionalData };
+      error.data = {
+        ...(typeof error.data === 'object' && error.data !== null ? error.data : {}),
+        ...additionalData,
+      };
     }
     return error;
   }

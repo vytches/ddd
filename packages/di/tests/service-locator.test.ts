@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SimpleContainer, VytchesDDD, ServiceLocator, ServiceNotFoundError,
-  ContainerConfigurationError } from '../src';
+import {
+  SimpleContainer,
+  VytchesDDD,
+  ServiceLocator,
+  ServiceNotFoundError,
+  ContainerConfigurationError,
+} from '../src';
 
 describe('ServiceLocator', () => {
   let globalContainer: SimpleContainer;
@@ -221,12 +226,16 @@ describe('ServiceLocator', () => {
 
       const disposableGlobal = {
         ...globalContainer,
-        dispose: () => { globalDisposed = true; }
+        dispose: () => {
+          globalDisposed = true;
+        },
       };
 
       const disposableContext = {
         ...contextContainer,
-        dispose: () => { contextDisposed = true; }
+        dispose: () => {
+          contextDisposed = true;
+        },
       };
 
       await VytchesDDD.configure(disposableGlobal as any);

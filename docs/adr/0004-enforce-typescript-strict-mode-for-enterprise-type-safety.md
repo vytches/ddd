@@ -8,7 +8,9 @@ Date: 2025-07-05
 
 ## Context
 
-VytchesDDD is an enterprise-grade library that needs to provide maximum type safety and reliability. TypeScript offers various strictness levels, and we need to decide on the appropriate configuration for our use case.
+VytchesDDD is an enterprise-grade library that needs to provide maximum type
+safety and reliability. TypeScript offers various strictness levels, and we need
+to decide on the appropriate configuration for our use case.
 
 ### Enterprise Quality Requirements
 
@@ -38,13 +40,16 @@ VytchesDDD is an enterprise-grade library that needs to provide maximum type saf
 
 ### Additional Strict Checks Considered
 
-- **`exactOptionalPropertyTypes`**: Distinguishes undefined from missing properties
+- **`exactOptionalPropertyTypes`**: Distinguishes undefined from missing
+  properties
 - **`noImplicitOverride`**: Requires explicit override annotations
-- **`noPropertyAccessFromIndexSignature`**: Prevents property access on index signatures
+- **`noPropertyAccessFromIndexSignature`**: Prevents property access on index
+  signatures
 
 ## Decision
 
-We will enforce **Maximum TypeScript Strictness** with the following configuration:
+We will enforce **Maximum TypeScript Strictness** with the following
+configuration:
 
 ### Core Strict Configuration
 
@@ -65,8 +70,10 @@ We will enforce **Maximum TypeScript Strictness** with the following configurati
 ### Rationale for Each Setting
 
 1. **`strict: true`**: Enables foundational type safety
-2. **`exactOptionalPropertyTypes`**: Prevents subtle bugs with optional properties
-3. **`noImplicitReturns`**: Ensures all functions have explicit return statements
+2. **`exactOptionalPropertyTypes`**: Prevents subtle bugs with optional
+   properties
+3. **`noImplicitReturns`**: Ensures all functions have explicit return
+   statements
 4. **`noFallthroughCasesInSwitch`**: Prevents accidental switch fallthrough
 5. **`noUncheckedIndexedAccess`**: Forces null checks on array/object access
 6. **`noImplicitOverride`**: Makes inheritance explicit and safe
@@ -141,7 +148,8 @@ function getFirstUser(users: User[]): User | undefined {
 - **ESLint Integration**: Rules to enforce explicit return types
 - **Type-Only Imports**: Prefer type imports for better tree-shaking
 - **Strict Null Checks**: Comprehensive handling of null/undefined scenarios
-- **Generic Constraints**: Use proper generic constraints throughout the codebase
+- **Generic Constraints**: Use proper generic constraints throughout the
+  codebase
 
 ### Success Metrics
 

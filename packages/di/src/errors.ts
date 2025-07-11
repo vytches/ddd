@@ -21,13 +21,16 @@ export class DIError extends BaseError {
  */
 export class ServiceNotFoundError extends DIError {
   constructor(token: ServiceToken, context?: string) {
-    const tokenString = typeof token === 'string' ? token : 
-                       typeof token === 'symbol' ? token.toString() : 
-                       token.name || 'Unknown';
-    
+    const tokenString =
+      typeof token === 'string'
+        ? token
+        : typeof token === 'symbol'
+          ? token.toString()
+          : token.name || 'Unknown';
+
     const contextString = context ? ` in context '${context}'` : '';
     const message = `Service '${tokenString}' not found${contextString}`;
-    
+
     super(message);
     this.name = 'ServiceNotFoundError';
   }
@@ -39,13 +42,17 @@ export class ServiceNotFoundError extends DIError {
 export class CircularDependencyError extends DIError {
   constructor(resolutionChain: ServiceToken[]) {
     const chainString = resolutionChain
-      .map(token => typeof token === 'string' ? token : 
-                   typeof token === 'symbol' ? token.toString() : 
-                   token.name || 'Unknown')
+      .map(token =>
+        typeof token === 'string'
+          ? token
+          : typeof token === 'symbol'
+            ? token.toString()
+            : token.name || 'Unknown'
+      )
       .join(' -> ');
-    
+
     const message = `Circular dependency detected: ${chainString}`;
-    
+
     super(message);
     this.name = 'CircularDependencyError';
   }
@@ -56,12 +63,15 @@ export class CircularDependencyError extends DIError {
  */
 export class InvalidRegistrationError extends DIError {
   constructor(token: ServiceToken, reason: string) {
-    const tokenString = typeof token === 'string' ? token : 
-                       typeof token === 'symbol' ? token.toString() : 
-                       token.name || 'Unknown';
-    
+    const tokenString =
+      typeof token === 'string'
+        ? token
+        : typeof token === 'symbol'
+          ? token.toString()
+          : token.name || 'Unknown';
+
     const message = `Invalid registration for service '${tokenString}': ${reason}`;
-    
+
     super(message);
     this.name = 'InvalidRegistrationError';
   }
@@ -72,13 +82,16 @@ export class InvalidRegistrationError extends DIError {
  */
 export class ServiceAlreadyRegisteredError extends DIError {
   constructor(token: ServiceToken, context?: string) {
-    const tokenString = typeof token === 'string' ? token : 
-                       typeof token === 'symbol' ? token.toString() : 
-                       token.name || 'Unknown';
-    
+    const tokenString =
+      typeof token === 'string'
+        ? token
+        : typeof token === 'symbol'
+          ? token.toString()
+          : token.name || 'Unknown';
+
     const contextString = context ? ` in context '${context}'` : '';
     const message = `Service '${tokenString}' is already registered${contextString}`;
-    
+
     super(message);
     this.name = 'ServiceAlreadyRegisteredError';
   }

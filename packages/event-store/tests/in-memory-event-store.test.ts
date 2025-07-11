@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { IStoredDomainEvent } from '@vytches-ddd/contracts';
-import { InMemoryEventStore, EventStoreConcurrencyError, StreamNotFoundError, StreamDeletedError } from '../src';
+import {
+  InMemoryEventStore,
+  EventStoreConcurrencyError,
+  StreamNotFoundError,
+  StreamDeletedError,
+} from '../src';
 
 describe('InMemoryEventStore', () => {
   let eventStore: InMemoryEventStore;
@@ -84,9 +89,9 @@ describe('InMemoryEventStore', () => {
       await eventStore.appendToStream(streamId, [event], -1);
 
       // Second append with wrong version fails
-      await expect(
-        eventStore.appendToStream(streamId, [event], -1)
-      ).rejects.toThrow(EventStoreConcurrencyError);
+      await expect(eventStore.appendToStream(streamId, [event], -1)).rejects.toThrow(
+        EventStoreConcurrencyError
+      );
     });
 
     it('should allow appending without version check', async () => {
@@ -125,9 +130,9 @@ describe('InMemoryEventStore', () => {
       await eventStore.appendToStream(streamId, [event]);
       await eventStore.deleteStream(streamId);
 
-      await expect(
-        eventStore.appendToStream(streamId, [event])
-      ).rejects.toThrow(StreamDeletedError);
+      await expect(eventStore.appendToStream(streamId, [event])).rejects.toThrow(
+        StreamDeletedError
+      );
     });
   });
 
@@ -186,9 +191,7 @@ describe('InMemoryEventStore', () => {
     });
 
     it('should throw error for non-existent stream', async () => {
-      await expect(
-        eventStore.readStream('non-existent')
-      ).rejects.toThrow(StreamNotFoundError);
+      await expect(eventStore.readStream('non-existent')).rejects.toThrow(StreamNotFoundError);
     });
   });
 
@@ -304,9 +307,9 @@ describe('InMemoryEventStore', () => {
         state: {},
       };
 
-      await expect(
-        eventStore.saveSnapshot('non-existent', snapshot)
-      ).rejects.toThrow(StreamNotFoundError);
+      await expect(eventStore.saveSnapshot('non-existent', snapshot)).rejects.toThrow(
+        StreamNotFoundError
+      );
     });
   });
 
@@ -396,9 +399,9 @@ describe('InMemoryEventStore', () => {
       await eventStore.disconnect();
       expect(eventStore.isConnected()).toBe(false);
 
-      await expect(
-        eventStore.appendToStream('test', [])
-      ).rejects.toThrow('Event store is not connected');
+      await expect(eventStore.appendToStream('test', [])).rejects.toThrow(
+        'Event store is not connected'
+      );
 
       await eventStore.connect();
       expect(eventStore.isConnected()).toBe(true);

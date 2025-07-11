@@ -1,6 +1,7 @@
 # Framework Integration Adapters
 
-This document provides comprehensive guidance for integrating `@vytches-ddd/di` with popular dependency injection frameworks.
+This document provides comprehensive guidance for integrating `@vytches-ddd/di`
+with popular dependency injection frameworks.
 
 ## Supported Frameworks
 
@@ -27,12 +28,12 @@ pnpm add @vytches-ddd/di @nestjs/core @nestjs/common
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { BaseContainerAdapter } from '@vytches-ddd/di';
-import { 
-  ServiceToken, 
-  Constructor, 
-  ServiceFactory, 
-  ServiceDescriptor, 
-  ServiceRegistrationOptions 
+import {
+  ServiceToken,
+  Constructor,
+  ServiceFactory,
+  ServiceDescriptor,
+  ServiceRegistrationOptions,
 } from '@vytches-ddd/di';
 
 @Injectable()
@@ -46,7 +47,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
     const tokenKey = this.getTokenKey(token);
-    
+
     try {
       // NestJS supports both strict and non-strict resolution
       return this.moduleRef.get(token, { strict: false });
@@ -68,7 +69,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       implementation,
       lifetime: options?.lifetime || ServiceLifetime.Transient,
       context: options?.context,
-      tags: options?.tags
+      tags: options?.tags,
     };
 
     this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
@@ -85,7 +86,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       factory,
       lifetime: options?.lifetime || ServiceLifetime.Transient,
       context: options?.context,
-      tags: options?.tags
+      tags: options?.tags,
     };
 
     this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
@@ -102,7 +103,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       instance,
       lifetime: ServiceLifetime.Singleton,
       context: options?.context,
-      tags: options?.tags
+      tags: options?.tags,
     };
 
     this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
@@ -142,10 +143,10 @@ import { NestJSContainerAdapter } from '../di/nestjs-container-adapter';
         VytchesDDD.configure(adapter);
         return adapter;
       },
-      inject: [ModuleRef]
-    }
+      inject: [ModuleRef],
+    },
   ],
-  exports: ['DI_CONTAINER_ADAPTER']
+  exports: ['DI_CONTAINER_ADAPTER'],
 })
 export class DIModule {}
 ```
@@ -163,10 +164,10 @@ export class UserService {
     // Resolve through VytchesDDD service locator
     const repository = VytchesDDD.resolve<UserRepository>('UserRepository');
     const emailService = VytchesDDD.resolve<EmailService>('EmailService');
-    
+
     const user = await repository.save(new User(userData));
     await emailService.sendWelcomeEmail(user.email);
-    
+
     return user;
   }
 }
@@ -185,15 +186,15 @@ import { DIModule } from './di.module';
     UserService,
     {
       provide: 'UserRepository',
-      useClass: TypeOrmUserRepository
+      useClass: TypeOrmUserRepository,
     },
     {
       provide: 'EmailService',
       useClass: SMTPEmailService,
-      scope: Scope.DEFAULT // Singleton
-    }
+      scope: Scope.DEFAULT, // Singleton
+    },
   ],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -220,8 +221,14 @@ import 'reflect-metadata';
 const container = new Container();
 
 // Register services with Inversify
-container.bind<UserRepository>('UserRepository').to(TypeOrmUserRepository).inSingletonScope();
-container.bind<EmailService>('EmailService').to(SMTPEmailService).inSingletonScope();
+container
+  .bind<UserRepository>('UserRepository')
+  .to(TypeOrmUserRepository)
+  .inSingletonScope();
+container
+  .bind<EmailService>('EmailService')
+  .to(SMTPEmailService)
+  .inSingletonScope();
 container.bind<UserService>('UserService').to(UserService).inTransientScope();
 
 // Create adapter and configure VytchesDDD
@@ -259,7 +266,7 @@ export class OrderService {
     // Use VytchesDDD service locator when needed
     const paymentService = VytchesDDD.resolve<PaymentService>('PaymentService');
     const auditService = VytchesDDD.resolve<AuditService>('AuditService');
-    
+
     await paymentService.processPayment(orderId);
     await auditService.logOrderProcessed(orderId);
   }
@@ -275,13 +282,15 @@ import { InversifyContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
 
 // Order Management Context
 const orderContainer = new Container();
-orderContainer.bind<SpecialOrderService>('SpecialOrderService').to(SpecialOrderService);
+orderContainer
+  .bind<SpecialOrderService>('SpecialOrderService')
+  .to(SpecialOrderService);
 orderContainer.bind<OrderValidator>('OrderValidator').to(ComplexOrderValidator);
 
 const orderAdapter = new InversifyContainerAdapter(orderContainer);
 VytchesDDD.configureContext('OrderManagement', orderAdapter);
 
-// User Management Context  
+// User Management Context
 const userContainer = new Container();
 userContainer.bind<UserAnalytics>('UserAnalytics').to(AdvancedUserAnalytics);
 userContainer.bind<UserValidator>('UserValidator').to(EnterpriseUserValidator);
@@ -309,7 +318,10 @@ import { TSyringeContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
 import 'reflect-metadata';
 
 // Register services with TSyringe
-container.registerSingleton<UserRepository>('UserRepository', TypeOrmUserRepository);
+container.registerSingleton<UserRepository>(
+  'UserRepository',
+  TypeOrmUserRepository
+);
 container.registerSingleton<EmailService>('EmailService', SMTPEmailService);
 container.register<UserService>('UserService', UserService);
 
@@ -349,11 +361,11 @@ import { container } from 'tsyringe';
 
 // Register factory with TSyringe
 container.register('DatabaseService', {
-  useFactory: (container) => {
+  useFactory: container => {
     const config = container.resolve<Config>('Config');
     const logger = container.resolve<Logger>('Logger');
     return new DatabaseService(config.connectionString, logger);
-  }
+  },
 });
 ```
 
@@ -383,7 +395,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
 
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
-    
+
     try {
       return this.container.resolve(this.getTokenKey(token));
     } catch (error) {
@@ -400,7 +412,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
     const lifetime = options?.lifetime || ServiceLifetime.Transient;
 
     const registration = {
-      [tokenKey]: this.mapLifetime(lifetime, implementation)
+      [tokenKey]: this.mapLifetime(lifetime, implementation),
     };
 
     this.container.register(registration);
@@ -411,7 +423,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
       implementation,
       lifetime,
       context: options?.context,
-      tags: options?.tags
+      tags: options?.tags,
     };
 
     this.serviceDescriptors.set(tokenKey, descriptor);
@@ -447,11 +459,11 @@ container.register({
   userRepository: asClass(TypeOrmUserRepository).singleton(),
   emailService: asClass(SMTPEmailService).singleton(),
   userService: asClass(UserService).transient(),
-  
+
   // Factory registration
   databaseService: asFunction(({ config, logger }) => {
     return new DatabaseService(config.connectionString, logger);
-  }).singleton()
+  }).singleton(),
 });
 
 const adapter = new AwilixContainerAdapter(container);
@@ -479,7 +491,7 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
     const tokenKey = this.getTokenKey(token);
-    
+
     // Try framework's native resolution first
     if (this.myContainer.has(tokenKey)) {
       return this.myContainer.get<T>(tokenKey);
@@ -500,17 +512,17 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
     options?: ServiceRegistrationOptions
   ): void {
     const tokenKey = this.getTokenKey(token);
-    
+
     // Register with your framework
     this.myContainer.bind(tokenKey, implementation);
-    
+
     // Store descriptor for metadata
     const descriptor: ServiceDescriptor<T> = {
       token,
       implementation,
       lifetime: options?.lifetime || ServiceLifetime.Transient,
       context: options?.context,
-      tags: options?.tags
+      tags: options?.tags,
     };
 
     this.services.set(tokenKey, descriptor);
@@ -543,7 +555,7 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
 // src/di/framework-extensions.ts
 export class EnhancedFrameworkAdapter extends MyFrameworkAdapter {
   // Add framework-specific features
-  
+
   registerWithMetadata<T>(
     token: ServiceToken<T>,
     implementation: Constructor<T>,
@@ -551,11 +563,11 @@ export class EnhancedFrameworkAdapter extends MyFrameworkAdapter {
   ): void {
     // Use framework's metadata system
     this.myContainer.bindWithMetadata(token, implementation, metadata);
-    
+
     // Register with VytchesDDD
     this.register(token, implementation, {
       tags: metadata.tags,
-      context: metadata.context
+      context: metadata.context,
     });
   }
 
@@ -574,21 +586,25 @@ export class EnhancedFrameworkAdapter extends MyFrameworkAdapter {
 ### 1. Adapter Selection Guidelines
 
 **Use NestJS Adapter when:**
+
 - Building NestJS applications
 - Need integration with NestJS modules and guards
 - Want to leverage NestJS's powerful DI system
 
 **Use InversifyJS Adapter when:**
+
 - Need advanced DI features (aspects, decorators)
 - Building enterprise applications with complex DI requirements
 - Want strong typing and interface-based programming
 
 **Use TSyringe Adapter when:**
+
 - Need lightweight DI solution
 - Building Node.js applications outside frameworks
 - Want Microsoft-supported DI container
 
 **Use SimpleContainer when:**
+
 - Testing scenarios
 - Simple applications without complex DI needs
 - Learning DDD patterns
@@ -611,6 +627,7 @@ VytchesDDD.configureContext('OrderManagement', orderContainer);
 ### 3. Migration Strategies
 
 **Gradual Migration:**
+
 ```typescript
 // Phase 1: Keep existing DI, add VytchesDDD
 const legacyContainer = getLegacyContainer();
@@ -645,7 +662,7 @@ describe('Service with Framework Adapter', () => {
   it('should resolve service through adapter', () => {
     const mockService = { test: 'value' };
     mockContainer.register('TestService', mockService);
-    
+
     const resolved = VytchesDDD.resolve<any>('TestService');
     expect(resolved).toBe(mockService);
   });
@@ -668,6 +685,7 @@ describe('Service with Framework Adapter', () => {
 ### Common Issues
 
 **1. Service Not Found Errors**
+
 ```typescript
 // Check registration in both framework and VytchesDDD
 console.log('Framework registered:', myContainer.has('ServiceName'));
@@ -675,12 +693,14 @@ console.log('VytchesDDD registered:', VytchesDDD.isRegistered('ServiceName'));
 ```
 
 **2. Circular Dependencies**
+
 ```typescript
 // Framework containers handle circular dependencies differently
 // Test with your specific container implementation
 ```
 
 **3. Lifetime Mismatches**
+
 ```typescript
 // Ensure lifetime mapping is correct for your framework
 // Some frameworks have different lifetime semantics
@@ -694,7 +714,7 @@ import { Logger } from '@vytches-ddd/logging';
 // Enable debug logging for DI operations
 Logger.configure({
   level: 'debug',
-  contexts: ['*Adapter', 'ServiceLocator']
+  contexts: ['*Adapter', 'ServiceLocator'],
 });
 ```
 
@@ -702,14 +722,14 @@ Logger.configure({
 
 ## Framework Comparison
 
-| Feature | NestJS | InversifyJS | TSyringe | Awilix | SimpleContainer |
-|---------|---------|-------------|----------|---------|-----------------|
-| Auto-discovery | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Decorators | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Scoped lifetime | ✅ | ✅ | ❌ | ✅ | ✅ |
-| Factory support | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Circular deps | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Bundle size | Large | Medium | Small | Small | Tiny |
-| Learning curve | High | Medium | Low | Low | Very Low |
+| Feature         | NestJS | InversifyJS | TSyringe | Awilix | SimpleContainer |
+| --------------- | ------ | ----------- | -------- | ------ | --------------- |
+| Auto-discovery  | ✅     | ✅          | ✅       | ✅     | ❌              |
+| Decorators      | ✅     | ✅          | ✅       | ❌     | ❌              |
+| Scoped lifetime | ✅     | ✅          | ❌       | ✅     | ✅              |
+| Factory support | ✅     | ✅          | ✅       | ✅     | ✅              |
+| Circular deps   | ✅     | ✅          | ✅       | ✅     | ❌              |
+| Bundle size     | Large  | Medium      | Small    | Small  | Tiny            |
+| Learning curve  | High   | Medium      | Low      | Low    | Very Low        |
 
 Choose the adapter that best fits your application's needs and constraints.

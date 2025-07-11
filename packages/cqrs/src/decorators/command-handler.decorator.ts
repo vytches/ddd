@@ -19,14 +19,18 @@ export function CommandHandler<T extends ICommand>(
       handlerType: target,
       options: diOptions,
       registeredAt: new Date(),
-      registeredWithDI: false
+      registeredWithDI: false,
     };
 
     // Store metadata in command class (for resolution)
-    Reflect.defineMetadata('di:command-handler', {
-      ...metadata,
-      serviceId: diOptions.serviceId || target.name
-    }, commandType);
+    Reflect.defineMetadata(
+      'di:command-handler',
+      {
+        ...metadata,
+        serviceId: diOptions.serviceId || target.name,
+      },
+      commandType
+    );
 
     // Store metadata in handler class (for auto-discovery)
     Reflect.defineMetadata('di:handler-metadata', metadata, target);

@@ -11,7 +11,7 @@ import { Logger } from '@vytches-ddd/logging';
 
 /**
  * Universal Event Dispatcher - Repository-compatible implementation
- * 
+ *
  * Integrates with IBaseRepository to provide complete event publishing pipeline:
  * - Middleware support for cross-cutting concerns
  * - Event processors for specialized handling
@@ -59,17 +59,16 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
     if (events.length === 0) return;
 
     const logger = Logger.forContext('UniversalEventDispatcher');
-    
+
     // Try to get aggregate ID if available (for repository aggregates)
     const aggregateWithId = aggregate as { getId?: () => { getValue(): string | number } };
-    const aggregateId = aggregateWithId.getId ? 
-      aggregateWithId.getId()?.getValue() : 'unknown';
-    
+    const aggregateId = aggregateWithId.getId ? aggregateWithId.getId()?.getValue() : 'unknown';
+
     logger.debug('Dispatching events for aggregate', {
       aggregateId,
       aggregateType: aggregate.constructor.name,
       eventCount: events.length,
-      eventTypes: events.map(e => e.eventType)
+      eventTypes: events.map(e => e.eventType),
     });
 
     try {
@@ -81,16 +80,19 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
 
       logger.debug('Aggregate events dispatched and committed', {
         aggregateId,
-        eventCount: events.length
-      });
-
-    } catch (error) {
-      logger.error('Failed to dispatch aggregate events', error instanceof Error ? error : undefined, {
-        aggregateId,
-        aggregateType: aggregate.constructor.name,
         eventCount: events.length,
-        errorMessage: error instanceof Error ? error.message : String(error)
       });
+    } catch (error) {
+      logger.error(
+        'Failed to dispatch aggregate events',
+        error instanceof Error ? error : undefined,
+        {
+          aggregateId,
+          aggregateType: aggregate.constructor.name,
+          eventCount: events.length,
+          errorMessage: error instanceof Error ? error.message : String(error),
+        }
+      );
       throw error;
     }
   }

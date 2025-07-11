@@ -49,7 +49,6 @@ class MockProjectionEngine {
     // Mock reset
   }
 
-
   async rebuild(events: AsyncIterable<any>): Promise<void> {
     // Mock rebuild
     for await (const event of events) {
@@ -74,10 +73,7 @@ describe('ProjectionProcessor', () => {
     payload: { data: 'test', aggregateId, aggregateType: 'TestAggregate', eventVersion: 1 },
   });
 
-  const createExtendedMockEvent = (
-    eventType: string,
-    aggregateId = 'test-id'
-  ): any => ({
+  const createExtendedMockEvent = (eventType: string, aggregateId = 'test-id'): any => ({
     ...createMockEvent(eventType, aggregateId),
     metadata: {
       eventId: 'event-123',

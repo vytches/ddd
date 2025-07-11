@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 import { CompositeSpecification } from '../../src';
 import { Specification } from '../../src';
 import type { ISpecification } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/testing';
 
 // Enhanced specification that includes name, description and failure explanation
 class NamedSpecification<T> extends CompositeSpecification<T> {
@@ -121,13 +120,13 @@ describe('Named Specifications with Explanations', () => {
       );
 
       // Act - Valid case
-      const [, validResult] = safeRun(() => usernameSpec.isSatisfiedBy(validUser));
+      const validResult = usernameSpec.isSatisfiedBy(validUser);
 
       // Assert - Valid case
       expect(validResult).toBe(true);
 
       // Act - Invalid case
-      const [, invalidResult] = safeRun(() => usernameSpec.isSatisfiedBy(invalidUser));
+      const invalidResult = usernameSpec.isSatisfiedBy(invalidUser);
 
       // Assert - Invalid case
       expect(invalidResult).toBe(false);
@@ -142,13 +141,13 @@ describe('Named Specifications with Explanations', () => {
       );
 
       // Act - Valid case
-      const [, validExplanation] = safeRun(() => usernameSpec.explainFailure(validUser));
+      const validExplanation = usernameSpec.explainFailure(validUser);
 
       // Assert - Valid case
       expect(validExplanation).toBeNull(); // No failure to explain
 
       // Act - Invalid case
-      const [, invalidExplanation] = safeRun(() => usernameSpec.explainFailure(invalidUser));
+      const invalidExplanation = usernameSpec.explainFailure(invalidUser);
 
       // Assert - Invalid case
       expect(invalidExplanation).toContain('UsernameMinLengthSpec');
@@ -215,13 +214,13 @@ describe('Named Specifications with Explanations', () => {
       const userSpec = createComplexUserSpecification();
 
       // Act - Valid user
-      const [, validResult] = safeRun(() => userSpec.isSatisfiedBy(validUser));
+      const validResult = userSpec.isSatisfiedBy(validUser);
 
       // Assert - Valid user
       expect(validResult).toBe(true);
 
       // Act - Invalid user
-      const [, invalidResult] = safeRun(() => userSpec.isSatisfiedBy(invalidUser));
+      const invalidResult = userSpec.isSatisfiedBy(invalidUser);
 
       // Assert - Invalid user
       expect(invalidResult).toBe(false);
@@ -232,7 +231,7 @@ describe('Named Specifications with Explanations', () => {
       const userSpec = createComplexUserSpecification();
 
       // Act - Invalid user (with multiple validation failures)
-      const [, invalidExplanation] = safeRun(() => userSpec.explainFailure?.(invalidUser) || null);
+      const invalidExplanation = userSpec.explainFailure?.(invalidUser) || null;
 
       // Assert - Invalid user
       expect(invalidExplanation).toContain('ValidUserSpec');
@@ -310,19 +309,19 @@ describe('Named Specifications with Explanations', () => {
       );
 
       // Act - Valid user
-      const [, validResult] = safeRun(() => combinedSpec.isSatisfiedBy(validUser));
+      const validResult = combinedSpec.isSatisfiedBy(validUser);
 
       // Assert - Valid user
       expect(validResult).toBe(true);
 
       // Act - Invalid user
-      const [, invalidResult] = safeRun(() => combinedSpec.isSatisfiedBy(invalidUser));
+      const invalidResult = combinedSpec.isSatisfiedBy(invalidUser);
 
       // Assert - Invalid user
       expect(invalidResult).toBe(false);
 
       // Act - Explanation
-      const [, explanation] = safeRun(() => combinedSpec.explainFailure?.(invalidUser) || null);
+      const explanation = combinedSpec.explainFailure?.(invalidUser) || null;
 
       // Assert - Explanation
       expect(explanation).not.toBeNull();

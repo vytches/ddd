@@ -16,7 +16,8 @@ applications using tactical and strategic DDD patterns, including:
 - **AI-First Design**: Documentation and structure optimized for LLM
   understanding
 - **Modular Architecture**: Use only what you need, compose as required
-- **Enterprise DI System**: Auto-discovery with context isolation and framework integration
+- **Enterprise DI System**: Auto-discovery with context isolation and framework
+  integration
 - **Production-Ready**: Enterprise features like circuit breakers, resilience
   patterns, ACL
 - **TypeScript Native**: Full type safety and modern TS features
@@ -25,21 +26,21 @@ applications using tactical and strategic DDD patterns, including:
 
 ## 📦 Packages
 
-| Package | Version | Description |
-| --------|---------|-------------|
-| [@vytches-ddd/core](./packages/core) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/core) | Core DDD building blocks (Value Objects, Entities, Aggregates) |
-| [@vytches-ddd/di](./packages/di) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/di) | Enterprise dependency injection with auto-discovery |
-| [@vytches-ddd/utils](./packages/utils) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/utils) | Common utilities and helpers |
-| [@vytches-ddd/validation](./packages/validation) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/validation) | Business rules, specifications, and validation patterns |
-| [@vytches-ddd/policies](./packages/policies) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/policies) | Business policies and domain policies |
-| [@vytches-ddd/events](./packages/events) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/events) | Event-driven architecture components |
-| [@vytches-ddd/cqrs](./packages/cqrs) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/cqrs) | Command Query Responsibility Segregation |
-| [@vytches-ddd/acl](./packages/acl) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/acl) | Anti-Corruption Layer for external systems |
-| [@vytches-ddd/projections](./packages/projections) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/projections) | Event projections and read models |
-| [@vytches-ddd/messaging](./packages/messaging) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/messaging) | Outbox pattern, sagas, and messaging patterns |
-| [@vytches-ddd/resilience](./packages/resilience) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/resilience) | Circuit breakers, retry patterns, timeouts |
-| [@vytches-ddd/testing](./packages/testing) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/testing) | Test utilities for DDD patterns |
-| [@vytches-ddd/enterprise](./packages/enterprise) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/enterprise) | All-in-one enterprise bundle |
+| Package                                            | Version                                                       | Description                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| [@vytches-ddd/core](./packages/core)               | ![npm](https://img.shields.io/npm/v/@vytches-ddd/core)        | Core DDD building blocks (Value Objects, Entities, Aggregates) |
+| [@vytches-ddd/di](./packages/di)                   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/di)          | Enterprise dependency injection with auto-discovery            |
+| [@vytches-ddd/utils](./packages/utils)             | ![npm](https://img.shields.io/npm/v/@vytches-ddd/utils)       | Common utilities and helpers                                   |
+| [@vytches-ddd/validation](./packages/validation)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/validation)  | Business rules, specifications, and validation patterns        |
+| [@vytches-ddd/policies](./packages/policies)       | ![npm](https://img.shields.io/npm/v/@vytches-ddd/policies)    | Business policies and domain policies                          |
+| [@vytches-ddd/events](./packages/events)           | ![npm](https://img.shields.io/npm/v/@vytches-ddd/events)      | Event-driven architecture components                           |
+| [@vytches-ddd/cqrs](./packages/cqrs)               | ![npm](https://img.shields.io/npm/v/@vytches-ddd/cqrs)        | Command Query Responsibility Segregation                       |
+| [@vytches-ddd/acl](./packages/acl)                 | ![npm](https://img.shields.io/npm/v/@vytches-ddd/acl)         | Anti-Corruption Layer for external systems                     |
+| [@vytches-ddd/projections](./packages/projections) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/projections) | Event projections and read models                              |
+| [@vytches-ddd/messaging](./packages/messaging)     | ![npm](https://img.shields.io/npm/v/@vytches-ddd/messaging)   | Outbox pattern, sagas, and messaging patterns                  |
+| [@vytches-ddd/resilience](./packages/resilience)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/resilience)  | Circuit breakers, retry patterns, timeouts                     |
+| [@vytches-ddd/testing](./packages/testing)         | ![npm](https://img.shields.io/npm/v/@vytches-ddd/testing)     | Test utilities for DDD patterns                                |
+| [@vytches-ddd/enterprise](./packages/enterprise)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/enterprise)  | All-in-one enterprise bundle                                   |
 
 ## 🚀 Quick Start
 
@@ -118,18 +119,18 @@ class User extends AggregateRoot<UserId> {
 ### CQRS with Dependency Injection
 
 ```typescript
-import { 
-  VytchesDDD, 
-  SimpleContainer, 
-  CommandHandler, 
+import {
+  VytchesDDD,
+  SimpleContainer,
+  CommandHandler,
   DomainService,
-  ServiceLifetime 
+  ServiceLifetime,
 } from '@vytches-ddd/core';
 
 // Domain Service with DI
 @DomainService({
   serviceId: 'userService',
-  lifetime: ServiceLifetime.Singleton
+  lifetime: ServiceLifetime.Singleton,
 })
 class UserService {
   async createUser(email: Email): Promise<User> {
@@ -211,7 +212,7 @@ class NotificationService {
   serviceId: 'orderService',
   context: 'OrderManagement',
   lifetime: ServiceLifetime.Singleton,
-  dependencies: ['paymentService', 'inventoryService']
+  dependencies: ['paymentService', 'inventoryService'],
 })
 class OrderService {
   processOrder(order: Order): Promise<OrderResult> {
@@ -229,8 +230,13 @@ const orderContainer = new SimpleContainer();
 VytchesDDD.configureContext('OrderManagement', orderContainer);
 
 // Usage - services resolved automatically
-const notificationService = VytchesDDD.resolve<NotificationService>('notificationService');
-const orderService = VytchesDDD.resolve<OrderService>('orderService', 'OrderManagement');
+const notificationService = VytchesDDD.resolve<NotificationService>(
+  'notificationService'
+);
+const orderService = VytchesDDD.resolve<OrderService>(
+  'orderService',
+  'OrderManagement'
+);
 ```
 
 ## 🏗️ Development

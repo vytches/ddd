@@ -344,7 +344,7 @@ describe('EnhancedQueryBus', () => {
           const result = await next();
           executionOrder.push('custom-end');
           return result;
-        }
+        },
       };
 
       // Mock LoggingMiddleware to track execution
@@ -370,7 +370,7 @@ describe('EnhancedQueryBus', () => {
       });
 
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
-      vi.spyOn(mockHandler, 'execute').mockImplementation(async (query) => {
+      vi.spyOn(mockHandler, 'execute').mockImplementation(async query => {
         executionOrder.push('handler');
         return `Result for ${query.id}`;
       });
@@ -382,7 +382,7 @@ describe('EnhancedQueryBus', () => {
         'custom-start',
         'handler',
         'custom-end',
-        'logging-end'
+        'logging-end',
       ]);
     });
 
@@ -393,7 +393,7 @@ describe('EnhancedQueryBus', () => {
         async handle(context: any, next: () => Promise<unknown>) {
           const result = await next();
           return `Transformed: ${result}`;
-        }
+        },
       };
 
       enhancedQueryBus.use(transformMiddleware);
@@ -432,7 +432,7 @@ describe('EnhancedQueryBus', () => {
       });
 
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
-      vi.spyOn(mockHandler, 'execute').mockImplementation(async (query) => `Result for ${query.id}`);
+      vi.spyOn(mockHandler, 'execute').mockImplementation(async query => `Result for ${query.id}`);
 
       // Execute multiple queries
       const results = [];
@@ -467,7 +467,7 @@ describe('EnhancedQueryBus', () => {
       });
 
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
-      vi.spyOn(mockHandler, 'execute').mockImplementation(async (query) => {
+      vi.spyOn(mockHandler, 'execute').mockImplementation(async query => {
         await new Promise(resolve => setTimeout(resolve, 50));
         return `Result for ${query.id}`;
       });
@@ -509,7 +509,7 @@ describe('EnhancedQueryBus', () => {
       const errorMiddleware = {
         async handle(context: any, next: () => Promise<unknown>) {
           throw error;
-        }
+        },
       };
 
       enhancedQueryBus.use(errorMiddleware);
@@ -530,7 +530,7 @@ describe('EnhancedQueryBus', () => {
         new TestQuery('success-3'),
       ];
 
-      vi.spyOn(mockHandler, 'execute').mockImplementation(async (query) => {
+      vi.spyOn(mockHandler, 'execute').mockImplementation(async query => {
         if (query.id.includes('error')) {
           throw new Error(`Error for ${query.id}`);
         }

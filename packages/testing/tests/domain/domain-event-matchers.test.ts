@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import type { EventMatchingContext, EventPattern } from '../../src/domain';
-import { DomainEventMatchers, assertEvent, assertEventSequence, assertEventWithPayload, createDomainEventMatchers } from '../../src/domain';
+import {
+  DomainEventMatchers,
+  assertEvent,
+  assertEventSequence,
+  assertEventWithPayload,
+  createDomainEventMatchers,
+} from '../../src/domain';
 
 describe('DomainEventMatchers', () => {
   let matcher: DomainEventMatchers;
@@ -19,7 +25,7 @@ describe('DomainEventMatchers', () => {
           orderId: 'order-123',
           customerId: 'customer-456',
           amount: 100,
-          items: [{ productId: 'product-1', quantity: 2 }]
+          items: [{ productId: 'product-1', quantity: 2 }],
         },
         metadata: {
           timestamp: new Date('2023-01-01T10:00:00Z'),
@@ -31,8 +37,8 @@ describe('DomainEventMatchers', () => {
           aggregateType: 'Order',
           aggregateVersion: 1,
           userId: 'user-1',
-          sessionId: 'session-1'
-        }
+          sessionId: 'session-1',
+        },
       },
       {
         eventType: 'PaymentProcessed',
@@ -40,7 +46,7 @@ describe('DomainEventMatchers', () => {
           orderId: 'order-123',
           paymentId: 'payment-789',
           amount: 100,
-          method: 'credit_card'
+          method: 'credit_card',
         },
         metadata: {
           timestamp: new Date('2023-01-01T10:05:00Z'),
@@ -52,15 +58,15 @@ describe('DomainEventMatchers', () => {
           aggregateType: 'Order',
           aggregateVersion: 2,
           userId: 'user-1',
-          sessionId: 'session-1'
-        }
+          sessionId: 'session-1',
+        },
       },
       {
         eventType: 'OrderShipped',
         payload: {
           orderId: 'order-123',
           trackingNumber: 'track-456',
-          carrier: 'UPS'
+          carrier: 'UPS',
         },
         metadata: {
           timestamp: new Date('2023-01-01T10:10:00Z'),
@@ -72,8 +78,8 @@ describe('DomainEventMatchers', () => {
           aggregateType: 'Order',
           aggregateVersion: 3,
           userId: 'user-1',
-          sessionId: 'session-1'
-        }
+          sessionId: 'session-1',
+        },
       },
       {
         eventType: 'InventoryUpdated',
@@ -81,7 +87,7 @@ describe('DomainEventMatchers', () => {
           productId: 'product-1',
           previousQuantity: 100,
           newQuantity: 98,
-          reason: 'order_fulfillment'
+          reason: 'order_fulfillment',
         },
         metadata: {
           timestamp: new Date('2023-01-01T10:15:00Z'),
@@ -93,9 +99,9 @@ describe('DomainEventMatchers', () => {
           aggregateType: 'Product',
           aggregateVersion: 15,
           userId: 'system',
-          sessionId: 'system-session'
-        }
-      }
+          sessionId: 'system-session',
+        },
+      },
     ];
   });
 
@@ -118,7 +124,9 @@ describe('DomainEventMatchers', () => {
 
     it('should find event with case sensitivity options', () => {
       // Act
-      const resultCaseSensitive = matcher.hasEvent(mockEvents, 'ordercreated', { caseSensitive: false });
+      const resultCaseSensitive = matcher.hasEvent(mockEvents, 'ordercreated', {
+        caseSensitive: false,
+      });
       const resultCaseExact = matcher.hasEvent(mockEvents, 'ordercreated', { caseSensitive: true });
 
       // Assert
@@ -153,7 +161,7 @@ describe('DomainEventMatchers', () => {
       // Assert
       expect(result.matches).toBe(false);
       expect(result.score).toBe(0);
-      expect(result.reason).toContain('No event of type \'NonExistentEvent\' found');
+      expect(result.reason).toContain("No event of type 'NonExistentEvent' found");
       expect(result.matchedEvent).toBeUndefined();
     });
 
@@ -165,9 +173,9 @@ describe('DomainEventMatchers', () => {
         metadata: {
           ...mockEvents?.[0]?.metadata,
           eventId: 'event-5',
-          timestamp: new Date('2023-01-01T10:20:00Z')
+          timestamp: new Date('2023-01-01T10:20:00Z'),
         },
-        payload: { ...mockEvents?.[0]?.payload, orderId: 'order-456' }
+        payload: { ...mockEvents?.[0]?.payload, orderId: 'order-456' },
       };
       const eventsWithDuplicate = [...mockEvents, additionalEvent];
 
@@ -189,9 +197,7 @@ describe('DomainEventMatchers', () => {
 
     it('should use custom matcher function', () => {
       // Arrange
-      const customMatcher = vi.fn((event: IExtendedDomainEvent) =>
-        event.payload.amount > 50
-      );
+      const customMatcher = vi.fn((event: IExtendedDomainEvent) => event.payload.amount > 50);
 
       // Act
       const result = matcher.hasEvent(mockEvents, 'OrderCreated', { customMatcher });
@@ -209,7 +215,7 @@ describe('DomainEventMatchers', () => {
         orderId: 'order-123',
         customerId: 'customer-456',
         amount: 100,
-        items: [{ productId: 'product-1', quantity: 2 }]
+        items: [{ productId: 'product-1', quantity: 2 }],
       };
 
       // Act
@@ -225,7 +231,7 @@ describe('DomainEventMatchers', () => {
 
       // Act
       const result = matcher.hasEventWithPayload(mockEvents, 'OrderCreated', partialPayload, {
-        partialPayload: true
+        partialPayload: true,
       });
 
       // Assert
@@ -247,14 +253,19 @@ describe('DomainEventMatchers', () => {
       // Arrange
       const payloadWithIgnoredField = {
         orderId: 'different-order', // This should be ignored
-        amount: 100
+        amount: 100,
       };
 
       // Act
-      const result = matcher.hasEventWithPayload(mockEvents, 'OrderCreated', payloadWithIgnoredField, {
-        partialPayload: true,
-        ignoreFields: ['orderId']
-      });
+      const result = matcher.hasEventWithPayload(
+        mockEvents,
+        'OrderCreated',
+        payloadWithIgnoredField,
+        {
+          partialPayload: true,
+          ignoreFields: ['orderId'],
+        }
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -266,7 +277,7 @@ describe('DomainEventMatchers', () => {
 
       // Act
       const result = matcher.findEventWithPayload(mockEvents, 'OrderCreated', expectedPayload, {
-        partialPayload: true
+        partialPayload: true,
       });
 
       // Assert
@@ -309,7 +320,7 @@ describe('DomainEventMatchers', () => {
       const pattern: EventPattern = {
         name: 'Order Creation Pattern',
         eventType: 'OrderCreated',
-        payload: { orderId: 'order-123' }
+        payload: { orderId: 'order-123' },
       };
 
       // Act
@@ -325,7 +336,7 @@ describe('DomainEventMatchers', () => {
       // Arrange
       const pattern: EventPattern = {
         name: 'Order Events Pattern',
-        eventType: /Order(Created|Shipped)/
+        eventType: /Order(Created|Shipped)/,
       };
 
       // Act
@@ -341,7 +352,7 @@ describe('DomainEventMatchers', () => {
       const pattern: EventPattern = {
         name: 'Order with User Pattern',
         eventType: 'OrderCreated',
-        metadata: { userId: 'user-1', aggregateType: 'Order' }
+        metadata: { userId: 'user-1', aggregateType: 'Order' },
       };
 
       // Act
@@ -357,8 +368,8 @@ describe('DomainEventMatchers', () => {
         name: 'Payment After Order Pattern',
         eventType: 'PaymentProcessed',
         order: {
-          after: ['OrderCreated']
-        }
+          after: ['OrderCreated'],
+        },
       };
 
       // Act
@@ -373,7 +384,7 @@ describe('DomainEventMatchers', () => {
       const pattern: EventPattern = {
         name: 'First Event Pattern',
         eventType: 'OrderCreated',
-        order: { position: 0 }
+        order: { position: 0 },
       };
 
       // Act
@@ -391,9 +402,9 @@ describe('DomainEventMatchers', () => {
         timing: {
           timeWindow: {
             start: new Date('2023-01-01T09:00:00Z'),
-            end: new Date('2023-01-01T11:00:00Z')
-          }
-        }
+            end: new Date('2023-01-01T11:00:00Z'),
+          },
+        },
       };
 
       // Act
@@ -405,14 +416,16 @@ describe('DomainEventMatchers', () => {
 
     it('should match pattern with custom validator', () => {
       // Arrange
-      const customValidator = vi.fn((event: IExtendedDomainEvent, context: EventMatchingContext) => {
-        return event.payload.amount > 50;
-      });
+      const customValidator = vi.fn(
+        (event: IExtendedDomainEvent, context: EventMatchingContext) => {
+          return event.payload.amount > 50;
+        }
+      );
 
       const pattern: EventPattern = {
         name: 'High Value Order Pattern',
         eventType: 'OrderCreated',
-        validator: customValidator
+        validator: customValidator,
       };
 
       // Act
@@ -428,7 +441,7 @@ describe('DomainEventMatchers', () => {
       const pattern: EventPattern = {
         name: 'Impossible Pattern',
         eventType: 'NonExistentEvent',
-        order: { position: 5 } // Position doesn't exist
+        order: { position: 5 }, // Position doesn't exist
       };
 
       // Act
@@ -443,7 +456,7 @@ describe('DomainEventMatchers', () => {
       // Arrange
       const pattern: EventPattern = {
         name: 'Order Events',
-        eventType: /^Order(Created|Shipped)$/
+        eventType: /^Order(Created|Shipped)$/,
       };
 
       // Act
@@ -501,7 +514,7 @@ describe('DomainEventMatchers', () => {
       expect(result.score).toBe(1);
       expect(result.context).toEqual({
         matchedIndices: [0, 1],
-        strict: false
+        strict: false,
       });
     });
 
@@ -516,7 +529,13 @@ describe('DomainEventMatchers', () => {
 
     it('should handle sequence longer than available events', () => {
       // Arrange
-      const longSequence = ['OrderCreated', 'PaymentProcessed', 'OrderShipped', 'OrderDelivered', 'OrderCompleted'];
+      const longSequence = [
+        'OrderCreated',
+        'PaymentProcessed',
+        'OrderShipped',
+        'OrderDelivered',
+        'OrderCompleted',
+      ];
 
       // Act
       const result = matcher.findEventSequence(mockEvents, longSequence);
@@ -531,13 +550,13 @@ describe('DomainEventMatchers', () => {
       const patterns: EventPattern[] = [
         {
           name: 'Order Created',
-          eventType: 'OrderCreated'
+          eventType: 'OrderCreated',
         },
         {
           name: 'Payment Processed',
           eventType: 'PaymentProcessed',
-          order: { after: ['OrderCreated'] }
-        }
+          order: { after: ['OrderCreated'] },
+        },
       ];
 
       // Act
@@ -613,7 +632,11 @@ describe('DomainEventMatchers', () => {
 
       // Assert
       expect(foundEvents).toHaveLength(3); // First 3 events match
-      expect(foundEvents.map(e => e.eventType)).toEqual(['OrderCreated', 'PaymentProcessed', 'OrderShipped']);
+      expect(foundEvents.map(e => e.eventType)).toEqual([
+        'OrderCreated',
+        'PaymentProcessed',
+        'OrderShipped',
+      ]);
     });
 
     it('should group events by metadata field', () => {
@@ -643,8 +666,8 @@ describe('DomainEventMatchers', () => {
       const eventsWithoutCorrelation = [
         {
           ...mockEvents[0],
-          metadata: { ...mockEvents?.[0]?.metadata, correlationId: undefined as unknown as string }
-        }
+          metadata: { ...mockEvents?.[0]?.metadata, correlationId: undefined as unknown as string },
+        },
       ];
 
       // Act
@@ -663,7 +686,11 @@ describe('DomainEventMatchers', () => {
 
       // Assert
       expect(aggregateEvents).toHaveLength(3);
-      expect(aggregateEvents.map(e => e.eventType)).toEqual(['OrderCreated', 'PaymentProcessed', 'OrderShipped']);
+      expect(aggregateEvents.map(e => e.eventType)).toEqual([
+        'OrderCreated',
+        'PaymentProcessed',
+        'OrderShipped',
+      ]);
     });
 
     it('should validate aggregate event sequence', () => {
@@ -671,7 +698,11 @@ describe('DomainEventMatchers', () => {
       const expectedSequence = ['OrderCreated', 'PaymentProcessed', 'OrderShipped'];
 
       // Act
-      const result = matcher.validateAggregateEventSequence(mockEvents, 'order-123', expectedSequence);
+      const result = matcher.validateAggregateEventSequence(
+        mockEvents,
+        'order-123',
+        expectedSequence
+      );
 
       // Assert
       expect(result.matches).toBe(true);
@@ -693,7 +724,7 @@ describe('DomainEventMatchers', () => {
       // Arrange
       const eventsWithGaps = [
         mockEvents[0], // version 1
-        { ...mockEvents[1], metadata: { ...mockEvents?.[1]?.metadata, aggregateVersion: 5 } } // version 5 (gap)
+        { ...mockEvents[1], metadata: { ...mockEvents?.[1]?.metadata, aggregateVersion: 5 } }, // version 5 (gap)
       ] as any[];
 
       // Act
@@ -708,7 +739,7 @@ describe('DomainEventMatchers', () => {
       // Arrange
       const eventsWithDuplicates = [
         mockEvents[0], // version 1
-        { ...mockEvents[1], metadata: { ...mockEvents?.[1]?.metadata, aggregateVersion: 1 } } // duplicate version 1
+        { ...mockEvents[1], metadata: { ...mockEvents?.[1]?.metadata, aggregateVersion: 1 } }, // duplicate version 1
       ] as any[];
 
       // Act
@@ -739,8 +770,14 @@ describe('DomainEventMatchers', () => {
       const expectedPayload = { orderId: 'order-123' };
 
       // Act & Assert
-      expect(() => assertEventWithPayload(mockEvents, 'OrderCreated', expectedPayload, { partialPayload: true })).not.toThrow();
-      expect(() => assertEventWithPayload(mockEvents, 'OrderCreated', { orderId: 'wrong-order' })).toThrow('Event payload assertion failed');
+      expect(() =>
+        assertEventWithPayload(mockEvents, 'OrderCreated', expectedPayload, {
+          partialPayload: true,
+        })
+      ).not.toThrow();
+      expect(() =>
+        assertEventWithPayload(mockEvents, 'OrderCreated', { orderId: 'wrong-order' })
+      ).toThrow('Event payload assertion failed');
     });
 
     it('should assert event sequence', () => {
@@ -749,7 +786,9 @@ describe('DomainEventMatchers', () => {
 
       // Act & Assert
       expect(() => assertEventSequence(mockEvents, expectedSequence)).not.toThrow();
-      expect(() => assertEventSequence(mockEvents, ['NonExistent', 'OrderCreated'])).toThrow('Event sequence assertion failed');
+      expect(() => assertEventSequence(mockEvents, ['NonExistent', 'OrderCreated'])).toThrow(
+        'Event sequence assertion failed'
+      );
     });
 
     it('should assert strict event sequence', () => {
@@ -758,7 +797,9 @@ describe('DomainEventMatchers', () => {
 
       // Act & Assert
       expect(() => assertEventSequence(mockEvents, expectedSequence, false)).not.toThrow(); // Non-strict passes
-      expect(() => assertEventSequence(mockEvents, expectedSequence, true)).toThrow('Event sequence assertion failed'); // Strict fails
+      expect(() => assertEventSequence(mockEvents, expectedSequence, true)).toThrow(
+        'Event sequence assertion failed'
+      ); // Strict fails
     });
   });
 
@@ -806,10 +847,8 @@ describe('DomainEventMatchers', () => {
       const complexPayload = {
         order: {
           id: 'order-123',
-          items: [
-            { productId: 'product-1', details: { name: 'Product 1', price: 50 } }
-          ]
-        }
+          items: [{ productId: 'product-1', details: { name: 'Product 1', price: 50 } }],
+        },
       };
       const eventWithComplexPayload: IExtendedDomainEvent = {
         ...mockEvents[0],
@@ -820,14 +859,19 @@ describe('DomainEventMatchers', () => {
       const partialMatch = {
         order: {
           id: 'order-123',
-          items: [{ productId: 'product-1' }]
-        }
+          items: [{ productId: 'product-1' }],
+        },
       };
 
       // Act
-      const result = matcher.hasEventWithPayload([eventWithComplexPayload], 'OrderCreated', partialMatch, {
-        partialPayload: true
-      });
+      const result = matcher.hasEventWithPayload(
+        [eventWithComplexPayload],
+        'OrderCreated',
+        partialMatch,
+        {
+          partialPayload: true,
+        }
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -839,8 +883,8 @@ describe('DomainEventMatchers', () => {
         name: 'Immediate Event',
         eventType: 'OrderCreated', // First event, no previous event to check delay against
         timing: {
-          maxDelay: 0 // Must be immediate
-        }
+          maxDelay: 0, // Must be immediate
+        },
       };
 
       // Act

@@ -8,11 +8,10 @@ import type {
 } from '@vytches-ddd/contracts';
 // import { VytchesDDD } from '@vytches-ddd/di';
 const VytchesDDD = {
-  resolve: (identifier: any, context?: any) => null
+  resolve: (identifier: any, context?: any) => null,
 } as any; // Temporarily disabled for testing
 import { IEventBus, isEventHandler } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
-
 
 /**
  * Symbol for custom middleware
@@ -344,7 +343,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
         }
 
         return handlerInstance.handle(event);
-      }
+      },
     };
 
     this.handlers.get(eventName)!.add(handlerFactory);

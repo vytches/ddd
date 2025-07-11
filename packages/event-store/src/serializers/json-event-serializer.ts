@@ -21,9 +21,7 @@ export class JsonEventSerializer implements IEventSerializer {
    */
   serialize(event: IStoredDomainEvent): string {
     try {
-      return this.pretty
-        ? JSON.stringify(event, null, 2)
-        : JSON.stringify(event);
+      return this.pretty ? JSON.stringify(event, null, 2) : JSON.stringify(event);
     } catch (error) {
       this.logger.error('Failed to serialize event', undefined, {
         eventType: event.eventType,

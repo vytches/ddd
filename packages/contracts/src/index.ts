@@ -64,11 +64,7 @@ export type {
 } from './validation';
 
 // Capabilities
-export {
-  Capability,
-  CapabilityRegistry,
-  createCapabilityRegistry,
-} from './capabilities';
+export { Capability, CapabilityRegistry, createCapabilityRegistry } from './capabilities';
 
 export type {
   IAggregateCapability,
@@ -87,12 +83,7 @@ export type {
 } from './capabilities';
 
 // Domain
-export type {
-  IEntityId,
-  IEntityIdConstructorParams,
-  IEntityIdFactory,
-  IdType,
-} from './domain';
+export type { IEntityId, IEntityIdConstructorParams, IEntityIdFactory, IdType } from './domain';
 
 export { EntityId } from './domain';
 
@@ -109,8 +100,4 @@ export type {
   IRecurringPattern,
 } from './scheduling';
 
-export {
-  JobStatus,
-  SchedulePriority,
-  BackoffStrategy,
-} from './scheduling';
+export { JobStatus, SchedulePriority, BackoffStrategy } from './scheduling';

@@ -7,7 +7,10 @@ import type { IAggregateRoot } from '../aggregate-interfaces';
  * Type-safe event sourcing capability implementation
  * Handles loading and saving aggregates from/to event store
  */
-export class EventSourcingCapability extends Capability<'eventSourcing'> implements IEventSourcingCapability {
+export class EventSourcingCapability
+  extends Capability<'eventSourcing'>
+  implements IEventSourcingCapability
+{
   override readonly type = 'eventSourcing' as const;
 
   static override get capabilityType(): string {

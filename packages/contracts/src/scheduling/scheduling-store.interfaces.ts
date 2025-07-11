@@ -1,4 +1,9 @@
-import type { IScheduledJob, IJobFilter, IJobQueryResult, JobStatus } from './scheduled-event.interfaces';
+import type {
+  IScheduledJob,
+  IJobFilter,
+  IJobQueryResult,
+  JobStatus,
+} from './scheduled-event.interfaces';
 
 /**
  * Storage interface for scheduled events

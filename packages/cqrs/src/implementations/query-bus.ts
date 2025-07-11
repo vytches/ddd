@@ -41,7 +41,9 @@ export class QueryBus extends IQueryBus {
   discoverHandlers(): void {
     // Legacy method - discovery is now handled by DI container auto-discovery
     // This method is kept for backward compatibility but does nothing
-    console.warn('QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.');
+    console.warn(
+      'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+    );
   }
 
   async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
@@ -62,9 +64,7 @@ export class QueryBus extends IQueryBus {
 
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
-    return this.executeWithMiddleware(context, () =>
-      handler.execute(query)
-    ) as Promise<R>;
+    return this.executeWithMiddleware(context, () => handler.execute(query)) as Promise<R>;
   }
 
   private getHandlerToken(queryClass: any): ServiceToken {

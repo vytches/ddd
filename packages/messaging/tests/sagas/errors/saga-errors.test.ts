@@ -15,7 +15,12 @@ import {
 describe('Saga Errors', () => {
   describe('SagaError (base class)', () => {
     class TestSagaError extends SagaError {
-      constructor(message: string, sagaId: string, sagaType?: string, context?: Record<string, unknown>) {
+      constructor(
+        message: string,
+        sagaId: string,
+        sagaType?: string,
+        context?: Record<string, unknown>
+      ) {
         super(message, sagaId, sagaType, context);
       }
     }
@@ -70,7 +75,9 @@ describe('Saga Errors', () => {
         'PaymentSaga'
       );
 
-      expect(error.message).toBe("Saga execution failed at step 'processPayment': Database connection failed");
+      expect(error.message).toBe(
+        "Saga execution failed at step 'processPayment': Database connection failed"
+      );
       expect(error.stepName).toBe('processPayment');
       expect(error.originalError).toBe(originalError);
       expect(error.sagaType).toBe('PaymentSaga');
@@ -137,7 +144,9 @@ describe('Saga Errors', () => {
         validationErrors
       );
 
-      expect(error.message).toBe('Saga configuration error for PaymentSaga: Invalid saga configuration');
+      expect(error.message).toBe(
+        'Saga configuration error for PaymentSaga: Invalid saga configuration'
+      );
       expect(error.sagaType).toBe('PaymentSaga');
       expect(error.validationErrors).toEqual(validationErrors);
     });
@@ -158,11 +167,10 @@ describe('Saga Errors', () => {
     });
 
     it('should generate structured error data', () => {
-      const error = new SagaConfigurationError(
-        'TestSaga',
-        'Configuration failed',
-        ['Error 1', 'Error 2']
-      );
+      const error = new SagaConfigurationError('TestSaga', 'Configuration failed', [
+        'Error 1',
+        'Error 2',
+      ]);
       const structured = error.toStructured();
 
       expect(structured).toMatchObject({
@@ -182,7 +190,9 @@ describe('Saga Errors', () => {
         'OrderSaga'
       );
 
-      expect(error.message).toBe('Event processing failed for OrderCreated: Failed to parse event payload');
+      expect(error.message).toBe(
+        'Event processing failed for OrderCreated: Failed to parse event payload'
+      );
       expect(error.eventType).toBe('OrderCreated');
     });
 
@@ -219,7 +229,9 @@ describe('Saga Errors', () => {
         'PaymentSaga'
       );
 
-      expect(error.message).toBe("Saga compensation failed at step 'processPayment': Refund failed");
+      expect(error.message).toBe(
+        "Saga compensation failed at step 'processPayment': Refund failed"
+      );
       expect(error.stepName).toBe('processPayment');
       expect(error.originalError).toBe(originalError);
     });
@@ -315,11 +327,7 @@ describe('Saga Errors', () => {
 
   describe('SagaInstanceLimitExceededError', () => {
     it('should create instance limit error', () => {
-      const error = new SagaInstanceLimitExceededError(
-        'OrderProcessingSaga',
-        10,
-        10
-      );
+      const error = new SagaInstanceLimitExceededError('OrderProcessingSaga', 10, 10);
 
       expect(error.message).toBe('Maximum instances reached for saga type: OrderProcessingSaga');
       expect(error.sagaType).toBe('OrderProcessingSaga');
@@ -341,10 +349,7 @@ describe('Saga Errors', () => {
 
   describe('SagaDefinitionNotFoundError', () => {
     it('should create definition not found error', () => {
-      const error = new SagaDefinitionNotFoundError(
-        'UnknownEvent',
-        ['OrderSaga', 'PaymentSaga']
-      );
+      const error = new SagaDefinitionNotFoundError('UnknownEvent', ['OrderSaga', 'PaymentSaga']);
 
       expect(error.message).toBe('No saga definition found for start event: UnknownEvent');
       expect(error.eventType).toBe('UnknownEvent');
@@ -358,10 +363,7 @@ describe('Saga Errors', () => {
     });
 
     it('should generate structured error data', () => {
-      const error = new SagaDefinitionNotFoundError(
-        'TestEvent',
-        ['Saga1', 'Saga2']
-      );
+      const error = new SagaDefinitionNotFoundError('TestEvent', ['Saga1', 'Saga2']);
       const structured = error.toStructured();
 
       expect(structured).toMatchObject({

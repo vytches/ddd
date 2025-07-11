@@ -5,7 +5,7 @@ import type {
   Constructor,
   ServiceFactory,
   ServiceDescriptor,
-  ServiceRegistrationOptions
+  ServiceRegistrationOptions,
 } from '../types';
 import { ServiceLifetime } from '../types';
 import {
@@ -13,7 +13,7 @@ import {
   InvalidRegistrationError,
   ServiceAlreadyRegisteredError,
   CircularDependencyError,
-  ContainerDisposedError
+  ContainerDisposedError,
 } from '../errors';
 
 /**
@@ -82,7 +82,7 @@ export class SimpleContainer implements IDependencyContainer {
       implementation,
       lifetime: options?.lifetime || ServiceLifetime.Transient,
       ...(options?.context !== undefined && { context: options.context }),
-      ...(options?.tags !== undefined && { tags: options.tags })
+      ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
     this.services.set(tokenKey, descriptor);
@@ -113,7 +113,7 @@ export class SimpleContainer implements IDependencyContainer {
       factory,
       lifetime: options?.lifetime || ServiceLifetime.Transient,
       ...(options?.context !== undefined && { context: options.context }),
-      ...(options?.tags !== undefined && { tags: options.tags })
+      ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
     this.services.set(tokenKey, descriptor);
@@ -144,7 +144,7 @@ export class SimpleContainer implements IDependencyContainer {
       instance,
       lifetime: ServiceLifetime.Singleton, // Instance registrations are always singleton
       ...(options?.context !== undefined && { context: options.context }),
-      ...(options?.tags !== undefined && { tags: options.tags })
+      ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
     this.services.set(tokenKey, descriptor);

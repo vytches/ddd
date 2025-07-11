@@ -57,7 +57,6 @@ export abstract class SagaStep implements ISagaStep {
       });
 
       return result;
-
     } catch (error) {
       this.logger.error('Saga step execution failed', error instanceof Error ? error : undefined, {
         step_name: this.name,
@@ -86,10 +85,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param state - Current saga state
    * @param context - Execution context
    */
-  async compensate(
-    state: ISagaState,
-    context: ISagaExecutionContext
-  ): Promise<ISagaActionResult> {
+  async compensate(state: ISagaState, context: ISagaExecutionContext): Promise<ISagaActionResult> {
     if (!this.compensatable) {
       this.logger.warn('Compensation requested for non-compensatable step', {
         stepName: this.name,
@@ -117,7 +113,6 @@ export abstract class SagaStep implements ISagaStep {
       });
 
       return result;
-
     } catch (error) {
       this.logger.error('Step compensation failed', error instanceof Error ? error : undefined, {
         step_name: this.name,
@@ -146,7 +141,10 @@ export abstract class SagaStep implements ISagaStep {
    */
   canExecute(event: IExtendedDomainEvent, state: ISagaState): boolean {
     // Check if event type is supported
-    if (!this.triggerEvents.includes(event.eventType) && !this.completionEvents.includes(event.eventType)) {
+    if (
+      !this.triggerEvents.includes(event.eventType) &&
+      !this.completionEvents.includes(event.eventType)
+    ) {
       return false;
     }
 
@@ -250,14 +248,16 @@ export abstract class SagaStep implements ISagaStep {
    * Helper method to create successful result
    * @param options - Result options
    */
-  protected createSuccessResult(options: {
-    commands?: unknown[];
-    events?: IExtendedDomainEvent[];
-    completesSaga?: boolean;
-    compensationData?: Record<string, unknown>;
-    nextStep?: string;
-    delay?: number;
-  } = {}): ISagaActionResult {
+  protected createSuccessResult(
+    options: {
+      commands?: unknown[];
+      events?: IExtendedDomainEvent[];
+      completesSaga?: boolean;
+      compensationData?: Record<string, unknown>;
+      nextStep?: string;
+      delay?: number;
+    } = {}
+  ): ISagaActionResult {
     return {
       success: true,
       ...options,

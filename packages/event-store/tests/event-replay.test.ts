@@ -26,7 +26,7 @@ describe('Event Replay', () => {
       fromTimestamp: new Date('2023-01-01'),
       toTimestamp: new Date('2023-12-31'),
       eventTypes: ['OrderCreated', 'OrderUpdated'],
-      maxEvents: 1000
+      maxEvents: 1000,
     };
 
     expect(filter).toBeDefined();
@@ -41,7 +41,7 @@ describe('Event Replay', () => {
       parallel: true,
       maxWorkers: 2,
       skipErrors: true,
-      eventTimeout: 5000
+      eventTimeout: 5000,
     };
 
     expect(config).toBeDefined();

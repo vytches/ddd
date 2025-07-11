@@ -5,7 +5,7 @@ import {
   ServiceNotFoundError,
   CircularDependencyError,
   ServiceAlreadyRegisteredError,
-  ContainerDisposedError
+  ContainerDisposedError,
 } from '../../src';
 
 describe('SimpleContainer', () => {
@@ -90,7 +90,7 @@ describe('SimpleContainer', () => {
       }
 
       container.registerInstance('Dependency', new Dependency());
-      container.registerFactory('TestService', (c) => {
+      container.registerFactory('TestService', c => {
         const dep = c.resolve<Dependency>('Dependency');
         return new TestService(dep);
       });
@@ -161,12 +161,12 @@ describe('SimpleContainer', () => {
         }
       }
 
-      container.registerFactory('ServiceA', (c) => {
+      container.registerFactory('ServiceA', c => {
         const serviceB = c.resolve<ServiceB>('ServiceB');
         return new ServiceA(serviceB);
       });
 
-      container.registerFactory('ServiceB', (c) => {
+      container.registerFactory('ServiceB', c => {
         const serviceA = c.resolve<ServiceA>('ServiceA');
         return new ServiceB(serviceA);
       });

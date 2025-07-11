@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ImportOptions, IACLAdapter, ACLContextInfo, IEnhancedACLAdapter } from '../src';
 import { ACLRegistry, ContextACLRegistry } from '../src';
 
-
 // Test models
 interface TestDomainModel {
   id: string;

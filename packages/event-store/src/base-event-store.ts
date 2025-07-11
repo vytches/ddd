@@ -48,16 +48,11 @@ export abstract class BaseEventStore implements IAdvancedEventStore {
     options?: IReadStreamOptions
   ): Promise<IEventStream<T>>;
 
-  abstract readAll<T = unknown>(
-    options?: IReadAllOptions
-  ): Promise<IGlobalEventStream<T>>;
+  abstract readAll<T = unknown>(options?: IReadAllOptions): Promise<IGlobalEventStream<T>>;
 
   abstract getStreamMetadata(streamId: string): Promise<IStreamMetadata | null>;
 
-  abstract setStreamMetadata(
-    streamId: string,
-    metadata: Partial<IStreamMetadata>
-  ): Promise<void>;
+  abstract setStreamMetadata(streamId: string, metadata: Partial<IStreamMetadata>): Promise<void>;
 
   abstract deleteStream(streamId: string, expectedVersion?: number): Promise<void>;
 
@@ -173,11 +168,7 @@ export abstract class BaseEventStore implements IAdvancedEventStore {
   /**
    * Log read operation
    */
-  protected logRead(
-    streamId: string,
-    eventCount: number,
-    options?: IReadStreamOptions
-  ): void {
+  protected logRead(streamId: string, eventCount: number, options?: IReadStreamOptions): void {
     this.logger.debug('Events read from stream', {
       streamId,
       eventCount,
@@ -222,7 +213,7 @@ export abstract class BaseEventStore implements IAdvancedEventStore {
   ): Promise<void> {
     const replay = this.createEventReplay();
     const result = await replay.replayFromStream(streamId, handler);
-    
+
     this.logger.info('Stream replay completed', {
       streamId,
       eventsReplayed: result.eventsReplayed,
@@ -238,12 +229,10 @@ export abstract class BaseEventStore implements IAdvancedEventStore {
   /**
    * Quick utility to replay all events
    */
-  async replayAll(
-    handler: (event: IStoredEvent) => Promise<void>
-  ): Promise<void> {
+  async replayAll(handler: (event: IStoredEvent) => Promise<void>): Promise<void> {
     const replay = this.createEventReplay();
     const result = await replay.replayAll(handler);
-    
+
     this.logger.info('Full replay completed', {
       eventsReplayed: result.eventsReplayed,
       duration: result.duration,

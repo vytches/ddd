@@ -6,11 +6,11 @@ export {
   AsyncDomainService,
 } from './base-domain-service';
 
-export { 
-  DomainService, 
-  getDomainServiceMetadata, 
-  getDIDomainServiceMetadata, 
-  isDomainServicePendingDIRegistration 
+export {
+  DomainService,
+  getDomainServiceMetadata,
+  getDIDomainServiceMetadata,
+  isDomainServicePendingDIRegistration,
 } from './domain-service.decorator';
 
 // Legacy registries and builders removed - use VytchesDDD DI system instead

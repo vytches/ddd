@@ -61,7 +61,10 @@ export abstract class BaseSaga implements ISaga {
    * @param event - Domain event to process
    * @param context - Execution context
    */
-  async handleEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  async handleEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     this.logger.info('Handling event in saga', {
       sagaId: this.sagaId,
       sagaType: this.sagaType,
@@ -86,7 +89,10 @@ export abstract class BaseSaga implements ISaga {
    * @param event - Domain event to process
    * @param context - Execution context
    */
-  private async executeEventHandling(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async executeEventHandling(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     try {
       // Update saga state with event processing timestamp
       this.updateState({
@@ -146,14 +152,17 @@ export abstract class BaseSaga implements ISaga {
       });
 
       return result;
-
     } catch (error) {
-      this.logger.error('Error handling event in saga', error instanceof Error ? error : undefined, {
-        saga_id: this.sagaId,
-        event_type: event.eventType,
-        error_message: error instanceof Error ? error.message : String(error),
-        error_stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.error(
+        'Error handling event in saga',
+        error instanceof Error ? error : undefined,
+        {
+          saga_id: this.sagaId,
+          event_type: event.eventType,
+          error_message: error instanceof Error ? error.message : String(error),
+          error_stack: error instanceof Error ? error.stack : undefined,
+        }
+      );
 
       // Update saga state with error
       this.updateState({
@@ -235,7 +244,6 @@ export abstract class BaseSaga implements ISaga {
       });
 
       return result;
-
     } catch (error) {
       this.logger.error('Error during compensation', error instanceof Error ? error : undefined, {
         saga_id: this.sagaId,
@@ -261,7 +269,10 @@ export abstract class BaseSaga implements ISaga {
   canHandle(event: IExtendedDomainEvent): boolean {
     // Check if any step can handle this event
     for (const step of this.steps.values()) {
-      if (step.triggerEvents.includes(event.eventType) || step.completionEvents.includes(event.eventType)) {
+      if (
+        step.triggerEvents.includes(event.eventType) ||
+        step.completionEvents.includes(event.eventType)
+      ) {
         return true;
       }
     }
@@ -316,7 +327,9 @@ export abstract class BaseSaga implements ISaga {
    * Add middleware to the saga pipeline
    * @param middleware - Middleware to add
    */
-  protected addMiddleware(middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }): void {
+  protected addMiddleware(
+    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }
+  ): void {
     this.middlewarePipeline.use(middleware);
     this.logger.debug('Middleware added to saga', {
       sagaType: this.sagaType,
@@ -410,7 +423,6 @@ export abstract class BaseSaga implements ISaga {
       });
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 

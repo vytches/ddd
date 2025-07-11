@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { BaseSaga, ConcreteSagaStep } from '../../../src/sagas/base';
-import type {
-  ISagaState,
-  ISagaStep,
-  ISagaExecutionContext,
-} from '../../../src/sagas/interfaces';
+import type { ISagaState, ISagaStep, ISagaExecutionContext } from '../../../src/sagas/interfaces';
 import { SagaStatus } from '../../../src/sagas/interfaces';
 import { PerformanceMonitoringMiddleware } from '../../../src/sagas/middleware';
 
@@ -55,7 +51,7 @@ class TestSaga extends BaseSaga {
             new TestEvent(
               'test-event-1',
               'OrderProcessed',
-              event.metadata?.aggregateId as string || 'agg-1',
+              (event.metadata?.aggregateId as string) || 'agg-1',
               { processed: true }
             ),
           ],
@@ -65,7 +61,8 @@ class TestSaga extends BaseSaga {
         this.compensationExecuted = true;
         return { success: true };
       },
-      canExecute: (event, state) => state.status !== SagaStatus.COMPLETED && state.status !== SagaStatus.FAILED,
+      canExecute: (event, state) =>
+        state.status !== SagaStatus.COMPLETED && state.status !== SagaStatus.FAILED,
     });
 
     this.addStep(processStep);
@@ -143,12 +140,7 @@ describe('BaseSaga', () => {
 
   describe('handleEvent', () => {
     it('should handle matching event successfully', async () => {
-      const event = new TestEvent(
-        'evt-1',
-        'OrderCreated',
-        'agg-1',
-        { orderId: 'order-123' }
-      );
+      const event = new TestEvent('evt-1', 'OrderCreated', 'agg-1', { orderId: 'order-123' });
 
       const result = await testSaga.handleEvent(event, executionContext);
 
@@ -159,12 +151,7 @@ describe('BaseSaga', () => {
     });
 
     it('should return error when no matching step found', async () => {
-      const event = new TestEvent(
-        'evt-2',
-        'UnknownEvent',
-        'agg-1',
-        {}
-      );
+      const event = new TestEvent('evt-2', 'UnknownEvent', 'agg-1', {});
 
       const result = await testSaga.handleEvent(event, executionContext);
 
@@ -175,7 +162,7 @@ describe('BaseSaga', () => {
 
     it('should return error when step cannot be executed', async () => {
       // Create a saga with a step that always rejects execution
-      const blockingSaga = new class extends BaseSaga {
+      const blockingSaga = new (class extends BaseSaga {
         protected initializeSteps(): void {
           const blockingStep = new ConcreteSagaStep({
             name: 'blockingStep',
@@ -189,14 +176,9 @@ describe('BaseSaga', () => {
           });
           this.addStep(blockingStep);
         }
-      }(initialState, 'BlockingSaga');
+      })(initialState, 'BlockingSaga');
 
-      const event = new TestEvent(
-        'evt-3',
-        'OrderCreated',
-        'agg-1',
-        {}
-      );
+      const event = new TestEvent('evt-3', 'OrderCreated', 'agg-1', {});
 
       const result = await blockingSaga.handleEvent(event, executionContext);
 
@@ -206,7 +188,7 @@ describe('BaseSaga', () => {
 
     it('should handle step execution error', async () => {
       // Create saga with failing step
-      const failingSaga = new class extends BaseSaga {
+      const failingSaga = new (class extends BaseSaga {
         protected initializeSteps(): void {
           const failingStep = new ConcreteSagaStep({
             name: 'failingStep',
@@ -222,7 +204,7 @@ describe('BaseSaga', () => {
           });
           this.addStep(failingStep);
         }
-      }(initialState, 'FailingSaga');
+      })(initialState, 'FailingSaga');
 
       const event = new TestEvent('evt-4', 'TestEvent', 'agg-1', {});
       const result = await failingSaga.handleEvent(event, executionContext);
@@ -398,11 +380,11 @@ describe('BaseSaga', () => {
         canExecute: () => true,
       });
 
-      const timeoutSaga = new class extends BaseSaga {
+      const timeoutSaga = new (class extends BaseSaga {
         protected initializeSteps(): void {
           this.addStep(timeoutStep);
         }
-      }(initialState, 'TimeoutSaga');
+      })(initialState, 'TimeoutSaga');
 
       const event = new TestEvent('evt-9', 'TimeoutEvent', 'agg-1', {});
 

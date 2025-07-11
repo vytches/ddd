@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  TestDataBuilder,
-  EntityIdBuilder,
-  UserBuilder,
-  DomainEventBuilder,
-} from '../../src';
+import { TestDataBuilder, EntityIdBuilder, UserBuilder, DomainEventBuilder } from '../../src';
 
 describe('TestDataBuilder', () => {
   beforeEach(() => {
@@ -21,7 +16,7 @@ describe('TestDataBuilder', () => {
 
     it('should create builder with defaults', () => {
       const builder = TestDataBuilder.create<TestData>({
-        defaults: { id: 'default-id', name: 'Default Name', count: 0 }
+        defaults: { id: 'default-id', name: 'Default Name', count: 0 },
       });
 
       const result = builder.build();
@@ -45,12 +40,11 @@ describe('TestDataBuilder', () => {
     });
 
     it('should allow setting multiple properties', () => {
-      const builder = TestDataBuilder.create<TestData>()
-        .withProperties({
-          id: 'multi-id',
-          name: 'Multi Name',
-          count: 100
-        });
+      const builder = TestDataBuilder.create<TestData>().withProperties({
+        id: 'multi-id',
+        name: 'Multi Name',
+        count: 100,
+      });
 
       const result = builder.build();
 
@@ -80,7 +74,7 @@ describe('TestDataBuilder', () => {
         .transform(data => ({
           ...data,
           name: `Generated for ${data.id}`,
-          count: (data.count || 0) * 2
+          count: (data.count || 0) * 2,
         }));
 
       const result = builder.build();
@@ -113,17 +107,23 @@ describe('TestDataBuilder', () => {
     it('should support sequence options', () => {
       const builder = TestDataBuilder.create<SequenceData>();
 
-      const item1 = builder.clone().withSequence('name', {
-        start: 10,
-        step: 5,
-        prefix: 'item-',
-        suffix: '-test'
-      }).build();
+      const item1 = builder
+        .clone()
+        .withSequence('name', {
+          start: 10,
+          step: 5,
+          prefix: 'item-',
+          suffix: '-test',
+        })
+        .build();
 
-      const item2 = builder.clone().withSequence('name', {
-        prefix: 'item-',
-        suffix: '-test'
-      }).build();
+      const item2 = builder
+        .clone()
+        .withSequence('name', {
+          prefix: 'item-',
+          suffix: '-test',
+        })
+        .build();
 
       expect(item1.name).toBe('item-10-test');
       expect(item2.name).toBe('item-15-test');
@@ -163,8 +163,9 @@ describe('TestDataBuilder', () => {
     }
 
     it('should generate random strings', () => {
-      const builder = TestDataBuilder.create<RandomData>()
-        .withRandom('randomString', 'string', { length: 8 });
+      const builder = TestDataBuilder.create<RandomData>().withRandom('randomString', 'string', {
+        length: 8,
+      });
 
       const result = builder.build();
 
@@ -173,8 +174,10 @@ describe('TestDataBuilder', () => {
     });
 
     it('should generate random numbers within range', () => {
-      const builder = TestDataBuilder.create<RandomData>()
-        .withRandom('randomNumber', 'number', { min: 10, max: 20 });
+      const builder = TestDataBuilder.create<RandomData>().withRandom('randomNumber', 'number', {
+        min: 10,
+        max: 20,
+      });
 
       const result = builder.build();
 
@@ -184,8 +187,7 @@ describe('TestDataBuilder', () => {
     });
 
     it('should generate random booleans', () => {
-      const builder = TestDataBuilder.create<RandomData>()
-        .withRandom('randomBoolean', 'boolean');
+      const builder = TestDataBuilder.create<RandomData>().withRandom('randomBoolean', 'boolean');
 
       const result = builder.build();
 
@@ -194,13 +196,15 @@ describe('TestDataBuilder', () => {
 
     it('should be reproducible with same seed', () => {
       TestDataBuilder.setRandomSeed(42);
-      const builder1 = TestDataBuilder.create<RandomData>()
-        .withRandom('randomString', 'string', { length: 10 });
+      const builder1 = TestDataBuilder.create<RandomData>().withRandom('randomString', 'string', {
+        length: 10,
+      });
       const result1 = builder1.build();
 
       TestDataBuilder.setRandomSeed(42);
-      const builder2 = TestDataBuilder.create<RandomData>()
-        .withRandom('randomString', 'string', { length: 10 });
+      const builder2 = TestDataBuilder.create<RandomData>().withRandom('randomString', 'string', {
+        length: 10,
+      });
       const result2 = builder2.build();
 
       expect(result1.randomString).toBe(result2.randomString);
@@ -215,11 +219,11 @@ describe('TestDataBuilder', () => {
 
     it('should validate data before building', () => {
       const builder = TestDataBuilder.create<ValidatedData>({
-        validator: (data) => {
+        validator: data => {
           if (data.age && data.age < 0) return 'Age cannot be negative';
           if (data.email && !data.email.includes('@')) return 'Invalid email';
           return true;
-        }
+        },
       });
 
       expect(() => {
@@ -259,23 +263,25 @@ describe('TestDataBuilder', () => {
               name: 'Default Name',
               settings: {
                 theme: 'light',
-                notifications: true
-              }
-            }
-          }
+                notifications: true,
+              },
+            },
+          },
         },
-        deepMerge: true
+        deepMerge: true,
       });
 
-      const result = builder.withProperties({
-        user: {
-          profile: {
-            settings: {
-              theme: 'dark'
-            }
-          }
-        }
-      } as any).build();
+      const result = builder
+        .withProperties({
+          user: {
+            profile: {
+              settings: {
+                theme: 'dark',
+              },
+            },
+          },
+        } as any)
+        .build();
 
       expect(result.user.id).toBe('default-id'); // Preserved
       expect(result.user.profile.name).toBe('Default Name'); // Preserved
@@ -292,23 +298,25 @@ describe('TestDataBuilder', () => {
               name: 'Default Name',
               settings: {
                 theme: 'light',
-                notifications: true
-              }
-            }
-          }
+                notifications: true,
+              },
+            },
+          },
         },
-        deepMerge: false
+        deepMerge: false,
       });
 
-      const result = builder.withProperties({
-        user: {
-          profile: {
-            settings: {
-              theme: 'dark'
-            }
-          }
-        }
-      } as any).build();
+      const result = builder
+        .withProperties({
+          user: {
+            profile: {
+              settings: {
+                theme: 'dark',
+              },
+            },
+          },
+        } as any)
+        .build();
 
       expect(result.user.id).toBeUndefined(); // Not preserved
       expect(result.user.profile.name).toBeUndefined(); // Not preserved
@@ -326,7 +334,7 @@ describe('TestDataBuilder', () => {
 
     it('should build multiple objects', () => {
       const builder = TestDataBuilder.create<CountedData>({
-        defaults: { name: 'Item', count: 1 }
+        defaults: { name: 'Item', count: 1 },
       });
 
       const items = builder.buildMany(3, 'id');
@@ -343,12 +351,12 @@ describe('TestDataBuilder', () => {
 
     it('should build with specific overrides', () => {
       const builder = TestDataBuilder.create<CountedData>({
-        defaults: { id: 'default', name: 'Default', count: 0 }
+        defaults: { id: 'default', name: 'Default', count: 0 },
       });
 
       const item = builder.buildWith({
         id: 'override',
-        count: 42
+        count: 42,
       });
 
       expect(item.id).toBe('override');
@@ -364,13 +372,9 @@ describe('TestDataBuilder', () => {
     }
 
     it('should clone builders independently', () => {
-      const baseBuilder = TestDataBuilder.create<CloneData>()
-        .with('id', 'base')
-        .with('value', 10);
+      const baseBuilder = TestDataBuilder.create<CloneData>().with('id', 'base').with('value', 10);
 
-      const clonedBuilder = baseBuilder.clone()
-        .with('id', 'cloned')
-        .with('value', 20);
+      const clonedBuilder = baseBuilder.clone().with('id', 'cloned').with('value', 20);
 
       const baseResult = baseBuilder.build();
       const clonedResult = clonedBuilder.build();
@@ -399,7 +403,7 @@ describe('TestDataBuilder', () => {
 
     it('should reset to defaults', () => {
       const builder = TestDataBuilder.create<CloneData>({
-        defaults: { id: 'default-id', value: 0 }
+        defaults: { id: 'default-id', value: 0 },
       });
 
       builder.with('id', 'modified').with('value', 999);
@@ -431,7 +435,9 @@ describe('EntityIdBuilder', () => {
     const result = builder.withUuid().build();
 
     // Basic UUID format check
-    expect(result.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(result.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
   });
 
   it('should create IDs with prefixes', () => {

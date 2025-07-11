@@ -23,7 +23,7 @@ describe('ScheduledEvent', () => {
       const scheduleOptions = {
         maxRetries: 3,
         backoff: 'exponential' as const,
-        priority: 1
+        priority: 1,
       };
 
       const event = new TestScheduledEvent(aggregateId, scheduleAt, 'Test', scheduleOptions);

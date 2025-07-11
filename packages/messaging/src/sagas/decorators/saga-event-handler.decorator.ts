@@ -33,7 +33,7 @@ export function SagaEventHandler(
         'unknown',
         '@SagaEventHandler decorator requires eventType',
         ['eventType is required'],
-        { usage: '@SagaEventHandler(\'OrderCreated\')' }
+        { usage: "@SagaEventHandler('OrderCreated')" }
       );
     }
 
@@ -56,7 +56,8 @@ export function SagaEventHandler(
     };
 
     // Get existing metadata or create new
-    const existingMetadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
+    const existingMetadata: SagaMetadata =
+      Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
 
     // Initialize event handlers map if it doesn't exist
     if (!existingMetadata.eventHandlers) {
@@ -101,7 +102,8 @@ export function StartSaga(options: Partial<SagaEventHandlerOptions> = {}): Metho
     Reflect.defineMetadata(methodMetadataKey, updatedOptions, target.constructor);
 
     // Update class metadata
-    const existingMetadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
+    const existingMetadata: SagaMetadata =
+      Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
     if (!existingMetadata.eventHandlers) {
       existingMetadata.eventHandlers = new Map();
     }
@@ -136,7 +138,8 @@ export function EndSaga(options: Partial<SagaEventHandlerOptions> = {}): MethodD
     Reflect.defineMetadata(methodMetadataKey, updatedOptions, target.constructor);
 
     // Update class metadata
-    const existingMetadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
+    const existingMetadata: SagaMetadata =
+      Reflect.getMetadata(SAGA_METADATA_KEY, target.constructor) || {};
     if (!existingMetadata.eventHandlers) {
       existingMetadata.eventHandlers = new Map();
     }
@@ -152,7 +155,10 @@ export function EndSaga(options: Partial<SagaEventHandlerOptions> = {}): MethodD
  * @param target - Target class
  * @param methodName - Method name
  */
-export function getEventHandlerMetadata(target: any, methodName: string): SagaEventHandlerOptions | undefined {
+export function getEventHandlerMetadata(
+  target: any,
+  methodName: string
+): SagaEventHandlerOptions | undefined {
   const methodMetadataKey = `saga:eventHandler:${methodName}`;
   return Reflect.getMetadata(methodMetadataKey, target);
 }

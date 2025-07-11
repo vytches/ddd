@@ -1,8 +1,8 @@
 import type {
   HandlerInfo,
   IHandlerDiscoveryPlugin,
-  IHandlerDiscoveryRegistry
-} from "./handler-discovery.interface";
+  IHandlerDiscoveryRegistry,
+} from './handler-discovery.interface';
 
 /**
  * Registry for handler discovery plugins

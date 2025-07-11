@@ -9,7 +9,7 @@ export {
   ProjectionRebuilder,
   createProjectionRebuilder,
   type IProjectionRebuilder,
-  type IProjectionRebuildConfig
+  type IProjectionRebuildConfig,
 } from './projection-rebuilder';
 
 export type {

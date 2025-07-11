@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PolicyRegistry, globalPolicyRegistry, LegacyPolicyRegistry } from '../src/policy-registry';
 import type { IBusinessPolicy } from '../src/business-policy-interface';
-import type {  RegistryPolicyMetadata } from '../src/policy-registry';
+import type { RegistryPolicyMetadata } from '../src/policy-registry';
 
 describe('PolicyRegistry', () => {
   let registry: PolicyRegistry;

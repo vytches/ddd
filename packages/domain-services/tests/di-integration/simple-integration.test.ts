@@ -4,7 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DomainServiceDiscoveryPlugin, DIDomainServiceMetadataRegistry, DomainService, getDIDomainServiceMetadata, isDomainServicePendingDIRegistration } from '../../src';
+import {
+  DomainServiceDiscoveryPlugin,
+  DIDomainServiceMetadataRegistry,
+  DomainService,
+  getDIDomainServiceMetadata,
+  isDomainServicePendingDIRegistration,
+} from '../../src';
 import { ServiceLifetime } from '@vytches-ddd/di';
 
 // Simple test base class
@@ -29,7 +35,7 @@ describe('Domain Services DI Metadata Integration', () => {
         dependencies: ['dependency1', 'dependency2'],
         transactional: true,
         publishesEvents: true,
-        caching: { enabled: true, ttl: 300 }
+        caching: { enabled: true, ttl: 300 },
       })
       class CompleteWorkflowService extends TestDomainService {
         constructor() {
@@ -54,7 +60,8 @@ describe('Domain Services DI Metadata Integration', () => {
       expect(isDomainServicePendingDIRegistration(CompleteWorkflowService)).toBe(true);
 
       // 4. Verify service is registered in metadata registry
-      const registeredService = DIDomainServiceMetadataRegistry.getService('completeWorkflowService');
+      const registeredService =
+        DIDomainServiceMetadataRegistry.getService('completeWorkflowService');
       expect(registeredService).toBeDefined();
       expect(registeredService?.serviceType).toBe(CompleteWorkflowService);
 
@@ -76,7 +83,7 @@ describe('Domain Services DI Metadata Integration', () => {
       @DomainService({
         serviceId: 'legacyOptionsService',
         dependencies: ['oldDep'],
-        transactional: true
+        transactional: true,
       })
       class LegacyOptionsService extends TestDomainService {
         constructor() {
@@ -101,34 +108,42 @@ describe('Domain Services DI Metadata Integration', () => {
       // Mix of legacy and DI-enhanced services
       @DomainService('legacy1')
       class _Legacy1 extends TestDomainService {
-        constructor() { super('legacy1'); }
+        constructor() {
+          super('legacy1');
+        }
       }
 
       @DomainService({
         serviceId: 'legacy2',
-        transactional: true
+        transactional: true,
       })
       class _Legacy2 extends TestDomainService {
-        constructor() { super('legacy2'); }
+        constructor() {
+          super('legacy2');
+        }
       }
 
       @DomainService({
         serviceId: 'di1',
         lifetime: ServiceLifetime.Singleton,
-        autoRegister: true
+        autoRegister: true,
       })
       class _DI1 extends TestDomainService {
-        constructor() { super('di1'); }
+        constructor() {
+          super('di1');
+        }
       }
 
       @DomainService({
         serviceId: 'di2',
         context: 'TestContext',
         tags: ['test'],
-        autoRegister: true
+        autoRegister: true,
       })
       class _DI2 extends TestDomainService {
-        constructor() { super('di2'); }
+        constructor() {
+          super('di2');
+        }
       }
 
       // Discovery should only find DI-enhanced services
@@ -158,7 +173,7 @@ describe('Domain Services DI Metadata Integration', () => {
         transactional: true,
         async: true,
         publishesEvents: true,
-        caching: { enabled: true, ttl: 600 }
+        caching: { enabled: true, ttl: 600 },
       })
       class _RichMetadataService extends TestDomainService {
         constructor() {
@@ -192,28 +207,34 @@ describe('Domain Services DI Metadata Integration', () => {
       @DomainService({
         serviceId: 'contextA1',
         context: 'ContextA',
-        tags: ['contextA', 'service1']
+        tags: ['contextA', 'service1'],
       })
       class ContextA1 extends TestDomainService {
-        constructor() { super('contextA1'); }
+        constructor() {
+          super('contextA1');
+        }
       }
 
       @DomainService({
         serviceId: 'contextA2',
         context: 'ContextA',
-        tags: ['contextA', 'service2']
+        tags: ['contextA', 'service2'],
       })
       class _ContextA2 extends TestDomainService {
-        constructor() { super('contextA2'); }
+        constructor() {
+          super('contextA2');
+        }
       }
 
       @DomainService({
         serviceId: 'contextB1',
         context: 'ContextB',
-        tags: ['contextB', 'service1']
+        tags: ['contextB', 'service1'],
       })
       class _ContextB1 extends TestDomainService {
-        constructor() { super('contextB1'); }
+        constructor() {
+          super('contextB1');
+        }
       }
 
       // Test context-based queries

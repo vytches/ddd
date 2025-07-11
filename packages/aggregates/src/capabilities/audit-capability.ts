@@ -20,17 +20,21 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     this.aggregate = aggregate as IAggregateRoot;
 
     // Store original apply method for restoration
-    this.originalApply = (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply;
-    
+    this.originalApply = (
+      this.aggregate as unknown as { apply: (...args: unknown[]) => void }
+    ).apply;
+
     // Intercept the apply method to capture events as they're added
     if (this.originalApply) {
-      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = (...args: unknown[]) => {
+      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = (
+        ...args: unknown[]
+      ) => {
         // Call original apply method first
         const result = this.originalApply!.call(this.aggregate, ...args);
-        
+
         // Then record the audit event for the newly added event
         this.recordAuditEvent();
-        
+
         return result;
       };
     }
@@ -39,9 +43,10 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   detach?(): void {
     // Restore original apply method
     if (this.aggregate && this.originalApply) {
-      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = this.originalApply;
+      (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply =
+        this.originalApply;
     }
-    
+
     this.aggregate = undefined!;
     this.auditLog = [];
     this.originalApply = undefined;

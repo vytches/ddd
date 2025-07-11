@@ -16,4 +16,3 @@ export * from '@vytches-ddd/policies';
 export * from '@vytches-ddd/validation';
 export * from '@vytches-ddd/projections';
 export * from '@vytches-ddd/di';
-

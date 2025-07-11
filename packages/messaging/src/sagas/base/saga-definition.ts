@@ -77,7 +77,9 @@ export abstract class SagaDefinition implements ISagaDefinition {
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        timeoutAt: this.defaultTimeout ? new Date(Date.now() + this.defaultTimeout) : undefined as Date | undefined,
+        timeoutAt: this.defaultTimeout
+          ? new Date(Date.now() + this.defaultTimeout)
+          : (undefined as Date | undefined),
         version: 1,
       };
 
@@ -92,14 +94,17 @@ export abstract class SagaDefinition implements ISagaDefinition {
       });
 
       return saga;
-
     } catch (error) {
-      this.logger.error('Failed to create saga instance', error instanceof Error ? error : undefined, {
-        saga_type: this.sagaType,
-        event_type: event.eventType,
-        error_message: error instanceof Error ? error.message : String(error),
-        error_stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.error(
+        'Failed to create saga instance',
+        error instanceof Error ? error : undefined,
+        {
+          saga_type: this.sagaType,
+          event_type: event.eventType,
+          error_message: error instanceof Error ? error.message : String(error),
+          error_stack: error instanceof Error ? error.stack : undefined,
+        }
+      );
 
       throw error;
     }

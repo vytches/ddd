@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { IBaseDomainService, DIDomainServiceMetadataRegistry, DomainServiceDiscoveryPlugin, DomainService, getDIDomainServiceMetadata, isDomainServicePendingDIRegistration } from '../../src';
+import {
+  IBaseDomainService,
+  DIDomainServiceMetadataRegistry,
+  DomainServiceDiscoveryPlugin,
+  DomainService,
+  getDIDomainServiceMetadata,
+  isDomainServicePendingDIRegistration,
+} from '../../src';
 import { ServiceLifetime } from '@vytches-ddd/di';
 
 // Simple test base class
@@ -25,7 +32,7 @@ describe('Domain Service DI Integration', () => {
         lifetime: ServiceLifetime.Singleton,
         context: 'TestContext',
         tags: ['test', 'domain'],
-        autoRegister: true
+        autoRegister: true,
       })
       class TestService extends TestDomainService {}
 
@@ -53,7 +60,7 @@ describe('Domain Service DI Integration', () => {
       @DomainService({
         serviceId: 'legacyService',
         transactional: true,
-        publishesEvents: true
+        publishesEvents: true,
       })
       class _LegacyService extends TestDomainService {}
 
@@ -67,7 +74,7 @@ describe('Domain Service DI Integration', () => {
       @DomainService({
         serviceId: 'pendingService',
         lifetime: ServiceLifetime.Transient,
-        autoRegister: true
+        autoRegister: true,
       })
       class PendingService extends TestDomainService {}
 
@@ -78,7 +85,7 @@ describe('Domain Service DI Integration', () => {
       @DomainService({
         serviceId: 'registryService',
         lifetime: ServiceLifetime.Singleton,
-        context: 'Registry'
+        context: 'Registry',
       })
       class RegistryService extends TestDomainService {}
 
@@ -109,7 +116,7 @@ describe('Domain Service DI Integration', () => {
         lifetime: ServiceLifetime.Singleton,
         context: 'Discovery',
         tags: ['discoverable'],
-        autoRegister: true
+        autoRegister: true,
       })
       class DiscoverableService extends TestDomainService {}
 
@@ -129,7 +136,7 @@ describe('Domain Service DI Integration', () => {
       @DomainService({
         serviceId: 'nonAutoService',
         lifetime: ServiceLifetime.Singleton,
-        autoRegister: false
+        autoRegister: false,
       })
       class _NonAutoService extends TestDomainService {}
 
@@ -156,7 +163,7 @@ describe('Domain Service DI Integration', () => {
     it('should store and retrieve services by ID', () => {
       @DomainService({
         serviceId: 'storageService',
-        lifetime: ServiceLifetime.Transient
+        lifetime: ServiceLifetime.Transient,
       })
       class StorageService extends TestDomainService {}
 
@@ -168,13 +175,13 @@ describe('Domain Service DI Integration', () => {
     it('should retrieve services by context', () => {
       @DomainService({
         serviceId: 'contextService1',
-        context: 'ContextA'
+        context: 'ContextA',
       })
       class _ContextServiceA extends TestDomainService {}
 
       @DomainService({
         serviceId: 'contextService2',
-        context: 'ContextB'
+        context: 'ContextB',
       })
       class _ContextServiceB extends TestDomainService {}
 
@@ -186,13 +193,13 @@ describe('Domain Service DI Integration', () => {
     it('should retrieve services by tag', () => {
       @DomainService({
         serviceId: 'taggedService1',
-        tags: ['order', 'business']
+        tags: ['order', 'business'],
       })
       class _TaggedService1 extends TestDomainService {}
 
       @DomainService({
         serviceId: 'taggedService2',
-        tags: ['user', 'business']
+        tags: ['user', 'business'],
       })
       class _TaggedService2 extends TestDomainService {}
 

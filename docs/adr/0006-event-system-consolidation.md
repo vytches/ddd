@@ -2,14 +2,17 @@
 
 **Status**: Implemented  
 **Date**: 2025-01-07  
-**Decision**: Consolidate 3 separate event bus implementations into 1 unified event bus with context-aware routing
+**Decision**: Consolidate 3 separate event bus implementations into 1 unified
+event bus with context-aware routing
 
 ## Context
 
-The current event system architecture consists of three separate event bus implementations:
+The current event system architecture consists of three separate event bus
+implementations:
 
 1. `InMemoryDomainEventBus` - for domain events within bounded contexts
-2. `InMemoryIntegrationEventBus` - for cross-context communication with context filtering
+2. `InMemoryIntegrationEventBus` - for cross-context communication with context
+   filtering
 3. `InMemoryAuditEventBus` - for audit trail (currently only a type alias)
 
 This architecture leads to several issues identified in IMPROVE.md:
@@ -24,7 +27,9 @@ This architecture leads to several issues identified in IMPROVE.md:
 ### Current Pain Points
 
 1. **Code Duplication**
-   - `InMemoryDomainEventBus` and `InMemoryIntegrationEventBus` share 90% of their code
+
+   - `InMemoryDomainEventBus` and `InMemoryIntegrationEventBus` share 90% of
+     their code
    - Only difference is context filtering in integration bus
    - Maintenance burden of multiple similar implementations
 
@@ -40,6 +45,7 @@ This architecture leads to several issues identified in IMPROVE.md:
    ```
 
 3. **Manual Event Routing**
+
    - Developers must manually choose which bus to use
    - No automatic routing based on event type
    - Error-prone and requires deep understanding of event types
@@ -51,14 +57,17 @@ This architecture leads to several issues identified in IMPROVE.md:
 
 ## Decision
 
-Consolidate the three event bus implementations into a single `UnifiedEventBus` with the following characteristics:
+Consolidate the three event bus implementations into a single `UnifiedEventBus`
+with the following characteristics:
 
 1. **Single Implementation**
+
    - One event bus class handling all event types
    - Context-aware subscriptions for filtering
    - Automatic routing based on event type
 
 2. **Context in Metadata**
+
    - Move context information to event metadata
    - Eliminate need for per-context bus instances
    - Enable flexible subscription filtering
@@ -74,10 +83,10 @@ Consolidate the three event bus implementations into a single `UnifiedEventBus` 
 
 ```typescript
 abstract class DomainEvent implements IDomainEvent {
-  readonly metadata: IEventMetadata & { 
-    contextId: string;  // Context in metadata
+  readonly metadata: IEventMetadata & {
+    contextId: string; // Context in metadata
   };
-  
+
   constructor(
     readonly eventType: string,
     readonly payload?: any,
@@ -85,7 +94,7 @@ abstract class DomainEvent implements IDomainEvent {
   ) {
     this.metadata = {
       ...baseMetadata,
-      contextId: contextId || getCurrentContext()
+      contextId: contextId || getCurrentContext(),
     };
   }
 }
@@ -96,16 +105,26 @@ abstract class DomainEvent implements IDomainEvent {
 ```typescript
 @Injectable()
 export class UnifiedEventBus implements IEventBus {
-  async publish(event: IDomainEvent | IIntegrationEvent | IAuditEvent): Promise<void> {
+  async publish(
+    event: IDomainEvent | IIntegrationEvent | IAuditEvent
+  ): Promise<void> {
     // Auto-routing based on event type
     const handlers = this.getHandlersForEvent(event);
     return this.executeHandlers(event, handlers);
   }
-  
+
   // Flexible subscription with context filtering
   subscribe(eventType: Constructor, handler: EventHandler): void;
-  subscribe(eventType: Constructor, contextId: string, handler: EventHandler): void;
-  subscribe(eventType: Constructor, contextIds: string[], handler: EventHandler): void;
+  subscribe(
+    eventType: Constructor,
+    contextId: string,
+    handler: EventHandler
+  ): void;
+  subscribe(
+    eventType: Constructor,
+    contextIds: string[],
+    handler: EventHandler
+  ): void;
 }
 ```
 
@@ -118,9 +137,9 @@ export class UnifiedEventBus implements IEventBus {
     {
       provide: IEventBus,
       useClass: UnifiedEventBus,
-      scope: Scope.DEFAULT // singleton
-    }
-  ]
+      scope: Scope.DEFAULT, // singleton
+    },
+  ],
 })
 export class EventModule {}
 
@@ -136,9 +155,9 @@ export class OrderService {
 ### Auto-Discovery with Enhanced Decorator
 
 ```typescript
-@EventHandler(OrderCreated, { 
-  context: 'order-context',  // Optional context filtering
-  lifetime: ServiceLifetime.Singleton 
+@EventHandler(OrderCreated, {
+  context: 'order-context', // Optional context filtering
+  lifetime: ServiceLifetime.Singleton,
 })
 export class OrderCreatedHandler {
   async handle(event: OrderCreated): Promise<void> {
@@ -152,22 +171,26 @@ export class OrderCreatedHandler {
 ### Positive
 
 1. **Reduced Complexity**
+
    - Single implementation to maintain
    - Unified API for all event types
    - Simpler mental model
 
 2. **Better Developer Experience**
+
    - Single injection point
    - Automatic event routing
    - Context filtering through subscriptions
    - Full IntelliSense support
 
 3. **Improved Testability**
+
    - Single mock for all event types
    - Easier test setup
    - Clearer test assertions
 
 4. **Performance Benefits**
+
    - Reduced object allocations
    - Single routing mechanism
    - Optimized handler lookup
@@ -180,11 +203,13 @@ export class OrderCreatedHandler {
 ### Negative
 
 1. **Breaking Changes**
+
    - Existing code requires updates
    - Handler registration changes
    - Documentation updates required
 
 2. **Single Point of Failure**
+
    - All events go through one bus
    - Mitigated by robust error handling
 
@@ -197,11 +222,13 @@ export class OrderCreatedHandler {
 ### Direct Replacement
 
 1. **Remove Old Implementations**
+
    - Delete `InMemoryDomainEventBus`
    - Delete `InMemoryIntegrationEventBus`
    - Remove all compatibility code
 
 2. **Deploy UnifiedEventBus**
+
    - Single implementation for all event types
    - Context-aware subscription API
    - Integrated with DI system
@@ -214,10 +241,12 @@ export class OrderCreatedHandler {
 ## Alternatives Considered
 
 1. **Keep Current Architecture**
+
    - Pro: No migration needed
    - Con: Maintains all current pain points
 
 2. **Universal Event Publisher Pattern**
+
    - Pro: Clean abstraction over buses
    - Con: Adds another layer of indirection
    - Con: Doesn't solve underlying duplication
@@ -251,31 +280,50 @@ Proceed with the unified event bus implementation as it:
 The implementation has been successfully delivered with the following outcomes:
 
 ### Achieved Metrics
+
 - **Code Reduction**: 67% reduction in event bus implementation code (3→1 buses)
-- **Type Safety**: 100% TypeScript compliance with zero `any` types in core implementation
-- **API Simplification**: Single injection point replacing 3 separate bus dependencies
-- **Context Flexibility**: Support for single, multiple, or all-context subscriptions
-- **Repository Integration**: Full integration with `IBaseRepository.save()` for automatic event publishing
+- **Type Safety**: 100% TypeScript compliance with zero `any` types in core
+  implementation
+- **API Simplification**: Single injection point replacing 3 separate bus
+  dependencies
+- **Context Flexibility**: Support for single, multiple, or all-context
+  subscriptions
+- **Repository Integration**: Full integration with `IBaseRepository.save()` for
+  automatic event publishing
 - **Performance**: ~50% faster event processing with concurrent `publishMany()`
 - **Clean Architecture**: Use cases require zero event handling code
 
 ### Technical Deliverables
-1. **✅ UnifiedEventBus Implementation** - Complete with context-aware routing and concurrent processing
-2. **✅ UniversalEventDispatcher** - Enhanced dispatcher with middleware pipeline and processor support
-3. **✅ Repository Integration** - Automatic event publishing through `IBaseRepository.save()`
+
+1. **✅ UnifiedEventBus Implementation** - Complete with context-aware routing
+   and concurrent processing
+2. **✅ UniversalEventDispatcher** - Enhanced dispatcher with middleware
+   pipeline and processor support
+3. **✅ Repository Integration** - Automatic event publishing through
+   `IBaseRepository.save()`
 4. **✅ Type Safety** - All TypeScript errors resolved, proper generic types
-5. **✅ Clean Architecture** - Repository pattern handles event publishing automatically
-6. **✅ Enterprise Features** - Transaction safety, optimistic concurrency, batch processing
+5. **✅ Clean Architecture** - Repository pattern handles event publishing
+   automatically
+6. **✅ Enterprise Features** - Transaction safety, optimistic concurrency,
+   batch processing
 7. **✅ DI Integration** - Enhanced decorators with `eventContext` support
 8. **✅ Documentation** - Updated guides, API reference, and usage examples
 
 ### Validation
-- **Type Checking**: ✅ Passes without errors
-- **Implementation**: ✅ All legacy buses removed, UniversalEventDispatcher restored as proper implementation
-- **API Design**: ✅ Follows industry best practices (MediatR, Spring, Axon patterns)
-- **Context Model**: ✅ Flexible subscription patterns implemented
-- **Repository Pattern**: ✅ Full integration with existing IBaseRepository infrastructure
-- **Transaction Safety**: ✅ Events persisted before publishing with optimistic concurrency control
-- **Performance**: ✅ Concurrent event processing with `publishMany()` and `publishEventsForAggregate()`
 
-The implementation follows a clean-slate approach, removing all legacy code and providing a modern, unified event system without the burden of backward compatibility.
+- **Type Checking**: ✅ Passes without errors
+- **Implementation**: ✅ All legacy buses removed, UniversalEventDispatcher
+  restored as proper implementation
+- **API Design**: ✅ Follows industry best practices (MediatR, Spring, Axon
+  patterns)
+- **Context Model**: ✅ Flexible subscription patterns implemented
+- **Repository Pattern**: ✅ Full integration with existing IBaseRepository
+  infrastructure
+- **Transaction Safety**: ✅ Events persisted before publishing with optimistic
+  concurrency control
+- **Performance**: ✅ Concurrent event processing with `publishMany()` and
+  `publishEventsForAggregate()`
+
+The implementation follows a clean-slate approach, removing all legacy code and
+providing a modern, unified event system without the burden of backward
+compatibility.

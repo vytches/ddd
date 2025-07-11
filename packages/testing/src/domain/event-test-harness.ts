@@ -131,7 +131,7 @@ export class EventTestHarness extends TestHarness {
       enableTimeFreezing: options.enableTimeFreezing ?? false,
       setupTimeout: options.setupTimeout ?? 30000,
       teardownTimeout: options.teardownTimeout ?? 10000,
-      verbose: options.verbose ?? false
+      verbose: options.verbose ?? false,
     });
     this.eventTestOptions = options;
     this.logger = Logger.forContext('EventTestHarness');
@@ -142,9 +142,9 @@ export class EventTestHarness extends TestHarness {
       onError: (error, eventType) => {
         this.logger.error('Event handler error in test', error, {
           eventType,
-          testContext: this.eventTestOptions.contextId
+          testContext: this.eventTestOptions.contextId,
         });
-      }
+      },
     });
   }
 
@@ -155,7 +155,7 @@ export class EventTestHarness extends TestHarness {
     this.logger.debug('Initializing EventTestHarness', {
       captureAllEvents: this.eventTestOptions.captureAllEvents,
       contextId: this.eventTestOptions.contextId,
-      maxCapturedEvents: this.eventTestOptions.maxCapturedEvents
+      maxCapturedEvents: this.eventTestOptions.maxCapturedEvents,
     });
 
     // Clear any existing state
@@ -171,7 +171,7 @@ export class EventTestHarness extends TestHarness {
     this.logger.debug('Setting up EventTestHarness', {
       captureAllEvents: this.eventTestOptions.captureAllEvents,
       contextId: this.eventTestOptions.contextId,
-      maxCapturedEvents: this.eventTestOptions.maxCapturedEvents
+      maxCapturedEvents: this.eventTestOptions.maxCapturedEvents,
     });
 
     // Setup event capture if enabled
@@ -191,7 +191,7 @@ export class EventTestHarness extends TestHarness {
   protected async performTeardown(): Promise<void> {
     this.logger.debug('Tearing down EventTestHarness', {
       capturedEventCount: this.capturedEvents.length,
-      subscriptionCount: this.subscriptions.length
+      subscriptionCount: this.subscriptions.length,
     });
 
     // Clear all subscriptions
@@ -253,7 +253,7 @@ export class EventTestHarness extends TestHarness {
   async publishEvent(event: IDomainEvent | IIntegrationEvent | IAuditEvent): Promise<void> {
     this.logger.debug('Publishing test event', {
       eventType: event.eventType,
-      contextId: this.eventTestOptions.contextId
+      contextId: this.eventTestOptions.contextId,
     });
 
     // Add context if specified
@@ -270,10 +270,12 @@ export class EventTestHarness extends TestHarness {
   /**
    * Publish multiple events
    */
-  async publishEvents(events: Array<IDomainEvent | IIntegrationEvent | IAuditEvent>): Promise<void> {
+  async publishEvents(
+    events: Array<IDomainEvent | IIntegrationEvent | IAuditEvent>
+  ): Promise<void> {
     this.logger.debug('Publishing multiple test events', {
       eventCount: events.length,
-      contextId: this.eventTestOptions.contextId
+      contextId: this.eventTestOptions.contextId,
     });
 
     const contextualEvents = events.map(event => this.addContextToEvent(event));
@@ -289,10 +291,13 @@ export class EventTestHarness extends TestHarness {
   /**
    * Publish events from an aggregate
    */
-  async publishEventsForAggregate(aggregate: { getDomainEvents(): IDomainEvent[]; commit(): void }): Promise<void> {
+  async publishEventsForAggregate(aggregate: {
+    getDomainEvents(): IDomainEvent[];
+    commit(): void;
+  }): Promise<void> {
     this.logger.debug('Publishing aggregate events in test', {
       aggregateType: aggregate.constructor.name,
-      eventCount: aggregate.getDomainEvents().length
+      eventCount: aggregate.getDomainEvents().length,
     });
 
     // Capture events BEFORE publishing if auto-capture is enabled
@@ -327,11 +332,11 @@ export class EventTestHarness extends TestHarness {
     this.logger.debug('Subscribing to event in test', {
       eventType,
       contexts,
-      handlerName: handler.name || 'anonymous'
+      handlerName: handler.name || 'anonymous',
     });
 
     // Wrap handler to track calls
-    const wrappedHandler: UnifiedEventHandler<T> = async (event) => {
+    const wrappedHandler: UnifiedEventHandler<T> = async event => {
       this.incrementHandlerCallCount(eventType);
       await handler(event);
     };
@@ -341,7 +346,7 @@ export class EventTestHarness extends TestHarness {
     this.subscriptions.push({
       eventType,
       contexts: contexts || [],
-      handler: wrappedHandler as UnifiedEventHandler
+      handler: wrappedHandler as UnifiedEventHandler,
     });
   }
 
@@ -356,11 +361,11 @@ export class EventTestHarness extends TestHarness {
     this.logger.debug('Subscribing to context in test', {
       contextId,
       eventType,
-      handlerName: handler.name || 'anonymous'
+      handlerName: handler.name || 'anonymous',
     });
 
     // Wrap handler to track calls
-    const wrappedHandler: UnifiedEventHandler<T> = async (event) => {
+    const wrappedHandler: UnifiedEventHandler<T> = async event => {
       this.incrementHandlerCallCount(eventType);
       await handler(event);
     };
@@ -370,7 +375,7 @@ export class EventTestHarness extends TestHarness {
     this.subscriptions.push({
       eventType,
       contexts: contextId,
-      handler: wrappedHandler as UnifiedEventHandler
+      handler: wrappedHandler as UnifiedEventHandler,
     });
   }
 
@@ -383,7 +388,7 @@ export class EventTestHarness extends TestHarness {
   ): void {
     this.logger.debug('Registering class-based handler in test', {
       eventType,
-      handlerClass: handler.constructor.name
+      handlerClass: handler.constructor.name,
     });
 
     // Wrap handler to track calls
@@ -391,7 +396,7 @@ export class EventTestHarness extends TestHarness {
       handle: async (event: T) => {
         this.incrementHandlerCallCount(eventType);
         await handler.handle(event);
-      }
+      },
     };
 
     this.eventBus.registerHandler(eventType, wrappedHandler);
@@ -408,7 +413,7 @@ export class EventTestHarness extends TestHarness {
     this.logger.info('Running event test scenario', {
       scenarioName: scenario.name,
       eventCount: scenario.events.length,
-      expectedHandlerCalls: scenario.expectedHandlerCalls
+      expectedHandlerCalls: scenario.expectedHandlerCalls,
     });
 
     const scenarioStart = Date.now();
@@ -420,13 +425,13 @@ export class EventTestHarness extends TestHarness {
     try {
       await Promise.race([
         scenarioPromise,
-        this.createTimeoutPromise(timeout, `Scenario '${scenario.name}' timed out`)
+        this.createTimeoutPromise(timeout, `Scenario '${scenario.name}' timed out`),
       ]);
 
       this.logger.info('Event scenario completed successfully', {
         scenarioName: scenario.name,
         duration: Date.now() - scenarioStart,
-        capturedEventCount: this.capturedEvents.length
+        capturedEventCount: this.capturedEvents.length,
       });
     } finally {
       this.scenarioPromises.delete(scenario.name);
@@ -468,13 +473,18 @@ export class EventTestHarness extends TestHarness {
     // Verify expected event types were published
     for (const expectedType of scenario.expectedEventTypes) {
       if (!this.assertions.eventWasPublished(expectedType)) {
-        throw new Error(`Expected event type '${expectedType}' was not published in scenario '${scenario.name}'`);
+        throw new Error(
+          `Expected event type '${expectedType}' was not published in scenario '${scenario.name}'`
+        );
       }
     }
 
     // Verify handler call count if specified
     if (scenario.expectedHandlerCalls !== undefined) {
-      const totalCalls = Array.from(this.handlerCallCounts.values()).reduce((sum, count) => sum + count, 0);
+      const totalCalls = Array.from(this.handlerCallCounts.values()).reduce(
+        (sum, count) => sum + count,
+        0
+      );
       if (totalCalls !== scenario.expectedHandlerCalls) {
         throw new Error(
           `Expected ${scenario.expectedHandlerCalls} handler calls but got ${totalCalls} in scenario '${scenario.name}'`
@@ -495,21 +505,23 @@ export class EventTestHarness extends TestHarness {
 
     // Override the event bus publish method to capture events
     const originalPublish = this.eventBus.publish.bind(this.eventBus);
-    this.eventBus.publish = async (event) => {
+    this.eventBus.publish = async event => {
       await originalPublish(event);
       this.captureEvent(event);
     };
 
     // Override the event bus publishMany method to capture events
     const originalPublishMany = this.eventBus.publishMany.bind(this.eventBus);
-    this.eventBus.publishMany = async (events) => {
+    this.eventBus.publishMany = async events => {
       await originalPublishMany(events);
       events.forEach(event => this.captureEvent(event));
     };
 
     // Override the event bus publishEventsForAggregate method to capture events
-    const originalPublishEventsForAggregate = this.eventBus.publishEventsForAggregate.bind(this.eventBus);
-    this.eventBus.publishEventsForAggregate = async (aggregate) => {
+    const originalPublishEventsForAggregate = this.eventBus.publishEventsForAggregate.bind(
+      this.eventBus
+    );
+    this.eventBus.publishEventsForAggregate = async aggregate => {
       const events = aggregate.getDomainEvents();
       await originalPublishEventsForAggregate(aggregate);
       events.forEach(event => this.captureEvent(this.addContextToEvent(event)));
@@ -530,35 +542,40 @@ export class EventTestHarness extends TestHarness {
       metadata: eventMetadata,
       contextId: eventMetadata.contextId || this.eventTestOptions.contextId,
       timestamp: new Date(),
-      order: ++this.eventCounter
+      order: ++this.eventCounter,
     };
 
     this.capturedEvents.push(capture);
 
     // Enforce max captured events limit
-    if (this.eventTestOptions.maxCapturedEvents && this.capturedEvents.length > this.eventTestOptions.maxCapturedEvents) {
+    if (
+      this.eventTestOptions.maxCapturedEvents &&
+      this.capturedEvents.length > this.eventTestOptions.maxCapturedEvents
+    ) {
       this.capturedEvents = this.capturedEvents.slice(-this.eventTestOptions.maxCapturedEvents);
     }
 
     this.logger.debug('Captured event', {
       eventType: capture.eventType,
       contextId: capture.contextId,
-      order: capture.order
+      order: capture.order,
     });
   }
 
   /**
    * Add context to event if specified
    */
-  private addContextToEvent(event: IDomainEvent | IIntegrationEvent | IAuditEvent): IDomainEvent | IIntegrationEvent | IAuditEvent {
+  private addContextToEvent(
+    event: IDomainEvent | IIntegrationEvent | IAuditEvent
+  ): IDomainEvent | IIntegrationEvent | IAuditEvent {
     if (!this.eventTestOptions.contextId) return event;
 
     return {
       ...event,
       metadata: {
         ...(event as any).metadata,
-        contextId: this.eventTestOptions.contextId
-      }
+        contextId: this.eventTestOptions.contextId,
+      },
     };
   }
 
@@ -580,16 +597,16 @@ export class EventTestHarness extends TestHarness {
       },
 
       eventWasPublishedWithPayload: (eventType: string, payload: unknown) => {
-        return this.capturedEvents.some(event =>
-          event.eventType === eventType &&
-          JSON.stringify(event.payload) === JSON.stringify(payload)
+        return this.capturedEvents.some(
+          event =>
+            event.eventType === eventType &&
+            JSON.stringify(event.payload) === JSON.stringify(payload)
         );
       },
 
       eventWasPublishedInContext: (eventType: string, contextId: string) => {
-        return this.capturedEvents.some(event =>
-          event.eventType === eventType &&
-          event.contextId === contextId
+        return this.capturedEvents.some(
+          event => event.eventType === eventType && event.contextId === contextId
         );
       },
 
@@ -629,7 +646,7 @@ export class EventTestHarness extends TestHarness {
 
       getHandlerCallCount: (eventType: string) => {
         return this.handlerCallCounts.get(eventType) || 0;
-      }
+      },
     };
   }
 
@@ -669,7 +686,7 @@ export class EventTestHarness extends TestHarness {
     if (this.scenarioPromises.size === 0) return;
 
     this.logger.debug('Waiting for pending scenarios', {
-      pendingCount: this.scenarioPromises.size
+      pendingCount: this.scenarioPromises.size,
     });
 
     await Promise.all(Array.from(this.scenarioPromises.values()));

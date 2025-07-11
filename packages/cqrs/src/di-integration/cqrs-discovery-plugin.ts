@@ -69,7 +69,7 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
               type: handlerType as 'command' | 'query',
               messageType: metadata.messageType,
               handlerType: value as any,
-              metadata: { ...metadata }
+              metadata: { ...metadata },
             });
           }
         }

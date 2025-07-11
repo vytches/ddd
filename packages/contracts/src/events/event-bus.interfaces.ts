@@ -47,7 +47,6 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
   abstract publishMany(events: TEvent[]): Promise<void>;
 }
 
-
 /**
  * Base options for all event bus implementations
  */

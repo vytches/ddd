@@ -26,10 +26,7 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
   /**
    * Schedule an event
    */
-  async schedule(
-    event: IScheduledEvent,
-    options?: IScheduleOptions
-  ): Promise<string> {
+  async schedule(event: IScheduledEvent, options?: IScheduleOptions): Promise<string> {
     this.validateEvent(event);
 
     const job = this.createJob(event, options);
@@ -129,41 +126,29 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
     // Apply filters
     if (filter) {
       if (filter.status) {
-        const statuses = Array.isArray(filter.status)
-          ? filter.status
-          : [filter.status];
-        jobs = jobs.filter((job) => statuses.includes(job.status));
+        const statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
+        jobs = jobs.filter(job => statuses.includes(job.status));
       }
 
       if (filter.eventType) {
-        const types = Array.isArray(filter.eventType)
-          ? filter.eventType
-          : [filter.eventType];
-        jobs = jobs.filter((job) => types.includes(job.event.type));
+        const types = Array.isArray(filter.eventType) ? filter.eventType : [filter.eventType];
+        jobs = jobs.filter(job => types.includes(job.event.type));
       }
 
       if (filter.scheduledAfter) {
-        jobs = jobs.filter(
-          (job) => job.scheduledAt >= filter.scheduledAfter!
-        );
+        jobs = jobs.filter(job => job.scheduledAt >= filter.scheduledAfter!);
       }
 
       if (filter.scheduledBefore) {
-        jobs = jobs.filter(
-          (job) => job.scheduledAt <= filter.scheduledBefore!
-        );
+        jobs = jobs.filter(job => job.scheduledAt <= filter.scheduledBefore!);
       }
 
       if (filter.createdAfter) {
-        jobs = jobs.filter(
-          (job) => job.createdAt >= filter.createdAfter!
-        );
+        jobs = jobs.filter(job => job.createdAt >= filter.createdAfter!);
       }
 
       if (filter.createdBefore) {
-        jobs = jobs.filter(
-          (job) => job.createdAt <= filter.createdBefore!
-        );
+        jobs = jobs.filter(job => job.createdAt <= filter.createdBefore!);
       }
     }
 
@@ -247,7 +232,7 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
     const start = Date.now();
 
     while (this.processing.size > 0 && Date.now() - start < timeout) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     if (this.processing.size > 0) {
@@ -260,7 +245,6 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
   protected async doProcessJob(job: IScheduledJob): Promise<void> {
     // This is the actual processing logic for the job
     // This method is called by processJob in the base class after lifecycle hooks
-
     // For InMemorySchedulerAdapter, we don't need to do anything here
     // The lifecycle hooks handle the actual processing
     // This is just a placeholder for the abstract method
@@ -305,9 +289,8 @@ export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
         attempts: job.attempts,
       });
     } catch (error) {
-      const maxRetries = job.event.scheduleOptions?.maxRetries ||
-        this.config.defaultMaxRetries ||
-        3;
+      const maxRetries =
+        job.event.scheduleOptions?.maxRetries || this.config.defaultMaxRetries || 3;
 
       job.lastError = error instanceof Error ? error.message : String(error);
       job.updatedAt = new Date();

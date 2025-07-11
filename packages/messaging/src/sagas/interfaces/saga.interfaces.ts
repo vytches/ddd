@@ -104,7 +104,10 @@ export interface ISaga {
    * @param event - Domain event to process
    * @param context - Execution context
    */
-  handleEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult>;
+  handleEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult>;
 
   /**
    * Execute compensation for a specific step
@@ -237,10 +240,7 @@ export interface ISagaStep {
    * @param state - Current saga state
    * @param context - Execution context
    */
-  compensate?(
-    state: ISagaState,
-    context: ISagaExecutionContext
-  ): Promise<ISagaActionResult>;
+  compensate?(state: ISagaState, context: ISagaExecutionContext): Promise<ISagaActionResult>;
 
   /**
    * Validate that step can be executed
@@ -281,10 +281,7 @@ export interface ISagaDefinition {
    * @param event - Starting event
    * @param context - Execution context
    */
-  createInstance(
-    event: IExtendedDomainEvent,
-    context: ISagaExecutionContext
-  ): Promise<ISaga>;
+  createInstance(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISaga>;
 
   /**
    * Get correlation data from starting event

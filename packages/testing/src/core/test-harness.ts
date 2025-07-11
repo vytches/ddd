@@ -64,7 +64,7 @@ export abstract class TestHarness {
       enableTimeFreezing: options.enableTimeFreezing ?? false,
       setupTimeout: options.setupTimeout ?? 30000,
       teardownTimeout: options.teardownTimeout ?? 10000,
-      verbose: options.verbose ?? false
+      verbose: options.verbose ?? false,
     };
 
     if (this.options.enableTimeFreezing) {
@@ -200,7 +200,7 @@ export abstract class TestHarness {
       setupTime: this._setupTime ? new Date(this._setupTime) : null,
       teardownTime: this._teardownTime ? new Date(this._teardownTime) : null,
       resourceCount: this._resources.size,
-      hasErrors: this._errors.length > 0
+      hasErrors: this._errors.length > 0,
     };
   }
 
@@ -298,7 +298,7 @@ export abstract class TestHarness {
    * Dispose of all registered resources
    */
   private async disposeAllResources(): Promise<void> {
-    const disposalPromises = Array.from(this._resources.values()).map(async (resource) => {
+    const disposalPromises = Array.from(this._resources.values()).map(async resource => {
       try {
         await resource.dispose();
         this.log(`Disposed resource: ${resource.type}#${resource.id}`);
@@ -412,7 +412,7 @@ export class TestResourceBuilder {
       id: this._id,
       type: this._type,
       created: new Date(),
-      dispose: this._disposeFn || (() => Promise.resolve())
+      dispose: this._disposeFn || (() => Promise.resolve()),
     };
   }
 
