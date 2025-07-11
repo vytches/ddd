@@ -19,7 +19,8 @@
     "../core/src/**/*",
     "../repositories/src/**/*",
     "../testing/src/**/*",
-    "../validation/src/**/*"
+    "../validation/src/**/*",
+    "../di/src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

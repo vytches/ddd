@@ -152,7 +152,9 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:contracts",
                   "scope:utils",
+                  "scope:di",
                   "scope:messaging",
+                  "scope:domain-primitives",
                   "scope:logging"
                 ]
               },

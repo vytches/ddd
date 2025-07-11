@@ -20,11 +20,114 @@ export {
   OutboxService,
 } from './outbox';
 
-// Sagas - Interfaces and Types
-export type { ISaga } from './sagas';
+// Sagas - Enterprise-grade process management and long-running workflows
+export type {
+  ISaga,
+  ISagaState,
+  ISagaExecutionContext,
+  ISagaActionResult,
+  ISagaStep,
+  ISagaDefinition,
+  ISagaFactory,
+  ISagaRepository,
+  ISagaQuery,
+  ISagaQueryResult,
+  ISagaRepositoryConfig,
+  ISagaRepositoryFactory,
+  ISagaOrchestrator,
+  ISagaProcessingResult,
+  ISagaOrchestratorConfig,
+  ISagaOrchestratorStatistics,
+  ISagaMonitor,
+  ISagaMetricsFilter,
+  ISagaMetrics,
+  SagaDecoratorOptions,
+  SagaEventHandlerOptions,
+  CompensationHandlerOptions,
+  StartSagaOptions,
+  EndSagaOptions,
+  TimeoutHandlerOptions,
+  SagaStepOptions,
+  SagaCorrelationOptions,
+  SagaMiddlewareOptions,
+  ISagaMiddleware,
+  ISagaMiddlewareContext,
+  SagaValidationOptions,
+  SagaMetadata,
+  SagaDiscoveryResult,
+} from './sagas';
 
-// Sagas - Enums
-export { SagaStatus } from './sagas';
+// Sagas - Enums and Errors
+export {
+  SagaStatus,
+  SagaConcurrencyError,
+  SagaNotFoundError,
+  isSagaMetadata,
+} from './sagas';
 
-// Sagas - Classes
-export { SagaManager } from './sagas';
+// Sagas - Base Classes
+export {
+  BaseSaga,
+  SagaStep,
+  ConcreteSagaStep,
+  SagaDefinition,
+} from './sagas';
+
+// Sagas - Infrastructure
+export {
+  InMemorySagaRepository,
+  SagaOrchestrator,
+} from './sagas';
+
+// Sagas - Decorators
+export {
+  Saga,
+  SagaEventHandler,
+  StartSaga,
+  EndSaga,
+  CompensationHandler,
+  getSagaMetadata,
+  getSagaType,
+  isSagaClass,
+  getAllSagaTypes,
+  getEventHandlerMetadata,
+  getEventHandlerMethods,
+  isEventHandlerMethod,
+  getCompensationHandlerMetadata,
+  getCompensationHandlerMethods,
+  isCompensationHandlerMethod,
+  getCompensationHandlerForStep,
+  getOrderedCompensationHandlers,
+  SAGA_METADATA_KEY,
+  SAGA_TYPE_METADATA_KEY,
+} from './sagas';
+
+// Sagas - Discovery
+export {
+  SagaDiscoveryPlugin,
+  sagaDiscoveryPlugin,
+} from './sagas';
+
+// Saga Middleware
+export {
+  BaseSagaMiddleware,
+  PerformanceMonitoringMiddleware,
+  RetryMiddleware,
+  CircuitBreakerMiddleware,
+  SecurityMiddleware,
+  SagaMiddlewarePipeline,
+} from './sagas';
+
+// Saga Error Classes
+export {
+  SagaError,
+  SagaExecutionError,
+  SagaStepError,
+  SagaConfigurationError,
+  SagaEventProcessingError,
+  SagaCompensationError,
+  SagaDiscoveryError,
+  SagaOrchestrationError,
+  SagaInstanceLimitExceededError,
+  SagaDefinitionNotFoundError,
+} from './sagas';

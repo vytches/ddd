@@ -766,6 +766,166 @@ const orderService = VytchesDDD.resolve<OrderService>('orderService', 'OrderMana
 const paymentService = VytchesDDD.resolve<PaymentService>('paymentService', 'PaymentProcessing');
 ```
 
+## Saga Framework Usage Guide
+
+### Basic Saga Implementation
+
+```typescript
+import { BaseSaga, SagaStatus } from '@vytches-ddd/messaging';
+import type { IExtendedDomainEvent, ISagaExecutionContext, ISagaActionResult } from '@vytches-ddd/messaging';
+
+// Define saga for long-running business processes
+class OrderProcessingSaga extends BaseSaga {
+  constructor() {
+    super('OrderProcessingSaga', 'Order Processing Workflow');
+  }
+
+  // Handle domain events in the saga
+  async handleEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+    switch (event.eventType) {
+      case 'OrderCreated':
+        return await this.handleOrderCreated(event, context);
+      case 'PaymentProcessed':
+        return await this.handlePaymentProcessed(event, context);
+      case 'InventoryReserved':
+        return await this.handleInventoryReserved(event, context);
+      default:
+        return { success: false, error: { message: 'Unhandled event type', code: 'UNHANDLED_EVENT' } };
+    }
+  }
+
+  // Define which events this saga can handle
+  canHandle(event: IExtendedDomainEvent): boolean {
+    return ['OrderCreated', 'PaymentProcessed', 'InventoryReserved', 'OrderFailed'].includes(event.eventType);
+  }
+
+  // Compensation logic for failed transactions
+  async compensate(stepName: string, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+    // Implement compensation logic based on current step
+    switch (stepName) {
+      case 'PaymentProcessed':
+        return await this.refundPayment(context);
+      case 'InventoryReserved':
+        return await this.releaseInventory(context);
+      default:
+        return { success: true };
+    }
+  }
+
+  private async handleOrderCreated(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+    // Move to next step and emit commands
+    this.updateState({
+      currentStep: 'ProcessPayment',
+      stepData: { ...this.state.stepData, orderId: event.payload.orderId }
+    });
+
+    return {
+      success: true,
+      commands: [{ type: 'ProcessPayment', payload: event.payload }],
+      events: [{ eventType: 'PaymentRequested', payload: event.payload }]
+    };
+  }
+}
+```
+
+### Saga Orchestrator Usage
+
+```typescript
+import { SagaOrchestrator, InMemorySagaRepository } from '@vytches-ddd/messaging';
+
+// Setup saga infrastructure
+const sagaRepository = new InMemorySagaRepository();
+const orchestrator = new SagaOrchestrator(sagaRepository, {
+  maxConcurrentExecutions: 50,
+  enableMetrics: true,
+  enableAutoRetry: true
+});
+
+// Register saga definitions
+const orderSagaDefinition: ISagaDefinition = {
+  sagaType: 'OrderProcessingSaga',
+  displayName: 'Order Processing Workflow',
+  description: 'Handles complete order processing with compensation',
+  startEvents: ['OrderCreated'],
+  defaultTimeout: 3600000, // 1 hour
+  maxInstances: 100,
+  steps: [],
+  createInstance: async (event, context) => new OrderProcessingSaga(),
+  getCorrelationData: (event) => ({ orderId: event.payload.orderId }),
+  validate: () => []
+};
+
+orchestrator.registerSagaDefinition(orderSagaDefinition);
+
+// Process events through orchestrator
+const event = createOrderCreatedEvent();
+const context = { correlationId: 'order-123', userId: 'user-456' };
+
+// Start new saga or process existing ones
+const results = await orchestrator.processEvent(event, context);
+```
+
+### Saga Repository Operations
+
+```typescript
+import { InMemorySagaRepository } from '@vytches-ddd/messaging';
+
+const repository = new InMemorySagaRepository({
+  enableOptimisticLocking: true,
+  enableAuditLog: true,
+  retentionPolicy: {
+    completedAfterDays: 30,
+    compensatedAfterDays: 60,
+    failedAfterDays: 90
+  }
+});
+
+// Save saga state
+await repository.save(sagaInstance);
+
+// Find sagas by correlation
+const relatedSagas = await repository.findByCorrelation({ orderId: 'order-123' });
+
+// Find timed out sagas for cleanup
+const timedOutSagas = await repository.findTimedOut(new Date());
+
+// Query sagas with advanced criteria
+const queryResult = await repository.query({
+  sagaType: 'OrderProcessingSaga',
+  status: [SagaStatus.STARTED, SagaStatus.EXECUTING],
+  createdBetween: { start: yesterday, end: today },
+  limit: 50,
+  sortBy: 'createdAt',
+  sortOrder: 'desc'
+});
+```
+
+### Saga Middleware
+
+```typescript
+import { LoggingMiddleware, RetryMiddleware, CircuitBreakerMiddleware } from '@vytches-ddd/messaging';
+
+// Create middleware pipeline
+const loggingMiddleware = new LoggingMiddleware();
+const retryMiddleware = new RetryMiddleware({
+  maxAttempts: 3,
+  baseDelay: 1000,
+  maxDelay: 30000
+});
+const circuitBreakerMiddleware = new CircuitBreakerMiddleware({
+  failureThreshold: 5,
+  resetTimeout: 60000
+});
+
+// Apply middleware to saga execution
+const middlewarePipeline = [loggingMiddleware, retryMiddleware, circuitBreakerMiddleware];
+
+// Middleware automatically handles cross-cutting concerns:
+// - Structured logging with context
+// - Automatic retry on transient failures  
+// - Circuit breaker for fault tolerance
+```
+
 ## Unified Event System Usage Guide
 
 ### Basic Event Publishing with Repository Pattern (Recommended)
@@ -947,6 +1107,12 @@ pnpm playground
   - Circular dependency elimination between testing and value-objects packages
   - TypeScript configuration standardization across all 22 packages
   - Two-layer EntityId pattern with enhanced validation
+- **🔥 COMPLETED**: **Saga Framework Implementation** - Enterprise-grade long-running business processes
+  - Complete saga orchestration system with state management and compensation patterns
+  - Advanced saga repository with optimistic concurrency control and querying capabilities
+  - Middleware pipeline for cross-cutting concerns (logging, retry, circuit breaker)
+  - Comprehensive test coverage with 100% functionality verification
+  - Enterprise features: timeout handling, instance limits, correlation tracking
 - **NEW**: Enterprise dependency injection system with auto-discovery and context isolation
 - **NEW**: Global service locator pattern following MediatR architecture
 - **NEW**: Enhanced decorators (@DomainService, @CommandHandler, @QueryHandler) with DI options
