@@ -25,6 +25,10 @@ else
     echo "  - Update specific packages: 'pnpm update <package-name> -D'"
     echo "  - Update all dependencies: 'pnpm update'"
     echo ""
+    echo "🔧 For transitive dependency vulnerabilities:"
+    echo "  - Add to package.json pnpm.overrides: { \"vulnerable-package\": \">=safe-version\" }"
+    echo "  - Example: { \"esbuild\": \">=0.25.0\" }"
+    echo ""
     echo "📋 To check specific packages:"
     echo "  - cd packages/<package-name> && pnpm outdated"
     

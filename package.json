@@ -190,6 +190,11 @@
     "vitest-sonar-reporter": "^2.0.1",
     "yargs": "^17.7.2"
   },
+  "pnpm": {
+    "overrides": {
+      "esbuild": ">=0.25.0"
+    }
+  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
