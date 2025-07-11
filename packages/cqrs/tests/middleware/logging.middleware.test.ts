@@ -28,7 +28,7 @@ describe('LoggingMiddleware', () => {
     mockLogger = {
       log: vi.fn(),
     };
-    nextFunction = vi.fn<[], Promise<any>>().mockResolvedValue('next-result');
+    nextFunction = vi.fn().mockResolvedValue('next-result') as any;
   });
 
   describe('constructor', () => {
@@ -264,8 +264,8 @@ describe('LoggingMiddleware', () => {
         const context1 = new CQRSExecutionContext(command1, mockCommandHandler, 'command');
         const context2 = new CQRSExecutionContext(command2, mockCommandHandler, 'command');
 
-        const next1 = vi.fn<[], Promise<string>>().mockResolvedValue('result-1');
-        const next2 = vi.fn<[], Promise<string>>().mockResolvedValue('result-2');
+        const next1 = vi.fn().mockResolvedValue('result-1');
+        const next2 = vi.fn().mockResolvedValue('result-2');
 
         const [result1, result2] = await Promise.all([
           middleware.handle(context1, next1),

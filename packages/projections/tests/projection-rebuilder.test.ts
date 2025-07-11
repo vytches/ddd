@@ -216,7 +216,7 @@ describe('ProjectionRebuilder', () => {
 
       await expect(
         rebuilder.rebuildMany(projections, undefined, { skipErrors: false })
-      ).rejects.toThrow(error);
+      ).rejects.toThrow(error.message);
     });
   });
 

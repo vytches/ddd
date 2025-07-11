@@ -148,8 +148,11 @@ describe('RetryPolicy', () => {
 
       expect(operation).toHaveBeenCalledTimes(2);
 
-      const firstCall = operation.mock.calls[0][0];
-      const secondCall = operation.mock.calls[1][0];
+      const calls = operation.mock.calls;
+      expect(calls.length).toBeGreaterThanOrEqual(2);
+
+      const firstCall = calls[0]![0];
+      const secondCall = calls[1]![0];
 
       expect(firstCall.attempt).toBe(1);
       expect(secondCall.attempt).toBe(2);
