@@ -29,7 +29,8 @@
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/logging": "workspace:*"
+    "@vytches-ddd/logging": "workspace:*",
+    "tslib": "^2.8.1"
   },
   "nx": {
     "tags": [
@@ -38,7 +39,6 @@
     ]
   },
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
-    "tslib": "^2.8.1"
+    "@vytches-ddd/testing": "workspace:*"
   }
 }

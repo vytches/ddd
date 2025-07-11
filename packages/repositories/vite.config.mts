@@ -10,7 +10,6 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
-      declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
   resolve: {
@@ -18,6 +17,7 @@ export default defineConfig({
       '@vytches-ddd/testing': resolve(__dirname, '../testing/src'),
       '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
       '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
     },
   },
   build: {
@@ -44,6 +44,12 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       enabled: false,
+    },
+    alias: {
+      '@vytches-ddd/testing': resolve(__dirname, '../testing/src'),
+      '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src'),
+      '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src'),
     },
   },
 });

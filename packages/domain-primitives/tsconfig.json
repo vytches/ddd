@@ -7,6 +7,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "../contracts/src/**/*", "../utils/src/**/*", "../logging/src/**/*"],
+  "include": ["src/**/*", "tests/**/*", "../utils/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

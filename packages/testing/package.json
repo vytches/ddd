@@ -30,7 +30,7 @@
     "@vytches-ddd/domain-primitives": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/contracts": "workspace:*",
-    "tslib": "^2.6.0"
+    "tslib": "^2.8.1"
   },
   "peerDependencies": {
     "@vytches-ddd/core": "workspace:*",

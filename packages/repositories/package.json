@@ -35,7 +35,6 @@
   },
   "peerDependencies": {
     "@vytches-ddd/domain-primitives": "*",
-    "@vytches-ddd/value-objects": "*",
     "@vytches-ddd/utils": "*",
     "@vytches-ddd/contracts": "*"
   },

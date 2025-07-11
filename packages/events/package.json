@@ -32,7 +32,7 @@
     "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/logging": "workspace:*",
     "@vytches-ddd/di": "workspace:*",
-    "tslib": "^2.6.0"
+    "tslib": "^2.8.1"
   },
   "nx": {
     "tags": [
