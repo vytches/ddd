@@ -15,10 +15,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
-      '@vytches-ddd/events': resolve(__dirname, '../events/src/index.ts'),
       '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
-      '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
-      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
     },
   },
   build: {
@@ -45,6 +42,10 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       enabled: false,
+    },
+    alias: {
+      '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+      '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
     },
   },
 });

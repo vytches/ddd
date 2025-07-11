@@ -22,6 +22,7 @@ export default defineConfig({
       '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
       '@vytches-ddd/aggregates': resolve(__dirname, '../aggregates/src/index.ts'),
       '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+      '@vytches-ddd/value-objects': resolve(__dirname, '../value-objects/src/index.ts'),
       '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
       '@vytches-ddd/testing': resolve(__dirname, '../testing/src/index.ts'),
       '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
@@ -57,6 +58,8 @@ export default defineConfig({
       '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/aggregates': new URL('../aggregates/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/value-objects': new URL('../value-objects/src/index.ts', import.meta.url)
+        .pathname,
       '@vytches-ddd/di': new URL('../di/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/testing': new URL('../testing/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/domain-primitives': new URL(
