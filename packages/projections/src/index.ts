@@ -5,6 +5,13 @@ export { BaseProjection } from './projection-base';
 
 export { ProjectionBuilder } from './projection.builder';
 
+export {
+  ProjectionRebuilder,
+  createProjectionRebuilder,
+  type IProjectionRebuilder,
+  type IProjectionRebuildConfig
+} from './projection-rebuilder';
+
 export type {
   IProjection,
   IProjectionStore,

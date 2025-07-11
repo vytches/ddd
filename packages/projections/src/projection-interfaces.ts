@@ -19,6 +19,7 @@ export interface IProjectionStore<TReadModel> {
   load(projectionName: string): Promise<TReadModel | null>;
   save(projectionName: string, state: TReadModel): Promise<void>;
   delete(projectionName: string): Promise<void>;
+  deleteAll(): Promise<void>;
   exists(projectionName: string): Promise<boolean>;
 }
 
@@ -40,6 +41,7 @@ export interface IProjectionLifecycleCapability<TReadModel> {
 
 export interface IProjectionEngine<TReadModel> {
   getProjectionName(): string;
+  getEventTypes(): string[];
   processEvent(event: IExtendedDomainEvent): Promise<void>;
   isInterestedIn(event: IExtendedDomainEvent): boolean;
   getState(): Promise<TReadModel | null>;
@@ -54,7 +56,6 @@ export interface IProjectionEngine<TReadModel> {
   removeCapability<T extends Capability & IProjectionCapability>(
     CapabilityClass: CapabilityConstructor<T>
   ): this;
-  rebuild(events: AsyncIterable<IExtendedDomainEvent>): Promise<void>;
 }
 
 /**

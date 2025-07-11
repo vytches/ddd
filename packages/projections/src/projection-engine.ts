@@ -1,4 +1,12 @@
-import type { IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
+import type {
+  IExtendedDomainEvent,
+  Capability,
+  CapabilityConstructor,
+  IProjectionCapability,
+  IEventStore,
+  IReplayFilter,
+  IReplayResult
+} from '@vytches-ddd/contracts';
 import { CapabilityRegistry } from '@vytches-ddd/contracts';
 import { LibUtils } from '@vytches-ddd/utils';
 
@@ -13,6 +21,7 @@ import type {
   IProjectionStore,
 } from './projection-interfaces';
 import { ExponentialBackoffStrategy } from './error-strategy';
+import { ProjectionRebuilder, type IProjectionRebuildConfig } from './projection-rebuilder';
 
 export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadModel> {
   private capabilities = new CapabilityRegistry();
@@ -115,7 +124,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     await this.store.save(this.projection.name, initialState);
   }
 
-  async rebuild(events: AsyncIterable<IExtendedDomainEvent>): Promise<void> {
+  async rebuildFromEvents(events: AsyncIterable<IExtendedDomainEvent>): Promise<void> {
     await this.reset();
 
     for await (const event of events) {
@@ -193,6 +202,31 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     if (promises.length > 0) {
       await Promise.all(promises);
     }
+  }
+
+  /**
+   * Rebuild this projection from event history
+   */
+  async rebuild(
+    eventStore: IEventStore,
+    filter?: IReplayFilter,
+    config?: IProjectionRebuildConfig
+  ): Promise<IReplayResult> {
+    const rebuilder = new ProjectionRebuilder(eventStore, this, this.store);
+    return rebuilder.rebuild(filter, config);
+  }
+
+  /**
+   * Rebuild this projection from specific stream
+   */
+  async rebuildFromStream(
+    eventStore: IEventStore,
+    streamId: string,
+    filter?: IReplayFilter,
+    config?: IProjectionRebuildConfig
+  ): Promise<IReplayResult> {
+    const rebuilder = new ProjectionRebuilder(eventStore, this, this.store);
+    return rebuilder.rebuildFromStream(streamId, filter, config);
   }
 }
 

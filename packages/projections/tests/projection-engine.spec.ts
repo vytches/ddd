@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { Capability } from '@vytches-ddd/contracts';
 import { ProjectionEngine, EnhancedProjectionEngine } from '../src/projection-engine';
-import type { IProjection, IProjectionStore, IProjectionCapability } from '../src/projection-interfaces';
 import { ProjectionError } from '../src/projection-errors';
 import { ExponentialBackoffStrategy } from '../src/error-strategy';
 
 // Mock Store implementation
-class MockProjectionStore<T> implements IProjectionStore<T> {
+class MockProjectionStore<T> {
   private data = new Map<string, T>();
 
   async load(projectionName: string): Promise<T | null> {
@@ -24,6 +22,10 @@ class MockProjectionStore<T> implements IProjectionStore<T> {
 
   async exists(projectionName: string): Promise<boolean> {
     return this.data.has(projectionName);
+  }
+
+  async deleteAll(): Promise<void> {
+    this.data.clear();
   }
 
   // Helper for testing
@@ -44,7 +46,7 @@ interface UserReadModel {
   version: number;
 }
 
-class MockUserProjection implements IProjection<UserReadModel> {
+class MockUserProjection {
   readonly name = 'UserProjection';
   readonly eventTypes = ['UserCreated', 'UserUpdated', 'UserDeleted'];
 
@@ -62,7 +64,7 @@ class MockUserProjection implements IProjection<UserReadModel> {
     };
   }
 
-  async apply(readModel: UserReadModel, event: IExtendedDomainEvent): Promise<UserReadModel> {
+  async apply(readModel: UserReadModel, event: any): Promise<UserReadModel> {
     if (this.shouldThrow) {
       throw new Error(`Failed to apply event ${event.eventType}`);
     }
@@ -98,7 +100,7 @@ class MockUserProjection implements IProjection<UserReadModel> {
 }
 
 // Mock Capability
-class MockCapability extends Capability<'mockCapability'> implements IProjectionCapability {
+class MockCapability extends Capability<'mockCapability'> {
   readonly type = 'mockCapability' as const;
   private attachedContext: any = null;
   public onAttachCalled = false;
@@ -132,7 +134,7 @@ describe('ProjectionEngine', () => {
     eventType: string,
     aggregateId = 'user-123',
     payload: any = {}
-  ): IExtendedDomainEvent => ({
+  ): any => ({
     eventType,
     payload,
     metadata: {
@@ -386,7 +388,7 @@ describe('EnhancedProjectionEngine', () => {
     eventType: string,
     aggregateId = 'user-123',
     payload: any = {}
-  ): IExtendedDomainEvent => ({
+  ): any => ({
     eventType,
     payload,
     metadata: {

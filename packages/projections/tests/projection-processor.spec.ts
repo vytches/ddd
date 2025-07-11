@@ -1,36 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IDomainEvent, IExtendedDomainEvent, Capability, CapabilityConstructor, IProjectionCapability } from '@vytches-ddd/contracts';
 import { ProjectionProcessor } from '../src/projection-processor';
 import { ProjectionEngineRegistry } from '../src/projection-registry';
-import type { IProjectionEngine } from '../src/projection-interfaces';
 
 // Mock implementation of IProjectionEngine
-class MockProjectionEngine implements IProjectionEngine<any> {
+class MockProjectionEngine {
   constructor(
     private name: string,
     private eventTypes: string[] = [],
     private shouldThrow = false
   ) {}
 
-  addCapability<T extends Capability & IProjectionCapability>(capability: T): this {
+  addCapability(capability: any): this {
     return this;
   }
 
-  getCapability<T extends Capability & IProjectionCapability>(
-    CapabilityClass: CapabilityConstructor<T>
-  ): T | undefined {
+  getCapability(CapabilityClass: any): any {
     return undefined;
   }
 
-  hasCapability<T extends Capability & IProjectionCapability>(
-    CapabilityClass: CapabilityConstructor<T>
-  ): boolean {
+  hasCapability(CapabilityClass: any): boolean {
     return false;
   }
 
-  removeCapability<T extends Capability & IProjectionCapability>(
-    CapabilityClass: CapabilityConstructor<T>
-  ): this {
+  removeCapability(CapabilityClass: any): this {
     return this;
   }
 
@@ -38,7 +30,11 @@ class MockProjectionEngine implements IProjectionEngine<any> {
     return this.name;
   }
 
-  async processEvent(event: IExtendedDomainEvent): Promise<void> {
+  getEventTypes(): string[] {
+    return this.eventTypes;
+  }
+
+  async processEvent(event: any): Promise<void> {
     if (this.shouldThrow) {
       throw new Error(`Processing failed for ${event.eventType}`);
     }
@@ -54,14 +50,14 @@ class MockProjectionEngine implements IProjectionEngine<any> {
   }
 
 
-  async rebuild(events: AsyncIterable<IExtendedDomainEvent>): Promise<void> {
+  async rebuild(events: AsyncIterable<any>): Promise<void> {
     // Mock rebuild
     for await (const event of events) {
       await this.processEvent(event);
     }
   }
 
-  isInterestedIn(event: IExtendedDomainEvent): boolean {
+  isInterestedIn(event: any): boolean {
     return this.eventTypes.includes(event.eventType);
   }
 }
@@ -73,7 +69,7 @@ describe('ProjectionProcessor', () => {
   let mockEngine2: MockProjectionEngine;
   let mockFailingEngine: MockProjectionEngine;
 
-  const createMockEvent = (eventType: string, aggregateId = 'test-id'): IDomainEvent => ({
+  const createMockEvent = (eventType: string, aggregateId = 'test-id'): any => ({
     eventType,
     payload: { data: 'test', aggregateId, aggregateType: 'TestAggregate', eventVersion: 1 },
   });
@@ -81,7 +77,7 @@ describe('ProjectionProcessor', () => {
   const createExtendedMockEvent = (
     eventType: string,
     aggregateId = 'test-id'
-  ): IExtendedDomainEvent => ({
+  ): any => ({
     ...createMockEvent(eventType, aggregateId),
     metadata: {
       eventId: 'event-123',
@@ -286,7 +282,7 @@ describe('ProjectionProcessor', () => {
           eventId: 'original-id',
           timestamp: originalTimestamp,
         },
-      } as IExtendedDomainEvent;
+      } as any;
 
       // Act
       await processor.process(event);
@@ -327,7 +323,7 @@ describe('ProjectionProcessor', () => {
       const processEventSpy = vi.spyOn(mockEngine1, 'processEvent');
       registry.register(mockEngine1);
 
-      const complexEvent: IDomainEvent = {
+      const complexEvent: any = {
         eventType: 'UserCreated',
         payload: {
           userData: {
@@ -386,7 +382,7 @@ describe('ProjectionProcessor', () => {
         eventVersion: 1,
         payload: {},
         // Missing other required properties intentionally
-      } as IDomainEvent;
+      } as any;
 
       // Act & Assert
       try {

@@ -17,4 +17,3 @@ export * from '@vytches-ddd/validation';
 export * from '@vytches-ddd/projections';
 export * from '@vytches-ddd/di';
 
-export const ENTERPRISE_VERSION = '0.1.0';
