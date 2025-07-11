@@ -43,6 +43,11 @@ export default defineConfig({
       '@vytches-ddd/validation': new URL('../validation/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/di': new URL('../di/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/testing': new URL('../testing/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/domain-primitives': new URL(
+        '../domain-primitives/src/index.ts',
+        import.meta.url
+      ).pathname,
     },
     coverage: {
       enabled: false,
