@@ -69,6 +69,8 @@ export default defineConfig({
     bail: 0,
     deps: {
       moduleDirectories: ['node_modules', 'packages'],
+      // Avoid problematic root package.json directory resolution
+      external: [/^\/package\.json/],
     },
     alias: {
       '@vytches-ddd/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
