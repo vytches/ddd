@@ -1,4 +1,4 @@
-# 7. Implement Flexible Event Scheduling System with Adapter Pattern
+# ADR-0009. Implement Flexible Event Scheduling System with Adapter Pattern
 
 Date: 2025-07-09
 

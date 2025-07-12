@@ -1,0 +1,94 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*" # Package version tags
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run quality checks
+        run: pnpm quality
+
+      - name: Create release assets
+        run: |
+          mkdir -p release-assets
+          tar -czf release-assets/vytches-ddd-packages.tar.gz packages/*/dist
+          zip -r release-assets/vytches-ddd-packages.zip packages/*/dist
+
+      - name: Generate changelog and package info
+        id: changelog
+        run: |
+          # Get all packages and their versions
+          echo "packages<<EOF" >> $GITHUB_OUTPUT
+          for pkg in packages/*/package.json; do
+            name=$(grep '"name"' "$pkg" | cut -d'"' -f4)
+            version=$(grep '"version"' "$pkg" | cut -d'"' -f4)
+            echo "- $name@$version" >> $GITHUB_OUTPUT
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Get changelog if exists
+          if [ -f CHANGELOG.md ]; then
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            head -100 CHANGELOG.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "changelog=Automated release for ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          generate_release_notes: true
+          body: |
+            ## 📦 VytchesDDD ${{ github.ref_name }}
+
+            Enterprise-grade TypeScript library implementing Domain-Driven Design patterns.
+
+            ### 🚀 Installation
+            ```bash
+            npm install @vytches-ddd/core --registry=https://npm.pkg.github.com
+            ```
+
+            ### 📋 Package Versions in this Release:
+            ${{ steps.changelog.outputs.packages }}
+
+            ### 📝 Changes
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### 📚 Documentation
+            See [README.md](https://github.com/PawelGozdz/vytches-ddd) for complete documentation.
+          files: |
+            release-assets/vytches-ddd-packages.tar.gz
+            release-assets/vytches-ddd-packages.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-# 6. Adopt Global Service Locator with Optional Context Isolation for Dependency Injection
+# ADR-0006. Adopt Global Service Locator with Optional Context Isolation for Dependency Injection
 
 Date: 2025-07-05
 

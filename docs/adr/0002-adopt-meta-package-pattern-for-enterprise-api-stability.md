@@ -1,4 +1,4 @@
-# 2. Adopt Meta-Package Pattern for Enterprise API Stability
+# ADR-0002. Adopt Meta-Package Pattern for Enterprise API Stability
 
 Date: 2025-07-05
 

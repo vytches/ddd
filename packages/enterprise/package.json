@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/enterprise",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Health checks and enterprise monitoring",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -47,8 +47,8 @@
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
-    "vitest": "^2.0.0",
-    "vite-plugin-dts": "^4.0.0"
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^2.0.0"
   },
   "nx": {
     "tags": [
@@ -56,5 +56,9 @@
       "type:lib",
       "layer:infrastructure"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

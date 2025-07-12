@@ -57,7 +57,7 @@ const CONFIG = {
   // Test execution thresholds (in seconds)
   testTimeThresholds: {
     package: 20, // Package tests should be under 15 seconds (enterprise packages need more time)
-    total: 360, // Total test suite under 5 minutes (expanded for enterprise packages)
+    total: 350, // Total test suite under 5 minutes
     individual: 5, // Individual test should be under 5 seconds
   },
 

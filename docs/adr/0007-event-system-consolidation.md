@@ -1,4 +1,4 @@
-# ADR-0006: Event System Consolidation - From 3 Buses to 1 Unified Implementation
+# ADR-0007: Event System Consolidation - From 3 Buses to 1 Unified Implementation
 
 **Status**: Implemented  
 **Date**: 2025-01-07  

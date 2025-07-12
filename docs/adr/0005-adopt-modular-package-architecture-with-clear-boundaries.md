@@ -1,4 +1,4 @@
-# 5. Adopt Modular Package Architecture with Clear Boundaries
+# ADR-0005. Adopt Modular Package Architecture with Clear Boundaries
 
 Date: 2025-07-05
 
