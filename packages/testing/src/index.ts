@@ -38,27 +38,5 @@ export {
 } from './core';
 
 // Phase 2: Domain Layer - Domain-specific testing utilities
-export {
-  // Event testing utilities
-  EventTestHarness,
-  type EventTestHarnessOptions,
-  type EventCapture,
-  type EventSubscription,
-  type EventTestScenario,
-  type EventAssertions,
-
-  // Aggregate testing utilities
-  AggregateTestBuilder,
-  EventSourcedAggregateTestBuilder,
-  createAggregateTestBuilder,
-  createEventSourcedAggregateTestBuilder,
-  type AggregateTestOptions,
-  type AggregateEventScenario,
-  type AggregateStateSnapshot,
-  DomainEventMatchers,
-  assertEvent,
-  assertEventWithPayload,
-  assertEventSequence,
-  type EventPattern,
-  type EventMatchResult,
-} from './domain';
+// TODO: Domain utilities temporarily removed to fix circular dependencies
+// export { ... } from './domain';

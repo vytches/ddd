@@ -1,11 +1,11 @@
 {
   "name": "@vytches-ddd/enterprise",
   "version": "0.1.0",
-  "description": "All-in-one enterprise bundle",
+  "description": "Health checks and enterprise monitoring",
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,36 +13,48 @@
       "require": "./dist/index.cjs"
     }
   },
+  "sideEffects": false,
   "files": [
     "dist",
-    "src",
     "README.md"
   ],
+  "keywords": [
+    "ddd",
+    "domain-driven-design",
+    "typescript",
+    "enterprise"
+  ],
+  "author": "VytchesDDD",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vytches/vytches-ddd.git",
+    "directory": "packages/enterprise"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
+    "clean": "rm -rf dist .tsbuildinfo",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@vytches-ddd/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.0.0",
+    "vite-plugin-dts": "^4.0.0"
   },
   "nx": {
     "tags": [
       "scope:enterprise",
-      "type:lib"
+      "type:lib",
+      "layer:infrastructure"
     ]
-  },
-  "dependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*",
-    "@vytches-ddd/policies": "workspace:*",
-    "@vytches-ddd/events": "workspace:*",
-    "@vytches-ddd/cqrs": "workspace:*",
-    "@vytches-ddd/acl": "workspace:*",
-    "@vytches-ddd/projections": "workspace:*",
-    "@vytches-ddd/messaging": "workspace:*",
-    "@vytches-ddd/resilience": "workspace:*",
-    "@vytches-ddd/di": "workspace:*"
   }
 }

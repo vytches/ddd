@@ -1,10 +1,15 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches-ddd/projections",
+  "projectType": "library",
+  "sourceRoot": "packages/projections/src",
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "lintFilePatterns": ["packages/projections/**/*.ts"]
+        "command": "vite build",
+        "cwd": "packages/projections"
       }
     },
     "test": {
@@ -12,6 +17,20 @@
       "options": {
         "command": "pnpm vitest run packages/projections/tests --reporter=verbose"
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/projections/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/projections/tsconfig.json"
+      }
     }
-  }
+  },
+  "tags": ["type:lib", "scope:projections", "layer:architecture"]
 }

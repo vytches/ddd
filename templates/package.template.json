@@ -1,7 +1,7 @@
 {
-  "name": "@vytches-ddd/domain-primitives",
+  "name": "@vytches-ddd/{PACKAGE_NAME}",
   "version": "0.1.0",
-  "description": "Core domain primitives and foundational types for Domain-Driven Design",
+  "description": "{PACKAGE_DESCRIPTION}",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -22,14 +22,14 @@
     "ddd",
     "domain-driven-design",
     "typescript",
-    "domain, primitives"
+    "{PACKAGE_KEYWORDS}"
   ],
   "author": "VytchesDDD",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/vytches/vytches-ddd.git",
-    "directory": "packages/domain-primitives"
+    "directory": "packages/{PACKAGE_NAME}"
   },
   "scripts": {
     "build": "vite build",
@@ -42,12 +42,13 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/utils": "workspace:*"
+    {PEER_DEPENDENCIES}
   },
   "dependencies": {
-    "@vytches-ddd/utils": "workspace:*"
+    {DEPENDENCIES}
   },
   "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vitest": "^2.0.0",
@@ -55,9 +56,9 @@
   },
   "nx": {
     "tags": [
-      "scope:domain-primitives",
+      "scope:{PACKAGE_NAME}",
       "type:lib",
-      "layer:foundation"
+      "layer:{LAYER_TAG}"
     ]
   }
 }

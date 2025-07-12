@@ -1,10 +1,15 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches-ddd/acl",
+  "projectType": "library",
+  "sourceRoot": "packages/acl/src",
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "lintFilePatterns": ["packages/acl/**/*.ts"]
+        "command": "vite build",
+        "cwd": "packages/acl"
       }
     },
     "test": {
@@ -12,7 +17,20 @@
       "options": {
         "command": "pnpm vitest run packages/acl/tests --reporter=verbose"
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/acl/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/acl/tsconfig.json"
+      }
     }
   },
-  "tags": ["type:lib", "scope:acl"]
+  "tags": ["type:lib", "scope:acl", "layer:integration"]
 }

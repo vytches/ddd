@@ -1,7 +1,55 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
+
+// Package type detection - determines build configuration
+const packageJsonContent = readFileSync('./package.json', 'utf-8');
+const packageJson = JSON.parse(packageJsonContent);
+const isMetaPackage = packageJson.dependencies && Object.keys(packageJson.dependencies).length > 0;
+const packageName = packageJson.name?.split('/')[1] || 'unknown';
+
+// Common dependencies that should be available in test environment
+const commonTestAliases = {
+  '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+  '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
+  '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
+  '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+};
+
+// Determine required dependencies based on package type
+function getPackageDependencies(): Record<string, string> {
+  if (isMetaPackage) {
+    // Meta packages don't need aliases - they re-export from dependencies
+    return {};
+  }
+
+  // Foundation packages (only need utils)
+  const foundationPackages = [
+    'domain-primitives',
+    'value-objects',
+    'repositories',
+    'aggregates',
+    'contracts',
+  ];
+  if (foundationPackages.includes(packageName)) {
+    return {
+      '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
+      '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
+    };
+  }
+
+  // Higher-level packages (need core + specific dependencies)
+  return {
+    '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+    '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
+    '@vytches-ddd/logging': commonTestAliases['@vytches-ddd/logging'],
+    '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
+  };
+}
+
+const buildAliases = getPackageDependencies();
 
 export default defineConfig({
   plugins: [
@@ -10,19 +58,22 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
-      declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
+  resolve: {
+    alias: buildAliases,
+  },
   build: {
     outDir: 'dist',
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'VytchesDDD',
+      name: `VytchesDDD${packageName.charAt(0).toUpperCase() + packageName.slice(1).replace(/-([a-z])/g, (_match: string, letter: string) => letter.toUpperCase())}`,
       formats: ['es', 'cjs'],
       fileName: format => `index.${format === 'es' ? 'js' : format}`,
     },
     rollupOptions: {
       external: id => {
+        // External all @vytches-ddd packages that are not source files
         return id.startsWith('@vytches-ddd/') && !id.includes('src/');
       },
     },
@@ -35,67 +86,14 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
-    // Disable coverage for individual package tests to prevent ENOENT errors
     coverage: {
       enabled: false,
     },
-    server: {
-      deps: {
-        // Avoid problematic root package.json directory resolution
-        external: [/^\/package\.json/],
-      },
-    },
     alias: {
-      '@vytches-ddd/core': new URL('../../packages/core/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/domain-primitives': new URL(
-        '../../packages/domain-primitives/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches-ddd/value-objects': new URL(
-        '../../packages/value-objects/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches-ddd/repositories': new URL(
-        '../../packages/repositories/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches-ddd/aggregates': new URL('../../packages/aggregates/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/utils': new URL('../../packages/utils/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/validation': new URL('../../packages/validation/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/policies': new URL('../../packages/policies/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/events': new URL('../../packages/events/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/cqrs': new URL('../../packages/cqrs/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/acl': new URL('../../packages/acl/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/projections': new URL(
-        '../../packages/projections/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches-ddd/messaging': new URL('../../packages/messaging/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/resilience': new URL('../../packages/resilience/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/testing': new URL('../../packages/testing/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/enterprise': new URL('../../packages/enterprise/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/cli': new URL('../../packages/cli/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/contracts': new URL('../../packages/contracts/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/domain-services': new URL(
-        '../../packages/domain-services/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches-ddd/logging': new URL('../../packages/logging/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches-ddd/di': new URL('../../packages/di/src/index.ts', import.meta.url).pathname,
-      '@vytches-ddd/event-store': new URL(
-        '../../packages/event-store/src/index.ts',
-        import.meta.url
-      ).pathname,
+      // All packages need all common aliases for testing
+      ...commonTestAliases,
+      // Add current package alias for self-imports in tests
+      [`@vytches-ddd/${packageName}`]: resolve(__dirname, 'src/index.ts'),
     },
   },
 });

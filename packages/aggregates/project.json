@@ -1,16 +1,15 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "name": "@vytches-ddd/aggregates",
   "projectType": "library",
   "sourceRoot": "packages/aggregates/src",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "dist/packages/aggregates",
-        "main": "packages/aggregates/src/index.ts",
-        "tsConfig": "packages/aggregates/tsconfig.json",
-        "assets": ["packages/aggregates/*.md"]
+        "command": "vite build",
+        "cwd": "packages/aggregates"
       }
     },
     "test": {
@@ -21,10 +20,17 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/aggregates/**/*.ts"]
       }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/aggregates/tsconfig.json"
+      }
     }
   },
-  "tags": ["type:lib", "scope:aggregates"]
+  "tags": ["type:lib", "scope:aggregates", "layer:foundation"]
 }

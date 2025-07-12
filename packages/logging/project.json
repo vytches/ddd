@@ -1,16 +1,15 @@
 {
-  "name": "@vytches-ddd/logging",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/logging/src",
+  "name": "@vytches-ddd/logging",
   "projectType": "library",
+  "sourceRoot": "packages/logging/src",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "packages/logging/dist",
-        "main": "packages/logging/src/index.ts",
-        "tsConfig": "packages/logging/tsconfig.json"
+        "command": "vite build",
+        "cwd": "packages/logging"
       }
     },
     "test": {
@@ -18,7 +17,20 @@
       "options": {
         "command": "pnpm vitest run packages/logging/tests --reporter=verbose"
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/logging/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/logging/tsconfig.json"
+      }
     }
   },
-  "tags": ["scope:logging", "type:lib"]
+  "tags": ["type:lib", "scope:logging", "layer:foundation"]
 }

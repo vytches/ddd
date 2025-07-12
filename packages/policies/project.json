@@ -1,5 +1,23 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches-ddd/policies",
+  "projectType": "library",
+  "sourceRoot": "packages/policies/src",
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/policies"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/policies/tests --reporter=verbose"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
@@ -7,12 +25,12 @@
         "lintFilePatterns": ["packages/policies/**/*.ts"]
       }
     },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
+    "type-check": {
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true
+        "command": "tsc --noEmit --project packages/policies/tsconfig.json"
       }
     }
-  }
+  },
+  "tags": ["type:lib", "scope:policies", "layer:patterns"]
 }

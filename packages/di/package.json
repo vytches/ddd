@@ -1,12 +1,11 @@
 {
   "name": "@vytches-ddd/di",
-  "version": "1.0.0",
-  "description": "Global Service Locator with Optional Context Isolation for Dependency Injection",
+  "version": "0.1.0",
+  "description": "Enterprise dependency injection with auto-discovery",
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,42 +13,50 @@
       "require": "./dist/index.cjs"
     }
   },
+  "sideEffects": false,
   "files": [
-    "dist/**/*",
+    "dist",
     "README.md"
   ],
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite build --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 20",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@vytches-ddd/domain-primitives": "workspace:*",
-    "@vytches-ddd/logging": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "reflect-metadata": "^0.2.2"
-  },
   "keywords": [
     "ddd",
     "domain-driven-design",
-    "dependency-injection",
-    "service-locator",
-    "ioc",
-    "container"
+    "typescript",
+    "di"
   ],
   "author": "VytchesDDD",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vytches/ddd.git",
+    "url": "https://github.com/vytches/vytches-ddd.git",
     "directory": "packages/di"
   },
-  "bugs": {
-    "url": "https://github.com/vytches/ddd/issues"
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
   },
-  "homepage": "https://github.com/vytches/ddd#readme"
+  "peerDependencies": {
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/logging": "workspace:*"
+  },
+  "devDependencies": {
+    "@vytches-ddd/testing": "workspace:*",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.0.0",
+    "vite-plugin-dts": "^4.0.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:di",
+      "type:lib",
+      "layer:foundation"
+    ]
+  }
 }

@@ -185,31 +185,25 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
     devDependencies:
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
       vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
         specifier: ^4.0.0
-        version: 4.5.14(@types/node@20.19.1)
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
       vitest:
-        specifier: ^0.34.0
-        version: 0.34.6(@vitest/ui@3.2.4)
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/aggregates:
     dependencies:
@@ -219,40 +213,65 @@ importers:
       '@vytches-ddd/domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches-ddd/logging':
+      '@vytches-ddd/value-objects':
         specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
+        version: link:../value-objects
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
       vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
         specifier: ^4.0.0
-        version: 4.5.14(@types/node@20.19.1)
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
       vitest:
-        specifier: ^0.34.0
-        version: 0.34.6(@vitest/ui@3.2.4)
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/cli:
     dependencies:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/logging':
+    devDependencies:
+      '@vytches-ddd/testing':
         specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/contracts:
-    dependencies:
-      '@vytches-ddd/utils':
+    devDependencies:
+      '@vytches-ddd/testing':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/core:
     dependencies:
@@ -267,7 +286,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/repositories':
         specifier: workspace:*
         version: link:../repositories
@@ -277,59 +296,74 @@ importers:
       '@vytches-ddd/value-objects':
         specifier: workspace:*
         version: link:../value-objects
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/cqrs:
     dependencies:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/di':
+      '@vytches-ddd/events':
         specifier: workspace:*
-        version: link:../di/dist
-      '@vytches-ddd/utils':
+        version: link:../events
+    devDependencies:
+      '@vytches-ddd/testing':
         specifier: workspace:*
-        version: link:../utils
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/di:
     dependencies:
-      '@vytches-ddd/domain-primitives':
+      '@vytches-ddd/contracts':
         specifier: workspace:*
-        version: link:../domain-primitives
+        version: link:../contracts
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
+        version: link:../logging
+    devDependencies:
+      '@vytches-ddd/testing':
         specifier: workspace:*
-        version: link:../utils
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-
-  packages/di/dist:
-    dependencies:
-      '@vytches-ddd/domain-primitives':
-        specifier: workspace:*
-        version: link:../../domain-primitives
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../../utils
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/domain-primitives:
     dependencies:
       '@vytches-ddd/utils':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../utils
     devDependencies:
       typescript:
@@ -347,106 +381,59 @@ importers:
 
   packages/domain-services:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/di':
-        specifier: workspace:*
-        version: link:../di/dist
-      '@vytches-ddd/events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
     devDependencies:
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/enterprise:
     dependencies:
-      '@vytches-ddd/acl':
-        specifier: workspace:*
-        version: link:../acl
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/cqrs':
-        specifier: workspace:*
-        version: link:../cqrs
-      '@vytches-ddd/di':
-        specifier: workspace:*
-        version: link:../di/dist
-      '@vytches-ddd/events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches-ddd/messaging':
-        specifier: workspace:*
-        version: link:../messaging
-      '@vytches-ddd/policies':
-        specifier: workspace:*
-        version: link:../policies
-      '@vytches-ddd/projections':
-        specifier: workspace:*
-        version: link:../projections
-      '@vytches-ddd/resilience':
-        specifier: workspace:*
-        version: link:../resilience
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/event-scheduling:
     dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/domain-primitives':
-        specifier: workspace:*
-        version: link:../domain-primitives
       '@vytches-ddd/events':
         specifier: workspace:*
         version: link:../events
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
-      '@vytches-ddd/value-objects':
-        specifier: workspace:*
-        version: link:../value-objects
-
-  packages/event-store:
-    dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches-ddd/core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
     devDependencies:
       '@vytches-ddd/testing':
         specifier: workspace:*
@@ -455,117 +442,177 @@ importers:
         specifier: ^5.0.0
         version: 5.8.3
       vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
         specifier: ^4.0.0
-        version: 4.5.14(@types/node@20.19.1)
-      vitest:
-        specifier: ^0.34.0
-        version: 0.34.6(@vitest/ui@3.2.4)
-
-  packages/events:
-    dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches-ddd/core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches-ddd/di':
-        specifier: workspace:*
-        version: link:../di/dist
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
-
-  packages/logging:
-    devDependencies:
-      '@vytches-ddd/utils':
-        specifier: '*'
-        version: link:../utils
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
       vitest:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
-  packages/logging/dist:
+  packages/event-store:
+    dependencies:
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches-ddd/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
-      '@vytches-ddd/utils':
-        specifier: '*'
-        version: link:../../utils
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/events:
+    dependencies:
+      '@vytches-ddd/aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@vytches-ddd/domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
+      '@vytches-ddd/value-objects':
+        specifier: workspace:*
+        version: link:../value-objects
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/logging:
+    dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
       vitest:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/messaging:
     dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches-ddd/di':
-        specifier: workspace:*
-        version: link:../di/dist
-      '@vytches-ddd/domain-primitives':
-        specifier: workspace:*
-        version: link:../domain-primitives
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-
-  packages/policies:
-    dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
-
-  packages/projections:
-    dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/logging':
+      '@vytches-ddd/events':
         specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
+        version: link:../events
+    devDependencies:
+      '@vytches-ddd/testing':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/policies:
+    dependencies:
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/projections:
+    dependencies:
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches-ddd/events':
+        specifier: workspace:*
+        version: link:../events
+    devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/repositories:
     dependencies:
       '@vytches-ddd/contracts':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../contracts
       '@vytches-ddd/domain-primitives':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches-ddd/utils':
-        specifier: '*'
-        version: link:../utils
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -584,80 +631,91 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
     devDependencies:
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/testing:
     dependencies:
-      '@vytches-ddd/aggregates':
-        specifier: workspace:*
-        version: link:../aggregates
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches-ddd/core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches-ddd/cqrs':
-        specifier: workspace:*
-        version: link:../cqrs
-      '@vytches-ddd/domain-primitives':
-        specifier: workspace:*
-        version: link:../domain-primitives
-      '@vytches-ddd/events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches-ddd/logging':
-        specifier: workspace:*
-        version: link:../logging/dist
-      '@vytches-ddd/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches-ddd/validation':
-        specifier: workspace:*
-        version: link:../validation
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
-
-  packages/utils: {}
-
-  packages/validation:
-    dependencies:
-      '@vytches-ddd/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/utils:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/validation:
+    dependencies:
+      '@vytches-ddd/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/value-objects:
     dependencies:
       '@vytches-ddd/contracts':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/domain-primitives':
-        specifier: '*'
-        version: link:../domain-primitives
       '@vytches-ddd/utils':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../utils
     devDependencies:
+      '@vytches-ddd/testing':
+        specifier: workspace:*
+        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -6110,24 +6168,6 @@ packages:
       '@babel/types': 7.27.6
     dev: true
 
-  /@types/chai-subset@1.3.6(@types/chai@4.3.20):
-    resolution:
-      {
-        integrity: sha512-m8lERkkQj+uek18hXOZuec3W/fCRTrU4hrnXjH3qhHy96ytuPaPiWGgu7sJb7tZxZonO75vYAjCvpe/e4VUwRw==,
-      }
-    peerDependencies:
-      '@types/chai': <5.2.0
-    dependencies:
-      '@types/chai': 4.3.20
-    dev: true
-
-  /@types/chai@4.3.20:
-    resolution:
-      {
-        integrity: sha512-/pC9HAB5I/xMlc5FP77qjCnI16ChlJfW0tGa0IUcFn38VJrTV6DeZ60NU5KZBtaOZqjdpwTWohz5HU1RrhiYxQ==,
-      }
-    dev: true
-
   /@types/chai@5.2.2:
     resolution:
       {
@@ -6738,17 +6778,6 @@ packages:
       - supports-color
     dev: true
 
-  /@vitest/expect@0.34.6:
-    resolution:
-      {
-        integrity: sha512-QUzKpUQRc1qC7qdGo7rMK3AkETI7w18gTCUrsNnyjjJKYiuUB9+TQK3QnR1unhCnWRC0AbKv2omLGQDF/mIjOw==,
-      }
-    dependencies:
-      '@vitest/spy': 0.34.6
-      '@vitest/utils': 0.34.6
-      chai: 4.5.0
-    dev: true
-
   /@vitest/expect@2.1.9:
     resolution:
       {
@@ -6832,17 +6861,6 @@ packages:
       tinyrainbow: 2.0.0
     dev: true
 
-  /@vitest/runner@0.34.6:
-    resolution:
-      {
-        integrity: sha512-1CUQgtJSLF47NnhN+F9X2ycxUP0kLHQ/JWvNHbeBfwW8CzEGgeskzNnHDyv1ieKTltuR6sdIHV+nmR6kPxQqzQ==,
-      }
-    dependencies:
-      '@vitest/utils': 0.34.6
-      p-limit: 4.0.0
-      pathe: 1.1.2
-    dev: true
-
   /@vitest/runner@2.1.9:
     resolution:
       {
@@ -6862,17 +6880,6 @@ packages:
       '@vitest/utils': 3.2.4
       pathe: 2.0.3
       strip-literal: 3.0.0
-    dev: true
-
-  /@vitest/snapshot@0.34.6:
-    resolution:
-      {
-        integrity: sha512-B3OZqYn6k4VaN011D+ve+AA4whM4QkcwcrwaKwAbyyvS/NB1hCWjFIBQxAQQSQir9/RtyAAGuq+4RJmbn2dH4w==,
-      }
-    dependencies:
-      magic-string: 0.30.17
-      pathe: 1.1.2
-      pretty-format: 29.7.0
     dev: true
 
   /@vitest/snapshot@2.1.9:
@@ -6895,15 +6902,6 @@ packages:
       '@vitest/pretty-format': 3.2.4
       magic-string: 0.30.17
       pathe: 2.0.3
-    dev: true
-
-  /@vitest/spy@0.34.6:
-    resolution:
-      {
-        integrity: sha512-xaCvneSaeBw/cz8ySmF7ZwGvL0lBjfvqc1LpQ/vcdHEvpLn3Ff1vAvjw+CoGn0802l++5L/pxb7whwcWAw+DUQ==,
-      }
-    dependencies:
-      tinyspy: 2.2.1
     dev: true
 
   /@vitest/spy@2.1.9:
@@ -6940,17 +6938,6 @@ packages:
       tinyglobby: 0.2.14
       tinyrainbow: 2.0.0
       vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
-    dev: true
-
-  /@vitest/utils@0.34.6:
-    resolution:
-      {
-        integrity: sha512-IG5aDD8S6zlvloDsnzHw0Ut5xczlF+kv2BOTo+iXfPr54Yhi5qbVOgGB1hZaVq4iJ4C/MZ2J0y15IlsV/ZcI0A==,
-      }
-    dependencies:
-      diff-sequences: 29.6.3
-      loupe: 2.3.7
-      pretty-format: 29.7.0
     dev: true
 
   /@vitest/utils@2.1.9:
@@ -7623,13 +7610,6 @@ packages:
     engines: { node: '>=0.8' }
     dev: true
 
-  /assertion-error@1.1.0:
-    resolution:
-      {
-        integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==,
-      }
-    dev: true
-
   /assertion-error@2.0.1:
     resolution:
       {
@@ -8298,22 +8278,6 @@ packages:
       }
     dev: true
 
-  /chai@4.5.0:
-    resolution:
-      {
-        integrity: sha512-RITGBfijLkBddZvnn8jdqoTypxvqbOLYQkGGxXzeFjVHvudaPw0HNFD9x928/eUwYWd2dPCugVqspGALTZZQKw==,
-      }
-    engines: { node: '>=4' }
-    dependencies:
-      assertion-error: 1.1.0
-      check-error: 1.0.3
-      deep-eql: 4.1.4
-      get-func-name: 2.0.2
-      loupe: 2.3.7
-      pathval: 1.1.1
-      type-detect: 4.1.0
-    dev: true
-
   /chai@5.2.1:
     resolution:
       {
@@ -8383,15 +8347,6 @@ packages:
       {
         integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==,
       }
-    dev: true
-
-  /check-error@1.0.3:
-    resolution:
-      {
-        integrity: sha512-iKEoDYaRmd1mxM90a2OEfWhjsjPpYPuQ+lMYsoxB126+t8fw7ySEO48nmDg5COTjxDI65/Y2OWpeEHk3ZOe8zg==,
-      }
-    dependencies:
-      get-func-name: 2.0.2
     dev: true
 
   /check-error@2.1.1:
@@ -9647,16 +9602,6 @@ packages:
     peerDependenciesMeta:
       babel-plugin-macros:
         optional: true
-    dev: true
-
-  /deep-eql@4.1.4:
-    resolution:
-      {
-        integrity: sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg==,
-      }
-    engines: { node: '>=6' }
-    dependencies:
-      type-detect: 4.1.0
     dev: true
 
   /deep-eql@5.0.2:
@@ -11470,13 +11415,6 @@ packages:
         integrity: sha512-vpeMIQKxczTD/0s2CdEWHcb0eeJe6TFjxb+J5xgX7hScxqrGuyjmv4c1D4A/gelKfyox0gJJwIHF+fLjeaM8kQ==,
       }
     engines: { node: '>=18' }
-    dev: true
-
-  /get-func-name@2.0.2:
-    resolution:
-      {
-        integrity: sha512-8vXOvuE167CtIc3OyItco7N/dpRtBbYOsPsXCz7X/PMnlGjYjSGuZJgM1Y7mmew7BKf9BqvLX2tnOVy1BBUsxQ==,
-      }
     dev: true
 
   /get-intrinsic@1.3.0:
@@ -14398,14 +14336,6 @@ packages:
       type-fest: 0.6.0
     dev: true
 
-  /local-pkg@0.4.3:
-    resolution:
-      {
-        integrity: sha512-SFppqq5p42fe2qcZQqqEOiVRXl+WCP1MdT6k7BDEW1j++sp5fIY+/fdRQitvKgB5BrBcmrs5m/L0v2FrU5MY1g==,
-      }
-    engines: { node: '>=14' }
-    dev: true
-
   /local-pkg@1.1.1:
     resolution:
       {
@@ -14674,15 +14604,6 @@ packages:
         integrity: sha512-Ajzxb8CM6WAnFjgiloPsI3bF+WCxcvhdIG3KNA2KN962+tdBsHcuQ4k4qX/EcS/2CRkcc0iAkR956Nib6aXU/Q==,
       }
     engines: { node: '>=0.10.0' }
-    dev: true
-
-  /loupe@2.3.7:
-    resolution:
-      {
-        integrity: sha512-zSMINGVYkdpYSOBmLi0D1Uo7JU9nVdQKrHxC8eYlV+9YKK9WePqAlL7lSlorG/U2Fw1w0hTBmaa/jrQ3UbPHtA==,
-      }
-    dependencies:
-      get-func-name: 2.0.2
     dev: true
 
   /loupe@3.1.4:
@@ -16631,13 +16552,6 @@ packages:
       }
     dev: true
 
-  /pathval@1.1.1:
-    resolution:
-      {
-        integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==,
-      }
-    dev: true
-
   /pathval@2.0.1:
     resolution:
       {
@@ -17659,17 +17573,6 @@ packages:
       picomatch: 4.0.2
       source-map: 0.7.4
       yargs: 17.7.2
-    dev: true
-
-  /rollup@3.29.5:
-    resolution:
-      {
-        integrity: sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==,
-      }
-    engines: { node: '>=14.18.0', npm: '>=8.0.0' }
-    hasBin: true
-    optionalDependencies:
-      fsevents: 2.3.3
     dev: true
 
   /rollup@4.44.0:
@@ -18788,15 +18691,6 @@ packages:
     engines: { node: '>=8' }
     dev: true
 
-  /strip-literal@1.3.0:
-    resolution:
-      {
-        integrity: sha512-PugKzOsyXpArk0yWmUwqOZecSO0GH0bPoctLcqNDH9J04pVW3lflYE0ujElBGTloevcxF5MofAOZ7C5l2b+wLg==,
-      }
-    dependencies:
-      acorn: 8.15.0
-    dev: true
-
   /strip-literal@3.0.0:
     resolution:
       {
@@ -19125,14 +19019,6 @@ packages:
       picomatch: 4.0.2
     dev: true
 
-  /tinypool@0.7.0:
-    resolution:
-      {
-        integrity: sha512-zSYNUlYSMhJ6Zdou4cJwo/p7w5nmAH17GRfU/ui3ctvjXFErXXkruT4MWW6poDeXgCaIBlGLrfU6TbTXxyGMww==,
-      }
-    engines: { node: '>=14.0.0' }
-    dev: true
-
   /tinypool@1.1.1:
     resolution:
       {
@@ -19153,14 +19039,6 @@ packages:
     resolution:
       {
         integrity: sha512-op4nsTR47R6p0vMUUoYl/a+ljLFVtlfaXkLQmqfLR1qHma1h/ysYk4hEXZ880bf2CYgTskvTa/e196Vd5dDQXw==,
-      }
-    engines: { node: '>=14.0.0' }
-    dev: true
-
-  /tinyspy@2.2.1:
-    resolution:
-      {
-        integrity: sha512-KYad6Vy5VDWV4GH3fjpseMQ/XU2BhIYP7Vzd0LG44qRWm/Yt2WCOTicFdvmgo6gWaqooMQCawTtILVQJupKu7A==,
       }
     engines: { node: '>=14.0.0' }
     dev: true
@@ -19418,6 +19296,7 @@ packages:
       {
         integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==,
       }
+    dev: true
 
   /tuf-js@2.2.1:
     resolution:
@@ -19470,14 +19349,6 @@ packages:
     resolution:
       {
         integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==,
-      }
-    engines: { node: '>=4' }
-    dev: true
-
-  /type-detect@4.1.0:
-    resolution:
-      {
-        integrity: sha512-Acylog8/luQ8L7il+geoSxhEkazvkslg7PSNKOX59mbB9cOveP5aq9h74Y7YU8yDpJwetzQQrfIwtf4Wp4LKcw==,
       }
     engines: { node: '>=4' }
     dev: true
@@ -20043,31 +19914,6 @@ packages:
       extsprintf: 1.3.0
     dev: true
 
-  /vite-node@0.34.6(@types/node@20.19.1):
-    resolution:
-      {
-        integrity: sha512-nlBMJ9x6n7/Amaz6F3zJ97EBwR2FkzhBRxF5e+jE6LA3yi6Wtc2lyTij1OnDMIr34v5g/tVQtsVAzhT0jc5ygA==,
-      }
-    engines: { node: '>=v14.18.0' }
-    hasBin: true
-    dependencies:
-      cac: 6.7.14
-      debug: 4.4.1
-      mlly: 1.7.4
-      pathe: 1.1.2
-      picocolors: 1.1.1
-      vite: 4.5.14(@types/node@20.19.1)
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-    dev: true
-
   /vite-node@2.1.9(@types/node@20.19.1):
     resolution:
       {
@@ -20179,45 +20025,6 @@ packages:
       - supports-color
     dev: true
 
-  /vite@4.5.14(@types/node@20.19.1):
-    resolution:
-      {
-        integrity: sha512-+v57oAaoYNnO3hIu5Z/tJRZjq5aHM2zDve9YZ8HngVHbhk66RStobhb1sqPMIPEleV6cNKYK4eGrAbE9Ulbl2g==,
-      }
-    engines: { node: ^14.18.0 || >=16.0.0 }
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      '@types/node': 20.19.1
-      esbuild: 0.25.6
-      postcss: 8.5.6
-      rollup: 3.29.5
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: true
-
   /vite@5.4.19(@types/node@20.19.1):
     resolution:
       {
@@ -20255,7 +20062,7 @@ packages:
       '@types/node': 20.19.1
       esbuild: 0.25.6
       postcss: 8.5.6
-      rollup: 4.44.0
+      rollup: 4.44.2
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
@@ -20378,75 +20185,6 @@ packages:
       vitest: '>=1'
     dependencies:
       vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
-    dev: true
-
-  /vitest@0.34.6(@vitest/ui@3.2.4):
-    resolution:
-      {
-        integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==,
-      }
-    engines: { node: '>=v14.18.0' }
-    hasBin: true
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@vitest/browser': '*'
-      '@vitest/ui': '*'
-      happy-dom: '*'
-      jsdom: '*'
-      playwright: '*'
-      safaridriver: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@vitest/browser':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
-      playwright:
-        optional: true
-      safaridriver:
-        optional: true
-      webdriverio:
-        optional: true
-    dependencies:
-      '@types/chai': 4.3.20
-      '@types/chai-subset': 1.3.6(@types/chai@4.3.20)
-      '@types/node': 20.19.1
-      '@vitest/expect': 0.34.6
-      '@vitest/runner': 0.34.6
-      '@vitest/snapshot': 0.34.6
-      '@vitest/spy': 0.34.6
-      '@vitest/ui': 3.2.4(vitest@3.2.4)
-      '@vitest/utils': 0.34.6
-      acorn: 8.15.0
-      acorn-walk: 8.3.4
-      cac: 6.7.14
-      chai: 4.5.0
-      debug: 4.4.1
-      local-pkg: 0.4.3
-      magic-string: 0.30.17
-      pathe: 1.1.2
-      picocolors: 1.1.1
-      std-env: 3.9.0
-      strip-literal: 1.3.0
-      tinybench: 2.9.0
-      tinypool: 0.7.0
-      vite: 4.5.14(@types/node@20.19.1)
-      vite-node: 0.34.6(@types/node@20.19.1)
-      why-is-node-running: 2.3.0
-    transitivePeerDependencies:
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
     dev: true
 
   /vitest@2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4):

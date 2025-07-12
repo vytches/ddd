@@ -1,31 +1,36 @@
 {
-  "name": "@vytches-ddd/di",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/di/src",
+  "name": "@vytches-ddd/di",
   "projectType": "library",
+  "sourceRoot": "packages/di/src",
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "packages/di/dist"
+        "command": "vite build",
+        "cwd": "packages/di"
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true,
-        "reportsDirectory": "../../coverage/packages/di"
+        "command": "pnpm vitest run packages/di/tests --reporter=verbose"
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/di/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["packages/di/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/di/tsconfig.json"
       }
     }
   },
-  "tags": ["scope:di", "type:library"]
+  "tags": ["type:lib", "scope:di", "layer:foundation"]
 }

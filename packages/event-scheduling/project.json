@@ -1,15 +1,21 @@
 {
-  "name": "@vytches-ddd/event-scheduling",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/event-scheduling/src",
+  "name": "@vytches-ddd/event-scheduling",
   "projectType": "library",
-  "tags": ["type:lib", "scope:event-scheduling"],
+  "sourceRoot": "packages/event-scheduling/src",
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "dist/packages/event-scheduling"
+        "command": "vite build",
+        "cwd": "packages/event-scheduling"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/event-scheduling/tests --reporter=verbose"
       }
     },
     "lint": {
@@ -19,11 +25,12 @@
         "lintFilePatterns": ["packages/event-scheduling/**/*.ts"]
       }
     },
-    "test": {
+    "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm vitest run packages/event-scheduling/tests --reporter=verbose"
+        "command": "tsc --noEmit --project packages/event-scheduling/tsconfig.json"
       }
     }
-  }
+  },
+  "tags": ["type:lib", "scope:event-scheduling", "layer:infrastructure"]
 }

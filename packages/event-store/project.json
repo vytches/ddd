@@ -1,16 +1,15 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "name": "@vytches-ddd/event-store",
   "projectType": "library",
   "sourceRoot": "packages/event-store/src",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "outputPath": "dist/packages/event-store",
-        "main": "packages/event-store/src/index.ts",
-        "tsConfig": "packages/event-store/tsconfig.json",
-        "assets": ["packages/event-store/*.md"]
+        "command": "vite build",
+        "cwd": "packages/event-store"
       }
     },
     "test": {
@@ -21,10 +20,17 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/event-store/**/*.ts"]
       }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/event-store/tsconfig.json"
+      }
     }
   },
-  "tags": ["type:lib", "scope:event-store"]
+  "tags": ["type:lib", "scope:event-store", "layer:infrastructure"]
 }

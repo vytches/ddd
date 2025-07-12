@@ -13,6 +13,9 @@ tmp/
 out/
 .nx/
 
+# TypeScript incremental compilation cache
+*.tsbuildinfo
+
 # Runtime data
 pids
 *.pid
