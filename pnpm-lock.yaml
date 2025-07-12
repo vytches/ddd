@@ -190,7 +190,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -212,7 +212,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -237,7 +237,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -261,7 +261,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/repositories':
         specifier: workspace:*
         version: link:../repositories
@@ -297,7 +297,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -401,7 +401,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -422,7 +422,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -453,7 +453,7 @@ importers:
         version: link:../di
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -466,18 +466,6 @@ importers:
       '@vytches-ddd/utils':
         specifier: '*'
         version: link:../utils
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
-  packages/logging/dist:
-    devDependencies:
-      '@vytches-ddd/utils':
-        specifier: '*'
-        version: link:../../utils
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -498,7 +486,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -528,7 +516,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -565,7 +553,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -599,7 +587,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -8293,6 +8281,20 @@ packages:
       type-detect: 4.1.0
     dev: true
 
+  /chai@5.2.0:
+    resolution:
+      {
+        integrity: sha512-mCuXncKXk5iCLhfhwTc0izo0gtEmpz5CtG2y8GiOINBlMVS6v8TMRc5TaLWKS6692m9+dVVfzgeVxR5UxWHTYw==,
+      }
+    engines: { node: '>=12' }
+    dependencies:
+      assertion-error: 2.0.1
+      check-error: 2.1.1
+      deep-eql: 5.0.2
+      loupe: 3.1.4
+      pathval: 2.0.1
+    dev: true
+
   /chai@5.2.1:
     resolution:
       {
@@ -10809,6 +10811,14 @@ packages:
     engines: { node: '>=0.10.0' }
     dependencies:
       homedir-polyfill: 1.0.3
+    dev: true
+
+  /expect-type@1.2.1:
+    resolution:
+      {
+        integrity: sha512-/kP8CAwxzLVEeFrMm4kMmy4CCDlpipyA7MYLVrdJIkV0fYF0UaigQHRsxHiuY/GEea+bh4KSv3TIlgr+2UL6bw==,
+      }
+    engines: { node: '>=12.0.0' }
     dev: true
 
   /expect-type@1.2.2:
@@ -20465,9 +20475,9 @@ packages:
       '@vitest/spy': 2.1.9
       '@vitest/ui': 3.2.4(vitest@3.2.4)
       '@vitest/utils': 2.1.9
-      chai: 5.2.1
+      chai: 5.2.0
       debug: 4.4.1
-      expect-type: 1.2.2
+      expect-type: 1.2.1
       magic-string: 0.30.17
       pathe: 1.1.2
       std-env: 3.9.0
