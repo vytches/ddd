@@ -30,7 +30,12 @@ export class CQRSConfiguration {
 
     // Auto-discovery if enabled (deprecated - DI container handles this)
     if (autoDiscovery) {
-      console.warn('autoDiscovery option is deprecated. Use DI container auto-discovery instead.');
+      // Suppress deprecation warnings in CI to avoid stderr confusion
+      if (!process.env.CI) {
+        console.warn(
+          'autoDiscovery option is deprecated. Use DI container auto-discovery instead.'
+        );
+      }
       this.commandBus.discoverHandlers();
       this.queryBus.discoverHandlers();
     }

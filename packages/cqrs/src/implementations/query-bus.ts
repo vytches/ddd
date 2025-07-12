@@ -41,9 +41,12 @@ export class QueryBus extends IQueryBus {
   discoverHandlers(): void {
     // Legacy method - discovery is now handled by DI container auto-discovery
     // This method is kept for backward compatibility but does nothing
-    console.warn(
-      'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
-    );
+    // Suppress deprecation warnings in CI to avoid stderr confusion
+    if (!process.env.CI) {
+      console.warn(
+        'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      );
+    }
   }
 
   async execute<T extends IQuery<R>, R>(query: T): Promise<R> {

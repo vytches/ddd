@@ -42,9 +42,12 @@ export class CommandBus extends ICommandBus {
   discoverHandlers(): void {
     // Legacy method - discovery is now handled by DI container auto-discovery
     // This method is kept for backward compatibility but does nothing
-    console.warn(
-      'CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
-    );
+    // Suppress deprecation warnings in CI to avoid stderr confusion
+    if (!process.env.CI) {
+      console.warn(
+        'CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      );
+    }
   }
 
   async execute<T extends ICommand>(command: T): Promise<void> {

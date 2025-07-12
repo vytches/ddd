@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
 import { ProjectionRebuilder } from '../src/projection-rebuilder';
+import { Logger } from '@vytches-ddd/logging';
 
 describe('ProjectionRebuilder', () => {
   let eventStore: any;
@@ -31,6 +32,21 @@ describe('ProjectionRebuilder', () => {
   };
 
   beforeEach(() => {
+    // Mock logger to prevent stderr output in CI
+    vi.spyOn(Logger, 'forContext').mockReturnValue({
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      withCorrelationId: vi.fn().mockReturnThis(),
+      withUserId: vi.fn().mockReturnThis(),
+      withTenantId: vi.fn().mockReturnThis(),
+      withRequestId: vi.fn().mockReturnThis(),
+      withSessionId: vi.fn().mockReturnThis(),
+      withContext: vi.fn().mockReturnThis(),
+    } as any);
+
     // Mock event replay
     eventReplay = {
       replayFromStream: vi.fn().mockResolvedValue(mockReplayResult),
@@ -98,7 +114,7 @@ describe('ProjectionRebuilder', () => {
     it('should filter events by projection event types', async () => {
       await rebuilder.rebuild();
 
-      const [handler, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      const [_handler, filter] = (eventReplay.replayAll as any).mock.calls[0];
       expect(filter.eventTypes).toEqual(['EventA', 'EventB']);
     });
 
@@ -127,6 +143,7 @@ describe('ProjectionRebuilder', () => {
       await rebuilder.rebuild(undefined, { skipErrors: true });
 
       const [handler] = (eventReplay.replayAll as any).mock.calls[0];
+      // Should not throw error when skipErrors is true
       await expect(handler(testEvent)).resolves.toBeUndefined();
     });
 
@@ -147,7 +164,7 @@ describe('ProjectionRebuilder', () => {
       await rebuilder.rebuild(undefined, { skipErrors: false });
 
       const [handler] = (eventReplay.replayAll as any).mock.calls[0];
-      const [handlerError] = await safeRun(() => handler(testEvent));
+      const [handlerError] = await safeRun(async () => await handler(testEvent));
       expect(handlerError).toBe(error);
     });
   });
@@ -216,8 +233,8 @@ describe('ProjectionRebuilder', () => {
       const error = new Error('Failed to rebuild projection TestProjection');
       eventReplay.replayAll = vi.fn().mockRejectedValueOnce(error);
 
-      const [rebuildError] = await safeRun(() =>
-        rebuilder.rebuildMany(projections, undefined, { skipErrors: false })
+      const [rebuildError] = await safeRun(
+        async () => await rebuilder.rebuildMany(projections, undefined, { skipErrors: false })
       );
       expect(rebuildError?.message).toBe(error.message);
     });
@@ -234,7 +251,7 @@ describe('ProjectionRebuilder', () => {
       const error = new Error('Clear failed');
       projectionStore.deleteAll = vi.fn().mockRejectedValue(error);
 
-      const [clearError] = await safeRun(() => rebuilder.clearProjectionState());
+      const [clearError] = await safeRun(async () => await rebuilder.clearProjectionState());
       expect(clearError?.message).toBe('Failed to clear state for projection TestProjection');
     });
   });

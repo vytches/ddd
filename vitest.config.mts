@@ -50,7 +50,7 @@ export default defineConfig({
         perFile: false,
       },
     },
-    reporters: ['verbose'],
+    reporters: process.env.CI ? ['default'] : ['verbose'],
     // Usuń vitest-sonar-reporter jeśli powoduje problemy
     // outputFile: {
     //   'vitest-sonar-reporter': 'test-report.xml',
