@@ -45,7 +45,7 @@ export class OutboxService {
   /**
    * Saves a message to the outbox
    */
-  async saveMessage<T = any>(
+  async saveMessage<T = unknown>(
     messageType: string,
     payload: T,
     options?: OutboxMessageOptions
@@ -64,7 +64,7 @@ export class OutboxService {
   /**
    * Saves multiple messages to the outbox in a batch
    */
-  async saveMessages<T = any>(
+  async saveMessages<T = unknown>(
     messages: Array<{
       messageType: string;
       payload: T;
@@ -87,7 +87,7 @@ export class OutboxService {
   /**
    * Schedules a message for delayed processing
    */
-  async scheduleMessage<T = any>(
+  async scheduleMessage<T = unknown>(
     messageType: string,
     payload: T,
     delayMs: number,
@@ -109,7 +109,7 @@ export class OutboxService {
   /**
    * Saves a high priority message to the outbox
    */
-  async saveHighPriorityMessage<T = any>(
+  async saveHighPriorityMessage<T = unknown>(
     messageType: string,
     payload: T,
     options?: OutboxMessageOptions
@@ -123,7 +123,7 @@ export class OutboxService {
   /**
    * Saves a critical priority message to the outbox
    */
-  async saveCriticalMessage<T = any>(
+  async saveCriticalMessage<T = unknown>(
     messageType: string,
     payload: T,
     options?: OutboxMessageOptions

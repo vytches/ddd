@@ -7,7 +7,7 @@ import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration
  * Base implementation of an integration event
  * Provides core functionality for all integration events
  */
-export abstract class IntegrationEvent<T = any> implements IIntegrationEvent<T> {
+export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent<T> {
   /**
    * Unique identifier for the event
    */

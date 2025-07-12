@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 
 // Local type definitions to avoid hard dependency on DI package
 interface HandlerInfo {
   type: 'command' | 'query' | 'event';
-  messageType: any;
-  handlerType: any;
-  metadata: any;
+  messageType: unknown;
+  handlerType: Function;
+  metadata: Record<string, unknown>;
 }
 
 interface IHandlerDiscoveryPlugin {
   readonly name: string;
-  discoverHandlers(assemblies?: any[]): Promise<HandlerInfo[]> | HandlerInfo[];
+  discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> | HandlerInfo[];
   isAvailable(): boolean;
 }
 
@@ -32,7 +33,7 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   /**
    * Discover CQRS handlers using pure metadata approach
    */
-  async discoverHandlers(assemblies?: any[]): Promise<HandlerInfo[]> {
+  async discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> {
     const handlers: HandlerInfo[] = [];
 
     // Scan provided assemblies for handlers
@@ -49,7 +50,7 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   /**
    * Scan a module for CQRS handlers
    */
-  private scanModule(module: any): HandlerInfo[] {
+  private scanModule(module: unknown): HandlerInfo[] {
     const handlers: HandlerInfo[] = [];
 
     // Handle null/undefined modules
@@ -68,7 +69,7 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
             handlers.push({
               type: handlerType as 'command' | 'query',
               messageType: metadata.messageType,
-              handlerType: value as any,
+              handlerType: value as Function,
               metadata: { ...metadata },
             });
           }

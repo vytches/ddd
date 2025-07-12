@@ -7,7 +7,7 @@ import type { Result } from '@vytches-ddd/utils';
 export interface IValidationError {
   property: string;
   message: string;
-  context?: Record<string, any> | undefined;
+  context?: Record<string, unknown> | undefined;
 }
 
 /**

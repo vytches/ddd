@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches-ddd/di';
 
@@ -71,7 +72,7 @@ export class CommandBus extends ICommandBus {
     await this.executeWithMiddleware(context, () => handler.execute(command));
   }
 
-  private getHandlerToken(commandClass: any): ServiceToken {
+  private getHandlerToken(commandClass: Function): ServiceToken {
     // Get handler metadata from command class
     const handlerMetadata = Reflect.getMetadata('di:command-handler', commandClass);
     if (!handlerMetadata) {

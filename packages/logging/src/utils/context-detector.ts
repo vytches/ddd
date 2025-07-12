@@ -7,6 +7,13 @@ export interface ContextDetectionResult {
   methodName?: string | undefined;
 }
 
+interface StackTraceFrame {
+  className?: string | undefined;
+  methodName?: string | undefined;
+  fileName?: string | undefined;
+  filePath?: string | undefined;
+}
+
 export class ContextDetector {
   private static readonly BOUNDED_CONTEXT_PATTERNS = [
     /packages\/([^\/]+)\/src/,
@@ -93,7 +100,7 @@ export class ContextDetector {
     }
   }
 
-  private static parseStackFrame(stack: string, skipFrames: number) {
+  private static parseStackFrame(stack: string, skipFrames: number): StackTraceFrame | null {
     if (!stack || stack.trim() === '') {
       return null;
     }
@@ -127,7 +134,7 @@ export class ContextDetector {
     return null;
   }
 
-  private static extractContextName(frame: any): string {
+  private static extractContextName(frame: StackTraceFrame): string {
     if (frame.className) {
       return frame.className;
     }
@@ -140,12 +147,13 @@ export class ContextDetector {
     return 'Unknown';
   }
 
-  private static extractBoundedContext(frame: any): string | undefined {
+  private static extractBoundedContext(frame: StackTraceFrame): string | undefined {
     if (!frame.filePath) return undefined;
 
+    const filePath = frame.filePath;
     for (const pattern of this.BOUNDED_CONTEXT_PATTERNS) {
-      const match = frame.filePath.match(pattern);
-      if (match) {
+      const match = filePath.match(pattern);
+      if (match && match[1]) {
         return this.toPascalCase(match[1]);
       }
     }

@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ICQRSMiddleware {
-  handle(context: ExecutionContext, next: () => Promise<any>): Promise<any>;
+  handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown>;
 }
 
 export interface ExecutionContext {
-  readonly commandOrQuery: any;
-  readonly handler: any;
+  readonly commandOrQuery: unknown;
+  readonly handler: unknown;
   readonly type: 'command' | 'query';
-  readonly metadata: Map<string, any>;
+  readonly metadata: Map<string, unknown>;
 }

@@ -5,7 +5,7 @@ import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interf
  * Interface for event upcaster
  * Transforms event payloads between versions
  */
-export interface IEventUpcaster<TInput = any, TOutput = any> {
+export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
   /**
    * Transforms an event payload from one version to another
    */
@@ -19,14 +19,14 @@ export interface IEventUpcaster<TInput = any, TOutput = any> {
 export interface IAuditEvent {
   eventId: string;
   timestamp: Date;
-  aggregateId: any;
+  aggregateId: unknown;
   aggregateType: string;
   aggregateVersion: number;
   eventType: string;
-  payload?: any;
+  payload?: unknown;
   metadata?: IEventMetadata;
-  actor?: any;
-  previousState?: any;
+  actor?: unknown;
+  previousState?: unknown;
 }
 
 /**
@@ -37,13 +37,13 @@ export interface IEventStore {
   /**
    * Gets all events for an aggregate
    */
-  getEvents(aggregateId: any): Promise<IExtendedDomainEvent[]>;
+  getEvents(aggregateId: unknown): Promise<IExtendedDomainEvent[]>;
 
   /**
    * Saves events for an aggregate
    */
   saveEvents(
-    aggregateId: any,
+    aggregateId: unknown,
     events: IExtendedDomainEvent[],
     expectedVersion: number
   ): Promise<void>;
@@ -51,5 +51,5 @@ export interface IEventStore {
   /**
    * Gets events after a specific version
    */
-  getEventsAfterVersion(aggregateId: any, version: number): Promise<IExtendedDomainEvent[]>;
+  getEventsAfterVersion(aggregateId: unknown, version: number): Promise<IExtendedDomainEvent[]>;
 }

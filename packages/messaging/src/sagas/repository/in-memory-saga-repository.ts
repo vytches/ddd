@@ -568,7 +568,7 @@ export class InMemorySagaRepository implements ISagaRepository {
    * @param saga - Saga instance
    * @param sortBy - Property to sort by
    */
-  private getSortValue(saga: ISaga, sortBy: string): any {
+  private getSortValue(saga: ISaga, sortBy: string): number | string {
     const state = saga.state;
 
     switch (sortBy) {

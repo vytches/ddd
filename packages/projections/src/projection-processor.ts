@@ -37,7 +37,7 @@ export class ProjectionProcessor implements IEventProcessor {
   }
 
   private async processWithErrorHandling(
-    engine: IProjectionEngine<any>,
+    engine: IProjectionEngine<unknown>,
     event: IExtendedDomainEvent
   ): Promise<void> {
     try {

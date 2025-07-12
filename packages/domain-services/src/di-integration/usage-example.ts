@@ -47,14 +47,16 @@ export class OrderProcessingService extends IBaseDomainService {
   async processOrder(orderId: string): Promise<void> {
     // Use service locator to resolve dependencies
     try {
-      const repository = VytchesDDD.resolve<any>('orderRepository', 'OrderManagement');
-      const paymentService = VytchesDDD.resolve<any>('paymentService');
+      const repository = VytchesDDD.resolve<unknown>('orderRepository', 'OrderManagement');
+      const paymentService = VytchesDDD.resolve<unknown>('paymentService');
 
       console.log(`Processing order ${orderId} with repository and payment service`);
 
       // Business logic here
-      await repository.findById(orderId);
-      await paymentService.processPayment(orderId);
+      await (repository as { findById: (id: string) => Promise<unknown> }).findById(orderId);
+      await (paymentService as { processPayment: (id: string) => Promise<unknown> }).processPayment(
+        orderId
+      );
     } catch (error) {
       console.error('Failed to resolve dependencies:', error);
       throw error;

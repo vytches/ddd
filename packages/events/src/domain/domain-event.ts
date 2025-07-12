@@ -5,7 +5,7 @@ import { LibUtils } from '@vytches-ddd/utils';
  * Base implementation of a domain event
  * Provides core functionality for all domain events
  */
-export abstract class DomainEvent<T = any> implements IExtendedDomainEvent<T> {
+export abstract class DomainEvent<T = unknown> implements IExtendedDomainEvent<T> {
   /**
    * Unique identifier for the event
    */

@@ -7,8 +7,18 @@
 
 // import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches-ddd/di';
 // Temporarily mocked for testing
-type IHandlerDiscoveryPlugin = any;
-type HandlerInfo = any;
+interface IHandlerDiscoveryPlugin {
+  readonly name: string;
+  isAvailable(): boolean;
+  discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> | HandlerInfo[];
+}
+
+interface HandlerInfo {
+  type: string;
+  messageType: unknown;
+  handlerType: unknown;
+  metadata: Record<string, unknown>;
+}
 import type { DIHandlerMetadata } from './di-types';
 
 /**
@@ -37,7 +47,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    * @param assemblies - Optional list of modules/assemblies to scan
    * @returns Promise<HandlerInfo[]> List of discovered event handlers
    */
-  async discoverHandlers(assemblies?: any[]): Promise<HandlerInfo[]> {
+  async discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> {
     const discoveredHandlers: HandlerInfo[] = [];
 
     // Scan assemblies if provided
@@ -61,7 +71,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    * @param assembly - Module or assembly to scan
    * @returns Promise<HandlerInfo[]> Event handlers found in the assembly
    */
-  private async scanAssemblyForEventHandlers(assembly: any): Promise<HandlerInfo[]> {
+  private async scanAssemblyForEventHandlers(assembly: unknown): Promise<HandlerInfo[]> {
     const handlers: HandlerInfo[] = [];
 
     if (!assembly || typeof assembly !== 'object') {
@@ -108,7 +118,7 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    * @param value - Value to check
    * @returns boolean True if the value is an event handler class
    */
-  private isEventHandlerClass(value: unknown): value is new (...args: any[]) => any {
+  private isEventHandlerClass(value: unknown): value is new (...args: unknown[]) => unknown {
     return (
       typeof value === 'function' &&
       value.prototype &&

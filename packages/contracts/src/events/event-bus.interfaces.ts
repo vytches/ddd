@@ -77,5 +77,5 @@ export interface BaseEventBusOptions {
  * Enables creation of processing pipelines for events
  */
 export type EventBusMiddleware = (
-  next: (event: any) => Promise<void>
-) => (event: any) => Promise<void>;
+  next: (event: unknown) => Promise<void>
+) => (event: unknown) => Promise<void>;

@@ -16,7 +16,7 @@ export class OutboxMessageFactory {
    * @param options Additional options
    * @returns Outbox message
    */
-  static createMessage<T = any>(
+  static createMessage<T = unknown>(
     messageType: string,
     payload: T,
     options?: OutboxMessageOptions
@@ -47,7 +47,7 @@ export class OutboxMessageFactory {
    * @param options Additional options
    * @returns Outbox message scheduled for later processing
    */
-  static createDelayedMessage<T = any>(
+  static createDelayedMessage<T = unknown>(
     messageType: string,
     payload: T,
     delayMs: number,
@@ -68,7 +68,7 @@ export class OutboxMessageFactory {
    * @param options Additional options
    * @returns High priority outbox message
    */
-  static createHighPriorityMessage<T = any>(
+  static createHighPriorityMessage<T = unknown>(
     messageType: string,
     payload: T,
     options?: OutboxMessageOptions
@@ -85,8 +85,8 @@ export class OutboxMessageFactory {
    * @param options Additional options
    * @returns Outbox message containing the integration event
    */
-  static createFromIntegrationEvent<T = any>(
-    event: { eventType: string; payload?: T; metadata?: Record<string, any> },
+  static createFromIntegrationEvent<T = unknown>(
+    event: { eventType: string; payload?: T; metadata?: Record<string, unknown> },
     options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     const mergedOptions: OutboxMessageOptions = {

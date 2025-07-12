@@ -328,7 +328,7 @@ export abstract class BaseSaga implements ISaga {
    * @param middleware - Middleware to add
    */
   protected addMiddleware(
-    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }
+    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: unknown): boolean }
   ): void {
     this.middlewarePipeline.use(middleware);
     this.logger.debug('Middleware added to saga', {

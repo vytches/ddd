@@ -35,7 +35,7 @@ export interface IProjectionRebuilder<TReadModel> {
    * Rebuild multiple projections
    */
   rebuildMany(
-    projections: IProjectionEngine<any>[],
+    projections: IProjectionEngine<unknown>[],
     filter?: IReplayFilter,
     config?: IProjectionRebuildConfig
   ): Promise<IReplayResult[]>;
@@ -198,7 +198,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
   }
 
   async rebuildMany(
-    projections: IProjectionEngine<any>[],
+    projections: IProjectionEngine<unknown>[],
     filter?: IReplayFilter,
     config?: IProjectionRebuildConfig
   ): Promise<IReplayResult[]> {

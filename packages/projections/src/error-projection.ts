@@ -25,7 +25,11 @@ export class ErrorProjection extends BaseProjection<ErrorProjectionState> {
 
   apply(state: ErrorProjectionState, event: IExtendedDomainEvent): ErrorProjectionState {
     return this.when(state, event, 'ProjectionErrorOccurred', (state, event) => {
-      const { projectionName, eventType, error } = event.payload;
+      const { projectionName, eventType, error } = event.payload as {
+        projectionName: string;
+        eventType: string;
+        error: { message: string; type: string; stack?: string };
+      };
       const now = new Date();
 
       // Filter out old errors

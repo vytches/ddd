@@ -1,8 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with
-code in this repository.
-
 ## CRITICAL: Test Files Location
 
 **When generating or creating test files, ALWAYS place them in the `tests/`
@@ -11,217 +8,50 @@ directory, NOT in `src/`.**
 - ✅ CORRECT: `packages/[package]/tests/my-component.test.ts`
 - ❌ WRONG: `packages/[package]/src/my-component.test.ts`
 
-This is essential to prevent circular dependencies where foundation packages
-would depend on the testing package.
-
 ## Development Commands
 
-### Primary Development Workflow
+```bash
+# Primary workflow
+pnpm dev           # Smart development mode
+pnpm playground    # Testing/prototyping
+pnpm test          # Run all tests
+pnpm build         # Build all packages
+pnpm lint          # Lint code
+pnpm type-check    # Type checking
+pnpm quality       # Run quality checks
+```
+
+### Architecture Decision Records
 
 ```bash
-# Smart development mode - auto-detects packages based on recent changes
-pnpm dev
-
-# Playground mode - for testing and prototyping
-pnpm playground
-
-# Package-specific development (auto-includes dependencies)
-pnpm dev:core
-pnpm dev:di
-pnpm dev:events
-pnpm dev:cqrs
-pnpm dev:policies
-pnpm dev:projections
-pnpm dev:validation
-pnpm dev:domain-services
-pnpm dev:acl
-pnpm dev:messaging
-pnpm dev:resilience
-pnpm dev:enterprise
-pnpm dev:cli
-pnpm dev:testing
-pnpm dev:logging
-pnpm dev:event-store
+pnpm adr:new "Decision Title"  # Create new ADR
+pnpm adr:list                  # List all ADRs
 ```
 
-### Testing
+All significant architectural decisions MUST be documented as ADRs.
 
-```bash
-# Run all tests
-pnpm test
+## Package Architecture
 
-# Run tests in watch mode
-pnpm test:watch
+### Import Strategy
 
-# Run tests with coverage
-pnpm test:coverage
+**External Consumers:**
 
-# Test specific areas
-pnpm test:affected
-pnpm test:package <package-name>
-
-# Test individual packages (CI-style with proper aliases)
-pnpm nx run @vytches-ddd/domain-services:test
-pnpm nx run @vytches-ddd/cqrs:test
-pnpm nx run @vytches-ddd/event-store:test
-
-# Test all packages through Nx (recommended for CI parity)
-pnpm nx run-many --target=test --all --parallel=3
+```typescript
+import { AggregateRoot, EntityId, BaseError } from '@vytches-ddd/core';
+import { Logger } from '@vytches-ddd/logging';
+import { CommandBus } from '@vytches-ddd/cqrs';
 ```
 
-### Build & Validation
+**Internal Packages:**
 
-```bash
-# Build all packages
-pnpm build
+```typescript
+// Core building blocks - direct imports
+import { IActor } from '@vytches-ddd/domain-primitives';
+import type { EntityId } from '@vytches-ddd/contracts';
 
-# Build only affected packages
-pnpm build:affected
-
-# Validate exports and bundles
-pnpm validate
-
-# Lint code
-pnpm lint
-
-# Type check
-pnpm type-check
+// Higher-level packages - meta-package imports
+import { AggregateRoot, EntityId } from '@vytches-ddd/core';
 ```
-
-### Quality Gates & Automation
-
-```bash
-# Quality gates orchestrator
-pnpm quality              # Run all quality checks
-pnpm quality:ci           # CI mode with exit codes
-pnpm quality:baseline     # Save current state
-
-# Individual quality monitors
-pnpm quality:any          # Type safety monitoring (67 any types)
-pnpm quality:bundle       # Bundle size validation (all <100KB)
-pnpm quality:performance  # Performance monitoring (build/test times)
-
-# Quality dashboard and analysis
-pnpm quality:verbose      # Detailed reporting
-node scripts/quality-gates/dashboard.js  # Historical trends
-```
-
-### Utilities
-
-```bash
-# Clean all build artifacts
-pnpm clean
-
-# View dependency graph
-pnpm graph
-
-# Format code
-pnpm format
-```
-
-### Architecture Decision Records (ADR)
-
-```bash
-# Create new ADR for architectural decisions
-pnpm adr:new "Decision Title"
-
-# List all ADRs
-pnpm adr:list
-
-# Change ADR status
-pnpm adr:status <number> <status>
-
-# Generate ADR documentation
-pnpm adr:generate
-
-# Export ADRs to HTML
-pnpm adr:export html
-```
-
-**IMPORTANT**: All significant architectural decisions MUST be documented as
-ADRs. This includes:
-
-- Changes to package architecture or boundaries
-- New patterns or technologies adopted
-- API design decisions affecting consumers
-- Infrastructure or tooling changes
-- Performance or security trade-offs
-
-ADRs are stored in `docs/adr/` and automatically indexed. See existing ADRs for
-examples of decision documentation format.
-
-## Project Architecture
-
-### Monorepo Structure
-
-- **packages/**: All library packages organized by domain
-- **examples/**: Usage examples and testing playgrounds
-- **tools/**: Build tools and development utilities
-- **scripts/**: Development workflow automation
-
-### Package Dependency Hierarchy
-
-```
-Foundation Layer:
-├── @vytches-ddd/contracts (Enterprise-grade contracts & fundamental types - EntityId, interfaces)
-├── @vytches-ddd/core (Meta-package: Enterprise API stability, 1.4KB)
-│   ├── @vytches-ddd/domain-primitives (Base classes, errors, interfaces)
-│   ├── @vytches-ddd/value-objects (Enhanced value objects, extended EntityId)
-│   ├── @vytches-ddd/repositories (Repository patterns, UnitOfWork)
-│   └── @vytches-ddd/aggregates (Aggregate root + capabilities)
-├── @vytches-ddd/di (Enterprise dependency injection with auto-discovery)
-├── @vytches-ddd/utils (Common utilities)
-└── @vytches-ddd/logging (Enterprise logging, structured logging, DDD-first design)
-
-Patterns Layer:
-├── @vytches-ddd/validation (Business rules, specifications)
-├── @vytches-ddd/policies (Business policies, policy builder)
-└── @vytches-ddd/domain-services (Domain services, domain logic coordination)
-
-Architecture Layer:
-├── @vytches-ddd/events (Unified event system, context-aware routing)
-├── @vytches-ddd/cqrs (Command Query Responsibility Segregation)
-└── @vytches-ddd/projections (Event projections, read models)
-
-Integration Layer:
-├── @vytches-ddd/acl (Anti-Corruption Layer)
-└── @vytches-ddd/messaging (Outbox pattern, sagas)
-
-Infrastructure Layer:
-├── @vytches-ddd/resilience (Circuit breakers, retry patterns)
-├── @vytches-ddd/enterprise (Health checks, monitoring)
-└── @vytches-ddd/event-store (Event sourcing, event streams, snapshots)
-
-Tooling Layer:
-├── @vytches-ddd/testing (Test utilities)
-└── @vytches-ddd/cli (Code generation tools)
-```
-
-### Key Architectural Patterns
-
-This project implements enterprise-grade Domain-Driven Design patterns:
-
-- **Value Objects**: Immutable objects representing domain concepts
-- **Entities**: Objects with identity and lifecycle management
-- **Aggregates**: Consistency boundaries for domain operations
-- **Unified Event System**: Single event bus for domain/integration/audit events
-  with context-aware routing
-- **CQRS**: Command Query Responsibility Segregation
-- **Dependency Injection**: Global service locator with auto-discovery and
-  context isolation
-- **Anti-Corruption Layer**: External system integration patterns
-- **Event Projections**: Read model generation from events with capabilities
-- **Event Sourcing**: Enterprise Event Store with streams, snapshots, and
-  optimistic concurrency
-- **Business Policies**: Fluent policy builder with specifications and
-  validations
-- **Validation Specifications**: Composite specifications and business rules
-- **Outbox Pattern**: Reliable message delivery
-- **Resilience Patterns**: Circuit breakers, retry, bulkhead, timeout strategies
-- **Observability**: Metrics collection, monitoring, and event-driven telemetry
-- **Shared Contracts**: Common interfaces across domain boundaries
-- **Enterprise Logging**: DDD-first structured logging with smart context
-  detection and data masking
 
 ### Module Boundaries & Import Strategy
 

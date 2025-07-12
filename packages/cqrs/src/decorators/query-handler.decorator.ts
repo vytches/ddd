@@ -8,10 +8,10 @@ import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
  * Framework agnostic - works with any DI container
  */
 export function QueryHandler<T extends IQuery<R>, R>(
-  queryType: new (...args: any[]) => T,
+  queryType: new (...args: unknown[]) => T,
   options?: QueryHandlerOptions
 ) {
-  return function <K extends IQueryHandler<T, R>>(target: new (...args: any[]) => K) {
+  return function <K extends IQueryHandler<T, R>>(target: new (...args: unknown[]) => K) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'query',

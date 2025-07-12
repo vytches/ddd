@@ -5,7 +5,7 @@
 
 // Import DI types (will be available when DI package is consumed)
 export type ServiceLifetime = 'transient' | 'singleton' | 'scoped';
-export type ServiceToken<T = any> = string | symbol | (new (...args: any[]) => T);
+export type ServiceToken<T = unknown> = string | symbol | (new (...args: unknown[]) => T);
 
 /**
  * DI-related options for CQRS decorators
@@ -67,10 +67,10 @@ export interface DIHandlerMetadata {
   type: 'command' | 'query' | 'event';
 
   /** Message type constructor */
-  messageType: new (...args: any[]) => any;
+  messageType: new (...args: unknown[]) => unknown;
 
   /** Handler constructor */
-  handlerType: new (...args: any[]) => any;
+  handlerType: new (...args: unknown[]) => unknown;
 
   /** DI options */
   options: DIDecoratorOptions;

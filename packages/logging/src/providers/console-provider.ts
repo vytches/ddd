@@ -1,4 +1,4 @@
-import type { LogProvider, LogEvent } from '../core/index';
+import type { LogProvider, LogEvent, LogContext } from '../core/index';
 
 export interface ConsoleProviderOptions {
   colorize?: boolean;
@@ -82,7 +82,7 @@ export class ConsoleProvider implements LogProvider {
     return JSON.stringify(logObject);
   }
 
-  private formatContext(context: any): string {
+  private formatContext(context: LogContext): string {
     const parts: string[] = [];
 
     if (context.boundedContext) {

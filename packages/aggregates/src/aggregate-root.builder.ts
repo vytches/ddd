@@ -1,8 +1,8 @@
-import type { IEventStore } from '@vytches-ddd/contracts';
+import type { IEventStore, Capability } from '@vytches-ddd/contracts';
 import { EntityId } from '@vytches-ddd/contracts';
 
 import { AggregateRoot } from './aggregate-root';
-import type { IAggregateConstructorParams } from './aggregate-interfaces';
+import type { IAggregateConstructorParams, IAggregateCapability } from './aggregate-interfaces';
 
 // Import capability classes
 import { SnapshotCapability } from './capabilities/snapshot-capability';
@@ -16,8 +16,8 @@ import { AuditCapability } from './capabilities/audit-capability';
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
   private capabilities: Array<{
-    capability: any;
-    configure?: ((cap: any) => void) | undefined;
+    capability: Capability & IAggregateCapability;
+    configure?: ((cap: Capability & IAggregateCapability) => void) | undefined;
   }> = [];
   private eventStore?: IEventStore;
 
@@ -70,11 +70,12 @@ export class AggregateBuilder<TId = string> {
     const capability = new EventSourcingCapability();
     this.capabilities.push({
       capability,
-      configure: (cap: EventSourcingCapability) => {
+      configure: (cap: Capability & IAggregateCapability) => {
+        const eventSourcingCap = cap as EventSourcingCapability;
         if (eventStore) {
-          cap.setEventStore(eventStore);
+          eventSourcingCap.setEventStore(eventStore);
         } else if (this.eventStore) {
-          cap.setEventStore(this.eventStore);
+          eventSourcingCap.setEventStore(this.eventStore);
         }
       },
     });
@@ -84,8 +85,16 @@ export class AggregateBuilder<TId = string> {
   /**
    * Add a custom capability
    */
-  withCapability<T>(capability: T, configure?: (cap: T) => void): this {
-    this.capabilities.push({ capability, configure });
+  withCapability<T extends Capability & IAggregateCapability>(
+    capability: T,
+    configure?: (cap: T) => void
+  ): this {
+    this.capabilities.push({
+      capability,
+      configure: configure
+        ? (cap: Capability & IAggregateCapability) => configure(cap as T)
+        : undefined,
+    });
     return this;
   }
 

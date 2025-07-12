@@ -196,11 +196,11 @@ export abstract class SagaStep implements ISagaStep {
   protected getEventData<T = unknown>(event: IExtendedDomainEvent, path: string): T | undefined {
     try {
       const parts = path.split('.');
-      let current: any = event;
+      let current: Record<string, unknown> = event as unknown as Record<string, unknown>;
 
       for (const part of parts) {
         if (current == null) return undefined;
-        current = current[part];
+        current = current[part] as Record<string, unknown>;
       }
 
       return current as T;
@@ -224,11 +224,11 @@ export abstract class SagaStep implements ISagaStep {
   protected getStateData<T = unknown>(state: ISagaState, path: string): T | undefined {
     try {
       const parts = path.split('.');
-      let current: any = state;
+      let current: Record<string, unknown> = state as unknown as Record<string, unknown>;
 
       for (const part of parts) {
         if (current == null) return undefined;
-        current = current[part];
+        current = current[part] as Record<string, unknown>;
       }
 
       return current as T;

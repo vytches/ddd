@@ -95,17 +95,17 @@ export interface IAuditEventMetadata {
   resourceType?: string;
 
   /** Previous state captured for audit purposes */
-  _previousState?: any;
+  _previousState?: unknown;
 
   /** Dodatkowe metadane specyficzne dla aplikacji */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * Podstawowy interfejs dla eventów audytowych
  * Reprezentuje zapis działania w systemie
  */
-export interface IAuditEvent<P = any> {
+export interface IAuditEvent<P = unknown> {
   /** Typ eventu */
   eventType: string;
 
@@ -120,7 +120,7 @@ export interface IAuditEvent<P = any> {
  * Interfejs dla transformera eventów domenowych na audytowe
  * Odpowiada za transformację eventów domenowych na eventy audytowe
  */
-export interface IDomainToAuditEventTransformer<D = any, A = any> {
+export interface IDomainToAuditEventTransformer<D = unknown, A = unknown> {
   /**
    * Transformuje event domenowy na event audytowy
    * @param domainEvent Event domenowy do transformacji
@@ -139,7 +139,7 @@ export interface IAuditEventFilter {
    * @param event Event audytowy do sprawdzenia
    * @returns True, jeśli event powinien być przetworzony, w przeciwnym razie false
    */
-  shouldProcess<T = any>(event: IAuditEvent<T>): boolean;
+  shouldProcess<T = unknown>(event: IAuditEvent<T>): boolean;
 }
 
 /**
@@ -151,7 +151,7 @@ export interface IAuditService {
    * Rejestruje zdarzenie audytowe
    * @param event Event audytowy do zarejestrowania
    */
-  record<T = any>(event: IAuditEvent<T>): Promise<void>;
+  record<T = unknown>(event: IAuditEvent<T>): Promise<void>;
 
   /**
    * Tworzy i rejestruje zdarzenie audytowe na podstawie szczegółów akcji
@@ -165,7 +165,7 @@ export interface IAuditService {
     action: AuditActionType | string,
     resourceType: string,
     resourceId: string,
-    data?: any,
+    data?: unknown,
     metadata?: Partial<IAuditEventMetadata>
   ): Promise<void>;
 }

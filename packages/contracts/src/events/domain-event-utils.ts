@@ -8,7 +8,7 @@ import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interf
  * @param metadata Optional additional metadata
  * @returns A complete domain event with metadata
  */
-export function createDomainEvent<P = any>(
+export function createDomainEvent<P = unknown>(
   eventType: string,
   payload: P,
   metadata?: Partial<IEventMetadata>

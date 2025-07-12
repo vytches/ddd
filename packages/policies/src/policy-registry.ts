@@ -4,7 +4,7 @@ import type { IBusinessPolicy, PolicyMetadata } from './business-policy-interfac
 /**
  * Policy definition for registry storage
  */
-export interface PolicyDefinition<T = any> {
+export interface PolicyDefinition<T = unknown> {
   policy: IBusinessPolicy<T>;
   metadata: RegistryPolicyMetadata;
 }
@@ -85,7 +85,7 @@ export class PolicyRegistry implements IPolicyRegistry {
     }
 
     const policyDefinition: PolicyDefinition<T> = {
-      policy: policy as IBusinessPolicy<any>,
+      policy: policy as IBusinessPolicy<T>,
       metadata: {
         registeredAt: new Date(),
         ...(metadata.registeredBy !== undefined && { registeredBy: metadata.registeredBy }),
@@ -276,7 +276,7 @@ export class PolicyRegistry implements IPolicyRegistry {
    * Export all policies to JSON
    */
   export(): RegistryExport {
-    const data: Record<string, Record<string, any>> = {};
+    const data: Record<string, Record<string, unknown>> = {};
 
     for (const [domain, policies] of Array.from(this.policies.entries())) {
       data[domain] = {};
@@ -314,7 +314,7 @@ export interface RegistryStats {
 export interface RegistryExport {
   exportedAt: Date;
   version: string;
-  data: Record<string, Record<string, any>>;
+  data: Record<string, Record<string, unknown>>;
 }
 
 /**

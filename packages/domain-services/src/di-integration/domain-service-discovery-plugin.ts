@@ -38,7 +38,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    * @param assemblies - Optional list of modules/assemblies to scan
    * @returns Promise<HandlerInfo[]> List of discovered domain services
    */
-  async discoverHandlers(assemblies?: any[]): Promise<HandlerInfo[]> {
+  async discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> {
     const discoveredServices: HandlerInfo[] = [];
 
     // Get all registered domain services from metadata registry
@@ -51,7 +51,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
         isDomainServicePendingDIRegistration(serviceMetadata.serviceType)
       ) {
         const handlerInfo: HandlerInfo = {
-          type: 'domain-service' as any, // Extend HandlerInfo type for domain services
+          type: 'domain-service' as unknown as 'command' | 'query' | 'event', // Extend HandlerInfo type for domain services
           messageType: serviceMetadata.serviceType, // Use service class as "message type"
           handlerType: serviceMetadata.serviceType,
           metadata: {
@@ -92,7 +92,7 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
    * @param assembly - Module or assembly to scan
    * @returns Promise<HandlerInfo[]> Domain services found in the assembly
    */
-  private async scanAssemblyForDomainServices(assembly: any): Promise<HandlerInfo[]> {
+  private async scanAssemblyForDomainServices(assembly: unknown): Promise<HandlerInfo[]> {
     const services: HandlerInfo[] = [];
 
     if (!assembly || typeof assembly !== 'object') {
@@ -108,9 +108,9 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 
         if (diMetadata && diMetadata.autoRegister) {
           const handlerInfo: HandlerInfo = {
-            type: 'domain-service' as any,
-            messageType: exportedValue as any,
-            handlerType: exportedValue as any,
+            type: 'domain-service' as unknown as 'command' | 'query' | 'event',
+            messageType: exportedValue as new (...args: unknown[]) => unknown,
+            handlerType: exportedValue as new (...args: unknown[]) => unknown,
             metadata: {
               serviceId: diMetadata.serviceId,
               lifetime: diMetadata.lifetime,

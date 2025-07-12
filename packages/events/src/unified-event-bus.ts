@@ -524,7 +524,9 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
         const middleware = middlewares[i];
         if (middleware) {
           const next = pipeline;
-          pipeline = middleware(next);
+          pipeline = middleware(next as (event: unknown) => Promise<void>) as (
+            event: BaseEvent
+          ) => Promise<void>;
         }
       }
 

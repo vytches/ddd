@@ -10,15 +10,17 @@ import type {
  * Stores mappings between domain event types and their transformers
  */
 export class IntegrationEventTransformerRegistry {
-  private readonly transformers: Map<string, IDomainToIntegrationEventTransformer<any, any>> =
-    new Map();
+  private readonly transformers: Map<
+    string,
+    IDomainToIntegrationEventTransformer<unknown, unknown>
+  > = new Map();
 
   /**
    * Registers a transformer for a specific domain event type
    * @param domainEventType Domain event type
    * @param transformer Transformer for this type
    */
-  public register<D = any, I = any>(
+  public register<D = unknown, I = unknown>(
     domainEventType: string,
     transformer: IDomainToIntegrationEventTransformer<D, I>
   ): void {
@@ -30,7 +32,7 @@ export class IntegrationEventTransformerRegistry {
    * @param domainEventType Domain event type
    * @returns Transformer for this type or undefined if not found
    */
-  public find<D = any, I = any>(
+  public find<D = unknown, I = unknown>(
     domainEventType: string
   ): IDomainToIntegrationEventTransformer<D, I> | undefined {
     return this.transformers.get(domainEventType) as
@@ -43,7 +45,7 @@ export class IntegrationEventTransformerRegistry {
    * @param domainEvent Domain event to transform
    * @returns Integration event or undefined if no transformer found
    */
-  public transform<D = any, I = any>(
+  public transform<D = unknown, I = unknown>(
     domainEvent: IExtendedDomainEvent<D>
   ): IIntegrationEvent<I> | undefined {
     const transformer = this.find(domainEvent.eventType);
@@ -52,7 +54,7 @@ export class IntegrationEventTransformerRegistry {
       return undefined;
     }
 
-    return transformer.transform(domainEvent);
+    return transformer.transform(domainEvent) as IIntegrationEvent<I>;
   }
 
   /**

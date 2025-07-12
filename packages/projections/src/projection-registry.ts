@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 
 import type { IProjectionEngine } from './projection-interfaces';
 
 export class ProjectionEngineRegistry {
-  private engines = new Map<string, IProjectionEngine<any>>();
+  private engines = new Map<string, IProjectionEngine<unknown>>();
 
   register<TReadModel>(engine: IProjectionEngine<TReadModel>): this {
     this.engines.set(engine.getProjectionName(), engine);
@@ -20,11 +19,11 @@ export class ProjectionEngineRegistry {
     return this.engines.get(projectionName) as IProjectionEngine<TReadModel>;
   }
 
-  getAll(): IProjectionEngine<any>[] {
+  getAll(): IProjectionEngine<unknown>[] {
     return Array.from(this.engines.values());
   }
 
-  getInterestedEngines(event: IExtendedDomainEvent): IProjectionEngine<any>[] {
+  getInterestedEngines(event: IExtendedDomainEvent): IProjectionEngine<unknown>[] {
     return this.getAll().filter(engine => engine.isInterestedIn(event));
   }
 

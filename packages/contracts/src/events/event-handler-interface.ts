@@ -39,7 +39,7 @@ export interface EventHandlerMetadata {
   /**
    * The event type this handler can process
    */
-  eventType: new (...args: any[]) => IDomainEvent;
+  eventType: new (...args: unknown[]) => IDomainEvent;
 }
 
 /**
@@ -48,6 +48,11 @@ export interface EventHandlerMetadata {
  * @param obj - The object to check
  * @returns True if the object implements IEventHandler
  */
-export function isEventHandler(obj: any): obj is IEventHandler<any> {
-  return obj && typeof obj === 'object' && 'handle' in obj && typeof obj.handle === 'function';
+export function isEventHandler(obj: unknown): obj is IEventHandler<IDomainEvent> {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'handle' in obj &&
+    typeof (obj as { handle: unknown }).handle === 'function'
+  );
 }

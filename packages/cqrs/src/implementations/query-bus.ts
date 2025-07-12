@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches-ddd/di';
 import { IQueryBus } from '../abstracts';
@@ -70,7 +71,7 @@ export class QueryBus extends IQueryBus {
     return this.executeWithMiddleware(context, () => handler.execute(query)) as Promise<R>;
   }
 
-  private getHandlerToken(queryClass: any): ServiceToken {
+  private getHandlerToken(queryClass: Function): ServiceToken {
     // Get handler metadata from query class
     const handlerMetadata = Reflect.getMetadata('di:query-handler', queryClass);
     if (!handlerMetadata) {

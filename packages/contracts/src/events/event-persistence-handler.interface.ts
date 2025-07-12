@@ -14,5 +14,5 @@ export abstract class IEventPersistenceHandler {
   /**
    * Get current version of an aggregate
    */
-  abstract getCurrentVersion(aggregateId: any): Promise<number | undefined>;
+  abstract getCurrentVersion(aggregateId: unknown): Promise<number | undefined>;
 }

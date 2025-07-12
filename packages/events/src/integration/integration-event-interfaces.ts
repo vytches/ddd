@@ -44,7 +44,7 @@ export interface IIntegrationEventMetadata {
  * Base interface for integration events
  * Represents an event communicated between bounded contexts
  */
-export interface IIntegrationEvent<P = any> {
+export interface IIntegrationEvent<P = unknown> {
   /** Type of the event */
   eventType: string;
 
@@ -59,7 +59,7 @@ export interface IIntegrationEvent<P = any> {
  * Interface for domain to integration event transformer
  * Responsible for transforming domain events to integration events
  */
-export interface IDomainToIntegrationEventTransformer<D = any, I = any> {
+export interface IDomainToIntegrationEventTransformer<D = unknown, I = unknown> {
   /**
    * Transformuje wydarzenie domenowe na wydarzenie integracyjne
    * @param domainEvent Wydarzenie domenowe do transformacji

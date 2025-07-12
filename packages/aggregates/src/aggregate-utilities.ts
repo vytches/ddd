@@ -4,6 +4,7 @@ import type {
   CapabilityConstructor,
   Capability,
   IAggregateCapability,
+  IAggregateSnapshot,
 } from '@vytches-ddd/contracts';
 import { AggregateError } from './aggregate-errors';
 import type { IAggregateRoot } from './aggregate-interfaces';
@@ -129,7 +130,7 @@ export function asEventSourcingAggregate<TId>(
 /**
  * Gets a list of all capabilities attached to an aggregate
  */
-export function getAggregateCapabilities(aggregate: AggregateRoot<any>): string[] {
+export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): string[] {
   return aggregate.getCapabilityTypes();
 }
 
@@ -137,7 +138,7 @@ export function getAggregateCapabilities(aggregate: AggregateRoot<any>): string[
  * Checks if aggregate has all specified capabilities
  */
 export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
-  aggregate: AggregateRoot<any>,
+  aggregate: AggregateRoot<unknown>,
   capabilities: CapabilityConstructor<T>[]
 ): boolean {
   return capabilities.every(CapabilityClass => aggregate.hasCapability(CapabilityClass));
@@ -147,7 +148,7 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
  * Checks if aggregate has any of the specified capabilities
  */
 export function hasAnyCapability<T extends Capability & IAggregateCapability>(
-  aggregate: AggregateRoot<any>,
+  aggregate: AggregateRoot<unknown>,
   capabilities: CapabilityConstructor<T>[]
 ): boolean {
   return capabilities.some(CapabilityClass => aggregate.hasCapability(CapabilityClass));
@@ -182,10 +183,10 @@ export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
  * Creates a snapshot if the aggregate has snapshot capability
  */
 export function createSnapshotIfCapable<TState>(
-  aggregate: AggregateRoot<any>,
+  aggregate: AggregateRoot<unknown>,
   serializer: () => TState,
-  metadataCreator?: () => any
-): any | null {
+  metadataCreator?: () => unknown
+): unknown | null {
   if (hasSnapshotCapability(aggregate)) {
     const snapshotCap = aggregate.getCapability(SnapshotCapability);
     return snapshotCap?.createSnapshot(serializer as () => unknown, metadataCreator) || null;
@@ -197,10 +198,10 @@ export function createSnapshotIfCapable<TState>(
  * Restores from snapshot if the aggregate has snapshot capability
  */
 export function restoreFromSnapshotIfCapable<TState = unknown>(
-  aggregate: AggregateRoot<any>,
-  snapshot: any,
+  aggregate: AggregateRoot<unknown>,
+  snapshot: IAggregateSnapshot<unknown, unknown>,
   deserializer: (state: TState) => void,
-  metadataRestorer?: (metadata: any) => void
+  metadataRestorer?: (metadata: unknown) => void
 ): boolean {
   if (hasSnapshotCapability(aggregate)) {
     const snapshotCap = aggregate.getCapability(SnapshotCapability);
@@ -248,8 +249,8 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
  * Loads from event store if the aggregate has event sourcing capability
  */
 export async function loadFromEventStoreIfCapable(
-  aggregate: AggregateRoot<any>,
-  aggregateId: any
+  aggregate: AggregateRoot<unknown>,
+  aggregateId: string | number
 ): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
     const eventSourcingCap = aggregate.getCapability(EventSourcingCapability);
@@ -264,7 +265,9 @@ export async function loadFromEventStoreIfCapable(
 /**
  * Saves to event store if the aggregate has event sourcing capability
  */
-export async function saveToEventStoreIfCapable(aggregate: AggregateRoot<any>): Promise<boolean> {
+export async function saveToEventStoreIfCapable(
+  aggregate: AggregateRoot<unknown>
+): Promise<boolean> {
   if (hasEventSourcingCapability(aggregate)) {
     const eventSourcingCap = aggregate.getCapability(EventSourcingCapability);
     if (eventSourcingCap) {
@@ -283,10 +286,10 @@ export async function saveToEventStoreIfCapable(aggregate: AggregateRoot<any>): 
  * Registers an upcaster if the aggregate has versioning capability
  */
 export function registerUpcasterIfCapable<TFrom, TTo>(
-  aggregate: AggregateRoot<any>,
+  aggregate: AggregateRoot<unknown>,
   eventType: string,
   sourceVersion: number,
-  upcaster: { upcast(payload: TFrom, metadata?: any): TTo }
+  upcaster: { upcast(payload: TFrom, metadata?: unknown): TTo }
 ): boolean {
   if (hasVersioningCapability(aggregate)) {
     const versioningCap = aggregate.getCapability(VersioningCapability);
@@ -299,7 +302,7 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 /**
  * Gets versioning information if the aggregate has versioning capability
  */
-export function getVersioningInfoIfCapable(aggregate: AggregateRoot<any>): any | null {
+export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasVersioningCapability(aggregate)) {
     const versioningCap = aggregate.getCapability(VersioningCapability);
     return versioningCap

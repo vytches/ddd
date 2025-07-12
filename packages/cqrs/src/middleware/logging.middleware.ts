@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ICQRSMiddleware, ExecutionContext } from './middleware.interface';
 
 export class LoggingMiddleware implements ICQRSMiddleware {
@@ -7,9 +6,9 @@ export class LoggingMiddleware implements ICQRSMiddleware {
     this.logger = logger || console;
   }
 
-  async handle(context: ExecutionContext, next: () => Promise<any>): Promise<any> {
+  async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
     const { commandOrQuery, type } = context;
-    const name = commandOrQuery.constructor.name;
+    const name = (commandOrQuery as { constructor: { name: string } }).constructor.name;
 
     const startTime = Date.now();
     this.logger!.log(`[CQRS] Executing ${type}: ${name}`);

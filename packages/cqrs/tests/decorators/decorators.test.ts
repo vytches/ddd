@@ -31,7 +31,7 @@ describe('CQRS Decorators', () => {
 
   describe('CommandHandler decorator', () => {
     it('should register command handler metadata', () => {
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           // Implementation
@@ -52,7 +52,7 @@ describe('CQRS Decorators', () => {
     });
 
     it('should return the original class unchanged', () => {
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         public testProperty = 'test';
 
@@ -73,14 +73,14 @@ describe('CQRS Decorators', () => {
     });
 
     it('should register multiple command handlers', () => {
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
         }
       }
 
-      @CommandHandler(AnotherCommand)
+      @CommandHandler(AnotherCommand as new (...args: unknown[]) => AnotherCommand)
       class AnotherCommandHandler implements ICommandHandler<AnotherCommand> {
         async execute(_command: AnotherCommand): Promise<void> {
           return;
@@ -97,7 +97,9 @@ describe('CQRS Decorators', () => {
     });
 
     it('should allow custom service ID', () => {
-      @CommandHandler(TestCommand, { serviceId: 'customTestHandler' })
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, {
+        serviceId: 'customTestHandler',
+      })
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           // Implementation
@@ -113,7 +115,7 @@ describe('CQRS Decorators', () => {
         abstract execute(command: T): Promise<void>;
       }
 
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler extends BaseHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
@@ -128,7 +130,7 @@ describe('CQRS Decorators', () => {
 
   describe('QueryHandler decorator', () => {
     it('should register query handler metadata', () => {
-      @QueryHandler(TestQuery)
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'result';
@@ -149,7 +151,7 @@ describe('CQRS Decorators', () => {
     });
 
     it('should return the original class unchanged', () => {
-      @QueryHandler(TestQuery)
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         public testProperty = 'test';
 
@@ -170,14 +172,14 @@ describe('CQRS Decorators', () => {
     });
 
     it('should register multiple query handlers', () => {
-      @QueryHandler(TestQuery)
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'test result';
         }
       }
 
-      @QueryHandler(AnotherQuery)
+      @QueryHandler(AnotherQuery as new (...args: unknown[]) => AnotherQuery)
       class AnotherQueryHandler implements IQueryHandler<AnotherQuery, number> {
         async execute(_query: AnotherQuery): Promise<number> {
           return 42;
@@ -194,7 +196,9 @@ describe('CQRS Decorators', () => {
     });
 
     it('should allow custom service ID', () => {
-      @QueryHandler(TestQuery, { serviceId: 'customTestQueryHandler' })
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery, {
+        serviceId: 'customTestQueryHandler',
+      })
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'result';
@@ -206,14 +210,14 @@ describe('CQRS Decorators', () => {
     });
 
     it('should work with different return types', () => {
-      @QueryHandler(TestQuery)
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
       class StringHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'string result';
         }
       }
 
-      @QueryHandler(AnotherQuery)
+      @QueryHandler(AnotherQuery as new (...args: unknown[]) => AnotherQuery)
       class NumberHandler implements IQueryHandler<AnotherQuery, number> {
         async execute(_query: AnotherQuery): Promise<number> {
           return 123;
@@ -230,14 +234,14 @@ describe('CQRS Decorators', () => {
 
   describe('Decorator integration', () => {
     it('should register both command and query handlers independently', () => {
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
         }
       }
 
-      @QueryHandler(TestQuery)
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
       class TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'result';
@@ -267,14 +271,14 @@ describe('CQRS Decorators', () => {
         constructor(public readonly filter: string) {}
       }
 
-      @CommandHandler(ComplexCommand)
+      @CommandHandler(ComplexCommand as new (...args: unknown[]) => ComplexCommand)
       class ComplexCommandHandler implements ICommandHandler<ComplexCommand> {
         async execute(_command: ComplexCommand): Promise<void> {
           return;
         }
       }
 
-      @QueryHandler(ComplexQuery)
+      @QueryHandler(ComplexQuery as new (...args: unknown[]) => ComplexQuery)
       class ComplexQueryHandler implements IQueryHandler<ComplexQuery, ComplexData> {
         async execute(_query: ComplexQuery): Promise<ComplexData> {
           return { id: 'test', items: [] };
@@ -291,7 +295,7 @@ describe('CQRS Decorators', () => {
 
   describe('Registration flags', () => {
     it('should mark handlers for DI registration by default', () => {
-      @CommandHandler(TestCommand)
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;
@@ -303,7 +307,9 @@ describe('CQRS Decorators', () => {
     });
 
     it('should respect autoRegister false option', () => {
-      @CommandHandler(TestCommand, { autoRegister: false })
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, {
+        autoRegister: false,
+      })
       class TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           return;

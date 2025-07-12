@@ -78,13 +78,13 @@ export interface ISnapshotProjectionCapability<TReadModel>
   loadLatestSnapshot(): Promise<{ state: TReadModel; position: number } | null>;
 }
 
-export interface IProjectionCheckpoint<TState = any> {
+export interface IProjectionCheckpoint<TState = unknown> {
   projectionName: string;
   position: number;
   state: TState;
   timestamp: Date;
   eventCount?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface IProjectionCheckpointStore {
@@ -143,8 +143,8 @@ export interface CheckpointProjectionOptions {
 export interface SnapshotProjectionOptions {
   interval?: number;
   maxSnapshots?: number;
-  compressState?: (state: any) => any;
-  decompressState?: (compressed: any) => any;
+  compressState?: (state: unknown) => unknown;
+  decompressState?: (compressed: unknown) => unknown;
 }
 
 export interface IProjectionRetryConfig {

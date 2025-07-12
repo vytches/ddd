@@ -286,11 +286,11 @@ export abstract class SagaDefinition implements ISagaDefinition {
   private extractEventProperty(event: IExtendedDomainEvent, propertyPath: string): unknown {
     try {
       const parts = propertyPath.split('.');
-      let current: any = event;
+      let current: Record<string, unknown> = event as unknown as Record<string, unknown>;
 
       for (const part of parts) {
         if (current == null) return undefined;
-        current = current[part];
+        current = current[part] as Record<string, unknown>;
       }
 
       return current;

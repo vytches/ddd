@@ -13,7 +13,7 @@ import { createIntegrationEvent } from './integration-event.utils';
  * Base implementation of a domain to integration event transformer
  * Provides core functionality for transforming domain events to integration events
  */
-export abstract class DomainToIntegrationTransformer<D = any, I = any>
+export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
   implements IDomainToIntegrationEventTransformer<IExtendedDomainEvent<D>, I>
 {
   /**

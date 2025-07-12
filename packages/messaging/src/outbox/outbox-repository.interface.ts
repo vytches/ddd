@@ -11,14 +11,14 @@ export abstract class IOutboxRepository {
    * @param message Message to save
    * @returns ID of the saved message
    */
-  abstract saveMessage<T = any>(message: IOutboxMessage<T>): Promise<string>;
+  abstract saveMessage<T = unknown>(message: IOutboxMessage<T>): Promise<string>;
 
   /**
    * Saves multiple messages to the outbox
    * @param messages Messages to save
    * @returns IDs of the saved messages
    */
-  abstract saveBatch<T = any>(messages: IOutboxMessage<T>[]): Promise<string[]>;
+  abstract saveBatch<T = unknown>(messages: IOutboxMessage<T>[]): Promise<string[]>;
 
   /**
    * Gets unprocessed messages from the outbox
@@ -74,7 +74,7 @@ export abstract class IOutboxRepository {
    * @param processAfter When to process the message
    * @returns ID of the saved message
    */
-  abstract scheduleMessage<T = any>(
+  abstract scheduleMessage<T = unknown>(
     message: IOutboxMessage<T>,
     processAfter: Date
   ): Promise<string>;

@@ -343,10 +343,10 @@ export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
     return this.circuitStates.get(circuitKey)!;
   }
 
-  private recordSuccess(circuitKey: string, circuitState: any): void {
-    circuitState.successCount++;
+  private recordSuccess(circuitKey: string, circuitState: Record<string, unknown>): void {
+    (circuitState.successCount as number)++;
 
-    if (circuitState.successCount >= this.successThreshold) {
+    if ((circuitState.successCount as number) >= this.successThreshold) {
       circuitState.failures = 0;
       circuitState.isOpen = false;
       this.logger.info('Circuit breaker closed after successful operations', {
@@ -357,12 +357,12 @@ export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
     }
   }
 
-  private recordFailure(circuitKey: string, circuitState: any): void {
-    circuitState.failures++;
+  private recordFailure(circuitKey: string, circuitState: Record<string, unknown>): void {
+    (circuitState.failures as number)++;
     circuitState.lastFailureTime = Date.now();
     circuitState.successCount = 0;
 
-    if (circuitState.failures >= this.failureThreshold) {
+    if ((circuitState.failures as number) >= this.failureThreshold) {
       circuitState.isOpen = true;
       this.logger.warn('Circuit breaker opened due to failures', {
         circuitKey,
@@ -419,7 +419,7 @@ export class SagaMiddlewarePipeline {
   private readonly logger: ReturnType<typeof Logger.forContext>;
   private readonly middlewares: (ISagaMiddleware & {
     getName?(): string;
-    shouldApply?(context: any): boolean;
+    shouldApply?(context: unknown): boolean;
   })[] = [];
 
   constructor() {
@@ -431,7 +431,7 @@ export class SagaMiddlewarePipeline {
    * @param middleware - Middleware to add
    */
   use(
-    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: any): boolean }
+    middleware: ISagaMiddleware & { getName?(): string; shouldApply?(context: unknown): boolean }
   ): void {
     this.middlewares.push(middleware);
     this.logger.debug('Middleware added to pipeline', {

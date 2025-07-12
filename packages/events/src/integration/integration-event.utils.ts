@@ -10,7 +10,7 @@ import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration
  * @param metadata Optional additional metadata
  * @returns A complete integration event with metadata
  */
-export function createIntegrationEvent<P = any>(
+export function createIntegrationEvent<P = unknown>(
   eventType: string,
   payload: P,
   metadata?: Partial<IIntegrationEventMetadata>
@@ -32,7 +32,7 @@ export function createIntegrationEvent<P = any>(
  * @param event Integration event to serialize
  * @returns Serialized event as JSON string
  */
-export function serializeIntegrationEvent<P = any>(event: IIntegrationEvent<P>): string {
+export function serializeIntegrationEvent<P = unknown>(event: IIntegrationEvent<P>): string {
   return JSON.stringify(event);
 }
 
@@ -41,7 +41,7 @@ export function serializeIntegrationEvent<P = any>(event: IIntegrationEvent<P>):
  * @param jsonString JSON string to deserialize
  * @returns Integration event object
  */
-export function deserializeIntegrationEvent<P = any>(jsonString: string): IIntegrationEvent<P> {
+export function deserializeIntegrationEvent<P = unknown>(jsonString: string): IIntegrationEvent<P> {
   return JSON.parse(jsonString);
 }
 
@@ -50,7 +50,7 @@ export function deserializeIntegrationEvent<P = any>(jsonString: string): IInteg
  * @param event Integration event
  * @returns Idempotency key
  */
-export function generateIdempotencyKey<P = any>(event: IIntegrationEvent<P>): string {
+export function generateIdempotencyKey<P = unknown>(event: IIntegrationEvent<P>): string {
   if (event.metadata?.idempotencyKey) {
     return event.metadata.idempotencyKey as string;
   }

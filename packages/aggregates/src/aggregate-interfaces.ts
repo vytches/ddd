@@ -104,7 +104,8 @@ export interface IAggregateCapability {
 /**
  * Interface for snapshot capability
  */
-export interface ISnapshotCapability<TState = any, TMeta = any> extends IAggregateCapability {
+export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
+  extends IAggregateCapability {
   /**
    * Creates a snapshot of the current aggregate state
    */
@@ -140,7 +141,7 @@ export interface IVersioningCapability extends IAggregateCapability {
   /**
    * Registers an upcaster for a specific event type and version
    */
-  registerUpcaster<TFrom = any, TTo = any>(
+  registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
     sourceVersion: number,
     upcaster: IEventUpcaster<TFrom, TTo>
@@ -211,7 +212,7 @@ export interface IAggregateBuilder<TId> {
   /**
    * Adds snapshot capability
    */
-  withSnapshots<TState = any, TMeta = any>(): this;
+  withSnapshots<TState = unknown, TMeta = unknown>(): this;
 
   /**
    * Adds versioning capability
@@ -253,7 +254,7 @@ export interface IAggregateEventHandler<T = unknown> {
 /**
  * Event middleware function signature
  */
-export type EventAggregateMiddleware<T = any> = (
+export type EventAggregateMiddleware<T = unknown> = (
   event: IExtendedDomainEvent<T>,
   next: (event: IExtendedDomainEvent<T>) => void
 ) => void;
@@ -261,7 +262,7 @@ export type EventAggregateMiddleware<T = any> = (
 /**
  * Represents an aggregate snapshot
  */
-export interface IAggregateSnapshot<TState = any, TMeta = any> {
+export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
   /** Aggregate identifier */
   id: unknown;
 

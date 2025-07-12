@@ -44,7 +44,7 @@ export interface IEventMetadata {
  * Base interface for domain events
  * Represents something that happened in the domain
  */
-export interface IDomainEvent<P = any> {
+export interface IDomainEvent<P = unknown> {
   /** Type of the event */
   eventType: string;
 
@@ -55,7 +55,7 @@ export interface IDomainEvent<P = any> {
 /**
  * Extended domain event interface with metadata
  */
-export interface IExtendedDomainEvent<P = any> extends IDomainEvent<P> {
+export interface IExtendedDomainEvent<P = unknown> extends IDomainEvent<P> {
   /** Event metadata */
   metadata?: IEventMetadata;
 }

@@ -302,7 +302,7 @@ export class SagaDiscoveryPlugin {
    * Check if a value is a constructor function
    * @param value - Value to check
    */
-  private isConstructor(value: any): boolean {
+  private isConstructor(value: unknown): boolean {
     return typeof value === 'function' && value.prototype && value.prototype.constructor === value;
   }
 }

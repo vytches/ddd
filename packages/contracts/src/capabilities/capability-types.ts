@@ -4,7 +4,7 @@ import type { IAggregateCapability, IProjectionCapability } from './capability-b
 /**
  * Snapshot capability interface for aggregates
  */
-export interface ISnapshotCapability<TState = any, TMeta = any>
+export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
   extends IAggregateCapability<'snapshot'> {
   /**
    * Creates a snapshot of the current aggregate state
@@ -41,7 +41,7 @@ export interface IVersioningCapability extends IAggregateCapability<'versioning'
   /**
    * Registers an event upcaster
    */
-  registerUpcaster<TFrom = any, TTo = any>(
+  registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
     sourceVersion: number,
     upcaster: IEventUpcaster<TFrom, TTo>
@@ -52,7 +52,7 @@ export interface IVersioningCapability extends IAggregateCapability<'versioning'
    */
   handleVersionedEvent(
     event: IExtendedDomainEvent,
-    handlers: Map<string, (payload: any, metadata?: any) => void>
+    handlers: Map<string, (payload: unknown, metadata?: unknown) => void>
   ): void;
 
   /**
@@ -73,7 +73,7 @@ export interface IEventSourcingCapability extends IAggregateCapability<'eventSou
   /**
    * Loads aggregate from event store
    */
-  loadFromEventStore(aggregateId: any): Promise<void>;
+  loadFromEventStore(aggregateId: unknown): Promise<void>;
 
   /**
    * Saves aggregate to event store
@@ -118,7 +118,7 @@ export interface IAuditCapability extends IAggregateCapability<'audit'> {
 /**
  * Checkpoint capability for projections
  */
-export interface ICheckpointCapability<TReadModel = any>
+export interface ICheckpointCapability<TReadModel = unknown>
   extends IProjectionCapability<'checkpoint', TReadModel> {
   /**
    * Save a checkpoint
@@ -148,7 +148,7 @@ export interface ICheckpointCapability<TReadModel = any>
 /**
  * Circuit breaker capability for projections
  */
-export interface ICircuitBreakerCapability<TReadModel = any>
+export interface ICircuitBreakerCapability<TReadModel = unknown>
   extends IProjectionCapability<'circuitBreaker', TReadModel> {
   /**
    * Record a success
@@ -179,7 +179,7 @@ export interface ICircuitBreakerCapability<TReadModel = any>
 /**
  * Dead letter capability for projections
  */
-export interface IDeadLetterCapability<TReadModel = any>
+export interface IDeadLetterCapability<TReadModel = unknown>
   extends IProjectionCapability<'deadLetter', TReadModel> {
   /**
    * Send event to dead letter queue
@@ -211,9 +211,9 @@ export interface IDeadLetterCapability<TReadModel = any>
 /**
  * Aggregate snapshot interface
  */
-export interface IAggregateSnapshot<TState = any, TMeta = any> {
+export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
   /** Aggregate ID */
-  aggregateId: any;
+  aggregateId: unknown;
 
   /** Aggregate version */
   version: number;

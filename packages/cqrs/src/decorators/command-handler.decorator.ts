@@ -8,10 +8,10 @@ import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
  * Framework agnostic - works with any DI container
  */
 export function CommandHandler<T extends ICommand>(
-  commandType: new (...args: any[]) => T,
+  commandType: new (...args: unknown[]) => T,
   options?: CommandHandlerOptions
 ) {
-  return function <K extends ICommandHandler<T>>(target: new (...args: any[]) => K) {
+  return function <K extends ICommandHandler<T>>(target: new (...args: unknown[]) => K) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'command',

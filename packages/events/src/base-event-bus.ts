@@ -5,11 +5,20 @@ import type {
   IEventHandler,
   BaseEventBusOptions,
   EventBusMiddleware,
+  IDomainEvent,
 } from '@vytches-ddd/contracts';
 // import { VytchesDDD } from '@vytches-ddd/di';
 const VytchesDDD = {
-  resolve: (identifier: any, context?: any) => null,
-} as any; // Temporarily disabled for testing
+  resolve: (
+    _identifier: string | symbol | (new (...args: unknown[]) => unknown),
+    _context?: string
+  ) => null,
+} as {
+  resolve: (
+    identifier: string | symbol | (new (...args: unknown[]) => unknown),
+    context?: string
+  ) => unknown | null;
+}; // Temporarily disabled for testing
 import { IEventBus, isEventHandler } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 
@@ -23,11 +32,13 @@ export const CUSTOM_MIDDLEWARE_SYMBOL = Symbol('CUSTOM_MIDDLEWARE');
  * Abstract base class for all event bus implementations
  * Provides common functionality for event bus variants
  */
-export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
+export abstract class BaseEventBus<
+  TEvent extends IDomainEvent = IDomainEvent,
+> extends IEventBus<TEvent> {
   /**
    * Map of event types to their handlers
    */
-  protected handlers: Map<string, Set<EventHandlerFn<any> | IEventHandler<any>>> = new Map();
+  protected handlers: Map<string, Set<EventHandlerFn<TEvent> | IEventHandler<TEvent>>> = new Map();
 
   /**
    * Configuration options for this event bus
@@ -144,7 +155,9 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
 
     if (this.options.middlewares && this.options.middlewares.length > 0) {
       for (let i = this.options.middlewares.length - 1; i >= 0; i--) {
-        pipeline = this.options.middlewares[i]!(pipeline);
+        pipeline = this.options.middlewares[i]!(pipeline as (event: unknown) => Promise<void>) as (
+          event: TEvent
+        ) => Promise<void>;
       }
     }
 
@@ -164,7 +177,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
       this.handlers.set(eventName, new Set());
     }
 
-    this.handlers.get(eventName)!.add(handler);
+    this.handlers.get(eventName)!.add(handler as EventHandlerFn<TEvent>);
 
     this.logger.debug(`Subscribed function handler to ${eventName}`);
   }
@@ -182,7 +195,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
       this.handlers.set(eventName, new Set());
     }
 
-    this.handlers.get(eventName)!.add(handler);
+    this.handlers.get(eventName)!.add(handler as IEventHandler<TEvent>);
 
     this.logger.debug(`Registered class handler to ${eventName}`);
   }
@@ -234,7 +247,7 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Extracts the event name from a constructor or string
    */
   protected getEventName<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T)
+    eventType: string | (new (...args: unknown[]) => T)
   ): string {
     if (typeof eventType === 'string') {
       return eventType;
@@ -268,8 +281,8 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
    * Useful for testing and debugging
    */
   getHandlers(
-    eventType: string | (new (...args: any[]) => any)
-  ): Set<EventHandlerFn<any> | IEventHandler<any>> | undefined {
+    eventType: string | (new (...args: unknown[]) => TEvent)
+  ): Set<EventHandlerFn<TEvent> | IEventHandler<TEvent>> | undefined {
     const eventName = this.getEventName(eventType);
     return this.handlers.get(eventName);
   }
@@ -314,9 +327,9 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
   /**
    * Register a handler factory that uses DI resolution
    */
-  registerHandlerFactory(
-    eventType: string | (new (...args: unknown[]) => any),
-    handlerClass: new (...args: any[]) => IEventHandler<any>
+  registerHandlerFactory<T extends TEvent>(
+    eventType: string | (new (...args: unknown[]) => T),
+    handlerClass: new (...args: unknown[]) => IEventHandler<T>
   ): void {
     const eventName = this.getEventName(eventType);
 
@@ -325,14 +338,14 @@ export abstract class BaseEventBus<TEvent = any> extends IEventBus<TEvent> {
     }
 
     // Create a factory function that resolves the handler from DI
-    const handlerFactory: IEventHandler<any> = {
-      handle: async (event: any) => {
-        let handlerInstance: IEventHandler<any>;
+    const handlerFactory: IEventHandler<T> = {
+      handle: async (event: T) => {
+        let handlerInstance: IEventHandler<T>;
 
         if (this.useDI && VytchesDDD) {
           try {
             // Try to resolve from DI container first
-            handlerInstance = VytchesDDD.resolve(handlerClass);
+            handlerInstance = VytchesDDD.resolve(handlerClass) as IEventHandler<T>;
           } catch {
             // Fallback to direct instantiation if not registered in DI
             handlerInstance = new handlerClass();
