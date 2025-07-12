@@ -1,16 +1,28 @@
 {
+  "name": "@vytches-ddd/event-store",
+  "projectType": "library",
+  "sourceRoot": "packages/event-store/src",
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "lintFilePatterns": ["packages/event-store/**/*.ts"]
+        "outputPath": "dist/packages/event-store",
+        "main": "packages/event-store/src/index.ts",
+        "tsConfig": "packages/event-store/tsconfig.json",
+        "assets": ["packages/event-store/*.md"]
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "command": "pnpm vitest run packages/event-store/tests --reporter=verbose"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/event-store/**/*.ts"]
       }
     }
   },

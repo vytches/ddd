@@ -33,7 +33,6 @@
     "@vytches-ddd/logging": "workspace:*"
   },
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^4.0.0",
     "vitest": "^0.34.0"
