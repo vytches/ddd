@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/acl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Anti-Corruption Layer for external system integration",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -51,8 +51,8 @@
     "@vytches-ddd/validation": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
-    "vitest": "^2.0.0",
-    "vite-plugin-dts": "^4.0.0"
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^2.0.0"
   },
   "nx": {
     "tags": [
