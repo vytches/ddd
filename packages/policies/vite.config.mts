@@ -46,6 +46,7 @@ function getPackageDependencies(): Record<string, string> {
     '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
     '@vytches-ddd/logging': commonTestAliases['@vytches-ddd/logging'],
     '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
+    '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
   };
 }
 

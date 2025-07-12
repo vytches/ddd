@@ -16,6 +16,7 @@ const commonTestAliases = {
   '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
   '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
   '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+  '@vytches-ddd/validation': resolve(__dirname, '../validation/src/index.ts'),
 };
 
 // Determine required dependencies based on package type
@@ -46,6 +47,7 @@ function getPackageDependencies(): Record<string, string> {
     '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
     '@vytches-ddd/logging': commonTestAliases['@vytches-ddd/logging'],
     '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
+    '@vytches-ddd/validation': commonTestAliases['@vytches-ddd/validation'],
   };
 }
 
