@@ -39,6 +39,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    root: __dirname,
     include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     passWithNoTests: true,
     coverage: {

@@ -35,6 +35,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    root: __dirname,
     coverage: {
       enabled: false,
     },
