@@ -1,0 +1,36 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches-ddd/domain-services",
+  "projectType": "library",
+  "sourceRoot": "packages/domain-services/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/domain-services"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/domain-services/tests --reporter=verbose"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/domain-services/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/domain-services/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:domain-services", "layer:patterns"]
+}

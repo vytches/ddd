@@ -1,0 +1,66 @@
+{
+  "name": "@vytches-ddd/core",
+  "version": "0.1.0",
+  "description": "Meta-package: Enterprise API stability for DDD building blocks",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "ddd",
+    "domain-driven-design",
+    "typescript",
+    "core"
+  ],
+  "author": "VytchesDDD",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vytches/vytches-ddd.git",
+    "directory": "packages/core"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@vytches-ddd/domain-primitives": "workspace:*",
+    "@vytches-ddd/value-objects": "workspace:*",
+    "@vytches-ddd/repositories": "workspace:*",
+    "@vytches-ddd/aggregates": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/logging": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.0.0",
+    "vite-plugin-dts": "^4.0.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:core",
+      "type:lib",
+      "layer:foundation"
+    ]
+  }
+}

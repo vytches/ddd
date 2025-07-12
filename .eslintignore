@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+lib/
+*.tsbuildinfo
+
+# Cache and temporary
+.nx/
+.cache/
+.vscode/
+coverage/
+
+# Config files
+*.config.js
+*.config.ts
+
+# Generated declaration files
+**/*.d.ts
+!packages/*/src/**/*.d.ts
+packages/*/src/index.d.ts
+
+# Don't ignore source files!
+!packages/*/src/**/*.ts
+!examples/*/src/**/*.ts

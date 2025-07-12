@@ -1,0 +1,111 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separatePatchReleases"
+  ],
+  "timezone": "Europe/Warsaw",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "stabilityDays": 3,
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Nx ecosystem - monthly updates, grouped",
+      "matchPackagePatterns": ["^@nx/", "^nx$"],
+      "groupName": "nx monorepo",
+      "schedule": ["before 6am on the first day of the month"],
+      "reviewersFromCodeOwners": true,
+      "assignees": ["@PawelGozdz"],
+      "addLabels": ["dependencies", "nx"]
+    },
+    {
+      "description": "TypeScript ecosystem - careful handling",
+      "matchPackageNames": ["typescript", "@types/node"],
+      "groupName": "typescript",
+      "schedule": ["before 6am on the first day of the month"],
+      "reviewersFromCodeOwners": true,
+      "assignees": ["@PawelGozdz"],
+      "addLabels": ["dependencies", "typescript"],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "ESLint ecosystem - monthly updates",
+      "matchPackagePatterns": ["eslint", "@typescript-eslint/"],
+      "groupName": "eslint",
+      "schedule": ["before 6am on the first day of the month"],
+      "addLabels": ["dependencies", "linting"]
+    },
+    {
+      "description": "Testing framework updates",
+      "matchPackagePatterns": ["vitest", "@vitest/", "^@golevelup/ts-vitest"],
+      "groupName": "testing",
+      "schedule": ["before 6am on the first day of the month"],
+      "addLabels": ["dependencies", "testing"]
+    },
+    {
+      "description": "Build tools - careful updates",
+      "matchPackageNames": ["vite", "rollup", "rimraf"],
+      "groupName": "build tools",
+      "schedule": ["before 6am on the first day of the month"],
+      "minimumReleaseAge": "7 days",
+      "addLabels": ["dependencies", "build"]
+    },
+    {
+      "description": "Lerna and release tools",
+      "matchPackageNames": ["lerna", "@semantic-release/changelog", "@semantic-release/git"],
+      "groupName": "release tools",
+      "schedule": ["before 6am on the first day of the month"],
+      "reviewersFromCodeOwners": true,
+      "addLabels": ["dependencies", "release"]
+    },
+    {
+      "description": "Runtime dependencies - immediate security updates",
+      "matchDepTypes": ["dependencies"],
+      "matchPackageNames": ["reflect-metadata", "uuid"],
+      "groupName": "runtime deps",
+      "schedule": ["at any time"],
+      "addLabels": ["dependencies", "runtime", "security"]
+    },
+    {
+      "description": "Pin exact versions for dev dependencies",
+      "matchDepTypes": ["devDependencies"],
+      "rangeStrategy": "pin"
+    },
+    {
+      "description": "Auto-merge patch updates for low-risk packages",
+      "matchUpdateTypes": ["patch"],
+      "matchPackageNames": ["prettier", "husky", "lint-staged", "commitizen"],
+      "automerge": true,
+      "addLabels": ["automerge", "patch"]
+    },
+    {
+      "description": "Disable updates for pinned tool versions",
+      "matchPackageNames": ["pnpm"],
+      "enabled": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "assignees": ["@PawelGozdz"],
+    "addLabels": ["security", "vulnerability"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"],
+    "addLabels": ["lockfile-maintenance"]
+  },
+  "postUpdateOptions": ["pnpmDedupe"],
+  "commitMessagePrefix": "chore(deps):",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "prTitle": "{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{title}}",
+  "branchPrefix": "renovate/",
+  "gitIgnoredAuthors": ["renovate[bot]@users.noreply.github.com"],
+  "platformAutomerge": false,
+  "requiredStatusChecks": ["build", "test", "lint", "type-check", "quality-gates"]
+}

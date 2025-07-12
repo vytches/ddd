@@ -1,0 +1,36 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches-ddd/enterprise",
+  "projectType": "library",
+  "sourceRoot": "packages/enterprise/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/enterprise"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/enterprise/tests --reporter=verbose"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/enterprise/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/enterprise/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:enterprise", "layer:infrastructure"]
+}
