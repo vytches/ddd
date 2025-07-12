@@ -43,6 +43,12 @@ export default defineConfig({
     coverage: {
       enabled: false,
     },
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
     alias: {
       '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
       '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),

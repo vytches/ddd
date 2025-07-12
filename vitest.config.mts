@@ -51,6 +51,7 @@ export default defineConfig({
       },
     },
     reporters: process.env.CI ? ['default'] : ['verbose'],
+    logLevel: process.env.CI ? 'error' : 'info',
     // Usuń vitest-sonar-reporter jeśli powoduje problemy
     // outputFile: {
     //   'vitest-sonar-reporter': 'test-report.xml',
@@ -69,8 +70,18 @@ export default defineConfig({
     bail: 0,
     deps: {
       moduleDirectories: ['node_modules', 'packages'],
-      // Avoid problematic root package.json directory resolution
-      external: [/^\/package\.json/],
+    },
+    server: {
+      deps: {
+        // Avoid problematic root package.json directory resolution
+        external: ['/package.json'],
+      },
+    },
+    // Suppress module resolution warnings in CI
+    onConsoleLog(log, type) {
+      if (process.env.CI && type === 'stderr' && log.includes('EISDIR')) {
+        return false; // Don't print EISDIR errors in CI
+      }
     },
     alias: {
       '@vytches-ddd/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,

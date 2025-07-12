@@ -154,7 +154,10 @@ describe('CommandBus', () => {
   });
 
   describe('discoverHandlers', () => {
-    it('should log deprecation warning', () => {
+    it('should log deprecation warning when not in CI', () => {
+      const originalCI = process.env.CI;
+      delete process.env.CI;
+
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
         return;
       });
@@ -166,6 +169,23 @@ describe('CommandBus', () => {
       );
 
       consoleSpy.mockRestore();
+      process.env.CI = originalCI;
+    });
+
+    it('should not log deprecation warning in CI environment', () => {
+      const originalCI = process.env.CI;
+      process.env.CI = 'true';
+
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
+
+      commandBus.discoverHandlers();
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+      process.env.CI = originalCI;
     });
   });
 

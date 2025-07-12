@@ -39,9 +39,11 @@ export default defineConfig({
     coverage: {
       enabled: false,
     },
-    deps: {
-      // Avoid problematic root package.json directory resolution
-      external: [/^\/package\.json/],
+    server: {
+      deps: {
+        // Avoid problematic root package.json directory resolution
+        external: [/^\/package\.json/],
+      },
     },
     alias: {
       '@vytches-ddd/core': new URL('../../packages/core/src/index.ts', import.meta.url).pathname,
