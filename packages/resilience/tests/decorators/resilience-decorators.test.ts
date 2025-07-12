@@ -291,9 +291,12 @@ describe('Resilience Decorators', () => {
     it('should throw for non-decorated methods', () => {
       const service = new TestService();
 
-      expect(() =>
+      const [metricsError] = safeRun(() =>
         getResilienceMetrics(service as unknown as Record<string, unknown>, 'nonExistentMethod')
-      ).toThrow('Method nonExistentMethod is not decorated with resilience patterns');
+      );
+      expect(metricsError?.message).toBe(
+        'Method nonExistentMethod is not decorated with resilience patterns'
+      );
     });
   });
 

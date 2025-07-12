@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 import { EnhancedCommandBus, CommandBus, LoggingMiddleware } from '../../src';
 import type { ICommand, ICommandHandler } from '../../src';
@@ -112,7 +113,8 @@ describe('EnhancedCommandBus', () => {
 
       vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
 
-      await expect(enhancedCommandBus.execute(command)).rejects.toThrow('Execution failed');
+      const [executeError] = await safeRun(() => enhancedCommandBus.execute(command));
+      expect(executeError?.message).toBe('Execution failed');
 
       const metrics = enhancedCommandBus.getMetrics();
       expect(metrics.executionCount).toBe(0);
@@ -130,7 +132,8 @@ describe('EnhancedCommandBus', () => {
         .mockResolvedValueOnce(undefined);
 
       await enhancedCommandBus.execute(command1);
-      await expect(enhancedCommandBus.execute(command2)).rejects.toThrow('Failed');
+      const [executeError] = await safeRun(() => enhancedCommandBus.execute(command2));
+      expect(executeError?.message).toBe('Failed');
       await enhancedCommandBus.execute(command3);
 
       const metrics = enhancedCommandBus.getMetrics();
@@ -260,8 +263,10 @@ describe('EnhancedCommandBus', () => {
       vi.spyOn(mockHandler, 'execute').mockRejectedValue(new Error('Test error'));
 
       // Generate some errors
-      await expect(enhancedCommandBus.execute(command)).rejects.toThrow();
-      await expect(enhancedCommandBus.execute(command)).rejects.toThrow();
+      const [error1] = await safeRun(() => enhancedCommandBus.execute(command));
+      expect(error1).toBeDefined();
+      const [error2] = await safeRun(() => enhancedCommandBus.execute(command));
+      expect(error2).toBeDefined();
 
       let metrics = enhancedCommandBus.getMetrics();
       expect(metrics.errors).toBe(2);

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { ISpecification, IValidator } from '@vytches-ddd/contracts';
 import type { IAsyncSpecification, PolicyRequest } from '../src/business-policy-interface';
 import { PolicyContextBuilder, PolicyRequestBuilder } from '../src/policy-context';
@@ -236,7 +237,9 @@ describe('Policy Builder', () => {
     describe('build method', () => {
       it('should throw error when no policies defined', () => {
         const builder = PolicyBuilder.create<TestEntity>();
-        expect(() => builder.build()).toThrow('No policies defined');
+        const [error] = safeRun(() => builder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('No policies defined');
       });
 
       it('should return single policy when only one policy defined', () => {
@@ -336,12 +339,16 @@ describe('Policy Builder', () => {
 
       it('should throw error when code is missing', () => {
         stepBuilder.withMessage('Test message');
-        expect(() => stepBuilder.build()).toThrow('Policy step requires violation code');
+        const [error] = safeRun(() => stepBuilder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('Policy step requires violation code');
       });
 
       it('should throw error when message is missing', () => {
         stepBuilder.withCode('TEST_CODE');
-        expect(() => stepBuilder.build()).toThrow('Policy step requires violation message');
+        const [error] = safeRun(() => stepBuilder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('Policy step requires violation message');
       });
     });
   });
@@ -405,14 +412,16 @@ describe('Policy Builder', () => {
 
       it('should throw error when code is missing', () => {
         asyncStepBuilder.withMessage('Async message');
-        expect(() => asyncStepBuilder.build()).toThrow('Async policy step requires violation code');
+        const [error] = safeRun(() => asyncStepBuilder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('Async policy step requires violation code');
       });
 
       it('should throw error when message is missing', () => {
         asyncStepBuilder.withCode('ASYNC_CODE');
-        expect(() => asyncStepBuilder.build()).toThrow(
-          'Async policy step requires violation message'
-        );
+        const [error] = safeRun(() => asyncStepBuilder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('Async policy step requires violation message');
       });
     });
   });
@@ -463,7 +472,9 @@ describe('Policy Builder', () => {
 
     describe('build method', () => {
       it('should throw error when no policies defined', () => {
-        expect(() => groupBuilder.build()).toThrow("Group 'test-group' has no policies defined");
+        const [error] = safeRun(() => groupBuilder.build());
+        expect(error).toBeDefined();
+        expect(error?.message).toContain("Group 'test-group' has no policies defined");
       });
 
       it('should return single policy when only one policy defined', () => {

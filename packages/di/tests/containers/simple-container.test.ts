@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import {
   ServiceLifetime,
   SimpleContainer,
@@ -133,9 +134,10 @@ describe('SimpleContainer', () => {
 
   describe('error handling', () => {
     it('should throw ServiceNotFoundError for unregistered service', () => {
-      expect(() => {
+      const [serviceNotFoundError] = safeRun(() => {
         container.resolve('UnregisteredService');
-      }).toThrow(ServiceNotFoundError);
+      });
+      expect(serviceNotFoundError).toBeInstanceOf(ServiceNotFoundError);
     });
 
     it('should throw ServiceAlreadyRegisteredError for duplicate registration', () => {
@@ -143,9 +145,10 @@ describe('SimpleContainer', () => {
 
       container.register('TestService', TestService);
 
-      expect(() => {
+      const [duplicateError] = safeRun(() => {
         container.register('TestService', TestService);
-      }).toThrow(ServiceAlreadyRegisteredError);
+      });
+      expect(duplicateError).toBeInstanceOf(ServiceAlreadyRegisteredError);
     });
 
     it('should throw CircularDependencyError for circular dependencies', () => {
@@ -171,9 +174,10 @@ describe('SimpleContainer', () => {
         return new ServiceB(serviceA);
       });
 
-      expect(() => {
+      const [circularError] = safeRun(() => {
         container.resolve('ServiceA');
-      }).toThrow(CircularDependencyError);
+      });
+      expect(circularError).toBeInstanceOf(CircularDependencyError);
     });
   });
 
@@ -255,9 +259,10 @@ describe('SimpleContainer', () => {
       container.register('TestService', TestService);
       container.dispose();
 
-      expect(() => {
+      const [disposedError] = safeRun(() => {
         container.resolve('TestService');
-      }).toThrow(ContainerDisposedError);
+      });
+      expect(disposedError).toBeInstanceOf(ContainerDisposedError);
     });
 
     it('should dispose singleton instances with dispose method', () => {

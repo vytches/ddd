@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { ACLRegistrationMetadata, IACLAdapter, ACLContextInfo } from '../src';
 import { BaseACLRegistry } from '../src/base-acl-registry';
 
@@ -168,9 +169,10 @@ describe('BaseACLRegistry', () => {
     });
 
     it('should throw error for non-existent context', () => {
-      expect(() => {
+      const [requiredError] = safeRun(() => {
         registry.getRequired('NonExistentContext');
-      }).toThrow('ACL adapter not found for context: NonExistentContext');
+      });
+      expect(requiredError?.message).toBe('ACL adapter not found for context: NonExistentContext');
     });
 
     it('should maintain type safety with generics', () => {
@@ -178,10 +180,11 @@ describe('BaseACLRegistry', () => {
       registry.register('TypedContext', adapter);
 
       // Should not throw and return the correct type
-      expect(() => {
+      const [typeError] = safeRun(() => {
         const retrieved = registry.getRequired<TestDomainModel, TestExternalModel>('TypedContext');
         expect(retrieved).toBe(adapter);
-      }).not.toThrow();
+      });
+      expect(typeError).toBeUndefined();
     });
   });
 

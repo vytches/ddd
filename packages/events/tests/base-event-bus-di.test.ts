@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { BaseEventBus } from '../src/base-event-bus';
 import type { IDomainEvent } from '@vytches-ddd/contracts';
 import type { IEventHandler } from '@vytches-ddd/contracts';
@@ -43,7 +44,8 @@ describe('BaseEventBus DI Integration', () => {
     eventBus.registerHandler('TestEvent', handler);
 
     const event = new TestEvent('test');
-    await expect(eventBus.publish(event)).resolves.not.toThrow();
+    const [publishError] = await safeRun(async () => await eventBus.publish(event));
+    expect(publishError).toBeUndefined();
   });
 
   it('should register handler factory for DI resolution', () => {
@@ -55,7 +57,8 @@ describe('BaseEventBus DI Integration', () => {
   });
 
   it('should discover handlers without throwing', () => {
-    expect(() => eventBus.discoverHandlers()).not.toThrow();
+    const [error] = safeRun(() => eventBus.discoverHandlers());
+    expect(error).toBeUndefined();
   });
 
   it('should create EventBus with DI enabled but gracefully fallback when DI not available', () => {
@@ -69,6 +72,7 @@ describe('BaseEventBus DI Integration', () => {
 
     const event = new TestEvent('test-value');
     // Should resolve handler through factory during publish
-    await expect(eventBus.publish(event)).resolves.not.toThrow();
+    const [publishError] = await safeRun(async () => await eventBus.publish(event));
+    expect(publishError).toBeUndefined();
   });
 });

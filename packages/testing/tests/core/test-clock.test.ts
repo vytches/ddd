@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { TestClock, withTestClock, type TimeAdvanceOptions } from '../../src';
 
 describe('TestClock', () => {
@@ -133,7 +134,8 @@ describe('TestClock', () => {
 
     it('should throw error when advancing unfrozen clock', () => {
       testClock.restore();
-      expect(() => testClock.advance(1000)).toThrow(
+      const [advanceError] = safeRun(() => testClock.advance(1000));
+      expect(advanceError?.message).toBe(
         'Cannot advance time when clock is not frozen. Call freeze() first.'
       );
     });
@@ -202,7 +204,8 @@ describe('TestClock', () => {
       testClock.freeze(new Date());
       testClock.restore();
 
-      expect(() => testClock.restore()).not.toThrow();
+      const [restoreError] = safeRun(() => testClock.restore());
+      expect(restoreError).toBeUndefined();
       expect(testClock.isFrozen()).toBe(false);
     });
 
@@ -269,11 +272,12 @@ describe('TestClock', () => {
     it('should restore time even if function throws', () => {
       const freezeDate = new Date('2024-01-01T12:00:00Z');
 
-      expect(() => {
+      const [throwError] = safeRun(() => {
         TestClock.runWithFrozenTime(freezeDate, () => {
           throw new Error('test error');
         });
-      }).toThrow('test error');
+      });
+      expect(throwError?.message).toBe('test error');
 
       // Time should still be restored
       expect(Date.now()).not.toBe(freezeDate.getTime());
@@ -386,14 +390,6 @@ describe('TestClock', () => {
     it('should work with timeout testing', async () => {
       const startTime = new Date('2024-01-01T12:00:00Z');
       testClock.freeze(startTime);
-
-      let timeoutCalled = false;
-      const timeoutPromise = new Promise<void>(resolve => {
-        setTimeout(() => {
-          timeoutCalled = true;
-          resolve();
-        }, 5000);
-      });
 
       // Advance time to trigger timeout
       testClock.advance(5000);
@@ -509,7 +505,8 @@ describe('withTestClock decorator', () => {
 
     const instance = new TestClass();
 
-    await expect(instance.testMethod()).rejects.toThrow('test error');
+    const [methodError] = await safeRun(() => instance.testMethod());
+    expect(methodError?.message).toBe('test error');
 
     // Time should still be restored
     expect(Date.now()).not.toBe(freezeDate.getTime());

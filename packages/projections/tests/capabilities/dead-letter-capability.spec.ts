@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { DomainErrorCode } from '@vytches-ddd/core';
 import { DeadLetterCapability } from '../../src';
@@ -212,7 +213,8 @@ describe('DeadLetterCapability', () => {
       const event = createMockEvent();
 
       // Act & Assert
-      await expect(failingCapability.onError(error, event)).rejects.toThrow('Store error');
+      const [onErrorError] = await safeRun(() => failingCapability.onError(error, event));
+      expect(onErrorError?.message).toBe('Store error');
     });
 
     it('should handle malformed error data gracefully', async () => {

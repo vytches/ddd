@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { validate } from 'uuid';
-import { LibUtils } from '../src/lib-utils';
+import { LibUtils, safeRun } from '../src';
 
 // Mock for uuid
 vi.mock('uuid', () => ({
@@ -768,7 +768,8 @@ describe('LibUtils', () => {
       obj2.self = obj2;
 
       // Act & Assert
-      expect(() => LibUtils.deepEqual(obj1, obj2)).not.toThrow(); // Should not cause stack overflow
+      const [circularError] = safeRun(() => LibUtils.deepEqual(obj1, obj2));
+      expect(circularError).toBeUndefined(); // Should not cause stack overflow
       // Expected result might be false because deepEqual may not handle circular references
       // This test mainly checks if the function doesn't cause an error
     });

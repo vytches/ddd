@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Capability } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches-ddd/utils';
 import { ProjectionEngine, EnhancedProjectionEngine } from '../src/projection-engine';
 import { ProjectionError } from '../src/projection-errors';
 import { ExponentialBackoffStrategy } from '../src/error-strategy';
@@ -259,9 +260,9 @@ describe('ProjectionEngine', () => {
       const event = createMockEvent('UserCreated', 'user-123', {});
 
       // Act & Assert
-      await expect(failingEngine.processEvent(event)).rejects.toThrow(
-        'Failed to create initial state'
-      );
+      const [error] = await safeRun(() => failingEngine.processEvent(event));
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Failed to create initial state');
     });
 
     it('should save state after successful event processing', async () => {
@@ -437,7 +438,8 @@ describe('EnhancedProjectionEngine', () => {
       vi.spyOn(errorStrategy, 'getDelay').mockReturnValue(10); // Fast delay for testing
 
       // Act & Assert
-      await expect(failingEngine.processEvent(event)).rejects.toThrow();
+      const [error] = await safeRun(() => failingEngine.processEvent(event));
+      expect(error).toBeInstanceOf(Error);
       expect(callCount).toBeGreaterThan(1); // Should have retried
     });
 
@@ -486,7 +488,9 @@ describe('EnhancedProjectionEngine', () => {
       const event = createMockEvent('UserCreated', 'user-123', {});
 
       // Act & Assert
-      await expect(engine.processEvent(event)).rejects.toThrow('Non-retryable error');
+      const [error] = await safeRun(() => engine.processEvent(event));
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Non-retryable error');
       expect(errorStrategy.shouldRetry).toHaveBeenCalledWith(nonRetryableError, 1);
     });
 
@@ -504,7 +508,8 @@ describe('EnhancedProjectionEngine', () => {
       });
 
       // Act & Assert
-      await expect(engine.processEvent(event)).rejects.toThrow();
+      const [error] = await safeRun(() => engine.processEvent(event));
+      expect(error).toBeInstanceOf(Error);
       expect(retryCallCount).toBe(3); // Initial attempt + 2 retries
     });
 
@@ -642,7 +647,8 @@ describe('EnhancedProjectionEngine', () => {
       const event = createMockEvent('UserCreated', 'user-123', {});
 
       // Act & Assert
-      await expect(engine.processEvent(event)).rejects.toThrow();
+      const [error] = await safeRun(() => engine.processEvent(event));
+      expect(error).toBeInstanceOf(Error);
     });
 
     it('should handle very large event payloads', async () => {

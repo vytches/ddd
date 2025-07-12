@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { Metric, HistogramMetric, TimerMetric } from '../../src/index';
+import { safeRun } from '@vytches-ddd/utils';
 import {
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
@@ -161,7 +162,9 @@ describe('Observability System', () => {
     it('should throw when registering duplicate collectors', () => {
       registry.register(collector);
 
-      expect(() => registry.register(collector)).toThrow('already registered');
+      const [error] = safeRun(() => registry.register(collector));
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('already registered');
     });
   });
 

@@ -238,12 +238,18 @@
                   "scope:core",
                   "scope:events",
                   "scope:logging",
+                  "scope:utils",
                   "scope:event-store"
                 ]
               },
               {
                 "sourceTag": "scope:event-scheduling",
-                "onlyDependOnLibsWithTags": ["scope:contracts", "scope:testing", "scope:events"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:contracts",
+                  "scope:testing",
+                  "scope:events",
+                  "scope:utils"
+                ]
               },
               {
                 "sourceTag": "scope:examples",

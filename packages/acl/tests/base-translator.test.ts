@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches-ddd/utils';
 import { BaseModelTranslator } from '../src/base-translator';
 import { TranslationError } from '../src/acl-errors';
 
@@ -220,20 +220,9 @@ describe('BaseModelTranslator', () => {
     it('should throw TranslationError when domain validation fails', () => {
       const invalidDomain = { ...sampleDomainModel, orderId: '' };
 
-      expect(() => {
-        validatingTranslator.toExternal(invalidDomain);
-      }).toThrow(TranslationError);
-
-      const error = (() => {
-        try {
-          validatingTranslator.toExternal(invalidDomain);
-          throw new Error('Expected method to throw but it did not');
-        } catch (e) {
-          return e as TranslationError;
-        }
-      })();
-
+      const [error] = safeRun(() => validatingTranslator.toExternal(invalidDomain));
       expect(error).toBeInstanceOf(TranslationError);
+
       if (error instanceof TranslationError) {
         expect(error.direction).toBe('TO_EXTERNAL');
         expect(error.contextName).toBe('ValidatingOrderContext');
@@ -245,20 +234,9 @@ describe('BaseModelTranslator', () => {
     it('should throw TranslationError when translation implementation fails', () => {
       const failingTranslator = new FailingTranslator('FailingContext');
 
-      expect(() => {
-        failingTranslator.toExternal(sampleDomainModel);
-      }).toThrow(TranslationError);
-
-      const error = (() => {
-        try {
-          failingTranslator.toExternal(sampleDomainModel);
-          throw new Error('Expected method to throw but it did not');
-        } catch (e) {
-          return e as TranslationError;
-        }
-      })();
-
+      const [error] = safeRun(() => failingTranslator.toExternal(sampleDomainModel));
       expect(error).toBeInstanceOf(TranslationError);
+
       if (error instanceof TranslationError) {
         expect(error.direction).toBe('TO_EXTERNAL');
         expect(error.contextName).toBe('FailingContext');
@@ -267,11 +245,8 @@ describe('BaseModelTranslator', () => {
     });
 
     it('should work without validation when validateDomain is not implemented', () => {
-      expect(() => {
-        translator.toExternal(sampleDomainModel);
-      }).not.toThrow();
-
-      const result = translator.toExternal(sampleDomainModel);
+      const [error, result] = safeRun(() => translator.toExternal(sampleDomainModel));
+      expect(error).toBeUndefined();
       expect(result).toEqual(sampleExternalModel);
     });
   });
@@ -318,20 +293,9 @@ describe('BaseModelTranslator', () => {
     it('should throw TranslationError when external validation fails', () => {
       const invalidExternal = { ...sampleExternalModel, order_id: '' };
 
-      expect(() => {
-        validatingTranslator.fromExternal(invalidExternal);
-      }).toThrow(TranslationError);
-
-      const error = (() => {
-        try {
-          validatingTranslator.fromExternal(invalidExternal);
-          throw new Error('Expected method to throw but it did not');
-        } catch (e) {
-          return e as TranslationError;
-        }
-      })();
-
+      const [error] = safeRun(() => validatingTranslator.fromExternal(invalidExternal));
       expect(error).toBeInstanceOf(TranslationError);
+
       if (error instanceof TranslationError) {
         expect(error.direction).toBe('FROM_EXTERNAL');
         expect(error.contextName).toBe('ValidatingOrderContext');
@@ -343,20 +307,9 @@ describe('BaseModelTranslator', () => {
     it('should throw TranslationError when translation implementation fails', () => {
       const failingTranslator = new FailingTranslator('FailingContext');
 
-      expect(() => {
-        failingTranslator.fromExternal(sampleExternalModel);
-      }).toThrow(TranslationError);
-
-      const error = (() => {
-        try {
-          failingTranslator.fromExternal(sampleExternalModel);
-          throw new Error('Expected method to throw but it did not');
-        } catch (e) {
-          return e as TranslationError;
-        }
-      })();
-
+      const [error] = safeRun(() => failingTranslator.fromExternal(sampleExternalModel));
       expect(error).toBeInstanceOf(TranslationError);
+
       if (error instanceof TranslationError) {
         expect(error.direction).toBe('FROM_EXTERNAL');
         expect(error.contextName).toBe('FailingContext');
@@ -365,11 +318,8 @@ describe('BaseModelTranslator', () => {
     });
 
     it('should work without validation when validateExternal is not implemented', () => {
-      expect(() => {
-        translator.fromExternal(sampleExternalModel);
-      }).not.toThrow();
-
-      const result = translator.fromExternal(sampleExternalModel);
+      const [error, result] = safeRun(() => translator.fromExternal(sampleExternalModel));
+      expect(error).toBeUndefined();
       expect(result).toEqual(sampleDomainModel);
     });
 
@@ -417,10 +367,10 @@ describe('BaseModelTranslator', () => {
   describe('validation behavior', () => {
     it('should skip validation when validation methods are not implemented', () => {
       // OrderTranslator doesn't implement validation methods
-      expect(() => {
-        translator.toExternal(sampleDomainModel);
-        translator.fromExternal(sampleExternalModel);
-      }).not.toThrow();
+      const [toExternalError] = safeRun(() => translator.toExternal(sampleDomainModel));
+      const [fromExternalError] = safeRun(() => translator.fromExternal(sampleExternalModel));
+      expect(toExternalError).toBeUndefined();
+      expect(fromExternalError).toBeUndefined();
     });
 
     it('should call validation methods when they are implemented', () => {
@@ -435,10 +385,12 @@ describe('BaseModelTranslator', () => {
       validatingTranslator.validateDomain.mockReturnValue(Result.ok(undefined));
       validatingTranslator.validateExternal.mockReturnValue(Result.ok(undefined));
 
-      expect(() => {
-        validatingTranslator.toExternal(sampleDomainModel);
-        validatingTranslator.fromExternal(sampleExternalModel);
-      }).not.toThrow();
+      const [toExternalError] = safeRun(() => validatingTranslator.toExternal(sampleDomainModel));
+      const [fromExternalError] = safeRun(() =>
+        validatingTranslator.fromExternal(sampleExternalModel)
+      );
+      expect(toExternalError).toBeUndefined();
+      expect(fromExternalError).toBeUndefined();
     });
 
     it('should provide detailed error information in validation failures', () => {

@@ -46,6 +46,7 @@ export default defineConfig({
       '@vytches-ddd/core': new URL('../core/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/contracts': new URL('../contracts/src/index.ts', import.meta.url).pathname,
       '@vytches-ddd/logging': new URL('../logging/src/index.ts', import.meta.url).pathname,
+      '@vytches-ddd/utils': new URL('../utils/src/index.ts', import.meta.url).pathname,
     },
     coverage: {
       enabled: false,

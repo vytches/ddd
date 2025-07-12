@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { LOG_LEVELS, isLogLevelEnabled, parseLogLevel } from '../../src';
 
 describe('Log Levels', () => {
@@ -98,11 +99,20 @@ describe('Log Levels', () => {
     });
 
     it('should throw error for invalid log levels', () => {
-      expect(() => parseLogLevel('invalid')).toThrow();
-      expect(() => parseLogLevel('verbose')).toThrow();
-      expect(() => parseLogLevel('silly')).toThrow();
-      expect(() => parseLogLevel('')).toThrow();
-      expect(() => parseLogLevel('  ')).toThrow();
+      const [invalidError] = safeRun(() => parseLogLevel('invalid'));
+      expect(invalidError).toBeDefined();
+
+      const [verboseError] = safeRun(() => parseLogLevel('verbose'));
+      expect(verboseError).toBeDefined();
+
+      const [sillyError] = safeRun(() => parseLogLevel('silly'));
+      expect(sillyError).toBeDefined();
+
+      const [emptyError] = safeRun(() => parseLogLevel(''));
+      expect(emptyError).toBeDefined();
+
+      const [spaceError] = safeRun(() => parseLogLevel('  '));
+      expect(spaceError).toBeDefined();
     });
 
     it('should provide helpful error messages', () => {
@@ -123,10 +133,17 @@ describe('Log Levels', () => {
     });
 
     it('should handle edge cases', () => {
-      expect(() => parseLogLevel(null as any)).toThrow();
-      expect(() => parseLogLevel(undefined as any)).toThrow();
-      expect(() => parseLogLevel(123 as any)).toThrow();
-      expect(() => parseLogLevel({} as any)).toThrow();
+      const [nullError] = safeRun(() => parseLogLevel(null as any));
+      expect(nullError).toBeDefined();
+
+      const [undefinedError] = safeRun(() => parseLogLevel(undefined as any));
+      expect(undefinedError).toBeDefined();
+
+      const [numberError] = safeRun(() => parseLogLevel(123 as any));
+      expect(numberError).toBeDefined();
+
+      const [objectError] = safeRun(() => parseLogLevel({} as any));
+      expect(objectError).toBeDefined();
     });
   });
 

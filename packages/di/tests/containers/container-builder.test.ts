@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { ContainerBuilder, ServiceLifetime } from '../../src';
 
 describe('ContainerBuilder', () => {
@@ -149,14 +150,15 @@ describe('ContainerBuilder', () => {
       class ServiceC {}
       class ServiceD {}
 
-      expect(() => {
+      const [chainError] = safeRun(() => {
         builder
           .register('ServiceA', ServiceA)
           .register('ServiceB', ServiceB, { lifetime: ServiceLifetime.Singleton })
           .registerFactory('ServiceC', () => new ServiceC())
           .registerInstance('ServiceD', new ServiceD())
           .build();
-      }).not.toThrow();
+      });
+      expect(chainError).toBeUndefined();
     });
   });
 });

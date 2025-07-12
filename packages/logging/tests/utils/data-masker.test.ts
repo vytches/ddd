@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { DataMasker } from '../../src';
 
 describe('DataMasker', () => {
@@ -275,7 +276,8 @@ describe('DataMasker', () => {
     it('should use default options when not provided', () => {
       const masker = new DataMasker(); // no options
 
-      expect(() => masker.maskData({ test: 'value' })).not.toThrow();
+      const [error] = safeRun(() => masker.maskData({ test: 'value' }));
+      expect(error).toBeUndefined();
     });
 
     it('should use custom replacement string', () => {

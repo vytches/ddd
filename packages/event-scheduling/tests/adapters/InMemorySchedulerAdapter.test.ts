@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { TestScheduledEvent, TestEventFactory, InMemorySchedulerAdapter } from '../../src';
 import { JobStatus, BackoffStrategy } from '@vytches-ddd/contracts';
 import type { ISchedulerLifecycle } from '@vytches-ddd/contracts';
@@ -47,7 +48,8 @@ describe('InMemorySchedulerAdapter', () => {
       await adapter.start();
 
       // Should not throw when starting again
-      await expect(adapter.start()).resolves.not.toThrow();
+      const [startError] = await safeRun(() => adapter.start());
+      expect(startError).toBeUndefined();
       expect(adapter.isRunning()).toBe(true);
     });
   });
@@ -77,7 +79,8 @@ describe('InMemorySchedulerAdapter', () => {
     });
 
     it('should not fail when stopping while not running', async () => {
-      await expect(adapter.stop()).resolves.not.toThrow();
+      const [stopError] = await safeRun(() => adapter.stop());
+      expect(stopError).toBeUndefined();
     });
   });
 
@@ -160,9 +163,8 @@ describe('InMemorySchedulerAdapter', () => {
     });
 
     it('should throw for non-existent job', async () => {
-      await expect(adapter.cancel('non-existent-job')).rejects.toThrow(
-        'Job non-existent-job not found'
-      );
+      const [cancelError] = await safeRun(() => adapter.cancel('non-existent-job'));
+      expect(cancelError?.message).toBe('Job non-existent-job not found');
     });
 
     it('should throw for completed job', async () => {
@@ -173,7 +175,8 @@ describe('InMemorySchedulerAdapter', () => {
       vi.advanceTimersByTime(100);
       await vi.runAllTimersAsync(); // Run all async timers to completion
 
-      await expect(adapter.cancel(jobId)).rejects.toThrow();
+      const [cancelError] = await safeRun(() => adapter.cancel(jobId));
+      expect(cancelError).toBeInstanceOf(Error);
     });
   });
 
@@ -307,9 +310,8 @@ describe('InMemorySchedulerAdapter', () => {
     it('should throw for non-existent job', async () => {
       const newTime = new Date(Date.now() + 1000);
 
-      await expect(adapter.reschedule('non-existent-job', newTime)).rejects.toThrow(
-        'Job non-existent-job not found'
-      );
+      const [error] = await safeRun(() => adapter.reschedule('non-existent-job', newTime));
+      expect(error?.message).toBe('Job non-existent-job not found');
     });
   });
 
@@ -486,7 +488,8 @@ describe('InMemorySchedulerAdapter', () => {
     });
 
     it('should handle null event gracefully', async () => {
-      await expect(adapter.schedule(null as any)).rejects.toThrow();
+      const [error] = await safeRun(() => adapter.schedule(null as any));
+      expect(error).toBeDefined();
     });
   });
 });

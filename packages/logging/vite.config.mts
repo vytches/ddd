@@ -38,5 +38,8 @@ export default defineConfig({
     coverage: {
       enabled: false,
     },
+    alias: {
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+    },
   },
 });

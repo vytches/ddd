@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { PolicyRegistry, globalPolicyRegistry, LegacyPolicyRegistry } from '../src/policy-registry';
 import type { IBusinessPolicy } from '../src/business-policy-interface';
 import type { RegistryPolicyMetadata } from '../src/policy-registry';
@@ -66,19 +67,23 @@ describe('PolicyRegistry', () => {
     it('should throw error when registering duplicate policy without replacement', () => {
       registry.register('test-domain', 'test-policy', mockPolicy);
 
-      expect(() => {
+      const [duplicateError] = safeRun(() => {
         registry.register('test-domain', 'test-policy', mockPolicy2);
-      }).toThrow('Policy "test-policy" already exists in domain "test-domain"');
+      });
+      expect(duplicateError?.message).toContain(
+        'Policy "test-policy" already exists in domain "test-domain"'
+      );
     });
 
     it('should allow registering duplicate policy with replacedBy metadata', () => {
       registry.register('test-domain', 'test-policy', mockPolicy);
 
-      expect(() => {
+      const [replaceError] = safeRun(() => {
         registry.register('test-domain', 'test-policy', mockPolicy2, {
           replacedBy: 'new-policy',
         });
-      }).not.toThrow();
+      });
+      expect(replaceError).toBeUndefined();
     });
   });
 
@@ -129,9 +134,10 @@ describe('PolicyRegistry', () => {
     });
 
     it('should throw error for non-existing policy', () => {
-      expect(() => {
+      const [policyError] = safeRun(() => {
         registry.getPolicy('test-domain', 'non-existing');
-      }).toThrow('Policy "non-existing" not found in domain "test-domain"');
+      });
+      expect(policyError?.message).toBe('Policy "non-existing" not found in domain "test-domain"');
     });
   });
 
@@ -220,9 +226,10 @@ describe('PolicyRegistry', () => {
     });
 
     it('should throw error for non-existing domain', () => {
-      expect(() => {
+      const [domainError] = safeRun(() => {
         registry.getPolicies('non-existing');
-      }).toThrow('Domain "non-existing" not found');
+      });
+      expect(domainError?.message).toBe('Domain "non-existing" not found');
     });
 
     it('should return copy of policies object', () => {

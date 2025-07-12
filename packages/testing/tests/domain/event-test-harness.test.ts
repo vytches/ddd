@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { EventTestHarness, type EventTestHarnessOptions, type EventTestScenario } from '../../src';
 import { DomainEvent } from '@vytches-ddd/events';
 import type { IDomainEvent } from '@vytches-ddd/contracts';
@@ -379,7 +380,8 @@ describe('EventTestHarness', () => {
       };
 
       // Act & Assert
-      await expect(harness.runScenario(scenario)).rejects.toThrow(
+      const [scenarioError] = await safeRun(() => harness.runScenario(scenario));
+      expect(scenarioError?.message).toBe(
         "Expected event type 'TestPaymentProcessedEvent' was not published in scenario 'Incomplete Flow'"
       );
     });
@@ -397,7 +399,8 @@ describe('EventTestHarness', () => {
       };
 
       // Act & Assert
-      await expect(harness.runScenario(scenario)).rejects.toThrow(
+      const [scenarioError] = await safeRun(() => harness.runScenario(scenario));
+      expect(scenarioError?.message).toBe(
         "Expected 5 handler calls but got 1 in scenario 'Wrong Handler Count'"
       );
     });
@@ -419,9 +422,8 @@ describe('EventTestHarness', () => {
       });
 
       // Act & Assert
-      await expect(harness.runScenario(scenario)).rejects.toThrow(
-        "Scenario 'Timeout Test' timed out"
-      );
+      const [scenarioError] = await safeRun(() => harness.runScenario(scenario));
+      expect(scenarioError?.message).toBe("Scenario 'Timeout Test' timed out");
 
       // Restore original method
       (harness as any).executeScenario = originalExecuteScenario;
@@ -539,14 +541,15 @@ describe('EventTestHarness', () => {
       harness.subscribeToEvent('TestOrderCreatedEvent', errorHandler);
 
       // Act & Assert
-      await expect(
+      const [publishError] = await safeRun(() =>
         harness.publishEvent(
           new TestOrderCreatedEvent({
             orderId: 'order-123',
             customerId: 'customer-456',
           })
         )
-      ).rejects.toThrow('Handler error');
+      );
+      expect(publishError?.message).toBe('Handler error');
 
       // Handler call should still be tracked
       expect(harness.assertions.hasHandlerBeenCalled('TestOrderCreatedEvent')).toBe(true);

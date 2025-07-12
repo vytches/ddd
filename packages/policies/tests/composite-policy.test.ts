@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches-ddd/utils';
 import {
   CompositePolicy,
   ConditionalPolicy,
@@ -494,9 +494,10 @@ describe('ConditionalPolicy', () => {
     it('should throw error for nested when()', () => {
       const nestedCondition = vi.fn();
 
-      expect(() => {
+      const [nestedError] = safeRun(() => {
         conditional.when(nestedCondition);
-      }).toThrow('Nested conditional policies are not supported');
+      });
+      expect(nestedError?.message).toBe('Nested conditional policies are not supported');
     });
   });
 });

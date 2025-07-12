@@ -29,6 +29,7 @@
   "dependencies": {
     "@vytches-ddd/core": "workspace:*",
     "@vytches-ddd/di": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*",
     "reflect-metadata": "^0.2.2",
     "tslib": "^2.8.1"
   },

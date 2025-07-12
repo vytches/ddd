@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches-ddd/utils';
 import { CheckpointCapability } from '../../src';
 import type {
   ICapabilityContext,
@@ -88,12 +89,11 @@ describe('CheckpointCapability', () => {
     });
 
     it('should throw error for invalid interval', () => {
-      expect(() => new CheckpointCapability(store, 0)).toThrow(
-        'checkpoint capability: interval must be positive'
-      );
-      expect(() => new CheckpointCapability(store, -1)).toThrow(
-        'checkpoint capability: interval must be positive'
-      );
+      const [zeroError] = safeRun(() => new CheckpointCapability(store, 0));
+      expect(zeroError?.message).toContain('checkpoint capability: interval must be positive');
+
+      const [negativeError] = safeRun(() => new CheckpointCapability(store, -1));
+      expect(negativeError?.message).toContain('checkpoint capability: interval must be positive');
     });
 
     it('should use default interval when not specified', () => {
@@ -218,7 +218,8 @@ describe('CheckpointCapability', () => {
       const unattachedCapability = new CheckpointCapability(store);
 
       // Act & Assert
-      await expect(unattachedCapability.loadCheckpoint()).rejects.toThrow();
+      const [error] = await safeRun(() => unattachedCapability.loadCheckpoint());
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
@@ -235,7 +236,8 @@ describe('CheckpointCapability', () => {
       const event = createMockEvent(100);
 
       // Act & Assert
-      await expect(failingCapability.onAfterApply(state, event)).rejects.toThrow('Store error');
+      const [error] = await safeRun(() => failingCapability.onAfterApply(state, event));
+      expect(error?.message).toBe('Store error');
     });
 
     it('should handle store errors gracefully during load', async () => {
@@ -247,7 +249,8 @@ describe('CheckpointCapability', () => {
       failingCapability.attach(context);
 
       // Act & Assert
-      await expect(failingCapability.loadCheckpoint()).rejects.toThrow('Load error');
+      const [error] = await safeRun(() => failingCapability.loadCheckpoint());
+      expect(error?.message).toBe('Load error');
     });
 
     it('should throw error when handling interval without attachment', async () => {
@@ -257,12 +260,13 @@ describe('CheckpointCapability', () => {
       const event = createMockEvent(100);
 
       // Act & Assert
-      await expect(unattachedCapability.onAfterApply(state, event)).rejects.toThrow();
+      const [error] = await safeRun(() => unattachedCapability.onAfterApply(state, event));
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
   describe('lifecycle', () => {
-    it('should attach and detach properly', () => {
+    it('should attach and detach properly', async () => {
       // Arrange
       const newCapability = new CheckpointCapability(store);
 
@@ -270,13 +274,15 @@ describe('CheckpointCapability', () => {
       newCapability.attach(context);
 
       // Assert - should not throw when attached
-      expect(() => newCapability.loadCheckpoint()).not.toThrow();
+      const [attachedError] = await safeRun(() => newCapability.loadCheckpoint());
+      expect(attachedError).toBeUndefined();
 
       // Act
       newCapability.detach();
 
       // Assert - should throw when detached
-      expect(() => newCapability.loadCheckpoint()).rejects.toThrow();
+      const [error] = await safeRun(() => newCapability.loadCheckpoint());
+      expect(error).toBeInstanceOf(Error);
     });
   });
 

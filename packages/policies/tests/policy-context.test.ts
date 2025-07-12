@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { PolicyContextBuilder, PolicyRequestBuilder } from '../src/policy-context';
 import type { PolicyContext } from '../src/business-policy-interface';
 
@@ -15,13 +16,17 @@ describe('PolicyContextBuilder', () => {
     it('should require userId', () => {
       const builder = PolicyContextBuilder.create().withEnvironment('test');
 
-      expect(() => builder.build()).toThrow('PolicyContext requires userId. Use .withUserId()');
+      const [error] = safeRun(() => builder.build());
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('PolicyContext requires userId. Use .withUserId()');
     });
 
     it('should require environment', () => {
       const builder = PolicyContextBuilder.create().withUserId('user-123');
 
-      expect(() => builder.build()).toThrow(
+      const [error] = safeRun(() => builder.build());
+      expect(error).toBeDefined();
+      expect(error?.message).toContain(
         'PolicyContext requires environment. Use .withEnvironment()'
       );
     });
@@ -318,13 +323,17 @@ describe('PolicyRequestBuilder', () => {
     it('should require entity', () => {
       const builder = PolicyRequestBuilder.create<TestEntity>().withContext(testContext);
 
-      expect(() => builder.build()).toThrow('PolicyRequest requires entity. Use .withEntity()');
+      const [error] = safeRun(() => builder.build());
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('PolicyRequest requires entity. Use .withEntity()');
     });
 
     it('should require context', () => {
       const builder = PolicyRequestBuilder.create<TestEntity>().withEntity(testEntity);
 
-      expect(() => builder.build()).toThrow(
+      const [error] = safeRun(() => builder.build());
+      expect(error).toBeDefined();
+      expect(error?.message).toContain(
         'PolicyRequest requires context. Use .withContext() or .withContextBuilder()'
       );
     });

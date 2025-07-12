@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import {
   BaseSagaMiddleware,
@@ -374,7 +375,8 @@ describe('CircuitBreakerMiddleware', () => {
     );
 
     // Next request should be rejected
-    await expect(middleware.before(context, next)).rejects.toThrow('Circuit breaker is open');
+    const [beforeError] = await safeRun(() => middleware.before(context, next));
+    expect(beforeError?.message).toContain('Circuit breaker is open');
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Circuit breaker is open, rejecting saga step',
       expect.any(Object)
@@ -476,7 +478,8 @@ describe('SecurityMiddleware', () => {
     const context = createMockMiddlewareContext();
     const next = vi.fn();
 
-    await expect(middleware.before(context, next)).rejects.toThrow('Unauthorized operation');
+    const [beforeError] = await safeRun(() => middleware.before(context, next));
+    expect(beforeError?.message).toBe('Unauthorized operation');
 
     expect(authorizer).toHaveBeenCalledWith(context);
     expect(next).not.toHaveBeenCalled();
@@ -504,9 +507,8 @@ describe('SecurityMiddleware', () => {
     // @ts-expect-error expected
     contextWithoutAuth.executionContext.userId = undefined;
 
-    await expect(middleware.before(contextWithoutAuth, next)).rejects.toThrow(
-      'Unauthorized operation'
-    );
+    const [beforeError] = await safeRun(() => middleware.before(contextWithoutAuth, next));
+    expect(beforeError?.message).toBe('Unauthorized operation');
     expect(next).not.toHaveBeenCalled();
 
     // With sessionId only - should allow
@@ -633,9 +635,10 @@ describe('SagaMiddlewarePipeline', () => {
     const context = createMockContext();
     const operation = vi.fn().mockRejectedValue(testError);
 
-    await expect(pipeline.execute(saga, event, context, 'testStep', operation)).rejects.toThrow(
-      'Operation failed'
+    const [executeError] = await safeRun(() =>
+      pipeline.execute(saga, event, context, 'testStep', operation)
     );
+    expect(executeError?.message).toBe('Operation failed');
 
     expect(errorOrder).toEqual(['Second:error', 'First:error']);
   });

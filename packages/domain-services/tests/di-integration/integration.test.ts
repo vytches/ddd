@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { VytchesDDD, SimpleContainer, ServiceLifetime } from '@vytches-ddd/di';
 import { IBaseDomainService, DomainServiceDiscoveryPlugin, DomainService } from '../../src';
 
@@ -96,9 +97,10 @@ describe('Domain Services DI Integration', () => {
 
     it('should NOT auto-register legacy services without DI options', () => {
       // Legacy service should not be auto-registered
-      expect(() => {
+      const [resolveError] = safeRun(() => {
         VytchesDDD.resolve<LegacyIntegrationService>('legacyIntegrationService');
-      }).toThrow();
+      });
+      expect(resolveError).toBeDefined();
     });
   });
 
@@ -173,9 +175,10 @@ describe('Domain Services DI Integration', () => {
 
   describe('Error handling', () => {
     it('should throw meaningful error for unregistered services', () => {
-      expect(() => {
+      const [resolveError] = safeRun(() => {
         VytchesDDD.resolve<any>('nonExistentService');
-      }).toThrow();
+      });
+      expect(resolveError).toBeDefined();
     });
 
     it('should handle missing context dependencies gracefully', () => {

@@ -45,6 +45,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@vytches-ddd/utils": "*",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   }

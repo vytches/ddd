@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches-ddd/utils';
 import { CircuitBreakerCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
 import type { ICapabilityContext, ICircuitBreakerConfig } from '../../src/projection-interfaces';
@@ -199,9 +200,9 @@ describe('CircuitBreakerCapability', () => {
       expect(capability.getState()).toBe(CircuitState.OPEN);
 
       // Act & Assert
-      await expect(capability.onBeforeApply(state, event)).rejects.toThrow(
-        'Circuit breaker OPEN for projection TestProjection'
-      );
+      const [openError] = await safeRun(() => capability.onBeforeApply(state, event));
+      expect(openError).toBeInstanceOf(Error);
+      expect(openError!.message).toBe('Circuit breaker OPEN for projection TestProjection');
     });
 
     it('should allow processing when circuit is CLOSED', async () => {
@@ -281,7 +282,8 @@ describe('CircuitBreakerCapability', () => {
       vi.advanceTimersByTime(config.recoveryTimeoutMs - 100); // Just before timeout
 
       // Assert - should still throw
-      await expect(capability.onBeforeApply(state, event)).rejects.toThrow();
+      const [timeoutError] = await safeRun(() => capability.onBeforeApply(state, event));
+      expect(timeoutError).toBeInstanceOf(Error);
       expect(capability.getState()).toBe(CircuitState.OPEN);
 
       vi.useRealTimers();
@@ -299,7 +301,8 @@ describe('CircuitBreakerCapability', () => {
       const event = createMockEvent();
 
       // Act & Assert - should throw because no failure time is set
-      await expect(newCapability.onBeforeApply(state, event)).rejects.toThrow();
+      const [error] = await safeRun(() => newCapability.onBeforeApply(state, event));
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
@@ -346,9 +349,9 @@ describe('CircuitBreakerCapability', () => {
       const event = createMockEvent();
 
       // Act & Assert - should use 'unknown' as projection name
-      await expect(newCapability.onBeforeApply(state, event)).rejects.toThrow(
-        'Circuit breaker OPEN for projection unknown'
-      );
+      const [unknownError] = await safeRun(() => newCapability.onBeforeApply(state, event));
+      expect(unknownError).toBeInstanceOf(Error);
+      expect(unknownError!.message).toBe('Circuit breaker OPEN for projection unknown');
     });
   });
 

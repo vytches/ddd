@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { ImportOptions, IACLAdapter, ACLContextInfo, IEnhancedACLAdapter } from '../src';
 import { ACLRegistry, ContextACLRegistry } from '../src';
 
@@ -334,9 +335,10 @@ describe('ACLRegistry', () => {
     it('should handle registration with undefined description', () => {
       const adapter = new MockACLAdapter('TestContext');
 
-      expect(() => {
+      const [registrationError] = safeRun(() => {
         registry.registerDirect('TestContext', adapter, undefined);
-      }).not.toThrow();
+      });
+      expect(registrationError).toBeUndefined();
 
       expect(registry.hasContext('TestContext')).toBe(true);
       const metadata = (registry as any).metadata.get('TestContext');

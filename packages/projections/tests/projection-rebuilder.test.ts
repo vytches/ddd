@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { ProjectionRebuilder } from '../src/projection-rebuilder';
 
 describe('ProjectionRebuilder', () => {
@@ -146,7 +147,8 @@ describe('ProjectionRebuilder', () => {
       await rebuilder.rebuild(undefined, { skipErrors: false });
 
       const [handler] = (eventReplay.replayAll as any).mock.calls[0];
-      await expect(handler(testEvent)).rejects.toThrow(error);
+      const [handlerError] = await safeRun(() => handler(testEvent));
+      expect(handlerError).toBe(error);
     });
   });
 
@@ -214,9 +216,10 @@ describe('ProjectionRebuilder', () => {
       const error = new Error('Failed to rebuild projection TestProjection');
       eventReplay.replayAll = vi.fn().mockRejectedValueOnce(error);
 
-      await expect(
+      const [rebuildError] = await safeRun(() =>
         rebuilder.rebuildMany(projections, undefined, { skipErrors: false })
-      ).rejects.toThrow(error.message);
+      );
+      expect(rebuildError?.message).toBe(error.message);
     });
   });
 
@@ -231,9 +234,8 @@ describe('ProjectionRebuilder', () => {
       const error = new Error('Clear failed');
       projectionStore.deleteAll = vi.fn().mockRejectedValue(error);
 
-      await expect(rebuilder.clearProjectionState()).rejects.toThrow(
-        'Failed to clear state for projection TestProjection'
-      );
+      const [clearError] = await safeRun(() => rebuilder.clearProjectionState());
+      expect(clearError?.message).toBe('Failed to clear state for projection TestProjection');
     });
   });
 });

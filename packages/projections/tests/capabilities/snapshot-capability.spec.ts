@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches-ddd/utils';
 import { SnapshotProjectionCapability } from '../../src';
 import type {
   ICapabilityContext,
@@ -77,7 +78,7 @@ class MockContext implements ICapabilityContext<any> {
     return null;
   }
 
-  async executeHooks(hookName: string, ...args: any[]): Promise<void> {
+  async executeHooks(_hookName: string, ..._args: any[]): Promise<void> {
     // Mock hook execution
   }
 }
@@ -113,12 +114,11 @@ describe('SnapshotProjectionCapability', () => {
     });
 
     it('should throw error for invalid interval', () => {
-      expect(() => new SnapshotProjectionCapability(store, 0)).toThrow(
-        'snapshot capability: interval must be positive'
-      );
-      expect(() => new SnapshotProjectionCapability(store, -1)).toThrow(
-        'snapshot capability: interval must be positive'
-      );
+      const [zeroError] = safeRun(() => new SnapshotProjectionCapability(store, 0));
+      expect(zeroError?.message).toBe('snapshot capability: interval must be positive');
+
+      const [negativeError] = safeRun(() => new SnapshotProjectionCapability(store, -1));
+      expect(negativeError?.message).toBe('snapshot capability: interval must be positive');
     });
 
     it('should use default interval when not specified', () => {
@@ -296,7 +296,8 @@ describe('SnapshotProjectionCapability', () => {
       const unattachedCapability = new SnapshotProjectionCapability(store);
 
       // Act & Assert
-      await expect(unattachedCapability.loadLatestSnapshot()).rejects.toThrow();
+      const [error] = await safeRun(() => unattachedCapability.loadLatestSnapshot());
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
@@ -313,7 +314,9 @@ describe('SnapshotProjectionCapability', () => {
       const event = createMockEvent(100);
 
       // Act & Assert
-      await expect(failingCapability.onAfterApply(state, event)).rejects.toThrow('Store error');
+      const [error] = await safeRun(() => failingCapability.onAfterApply(state, event));
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Store error');
     });
 
     it('should handle store errors gracefully during load', async () => {
@@ -325,7 +328,9 @@ describe('SnapshotProjectionCapability', () => {
       failingCapability.attach(context);
 
       // Act & Assert
-      await expect(failingCapability.loadLatestSnapshot()).rejects.toThrow('Load error');
+      const [error] = await safeRun(() => failingCapability.loadLatestSnapshot());
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Load error');
     });
 
     it('should throw error when handling interval without attachment', async () => {
@@ -335,12 +340,13 @@ describe('SnapshotProjectionCapability', () => {
       const event = createMockEvent(100);
 
       // Act & Assert
-      await expect(unattachedCapability.onAfterApply(state, event)).rejects.toThrow();
+      const [error] = await safeRun(() => unattachedCapability.onAfterApply(state, event));
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
   describe('lifecycle', () => {
-    it('should attach and detach properly', () => {
+    it('should attach and detach properly', async () => {
       // Arrange
       const newCapability = new SnapshotProjectionCapability(store);
 
@@ -348,13 +354,15 @@ describe('SnapshotProjectionCapability', () => {
       newCapability.attach(context);
 
       // Assert - should not throw when attached
-      expect(() => newCapability.loadLatestSnapshot()).not.toThrow();
+      const [attachError] = await safeRun(() => newCapability.loadLatestSnapshot());
+      expect(attachError).toBeUndefined();
 
       // Act
       newCapability.detach();
 
       // Assert - should throw when detached
-      expect(() => newCapability.loadLatestSnapshot()).rejects.toThrow();
+      const [detachError] = await safeRun(() => newCapability.loadLatestSnapshot());
+      expect(detachError).toBeInstanceOf(Error);
     });
   });
 

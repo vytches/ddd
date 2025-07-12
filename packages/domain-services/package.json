@@ -31,6 +31,7 @@
     "@vytches-ddd/di": "workspace:*",
     "@vytches-ddd/events": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*",
     "tslib": "^2.8.1"
   },
   "devDependencies": {

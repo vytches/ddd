@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { Bulkhead, BulkheadRejectedException } from '../../src';
 import { DefaultResilienceContext } from '../../src/core/resilience-context';
 
@@ -85,9 +86,8 @@ describe('Bulkhead', () => {
         promises.push(bulkhead.execute(longRunningOp, context));
       }
 
-      await expect(bulkhead.execute(longRunningOp, context)).rejects.toThrow(
-        BulkheadRejectedException
-      );
+      const [error] = await safeRun(() => bulkhead.execute(longRunningOp, context));
+      expect(error).toBeInstanceOf(BulkheadRejectedException);
 
       const metrics = bulkhead.getMetrics();
       expect(metrics.totalRejected).toBe(1);
@@ -104,7 +104,8 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       const slowOperation = () => new Promise(resolve => setTimeout(resolve, 200));
 
-      await expect(bulkheadWithShortTimeout.execute(slowOperation, context)).rejects.toThrow();
+      const [error] = await safeRun(() => bulkheadWithShortTimeout.execute(slowOperation, context));
+      expect(error).toBeInstanceOf(Error);
     });
 
     it('should not apply timeout when not configured', async () => {
@@ -146,7 +147,8 @@ describe('Bulkhead', () => {
 
       setTimeout(() => abortController.abort(), 10);
 
-      await expect(queuedPromise).rejects.toThrow();
+      const [error] = await safeRun(() => queuedPromise);
+      expect(error).toBeInstanceOf(Error);
     });
   });
 
@@ -213,7 +215,9 @@ describe('Bulkhead', () => {
       const context = DefaultResilienceContext.create();
       const failingOperation = vi.fn().mockRejectedValue(new Error('operation failed'));
 
-      await expect(bulkhead.execute(failingOperation, context)).rejects.toThrow('operation failed');
+      const [error] = await safeRun(() => bulkhead.execute(failingOperation, context));
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('operation failed');
 
       expect(failingOperation).toHaveBeenCalled();
     });
@@ -239,7 +243,9 @@ describe('Bulkhead', () => {
       resolveOp1!('result1');
       await promise1;
 
-      await expect(failPromise).rejects.toThrow('fail');
+      const [error] = await safeRun(() => failPromise);
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('fail');
       const result = await successPromise;
 
       expect(result).toBe('success');

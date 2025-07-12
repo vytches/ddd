@@ -190,7 +190,8 @@ describe('expectError', () => {
     const result: SafeRunResult<string> = safeRun(() => 'success');
     const errorExtractor = expectError(Error);
 
-    expect(() => errorExtractor(result)).toThrow(
+    const [extractorError] = safeRun(() => errorExtractor(result));
+    expect(extractorError?.message).toBe(
       'Expected error of type Error, but operation succeeded with value: success'
     );
   });
@@ -201,7 +202,8 @@ describe('expectError', () => {
     });
     const errorExtractor = expectError(TestValidationError);
 
-    expect(() => errorExtractor(result)).toThrow(
+    const [wrongTypeError] = safeRun(() => errorExtractor(result));
+    expect(wrongTypeError?.message).toBe(
       'Expected error of type TestValidationError, but got Error: wrong type'
     );
   });
@@ -234,7 +236,8 @@ describe('expectSuccess', () => {
       throw new Error('operation failed');
     });
 
-    expect(() => expectSuccess(result)).toThrow(
+    const [successError] = safeRun(() => expectSuccess(result));
+    expect(successError?.message).toBe(
       'Expected successful operation, but got error: operation failed'
     );
   });
@@ -243,9 +246,8 @@ describe('expectSuccess', () => {
     // Simulate undefined value (edge case)
     const result: SafeRunResult<string> = [undefined, undefined];
 
-    expect(() => expectSuccess(result)).toThrow(
-      'Expected successful operation, but got undefined value'
-    );
+    const [undefinedError] = safeRun(() => expectSuccess(result));
+    expect(undefinedError?.message).toBe('Expected successful operation, but got undefined value');
   });
 
   it('should handle falsy values correctly', () => {

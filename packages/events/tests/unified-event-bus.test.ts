@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { DomainEvent, UnifiedEventBus } from '../src';
 import type { IIntegrationEvent } from '../src/integration/integration-event-interfaces';
 
@@ -225,7 +226,8 @@ describe('UnifiedEventBus', () => {
 
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
-      await expect(eventBus.publish(testEvent)).rejects.toThrow('Handler error');
+      const [publishError] = await safeRun(() => eventBus.publish(testEvent));
+      expect(publishError?.message).toBe('Handler error');
       expect(onError).toHaveBeenCalledWith(expect.any(Error), 'TestDomainEvent');
       expect(workingHandler).toHaveBeenCalled(); // Should still be called
     });
@@ -247,7 +249,8 @@ describe('UnifiedEventBus', () => {
 
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
-      await expect(eventBus.publish(testEvent)).rejects.toThrow();
+      const [publishError] = await safeRun(() => eventBus.publish(testEvent));
+      expect(publishError).toBeInstanceOf(Error);
       expect(handler1).toHaveBeenCalled();
       expect(handler2).toHaveBeenCalled();
       expect(onError).toHaveBeenCalled();

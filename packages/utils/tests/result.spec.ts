@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Result } from '../src/result';
+import { Result, safeRun } from '../src';
 
 describe('Result', () => {
   describe('creation', () => {
@@ -45,7 +45,8 @@ describe('Result', () => {
       const result = Result.fail<number>(error);
 
       // Act & Assert
-      expect(() => result.value).toThrow('Cannot get value of a failure result');
+      const [valueError] = safeRun(() => result.value);
+      expect(valueError?.message).toBe('Cannot get value of a failure result');
     });
 
     it('should throw when accessing error of success result', () => {
@@ -53,7 +54,8 @@ describe('Result', () => {
       const result = Result.ok<number>(42);
 
       // Act & Assert
-      expect(() => result.error).toThrow('Cannot get error of a success result');
+      const [errorError] = safeRun(() => result.error);
+      expect(errorError?.message).toBe('Cannot get error of a success result');
     });
   });
 

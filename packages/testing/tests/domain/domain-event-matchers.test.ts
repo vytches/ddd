@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import type { EventMatchingContext, EventPattern } from '../../src/domain';
@@ -761,8 +762,11 @@ describe('DomainEventMatchers', () => {
 
     it('should assert event existence', () => {
       // Act & Assert
-      expect(() => assertEvent(mockEvents, 'OrderCreated')).not.toThrow();
-      expect(() => assertEvent(mockEvents, 'NonExistentEvent')).toThrow('Event assertion failed');
+      const [validAssertError] = safeRun(() => assertEvent(mockEvents, 'OrderCreated'));
+      expect(validAssertError).toBeUndefined();
+
+      const [invalidAssertError] = safeRun(() => assertEvent(mockEvents, 'NonExistentEvent'));
+      expect(invalidAssertError?.message).toContain('Event assertion failed');
     });
 
     it('should assert event with payload', () => {
@@ -770,14 +774,17 @@ describe('DomainEventMatchers', () => {
       const expectedPayload = { orderId: 'order-123' };
 
       // Act & Assert
-      expect(() =>
+      const [validPayloadError] = safeRun(() =>
         assertEventWithPayload(mockEvents, 'OrderCreated', expectedPayload, {
           partialPayload: true,
         })
-      ).not.toThrow();
-      expect(() =>
+      );
+      expect(validPayloadError).toBeUndefined();
+
+      const [invalidPayloadError] = safeRun(() =>
         assertEventWithPayload(mockEvents, 'OrderCreated', { orderId: 'wrong-order' })
-      ).toThrow('Event payload assertion failed');
+      );
+      expect(invalidPayloadError?.message).toContain('Event payload assertion failed');
     });
 
     it('should assert event sequence', () => {
@@ -785,10 +792,13 @@ describe('DomainEventMatchers', () => {
       const expectedSequence = ['OrderCreated', 'PaymentProcessed'];
 
       // Act & Assert
-      expect(() => assertEventSequence(mockEvents, expectedSequence)).not.toThrow();
-      expect(() => assertEventSequence(mockEvents, ['NonExistent', 'OrderCreated'])).toThrow(
-        'Event sequence assertion failed'
+      const [validSequenceError] = safeRun(() => assertEventSequence(mockEvents, expectedSequence));
+      expect(validSequenceError).toBeUndefined();
+
+      const [invalidSequenceError] = safeRun(() =>
+        assertEventSequence(mockEvents, ['NonExistent', 'OrderCreated'])
       );
+      expect(invalidSequenceError?.message).toContain('Event sequence assertion failed');
     });
 
     it('should assert strict event sequence', () => {
@@ -796,10 +806,13 @@ describe('DomainEventMatchers', () => {
       const expectedSequence = ['OrderCreated', 'OrderShipped']; // Missing PaymentProcessed in between
 
       // Act & Assert
-      expect(() => assertEventSequence(mockEvents, expectedSequence, false)).not.toThrow(); // Non-strict passes
-      expect(() => assertEventSequence(mockEvents, expectedSequence, true)).toThrow(
-        'Event sequence assertion failed'
-      ); // Strict fails
+      const [nonStrictError] = safeRun(() =>
+        assertEventSequence(mockEvents, expectedSequence, false)
+      );
+      expect(nonStrictError).toBeUndefined(); // Non-strict passes
+
+      const [strictError] = safeRun(() => assertEventSequence(mockEvents, expectedSequence, true));
+      expect(strictError?.message).toContain('Event sequence assertion failed'); // Strict fails
     });
   });
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 import { CommandBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
 import type { CQRSExecutionContext, ICQRSMiddleware, ICommand, ICommandHandler } from '../../src/';
@@ -83,15 +84,17 @@ describe('CommandBus', () => {
 
   describe('register', () => {
     it('should throw CQRSConfigurationError for manual registration', () => {
-      expect(() => {
+      const [registerError] = safeRun(() => {
         commandBus.register(TestCommand, mockHandler);
-      }).toThrow(CQRSConfigurationError);
+      });
+      expect(registerError).toBeInstanceOf(CQRSConfigurationError);
     });
 
     it('should throw with deprecation message', () => {
-      expect(() => {
+      const [messageError] = safeRun(() => {
         commandBus.register(TestCommand, mockHandler);
-      }).toThrow(
+      });
+      expect(messageError?.message).toContain(
         'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.'
       );
     });
@@ -101,17 +104,19 @@ describe('CommandBus', () => {
     it('should throw CQRSConfigurationError for manual factory registration', () => {
       const factory = () => mockHandler;
 
-      expect(() => {
+      const [factoryError] = safeRun(() => {
         commandBus.registerFactory(TestCommand, factory);
-      }).toThrow(CQRSConfigurationError);
+      });
+      expect(factoryError).toBeInstanceOf(CQRSConfigurationError);
     });
 
     it('should throw with deprecation message', () => {
       const factory = () => mockHandler;
 
-      expect(() => {
+      const [factoryMessageError] = safeRun(() => {
         commandBus.registerFactory(TestCommand, factory);
-      }).toThrow(
+      });
+      expect(factoryMessageError?.message).toContain(
         'Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.'
       );
     });
@@ -197,7 +202,8 @@ describe('CommandBus', () => {
         throw new Error('Handler not found');
       });
 
-      await expect(commandBus.execute(command)).rejects.toThrow(HandlerNotFoundError);
+      const [executeError] = await safeRun(() => commandBus.execute(command));
+      expect(executeError).toBeInstanceOf(HandlerNotFoundError);
     });
 
     it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
@@ -205,8 +211,9 @@ describe('CommandBus', () => {
 
       vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
 
-      await expect(commandBus.execute(command)).rejects.toThrow(CQRSConfigurationError);
-      await expect(commandBus.execute(command)).rejects.toThrow(
+      const [executeError] = await safeRun(() => commandBus.execute(command));
+      expect(executeError).toBeInstanceOf(CQRSConfigurationError);
+      expect(executeError?.message).toContain(
         'No handler registered for command TestCommand. Did you forget @CommandHandler decorator?'
       );
     });
@@ -227,7 +234,8 @@ describe('CommandBus', () => {
 
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(commandBus.execute(command)).rejects.toThrow('Data is required');
+      const [validationError] = await safeRun(() => commandBus.execute(command));
+      expect(validationError?.message).toBe('Data is required');
     });
 
     it('should execute middleware in correct order', async () => {
@@ -262,7 +270,8 @@ describe('CommandBus', () => {
       vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(commandBus.execute(command)).rejects.toThrow('Handler execution failed');
+      const [handlerError] = await safeRun(() => commandBus.execute(command));
+      expect(handlerError?.message).toBe('Handler execution failed');
     });
 
     it('should create proper execution context', async () => {

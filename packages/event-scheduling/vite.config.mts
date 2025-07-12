@@ -10,7 +10,6 @@ export default defineConfig({
       exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
       entryRoot: 'src',
-      declarationMap: false, // Disable .d.ts.map files for smaller bundles
     }),
   ],
   build: {
@@ -37,6 +36,9 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       enabled: false,
+    },
+    alias: {
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
     },
   },
 });

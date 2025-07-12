@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { TestDataBuilder, EntityIdBuilder, UserBuilder, DomainEventBuilder } from '../../src';
 
 describe('TestDataBuilder', () => {
@@ -226,17 +227,20 @@ describe('TestDataBuilder', () => {
         },
       });
 
-      expect(() => {
+      const [ageError] = safeRun(() => {
         builder.with('age', -5).build();
-      }).toThrow('TestDataBuilder validation failed: Age cannot be negative');
+      });
+      expect(ageError?.message).toBe('TestDataBuilder validation failed: Age cannot be negative');
 
-      expect(() => {
+      const [emailError] = safeRun(() => {
         builder.with('age', 25).with('email', 'invalid-email').build();
-      }).toThrow('TestDataBuilder validation failed: Invalid email');
+      });
+      expect(emailError?.message).toBe('TestDataBuilder validation failed: Invalid email');
 
-      expect(() => {
+      const [validError] = safeRun(() => {
         builder.with('age', 25).with('email', 'valid@email.com').build();
-      }).not.toThrow();
+      });
+      expect(validError).toBeUndefined();
     });
   });
 
@@ -496,13 +500,15 @@ describe('UserBuilder', () => {
   });
 
   it('should validate user data', () => {
-    expect(() => {
+    const [ageError] = safeRun(() => {
       new UserBuilder().with('age', -5).build();
-    }).toThrow('TestDataBuilder validation failed: Age cannot be negative');
+    });
+    expect(ageError?.message).toBe('TestDataBuilder validation failed: Age cannot be negative');
 
-    expect(() => {
+    const [emailError] = safeRun(() => {
       new UserBuilder().with('email', 'invalid-email').build();
-    }).toThrow('TestDataBuilder validation failed: Invalid email format');
+    });
+    expect(emailError?.message).toBe('TestDataBuilder validation failed: Invalid email format');
   });
 
   it('should create users with random ages', () => {

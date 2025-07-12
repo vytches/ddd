@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { ContextACLRegistry } from '../src/context-acl-registry';
 import type { IACLAdapter, ACLContextInfo } from '../src/acl.interfaces';
 
@@ -147,9 +148,9 @@ describe('ContextACLRegistry', () => {
     });
 
     it('should throw error for non-existent adapter in getRequired', () => {
-      expect(() => {
-        registry.getRequired('NonExistentService');
-      }).toThrow('ACL adapter not found for context: NonExistentService');
+      const [error] = safeRun(() => registry.getRequired('NonExistentService'));
+      expect(error).toBeDefined();
+      expect(error?.message).toContain('ACL adapter not found for context: NonExistentService');
     });
 
     it('should support hasContext method', () => {
@@ -288,9 +289,8 @@ describe('ContextACLRegistry', () => {
     it('should handle registration with undefined description', () => {
       const adapter = new MockACLAdapter('TestService');
 
-      expect(() => {
-        registry.registerLocal('TestService', adapter, undefined);
-      }).not.toThrow();
+      const [error] = safeRun(() => registry.registerLocal('TestService', adapter, undefined));
+      expect(error).toBeUndefined();
 
       expect(registry.hasContext('TestService')).toBe(true);
       const metadata = (registry as any).metadata.get('TestService');
@@ -342,9 +342,8 @@ describe('ContextACLRegistry', () => {
       const longContextRegistry = new ContextACLRegistry(longContextName);
       const adapter = new MockACLAdapter(longTargetName);
 
-      expect(() => {
-        longContextRegistry.registerLocal(longTargetName, adapter);
-      }).not.toThrow();
+      const [error] = safeRun(() => longContextRegistry.registerLocal(longTargetName, adapter));
+      expect(error).toBeUndefined();
 
       expect(longContextRegistry.hasContext(longTargetName)).toBe(true);
       expect(longContextRegistry.getRegistryName()).toBe(`ContextACLRegistry(${longContextName})`);

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches-ddd/utils';
 import { BusinessRuleValidator } from '@vytches-ddd/validation';
 import { ValidationError, ValidationErrors } from '@vytches-ddd/validation';
 import { BaseApplicationService, ApplicationError, type IApplicationService } from '../../src';
@@ -409,9 +409,10 @@ describe('ApplicationError', () => {
     });
 
     it('should work in try-catch blocks', () => {
-      expect(() => {
+      const [throwError] = safeRun(() => {
         throw new ApplicationError('Test application error');
-      }).toThrow('Test application error');
+      });
+      expect(throwError?.message).toBe('Test application error');
     });
 
     it('should be catchable as Error', () => {

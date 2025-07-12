@@ -323,10 +323,18 @@ import from the testing package.
 
 ## Testing Strategy
 
+### Test File Naming Convention
+
+**IMPORTANT**: Use `.test.ts` extension for all test files, NOT `.spec.ts`. This
+is the standard convention used throughout the codebase and aligns with modern
+TypeScript frameworks like Jest, Vitest, and others.
+
+- ✅ CORRECT: `user-service.test.ts`
+- ❌ WRONG: `user-service.spec.ts`
+
 ### Test Organization
 
-- Unit tests: `*.test.ts` and `*.spec.ts` files in `tests/` directory (NOT in
-  `src/`)
+- Unit tests: `*.test.ts` files in `tests/` directory (NOT in `src/`)
 - Integration tests: In `examples/` directory
 - API surface tests: `api-surface.test.ts` files in `tests/` directory
 - Test file structure mirrors source structure: `src/domain/entity.ts` →
@@ -337,6 +345,116 @@ import from the testing package.
 - Use `@vytches-ddd/testing` package for DDD-specific test utilities
 - Vitest configuration supports package aliases
 - Coverage thresholds: 80% for branches, functions, lines, statements
+
+### Test Error Handling Patterns
+
+**CRITICAL**: All test files MUST use `safeRun` from `@vytches-ddd/utils` for
+error testing. Never use Jest/Vitest `toThrow` patterns.
+
+**Required Patterns:**
+
+```typescript
+// ✅ CORRECT: Use safeRun for synchronous error testing
+import { safeRun } from '@vytches-ddd/utils';
+
+const [error] = safeRun(() => someFunction());
+expect(error).toBeInstanceOf(ErrorClass);
+expect(error?.message).toBe('Expected error message');
+expect(error).toBeDefined(); // For any error
+expect(error).toBeNull(); // For no error
+
+// ✅ CORRECT: Use safeRun for asynchronous error testing
+const [asyncError] = await safeRun(async () => await someAsyncFunction());
+expect(asyncError).toBeInstanceOf(ErrorClass);
+
+// ✅ CORRECT: Use safeRun for functions that should not throw
+const [noError] = safeRun(() => validFunction());
+expect(noError).toBeNull();
+```
+
+**Deprecated Patterns to Avoid:**
+
+```typescript
+// ❌ WRONG: Do not use these patterns
+expect(() => someFunction()).toThrow(ErrorClass);
+expect(() => someFunction()).toThrow('error message');
+expect(() => someFunction()).not.toThrow();
+await expect(async () => someFunction()).rejects.toThrow(ErrorClass);
+```
+
+**Migration Guidelines:**
+
+- Always import `safeRun` from `@vytches-ddd/utils` at the top of test files
+- Replace `expect(() => fn()).toThrow(ErrorClass)` with
+  `const [error] = safeRun(() => fn()); expect(error).toBeInstanceOf(ErrorClass)`
+- Replace `expect(() => fn()).toThrow(message)` with
+  `const [error] = safeRun(() => fn()); expect(error?.message).toBe(message)`
+- Replace `expect(() => fn()).not.toThrow()` with
+  `const [error] = safeRun(() => fn()); expect(error).toBeUndefined()`
+- Use descriptive variable names for errors: `throwError`, `validationError`,
+  `configError`, etc.
+
+### Test Generation Examples
+
+When generating test files, follow these patterns:
+
+**Example Test File Structure:**
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
+import { UserService } from '../src/user-service';
+import { ValidationError, NotFoundError } from '@vytches-ddd/domain-primitives';
+
+describe('UserService', () => {
+  let service: UserService;
+
+  beforeEach(() => {
+    service = new UserService();
+  });
+
+  describe('createUser', () => {
+    it('should create user successfully', () => {
+      const userData = { name: 'John', email: 'john@example.com' };
+      const [error, user] = safeRun(() => service.createUser(userData));
+
+      expect(error).toBeUndefined();
+      expect(user).toBeDefined();
+      expect(user?.name).toBe('John');
+    });
+
+    it('should throw ValidationError for invalid email', () => {
+      const userData = { name: 'John', email: 'invalid-email' };
+      const [validationError] = safeRun(() => service.createUser(userData));
+
+      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError?.message).toContain('Invalid email format');
+    });
+
+    it('should handle async operations correctly', async () => {
+      const [saveError, result] = await safeRun(
+        async () => await service.saveUser({ name: 'Jane' })
+      );
+
+      expect(saveError).toBeUndefined();
+      expect(result?.id).toBeDefined();
+    });
+  });
+});
+```
+
+**Key Points for Test Generation:**
+
+1. **File naming**: Always use `.test.ts` extension
+2. **Import safeRun**: Always import from `@vytches-ddd/utils`
+3. **Error handling**: Use safeRun for all error assertions
+4. **Variable naming**: Use descriptive names like `validationError`,
+   `notFoundError`
+5. **Async handling**: Use `await safeRun(async () => ...)` for async operations
+6. **Error checks**: Use `.toBeUndefined()` for no error, `.toBeInstanceOf()`
+   for error types
+7. **Message checks**: Use `.toContain()` for error messages that might have
+   prefixes
 
 ## Code Style & Quality
 

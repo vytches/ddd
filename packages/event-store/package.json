@@ -31,6 +31,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@vytches-ddd/utils": "workspace:*",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {

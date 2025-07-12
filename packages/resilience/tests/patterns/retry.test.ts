@@ -48,8 +48,8 @@ describe('RetryPolicy', () => {
       const error = new Error('persistent failure');
       const operation = vi.fn().mockRejectedValue(error);
 
-      const [retryError, result] = await safeRun(async () =>
-        retryPolicy.execute(operation, context)
+      const [retryError, result] = await safeRun(
+        async () => await retryPolicy.execute(operation, context)
       );
 
       expect(result).toBeUndefined();
@@ -85,7 +85,8 @@ describe('RetryPolicy', () => {
       const nonRetryableError = new Error('fatal error');
       const operation = vi.fn().mockRejectedValue(nonRetryableError);
 
-      await expect(retryablePolicy.execute(operation, context)).rejects.toThrow('fatal error');
+      const [error] = await safeRun(async () => await retryablePolicy.execute(operation, context));
+      expect(error?.message).toBe('fatal error');
 
       expect(operation).toHaveBeenCalledTimes(1);
     });
@@ -100,9 +101,8 @@ describe('RetryPolicy', () => {
       const retryableError = new Error('retryable error');
       const operation = vi.fn().mockRejectedValue(retryableError);
 
-      await expect(retryablePolicy.execute(operation, context)).rejects.toThrow(
-        MaxRetriesExceededError
-      );
+      const [error] = await safeRun(async () => await retryablePolicy.execute(operation, context));
+      expect(error).toBeInstanceOf(MaxRetriesExceededError);
 
       expect(operation).toHaveBeenCalledTimes(defaultConfig.maxAttempts);
     });
@@ -113,9 +113,8 @@ describe('RetryPolicy', () => {
       const context = DefaultResilienceContext.create();
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
 
-      await expect(retryPolicy.execute(operation, context)).rejects.toThrow(
-        MaxRetriesExceededError
-      );
+      const [error] = await safeRun(async () => await retryPolicy.execute(operation, context));
+      expect(error).toBeInstanceOf(MaxRetriesExceededError);
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -132,7 +131,8 @@ describe('RetryPolicy', () => {
       const context = DefaultResilienceContext.create();
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
 
-      await expect(policy.execute(operation, context)).rejects.toThrow(MaxRetriesExceededError);
+      const [error] = await safeRun(async () => await policy.execute(operation, context));
+      expect(error).toBeInstanceOf(MaxRetriesExceededError);
     });
   });
 
@@ -151,12 +151,14 @@ describe('RetryPolicy', () => {
       const calls = operation.mock.calls;
       expect(calls.length).toBeGreaterThanOrEqual(2);
 
-      const firstCall = calls[0]![0];
-      const secondCall = calls[1]![0];
+      const firstCall = calls[0]?.[0];
+      const secondCall = calls[1]?.[0];
 
-      expect(firstCall.attempt).toBe(1);
-      expect(secondCall.attempt).toBe(2);
-      expect(firstCall.correlationId).toBe(secondCall.correlationId);
+      expect(firstCall).toBeDefined();
+      expect(secondCall).toBeDefined();
+      expect(firstCall?.attempt).toBe(1);
+      expect(secondCall?.attempt).toBe(2);
+      expect(firstCall?.correlationId).toBe(secondCall?.correlationId);
     });
 
     it('should respect context abort signal', async () => {
@@ -173,7 +175,8 @@ describe('RetryPolicy', () => {
 
       abortController.abort();
 
-      await expect(retryPolicy.execute(operation, context)).rejects.toThrow();
+      const [error] = await safeRun(async () => await retryPolicy.execute(operation, context));
+      expect(error).toBeInstanceOf(Error);
     });
   });
 

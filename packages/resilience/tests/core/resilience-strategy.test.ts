@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import {
   ResiliencePolicyBuilder,
   CompositeResilienceStrategy,
@@ -74,7 +75,8 @@ describe('ResilienceStrategy', () => {
         .fn()
         .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
 
-      await expect(strategy.execute(operation, context)).rejects.toThrow(TimeoutError);
+      const [error] = await safeRun(() => strategy.execute(operation, context));
+      expect(error).toBeInstanceOf(TimeoutError);
     });
 
     it('should succeed if operation completes within timeout', async () => {
@@ -180,9 +182,10 @@ describe('ResilienceStrategy', () => {
     });
 
     it('should throw error when no strategies configured', () => {
-      expect(() => {
+      const [configError] = safeRun(() => {
         ResiliencePolicyBuilder.create().build();
-      }).toThrow('At least one resilience strategy must be configured');
+      });
+      expect(configError?.message).toBe('At least one resilience strategy must be configured');
     });
 
     it('should execute complete resilience policy', async () => {

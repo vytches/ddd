@@ -1,5 +1,6 @@
 import type { MockedFunction } from 'vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { CQRSExecutionContext, LoggingMiddleware } from '../../src';
 import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../../src';
 
@@ -113,7 +114,8 @@ describe('LoggingMiddleware', () => {
 
         nextFunction.mockRejectedValue(error);
 
-        await expect(middleware.handle(context, nextFunction)).rejects.toThrow(error);
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError).toBe(error);
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing command: TestCommand');
@@ -132,7 +134,8 @@ describe('LoggingMiddleware', () => {
 
         nextFunction.mockRejectedValue(error);
 
-        await expect(middleware.handle(context, nextFunction)).rejects.toThrow(error);
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError).toBe(error);
 
         expect(mockLogger.log).toHaveBeenCalledTimes(2);
         expect(mockLogger.log).toHaveBeenNthCalledWith(1, '[CQRS] Executing query: TestQuery');
@@ -156,7 +159,8 @@ describe('LoggingMiddleware', () => {
             )
         );
 
-        await expect(middleware.handle(context, nextFunction)).rejects.toThrow('Delayed error');
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError?.message).toBe('Delayed error');
 
         const errorLogCall = mockLogger?.log?.mock?.calls?.[1]?.[0];
         const durationMatch = errorLogCall?.match(/failed after (\d+)ms:/);

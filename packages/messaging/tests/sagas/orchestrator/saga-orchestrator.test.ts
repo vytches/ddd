@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 import { SagaOrchestrator } from '../../../src/sagas/orchestrator';
 import type {
@@ -162,10 +163,9 @@ describe('SagaOrchestrator', () => {
         validate: vi.fn().mockReturnValue(['Invalid configuration']),
       });
 
-      expect(() => orchestrator.registerSagaDefinition(definition)).toThrow(SagaConfigurationError);
-      expect(() => orchestrator.registerSagaDefinition(definition)).toThrow(
-        'Invalid saga definition'
-      );
+      const [registrationError] = safeRun(() => orchestrator.registerSagaDefinition(definition));
+      expect(registrationError).toBeInstanceOf(SagaConfigurationError);
+      expect(registrationError?.message).toContain('Invalid saga definition');
     });
 
     it('should update start event mappings', () => {
@@ -214,9 +214,8 @@ describe('SagaOrchestrator', () => {
       const event = createMockEvent('UnknownEvent');
       const context = createMockContext();
 
-      await expect(orchestrator.startSaga(event, context)).rejects.toThrow(
-        SagaDefinitionNotFoundError
-      );
+      const [startError] = await safeRun(() => orchestrator.startSaga(event, context));
+      expect(startError).toBeInstanceOf(SagaDefinitionNotFoundError);
     });
 
     it('should check instance limits', async () => {
@@ -230,9 +229,8 @@ describe('SagaOrchestrator', () => {
       const event = createMockEvent('OrderCreated');
       const context = createMockContext();
 
-      await expect(orchestrator.startSaga(event, context)).rejects.toThrow(
-        SagaInstanceLimitExceededError
-      );
+      const [startError] = await safeRun(() => orchestrator.startSaga(event, context));
+      expect(startError).toBeInstanceOf(SagaInstanceLimitExceededError);
     });
 
     it('should update statistics on success', async () => {

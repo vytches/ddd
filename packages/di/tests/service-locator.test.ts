@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import {
   SimpleContainer,
   VytchesDDD,
@@ -25,15 +26,17 @@ describe('ServiceLocator', () => {
 
   describe('configure', () => {
     it('should configure global container', () => {
-      expect(() => {
+      const [configureError] = safeRun(() => {
         VytchesDDD.configure(globalContainer);
-      }).not.toThrow();
+      });
+      expect(configureError).toBeUndefined();
     });
 
     it('should throw error for null container', () => {
-      expect(() => {
+      const [nullContainerError] = safeRun(() => {
         VytchesDDD.configure(null as any);
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(nullContainerError).toBeInstanceOf(ContainerConfigurationError);
     });
   });
 
@@ -41,41 +44,44 @@ describe('ServiceLocator', () => {
     it('should configure context container', () => {
       VytchesDDD.configure(globalContainer);
 
-      expect(() => {
+      const [contextError] = safeRun(() => {
         VytchesDDD.configureContext('TestContext', contextContainer);
-      }).not.toThrow();
+      });
+      expect(contextError).toBeUndefined();
     });
 
     it('should throw error for null context name', () => {
       VytchesDDD.configure(globalContainer);
 
-      expect(() => {
+      const [nullContextError] = safeRun(() => {
         VytchesDDD.configureContext(null as any, contextContainer);
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(nullContextError).toBeInstanceOf(ContainerConfigurationError);
     });
 
-    it('should throw error for null container', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should throw error for null container', () => {
+      VytchesDDD.configure(globalContainer);
 
-      expect(() => {
+      const [nullContainerContextError] = safeRun(() => {
         VytchesDDD.configureContext('TestContext', null as any);
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(nullContainerContextError).toBeInstanceOf(ContainerConfigurationError);
     });
   });
 
   describe('resolve', () => {
-    it('should resolve from global container', async () => {
+    it('should resolve from global container', () => {
       class TestService {}
 
       globalContainer.register('TestService', TestService);
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
 
       const instance = VytchesDDD.resolve<TestService>('TestService');
 
       expect(instance).toBeInstanceOf(TestService);
     });
 
-    it('should resolve from context container when context specified', async () => {
+    it('should resolve from context container when context specified', () => {
       class TestService {
         constructor(public source: string) {}
       }
@@ -83,7 +89,7 @@ describe('ServiceLocator', () => {
       globalContainer.registerFactory('TestService', () => new TestService('global'));
       contextContainer.registerFactory('TestService', () => new TestService('context'));
 
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
       VytchesDDD.configureContext('TestContext', contextContainer);
 
       const globalInstance = VytchesDDD.resolve<TestService>('TestService');
@@ -93,11 +99,11 @@ describe('ServiceLocator', () => {
       expect(contextInstance.source).toBe('context');
     });
 
-    it('should fallback to global container when service not found in context', async () => {
+    it('should fallback to global container when service not found in context', () => {
       class TestService {}
 
       globalContainer.register('TestService', TestService);
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
       VytchesDDD.configureContext('TestContext', contextContainer);
 
       const instance = VytchesDDD.resolve<TestService>('TestService', 'TestContext');
@@ -105,40 +111,43 @@ describe('ServiceLocator', () => {
       expect(instance).toBeInstanceOf(TestService);
     });
 
-    it('should throw ServiceNotFoundError when service not found', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should throw ServiceNotFoundError when service not found', () => {
+      VytchesDDD.configure(globalContainer);
 
-      expect(() => {
+      const [serviceNotFoundError] = safeRun(() => {
         VytchesDDD.resolve('UnregisteredService');
-      }).toThrow(ServiceNotFoundError);
+      });
+      expect(serviceNotFoundError).toBeInstanceOf(ServiceNotFoundError);
     });
 
-    it('should throw ContainerConfigurationError when no global container configured', async () => {
-      expect(() => {
+    it('should throw ContainerConfigurationError when no global container configured', () => {
+      const [noContainerError] = safeRun(() => {
         VytchesDDD.resolve('TestService');
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(noContainerError).toBeInstanceOf(ContainerConfigurationError);
     });
   });
 
   describe('getGlobalContainer', () => {
-    it('should return global container', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return global container', () => {
+      VytchesDDD.configure(globalContainer);
 
       const container = VytchesDDD.getGlobalContainer();
 
       expect(container).toBe(globalContainer);
     });
 
-    it('should throw error when no global container configured', async () => {
-      expect(() => {
+    it('should throw error when no global container configured', () => {
+      const [getContainerError] = safeRun(() => {
         VytchesDDD.getGlobalContainer();
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(getContainerError).toBeInstanceOf(ContainerConfigurationError);
     });
   });
 
   describe('getContext', () => {
-    it('should return context container', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return context container', () => {
+      VytchesDDD.configure(globalContainer);
       VytchesDDD.configureContext('TestContext', contextContainer);
 
       const container = VytchesDDD.getContext('TestContext');
@@ -146,8 +155,8 @@ describe('ServiceLocator', () => {
       expect(container).toBe(contextContainer);
     });
 
-    it('should return undefined for unregistered context', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return undefined for unregistered context', () => {
+      VytchesDDD.configure(globalContainer);
 
       const container = VytchesDDD.getContext('UnregisteredContext');
 
@@ -156,8 +165,8 @@ describe('ServiceLocator', () => {
   });
 
   describe('getContexts', () => {
-    it('should return all registered contexts', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return all registered contexts', () => {
+      VytchesDDD.configure(globalContainer);
       VytchesDDD.configureContext('Context1', contextContainer);
       VytchesDDD.configureContext('Context2', new SimpleContainer());
 
@@ -168,8 +177,8 @@ describe('ServiceLocator', () => {
       expect(contexts).toContain('Context2');
     });
 
-    it('should return empty array when no contexts registered', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return empty array when no contexts registered', () => {
+      VytchesDDD.configure(globalContainer);
 
       const contexts = VytchesDDD.getContexts();
 
@@ -178,49 +187,50 @@ describe('ServiceLocator', () => {
   });
 
   describe('isRegistered', () => {
-    it('should return true for registered service in global container', async () => {
+    it('should return true for registered service in global container', () => {
       class TestService {}
 
       globalContainer.register('TestService', TestService);
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
 
       expect(VytchesDDD.isRegistered('TestService')).toBe(true);
     });
 
-    it('should return true for registered service in context container', async () => {
+    it('should return true for registered service in context container', () => {
       class TestService {}
 
       contextContainer.register('TestService', TestService);
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
       VytchesDDD.configureContext('TestContext', contextContainer);
 
       expect(VytchesDDD.isRegistered('TestService', 'TestContext')).toBe(true);
     });
 
-    it('should return false for unregistered service', async () => {
-      await VytchesDDD.configure(globalContainer);
+    it('should return false for unregistered service', () => {
+      VytchesDDD.configure(globalContainer);
 
       expect(VytchesDDD.isRegistered('UnregisteredService')).toBe(false);
     });
   });
 
   describe('reset', () => {
-    it('should reset service locator', async () => {
+    it('should reset service locator', () => {
       class TestService {}
 
       globalContainer.register('TestService', TestService);
-      await VytchesDDD.configure(globalContainer);
+      VytchesDDD.configure(globalContainer);
 
       VytchesDDD.reset();
 
-      expect(() => {
+      const [resetError] = safeRun(() => {
         VytchesDDD.getGlobalContainer();
-      }).toThrow(ContainerConfigurationError);
+      });
+      expect(resetError).toBeInstanceOf(ContainerConfigurationError);
     });
   });
 
   describe('dispose', () => {
-    it('should dispose all containers', async () => {
+    it('should dispose all containers', () => {
       let globalDisposed = false;
       let contextDisposed = false;
 
@@ -238,7 +248,7 @@ describe('ServiceLocator', () => {
         },
       };
 
-      await VytchesDDD.configure(disposableGlobal as any);
+      VytchesDDD.configure(disposableGlobal as any);
       VytchesDDD.configureContext('TestContext', disposableContext as any);
 
       VytchesDDD.dispose();
@@ -249,7 +259,7 @@ describe('ServiceLocator', () => {
   });
 
   describe('singleton behavior', () => {
-    it('should maintain singleton instance across calls', async () => {
+    it('should maintain singleton instance across calls', () => {
       const instance1 = ServiceLocator.getInstance();
       const instance2 = ServiceLocator.getInstance();
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 
 import type { ISpecification } from '@vytches-ddd/contracts';
 
@@ -385,7 +386,8 @@ describe('RulesRegistry', () => {
       RulesRegistry.register(provider);
 
       // Assert
-      expect(() => RulesRegistry.getProvider('test-provider')).not.toThrow();
+      const [getProviderError] = safeRun(() => RulesRegistry.getProvider('test-provider'));
+      expect(getProviderError).toBeUndefined();
     });
 
     it('should throw error when registering a provider with duplicate name', () => {
@@ -395,7 +397,8 @@ describe('RulesRegistry', () => {
       RulesRegistry.register(provider1);
 
       // Act & Assert
-      expect(() => RulesRegistry.register(provider2)).toThrow(
+      const [duplicateError] = safeRun(() => RulesRegistry.register(provider2));
+      expect(duplicateError?.message).toBe(
         'Rule provider with name "test-provider" is already registered'
       );
     });
@@ -417,9 +420,8 @@ describe('RulesRegistry', () => {
 
     it('should throw error when getting a non-existent provider', () => {
       // Act & Assert
-      expect(() => RulesRegistry.getProvider('non-existent')).toThrow(
-        'Rule provider "non-existent" not found'
-      );
+      const [nonExistentError] = safeRun(() => RulesRegistry.getProvider('non-existent'));
+      expect(nonExistentError?.message).toBe('Rule provider "non-existent" not found');
     });
   });
 
@@ -466,9 +468,8 @@ describe('RulesRegistry', () => {
 
     it('should throw error when domain does not exist', () => {
       // Act & Assert
-      expect(() => RulesRegistry.forDomain('non-existent')).toThrow(
-        'Rule provider "non-existent" not found'
-      );
+      const [domainError] = safeRun(() => RulesRegistry.forDomain('non-existent'));
+      expect(domainError?.message).toBe('Rule provider "non-existent" not found');
     });
 
     it('should handle multiple domains', () => {

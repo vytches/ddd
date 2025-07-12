@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches-ddd/utils';
 import { ACLError, BaseACLMiddleware } from '../src';
 import type { ACLMiddleware, ExecuteOptions } from '../src';
 
@@ -206,9 +206,11 @@ describe('Concrete Middleware Implementations', () => {
     it('should log even when next throws an error', async () => {
       const errorNext = vi.fn().mockRejectedValue(new Error('Test error'));
 
-      await expect(
+      const [error] = await safeRun(() =>
         middleware.execute('CREATE', testDomainModel, testOptions, errorNext)
-      ).rejects.toThrow('Test error');
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Test error');
 
       expect(middleware.executionLog).toEqual([
         { operation: 'CREATE', phase: 'before' },
@@ -315,9 +317,11 @@ describe('Concrete Middleware Implementations', () => {
         throw new Error('Operation failed');
       });
 
-      await expect(
+      const [error] = await safeRun(() =>
         middleware.execute('CREATE', testDomainModel, testOptions, failingNext)
-      ).rejects.toThrow('Operation failed');
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Operation failed');
 
       expect(middleware.lastExecutionTime).toBe(50);
     });
@@ -367,9 +371,11 @@ describe('Concrete Middleware Implementations', () => {
       const middleware = new ErrorHandlingMiddleware(false);
       const errorNext = vi.fn().mockRejectedValue(new Error('Network timeout'));
 
-      await expect(
+      const [error] = await safeRun(() =>
         middleware.execute('CREATE', testDomainModel, testOptions, errorNext)
-      ).rejects.toThrow('Network timeout');
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(error!.message).toBe('Network timeout');
     });
 
     it('should handle different error types', async () => {

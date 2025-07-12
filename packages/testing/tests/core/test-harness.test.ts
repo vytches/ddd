@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { TestHarness, SimpleTestHarness, TestResourceBuilder } from '../../src';
 
 describe('TestHarness', () => {
@@ -46,7 +47,8 @@ describe('TestHarness', () => {
       });
 
       it('should require initialization before setup', async () => {
-        await expect(harness.setup()).rejects.toThrow(
+        const [setupError] = await safeRun(() => harness.setup());
+        expect(setupError?.message).toBe(
           'TestHarness must be initialized before use. Call initialize() first.'
         );
       });
@@ -93,9 +95,8 @@ describe('TestHarness', () => {
 
         await customHarness.initialize();
 
-        await expect(customHarness.setup()).rejects.toThrow(
-          `Failed to setup TestHarness: ${errorMessage}`
-        );
+        const [setupError] = await safeRun(() => customHarness.setup());
+        expect(setupError?.message).toBe(`Failed to setup TestHarness: ${errorMessage}`);
 
         const errors = customHarness.getErrors();
         expect(errors).toHaveLength(1);
@@ -112,7 +113,8 @@ describe('TestHarness', () => {
         await customHarness.setup();
 
         // Teardown should not throw even if teardown function fails
-        await expect(customHarness.teardown()).resolves.not.toThrow();
+        const [teardownError] = await safeRun(() => customHarness.teardown());
+        expect(teardownError).toBeUndefined();
 
         const errors = customHarness.getErrors();
         expect(errors).toHaveLength(1);
@@ -198,7 +200,8 @@ describe('TestHarness', () => {
         await harness.initialize();
         await harness.setup();
 
-        expect(() => (harness as any).getTestClock()).toThrow(
+        const [clockError] = safeRun(() => (harness as any).getTestClock());
+        expect(clockError?.message).toBe(
           'TestClock is not enabled. Set enableTimeFreezing: true in options.'
         );
       });
@@ -288,7 +291,8 @@ describe('TestHarness', () => {
       it('should require initialization for reset', async () => {
         const freshHarness = new SimpleTestHarness();
 
-        await expect(freshHarness.reset()).rejects.toThrow(
+        const [resetError] = await safeRun(() => freshHarness.reset());
+        expect(resetError?.message).toBe(
           'TestHarness must be initialized before use. Call initialize() first.'
         );
 
@@ -300,7 +304,8 @@ describe('TestHarness', () => {
       it('should dispose cleanly even if not set up', async () => {
         await harness.initialize();
 
-        await expect(harness.dispose()).resolves.not.toThrow();
+        const [disposeError] = await safeRun(() => harness.dispose());
+        expect(disposeError).toBeUndefined();
 
         const state = harness.getState();
         expect(state.isInitialized).toBe(false);
@@ -382,7 +387,8 @@ describe('TestHarness', () => {
     it('should handle disposal without custom function', async () => {
       const resource = TestResourceBuilder.create('test-type').build();
 
-      await expect(resource.dispose()).resolves.not.toThrow();
+      const [resourceDisposeError] = await safeRun(() => resource.dispose());
+      expect(resourceDisposeError).toBeUndefined();
     });
 
     it('should support fluent builder pattern', () => {

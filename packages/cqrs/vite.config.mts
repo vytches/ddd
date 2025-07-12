@@ -46,6 +46,7 @@ export default defineConfig({
     alias: {
       '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
       '@vytches-ddd/di': resolve(__dirname, '../di/src/index.ts'),
+      '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
     },
   },
 });

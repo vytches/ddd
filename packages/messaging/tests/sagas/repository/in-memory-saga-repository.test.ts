@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { safeRun } from '@vytches-ddd/utils';
 import { InMemorySagaRepository } from '../../../src/sagas/repository';
 import type {
   ISaga,
@@ -121,7 +122,8 @@ describe('InMemorySagaRepository', () => {
         state: { ...saga1.state, version: 1 },
       });
 
-      await expect(repository.save(saga2)).rejects.toThrow(SagaConcurrencyError);
+      const [saveError] = await safeRun(() => repository.save(saga2));
+      expect(saveError).toBeInstanceOf(SagaConcurrencyError);
     });
 
     it('should allow save when optimistic locking disabled', async () => {
@@ -340,7 +342,8 @@ describe('InMemorySagaRepository', () => {
     });
 
     it('should throw error when saga not found', async () => {
-      await expect(repository.remove('non-existent')).rejects.toThrow(SagaNotFoundError);
+      const [removeError] = await safeRun(() => repository.remove('non-existent'));
+      expect(removeError).toBeInstanceOf(SagaNotFoundError);
     });
   });
 
@@ -402,19 +405,21 @@ describe('InMemorySagaRepository', () => {
       const saga = createMockSaga();
       await repository.save(saga);
 
-      await expect(
+      const [updateError] = await safeRun(() =>
         repository.updateState(
           'saga-123',
           { status: SagaStatus.EXECUTING },
           0 // Wrong version
         )
-      ).rejects.toThrow(SagaConcurrencyError);
+      );
+      expect(updateError).toBeInstanceOf(SagaConcurrencyError);
     });
 
     it('should throw error when saga not found', async () => {
-      await expect(
+      const [error] = await safeRun(() =>
         repository.updateState('non-existent', { status: SagaStatus.EXECUTING }, 1)
-      ).rejects.toThrow(SagaNotFoundError);
+      );
+      expect(error).toBeInstanceOf(SagaNotFoundError);
     });
 
     it('should update indexes after state change', async () => {

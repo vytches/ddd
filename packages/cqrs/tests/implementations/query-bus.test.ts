@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 import { QueryBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
 import type { ICQRSMiddleware, IQuery, IQueryHandler, CQRSExecutionContext } from '../../src';
@@ -83,15 +84,17 @@ describe('QueryBus', () => {
 
   describe('register', () => {
     it('should throw CQRSConfigurationError for manual registration', () => {
-      expect(() => {
+      const [registerError] = safeRun(() => {
         queryBus.register(TestQuery, mockHandler);
-      }).toThrow(CQRSConfigurationError);
+      });
+      expect(registerError).toBeInstanceOf(CQRSConfigurationError);
     });
 
     it('should throw with deprecation message', () => {
-      expect(() => {
+      const [messageError] = safeRun(() => {
         queryBus.register(TestQuery, mockHandler);
-      }).toThrow(
+      });
+      expect(messageError?.message).toContain(
         'Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.'
       );
     });
@@ -101,17 +104,19 @@ describe('QueryBus', () => {
     it('should throw CQRSConfigurationError for manual factory registration', () => {
       const factory = () => mockHandler;
 
-      expect(() => {
+      const [factoryError] = safeRun(() => {
         queryBus.registerFactory(TestQuery, factory);
-      }).toThrow(CQRSConfigurationError);
+      });
+      expect(factoryError).toBeInstanceOf(CQRSConfigurationError);
     });
 
     it('should throw with deprecation message', () => {
       const factory = () => mockHandler;
 
-      expect(() => {
+      const [factoryMessageError] = safeRun(() => {
         queryBus.registerFactory(TestQuery, factory);
-      }).toThrow(
+      });
+      expect(factoryMessageError?.message).toContain(
         'Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.'
       );
     });
@@ -199,7 +204,8 @@ describe('QueryBus', () => {
         throw new Error('Handler not found');
       });
 
-      await expect(queryBus.execute(query)).rejects.toThrow(HandlerNotFoundError);
+      const [executeError] = await safeRun(() => queryBus.execute(query));
+      expect(executeError).toBeInstanceOf(HandlerNotFoundError);
     });
 
     it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
@@ -207,8 +213,9 @@ describe('QueryBus', () => {
 
       vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
 
-      await expect(queryBus.execute(query)).rejects.toThrow(CQRSConfigurationError);
-      await expect(queryBus.execute(query)).rejects.toThrow(
+      const [executeError] = await safeRun(() => queryBus.execute(query));
+      expect(executeError).toBeInstanceOf(CQRSConfigurationError);
+      expect(executeError?.message).toContain(
         'No handler registered for query TestQuery. Did you forget @QueryHandler decorator?'
       );
     });
@@ -229,7 +236,8 @@ describe('QueryBus', () => {
 
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(queryBus.execute(query)).rejects.toThrow('ID is required');
+      const [error] = await safeRun(() => queryBus.execute(query));
+      expect(error?.message).toBe('ID is required');
     });
 
     it('should execute middleware in correct order', async () => {
@@ -261,12 +269,13 @@ describe('QueryBus', () => {
 
     it('should handle handler execution errors', async () => {
       const query = new TestQuery('test-id');
-      const error = new Error('Handler execution failed');
+      const handlerError = new Error('Handler execution failed');
 
-      vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
+      vi.spyOn(mockHandler, 'execute').mockRejectedValue(handlerError);
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(queryBus.execute(query)).rejects.toThrow('Handler execution failed');
+      const [error] = await safeRun(() => queryBus.execute(query));
+      expect(error?.message).toBe('Handler execution failed');
     });
 
     it('should create proper execution context', async () => {
@@ -498,28 +507,30 @@ describe('QueryBus', () => {
 
     it('should propagate handler errors', async () => {
       const query = new TestQuery('test-id');
-      const error = new Error('Custom handler error');
+      const handlerError = new Error('Custom handler error');
 
-      vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
+      vi.spyOn(mockHandler, 'execute').mockRejectedValue(handlerError);
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(queryBus.execute(query)).rejects.toThrow('Custom handler error');
+      const [error] = await safeRun(() => queryBus.execute(query));
+      expect(error?.message).toBe('Custom handler error');
     });
 
     it('should handle middleware errors', async () => {
       const query = new TestQuery('test-id');
-      const error = new Error('Middleware error');
+      const middlewareError = new Error('Middleware error');
 
       const errorMiddleware: ICQRSMiddleware = {
         async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
-          throw error;
+          throw middlewareError;
         },
       };
 
       queryBus.use(errorMiddleware);
       (mockContainer.resolve as Mock).mockReturnValue(mockHandler);
 
-      await expect(queryBus.execute(query)).rejects.toThrow('Middleware error');
+      const [error] = await safeRun(() => queryBus.execute(query));
+      expect(error?.message).toBe('Middleware error');
     });
   });
 });

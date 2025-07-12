@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
+import { safeRun } from '@vytches-ddd/utils';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 import { LoggingMiddleware, QueryBus, EnhancedQueryBus } from '../../src';
 import type { IQuery, IQueryHandler } from '../../src';
@@ -119,7 +120,8 @@ describe('EnhancedQueryBus', () => {
 
       vi.spyOn(mockHandler, 'execute').mockRejectedValue(error);
 
-      await expect(enhancedQueryBus.execute(query)).rejects.toThrow('Execution failed');
+      const [executeError] = await safeRun(() => enhancedQueryBus.execute(query));
+      expect(executeError?.message).toBe('Execution failed');
 
       const metrics = enhancedQueryBus.getMetrics();
       expect(metrics.executionCount).toBe(0);
@@ -137,7 +139,8 @@ describe('EnhancedQueryBus', () => {
         .mockResolvedValueOnce('Result for success');
 
       const result1 = await enhancedQueryBus.execute(query1);
-      await expect(enhancedQueryBus.execute(query2)).rejects.toThrow('Failed');
+      const [executeError] = await safeRun(() => enhancedQueryBus.execute(query2));
+      expect(executeError?.message).toBe('Failed');
       const result3 = await enhancedQueryBus.execute(query3);
 
       expect(result1).toBe('Result for success');
@@ -302,8 +305,10 @@ describe('EnhancedQueryBus', () => {
       vi.spyOn(mockHandler, 'execute').mockRejectedValue(new Error('Test error'));
 
       // Generate some errors
-      await expect(enhancedQueryBus.execute(query)).rejects.toThrow();
-      await expect(enhancedQueryBus.execute(query)).rejects.toThrow();
+      const [error1] = await safeRun(() => enhancedQueryBus.execute(query));
+      expect(error1).toBeDefined();
+      const [error2] = await safeRun(() => enhancedQueryBus.execute(query));
+      expect(error2).toBeDefined();
 
       let metrics = enhancedQueryBus.getMetrics();
       expect(metrics.errors).toBe(2);
@@ -504,17 +509,18 @@ describe('EnhancedQueryBus', () => {
 
     it('should handle errors in middleware and update metrics', async () => {
       const query = new TestQuery('test-id');
-      const error = new Error('Middleware error');
+      const middlewareError = new Error('Middleware error');
 
       const errorMiddleware = {
         async handle(context: any, next: () => Promise<unknown>) {
-          throw error;
+          throw middlewareError;
         },
       };
 
       enhancedQueryBus.use(errorMiddleware);
 
-      await expect(enhancedQueryBus.execute(query)).rejects.toThrow('Middleware error');
+      const [error] = await safeRun(() => enhancedQueryBus.execute(query));
+      expect(error?.message).toBe('Middleware error');
 
       const metrics = enhancedQueryBus.getMetrics();
       expect(metrics.errors).toBe(1);

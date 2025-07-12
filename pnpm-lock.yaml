@@ -190,7 +190,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -212,7 +212,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -234,7 +234,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -258,7 +258,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/repositories':
         specifier: workspace:*
         version: link:../repositories
@@ -277,6 +277,9 @@ importers:
       '@vytches-ddd/di':
         specifier: workspace:*
         version: link:../di
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -291,7 +294,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -329,6 +332,9 @@ importers:
       '@vytches-ddd/events':
         specifier: workspace:*
         version: link:../events
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vytches-ddd/validation':
         specifier: workspace:*
         version: link:../validation
@@ -392,7 +398,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -413,7 +419,10 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -431,7 +440,7 @@ importers:
         version: link:../di
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -441,15 +450,9 @@ importers:
 
   packages/logging:
     devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
-  packages/logging/dist:
-    devDependencies:
+      '@vytches-ddd/utils':
+        specifier: '*'
+        version: link:../utils
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -470,7 +473,7 @@ importers:
         version: link:../domain-primitives
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -500,7 +503,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -537,7 +540,7 @@ importers:
         version: link:../core
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -571,7 +574,7 @@ importers:
         version: link:../events
       '@vytches-ddd/logging':
         specifier: workspace:*
-        version: link:../logging/dist
+        version: link:../logging
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
