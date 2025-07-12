@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  actions: read
+
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
 
@@ -37,6 +41,21 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+          error-on-no-successful-workflow: false
+        continue-on-error: true
+
+      - name: Fallback SHA detection
+        if: failure()
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "NX_BASE=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+            echo "NX_HEAD=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          else
+            echo "NX_BASE=${{ github.event.before }}" >> $GITHUB_ENV
+            echo "NX_HEAD=${{ github.sha }}" >> $GITHUB_ENV
+          fi
 
       - name: Check formatting
         run: pnpm format:check

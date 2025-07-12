@@ -58,5 +58,9 @@
       "type:lib",
       "layer:architecture"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

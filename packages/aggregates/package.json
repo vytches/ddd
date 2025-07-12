@@ -64,5 +64,9 @@
       "type:lib",
       "layer:foundation"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

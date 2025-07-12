@@ -1,4 +1,4 @@
-# 1. Adopt Monorepo Architecture with Nx and PNPM Workspaces
+# ADR-0001. Adopt Monorepo Architecture with Nx and PNPM Workspaces
 
 Date: 2025-07-05
 

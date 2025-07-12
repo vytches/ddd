@@ -2,15 +2,14 @@
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "version": "independent",
   "npmClient": "pnpm",
-  "useWorkspaces": true,
   "packages": ["packages/*"],
   "command": {
     "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish packages",
-      "registry": "https://registry.npmjs.org/",
+      "registry": "https://npm.pkg.github.com",
       "distTag": "latest",
-      "allowBranch": ["main", "release/*", "next"],
+      "allowBranch": ["main", "release/*", "develop", "feature/*"],
       "ignoreChanges": [
         "**/*.md",
         "**/*.spec.ts",
@@ -23,11 +22,12 @@
       ]
     },
     "version": {
-      "allowBranch": ["main", "release/*"],
+      "allowBranch": ["main", "release/*", "develop", "feature/*"],
       "conventionalCommits": true,
       "exact": true,
       "push": false,
       "createRelease": "github",
+      "tagVersionPrefix": "v",
       "message": "chore(release): version packages",
       "ignoreChanges": [
         "**/*.md",

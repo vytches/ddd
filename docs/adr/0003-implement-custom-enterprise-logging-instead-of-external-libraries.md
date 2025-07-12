@@ -1,4 +1,4 @@
-# 3. Implement Custom Enterprise Logging Instead of External Libraries
+# ADR-0003. Implement Custom Enterprise Logging Instead of External Libraries
 
 Date: 2025-07-05
 

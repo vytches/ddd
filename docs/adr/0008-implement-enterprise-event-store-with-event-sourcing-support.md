@@ -1,4 +1,4 @@
-# 9. Implement Enterprise Event Store with Event Sourcing Support
+# ADR-0008. Implement Enterprise Event Store with Event Sourcing Support
 
 Date: 2025-07-09
 

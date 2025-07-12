@@ -60,5 +60,9 @@
       "type:lib",
       "layer:integration"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

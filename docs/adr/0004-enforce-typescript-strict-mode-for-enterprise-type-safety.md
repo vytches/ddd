@@ -1,4 +1,4 @@
-# 4. Enforce TypeScript Strict Mode for Enterprise Type Safety
+# ADR-0004. Enforce TypeScript Strict Mode for Enterprise Type Safety
 
 Date: 2025-07-05
 
