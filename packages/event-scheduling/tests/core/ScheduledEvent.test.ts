@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ScheduledEvent, TestScheduledEvent, TestEventFactory } from '../../src';
+import type { IScheduleOptions } from '../../src';
+import { ScheduledEvent, TestScheduledEvent, TestEventFactory, BackoffStrategy } from '../../src';
 
 describe('ScheduledEvent', () => {
   describe('constructor', () => {
@@ -20,9 +21,9 @@ describe('ScheduledEvent', () => {
     it('should create a scheduled event with schedule options', () => {
       const aggregateId = 'test-123';
       const scheduleAt = new Date(Date.now() + 1000);
-      const scheduleOptions = {
+      const scheduleOptions: IScheduleOptions = {
         maxRetries: 3,
-        backoff: 'exponential' as const,
+        backoff: BackoffStrategy.EXPONENTIAL,
         priority: 1,
       };
 
@@ -147,7 +148,7 @@ describe('ScheduledEvent', () => {
     });
 
     it('should preserve schedule options when rescheduling', () => {
-      const originalEvent = TestEventFactory.withRetry('test-123', 5, 'linear');
+      const originalEvent = TestEventFactory.withRetry('test-123', 5, BackoffStrategy.LINEAR);
       const newTime = new Date(Date.now() + 5000);
 
       const rescheduled = originalEvent.reschedule(newTime);
@@ -172,7 +173,7 @@ describe('ScheduledEvent', () => {
     });
 
     it('should create events with retry configuration', () => {
-      const event = TestEventFactory.withRetry('test-123', 5, 'linear');
+      const event = TestEventFactory.withRetry('test-123', 5, BackoffStrategy.LINEAR);
 
       expect(event.scheduleOptions?.maxRetries).toBe(5);
       expect(event.scheduleOptions?.backoff).toBe('linear');
