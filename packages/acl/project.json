@@ -13,5 +13,6 @@
         "command": "pnpm vitest run packages/acl/tests --reporter=verbose"
       }
     }
-  }
+  },
+  "tags": ["type:lib", "scope:acl"]
 }

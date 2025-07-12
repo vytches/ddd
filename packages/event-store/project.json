@@ -1,35 +1,5 @@
 {
-  "name": "@vytches-ddd/event-store",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/event-store/src",
-  "projectType": "library",
-  "release": {
-    "version": {
-      "manifestRootsToUpdate": ["dist/{projectRoot}"],
-      "currentVersionResolver": "git-tag",
-      "fallbackCurrentVersionResolver": "disk"
-    }
-  },
-  "tags": ["scope:event-store", "type:library"],
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/event-store",
-        "main": "packages/event-store/src/index.ts",
-        "tsConfig": "packages/event-store/tsconfig.lib.json",
-        "assets": ["packages/event-store/*.md"]
-      }
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
-      "options": {
-        "passWithNoTests": true,
-        "reportsDirectory": "../../coverage/packages/event-store"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
@@ -37,10 +7,12 @@
         "lintFilePatterns": ["packages/event-store/**/*.ts"]
       }
     },
-    "nx-release-publish": {
+    "test": {
+      "executor": "nx:run-commands",
       "options": {
-        "packageRoot": "dist/{projectRoot}"
+        "command": "pnpm vitest run packages/event-store/tests --reporter=verbose"
       }
     }
-  }
+  },
+  "tags": ["type:lib", "scope:event-store"]
 }
