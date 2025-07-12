@@ -170,7 +170,17 @@ describe('BaseACLAdapter', () => {
       vi.useFakeTimers();
 
       mockExternalAPI.execute.mockImplementationOnce(
-        () => new Promise(resolve => setTimeout(resolve, 2000))
+        () =>
+          new Promise<TestResult>(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  success: true,
+                  message: 'Executed CREATE with test-123',
+                }),
+              2000
+            )
+          )
       );
 
       const resultPromise = adapter.execute('CREATE', testDomainModel, { timeout: 1000 });
