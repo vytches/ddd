@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/repositories",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Repository patterns and Unit of Work for DDD aggregates",
   "type": "module",
   "main": "./dist/index.cjs",

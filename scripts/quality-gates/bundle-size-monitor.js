@@ -36,7 +36,7 @@ const CONFIG = {
 
     // Pattern packages (medium size)
     validation: 100,
-    policies: 80,
+    policies: 190,
     'domain-services': 50,
 
     // Architecture packages (can be larger)

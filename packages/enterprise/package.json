@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/enterprise",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Health checks and enterprise monitoring",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -42,7 +42,8 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*"
+    "@vytches-ddd/core": "workspace:*",
+    "@vytches-ddd/policies": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

@@ -44,7 +44,7 @@ Each package evolves independently following semantic versioning:
 ### **Production Branches:**
 
 - `main` - Stable production releases only
-- `release/next` - Universal release preparation branch
+- `release/YYYY-MM-DD` - Date-based release preparation branches
 - `hotfix/description` - Critical production fixes
 
 ### **Development Branches:**
@@ -58,6 +58,36 @@ Each package evolves independently following semantic versioning:
 {
   "allowBranch": ["main", "release/*", "develop"]
 }
+```
+
+**Important:** Feature branches (`feature/*`) are intentionally excluded to
+enforce proper release workflow where versioning only happens in release
+branches.
+
+### **Release Branch Naming Convention:**
+
+**Date-based (RECOMMENDED):**
+
+```bash
+release/2025-07-12     # Standard release
+release/2025-07-15     # Another release same month
+release/2025-07-12-alpha  # Pre-release version
+```
+
+**Benefits of date-based naming:**
+
+- ✅ **Unique names** - no conflicts between releases
+- ✅ **No cleanup needed** - each release has permanent branch for history
+- ✅ **Clear timeline** - easy to see when releases happened
+- ✅ **Independent versioning** - branch name doesn't need to match package
+  versions
+
+**Alternative naming patterns:**
+
+```bash
+release/sprint-42           # Sprint-based
+release/milestone-2.1       # Milestone-based
+release/security-updates    # Feature collection-based
 ```
 
 ## Release Commands Reference
@@ -119,8 +149,8 @@ git commit -m "test(events): add comprehensive retry tests"
 git push origin feature/add-retry-mechanism
 # Create PR: feature → main (or develop)
 
-# 2. When ready for release, collect all merged features
-git checkout -b release/next
+# 2. When ready for release, create date-based release branch
+git checkout -b release/$(date +%Y-%m-%d)
 
 # 3. Merge all completed features (if using develop branch)
 git merge develop  # Contains all merged features
@@ -139,8 +169,8 @@ pnpm release:version
 git log --oneline -5
 git show HEAD  # Review version commit
 
-# 7. Push release branch with tags
-git push origin release/next --tags
+# 7. Push release branch with tags (CRITICAL: --tags sends git tags to GitHub)
+git push origin release/$(date +%Y-%m-%d) --tags
 
 # 8. Create Pull Request to main
 gh pr create --title "Release $(date +%Y.%m.%d)" --body "Automated release"
@@ -174,8 +204,8 @@ gh pr create --title "HOTFIX: Critical security patch" --urgency=high
 ### **🧪 Pre-release Process**
 
 ```bash
-# 1. Create pre-release versions
-git checkout -b release/next-alpha
+# 1. Create pre-release versions with date-based branch
+git checkout -b release/$(date +%Y-%m-%d)-alpha
 pnpm release:prerelease
 # ↳ Creates versions like 1.1.0-alpha.0
 
@@ -183,7 +213,7 @@ pnpm release:prerelease
 pnpm publish # to alpha tag
 
 # 3. Graduate to stable when ready
-git checkout release/next
+git checkout -b release/$(date +%Y-%m-%d)
 pnpm release:graduate
 # ↳ 1.1.0-alpha.0 → 1.1.0
 ```
@@ -259,6 +289,23 @@ chore(deps): update development dependencies
 v1.0.0  # for @vytches-ddd/core@1.0.0
 v1.2.3  # for @vytches-ddd/events@1.2.3
 ```
+
+**CRITICAL: Always use `--tags` flag when pushing release branches:**
+
+```bash
+# ✅ CORRECT: Sends git tags to GitHub (required for GitHub Releases)
+git push origin release/2025-07-12 --tags
+
+# ❌ WRONG: Tags remain local only, GitHub Releases won't work
+git push origin release/2025-07-12
+```
+
+**Why `--tags` is essential:**
+
+- 🏷️ GitHub Releases require git tags on remote repository
+- 📦 GitHub Packages publishing triggered by tag push
+- 🔄 CI/CD workflows depend on tag availability
+- 📋 Automatic changelog generation needs tag history
 
 ### **📦 GitHub Packages Publishing**
 
