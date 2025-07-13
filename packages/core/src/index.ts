@@ -1,4 +1,5 @@
 // Core aggregates - re-exported from aggregates package
+// Test comment for lerna behavior
 export { AggregateRoot, AggregateBuilder, AggregateError } from '@vytches-ddd/aggregates';
 
 // Aggregate interfaces
