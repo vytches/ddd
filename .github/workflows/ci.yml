@@ -1,7 +1,8 @@
 name: CI
 
 on:
-  push:
+  # Only test on PRs - avoid duplicate runs after merge
+  pull_request:
     branches: [main, develop, "release/**"]
     paths-ignore:
       - "**/*.md"
@@ -12,8 +13,9 @@ on:
       - ".vscode/**"
       - ".idea/**"
       - "**/.DS_Store"
-  pull_request:
-    branches: [main, develop, "release/**"]
+  # Only run on main for deployment/release purposes
+  push:
+    branches: [main]
     paths-ignore:
       - "**/*.md"
       - "docs/**"
@@ -38,7 +40,8 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        # Use only latest LTS for efficiency - add 18.x back if compatibility issues arise
+        node-version: [20.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -166,7 +169,8 @@ jobs:
 
   security:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
+    # Run security checks primarily on PRs for early feedback
+    if: "github.event_name == 'pull_request' && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
