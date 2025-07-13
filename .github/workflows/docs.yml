@@ -2,13 +2,13 @@ name: Documentation
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
     paths:
       - "**/*.md"
       - "docs/**"
       - "*.md"
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
     paths:
       - "**/*.md"
       - "docs/**"
@@ -24,10 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Check markdown formatting
         run: npx prettier --check "**/*.md"

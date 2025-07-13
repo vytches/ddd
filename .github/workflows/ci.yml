@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
     paths-ignore:
       - "**/*.md"
       - "docs/**"
@@ -13,7 +13,7 @@ on:
       - ".idea/**"
       - "**/.DS_Store"
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
     paths-ignore:
       - "**/*.md"
       - "docs/**"
