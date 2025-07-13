@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/policies",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Business policies and policy builder patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -47,8 +47,8 @@
     "@vytches-ddd/validation": "workspace:*"
   },
   "devDependencies": {
-    "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/testing": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^4.0.0",
