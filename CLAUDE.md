@@ -489,15 +489,31 @@ handling
 - **Integration Coverage**: Fully integrated across all packages (core, events,
   cqrs, resilience, messaging, etc.)
 
-#### Business Policies Package (@vytches-ddd/policies)
+#### Business Policies Package (@vytches-ddd/policies) - V2
 
-- **Fluent Policy Builder**: Chain policies with `.must()`, `.mustAsync()`,
-  `.and()`, `.or()`
-- **Composite Policies**: Group policies with AND/OR logic
-- **Conditional Policies**: Apply policies based on runtime conditions with
+- **Unified Promise-Based API**: Consistent async interface across all policy
+  operations
+- **Enterprise Context System**: Built-in audit trails, multi-tenancy, and
+  correlation tracking
+- **Advanced Fluent Builder**: Rich API with `.must()`, `.mustAsync()`,
   `.when().then().otherwise()`
-- **Violation Management**: Structured policy violations with severity levels
-- **Policy Registry**: Central registration and retrieval of domain policies
+- **Specification Integration**: Direct support for ISpecification and
+  IAsyncSpecification patterns
+- **Complex Group Logic**: PolicyGroup for sophisticated AND/OR business rule
+  combinations
+- **Rich Violation System**: Structured violations with severity levels
+  (ERROR/WARNING/INFO)
+- **Conditional Policies**: Dynamic policy execution based on runtime conditions
+- **Event-Driven Architecture**: Automatic policy evaluation events for
+  observability
+- **Policy Registry**: Central registration with domain-based organization and
+  querying
+- **Policy Behaviors**: MediatR-style behaviors for cross-cutting concerns
+  - `PolicyRetryBehavior`: Business rule retry logic for transient failures
+  - `PolicyCachingBehavior`: Policy-specific caching with business semantics
+  - `PolicyTemporalBehavior`: Time-aware policy execution for business rules
+- **Adapter Pattern Ready**: Framework for integrating external validation
+  libraries
 
 #### Event Projections Package (@vytches-ddd/projections)
 
@@ -1103,6 +1119,380 @@ export class OrderModule implements OnModuleInit {
     VytchesDDD.configure(adapter);
   }
 }
+```
+
+## Policies V2 Usage Guide
+
+### Basic Policy Creation
+
+The new Policies V2 provides a unified Promise-based API with rich enterprise
+features:
+
+```typescript
+import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import {
+  AgeSpecification,
+  EmailSpecification,
+} from '@your-domain/specifications';
+
+// Basic policy with specifications
+const userPolicy = PolicyBuilder.create<User>()
+  .withId('user-validation')
+  .withDomain('authentication')
+  .withName('User Registration Policy')
+  .must(new AgeSpecification(18))
+  .withCode('AGE_TOO_LOW')
+  .withMessage('Must be at least 18 years old')
+  .withSeverity('ERROR')
+  .and()
+  .must(new EmailSpecification())
+  .withCode('INVALID_EMAIL')
+  .withMessage('Valid email required')
+  .withSeverity('ERROR')
+  .build();
+
+// Execute policy with context
+const context = PolicyContext.create()
+  .withUserId('user-123')
+  .withSessionId('session-456')
+  .withRequestId('req-789')
+  .build();
+
+const result = await userPolicy.check({ entity: user, context });
+if (result.isFailure()) {
+  console.log('Violations:', result.error.violations);
+}
+```
+
+### Advanced Policy Features
+
+```typescript
+// Conditional policies with when/then/otherwise
+const dynamicPolicy = PolicyBuilder.create<Order>()
+  .withId('order-validation')
+  .withDomain('orders')
+  .must(new BasicOrderValidation())
+  .when(order => order.amount > 10000)
+  .then()
+  .must(new ManagerApprovalSpec())
+  .withCode('APPROVAL_REQUIRED')
+  .withMessage('Manager approval required for large orders')
+  .when(ctx => ctx.environment === 'production')
+  .then()
+  .must(new StrictSecurityPolicy())
+  .otherwise()
+  .should(new RelaxedValidation())
+  .withSeverity('WARNING')
+  .build();
+```
+
+### Complex Group Logic
+
+```typescript
+import { PolicyGroup } from '@vytches-ddd/policies';
+
+// OR group logic for flexible business rules
+const excellentCreditGroup = PolicyGroup.create<LoanApplication>(
+  'excellent-credit'
+).mustSatisfy(
+  app => app.creditScore >= 800,
+  'CREDIT_NOT_EXCELLENT',
+  'Excellent credit required'
+);
+
+const goodCreditWithCollateralGroup = PolicyGroup.create<LoanApplication>(
+  'good-credit-collateral'
+)
+  .mustSatisfy(
+    app => app.creditScore >= 650,
+    'CREDIT_NOT_GOOD',
+    'Good credit required'
+  )
+  .and()
+  .mustSatisfy(
+    app => app.collateral >= 50000,
+    'INSUFFICIENT_COLLATERAL',
+    'Collateral required'
+  );
+
+const loanPolicy = PolicyBuilder.create<LoanApplication>()
+  .withId('loan-approval')
+  .withDomain('lending')
+  .shouldSatisfyAny(excellentCreditGroup, goodCreditWithCollateralGroup)
+  .build();
+```
+
+### Event-Driven Policies
+
+```typescript
+// Policy with automatic event emission
+const auditedPolicy = PolicyBuilder.create<User>()
+  .withId('user-security')
+  .withDomain('security')
+  .must(new SecuritySpecification())
+  .withEvents({ enabled: true })
+  .build();
+
+// Listen to policy events
+policyEventBus.subscribe('POLICY_EVALUATED', event => {
+  console.log(
+    `Policy ${event.policyId} evaluated with result: ${event.result.isSuccess()}`
+  );
+});
+```
+
+### Specification Integration
+
+```typescript
+// Direct specification support
+const specPolicy = PolicyBuilder.create<User>()
+  .must(AgeSpecification.create({ min: 18, max: 65 }))
+  .and()
+  .must(EmailSpecification.create())
+  .and()
+  .mustSatisfyRules(rules =>
+    rules
+      .forProperty('name', Rules.required().minLength(2))
+      .forProperty('phone', Rules.required().phone())
+  )
+  .build();
+
+// Custom async specifications
+class CreditCheckSpecification implements IAsyncSpecification<LoanApplication> {
+  async isSatisfiedByAsync(app: LoanApplication): Promise<boolean> {
+    const score = await creditService.getScore(app.applicantId);
+    return score >= app.requiredMinScore;
+  }
+}
+
+const asyncPolicy = PolicyBuilder.create<LoanApplication>()
+  .mustAsync(new CreditCheckSpecification())
+  .withCode('CREDIT_CHECK_FAILED')
+  .build();
+```
+
+### Policy Registry Usage
+
+```typescript
+import { PolicyRegistry } from '@vytches-ddd/policies';
+
+const registry = new PolicyRegistry();
+
+// Register policies
+registry.register({
+  id: 'user-validation',
+  domain: 'authentication',
+  name: 'User Validation Policy',
+  policy: userPolicy,
+  version: '1.0.0',
+  tags: ['security', 'validation'],
+});
+
+// Retrieve policies
+const policy = registry.resolve<User>({
+  domain: 'authentication',
+  id: 'user-validation',
+});
+
+// Query policies by domain
+const securityPolicies = registry.findByDomain('security');
+```
+
+### Error Handling and Violations
+
+```typescript
+// Rich violation handling
+const result = await policy.check({ entity: user, context });
+
+if (result.isFailure()) {
+  const violations = result.error.violations;
+
+  violations.forEach(violation => {
+    console.log({
+      code: violation.code,
+      message: violation.message,
+      severity: violation.severity, // ERROR, WARNING, INFO
+      field: violation.field,
+      details: violation.details,
+      timestamp: violation.timestamp,
+    });
+  });
+
+  // Filter by severity
+  const errors = violations.filter(v => v.severity === 'ERROR');
+  const warnings = violations.filter(v => v.severity === 'WARNING');
+}
+```
+
+## Policy Behaviors Usage Guide
+
+### Basic Policy Behavior Usage
+
+Policy Behaviors follow the MediatR pattern and wrap business policies with
+cross-cutting concerns like retry logic, caching, and temporal validation.
+
+```typescript
+import {
+  PolicyRetryBehavior,
+  PolicyCachingBehavior,
+  PolicyTemporalBehavior,
+} from '@vytches-ddd/policies';
+
+// Create a base business policy
+class PaymentValidationPolicy extends BaseBusinessPolicy<PaymentData> {
+  async check(
+    request: PolicyRequest<PaymentData>
+  ): Promise<Result<PaymentData, PolicyViolation>> {
+    // Business validation logic
+    return this.success(request.entity);
+  }
+}
+
+// Wrap with retry behavior for transient failures
+const retryPolicy = PolicyRetryBehavior.create(new PaymentValidationPolicy(), {
+  maxAttempts: 3,
+  baseDelay: 1000,
+  backoff: 'exponential',
+  shouldRetry: violation => violation.code.includes('TIMEOUT'),
+});
+
+// Wrap with caching for performance
+const cachedPolicy = PolicyCachingBehavior.create(retryPolicy, {
+  ttl: 60000, // 1 minute
+  maxSize: 100,
+});
+
+// Execute the wrapped policy
+const result = await cachedPolicy.check({ entity: paymentData, context });
+```
+
+### Policy Retry Behavior
+
+```typescript
+import {
+  PolicyRetryBehavior,
+  PolicyRetryBehaviorFactory,
+} from '@vytches-ddd/policies';
+
+// Factory methods for common scenarios
+const transientFailurePolicy = PolicyRetryBehaviorFactory.forTransientFailures(
+  basePolicy,
+  3 // max attempts
+);
+
+const externalServicePolicy = PolicyRetryBehaviorFactory.forExternalServices(
+  basePolicy,
+  { maxAttempts: 5, baseDelay: 2000, maxDelay: 60000 }
+);
+
+// Custom retry logic
+const customRetryPolicy = PolicyRetryBehaviorFactory.withCustomLogic(
+  basePolicy,
+  violation => violation.severity === 'WARNING', // Only retry warnings
+  3,
+  1000
+);
+
+// Monitor retry metrics
+const metrics = retryPolicy.getRetryMetrics();
+console.log(
+  `Success rate: ${metrics.successfulEvaluations / metrics.totalAttempts}`
+);
+```
+
+### Policy Caching Behavior
+
+```typescript
+import {
+  PolicyCachingBehavior,
+  PolicyCachingBehaviorFactory,
+} from '@vytches-ddd/policies';
+
+// Simple TTL-based caching
+const cachedPolicy = PolicyCachingBehaviorFactory.withTTL(basePolicy, 30000); // 30 seconds
+
+// Custom key generation
+const customCachedPolicy = PolicyCachingBehavior.create(basePolicy, {
+  ttl: 60000,
+  keyGenerator: request => `${request.entity.id}_${request.context.userId}`,
+  namespace: 'payment-validation',
+  maxSize: 500,
+});
+
+// Cache with metrics
+const metricsPolicy = PolicyCachingBehaviorFactory.withMetrics(
+  basePolicy,
+  60000, // TTL
+  request => `custom_${request.entity.type}` // Custom key
+);
+```
+
+### Policy Temporal Behavior
+
+```typescript
+import {
+  PolicyTemporalBehavior,
+  PolicyTemporalBehaviorBuilder,
+  PolicyTemporalBehaviorFactory,
+} from '@vytches-ddd/policies';
+
+// Business hours policy
+const businessHoursPolicy = PolicyTemporalBehaviorFactory.forBusinessHours(
+  strictPolicy,
+  relaxedPolicy,
+  { start: '09:00', end: '17:00' }
+);
+
+// Working days vs weekends
+const workingDaysPolicy = PolicyTemporalBehaviorFactory.forWorkingDays(
+  businessPolicy,
+  weekendPolicy,
+  [1, 2, 3, 4, 5] // Monday to Friday
+);
+
+// Complex temporal builder
+const temporalPolicy = PolicyTemporalBehaviorBuilder.from(basePolicy)
+  .withBusinessHours('09:00', '17:00')
+  .withWorkingDays([1, 2, 3, 4, 5])
+  .withTimezone('America/New_York')
+  .duringBusinessHours(strictPolicy)
+  .duringAfterHours(relaxedPolicy)
+  .duringWeekends(weekendPolicy)
+  .withTemporalInfo(true) // Include timing info in results
+  .build();
+```
+
+### Behavior Composition
+
+```typescript
+// Chain multiple behaviors
+const composedPolicy = PolicyCachingBehavior.create(
+  PolicyRetryBehavior.create(
+    PolicyTemporalBehavior.create(basePolicy, temporalConfig),
+    retryConfig
+  ),
+  cacheConfig
+);
+
+// Execution order: Cache → Retry → Temporal → Base Policy
+const result = await composedPolicy.check(request);
+```
+
+### Backward Compatibility
+
+All policy behaviors maintain backward compatibility through aliases:
+
+```typescript
+// New naming (recommended)
+import { PolicyRetryBehavior } from '@vytches-ddd/policies';
+
+// Old naming (deprecated in v2.1)
+import { RetryPolicy, PolicyRetryDecorator } from '@vytches-ddd/policies';
+
+// All work identically
+const policy1 = PolicyRetryBehavior.create(basePolicy, config);
+const policy2 = RetryPolicy.create(basePolicy, config); // Same as above
+const policy3 = PolicyRetryDecorator.create(basePolicy, config); // Same as above
 ```
 
 ## Examples and Showcases

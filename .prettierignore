@@ -2,3 +2,5 @@
 templates/
 /.nx/cache
 /.nx/workspace-data
+.vscode
+.claude

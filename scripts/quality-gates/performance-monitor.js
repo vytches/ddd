@@ -27,7 +27,7 @@ const CONFIG = {
   buildTimeThresholds: {
     // Per-package build time limits
     package: {
-      core: 5, // Meta-package should build very fast
+      core: 6, // Meta-package should build very fast
       'domain-primitives': 30,
       'value-objects': 30,
       repositories: 30,

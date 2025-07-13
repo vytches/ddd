@@ -1,0 +1,55 @@
+name: Workflow Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate workflow syntax
+        run: |
+          echo "✅ Validating GitHub workflow files..."
+          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
+            if [ -f "$file" ]; then
+              echo "Checking $file"
+              # Basic YAML syntax check
+              python3 -c "
+              import yaml
+              import sys
+              try:
+                  with open('$file', 'r') as f:
+                      yaml.safe_load(f)
+                  print('✅ $file - Valid YAML')
+              except yaml.YAMLError as e:
+                  print('❌ $file - Invalid YAML:', e)
+                  sys.exit(1)
+              "
+            fi
+          done
+
+      - name: Check for required permissions
+        run: |
+          echo "✅ Checking workflow permissions..."
+          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
+            if [ -f "$file" ]; then
+              if ! grep -q "permissions:" "$file"; then
+                echo "⚠️ $file - Consider adding explicit permissions"
+              else
+                echo "✅ $file - Has permissions defined"
+              fi
+            fi
+          done

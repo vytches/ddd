@@ -13,6 +13,7 @@ const packageName = packageJson.name?.split('/')[1] || 'unknown';
 // Common dependencies that should be available in test environment
 const commonTestAliases = {
   '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
+  '@vytches-ddd/policies': resolve(__dirname, '../policies/src/index.ts'),
   '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
   '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
   '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
@@ -43,6 +44,7 @@ function getPackageDependencies(): Record<string, string> {
   // Higher-level packages (need core + specific dependencies)
   return {
     '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
+    '@vytches-ddd/policies': resolve(__dirname, '../policies/src/index.ts'),
     '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
     '@vytches-ddd/logging': commonTestAliases['@vytches-ddd/logging'],
     '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],

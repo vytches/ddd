@@ -3,8 +3,26 @@ name: CI
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".vscode/**"
+      - ".idea/**"
+      - "**/.DS_Store"
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".vscode/**"
+      - ".idea/**"
+      - "**/.DS_Store"
 
 permissions:
   contents: read
@@ -16,6 +34,8 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
+    # Skip CI for documentation-only commits
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
     strategy:
       matrix:
         node-version: [18.x, 20.x]
@@ -57,7 +77,20 @@ jobs:
             echo "NX_HEAD=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
+      - name: Check if formatting needed
+        id: check_format
+        run: |
+          # Check if any source files changed
+          if git diff --name-only ${{ env.NX_BASE }}...${{ env.NX_HEAD }} | grep -E '\.(ts|js|jsx|tsx|json|md)$' > /dev/null; then
+            echo "skip_format=false" >> $GITHUB_OUTPUT
+            echo "Source files changed, checking formatting"
+          else
+            echo "skip_format=true" >> $GITHUB_OUTPUT
+            echo "No source files changed, skipping format check"
+          fi
+
       - name: Check formatting
+        if: steps.check_format.outputs.skip_format == 'false'
         run: pnpm format:check
 
       - name: Lint affected projects
@@ -74,7 +107,20 @@ jobs:
       - name: Build affected projects
         run: pnpm nx affected --target=build --parallel=3
 
+      - name: Check if quality gates needed
+        id: check_gates
+        run: |
+          # Check if any code files changed (not just docs)
+          if pnpm nx affected --target=build --dry-run | grep -q "No projects"; then
+            echo "skip_gates=true" >> $GITHUB_OUTPUT
+            echo "No projects affected, skipping quality gates"
+          else
+            echo "skip_gates=false" >> $GITHUB_OUTPUT
+            echo "Projects affected, running quality gates"
+          fi
+
       - name: Run Quality Gates
+        if: steps.check_gates.outputs.skip_gates == 'false'
         run: node scripts/quality-gates/quality-gates.js --ci --parallel
         env:
           NODE_ENV: ci
@@ -91,7 +137,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,6 +166,7 @@ jobs:
 
   security:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

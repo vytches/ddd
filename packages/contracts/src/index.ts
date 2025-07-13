@@ -61,6 +61,7 @@ export type {
   IValidator,
   IValidationRule,
   ISpecification,
+  IAsyncSpecification,
 } from './validation';
 
 // Capabilities

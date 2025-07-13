@@ -10,3 +10,4 @@
 - [8. implement-enterprise-event-store-with-event-sourcing-support](0008-implement-enterprise-event-store-with-event-sourcing-support.md)
 - [9. implement-flexible-event-scheduling-system-with-adapter-pattern](0009-implement-flexible-event-scheduling-system-with-adapter-pattern.md)
 - [10. release-process-and-branching-strategy](0010-release-process-and-branching-strategy.md)
+- [11. ci-cd-optimization-with-smart-path-filtering](0011-ci-cd-optimization-with-smart-path-filtering.md)

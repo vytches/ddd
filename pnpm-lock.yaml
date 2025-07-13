@@ -418,6 +418,9 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
+      '@vytches-ddd/policies':
+        specifier: workspace:*
+        version: link:../policies
     devDependencies:
       typescript:
         specifier: ^5.0.0
@@ -572,6 +575,9 @@ importers:
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
+      '@vytches-ddd/utils':
+        specifier: workspace:*
+        version: link:../utils
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
