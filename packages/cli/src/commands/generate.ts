@@ -3,7 +3,7 @@
  * Generates all VytchesDDD components with intelligent templates
  */
 
-import { Command } from '../types';
+import type { Command } from '../types';
 import { Colors } from '../core/utils/colors';
 import { TemplateEngine } from '../core/engines/template-engine';
 import { PatternRegistry } from '../core/engines/pattern-registry';
@@ -31,6 +31,31 @@ interface DomainContextOptions {
 }
 
 /**
+ * Property definition
+ */
+interface PropertyDefinition {
+  name: string;
+  type: string;
+  optional: boolean;
+}
+
+/**
+ * Method definition
+ */
+interface MethodDefinition {
+  name: string;
+  description: string;
+}
+
+/**
+ * Event definition
+ */
+interface EventDefinition {
+  name: string;
+  description: string;
+}
+
+/**
  * Component generation options
  */
 interface GenerateOptions {
@@ -43,10 +68,10 @@ interface GenerateOptions {
   dryRun?: boolean;
   domain?: string;
   fullDomain?: boolean;
-  properties?: string[];
-  methods?: string[];
-  events?: string[];
-  [key: string]: any;
+  properties?: PropertyDefinition[];
+  methods?: MethodDefinition[];
+  events?: EventDefinition[];
+  [key: string]: unknown;
 }
 
 /**
@@ -60,47 +85,58 @@ export const generateCommand: Command = {
     {
       flags: '-t, --type <type>',
       description: 'Component type to generate',
-      choices: ['aggregate', 'entity', 'value-object', 'specification', 'policy', 'command', 'query', 'event', 'repository', 'domain-service']
+      choices: [
+        'aggregate',
+        'entity',
+        'value-object',
+        'specification',
+        'policy',
+        'command',
+        'query',
+        'event',
+        'repository',
+        'domain-service',
+      ],
     },
     {
       flags: '-n, --name <name>',
-      description: 'Component name'
+      description: 'Component name',
     },
     {
       flags: '-o, --output, --output-path <path>',
       description: 'Output directory path',
-      defaultValue: './src'
+      defaultValue: './src',
     },
     {
       flags: '-f, --framework <framework>',
       description: 'Target framework',
       choices: ['nestjs', 'express', 'fastify', 'standalone'],
-      defaultValue: 'standalone'
+      defaultValue: 'standalone',
     },
     {
       flags: '--interactive',
       description: 'Use interactive mode',
-      defaultValue: false
+      defaultValue: false,
     },
     {
       flags: '--with-tests',
       description: 'Generate tests',
-      defaultValue: true
+      defaultValue: true,
     },
     {
       flags: '--dry-run',
       description: 'Preview changes without creating files',
-      defaultValue: false
+      defaultValue: false,
     },
     {
       flags: '--domain <domain>',
-      description: 'Domain name for the component'
+      description: 'Domain name for the component',
     },
     {
       flags: '--full-domain',
       description: 'Generate complete domain context with all components',
-      defaultValue: false
-    }
+      defaultValue: false,
+    },
   ],
   examples: [
     'vytches-ddd generate --type aggregate --name Order',
@@ -110,11 +146,11 @@ export const generateCommand: Command = {
     'vytches-ddd generate --type specification --name OrderCanBeShipped',
     'vytches-ddd generate --domain ecommerce                 # Bulk component selection',
     'vytches-ddd generate --domain ecommerce --full-domain   # Complete domain context',
-    'vytches-ddd generate --type aggregate --name Order --output ./modules/order/src   # Custom output path'
+    'vytches-ddd generate --type aggregate --name Order --output ./modules/order/src   # Custom output path',
   ],
   action: async (args: string[], options: GenerateOptions) => {
     const startTime = Performance.now();
-    
+
     try {
       console.log(Colors.bold(Colors.cyan('🔧 VytchesDDD Component Generator')));
       console.log(Colors.dim('Generating enterprise-grade DDD components'));
@@ -122,7 +158,7 @@ export const generateCommand: Command = {
 
       // Initialize generator
       const generator = new ComponentGenerator(options);
-      
+
       // Check if this is a domain context generation request
       if (options.domain && options.fullDomain) {
         await generator.runDomainContextMode();
@@ -138,21 +174,22 @@ export const generateCommand: Command = {
       const duration = Performance.since(startTime);
       console.log('');
       console.log(Colors.success(`✅ Generation completed in ${duration.toFixed(1)}ms`));
-
     } catch (error) {
       console.error('');
-      console.error(Colors.error(`❌ Generation failed: ${error instanceof Error ? error.message : error}`));
-      
+      console.error(
+        Colors.error(`❌ Generation failed: ${error instanceof Error ? error.message : error}`)
+      );
+
       if (error instanceof ValidationError) {
         console.error(Colors.dim('Validation errors:'));
         error.details.forEach(detail => {
           console.error(`  ${Colors.error('•')} ${detail}`);
         });
       }
-      
+
       process.exit(1);
     }
-  }
+  },
 };
 
 /**
@@ -177,7 +214,7 @@ class ComponentGenerator {
     // Start chat session
     this.sessionId = await chatHistory.startSession('Component Generation', {
       mode: 'interactive',
-      startedAt: new Date().toISOString()
+      startedAt: new Date().toISOString(),
     });
 
     console.log(Colors.info('🎯 Interactive Component Generation'));
@@ -185,57 +222,63 @@ class ComponentGenerator {
 
     // Get component type
     if (!this.options.type) {
-      this.options.type = await promptForChoice(
-        'Select component type:',
-        [
-          { name: 'Aggregate Root', value: 'aggregate', description: 'Core domain aggregate with business rules' },
-          { name: 'Entity', value: 'entity', description: 'Domain entity with identity' },
-          { name: 'Value Object', value: 'value-object', description: 'Immutable value object' },
-          { name: 'Specification', value: 'specification', description: 'Business rule specification' },
-          { name: 'Policy', value: 'policy', description: 'Business policy with rules' },
-          { name: 'Command', value: 'command', description: 'CQRS command with handler' },
-          { name: 'Query', value: 'query', description: 'CQRS query with handler' },
-          { name: 'Domain Event', value: 'event', description: 'Domain event for side effects' },
-          { name: 'Repository', value: 'repository', description: 'Repository pattern implementation' },
-          { name: 'Domain Service', value: 'domain-service', description: 'Domain service for complex logic' }
-        ]
-      );
+      this.options.type = await promptForChoice('Select component type:', [
+        {
+          name: 'Aggregate Root',
+          value: 'aggregate',
+          description: 'Core domain aggregate with business rules',
+        },
+        { name: 'Entity', value: 'entity', description: 'Domain entity with identity' },
+        { name: 'Value Object', value: 'value-object', description: 'Immutable value object' },
+        {
+          name: 'Specification',
+          value: 'specification',
+          description: 'Business rule specification',
+        },
+        { name: 'Policy', value: 'policy', description: 'Business policy with rules' },
+        { name: 'Command', value: 'command', description: 'CQRS command with handler' },
+        { name: 'Query', value: 'query', description: 'CQRS query with handler' },
+        { name: 'Domain Event', value: 'event', description: 'Domain event for side effects' },
+        {
+          name: 'Repository',
+          value: 'repository',
+          description: 'Repository pattern implementation',
+        },
+        {
+          name: 'Domain Service',
+          value: 'domain-service',
+          description: 'Domain service for complex logic',
+        },
+      ]);
     }
 
     // Get component name
     if (!this.options.name) {
-      this.options.name = await promptForInput(
-        `Enter ${this.options.type} name:`,
-        {
-          validate: (input: string) => {
-            if (!input.trim()) return 'Component name is required';
-            if (!/^[A-Za-z][A-Za-z0-9]*$/.test(input)) return 'Name must be valid identifier';
-            return true;
-          }
-        }
-      );
+      this.options.name = await promptForInput(`Enter ${this.options.type} name:`, {
+        validate: (input: string) => {
+          if (!input.trim()) return 'Component name is required';
+          if (!/^[A-Za-z][A-Za-z0-9]*$/.test(input)) return 'Name must be valid identifier';
+          return true;
+        },
+      });
     }
 
     // Get domain (optional)
     if (!this.options.domain) {
-      this.options.domain = await promptForInput(
-        'Enter domain name (optional):',
-        { required: false }
-      );
+      this.options.domain = await promptForInput('Enter domain name (optional):', {
+        required: false,
+      });
     }
 
     // Component-specific questions
     await this.askComponentSpecificQuestions();
 
     // Ask for output directory
-    const outputPath = await promptForInput(
-      'Enter output directory path (default: ./src):',
-      { 
-        required: false,
-        defaultValue: this.options.output || './src'
-      }
-    );
-    
+    const outputPath = await promptForInput('Enter output directory path (default: ./src):', {
+      required: false,
+      defaultValue: this.options.output || './src',
+    });
+
     // Update output path
     this.options.output = outputPath || './src';
 
@@ -250,7 +293,7 @@ class ComponentGenerator {
     // Show summary and confirm
     await this.showGenerationSummary();
     const proceed = await promptForConfirmation('Generate component?', true);
-    
+
     if (!proceed) {
       console.log(Colors.yellow('Generation cancelled'));
       return;
@@ -283,20 +326,14 @@ class ComponentGenerator {
     console.log('');
 
     // Aggregate name is required
-    const aggregateName = await promptForInput(
-      'Enter aggregate root name:',
-      { required: true }
-    );
+    const aggregateName = await promptForInput('Enter aggregate root name:', { required: true });
 
     // Ask for output directory
-    const outputPath = await promptForInput(
-      'Enter output directory path (default: ./src):',
-      { 
-        required: false,
-        defaultValue: this.options.output || './src'
-      }
-    );
-    
+    const outputPath = await promptForInput('Enter output directory path (default: ./src):', {
+      required: false,
+      defaultValue: this.options.output || './src',
+    });
+
     // Update output path
     this.options.output = outputPath || './src';
 
@@ -315,19 +352,16 @@ class ComponentGenerator {
     console.log('');
     console.log(Colors.dim('Examples: 1,2,5,8 or 1-5 or all'));
 
-    const selection = await promptForInput(
-      'Your selection:',
-      { required: true }
-    );
+    const selection = await promptForInput('Your selection:', { required: true });
 
     const componentTypes = this.parseComponentSelection(selection);
-    
+
     console.log('');
     console.log(Colors.info(`Selected: ${componentTypes.join(', ')}`));
     console.log('');
 
     const domainOptions = await this.buildDomainOptionsFromSelection(
-      this.options.domain!,
+      this.options.domain || 'Default',
       aggregateName,
       componentTypes
     );
@@ -335,7 +369,7 @@ class ComponentGenerator {
     // Show summary and generate
     await this.showSelectionSummary(domainOptions);
     const proceed = await promptForConfirmation('Generate selected components?', true);
-    
+
     if (proceed) {
       await this.generateDomainContext(domainOptions);
     } else {
@@ -349,7 +383,7 @@ class ComponentGenerator {
   private parseComponentSelection(selection: string): string[] {
     const componentMap: Record<number, string> = {
       1: 'Entity',
-      2: 'Value Object', 
+      2: 'Value Object',
       3: 'Specification',
       4: 'Policy',
       5: 'Command',
@@ -357,7 +391,7 @@ class ComponentGenerator {
       7: 'Domain Event',
       8: 'Repository',
       9: 'Domain Service',
-      10: 'ACL Components'
+      10: 'ACL Components',
     };
 
     if (selection.toLowerCase() === 'all') {
@@ -411,7 +445,7 @@ class ComponentGenerator {
       includeRepository: componentTypes.includes('Repository'),
       includeACL: componentTypes.includes('ACL Components'),
       includeDomainService: componentTypes.includes('Domain Service'),
-      includeSpecs: componentTypes.includes('Specification')
+      includeSpecs: componentTypes.includes('Specification'),
     };
 
     // Auto-generate names based on aggregate for selected components
@@ -449,7 +483,7 @@ class ComponentGenerator {
     console.log(`  ${Colors.cyan('Domain:')} ${options.domainName}`);
     console.log(`  ${Colors.cyan('Aggregate:')} ${options.aggregateName}`);
     console.log(`  ${Colors.cyan('Output Path:')} ${this.options.output}`);
-    
+
     if (options.entityNames.length > 0) {
       console.log(`  ${Colors.cyan('Entities:')} ${options.entityNames.join(', ')}`);
     }
@@ -487,28 +521,23 @@ class ComponentGenerator {
     console.log(Colors.info('🏗️  Complete Domain Context Generation'));
     console.log('');
 
-    const domainName = this.options.domain!;
-    
+    const domainName = this.options.domain || 'Default';
+
     // Interactive prompts for domain context
-    const aggregateName = await promptForInput(
-      'Enter aggregate root name:',
-      { required: true }
-    );
+    const aggregateName = await promptForInput('Enter aggregate root name:', { required: true });
 
     // Ask for output directory
-    const outputPath = await promptForInput(
-      'Enter output directory path (default: ./src):',
-      { 
-        required: false,
-        defaultValue: this.options.output || './src'
-      }
-    );
-    
+    const outputPath = await promptForInput('Enter output directory path (default: ./src):', {
+      required: false,
+      defaultValue: this.options.output || './src',
+    });
+
     // Update output path
     this.options.output = outputPath || './src';
 
     const entityNames: string[] = [];
     console.log(Colors.info('Define entities (press Enter with empty name to finish):'));
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const entityName = await promptForInput('Entity name:', { required: false });
       if (!entityName) break;
@@ -517,6 +546,7 @@ class ComponentGenerator {
 
     const valueObjects: string[] = [];
     console.log(Colors.info('Define value objects (press Enter with empty name to finish):'));
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const voName = await promptForInput('Value Object name:', { required: false });
       if (!voName) break;
@@ -525,6 +555,7 @@ class ComponentGenerator {
 
     const events: string[] = [];
     console.log(Colors.info('Define domain events (press Enter with empty name to finish):'));
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const eventName = await promptForInput('Event name:', { required: false });
       if (!eventName) break;
@@ -533,6 +564,7 @@ class ComponentGenerator {
 
     const commands: string[] = [];
     console.log(Colors.info('Define commands (press Enter with empty name to finish):'));
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const commandName = await promptForInput('Command name:', { required: false });
       if (!commandName) break;
@@ -541,6 +573,7 @@ class ComponentGenerator {
 
     const queries: string[] = [];
     console.log(Colors.info('Define queries (press Enter with empty name to finish):'));
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const queryName = await promptForInput('Query name:', { required: false });
       if (!queryName) break;
@@ -563,7 +596,7 @@ class ComponentGenerator {
       includeRepository,
       includeACL,
       includeDomainService,
-      includeSpecs
+      includeSpecs,
     };
 
     // Show summary
@@ -572,10 +605,16 @@ class ComponentGenerator {
     console.log('');
     console.log(`  ${Colors.cyan('Domain:')} ${domainName}`);
     console.log(`  ${Colors.cyan('Aggregate:')} ${aggregateName}`);
-    console.log(`  ${Colors.cyan('Entities:')} ${entityNames.length > 0 ? entityNames.join(', ') : 'None'}`);
-    console.log(`  ${Colors.cyan('Value Objects:')} ${valueObjects.length > 0 ? valueObjects.join(', ') : 'None'}`);
+    console.log(
+      `  ${Colors.cyan('Entities:')} ${entityNames.length > 0 ? entityNames.join(', ') : 'None'}`
+    );
+    console.log(
+      `  ${Colors.cyan('Value Objects:')} ${valueObjects.length > 0 ? valueObjects.join(', ') : 'None'}`
+    );
     console.log(`  ${Colors.cyan('Events:')} ${events.length > 0 ? events.join(', ') : 'None'}`);
-    console.log(`  ${Colors.cyan('Commands:')} ${commands.length > 0 ? commands.join(', ') : 'None'}`);
+    console.log(
+      `  ${Colors.cyan('Commands:')} ${commands.length > 0 ? commands.join(', ') : 'None'}`
+    );
     console.log(`  ${Colors.cyan('Queries:')} ${queries.length > 0 ? queries.join(', ') : 'None'}`);
     console.log(`  ${Colors.cyan('Repository:')} ${includeRepository ? 'Yes' : 'No'}`);
     console.log(`  ${Colors.cyan('Domain Service:')} ${includeDomainService ? 'Yes' : 'No'}`);
@@ -584,7 +623,7 @@ class ComponentGenerator {
     console.log('');
 
     const proceed = await promptForConfirmation('Generate complete domain context?', true);
-    
+
     if (!proceed) {
       console.log(Colors.yellow('Domain context generation cancelled'));
       return;
@@ -635,7 +674,7 @@ class ComponentGenerator {
    */
   private async askAggregateQuestions(): Promise<void> {
     console.log(Colors.info('📊 Aggregate Configuration'));
-    
+
     // Properties
     const properties = await this.collectProperties();
     this.options.properties = properties;
@@ -657,7 +696,7 @@ class ComponentGenerator {
    */
   private async askEntityQuestions(): Promise<void> {
     console.log(Colors.info('🏢 Entity Configuration'));
-    
+
     const properties = await this.collectProperties();
     this.options.properties = properties;
 
@@ -670,7 +709,7 @@ class ComponentGenerator {
    */
   private async askValueObjectQuestions(): Promise<void> {
     console.log(Colors.info('💎 Value Object Configuration'));
-    
+
     const properties = await this.collectProperties();
     this.options.properties = properties;
 
@@ -684,7 +723,7 @@ class ComponentGenerator {
    */
   private async askSpecificationQuestions(): Promise<void> {
     console.log(Colors.info('📋 Specification Configuration'));
-    
+
     const description = await promptForInput('Description (optional):', { required: false });
     this.options.description = description || '';
 
@@ -697,7 +736,7 @@ class ComponentGenerator {
    */
   private async askPolicyQuestions(): Promise<void> {
     console.log(Colors.info('📜 Policy Configuration'));
-    
+
     const description = await promptForInput('Enter policy description:');
     this.options.description = description;
 
@@ -710,7 +749,7 @@ class ComponentGenerator {
    */
   private async askCqrsQuestions(): Promise<void> {
     console.log(Colors.info(`⚡ ${this.options.type?.toUpperCase()} Configuration`));
-    
+
     const description = await promptForInput(`Description (optional):`, { required: false });
     this.options.description = description || '';
 
@@ -727,21 +766,18 @@ class ComponentGenerator {
    */
   private async askEventQuestions(): Promise<void> {
     console.log(Colors.info('⚡ Event Configuration'));
-    
+
     const description = await promptForInput('Enter event description:');
     this.options.description = description;
 
     const properties = await this.collectProperties();
     this.options.properties = properties;
 
-    const eventType = await promptForChoice(
-      'Event type:',
-      [
-        { name: 'Domain Event', value: 'domain' },
-        { name: 'Integration Event', value: 'integration' },
-        { name: 'Application Event', value: 'application' }
-      ]
-    );
+    const eventType = await promptForChoice('Event type:', [
+      { name: 'Domain Event', value: 'domain' },
+      { name: 'Integration Event', value: 'integration' },
+      { name: 'Application Event', value: 'application' },
+    ]);
     this.options.eventType = eventType;
   }
 
@@ -750,7 +786,7 @@ class ComponentGenerator {
    */
   private async askRepositoryQuestions(): Promise<void> {
     console.log(Colors.info('🏪 Repository Configuration'));
-    
+
     const entityName = await promptForInput('Enter entity name this repository manages:');
     this.options.entityName = entityName;
 
@@ -766,7 +802,7 @@ class ComponentGenerator {
    */
   private async askDomainServiceQuestions(): Promise<void> {
     console.log(Colors.info('🔧 Domain Service Configuration'));
-    
+
     const description = await promptForInput('Enter service description:');
     this.options.description = description;
 
@@ -780,95 +816,97 @@ class ComponentGenerator {
   /**
    * Collect properties from user (simplified)
    */
-  private async collectProperties(): Promise<any[]> {
-    const properties = [];
-    
+  private async collectProperties(): Promise<PropertyDefinition[]> {
+    const properties: PropertyDefinition[] = [];
+
     console.log(Colors.info('Define properties (press Enter with empty name to finish):'));
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const name = await promptForInput('Property name:', { required: false });
       if (!name) break;
-      
-      const type = await promptForInput('Type (optional):', { required: false, defaultValue: 'string' });
-      const description = await promptForInput('Description (optional):', { required: false });
-      
-      properties.push({ 
-        name, 
-        type: type || 'string', 
-        required: true, // Default to required 
-        description: description || '' 
+
+      const type = await promptForInput('Type (optional):', {
+        required: false,
+        defaultValue: 'string',
+      });
+
+      properties.push({
+        name,
+        type: type || 'string',
+        optional: false, // Default to required
       });
     }
-    
+
     return properties;
   }
 
   /**
    * Collect methods from user (simplified)
    */
-  private async collectMethods(): Promise<any[]> {
-    const methods = [];
-    
+  private async collectMethods(): Promise<MethodDefinition[]> {
+    const methods: MethodDefinition[] = [];
+
     console.log(Colors.info('Define methods (press Enter with empty name to finish):'));
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const name = await promptForInput('Method name:', { required: false });
       if (!name) break;
-      
+
       const description = await promptForInput('Description (optional):', { required: false });
-      
-      methods.push({ 
-        name, 
-        description: description || '', 
-        returnType: 'void', 
-        parameters: [] 
+
+      methods.push({
+        name,
+        description: description || '',
       });
     }
-    
+
     return methods;
   }
 
   /**
    * Collect events from user (simplified)
    */
-  private async collectEvents(): Promise<any[]> {
-    const events = [];
-    
+  private async collectEvents(): Promise<EventDefinition[]> {
+    const events: EventDefinition[] = [];
+
     console.log(Colors.info('Define domain events (press Enter with empty name to finish):'));
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const name = await promptForInput('Event name:', { required: false });
       if (!name) break;
-      
+
       const description = await promptForInput('Description (optional):', { required: false });
-      
+
       events.push({ name, description: description || '' });
     }
-    
+
     return events;
   }
 
   /**
    * Collect rules from user (simplified)
    */
-  private async collectRules(): Promise<any[]> {
-    const rules = [];
-    
+  private async collectRules(): Promise<Array<{ name: string; description: string }>> {
+    const rules: Array<{ name: string; description: string }> = [];
+
     console.log(Colors.info('Define business rules (press Enter with empty name to finish):'));
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const name = await promptForInput('Rule name:', { required: false });
       if (!name) break;
-      
+
       const description = await promptForInput('Description (optional):', { required: false });
-      
-      rules.push({ 
-        name, 
-        description: description || '', 
-        expression: `// TODO: Implement ${name} logic` 
+
+      rules.push({
+        name,
+        description: description || '',
       });
     }
-    
+
     return rules;
   }
 
@@ -879,26 +917,26 @@ class ComponentGenerator {
     console.log('');
     console.log(Colors.bold('📋 Generation Summary'));
     console.log('');
-    
+
     console.log(`  ${Colors.cyan('Type:')} ${this.options.type}`);
     console.log(`  ${Colors.cyan('Name:')} ${this.options.name}`);
     console.log(`  ${Colors.cyan('Domain:')} ${this.options.domain || 'Default'}`);
     console.log(`  ${Colors.cyan('Framework:')} ${this.options.framework}`);
     console.log(`  ${Colors.cyan('Output Path:')} ${this.options.output}`);
     console.log(`  ${Colors.cyan('Tests:')} ${this.options.withTests ? 'Yes' : 'No'}`);
-    
+
     if (this.options.properties?.length) {
       console.log(`  ${Colors.cyan('Properties:')} ${this.options.properties.length}`);
     }
-    
+
     if (this.options.methods?.length) {
       console.log(`  ${Colors.cyan('Methods:')} ${this.options.methods.length}`);
     }
-    
+
     if (this.options.events?.length) {
       console.log(`  ${Colors.cyan('Events:')} ${this.options.events.length}`);
     }
-    
+
     console.log('');
   }
 
@@ -907,19 +945,19 @@ class ComponentGenerator {
    */
   private validateOptions(): void {
     const errors: string[] = [];
-    
+
     if (!this.options.type) {
       errors.push('Component type is required');
     }
-    
+
     if (!this.options.name) {
       errors.push('Component name is required');
     }
-    
+
     if (this.options.name && !/^[A-Za-z][A-Za-z0-9]*$/.test(this.options.name)) {
       errors.push('Component name must be a valid identifier');
     }
-    
+
     if (errors.length > 0) {
       throw new ValidationError('Invalid options', errors);
     }
@@ -930,16 +968,16 @@ class ComponentGenerator {
    */
   private async generateComponent(): Promise<void> {
     console.log(Colors.info(`🔨 Generating ${this.options.type}...`));
-    
+
     // Load appropriate template
     await this.loadTemplates();
-    
+
     // Prepare template context
     const context = this.prepareTemplateContext();
-    
+
     // Generate files
     const files = await this.generateFiles(context);
-    
+
     if (this.options.dryRun) {
       console.log(Colors.yellow('🔍 Dry run mode - files that would be generated:'));
       files.forEach(file => {
@@ -950,9 +988,9 @@ class ComponentGenerator {
       for (const file of files) {
         await this.writeFile(file);
       }
-      
+
       console.log(Colors.success(`✅ Generated ${files.length} files`));
-      
+
       // Show next steps
       this.showNextSteps();
     }
@@ -965,16 +1003,16 @@ class ComponentGenerator {
     // For ES modules, we need to use import.meta.url to get the current file path
     const currentFile = new URL(import.meta.url).pathname;
     const currentDir = FileSystem.getDirectoryName(currentFile);
-    
+
     // Find templates directory - check multiple possible locations
     const possibleTemplateDirs = [
-      FileSystem.joinPath(currentDir, '../templates'),        // Source: src/commands/../templates
-      FileSystem.joinPath(currentDir, '../../templates'),     // Dist: dist/commands/../../templates
-      FileSystem.joinPath(process.cwd(), 'templates'),        // Current working directory
+      FileSystem.joinPath(currentDir, '../templates'), // Source: src/commands/../templates
+      FileSystem.joinPath(currentDir, '../../templates'), // Dist: dist/commands/../../templates
+      FileSystem.joinPath(process.cwd(), 'templates'), // Current working directory
       FileSystem.joinPath(process.cwd(), 'node_modules/@vytches-ddd/cli/templates'),
       FileSystem.joinPath(process.cwd(), 'node_modules/@vytches-ddd/cli/dist/templates'),
     ];
-    
+
     let templatesDir: string | null = null;
     for (const dir of possibleTemplateDirs) {
       if (FileSystem.exists(dir) && FileSystem.isDirectory(dir)) {
@@ -982,26 +1020,30 @@ class ComponentGenerator {
         break;
       }
     }
-    
+
     if (!templatesDir) {
-      throw new Error(`Templates directory not found. Searched paths: ${possibleTemplateDirs.join(', ')}`);
+      throw new Error(
+        `Templates directory not found. Searched paths: ${possibleTemplateDirs.join(', ')}`
+      );
     }
-    
+
     try {
       await this.templateEngine.loadTemplatesFromDirectory(templatesDir);
     } catch (error) {
-      throw new Error(`Failed to load templates from ${templatesDir}: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to load templates from ${templatesDir}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
   /**
    * Prepare template context
    */
-  private prepareTemplateContext(): any {
-    const name = this.options.name!;
+  private prepareTemplateContext(): Record<string, unknown> {
+    const name = this.options.name || 'DefaultName';
     const domain = this.options.domain || 'Default';
-    const type = this.options.type!;
-    
+    const type = this.options.type || 'entity';
+
     // Base context for all components
     const baseContext = {
       name,
@@ -1022,7 +1064,7 @@ class ComponentGenerator {
     // Type-specific context enhancement
     return {
       ...baseContext,
-      ...this.getTypeSpecificContext(type, name, baseContext)
+      ...this.getTypeSpecificContext(type, name, baseContext),
     };
   }
 
@@ -1031,25 +1073,29 @@ class ComponentGenerator {
    */
   private getImportsForType(type: string): string[] {
     const importMap: Record<string, string[]> = {
-      'specification': ['ISpecification'],
-      'aggregate': ['AggregateRoot', 'EntityId', 'DomainEvent'],
-      'entity': ['Entity', 'EntityId'],
+      specification: ['ISpecification'],
+      aggregate: ['AggregateRoot', 'EntityId', 'DomainEvent'],
+      entity: ['Entity', 'EntityId'],
       'value-object': ['ValueObject'],
-      'policy': ['Policy', 'PolicyBuilder'],
-      'command': ['ICommand', 'ICommandHandler'],
-      'query': ['IQuery', 'IQueryHandler'],
-      'event': ['DomainEvent', 'IExtendedDomainEvent'],
-      'repository': ['IRepository', 'IBaseRepository'],
-      'domain-service': ['DomainService']
+      policy: ['Policy', 'PolicyBuilder'],
+      command: ['ICommand', 'ICommandHandler'],
+      query: ['IQuery', 'IQueryHandler'],
+      event: ['DomainEvent', 'IExtendedDomainEvent'],
+      repository: ['IRepository', 'IBaseRepository'],
+      'domain-service': ['DomainService'],
     };
-    
+
     return importMap[type] || [];
   }
 
   /**
    * Get type-specific context properties
    */
-  private getTypeSpecificContext(type: string, name: string, baseContext: any): any {
+  private getTypeSpecificContext(
+    type: string,
+    name: string,
+    _baseContext: Record<string, unknown>
+  ): Record<string, unknown> {
     switch (type) {
       case 'specification':
         return this.getSpecificationContext(name);
@@ -1078,127 +1124,134 @@ class ComponentGenerator {
   /**
    * Specification-specific context
    */
-  private getSpecificationContext(name: string): any {
+  private getSpecificationContext(name: string): Record<string, unknown> {
     // Try to infer entity type from specification name
     const entityType = this.inferEntityTypeFromName(name);
-    
+
     return {
       entityType,
       isAsync: this.options.isAsync || false,
       hasComplexLogic: false,
-      validationRules: this.options.properties?.map((p: any) => ({
-        property: p.name || p,
-        rule: `validate ${p.name || p}`,
-        type: p.type || 'string'
-      })) || []
+      validationRules:
+        this.options.properties?.map((p: unknown) => {
+          const prop = p as { name?: string; type?: string } | string;
+          const name = typeof prop === 'string' ? prop : prop.name || '';
+          const type = typeof prop === 'string' ? 'string' : prop.type || 'string';
+          return {
+            property: name,
+            rule: `validate ${name}`,
+            type,
+          };
+        }) || [],
     };
   }
 
   /**
    * Aggregate-specific context
    */
-  private getAggregateContext(): any {
+  private getAggregateContext(): Record<string, unknown> {
     return {
-      entityType: this.options.entityType || this.toPascalCase(this.options.name!),
+      entityType: this.options.entityType || this.toPascalCase(this.options.name || 'DefaultName'),
       properties: this.options.properties || [],
       methods: this.options.methods || [],
       events: this.options.events || [],
       hasInvariants: true,
       hasBusinessRules: true,
       identityType: 'EntityId',
-      rootEntityName: this.toPascalCase(this.options.name!)
+      rootEntityName: this.toPascalCase(this.options.name || 'DefaultName'),
     };
   }
 
   /**
    * Entity-specific context
    */
-  private getEntityContext(): any {
+  private getEntityContext(): Record<string, unknown> {
     return {
       properties: this.options.properties || [],
       methods: this.options.methods || [],
       identityType: 'EntityId',
       hasValidation: this.options.hasValidation !== false,
-      hasBusinessLogic: true
+      hasBusinessLogic: true,
     };
   }
 
   /**
    * Value Object-specific context
    */
-  private getValueObjectContext(): any {
+  private getValueObjectContext(): Record<string, unknown> {
     return {
       properties: this.options.properties || [],
       hasValidation: true,
       hasComparison: true,
       isImmutable: true,
       hasEquality: true,
-      hasHashCode: true
+      hasHashCode: true,
     };
   }
 
   /**
    * Policy-specific context
    */
-  private getPolicyContext(): any {
+  private getPolicyContext(): Record<string, unknown> {
     return {
       rules: this.options.rules || [],
       hasConditions: true,
       hasActions: true,
       severity: 'ERROR',
-      entityType: this.options.entityType || 'any'
+      entityType: this.options.entityType || 'unknown',
     };
   }
 
   /**
    * CQRS-specific context
    */
-  private getCqrsContext(type: string): any {
+  private getCqrsContext(type: string): Record<string, unknown> {
     return {
       properties: this.options.properties || [],
       hasValidation: this.options.hasValidation !== false,
       hasResult: type === 'command',
-      returnType: type === 'command' ? 'void' : 'any',
-      isAsync: true
+      returnType: type === 'command' ? 'void' : 'unknown',
+      isAsync: true,
     };
   }
 
   /**
    * Event-specific context
    */
-  private getEventContext(): any {
+  private getEventContext(): Record<string, unknown> {
     return {
       properties: this.options.properties || [],
       eventType: this.options.eventType || 'domain',
-      aggregateId: `${this.toPascalCase(this.options.name!)}Id`,
+      aggregateId: `${this.toPascalCase(this.options.name || 'DefaultName')}Id`,
       occurredOn: true,
-      version: 1
+      version: 1,
     };
   }
 
   /**
    * Repository-specific context
    */
-  private getRepositoryContext(): any {
-    const entityName = this.options.entityName || this.options.name!.replace(/Repository$/, '');
+  private getRepositoryContext(): Record<string, unknown> {
+    const entityName =
+      this.options.entityName || (this.options.name || 'DefaultName').replace(/Repository$/, '');
     return {
-      entityName: this.toPascalCase(entityName),
-      entityType: this.toPascalCase(entityName),
+      entityName: this.toPascalCase(String(entityName)),
+      entityType: this.toPascalCase(String(entityName)),
       hasUnitOfWork: this.options.hasUnitOfWork !== false,
       hasSpecification: this.options.hasSpecification !== false,
-      identityType: 'EntityId'
+      identityType: 'EntityId',
     };
   }
 
   /**
    * Domain Service-specific context
    */
-  private getDomainServiceContext(): any {
+  private getDomainServiceContext(): Record<string, unknown> {
     return {
       methods: this.options.methods || [],
       hasDependencies: this.options.hasDependencies !== false,
       isStateless: true,
-      hasBusinessLogic: true
+      hasBusinessLogic: true,
     };
   }
 
@@ -1212,77 +1265,85 @@ class ComponentGenerator {
       .replace(/Spec$/i, '')
       .replace(/Validation$/i, '')
       .replace(/Rule$/i, '');
-    
+
     return entityName || 'T';
   }
 
   /**
    * Generate files
    */
-  private async generateFiles(context: any): Promise<any[]> {
-    const files = [];
-    const type = this.options.type!;
-    
+  private async generateFiles(
+    context: Record<string, unknown>
+  ): Promise<Array<{ path: string; content: string }>> {
+    const files: Array<{ path: string; content: string }> = [];
+    const type = this.options.type || 'entity';
+
     // Validate template existence
     const mainTemplateName = `${type}.ts`;
     if (!this.templateEngine.hasTemplate(mainTemplateName)) {
       const availableTemplates = this.templateEngine.getTemplateNames().join(', ');
-      throw new Error(`Template not found: ${mainTemplateName}. Available templates: ${availableTemplates}`);
+      throw new Error(
+        `Template not found: ${mainTemplateName}. Available templates: ${availableTemplates}`
+      );
     }
-    
+
     // Main component file
     const mainFile = {
       path: this.getMainFilePath(context),
-      content: this.templateEngine.render(mainTemplateName, context)
+      content: this.templateEngine.render(mainTemplateName, context),
     };
     files.push(mainFile);
-    
+
     // Test file
     if (this.options.withTests) {
       const testTemplateName = `${type}.test.ts`;
       if (this.templateEngine.hasTemplate(testTemplateName)) {
         const testFile = {
           path: this.getTestFilePath(context),
-          content: this.templateEngine.render(testTemplateName, context)
+          content: this.templateEngine.render(testTemplateName, context),
         };
         files.push(testFile);
       } else {
-        console.log(Colors.yellow(`⚠️  Test template not found: ${testTemplateName}. Skipping test generation.`));
+        console.log(
+          Colors.yellow(
+            `⚠️  Test template not found: ${testTemplateName}. Skipping test generation.`
+          )
+        );
       }
     }
-    
+
     // Framework-specific files
     if (this.options.framework !== 'standalone') {
       const frameworkFiles = await this.generateFrameworkFiles(context);
       files.push(...frameworkFiles);
     }
-    
+
     return files;
   }
 
   /**
    * Get main file path with proper naming conventions
    */
-  private getMainFilePath(context: any): string {
-    const type = this.options.type!;
+  private getMainFilePath(context: Record<string, unknown>): string {
+    const type = this.options.type || 'entity';
     const output = this.options.output || './src';
-    
+
     const typeFolder = this.getTypeFolder(type);
-    const fileName = this.getFormattedFileName(context.fileName, type);
-    
+    const fileName = this.getFormattedFileName(String(context.fileName), type);
+
     return FileSystem.joinPath(output, typeFolder, fileName);
   }
 
   /**
    * Get test file path with proper naming conventions
    */
-  private getTestFilePath(context: any): string {
-    const type = this.options.type!;
+  private getTestFilePath(context: Record<string, unknown>): string {
+    const type = this.options.type || 'entity';
     const output = this.options.output || './src';
-    
+
     const typeFolder = this.getTypeFolder(type);
-    const fileName = this.getFormattedFileName(context.fileName, type, true);
-    
+    const fileName = this.getFormattedFileName(String(context.fileName), type, true);
+
     return FileSystem.joinPath(output, '../tests', typeFolder, fileName);
   }
 
@@ -1291,28 +1352,28 @@ class ComponentGenerator {
    */
   private getTypeFolder(type: string): string {
     const folderMap: Record<string, string> = {
-      'aggregate': 'domain/aggregates',
-      'entity': 'domain/entities',
+      aggregate: 'domain/aggregates',
+      entity: 'domain/entities',
       'value-object': 'domain/value-objects',
-      'specification': 'domain/specifications',
-      'policy': 'domain/policies',
-      'command': 'application/commands',
-      'query': 'application/queries',
-      'event': 'domain/events',
-      'repository': 'infrastructure/repositories',
-      'domain-service': 'domain/services'
+      specification: 'domain/specifications',
+      policy: 'domain/policies',
+      command: 'application/commands',
+      query: 'application/queries',
+      event: 'domain/events',
+      repository: 'infrastructure/repositories',
+      'domain-service': 'domain/services',
     };
-    
+
     return folderMap[type] || 'domain';
   }
 
   /**
    * Get formatted file name with enterprise naming conventions
    */
-  private getFormattedFileName(baseName: string, type: string, isTest: boolean = false): string {
+  private getFormattedFileName(baseName: string, type: string, isTest = false): string {
     // Enterprise naming conventions:
     // - Aggregates: customer.aggregate.ts
-    // - Entities: customer.entity.ts  
+    // - Entities: customer.entity.ts
     // - Value Objects: email-address.value-object.ts
     // - Specifications: customer.specification.ts
     // - Policies: customer.policy.ts
@@ -1322,30 +1383,30 @@ class ComponentGenerator {
     // - Repositories: customer.repository.ts
     // - Domain Services: customer.service.ts
     // - Tests: customer.aggregate.test.ts
-    
+
     const typeMap: Record<string, string> = {
-      'aggregate': 'aggregate',
-      'entity': 'entity',
+      aggregate: 'aggregate',
+      entity: 'entity',
       'value-object': 'value-object',
-      'specification': 'specification',
-      'policy': 'policy',
-      'command': 'command',
-      'query': 'query',
-      'event': 'event',
-      'repository': 'repository',
-      'domain-service': 'service'
+      specification: 'specification',
+      policy: 'policy',
+      command: 'command',
+      query: 'query',
+      event: 'event',
+      repository: 'repository',
+      'domain-service': 'service',
     };
-    
+
     const typeSuffix = typeMap[type] || type;
     const testSuffix = isTest ? '.test' : '';
-    
+
     return `${baseName}.${typeSuffix}${testSuffix}.ts`;
   }
 
   /**
    * Get file extension with proper naming conventions
    */
-  private getFileExtension(type: string): string {
+  private getFileExtension(_type: string): string {
     // All TypeScript files use .ts extension
     return 'ts';
   }
@@ -1353,59 +1414,64 @@ class ComponentGenerator {
   /**
    * Generate framework-specific files
    */
-  private async generateFrameworkFiles(context: any): Promise<any[]> {
-    const files = [];
-    
+  private async generateFrameworkFiles(
+    context: Record<string, unknown>
+  ): Promise<Array<{ path: string; content: string }>> {
+    const files: Array<{ path: string; content: string }> = [];
+
     // NestJS-specific files
     if (this.options.framework === 'nestjs') {
       if (this.options.type === 'command' || this.options.type === 'query') {
         const handlerFile = {
           path: this.getHandlerFilePath(context),
-          content: this.templateEngine.render(`${this.options.type}-handler.nestjs.template`, context)
+          content: this.templateEngine.render(
+            `${this.options.type}-handler.nestjs.template`,
+            context
+          ),
         };
         files.push(handlerFile);
       }
-      
+
       if (this.options.type === 'repository') {
         const moduleFile = {
           path: this.getModuleFilePath(context),
-          content: this.templateEngine.render('repository.module.nestjs.template', context)
+          content: this.templateEngine.render('repository.module.nestjs.template', context),
         };
         files.push(moduleFile);
       }
     }
-    
+
     return files;
   }
 
   /**
    * Get handler file path
    */
-  private getHandlerFilePath(context: any): string {
+  private getHandlerFilePath(context: Record<string, unknown>): string {
     const output = this.options.output || './src';
     const fileName = `${context.fileName}.handler.ts`;
-    
+
     return FileSystem.joinPath(output, 'application/handlers', fileName);
   }
 
   /**
    * Get module file path
    */
-  private getModuleFilePath(context: any): string {
+  private getModuleFilePath(context: Record<string, unknown>): string {
     const output = this.options.output || './src';
     const fileName = `${context.fileName}.module.ts`;
-    
+
     return FileSystem.joinPath(output, 'infrastructure/modules', fileName);
   }
 
   /**
    * Write file
    */
-  private async writeFile(file: any): Promise<void> {
+  private async writeFile(file: { path: string; content: string }): Promise<void> {
     const dir = FileSystem.getDirectoryName(file.path);
     await FileSystem.createDirectory(dir);
     await FileSystem.writeFile(file.path, file.content);
-    
+
     console.log(`  ${Colors.green('✓')} ${file.path}`);
   }
 
@@ -1425,7 +1491,7 @@ class ComponentGenerator {
 
   // Helper methods for string transformations
   private toCamelCase(str: string): string {
-    return str.replace(/[_-\s]+(.)?/g, (_, char) => char ? char.toUpperCase() : '');
+    return str.replace(/[_-\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ''));
   }
 
   private toPascalCase(str: string): string {
@@ -1434,9 +1500,10 @@ class ComponentGenerator {
   }
 
   private toKebabCase(str: string): string {
-    return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
-              .replace(/[_\s]+/g, '-')
-              .replace(/^-+|-+$/g, '');
+    return str
+      .replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
+      .replace(/[_\s]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   /**
@@ -1444,28 +1511,28 @@ class ComponentGenerator {
    */
   private getFormattedClassName(name: string, type: string): string {
     const baseName = this.toPascalCase(name);
-    
+
     // Enterprise DDD naming conventions for class names
     const classSuffixMap: Record<string, string> = {
-      'aggregate': '',           // CustomerAggregate -> Customer (extends AggregateRoot)
-      'entity': '',             // CustomerEntity -> Customer (extends Entity)
-      'value-object': '',       // EmailAddress -> EmailAddress (extends ValueObject)
-      'specification': 'Specification',  // CustomerSpecification -> CustomerSpecification
-      'policy': 'Policy',       // CustomerPolicy -> CustomerPolicy
-      'command': 'Command',     // CreateCustomer -> CreateCustomerCommand
-      'query': 'Query',         // GetCustomer -> GetCustomerQuery
-      'event': 'Event',         // CustomerCreated -> CustomerCreatedEvent
-      'repository': 'Repository', // CustomerRepository -> CustomerRepository
-      'domain-service': 'Service'  // CustomerService -> CustomerService
+      aggregate: '', // CustomerAggregate -> Customer (extends AggregateRoot)
+      entity: '', // CustomerEntity -> Customer (extends Entity)
+      'value-object': '', // EmailAddress -> EmailAddress (extends ValueObject)
+      specification: 'Specification', // CustomerSpecification -> CustomerSpecification
+      policy: 'Policy', // CustomerPolicy -> CustomerPolicy
+      command: 'Command', // CreateCustomer -> CreateCustomerCommand
+      query: 'Query', // GetCustomer -> GetCustomerQuery
+      event: 'Event', // CustomerCreated -> CustomerCreatedEvent
+      repository: 'Repository', // CustomerRepository -> CustomerRepository
+      'domain-service': 'Service', // CustomerService -> CustomerService
     };
-    
+
     const suffix = classSuffixMap[type];
-    
+
     // Handle special cases where the name already contains the suffix
     if (suffix && !baseName.endsWith(suffix)) {
       return `${baseName}${suffix}`;
     }
-    
+
     return baseName;
   }
 
@@ -1476,8 +1543,8 @@ class ComponentGenerator {
     console.log(Colors.info(`🏗️  Generating complete domain context: ${domainOptions.domainName}`));
     console.log('');
 
-    const files: any[] = [];
-    
+    const files: Array<{ path: string; content: string }> = [];
+
     // Set domain context for all components
     this.options.domain = domainOptions.domainName;
     this.options.output = this.options.output || './src';
@@ -1485,19 +1552,19 @@ class ComponentGenerator {
     try {
       // Load templates first
       await this.loadTemplates();
-      
+
       // 1. Generate Aggregate Root
       console.log(Colors.info('📊 Generating Aggregate Root...'));
       this.options.type = 'aggregate';
       this.options.name = domainOptions.aggregateName;
-      files.push(...await this.generateFiles(this.prepareTemplateContext()));
+      files.push(...(await this.generateFiles(this.prepareTemplateContext())));
 
       // 2. Generate Entities
       for (const entityName of domainOptions.entityNames) {
         console.log(Colors.info(`🏢 Generating Entity: ${entityName}...`));
         this.options.type = 'entity';
         this.options.name = entityName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 3. Generate Value Objects
@@ -1505,7 +1572,7 @@ class ComponentGenerator {
         console.log(Colors.info(`💎 Generating Value Object: ${voName}...`));
         this.options.type = 'value-object';
         this.options.name = voName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 4. Generate Domain Events
@@ -1513,7 +1580,7 @@ class ComponentGenerator {
         console.log(Colors.info(`⚡ Generating Domain Event: ${eventName}...`));
         this.options.type = 'event';
         this.options.name = eventName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 5. Generate Commands
@@ -1521,7 +1588,7 @@ class ComponentGenerator {
         console.log(Colors.info(`⚡ Generating Command: ${commandName}...`));
         this.options.type = 'command';
         this.options.name = commandName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 6. Generate Queries
@@ -1529,7 +1596,7 @@ class ComponentGenerator {
         console.log(Colors.info(`🔍 Generating Query: ${queryName}...`));
         this.options.type = 'query';
         this.options.name = queryName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 7. Generate Repository (if requested)
@@ -1538,7 +1605,7 @@ class ComponentGenerator {
         this.options.type = 'repository';
         this.options.name = `${domainOptions.aggregateName}Repository`;
         this.options.entityName = domainOptions.aggregateName;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 8. Generate Domain Service (if requested)
@@ -1546,7 +1613,7 @@ class ComponentGenerator {
         console.log(Colors.info(`🔧 Generating Domain Service...`));
         this.options.type = 'domain-service';
         this.options.name = `${domainOptions.domainName}Service`;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // 9. Generate Specifications (if requested)
@@ -1557,7 +1624,7 @@ class ComponentGenerator {
         for (const componentName of componentsToSpec) {
           this.options.type = 'specification';
           this.options.name = `${componentName}Specification`;
-          files.push(...await this.generateFiles(this.prepareTemplateContext()));
+          files.push(...(await this.generateFiles(this.prepareTemplateContext())));
         }
       }
 
@@ -1567,7 +1634,7 @@ class ComponentGenerator {
         // ACL Adapter
         this.options.type = 'domain-service'; // Use domain service template for ACL
         this.options.name = `${domainOptions.domainName}ACLAdapter`;
-        files.push(...await this.generateFiles(this.prepareTemplateContext()));
+        files.push(...(await this.generateFiles(this.prepareTemplateContext())));
       }
 
       // Write all files
@@ -1581,16 +1648,21 @@ class ComponentGenerator {
 
       // Summary
       console.log('');
-      console.log(Colors.success(`✅ Generated complete domain context: ${domainOptions.domainName}`));
+      console.log(
+        Colors.success(`✅ Generated complete domain context: ${domainOptions.domainName}`)
+      );
       console.log(Colors.info(`📊 Total files: ${files.length}`));
       console.log('');
-      
+
       // Show structure
       this.showDomainStructure(domainOptions, files);
-      
     } catch (error) {
       console.error('');
-      console.error(Colors.error(`❌ Domain context generation failed: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(
+          `❌ Domain context generation failed: ${error instanceof Error ? error.message : error}`
+        )
+      );
       throw error;
     }
   }
@@ -1598,20 +1670,23 @@ class ComponentGenerator {
   /**
    * Show generated domain structure
    */
-  private showDomainStructure(domainOptions: DomainContextOptions, files: any[]): void {
+  private showDomainStructure(
+    domainOptions: DomainContextOptions,
+    _files: Array<{ path: string; content: string }>
+  ): void {
     console.log(Colors.bold('🏗️  Generated Domain Structure:'));
     console.log('');
     console.log(`📁 ${domainOptions.domainName}/`);
     console.log(`├── 📊 ${domainOptions.aggregateName}Aggregate`);
-    
+
     domainOptions.entityNames.forEach(entity => {
       console.log(`├── 🏢 ${entity}Entity`);
     });
-    
+
     domainOptions.valueObjects.forEach(vo => {
       console.log(`├── 💎 ${vo}ValueObject`);
     });
-    
+
     domainOptions.events.forEach(event => {
       console.log(`├── ⚡ ${event}Event`);
     });

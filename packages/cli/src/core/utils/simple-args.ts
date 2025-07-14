@@ -17,26 +17,26 @@ export class SimpleArgsParser {
   static parse(argv: string[]): ParsedArgs {
     // Skip node and script path
     const args = argv.slice(2);
-    
+
     // Debug what we're parsing (remove in production)
     // console.log(`🔍 Debug parsing - Raw argv:`, argv);
     // console.log(`🔍 Debug parsing - Args after slice:`, args);
-    
+
     if (args.length === 0) {
       return { args: [], options: {} };
     }
 
     const command = args[0] && !args[0].startsWith('-') ? args[0] : undefined;
     const remaining = command ? args.slice(1) : args;
-    
+
     const options: Record<string, any> = {};
     const positional: string[] = [];
 
     for (let i = 0; i < remaining.length; i++) {
       const arg = remaining[i];
-      
+
       if (!arg) continue;
-      
+
       if (arg.startsWith('--')) {
         if (arg.includes('=')) {
           // --key=value
@@ -48,10 +48,10 @@ export class SimpleArgsParser {
           // --key [value]
           const key = arg.substring(2);
           const nextArg = remaining[i + 1];
-          
+
           // Handle component shortcuts and regular flags
           const result = this.handleComponentShortcuts(key, nextArg);
-          
+
           // Special handling for component shortcuts with name
           if (result.key === 'componentWithName') {
             options.type = result.value.type;
@@ -59,7 +59,7 @@ export class SimpleArgsParser {
           } else {
             options[this.toCamelCase(result.key)] = result.value;
           }
-          
+
           if (result.skipNext) {
             i++; // Skip next arg
           }
@@ -68,7 +68,7 @@ export class SimpleArgsParser {
         // -f [value]
         const key = arg.substring(1);
         const nextArg = remaining[i + 1];
-        
+
         if (nextArg && !nextArg.startsWith('-')) {
           // -f value
           options[this.expandShortFlag(key)] = this.parseValue(nextArg);
@@ -86,7 +86,7 @@ export class SimpleArgsParser {
     return {
       command,
       args: positional,
-      options
+      options,
     };
   }
 
@@ -102,36 +102,39 @@ export class SimpleArgsParser {
    */
   private static expandShortFlag(flag: string): string {
     const shortFlags: Record<string, string> = {
-      't': 'type',
-      'n': 'name',
-      'o': 'output',
-      'f': 'framework',
-      'd': 'debug',
-      'c': 'config',
-      'h': 'help',
-      'v': 'version'
+      t: 'type',
+      n: 'name',
+      o: 'output',
+      f: 'framework',
+      d: 'debug',
+      c: 'config',
+      h: 'help',
+      v: 'version',
     };
-    
+
     return shortFlags[flag] || flag;
   }
-  
+
   /**
    * Handle component type shortcuts like --specification
    */
-  private static handleComponentShortcuts(key: string, nextArg?: string): { key: string; value: any; skipNext: boolean } {
+  private static handleComponentShortcuts(
+    key: string,
+    nextArg?: string
+  ): { key: string; value: any; skipNext: boolean } {
     const componentShortcuts: Record<string, string> = {
-      'specification': 'specification',
-      'aggregate': 'aggregate',
-      'entity': 'entity',
+      specification: 'specification',
+      aggregate: 'aggregate',
+      entity: 'entity',
       'value-object': 'value-object',
-      'policy': 'policy',
-      'command': 'command',
-      'query': 'query',
-      'event': 'event',
-      'repository': 'repository',
-      'domain-service': 'domain-service'
+      policy: 'policy',
+      command: 'command',
+      query: 'query',
+      event: 'event',
+      repository: 'repository',
+      'domain-service': 'domain-service',
     };
-    
+
     if (componentShortcuts[key]) {
       // If next arg looks like a name (not a flag), treat it as name
       if (nextArg && !nextArg.startsWith('-')) {
@@ -139,20 +142,20 @@ export class SimpleArgsParser {
         return {
           key: 'componentWithName',
           value: { type: componentShortcuts[key], name: nextArg },
-          skipNext: true
+          skipNext: true,
         };
       }
       return {
         key: 'type',
         value: componentShortcuts[key],
-        skipNext: false
+        skipNext: false,
       };
     }
-    
+
     return {
       key,
       value: nextArg && !nextArg.startsWith('-') ? this.parseValue(nextArg) : true,
-      skipNext: !!(nextArg && !nextArg.startsWith('-'))
+      skipNext: !!(nextArg && !nextArg.startsWith('-')),
     };
   }
 
@@ -163,11 +166,11 @@ export class SimpleArgsParser {
     // Boolean
     if (value === 'true') return true;
     if (value === 'false') return false;
-    
+
     // Number
     if (/^\d+$/.test(value)) return parseInt(value, 10);
     if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
-    
+
     // String
     return value;
   }
@@ -178,12 +181,14 @@ export class SimpleArgsParser {
   static showHelp(commandName?: string): void {
     console.log('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder');
     console.log('');
-    
+
     if (!commandName || commandName === 'generate') {
       console.log('Usage: vytches-ddd generate [options]');
       console.log('');
       console.log('Options:');
-      console.log('  -t, --type <type>        Component type (aggregate, entity, value-object, specification, etc.)');
+      console.log(
+        '  -t, --type <type>        Component type (aggregate, entity, value-object, specification, etc.)'
+      );
       console.log('  -n, --name <name>        Component name');
       console.log('  -o, --output <path>      Output directory (default: ./src)');
       console.log('  -f, --framework <fw>     Framework (nestjs, express, fastify, standalone)');
@@ -197,7 +202,7 @@ export class SimpleArgsParser {
       console.log('  vytches-ddd generate --type specification --name OrderValidation');
       console.log('  vytches-ddd generate --interactive');
     }
-    
+
     if (!commandName || commandName === 'domain') {
       console.log('Usage: vytches-ddd domain [options]');
       console.log('');

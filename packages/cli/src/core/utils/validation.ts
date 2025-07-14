@@ -61,14 +61,70 @@ export class Validation {
 
     // Check for reserved words
     const reservedWords = [
-      'abstract', 'arguments', 'await', 'boolean', 'break', 'byte', 'case', 'catch',
-      'char', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-      'double', 'else', 'enum', 'eval', 'export', 'extends', 'false', 'final',
-      'finally', 'float', 'for', 'function', 'goto', 'if', 'implements', 'import',
-      'in', 'instanceof', 'int', 'interface', 'let', 'long', 'native', 'new',
-      'null', 'package', 'private', 'protected', 'public', 'return', 'short',
-      'static', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws',
-      'transient', 'true', 'try', 'typeof', 'var', 'void', 'volatile', 'while', 'with', 'yield'
+      'abstract',
+      'arguments',
+      'await',
+      'boolean',
+      'break',
+      'byte',
+      'case',
+      'catch',
+      'char',
+      'class',
+      'const',
+      'continue',
+      'debugger',
+      'default',
+      'delete',
+      'do',
+      'double',
+      'else',
+      'enum',
+      'eval',
+      'export',
+      'extends',
+      'false',
+      'final',
+      'finally',
+      'float',
+      'for',
+      'function',
+      'goto',
+      'if',
+      'implements',
+      'import',
+      'in',
+      'instanceof',
+      'int',
+      'interface',
+      'let',
+      'long',
+      'native',
+      'new',
+      'null',
+      'package',
+      'private',
+      'protected',
+      'public',
+      'return',
+      'short',
+      'static',
+      'super',
+      'switch',
+      'synchronized',
+      'this',
+      'throw',
+      'throws',
+      'transient',
+      'true',
+      'try',
+      'typeof',
+      'var',
+      'void',
+      'volatile',
+      'while',
+      'with',
+      'yield',
     ];
 
     if (reservedWords.includes(name.toLowerCase())) {
@@ -164,8 +220,14 @@ export class Validation {
   static version(version: string): void {
     this.required(version, 'Version');
 
-    const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
-    this.pattern(version, semverPattern, 'Version must follow semantic versioning (e.g., 1.0.0)', 'Version');
+    const semverPattern =
+      /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+    this.pattern(
+      version,
+      semverPattern,
+      'Version must follow semantic versioning (e.g., 1.0.0)',
+      'Version'
+    );
   }
 
   /**
@@ -209,8 +271,8 @@ export class Validation {
     obj: T,
     requiredFields: Array<keyof T>
   ): void {
-    const missing = requiredFields.filter(field =>
-      obj[field] === undefined || obj[field] === null || obj[field] === ''
+    const missing = requiredFields.filter(
+      field => obj[field] === undefined || obj[field] === null || obj[field] === ''
     );
 
     if (missing.length > 0) {
@@ -237,17 +299,16 @@ export class Validation {
       if (error instanceof ValidationError) {
         throw error;
       }
-      throw new ValidationError(`Validation failed: ${error instanceof Error ? error.message : error}`);
+      throw new ValidationError(
+        `Validation failed: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
   /**
    * Create a validator function with custom message
    */
-  static custom<T>(
-    predicate: (value: T) => boolean,
-    message: string
-  ): (value: T) => void {
+  static custom<T>(predicate: (value: T) => boolean, message: string): (value: T) => void {
     return (value: T) => {
       if (!predicate(value)) {
         throw new ValidationError(message);
@@ -258,7 +319,10 @@ export class Validation {
   /**
    * Safe validation that returns result instead of throwing
    */
-  static safe<T>(value: T, validator: (value: T) => void): {
+  static safe<T>(
+    value: T,
+    validator: (value: T) => void
+  ): {
     isValid: boolean;
     error?: string;
   } {
@@ -268,7 +332,7 @@ export class Validation {
     } catch (error) {
       return {
         isValid: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

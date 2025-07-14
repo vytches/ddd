@@ -164,13 +164,17 @@ export class DomainAnalyzer {
     nlpAnalysis: NLPAnalysis,
     boundedContexts: BoundedContextMap
   ): Promise<DomainAnalysis> {
-
     const complexity = this.analyzeComplexity(nlpAnalysis, boundedContexts);
     const architecture = this.recommendArchitecture(nlpAnalysis, boundedContexts, complexity);
     const risks = this.assessRisks(nlpAnalysis, boundedContexts, complexity);
     const opportunities = this.identifyOpportunities(nlpAnalysis, boundedContexts);
     const metrics = this.calculateMetrics(nlpAnalysis, boundedContexts);
-    const recommendations = this.generateRecommendations(nlpAnalysis, boundedContexts, complexity, architecture);
+    const recommendations = this.generateRecommendations(
+      nlpAnalysis,
+      boundedContexts,
+      complexity,
+      architecture
+    );
 
     return {
       complexity,
@@ -178,7 +182,7 @@ export class DomainAnalyzer {
       risks,
       opportunities,
       metrics,
-      recommendations
+      recommendations,
     };
   }
 
@@ -196,7 +200,10 @@ export class DomainAnalyzer {
     factors.push(entityComplexity);
 
     // Relationship complexity
-    const relationshipComplexity = this.calculateRelationshipComplexity(nlpAnalysis, boundedContexts);
+    const relationshipComplexity = this.calculateRelationshipComplexity(
+      nlpAnalysis,
+      boundedContexts
+    );
     factors.push(relationshipComplexity);
 
     // Business rule complexity
@@ -212,7 +219,7 @@ export class DomainAnalyzer {
     factors.push(integrationComplexity);
 
     // Calculate overall complexity
-    const overall = factors.reduce((sum, factor) => sum + (factor.score * factor.weight), 0);
+    const overall = factors.reduce((sum, factor) => sum + factor.score * factor.weight, 0);
 
     // Complexity breakdown
     const breakdown = {
@@ -220,7 +227,7 @@ export class DomainAnalyzer {
       relationships: relationshipComplexity.score,
       businessRules: businessRuleComplexity.score,
       processes: processComplexity.score,
-      integrations: integrationComplexity.score
+      integrations: integrationComplexity.score,
     };
 
     // Classification
@@ -234,7 +241,7 @@ export class DomainAnalyzer {
       factors,
       breakdown,
       classification,
-      reasoning
+      reasoning,
     };
   }
 
@@ -262,7 +269,9 @@ export class DomainAnalyzer {
     const evidence = [
       `${entityCount} entities identified`,
       `Distributed across ${contextCount} contexts`,
-      contextCount > 0 ? `Average ${Math.round(entityCount / contextCount)} entities per context` : 'No context organization'
+      contextCount > 0
+        ? `Average ${Math.round(entityCount / contextCount)} entities per context`
+        : 'No context organization',
     ];
 
     return {
@@ -271,7 +280,7 @@ export class DomainAnalyzer {
       weight: 0.25,
       impact: score * 0.25,
       description: 'Complexity from domain entities and their organization',
-      evidence
+      evidence,
     };
   }
 
@@ -291,7 +300,7 @@ export class DomainAnalyzer {
     const evidence = [
       `${relationshipCount} entity relationships`,
       `${contextRelationships} context relationships`,
-      `Relationship density: ${relationshipCount > 0 ? (relationshipCount / nlpAnalysis.entities.length).toFixed(2) : '0'}`
+      `Relationship density: ${relationshipCount > 0 ? (relationshipCount / nlpAnalysis.entities.length).toFixed(2) : '0'}`,
     ];
 
     return {
@@ -300,7 +309,7 @@ export class DomainAnalyzer {
       weight: 0.2,
       impact: score * 0.2,
       description: 'Complexity from entity and context relationships',
-      evidence
+      evidence,
     };
   }
 
@@ -309,7 +318,9 @@ export class DomainAnalyzer {
    */
   private calculateBusinessRuleComplexity(nlpAnalysis: NLPAnalysis): ComplexityFactor {
     const ruleCount = nlpAnalysis.businessRules.length;
-    const highPriorityRules = nlpAnalysis.businessRules.filter(rule => rule.priority === 'high').length;
+    const highPriorityRules = nlpAnalysis.businessRules.filter(
+      rule => rule.priority === 'high'
+    ).length;
 
     let score = Math.min(ruleCount * 0.08, 0.4);
     score += highPriorityRules * 0.05; // Extra weight for high priority rules
@@ -317,7 +328,7 @@ export class DomainAnalyzer {
     const evidence = [
       `${ruleCount} business rules identified`,
       `${highPriorityRules} high-priority rules`,
-      `Rule types: ${[...new Set(nlpAnalysis.businessRules.map(r => r.type))].join(', ')}`
+      `Rule types: ${[...new Set(nlpAnalysis.businessRules.map(r => r.type))].join(', ')}`,
     ];
 
     return {
@@ -326,7 +337,7 @@ export class DomainAnalyzer {
       weight: 0.25,
       impact: score * 0.25,
       description: 'Complexity from business rules and constraints',
-      evidence
+      evidence,
     };
   }
 
@@ -338,10 +349,11 @@ export class DomainAnalyzer {
     boundedContexts: BoundedContextMap
   ): ComplexityFactor {
     const processCount = nlpAnalysis.processes.length;
-    const longRunningProcesses = nlpAnalysis.processes.filter(process =>
-      process.toLowerCase().includes('workflow') ||
-      process.toLowerCase().includes('orchestrat') ||
-      process.toLowerCase().includes('saga')
+    const longRunningProcesses = nlpAnalysis.processes.filter(
+      process =>
+        process.toLowerCase().includes('workflow') ||
+        process.toLowerCase().includes('orchestrat') ||
+        process.toLowerCase().includes('saga')
     ).length;
 
     let score = Math.min(processCount * 0.04, 0.3);
@@ -350,7 +362,7 @@ export class DomainAnalyzer {
     const evidence = [
       `${processCount} business processes`,
       `${longRunningProcesses} complex/long-running processes`,
-      `Process distribution across ${boundedContexts.contexts.length} contexts`
+      `Process distribution across ${boundedContexts.contexts.length} contexts`,
     ];
 
     return {
@@ -359,7 +371,7 @@ export class DomainAnalyzer {
       weight: 0.2,
       impact: score * 0.2,
       description: 'Complexity from business processes and workflows',
-      evidence
+      evidence,
     };
   }
 
@@ -394,8 +406,8 @@ export class DomainAnalyzer {
     }
 
     // Context relationships
-    const complexRelationships = boundedContexts.relationships.filter(rel =>
-      rel.type === 'anti-corruption-layer' || rel.integration === 'event-driven'
+    const complexRelationships = boundedContexts.relationships.filter(
+      rel => rel.type === 'anti-corruption-layer' || rel.integration === 'event-driven'
     ).length;
 
     if (complexRelationships > 0) {
@@ -413,7 +425,7 @@ export class DomainAnalyzer {
       weight: 0.1,
       impact: score * 0.1,
       description: 'Complexity from system integrations and context communication',
-      evidence
+      evidence,
     };
   }
 
@@ -440,9 +452,11 @@ export class DomainAnalyzer {
       .slice(0, 3)
       .map(f => f.name);
 
-    return `Domain classified as ${classification} with ${(overall * 100).toFixed(0)}% complexity. ` +
-           `Primary complexity drivers: ${topFactors.join(', ')}. ` +
-           `This suggests ${this.getArchitecturalGuidance(classification)}.`;
+    return (
+      `Domain classified as ${classification} with ${(overall * 100).toFixed(0)}% complexity. ` +
+      `Primary complexity drivers: ${topFactors.join(', ')}. ` +
+      `This suggests ${this.getArchitecturalGuidance(classification)}.`
+    );
   }
 
   /**
@@ -453,7 +467,7 @@ export class DomainAnalyzer {
       simple: 'a simple layered or hexagonal architecture',
       moderate: 'clean architecture with clear bounded contexts',
       complex: 'clean architecture with CQRS and event-driven patterns',
-      enterprise: 'microservices with full event sourcing and advanced patterns'
+      enterprise: 'microservices with full event sourcing and advanced patterns',
     };
 
     return (guidance[classification] || guidance.moderate) as string;
@@ -467,7 +481,10 @@ export class DomainAnalyzer {
     boundedContexts: BoundedContextMap,
     complexity: ComplexityAnalysis
   ): ArchitectureRecommendation {
-    const recommendations = this.getArchitectureRecommendations(complexity.classification, boundedContexts);
+    const recommendations = this.getArchitectureRecommendations(
+      complexity.classification,
+      boundedContexts
+    );
 
     return {
       primary: recommendations.primary,
@@ -475,7 +492,7 @@ export class DomainAnalyzer {
       reasoning: recommendations.reasoning,
       confidence: recommendations.confidence,
       considerations: recommendations.considerations,
-      migration: this.assessMigrationStrategy(nlpAnalysis, boundedContexts, complexity)
+      migration: this.assessMigrationStrategy(nlpAnalysis, boundedContexts, complexity),
     };
   }
 
@@ -501,7 +518,7 @@ export class DomainAnalyzer {
           alternatives: ['Layered Architecture', 'Clean Architecture'],
           reasoning: 'Simple domain with clear external dependencies',
           confidence: 0.9,
-          considerations: ['Easy to understand', 'Quick to implement', 'Good for small teams']
+          considerations: ['Easy to understand', 'Quick to implement', 'Good for small teams'],
         };
 
       case 'moderate':
@@ -510,7 +527,7 @@ export class DomainAnalyzer {
           alternatives: ['Hexagonal Architecture', 'Onion Architecture'],
           reasoning: 'Moderate complexity requires clear separation of concerns',
           confidence: 0.85,
-          considerations: ['Clear layer separation', 'Testable design', 'Scalable structure']
+          considerations: ['Clear layer separation', 'Testable design', 'Scalable structure'],
         };
 
       case 'complex':
@@ -519,7 +536,11 @@ export class DomainAnalyzer {
           alternatives: ['Microservices', 'Event-Driven Architecture'],
           reasoning: 'Complex domain with multiple contexts and advanced patterns',
           confidence: 0.8,
-          considerations: ['CQRS recommended', 'Event sourcing for audit', 'Advanced testing strategies']
+          considerations: [
+            'CQRS recommended',
+            'Event sourcing for audit',
+            'Advanced testing strategies',
+          ],
         };
 
       case 'enterprise':
@@ -528,7 +549,7 @@ export class DomainAnalyzer {
           alternatives: ['Event-Driven Architecture', 'Modular Monolith'],
           reasoning: 'Enterprise complexity requires distributed architecture',
           confidence: 0.75,
-          considerations: ['Service boundaries', 'Data consistency', 'Operational complexity']
+          considerations: ['Service boundaries', 'Data consistency', 'Operational complexity'],
         };
 
       default:
@@ -537,7 +558,7 @@ export class DomainAnalyzer {
           alternatives: ['Hexagonal Architecture'],
           reasoning: 'Default recommendation for unknown complexity',
           confidence: 0.6,
-          considerations: ['Flexible starting point', 'Can evolve with requirements']
+          considerations: ['Flexible starting point', 'Can evolve with requirements'],
         };
     }
   }
@@ -561,7 +582,7 @@ export class DomainAnalyzer {
       phases: this.generateMigrationPhases(boundedContexts, complexity),
       duration: this.estimateMigrationDuration(boundedContexts, complexity),
       risks: this.identifyMigrationRisks(complexity),
-      benefits: this.identifyMigrationBenefits(complexity)
+      benefits: this.identifyMigrationBenefits(complexity),
     };
   }
 
@@ -570,10 +591,12 @@ export class DomainAnalyzer {
    */
   private hasLegacySystemIndicators(nlpAnalysis: NLPAnalysis): boolean {
     const text = [...nlpAnalysis.entities, ...nlpAnalysis.processes].join(' ').toLowerCase();
-    return text.includes('legacy') ||
-           text.includes('migration') ||
-           text.includes('modernization') ||
-           text.includes('replace');
+    return (
+      text.includes('legacy') ||
+      text.includes('migration') ||
+      text.includes('modernization') ||
+      text.includes('replace')
+    );
   }
 
   /**
@@ -592,7 +615,7 @@ export class DomainAnalyzer {
       duration: '2-4 weeks',
       activities: ['Set up new architecture', 'Establish patterns', 'Create shared infrastructure'],
       deliverables: ['Project structure', 'Base patterns', 'CI/CD pipeline'],
-      risks: ['Team learning curve', 'Tooling challenges']
+      risks: ['Team learning curve', 'Tooling challenges'],
     });
 
     // Phase 2-N: Context migration
@@ -605,14 +628,14 @@ export class DomainAnalyzer {
           `Extract ${context.name} domain`,
           'Implement new patterns',
           'Create anti-corruption layer',
-          'Gradual traffic migration'
+          'Gradual traffic migration',
         ],
         deliverables: [
           `${context.name} bounded context`,
           'Integration tests',
-          'Performance benchmarks'
+          'Performance benchmarks',
         ],
-        risks: ['Data consistency', 'Integration complexity', 'Performance impact']
+        risks: ['Data consistency', 'Integration complexity', 'Performance impact'],
       });
     });
 
@@ -623,7 +646,7 @@ export class DomainAnalyzer {
       duration: '2-3 weeks',
       activities: ['Remove legacy code', 'Final testing', 'Documentation update'],
       deliverables: ['Clean codebase', 'Updated documentation', 'Migration report'],
-      risks: ['Missed dependencies', 'Knowledge loss']
+      risks: ['Missed dependencies', 'Knowledge loss'],
     });
 
     return phases;
@@ -641,7 +664,9 @@ export class DomainAnalyzer {
     const complexityMultiplier = complexity.overall; // Complexity factor
     const cleanupWeeks = 2; // Cleanup
 
-    const totalWeeks = Math.ceil((baseWeeks + contextWeeks) * (1 + complexityMultiplier) + cleanupWeeks);
+    const totalWeeks = Math.ceil(
+      (baseWeeks + contextWeeks) * (1 + complexityMultiplier) + cleanupWeeks
+    );
     const months = Math.ceil(totalWeeks / 4);
 
     return `${totalWeeks} weeks (${months} months)`;
@@ -655,7 +680,7 @@ export class DomainAnalyzer {
       'Data migration complexity',
       'Business disruption',
       'Team productivity impact',
-      'Integration challenges'
+      'Integration challenges',
     ];
 
     if (complexity.classification === 'enterprise') {
@@ -673,7 +698,7 @@ export class DomainAnalyzer {
       'Improved maintainability',
       'Better testability',
       'Cleaner architecture',
-      'Reduced technical debt'
+      'Reduced technical debt',
     ];
 
     if (complexity.classification === 'enterprise') {
@@ -702,7 +727,7 @@ export class DomainAnalyzer {
         impact: 'Increased development time and maintenance costs',
         likelihood: 0.7,
         mitigation: ['Incremental development', 'Strong testing strategy', 'Expert consultation'],
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       });
     }
 
@@ -714,8 +739,12 @@ export class DomainAnalyzer {
         description: 'Complex business rules may be misinterpreted or incorrectly implemented',
         impact: 'Business process failures and compliance issues',
         likelihood: 0.5,
-        mitigation: ['Business stakeholder involvement', 'Specification by example', 'Regular reviews'],
-        contexts: boundedContexts.contexts.filter(c => c.complexity > 0.6).map(c => c.name)
+        mitigation: [
+          'Business stakeholder involvement',
+          'Specification by example',
+          'Regular reviews',
+        ],
+        contexts: boundedContexts.contexts.filter(c => c.complexity > 0.6).map(c => c.name),
       });
     }
 
@@ -728,7 +757,7 @@ export class DomainAnalyzer {
         impact: 'Data breaches and compliance violations',
         likelihood: 0.6,
         mitigation: ['Security reviews', 'Penetration testing', 'Compliance audits'],
-        contexts: ['All contexts']
+        contexts: ['All contexts'],
       });
     }
 
@@ -745,8 +774,9 @@ export class DomainAnalyzer {
     const opportunities: DomainOpportunity[] = [];
 
     // Automation opportunities
-    const manualProcesses = nlpAnalysis.processes.filter(process =>
-      process.toLowerCase().includes('manual') || process.toLowerCase().includes('approve')
+    const manualProcesses = nlpAnalysis.processes.filter(
+      process =>
+        process.toLowerCase().includes('manual') || process.toLowerCase().includes('approve')
     );
 
     if (manualProcesses.length > 0) {
@@ -757,7 +787,7 @@ export class DomainAnalyzer {
         benefits: ['Reduced processing time', 'Lower error rates', 'Cost savings'],
         effort: 'medium',
         prerequisites: ['Business rule definition', 'Workflow modeling'],
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       });
     }
 
@@ -770,7 +800,7 @@ export class DomainAnalyzer {
         benefits: ['Loose coupling', 'Better scalability', 'Improved resilience'],
         effort: 'medium',
         prerequisites: ['Event modeling', 'Message infrastructure'],
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       });
     }
 
@@ -789,26 +819,26 @@ export class DomainAnalyzer {
         entities: nlpAnalysis.entities.length,
         aggregates: this.estimateAggregateCount(nlpAnalysis, boundedContexts),
         boundedContexts: boundedContexts.contexts.length,
-        relationships: nlpAnalysis.relationships.length
+        relationships: nlpAnalysis.relationships.length,
       },
       complexity: {
         cyclomaticComplexity: this.calculateCyclomaticComplexity(nlpAnalysis),
         cognitiveComplexity: this.calculateCognitiveComplexity(nlpAnalysis),
         businessRuleComplexity: nlpAnalysis.businessRules.length * 0.1,
-        integrationComplexity: boundedContexts.relationships.length * 0.1
+        integrationComplexity: boundedContexts.relationships.length * 0.1,
       },
       quality: {
         cohesion: this.calculateCohesion(boundedContexts),
         coupling: this.calculateCoupling(boundedContexts),
         abstraction: this.calculateAbstraction(nlpAnalysis),
-        stability: this.calculateStability(boundedContexts)
+        stability: this.calculateStability(boundedContexts),
       },
       business: {
         coreProcesses: boundedContexts.contexts.filter(c => c.type === 'core').length,
         supportingProcesses: boundedContexts.contexts.filter(c => c.type === 'supporting').length,
         genericProcesses: boundedContexts.contexts.filter(c => c.type === 'generic').length,
-        businessValue: this.calculateBusinessValue(nlpAnalysis, boundedContexts)
-      }
+        businessValue: this.calculateBusinessValue(nlpAnalysis, boundedContexts),
+      },
     };
   }
 
@@ -833,7 +863,7 @@ export class DomainAnalyzer {
       effort: complexity.classification === 'simple' ? 'low' : 'medium',
       timeline: '2-4 weeks',
       dependencies: ['Team training', 'Tooling setup'],
-      success_criteria: ['Clean layer separation', 'Dependency inversion', 'Test coverage > 80%']
+      success_criteria: ['Clean layer separation', 'Dependency inversion', 'Test coverage > 80%'],
     });
 
     // Pattern recommendations
@@ -847,7 +877,11 @@ export class DomainAnalyzer {
         effort: 'medium',
         timeline: '3-5 weeks',
         dependencies: ['Event infrastructure', 'Read model storage'],
-        success_criteria: ['Separate command/query models', 'Performance improvements', 'Scalable reads']
+        success_criteria: [
+          'Separate command/query models',
+          'Performance improvements',
+          'Scalable reads',
+        ],
       });
     }
 
@@ -861,14 +895,17 @@ export class DomainAnalyzer {
       effort: 'low',
       timeline: '1-2 weeks',
       dependencies: ['Testing framework selection', 'CI/CD pipeline'],
-      success_criteria: ['Test coverage > 90%', 'Automated testing', 'Fast feedback loops']
+      success_criteria: ['Test coverage > 90%', 'Automated testing', 'Fast feedback loops'],
     });
 
     return recommendations;
   }
 
   // Helper methods for metric calculations
-  private estimateAggregateCount(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): number {
+  private estimateAggregateCount(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): number {
     // Estimate one aggregate per 2-3 entities, distributed across contexts
     return Math.ceil(nlpAnalysis.entities.length / 2.5);
   }
@@ -885,16 +922,21 @@ export class DomainAnalyzer {
 
   private calculateCohesion(boundedContexts: BoundedContextMap): number {
     // Higher cohesion when contexts have focused responsibilities
-    const avgEntitiesPerContext = boundedContexts.contexts.length > 0 ?
-      boundedContexts.contexts.reduce((sum, ctx) => sum + ctx.entities.length, 0) / boundedContexts.contexts.length : 0;
+    const avgEntitiesPerContext =
+      boundedContexts.contexts.length > 0
+        ? boundedContexts.contexts.reduce((sum, ctx) => sum + ctx.entities.length, 0) /
+          boundedContexts.contexts.length
+        : 0;
 
-    return Math.max(0, 1 - (avgEntitiesPerContext / 10)); // Lower is better for cohesion
+    return Math.max(0, 1 - avgEntitiesPerContext / 10); // Lower is better for cohesion
   }
 
   private calculateCoupling(boundedContexts: BoundedContextMap): number {
     // Lower coupling when fewer relationships between contexts
-    const relationshipRatio = boundedContexts.contexts.length > 0 ?
-      boundedContexts.relationships.length / boundedContexts.contexts.length : 0;
+    const relationshipRatio =
+      boundedContexts.contexts.length > 0
+        ? boundedContexts.relationships.length / boundedContexts.contexts.length
+        : 0;
 
     return Math.min(1, relationshipRatio / 3); // Lower is better
   }
@@ -910,10 +952,13 @@ export class DomainAnalyzer {
     const dependentContexts = boundedContexts.relationships.length;
     const totalContexts = boundedContexts.contexts.length;
 
-    return totalContexts > 0 ? Math.max(0, 1 - (dependentContexts / totalContexts)) : 1;
+    return totalContexts > 0 ? Math.max(0, 1 - dependentContexts / totalContexts) : 1;
   }
 
-  private calculateBusinessValue(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): number {
+  private calculateBusinessValue(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): number {
     // Business value based on core processes and business rules
     const coreContexts = boundedContexts.contexts.filter(c => c.type === 'core').length;
     const totalContexts = boundedContexts.contexts.length;
@@ -923,6 +968,11 @@ export class DomainAnalyzer {
 
   private hasSecurityRequirements(nlpAnalysis: NLPAnalysis): boolean {
     const text = [...nlpAnalysis.entities, ...nlpAnalysis.processes].join(' ').toLowerCase();
-    return text.includes('security') || text.includes('auth') || text.includes('permission') || text.includes('encrypt');
+    return (
+      text.includes('security') ||
+      text.includes('auth') ||
+      text.includes('permission') ||
+      text.includes('encrypt')
+    );
   }
 }

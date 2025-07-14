@@ -4,7 +4,6 @@
  */
 
 import type { NLPAnalysis } from './natural-language-processor';
-import { Colors } from '../../core/utils/colors';
 
 /**
  * Bounded context definition
@@ -26,7 +25,12 @@ export interface BoundedContext {
 export interface ContextRelationship {
   upstream: string;
   downstream: string;
-  type: 'customer-supplier' | 'conformist' | 'anti-corruption-layer' | 'shared-kernel' | 'partnership';
+  type:
+    | 'customer-supplier'
+    | 'conformist'
+    | 'anti-corruption-layer'
+    | 'shared-kernel'
+    | 'partnership';
   description: string;
   integration: 'synchronous' | 'asynchronous' | 'batch' | 'event-driven';
 }
@@ -57,29 +61,53 @@ export interface ContextInsight {
 export class BoundedContextMapper {
   private domainPatterns: Record<string, string[]> = {
     'e-commerce': [
-      'Order Management', 'Customer Management', 'Inventory Management',
-      'Payment Processing', 'Shipping & Fulfillment', 'Product Catalog'
+      'Order Management',
+      'Customer Management',
+      'Inventory Management',
+      'Payment Processing',
+      'Shipping & Fulfillment',
+      'Product Catalog',
     ],
-    'banking': [
-      'Account Management', 'Transaction Processing', 'Loan Management',
-      'Payment Services', 'Compliance & Reporting', 'Customer Onboarding'
+    banking: [
+      'Account Management',
+      'Transaction Processing',
+      'Loan Management',
+      'Payment Services',
+      'Compliance & Reporting',
+      'Customer Onboarding',
     ],
-    'healthcare': [
-      'Patient Management', 'Appointment Scheduling', 'Medical Records',
-      'Billing & Insurance', 'Treatment Planning', 'Medication Management'
+    healthcare: [
+      'Patient Management',
+      'Appointment Scheduling',
+      'Medical Records',
+      'Billing & Insurance',
+      'Treatment Planning',
+      'Medication Management',
     ],
-    'education': [
-      'Student Management', 'Course Management', 'Assessment & Grading',
-      'Enrollment & Registration', 'Academic Planning', 'Resource Management'
+    education: [
+      'Student Management',
+      'Course Management',
+      'Assessment & Grading',
+      'Enrollment & Registration',
+      'Academic Planning',
+      'Resource Management',
     ],
-    'logistics': [
-      'Transportation Management', 'Warehouse Management', 'Route Planning',
-      'Package Tracking', 'Fleet Management', 'Customer Service'
+    logistics: [
+      'Transportation Management',
+      'Warehouse Management',
+      'Route Planning',
+      'Package Tracking',
+      'Fleet Management',
+      'Customer Service',
     ],
-    'insurance': [
-      'Policy Management', 'Claims Processing', 'Underwriting',
-      'Customer Management', 'Billing & Payments', 'Risk Assessment'
-    ]
+    insurance: [
+      'Policy Management',
+      'Claims Processing',
+      'Underwriting',
+      'Customer Management',
+      'Billing & Payments',
+      'Risk Assessment',
+    ],
   };
 
   /**
@@ -101,14 +129,17 @@ export class BoundedContextMapper {
     return {
       contexts,
       relationships,
-      insights
+      insights,
     };
   }
 
   /**
    * Validate provided bounded contexts against NLP analysis
    */
-  async validateContexts(providedContexts: string[], nlpAnalysis: NLPAnalysis): Promise<BoundedContextMap> {
+  async validateContexts(
+    providedContexts: string[],
+    nlpAnalysis: NLPAnalysis
+  ): Promise<BoundedContextMap> {
     // Create contexts from provided names
     const contexts = providedContexts.map(name => this.createContextFromName(name, nlpAnalysis));
 
@@ -124,7 +155,7 @@ export class BoundedContextMapper {
     return {
       contexts,
       relationships,
-      insights
+      insights,
     };
   }
 
@@ -154,8 +185,7 @@ export class BoundedContextMapper {
     });
 
     // Find highest scoring domain
-    const topDomain = Object.entries(domainScores)
-      .sort(([, a], [, b]) => b - a)[0];
+    const topDomain = Object.entries(domainScores).sort(([, a], [, b]) => b - a)[0];
 
     return topDomain && topDomain[1] > 0 ? topDomain[0] : 'generic';
   }
@@ -163,7 +193,10 @@ export class BoundedContextMapper {
   /**
    * Generate contexts from NLP analysis
    */
-  private async generateContextsFromAnalysis(nlpAnalysis: NLPAnalysis, domainType: string): Promise<BoundedContext[]> {
+  private async generateContextsFromAnalysis(
+    nlpAnalysis: NLPAnalysis,
+    domainType: string
+  ): Promise<BoundedContext[]> {
     const contexts: BoundedContext[] = [];
 
     // Strategy 1: Use domain patterns if detected
@@ -173,7 +206,10 @@ export class BoundedContextMapper {
     }
 
     // Strategy 2: Entity clustering
-    const entityClusters = this.clusterEntitiesByDomain(nlpAnalysis.entities, nlpAnalysis.relationships);
+    const entityClusters = this.clusterEntitiesByDomain(
+      nlpAnalysis.entities,
+      nlpAnalysis.relationships
+    );
     const clusterContexts = this.generateFromEntityClusters(entityClusters, nlpAnalysis);
     contexts.push(...clusterContexts);
 
@@ -199,7 +235,10 @@ export class BoundedContextMapper {
   /**
    * Generate contexts from domain patterns
    */
-  private generateFromDomainPatterns(domainType: string, nlpAnalysis: NLPAnalysis): BoundedContext[] {
+  private generateFromDomainPatterns(
+    domainType: string,
+    nlpAnalysis: NLPAnalysis
+  ): BoundedContext[] {
     const patterns = this.domainPatterns[domainType];
     const contexts: BoundedContext[] = [];
 
@@ -216,23 +255,26 @@ export class BoundedContextMapper {
   /**
    * Cluster entities by domain relationships
    */
-  private clusterEntitiesByDomain(entities: string[], relationships: any[]): string[][] {
+  private clusterEntitiesByDomain(
+    entities: string[],
+    _relationships: Array<{ from: string; to: string; type: string }>
+  ): string[][] {
     const clusters: string[][] = [];
     const used = new Set<string>();
 
     // Business domain clustering keywords
     const clusterKeywords: Record<string, string[]> = {
-      'customer': ['customer', 'user', 'client', 'account', 'profile', 'contact'],
-      'order': ['order', 'cart', 'item', 'product', 'inventory', 'catalog'],
-      'payment': ['payment', 'invoice', 'billing', 'transaction', 'charge', 'refund'],
-      'fulfillment': ['shipment', 'delivery', 'package', 'tracking', 'warehouse', 'logistics'],
-      'content': ['document', 'file', 'media', 'content', 'resource', 'asset'],
-      'communication': ['message', 'notification', 'email', 'sms', 'alert', 'communication'],
-      'analytics': ['report', 'analytics', 'metric', 'dashboard', 'insight', 'statistic']
+      customer: ['customer', 'user', 'client', 'account', 'profile', 'contact'],
+      order: ['order', 'cart', 'item', 'product', 'inventory', 'catalog'],
+      payment: ['payment', 'invoice', 'billing', 'transaction', 'charge', 'refund'],
+      fulfillment: ['shipment', 'delivery', 'package', 'tracking', 'warehouse', 'logistics'],
+      content: ['document', 'file', 'media', 'content', 'resource', 'asset'],
+      communication: ['message', 'notification', 'email', 'sms', 'alert', 'communication'],
+      analytics: ['report', 'analytics', 'metric', 'dashboard', 'insight', 'statistic'],
     };
 
     // Create clusters based on keywords
-    Object.entries(clusterKeywords).forEach(([clusterName, keywords]) => {
+    Object.entries(clusterKeywords).forEach(([_clusterName, keywords]) => {
       const cluster = entities.filter(entity => {
         const lowerEntity = entity.toLowerCase();
         return keywords.some(keyword => lowerEntity.includes(keyword)) && !used.has(entity);
@@ -256,28 +298,51 @@ export class BoundedContextMapper {
   /**
    * Group processes by domain area
    */
-  private groupProcessesByDomain(processes: string[], entities: string[]): Record<string, string[]> {
+  private groupProcessesByDomain(
+    processes: string[],
+    _entities: string[]
+  ): Record<string, string[]> {
     const groups: Record<string, string[]> = {
-      'management': [],
-      'processing': [],
-      'communication': [],
-      'analytics': [],
-      'security': [],
-      'general': []
+      management: [],
+      processing: [],
+      communication: [],
+      analytics: [],
+      security: [],
+      general: [],
     };
 
     processes.forEach(process => {
       const lowerProcess = process.toLowerCase();
 
-      if (lowerProcess.includes('manage') || lowerProcess.includes('admin') || lowerProcess.includes('configure')) {
+      if (
+        lowerProcess.includes('manage') ||
+        lowerProcess.includes('admin') ||
+        lowerProcess.includes('configure')
+      ) {
         groups?.['management']?.push(process);
-      } else if (lowerProcess.includes('process') || lowerProcess.includes('execute') || lowerProcess.includes('perform')) {
+      } else if (
+        lowerProcess.includes('process') ||
+        lowerProcess.includes('execute') ||
+        lowerProcess.includes('perform')
+      ) {
         groups?.['processing']?.push(process);
-      } else if (lowerProcess.includes('send') || lowerProcess.includes('notify') || lowerProcess.includes('communicate')) {
+      } else if (
+        lowerProcess.includes('send') ||
+        lowerProcess.includes('notify') ||
+        lowerProcess.includes('communicate')
+      ) {
         groups?.['communication']?.push(process);
-      } else if (lowerProcess.includes('analyze') || lowerProcess.includes('report') || lowerProcess.includes('calculate')) {
+      } else if (
+        lowerProcess.includes('analyze') ||
+        lowerProcess.includes('report') ||
+        lowerProcess.includes('calculate')
+      ) {
         groups?.['analytics']?.push(process);
-      } else if (lowerProcess.includes('authenticate') || lowerProcess.includes('authorize') || lowerProcess.includes('secure')) {
+      } else if (
+        lowerProcess.includes('authenticate') ||
+        lowerProcess.includes('authorize') ||
+        lowerProcess.includes('secure')
+      ) {
         groups?.['security']?.push(process);
       } else {
         groups?.['general']?.push(process);
@@ -297,8 +362,11 @@ export class BoundedContextMapper {
   /**
    * Generate contexts from entity clusters
    */
-  private generateFromEntityClusters(clusters: string[][], nlpAnalysis: NLPAnalysis): BoundedContext[] {
-    return clusters.map((cluster, index) => {
+  private generateFromEntityClusters(
+    clusters: string[][],
+    nlpAnalysis: NLPAnalysis
+  ): BoundedContext[] {
+    return clusters.map((cluster, _index) => {
       const contextName = this.generateContextNameFromEntities(cluster);
       return this.createContextFromEntities(contextName, cluster, nlpAnalysis);
     });
@@ -307,7 +375,10 @@ export class BoundedContextMapper {
   /**
    * Generate contexts from process groups
    */
-  private generateFromProcessGroups(groups: Record<string, string[]>, nlpAnalysis: NLPAnalysis): BoundedContext[] {
+  private generateFromProcessGroups(
+    groups: Record<string, string[]>,
+    nlpAnalysis: NLPAnalysis
+  ): BoundedContext[] {
     return Object.entries(groups).map(([groupName, processes]) => {
       const contextName = this.capitalizeWords(groupName);
       return this.createContextFromProcesses(contextName, processes, nlpAnalysis);
@@ -343,14 +414,18 @@ export class BoundedContextMapper {
       events: relatedEvents,
       responsibilities: this.generateResponsibilities(pattern, relatedEntities, relatedProcesses),
       type: 'core',
-      complexity: this.calculateContextComplexity(relatedEntities, relatedProcesses, relatedEvents)
+      complexity: this.calculateContextComplexity(relatedEntities, relatedProcesses, relatedEvents),
     };
   }
 
   /**
    * Create context from entities
    */
-  private createContextFromEntities(name: string, entities: string[], nlpAnalysis: NLPAnalysis): BoundedContext {
+  private createContextFromEntities(
+    name: string,
+    entities: string[],
+    nlpAnalysis: NLPAnalysis
+  ): BoundedContext {
     // Find related processes and events
     const relatedProcesses = nlpAnalysis.processes.filter(process =>
       entities.some(entity => process.toLowerCase().includes(entity.toLowerCase()))
@@ -368,14 +443,18 @@ export class BoundedContextMapper {
       events: relatedEvents,
       responsibilities: this.generateResponsibilities(name, entities, relatedProcesses),
       type: 'supporting',
-      complexity: this.calculateContextComplexity(entities, relatedProcesses, relatedEvents)
+      complexity: this.calculateContextComplexity(entities, relatedProcesses, relatedEvents),
     };
   }
 
   /**
    * Create context from processes
    */
-  private createContextFromProcesses(name: string, processes: string[], nlpAnalysis: NLPAnalysis): BoundedContext {
+  private createContextFromProcesses(
+    name: string,
+    processes: string[],
+    nlpAnalysis: NLPAnalysis
+  ): BoundedContext {
     // Find related entities and events
     const relatedEntities = nlpAnalysis.entities.filter(entity =>
       processes.some(process => process.toLowerCase().includes(entity.toLowerCase()))
@@ -393,7 +472,7 @@ export class BoundedContextMapper {
       events: relatedEvents,
       responsibilities: this.generateResponsibilities(name, relatedEntities, processes),
       type: 'supporting',
-      complexity: this.calculateContextComplexity(relatedEntities, processes, relatedEvents)
+      complexity: this.calculateContextComplexity(relatedEntities, processes, relatedEvents),
     };
   }
 
@@ -513,7 +592,10 @@ export class BoundedContextMapper {
   /**
    * Generate context relationships
    */
-  private generateContextRelationships(contexts: BoundedContext[], nlpAnalysis: NLPAnalysis): ContextRelationship[] {
+  private generateContextRelationships(
+    contexts: BoundedContext[],
+    nlpAnalysis: NLPAnalysis
+  ): ContextRelationship[] {
     const relationships: ContextRelationship[] = [];
 
     // Generate relationships based on entity dependencies and process flows
@@ -540,23 +622,17 @@ export class BoundedContextMapper {
   private analyzeContextRelationship(
     context1: BoundedContext,
     context2: BoundedContext,
-    nlpAnalysis: NLPAnalysis
+    _nlpAnalysis: NLPAnalysis
   ): ContextRelationship | null {
     // Check for shared entities or dependencies
-    const sharedEntities = context1.entities.filter(entity =>
-      context2.entities.includes(entity)
-    );
+    const sharedEntities = context1.entities.filter(entity => context2.entities.includes(entity));
 
     const hasProcessDependency = context1.processes.some(process =>
-      context2.entities.some(entity =>
-        process.toLowerCase().includes(entity.toLowerCase())
-      )
+      context2.entities.some(entity => process.toLowerCase().includes(entity.toLowerCase()))
     );
 
     const hasEventFlow = context1.events.some(event =>
-      context2.processes.some(process =>
-        event.toLowerCase().includes(process.toLowerCase())
-      )
+      context2.processes.some(process => event.toLowerCase().includes(process.toLowerCase()))
     );
 
     if (sharedEntities.length > 0) {
@@ -565,7 +641,7 @@ export class BoundedContextMapper {
         downstream: context2.name,
         type: 'shared-kernel',
         description: `Share common entities: ${sharedEntities.join(', ')}`,
-        integration: 'synchronous'
+        integration: 'synchronous',
       };
     }
 
@@ -575,7 +651,7 @@ export class BoundedContextMapper {
         downstream: context1.name,
         type: 'customer-supplier',
         description: `${context1.name} depends on ${context2.name} entities`,
-        integration: 'synchronous'
+        integration: 'synchronous',
       };
     }
 
@@ -585,7 +661,7 @@ export class BoundedContextMapper {
         downstream: context2.name,
         type: 'customer-supplier',
         description: `Event-driven communication from ${context1.name} to ${context2.name}`,
-        integration: 'event-driven'
+        integration: 'event-driven',
       };
     }
 
@@ -610,7 +686,7 @@ export class BoundedContextMapper {
           title: 'Large Context Detected',
           description: `${context.name} has ${context.entities.length} entities. Consider splitting into smaller contexts.`,
           contexts: [context.name],
-          impact: 'medium'
+          impact: 'medium',
         });
       }
 
@@ -620,7 +696,7 @@ export class BoundedContextMapper {
           title: 'High Complexity Context',
           description: `${context.name} is highly complex. Consider advanced patterns like CQRS or Event Sourcing.`,
           contexts: [context.name],
-          impact: 'high'
+          impact: 'high',
         });
       }
     });
@@ -633,7 +709,7 @@ export class BoundedContextMapper {
         title: 'Too Many Shared Kernels',
         description: 'Multiple shared kernels detected. This can lead to tight coupling.',
         contexts: sharedKernels.flatMap(r => [r.upstream, r.downstream]),
-        impact: 'high'
+        impact: 'high',
       });
     }
 
@@ -644,7 +720,7 @@ export class BoundedContextMapper {
         title: 'Single Context Domain',
         description: 'Consider if this domain would benefit from multiple bounded contexts.',
         contexts: contexts.map(c => c.name),
-        impact: 'low'
+        impact: 'low',
       });
     }
 
@@ -654,7 +730,7 @@ export class BoundedContextMapper {
         title: 'Potential for More Contexts',
         description: 'High domain complexity suggests more bounded contexts might be beneficial.',
         contexts: contexts.map(c => c.name),
-        impact: 'medium'
+        impact: 'medium',
       });
     }
 
@@ -667,11 +743,11 @@ export class BoundedContextMapper {
   private getDomainKeywords(domain: string): string[] {
     const keywords: Record<string, string[]> = {
       'e-commerce': ['order', 'product', 'customer', 'payment', 'cart', 'checkout', 'inventory'],
-      'banking': ['account', 'transaction', 'payment', 'loan', 'credit', 'debit', 'balance'],
-      'healthcare': ['patient', 'doctor', 'appointment', 'treatment', 'diagnosis', 'prescription'],
-      'education': ['student', 'teacher', 'course', 'lesson', 'grade', 'exam', 'assignment'],
-      'logistics': ['package', 'delivery', 'shipping', 'warehouse', 'tracking', 'route'],
-      'insurance': ['policy', 'claim', 'premium', 'coverage', 'risk', 'underwriting']
+      banking: ['account', 'transaction', 'payment', 'loan', 'credit', 'debit', 'balance'],
+      healthcare: ['patient', 'doctor', 'appointment', 'treatment', 'diagnosis', 'prescription'],
+      education: ['student', 'teacher', 'course', 'lesson', 'grade', 'exam', 'assignment'],
+      logistics: ['package', 'delivery', 'shipping', 'warehouse', 'tracking', 'route'],
+      insurance: ['policy', 'claim', 'premium', 'coverage', 'risk', 'underwriting'],
     };
 
     return keywords[domain] || [];
@@ -701,7 +777,7 @@ export class BoundedContextMapper {
       events: relatedEvents,
       responsibilities: this.generateResponsibilities(name, relatedEntities, relatedProcesses),
       type: 'core',
-      complexity: this.calculateContextComplexity(relatedEntities, relatedProcesses, relatedEvents)
+      complexity: this.calculateContextComplexity(relatedEntities, relatedProcesses, relatedEvents),
     };
   }
 
@@ -711,16 +787,20 @@ export class BoundedContextMapper {
       const contextKeywords = context.name.toLowerCase().split(/\s+/);
 
       nlpAnalysis.entities.forEach(entity => {
-        if (!context.entities.includes(entity) &&
-            contextKeywords.some(keyword => entity.toLowerCase().includes(keyword))) {
+        if (
+          !context.entities.includes(entity) &&
+          contextKeywords.some(keyword => entity.toLowerCase().includes(keyword))
+        ) {
           context.entities.push(entity);
         }
       });
 
       // Add missing processes
       nlpAnalysis.processes.forEach(process => {
-        if (!context.processes.includes(process) &&
-            contextKeywords.some(keyword => process.toLowerCase().includes(keyword))) {
+        if (
+          !context.processes.includes(process) &&
+          contextKeywords.some(keyword => process.toLowerCase().includes(keyword))
+        ) {
           context.processes.push(process);
         }
       });
@@ -734,7 +814,10 @@ export class BoundedContextMapper {
     });
   }
 
-  private generateValidationInsights(contexts: BoundedContext[], nlpAnalysis: NLPAnalysis): ContextInsight[] {
+  private generateValidationInsights(
+    contexts: BoundedContext[],
+    nlpAnalysis: NLPAnalysis
+  ): ContextInsight[] {
     const insights: ContextInsight[] = [];
 
     // Check if all entities are covered
@@ -750,7 +833,7 @@ export class BoundedContextMapper {
         title: 'Uncovered Entities',
         description: `Some entities are not assigned to any context: ${uncoveredEntities.join(', ')}`,
         contexts: [],
-        impact: 'medium'
+        impact: 'medium',
       });
     }
 
@@ -766,11 +849,11 @@ export class BoundedContextMapper {
       events: nlpAnalysis.events.slice(0, 10),
       responsibilities: ['Core business logic', 'Domain rule enforcement', 'State management'],
       type: 'core',
-      complexity: nlpAnalysis.complexity
+      complexity: nlpAnalysis.complexity,
     };
   }
 
-  private classifyContextTypes(contexts: BoundedContext[], nlpAnalysis: NLPAnalysis): void {
+  private classifyContextTypes(contexts: BoundedContext[], _nlpAnalysis: NLPAnalysis): void {
     // Classify based on complexity and business importance
     contexts.forEach(context => {
       if (context.complexity > 0.7 || context.entities.length > 6) {
@@ -801,13 +884,15 @@ export class BoundedContextMapper {
       { keywords: ['order', 'cart', 'item'], name: 'Order Management' },
       { keywords: ['payment', 'billing', 'invoice'], name: 'Payment Processing' },
       { keywords: ['product', 'inventory', 'catalog'], name: 'Product Management' },
-      { keywords: ['shipment', 'delivery', 'package'], name: 'Fulfillment' }
+      { keywords: ['shipment', 'delivery', 'package'], name: 'Fulfillment' },
     ];
 
     for (const theme of themes) {
-      if (entities.some(entity =>
-        theme.keywords.some(keyword => entity.toLowerCase().includes(keyword))
-      )) {
+      if (
+        entities.some(entity =>
+          theme.keywords.some(keyword => entity.toLowerCase().includes(keyword))
+        )
+      ) {
         return theme.name;
       }
     }
@@ -816,7 +901,11 @@ export class BoundedContextMapper {
     return `${entities[0]} Management`;
   }
 
-  private generateResponsibilities(name: string, entities: string[], processes: string[]): string[] {
+  private generateResponsibilities(
+    name: string,
+    entities: string[],
+    processes: string[]
+  ): string[] {
     const responsibilities: string[] = [];
 
     // Add entity-based responsibilities
@@ -840,7 +929,11 @@ export class BoundedContextMapper {
     return responsibilities.slice(0, 5);
   }
 
-  private calculateContextComplexity(entities: string[], processes: string[], events: string[]): number {
+  private calculateContextComplexity(
+    entities: string[],
+    processes: string[],
+    events: string[]
+  ): number {
     const entityWeight = entities.length * 0.1;
     const processWeight = processes.length * 0.08;
     const eventWeight = events.length * 0.05;
@@ -849,8 +942,9 @@ export class BoundedContextMapper {
   }
 
   private capitalizeWords(str: string): string {
-    return str.split(' ').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
+    return str
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 }

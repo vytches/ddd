@@ -242,7 +242,10 @@ export interface ContextAwarePrompt extends PromptConfig {
 
 export interface SmartPromptEngine {
   analyzeContext: (context: WorkflowContext) => Promise<ProjectAnalysis>;
-  generateSuggestions: (prompt: ContextAwarePrompt, context: WorkflowContext) => Promise<PromptSuggestion[]>;
+  generateSuggestions: (
+    prompt: ContextAwarePrompt,
+    context: WorkflowContext
+  ) => Promise<PromptSuggestion[]>;
   adaptPrompt: (prompt: ContextAwarePrompt, context: WorkflowContext) => Promise<PromptConfig>;
   displayAnalysis: (analysis: ProjectAnalysis) => void;
 }

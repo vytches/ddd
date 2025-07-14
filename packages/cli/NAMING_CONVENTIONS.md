@@ -2,35 +2,38 @@
 
 ## Overview
 
-The VytchesDDD CLI follows enterprise-grade naming conventions that ensure consistency, clarity, and alignment with Domain-Driven Design principles across all generated components.
+The VytchesDDD CLI follows enterprise-grade naming conventions that ensure
+consistency, clarity, and alignment with Domain-Driven Design principles across
+all generated components.
 
 ## File Naming Conventions
 
 ### Pattern: `{base-name}.{component-type}.ts`
 
-All generated files follow a consistent pattern that makes their purpose immediately clear:
+All generated files follow a consistent pattern that makes their purpose
+immediately clear:
 
-| Component Type | File Name Pattern | Example |
-|----------------|------------------|---------|
-| **Aggregate** | `{name}.aggregate.ts` | `customer.aggregate.ts` |
-| **Entity** | `{name}.entity.ts` | `order.entity.ts` |
-| **Value Object** | `{name}.value-object.ts` | `email-address.value-object.ts` |
-| **Specification** | `{name}.specification.ts` | `customer-validation.specification.ts` |
-| **Policy** | `{name}.policy.ts` | `pricing.policy.ts` |
-| **Command** | `{name}.command.ts` | `create-customer.command.ts` |
-| **Query** | `{name}.query.ts` | `get-customer.query.ts` |
-| **Event** | `{name}.event.ts` | `customer-created.event.ts` |
-| **Repository** | `{name}.repository.ts` | `customer.repository.ts` |
-| **Domain Service** | `{name}.service.ts` | `pricing.service.ts` |
+| Component Type     | File Name Pattern         | Example                                |
+| ------------------ | ------------------------- | -------------------------------------- |
+| **Aggregate**      | `{name}.aggregate.ts`     | `customer.aggregate.ts`                |
+| **Entity**         | `{name}.entity.ts`        | `order.entity.ts`                      |
+| **Value Object**   | `{name}.value-object.ts`  | `email-address.value-object.ts`        |
+| **Specification**  | `{name}.specification.ts` | `customer-validation.specification.ts` |
+| **Policy**         | `{name}.policy.ts`        | `pricing.policy.ts`                    |
+| **Command**        | `{name}.command.ts`       | `create-customer.command.ts`           |
+| **Query**          | `{name}.query.ts`         | `get-customer.query.ts`                |
+| **Event**          | `{name}.event.ts`         | `customer-created.event.ts`            |
+| **Repository**     | `{name}.repository.ts`    | `customer.repository.ts`               |
+| **Domain Service** | `{name}.service.ts`       | `pricing.service.ts`                   |
 
 ### Test Files: `{base-name}.{component-type}.test.ts`
 
 Test files follow the same pattern with an additional `.test` suffix:
 
-| Component Type | Test File Pattern | Example |
-|----------------|------------------|---------|
-| **Aggregate** | `{name}.aggregate.test.ts` | `customer.aggregate.test.ts` |
-| **Entity** | `{name}.entity.test.ts` | `order.entity.test.ts` |
+| Component Type   | Test File Pattern             | Example                              |
+| ---------------- | ----------------------------- | ------------------------------------ |
+| **Aggregate**    | `{name}.aggregate.test.ts`    | `customer.aggregate.test.ts`         |
+| **Entity**       | `{name}.entity.test.ts`       | `order.entity.test.ts`               |
 | **Value Object** | `{name}.value-object.test.ts` | `email-address.value-object.test.ts` |
 
 ## Class Naming Conventions
@@ -39,18 +42,18 @@ Test files follow the same pattern with an additional `.test` suffix:
 
 Class names use PascalCase with appropriate DDD suffixes:
 
-| Component Type | Class Name Pattern | Example |
-|----------------|------------------|---------|
-| **Aggregate** | `{Name}` | `Customer` (extends AggregateRoot) |
-| **Entity** | `{Name}` | `Order` (extends Entity) |
-| **Value Object** | `{Name}` | `EmailAddress` (extends ValueObject) |
-| **Specification** | `{Name}Specification` | `CustomerValidationSpecification` |
-| **Policy** | `{Name}Policy` | `PricingPolicy` |
-| **Command** | `{Name}Command` | `CreateCustomerCommand` |
-| **Query** | `{Name}Query` | `GetCustomerQuery` |
-| **Event** | `{Name}Event` | `CustomerCreatedEvent` |
-| **Repository** | `{Name}Repository` | `CustomerRepository` |
-| **Domain Service** | `{Name}Service` | `PricingService` |
+| Component Type     | Class Name Pattern    | Example                              |
+| ------------------ | --------------------- | ------------------------------------ |
+| **Aggregate**      | `{Name}`              | `Customer` (extends AggregateRoot)   |
+| **Entity**         | `{Name}`              | `Order` (extends Entity)             |
+| **Value Object**   | `{Name}`              | `EmailAddress` (extends ValueObject) |
+| **Specification**  | `{Name}Specification` | `CustomerValidationSpecification`    |
+| **Policy**         | `{Name}Policy`        | `PricingPolicy`                      |
+| **Command**        | `{Name}Command`       | `CreateCustomerCommand`              |
+| **Query**          | `{Name}Query`         | `GetCustomerQuery`                   |
+| **Event**          | `{Name}Event`         | `CustomerCreatedEvent`               |
+| **Repository**     | `{Name}Repository`    | `CustomerRepository`                 |
+| **Domain Service** | `{Name}Service`       | `PricingService`                     |
 
 ## Directory Structure Conventions
 
@@ -85,22 +88,27 @@ tests/                      # Mirror structure of src/
 ## Benefits of These Conventions
 
 ### 1. **Immediate Component Recognition**
+
 - File names instantly communicate the component type and purpose
 - No need to open files to understand their role in the domain
 
 ### 2. **Consistent Sorting and Grouping**
+
 - Components of the same type naturally group together in file explorers
 - Alphabetical sorting maintains logical organization
 
 ### 3. **IDE Integration**
+
 - Modern IDEs can provide better autocomplete and navigation
 - File search becomes more predictable and efficient
 
 ### 4. **Team Collaboration**
+
 - New team members can quickly understand the codebase structure
 - Code reviews become more efficient with clear naming patterns
 
 ### 5. **DDD Alignment**
+
 - Naming conventions directly reflect DDD concepts
 - Enforces proper separation of concerns
 
@@ -124,16 +132,17 @@ vytches-ddd generate --type event --name CustomerCreated
 
 The CLI automatically handles name transformations:
 
-| Input | Component Type | File Name | Class Name |
-|-------|---------------|-----------|------------|
-| `Customer` | aggregate | `customer.aggregate.ts` | `Customer` |
-| `EmailAddress` | value-object | `email-address.value-object.ts` | `EmailAddress` |
-| `CreateCustomer` | command | `create-customer.command.ts` | `CreateCustomerCommand` |
-| `customer-created` | event | `customer-created.event.ts` | `CustomerCreatedEvent` |
+| Input              | Component Type | File Name                       | Class Name              |
+| ------------------ | -------------- | ------------------------------- | ----------------------- |
+| `Customer`         | aggregate      | `customer.aggregate.ts`         | `Customer`              |
+| `EmailAddress`     | value-object   | `email-address.value-object.ts` | `EmailAddress`          |
+| `CreateCustomer`   | command        | `create-customer.command.ts`    | `CreateCustomerCommand` |
+| `customer-created` | event          | `customer-created.event.ts`     | `CustomerCreatedEvent`  |
 
 ## Migration from Previous Versions
 
-If you have existing components with different naming patterns, the CLI will generate new files with the correct conventions. You can:
+If you have existing components with different naming patterns, the CLI will
+generate new files with the correct conventions. You can:
 
 1. **Gradual Migration**: Generate new components with correct naming
 2. **Bulk Rename**: Use IDE refactoring tools to rename existing files
@@ -160,4 +169,5 @@ The naming conventions remain consistent across all supported frameworks:
 
 ---
 
-*These conventions ensure that your DDD codebase remains maintainable, discoverable, and aligned with enterprise standards as it scales.*
+_These conventions ensure that your DDD codebase remains maintainable,
+discoverable, and aligned with enterprise standards as it scales._

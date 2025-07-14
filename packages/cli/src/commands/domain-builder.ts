@@ -13,60 +13,68 @@ import { Performance } from '../core/utils/performance';
  */
 export const domainBuilderCommand: Command = {
   name: 'create-domain',
-  description: 'Create complete domain implementations with AI-powered guidance and pattern detection',
+  description:
+    'Create complete domain implementations with AI-powered guidance and pattern detection',
   aliases: ['domain', 'build-domain', 'cd'],
   options: [
     {
       flags: '-n, --name <name>',
       description: 'Domain name (will prompt if not provided)',
-      required: false
+      required: false,
     },
     {
       flags: '-s, --structure <type>',
       description: 'Project structure',
-      choices: ['clean-architecture', 'hexagonal', 'onion', 'modular-monolith', 'microservices', 'custom'],
-      defaultValue: 'clean-architecture'
+      choices: [
+        'clean-architecture',
+        'hexagonal',
+        'onion',
+        'modular-monolith',
+        'microservices',
+        'custom',
+      ],
+      defaultValue: 'clean-architecture',
     },
     {
       flags: '-f, --framework <framework>',
       description: 'Target framework',
       choices: ['nestjs', 'express', 'fastify', 'standalone'],
-      defaultValue: 'nestjs'
+      defaultValue: 'nestjs',
     },
     {
       flags: '--guided',
       description: 'Use guided interactive workflow (default)',
-      defaultValue: true
+      defaultValue: true,
     },
     {
       flags: '--quick',
-      description: 'Quick domain generation with smart defaults'
+      description: 'Quick domain generation with smart defaults',
     },
     {
       flags: '--patterns <patterns>',
-      description: 'Comma-separated list of patterns to include (cqrs,event-sourcing,saga,etc.)'
+      description: 'Comma-separated list of patterns to include (cqrs,event-sourcing,saga,etc.)',
     },
     {
       flags: '--bounded-contexts <contexts>',
-      description: 'Comma-separated list of bounded contexts'
+      description: 'Comma-separated list of bounded contexts',
     },
     {
       flags: '--compliance <standards>',
       description: 'Compliance standards to include (gdpr,hipaa,sox,pci)',
-      choices: ['gdpr', 'hipaa', 'sox', 'pci']
+      choices: ['gdpr', 'hipaa', 'sox', 'pci'],
     },
     {
       flags: '--security <features>',
-      description: 'Security features to include (jwt,oauth2,rbac,encryption)'
+      description: 'Security features to include (jwt,oauth2,rbac,encryption)',
     },
     {
       flags: '--monitoring',
-      description: 'Include monitoring and observability setup'
+      description: 'Include monitoring and observability setup',
     },
     {
       flags: '--dry-run',
-      description: 'Show what would be generated without creating files'
-    }
+      description: 'Show what would be generated without creating files',
+    },
   ],
   examples: [
     'vytches-ddd create-domain',
@@ -74,14 +82,16 @@ export const domainBuilderCommand: Command = {
     'vytches-ddd create-domain --guided',
     'vytches-ddd create-domain --quick --patterns cqrs,event-sourcing',
     'vytches-ddd create-domain "Banking System" --compliance sox,pci --security jwt,encryption',
-    'vytches-ddd create-domain --bounded-contexts "Orders,Customers,Inventory" --framework nestjs'
+    'vytches-ddd create-domain --bounded-contexts "Orders,Customers,Inventory" --framework nestjs',
   ],
   action: async (args: string[], options: Record<string, unknown>) => {
     const startTime = Performance.now();
 
     try {
       console.log(Colors.bold(Colors.cyan('🎯 VytchesDDD Complete Domain Builder')));
-      console.log(Colors.dim('Building enterprise-grade domain implementations with AI assistance'));
+      console.log(
+        Colors.dim('Building enterprise-grade domain implementations with AI assistance')
+      );
       console.log('');
 
       // Extract domain name from args or options
@@ -105,7 +115,7 @@ export const domainBuilderCommand: Command = {
         compliance: parseCommaSeparated(options.compliance as string),
         security: parseCommaSeparated(options.security as string),
         monitoring: Boolean(options.monitoring),
-        dryRun: Boolean(options.dryRun)
+        dryRun: Boolean(options.dryRun),
       });
 
       // Execute domain building workflow
@@ -138,21 +148,28 @@ export const domainBuilderCommand: Command = {
         console.log(`  ${Colors.green('3.')} Run tests: ${Colors.dim('pnpm test')}`);
 
         if (result.hasDatabase) {
-          console.log(`  ${Colors.green('4.')} Setup database: ${Colors.dim('docker-compose up -d')}`);
+          console.log(
+            `  ${Colors.green('4.')} Setup database: ${Colors.dim('docker-compose up -d')}`
+          );
         }
 
         if (result.hasMonitoring) {
-          console.log(`  ${Colors.green('5.')} View monitoring: ${Colors.dim('http://localhost:3001/metrics')}`);
+          console.log(
+            `  ${Colors.green('5.')} View monitoring: ${Colors.dim('http://localhost:3001/metrics')}`
+          );
         }
 
         console.log('');
         console.log(Colors.dim('💡 Use "vytches-ddd analyze" to verify domain compliance'));
         console.log(Colors.dim('💡 Use "vytches-ddd suggest" for optimization recommendations'));
       }
-
     } catch (error) {
       console.error('');
-      console.error(Colors.error(`❌ Domain generation failed: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(
+          `❌ Domain generation failed: ${error instanceof Error ? error.message : error}`
+        )
+      );
 
       if (error instanceof Error && error.stack) {
         console.error('');
@@ -162,7 +179,7 @@ export const domainBuilderCommand: Command = {
 
       process.exit(1);
     }
-  }
+  },
 };
 
 /**
@@ -170,5 +187,8 @@ export const domainBuilderCommand: Command = {
  */
 function parseCommaSeparated(value: string | undefined): string[] {
   if (!value) return [];
-  return value.split(',').map(v => v.trim()).filter(Boolean);
+  return value
+    .split(',')
+    .map(v => v.trim())
+    .filter(Boolean);
 }

@@ -60,24 +60,24 @@ function copyTemplatesPlugin() {
       // Copy templates directory to dist
       const templatesDir = resolve(__dirname, 'templates');
       const distTemplatesDir = resolve(__dirname, 'dist', 'templates');
-      
+
       // Create dist/templates directory
       mkdirSync(distTemplatesDir, { recursive: true });
-      
+
       // Recursively copy template files
       copyDirectory(templatesDir, distTemplatesDir);
-    }
+    },
   };
 }
 
 // Helper function to recursively copy directories
 function copyDirectory(src: string, dest: string) {
   const entries = readdirSync(src, { withFileTypes: true });
-  
+
   for (const entry of entries) {
     const srcPath = join(src, entry.name);
     const destPath = join(dest, entry.name);
-    
+
     if (entry.isDirectory()) {
       mkdirSync(destPath, { recursive: true });
       copyDirectory(srcPath, destPath);
@@ -118,13 +118,23 @@ export default defineConfig({
     rollupOptions: {
       external: id => {
         // Externalize Node.js built-ins
-        const nodeBuiltins = ['fs', 'path', 'readline', 'child_process', 'os', 'crypto', 'stream', 'util', 'events'];
+        const nodeBuiltins = [
+          'fs',
+          'path',
+          'readline',
+          'child_process',
+          'os',
+          'crypto',
+          'stream',
+          'util',
+          'events',
+        ];
         if (nodeBuiltins.includes(id)) {
           return true;
         }
         // External all @vytches-ddd packages that are not source files
         return id.startsWith('@vytches-ddd/') && !id.includes('src/');
-      }
+      },
     },
     sourcemap: false, // Disable source maps for production builds
     target: 'ES2020',

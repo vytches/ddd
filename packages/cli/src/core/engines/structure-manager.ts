@@ -3,7 +3,7 @@
  * Manages different architecture patterns and project layouts
  */
 
-import type { ProjectStructure} from '../../types';
+import type { ProjectStructure } from '../../types';
 import { CLIError } from '../../types';
 import { FileSystem } from '../utils/file-system';
 
@@ -63,20 +63,20 @@ export class StructureManager {
         'tests/domain',
         'tests/application',
         'tests/infrastructure',
-        'tests/presentation'
+        'tests/presentation',
       ],
       files: {
         'src/domain/index.ts': '// Domain layer exports',
         'src/application/index.ts': '// Application layer exports',
         'src/infrastructure/index.ts': '// Infrastructure layer exports',
-        'src/presentation/index.ts': '// Presentation layer exports'
+        'src/presentation/index.ts': '// Presentation layer exports',
       },
       patterns: {
         domain: 'src/domain',
         application: 'src/application',
         infrastructure: 'src/infrastructure',
-        presentation: 'src/presentation'
-      }
+        presentation: 'src/presentation',
+      },
     });
 
     // Hexagonal Architecture
@@ -93,17 +93,17 @@ export class StructureManager {
         'src/adapters/secondary/messaging',
         'src/adapters/secondary/external',
         'tests/core',
-        'tests/adapters'
+        'tests/adapters',
       ],
       files: {
         'src/core/index.ts': '// Core domain exports',
-        'src/adapters/index.ts': '// Adapters exports'
+        'src/adapters/index.ts': '// Adapters exports',
       },
       patterns: {
         domain: 'src/core/domain',
         application: 'src/core/application',
-        infrastructure: 'src/adapters/secondary'
-      }
+        infrastructure: 'src/adapters/secondary',
+      },
     });
 
     // Onion Architecture
@@ -122,19 +122,19 @@ export class StructureManager {
         'src/presentation/web',
         'tests/core',
         'tests/infrastructure',
-        'tests/presentation'
+        'tests/presentation',
       ],
       files: {
         'src/core/index.ts': '// Core layer exports',
         'src/infrastructure/index.ts': '// Infrastructure layer exports',
-        'src/presentation/index.ts': '// Presentation layer exports'
+        'src/presentation/index.ts': '// Presentation layer exports',
       },
       patterns: {
         domain: 'src/core/domain',
         application: 'src/core/application',
         infrastructure: 'src/infrastructure',
-        presentation: 'src/presentation'
-      }
+        presentation: 'src/presentation',
+      },
     });
 
     // Modular Monolith
@@ -157,18 +157,18 @@ export class StructureManager {
         'src/api',
         'tests/modules',
         'tests/shared',
-        'tests/integration'
+        'tests/integration',
       ],
       files: {
         'src/modules/index.ts': '// Modules exports',
         'src/shared/index.ts': '// Shared exports',
-        'src/api/index.ts': '// API exports'
+        'src/api/index.ts': '// API exports',
       },
       patterns: {
         domain: 'src/modules/*/domain',
         application: 'src/modules/*/application',
-        infrastructure: 'src/modules/*/infrastructure'
-      }
+        infrastructure: 'src/modules/*/infrastructure',
+      },
     });
 
     // Microservices
@@ -190,19 +190,22 @@ export class StructureManager {
         'shared/utils',
         'gateway',
         'tests/services',
-        'tests/integration'
+        'tests/integration',
       ],
       files: {
-        'services/order-service/package.json': '{\n  "name": "order-service",\n  "version": "1.0.0"\n}',
-        'services/customer-service/package.json': '{\n  "name": "customer-service",\n  "version": "1.0.0"\n}',
-        'services/inventory-service/package.json': '{\n  "name": "inventory-service",\n  "version": "1.0.0"\n}',
-        'shared/index.ts': '// Shared exports'
+        'services/order-service/package.json':
+          '{\n  "name": "order-service",\n  "version": "1.0.0"\n}',
+        'services/customer-service/package.json':
+          '{\n  "name": "customer-service",\n  "version": "1.0.0"\n}',
+        'services/inventory-service/package.json':
+          '{\n  "name": "inventory-service",\n  "version": "1.0.0"\n}',
+        'shared/index.ts': '// Shared exports',
       },
       patterns: {
         domain: 'services/*/src/domain',
         application: 'services/*/src/application',
-        infrastructure: 'services/*/src/infrastructure'
-      }
+        infrastructure: 'services/*/src/infrastructure',
+      },
     });
   }
 
@@ -238,18 +241,22 @@ export class StructureManager {
     try {
       // Check for typical structure indicators
       const indicators = [
-        { structure: 'clean-architecture' as ProjectStructure, paths: ['src/domain', 'src/application', 'src/infrastructure'] },
+        {
+          structure: 'clean-architecture' as ProjectStructure,
+          paths: ['src/domain', 'src/application', 'src/infrastructure'],
+        },
         { structure: 'hexagonal' as ProjectStructure, paths: ['src/core', 'src/adapters'] },
-        { structure: 'onion' as ProjectStructure, paths: ['src/core/domain', 'src/core/application'] },
+        {
+          structure: 'onion' as ProjectStructure,
+          paths: ['src/core/domain', 'src/core/application'],
+        },
         { structure: 'modular-monolith' as ProjectStructure, paths: ['src/modules'] },
-        { structure: 'microservices' as ProjectStructure, paths: ['services'] }
+        { structure: 'microservices' as ProjectStructure, paths: ['services'] },
       ];
 
       for (const indicator of indicators) {
         const hasAllPaths = await Promise.all(
-          indicator.paths.map(path =>
-            FileSystem.exists(FileSystem.joinPath(projectPath, path))
-          )
+          indicator.paths.map(path => FileSystem.exists(FileSystem.joinPath(projectPath, path)))
         );
 
         if (hasAllPaths.every(exists => exists)) {
@@ -281,9 +288,10 @@ export class StructureManager {
         const fullPath = FileSystem.joinPath(projectPath, filePath);
         await FileSystem.writeFile(fullPath, content);
       }
-
     } catch (error) {
-      throw new CLIError(`Failed to create ${type} structure: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to create ${type} structure: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -364,7 +372,11 @@ export class StructureManager {
       }
 
       // Check patterns
-      if (!config.patterns.domain || !config.patterns.application || !config.patterns.infrastructure) {
+      if (
+        !config.patterns.domain ||
+        !config.patterns.application ||
+        !config.patterns.infrastructure
+      ) {
         return false;
       }
 

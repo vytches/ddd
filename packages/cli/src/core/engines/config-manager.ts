@@ -74,9 +74,10 @@ export class ConfigManager {
       this.validateConfiguration(this.config);
 
       return this.config;
-
     } catch (error) {
-      throw new ConfigError(`Failed to initialize configuration: ${error instanceof Error ? error.message : error}`);
+      throw new ConfigError(
+        `Failed to initialize configuration: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -85,7 +86,9 @@ export class ConfigManager {
    */
   static getConfig(): CLIConfig {
     if (!this.config) {
-      throw new ConfigError('Configuration not initialized. Call ConfigManager.initialize() first.');
+      throw new ConfigError(
+        'Configuration not initialized. Call ConfigManager.initialize() first.'
+      );
     }
     return this.config;
   }
@@ -140,16 +143,19 @@ export class ConfigManager {
       if (ext === '.json' || configPath.endsWith('.vytchesrc')) {
         return JSON.parse(content);
       } else if (ext === '.yaml' || ext === '.yml') {
-        throw new ConfigError('YAML configuration files are not supported yet. Please use JSON format.');
+        throw new ConfigError(
+          'YAML configuration files are not supported yet. Please use JSON format.'
+        );
       }
 
       throw new ConfigError(`Unsupported configuration file format: ${ext}`);
-
     } catch (error) {
       if (error instanceof ConfigError) {
         throw error;
       }
-      throw new ConfigError(`Failed to parse configuration file ${configPath}: ${error instanceof Error ? error.message : error}`);
+      throw new ConfigError(
+        `Failed to parse configuration file ${configPath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -253,16 +259,25 @@ export class ConfigManager {
 
     // Validate project structure
     const validStructures: ProjectStructure[] = [
-      'clean-architecture', 'hexagonal', 'onion', 'modular-monolith', 'microservices', 'custom'
+      'clean-architecture',
+      'hexagonal',
+      'onion',
+      'modular-monolith',
+      'microservices',
+      'custom',
     ];
     if (!validStructures.includes(config.projectStructure)) {
-      errors.push(`Invalid project structure: ${config.projectStructure}. Must be one of: ${validStructures.join(', ')}`);
+      errors.push(
+        `Invalid project structure: ${config.projectStructure}. Must be one of: ${validStructures.join(', ')}`
+      );
     }
 
     // Validate framework
     const validFrameworks: FrameworkType[] = ['nestjs', 'express', 'fastify', 'standalone'];
     if (!validFrameworks.includes(config.framework)) {
-      errors.push(`Invalid framework: ${config.framework}. Must be one of: ${validFrameworks.join(', ')}`);
+      errors.push(
+        `Invalid framework: ${config.framework}. Must be one of: ${validFrameworks.join(', ')}`
+      );
     }
 
     // Validate output directory
@@ -285,7 +300,9 @@ export class ConfigManager {
     }
 
     if (errors.length > 0) {
-      throw new ConfigError(`Configuration validation failed:\n${errors.map(e => `  - ${e}`).join('\n')}`);
+      throw new ConfigError(
+        `Configuration validation failed:\n${errors.map(e => `  - ${e}`).join('\n')}`
+      );
     }
   }
 
@@ -293,7 +310,8 @@ export class ConfigManager {
    * Save configuration to file
    */
   static async saveConfiguration(config: CLIConfig, filePath?: string): Promise<void> {
-    const targetPath = filePath || this.configPath || path.join(process.cwd(), 'vytches-ddd.config.yaml');
+    const targetPath =
+      filePath || this.configPath || path.join(process.cwd(), 'vytches-ddd.config.yaml');
 
     try {
       const ext = path.extname(targetPath).toLowerCase();
@@ -308,9 +326,10 @@ export class ConfigManager {
 
       fs.writeFileSync(targetPath, content, 'utf-8');
       this.configPath = targetPath;
-
     } catch (error) {
-      throw new ConfigError(`Failed to save configuration to ${targetPath}: ${error instanceof Error ? error.message : error}`);
+      throw new ConfigError(
+        `Failed to save configuration to ${targetPath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -338,7 +357,7 @@ export class ConfigManager {
     return {
       configPath: this.configPath,
       config: this.config,
-      source: this.actualSource
+      source: this.actualSource,
     };
   }
 }

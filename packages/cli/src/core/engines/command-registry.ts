@@ -4,7 +4,7 @@
  */
 
 import { Command as CommanderCommand, program } from 'commander';
-import type { CLIConfig, Command, CommandAction} from '../../types';
+import type { CLIConfig, Command, CommandAction } from '../../types';
 import { CLIError } from '../../types';
 import { Colors } from '../utils/colors';
 import { Performance } from '../utils/performance';
@@ -46,14 +46,14 @@ export class CommandRegistry {
       .option('-c, --config <path>', 'Configuration file path')
       .option('--dry-run', 'Preview changes without executing', false)
       .configureOutput({
-        writeOut: (str) => {
+        writeOut: str => {
           if (process.stdout && process.stdout.write) {
             process.stdout.write(Colors.cyan(str));
           } else {
             console.log(Colors.cyan(str));
           }
         },
-        writeErr: (str) => {
+        writeErr: str => {
           if (process.stderr && process.stderr.write) {
             process.stderr.write(Colors.red(str));
           } else {
@@ -71,9 +71,7 @@ export class CommandRegistry {
     this.commands.set(command.name, command);
 
     // Create Commander command
-    const cmd = this.program
-      .command(command.name)
-      .description(command.description);
+    const cmd = this.program.command(command.name).description(command.description);
 
     // Add aliases
     if (command.aliases) {
@@ -125,7 +123,6 @@ export class CommandRegistry {
           const duration = Performance.since(startTime);
           console.log(Colors.dim(`\n⚡ Command '${command.name}' completed in ${duration}ms`));
         }
-
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error(Colors.red(`❌ Error in command '${command.name}': ${message}`));
@@ -156,9 +153,10 @@ export class CommandRegistry {
 
       // Add help enhancements
       this.enhanceHelp();
-
     } catch (error) {
-      throw new CLIError(`Failed to load commands: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to load commands: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -178,26 +176,26 @@ export class CommandRegistry {
         {
           flags: '-p, --path <path>',
           description: 'Path to analyze',
-          defaultValue: './src'
+          defaultValue: './src',
         },
         {
           flags: '-t, --type <type>',
           description: 'Analysis type',
           choices: ['domain', 'performance', 'security', 'architecture', 'all'],
-          defaultValue: 'all'
+          defaultValue: 'all',
         },
         {
           flags: '--format <format>',
           description: 'Output format',
           choices: ['console', 'json', 'html'],
-          defaultValue: 'console'
-        }
+          defaultValue: 'console',
+        },
       ],
       examples: [
         'vytches-ddd analyze --path ./src/domain',
-        'vytches-ddd analyze --type security --format json'
+        'vytches-ddd analyze --type security --format json',
       ],
-      action: this.createAnalyzeAction()
+      action: this.createAnalyzeAction(),
     });
 
     // Setup commands
@@ -209,26 +207,32 @@ export class CommandRegistry {
         {
           flags: '-s, --structure <structure>',
           description: 'Project structure',
-          choices: ['clean-architecture', 'hexagonal', 'onion', 'modular-monolith', 'microservices'],
-          defaultValue: 'clean-architecture'
+          choices: [
+            'clean-architecture',
+            'hexagonal',
+            'onion',
+            'modular-monolith',
+            'microservices',
+          ],
+          defaultValue: 'clean-architecture',
         },
         {
           flags: '-f, --framework <framework>',
           description: 'Framework to integrate',
           choices: ['nestjs', 'express', 'fastify'],
-          defaultValue: 'nestjs'
+          defaultValue: 'nestjs',
         },
         {
           flags: '--enterprise',
           description: 'Include enterprise features',
-          defaultValue: false
-        }
+          defaultValue: false,
+        },
       ],
       examples: [
         'vytches-ddd setup --structure hexagonal --framework nestjs',
-        'vytches-ddd setup --enterprise'
+        'vytches-ddd setup --enterprise',
       ],
-      action: this.createSetupAction()
+      action: this.createSetupAction(),
     });
 
     // Workflow commands
@@ -253,7 +257,9 @@ export class CommandRegistry {
    * Enhance help output
    */
   private enhanceHelp(): void {
-    this.program.addHelpText('before', `
+    this.program.addHelpText(
+      'before',
+      `
 ${Colors.bold(Colors.cyan('🎯 VytchesDDD CLI'))} - ${Colors.dim('Enterprise-Grade Domain Builder')}
 
 ${Colors.bold('Revolutionary Features:')}
@@ -263,9 +269,12 @@ ${Colors.bold('Revolutionary Features:')}
   • Interactive AI-powered workflows
   • Enterprise-grade features out of the box
 
-`);
+`
+    );
 
-    this.program.addHelpText('after', `
+    this.program.addHelpText(
+      'after',
+      `
 ${Colors.bold('Examples:')}
   ${Colors.dim('# Generate complete e-commerce domain')}
   $ vytches-ddd create-domain "E-commerce Platform"
@@ -281,7 +290,8 @@ ${Colors.bold('Examples:')}
 
 ${Colors.bold('Documentation:')} ${Colors.cyan('https://github.com/vytches/vytches-ddd')}
 ${Colors.bold('Issues & Support:')} ${Colors.cyan('https://github.com/vytches/vytches-ddd/issues')}
-`);
+`
+    );
   }
 
   /**
@@ -304,7 +314,6 @@ ${Colors.bold('Issues & Support:')} ${Colors.cyan('https://github.com/vytches/vy
   getAllCommands(): Command[] {
     return Array.from(this.commands.values());
   }
-
 
   /**
    * Create analyze action (placeholder)

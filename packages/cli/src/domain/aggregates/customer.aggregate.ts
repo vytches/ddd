@@ -10,25 +10,19 @@ import { AggregateRoot, EntityId } from '@vytches-ddd/core';
  * Customer aggregate
  */
 export class Customer extends AggregateRoot {
-  private constructor(
-    id: EntityId,
-  ) {
+  private constructor(id: EntityId) {
     super({ id });
   }
 
   /**
    * Factory method to create a new Customer
    */
-  static create(
-  ): Customer {
+  static create(): Customer {
     const id = EntityId.createWithRandomUUID();
-    
+
     // Validate business rules
 
-    const aggregate = new Customer(
-      id,
-    );
-
+    const aggregate = new Customer(id);
 
     return aggregate;
   }
@@ -36,16 +30,11 @@ export class Customer extends AggregateRoot {
   /**
    * Reconstitute aggregate from persistence
    */
-  static fromPersistence(
-    id: EntityId,
-  ): Customer {
-    return new Customer(
-      id,
-    );
+  static fromPersistence(id: EntityId): Customer {
+    return new Customer(id);
   }
 
   // Getters
-
 
   /**
    * Get aggregate snapshot for persistence

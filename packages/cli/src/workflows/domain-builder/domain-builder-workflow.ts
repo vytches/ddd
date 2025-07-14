@@ -78,10 +78,13 @@ export class DomainBuilderWorkflow {
     this.sessionId = await chatHistory.startSession('Complete Domain Builder', {
       workflowType: 'domain-builder',
       config: this.config,
-      startedAt: new Date().toISOString()
+      startedAt: new Date().toISOString(),
     });
 
-    await chatHistory.addMessage('system', `Started domain building for: ${this.config.domainName || 'Unknown Domain'}`);
+    await chatHistory.addMessage(
+      'system',
+      `Started domain building for: ${this.config.domainName || 'Unknown Domain'}`
+    );
 
     try {
       const context = await this.workflow.start('initialization');
@@ -94,17 +97,21 @@ export class DomainBuilderWorkflow {
         patterns: context.patterns || [],
         hasDatabase: context.hasDatabase || false,
         hasMonitoring: context.hasMonitoring || false,
-        claudeCodeIntegration: context.claudeCodeIntegration
+        claudeCodeIntegration: context.claudeCodeIntegration,
       };
 
       // Record completion
-      await chatHistory.addMessage('system',
+      await chatHistory.addMessage(
+        'system',
         `Domain building completed. Generated ${result.generatedFiles.length} files across ${result.boundedContexts.length} bounded contexts.`
       );
 
       return result;
     } catch (error) {
-      await chatHistory.addMessage('system', `Domain building failed: ${error instanceof Error ? error.message : error}`);
+      await chatHistory.addMessage(
+        'system',
+        `Domain building failed: ${error instanceof Error ? error.message : error}`
+      );
       throw error;
     }
   }
@@ -125,7 +132,7 @@ export class DomainBuilderWorkflow {
       this.createGenerationPlanStep(),
       this.createFileGenerationStep(),
       this.createClaudeCodeIntegrationStep(),
-      this.createCompletionStep()
+      this.createCompletionStep(),
     ]);
   }
 
@@ -138,7 +145,7 @@ export class DomainBuilderWorkflow {
       title: '🎯 Domain Builder Initialization',
       description: 'Setting up domain generation environment',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Initializing domain builder...'));
         console.log('');
 
@@ -153,13 +160,14 @@ export class DomainBuilderWorkflow {
         context.nlpProcessor = this.nlpProcessor;
 
         // Record configuration in chat history
-        await chatHistory.addMessage('assistant',
+        await chatHistory.addMessage(
+          'assistant',
           `Initializing domain builder with structure: ${this.config.structure}, framework: ${this.config.framework}`
         );
 
         console.log(Colors.success('✅ Domain builder initialized'));
       },
-      next: this.config.guided ? 'domain-analysis' : 'nlp-processing'
+      next: this.config.guided ? 'domain-analysis' : 'nlp-processing',
     };
   }
 
@@ -185,9 +193,9 @@ export class DomainBuilderWorkflow {
             return 'Description is too long (max 1000 characters). Focus on key business concepts.';
           }
           return true;
-        }
+        },
       },
-      next: 'nlp-processing'
+      next: 'nlp-processing',
     };
   }
 
@@ -200,11 +208,12 @@ export class DomainBuilderWorkflow {
       title: '🔍 Natural Language Processing',
       description: 'AI analysis of domain description for intelligent component suggestion',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Analyzing domain description with AI...'));
         console.log('');
 
-        const description = context.answers['domain-analysis'] || this.config.domainName || 'Generic Business Domain';
+        const description =
+          context.answers['domain-analysis'] || this.config.domainName || 'Generic Business Domain';
 
         // Record user input
         await chatHistory.addMessage('user', `Domain description: ${description}`);
@@ -217,11 +226,12 @@ export class DomainBuilderWorkflow {
         this.displayNLPAnalysis(nlpAnalysis);
 
         // Record analysis in chat history
-        await chatHistory.addMessage('assistant',
+        await chatHistory.addMessage(
+          'assistant',
           `NLP analysis completed. Identified ${nlpAnalysis.entities.length} entities, ${nlpAnalysis.processes.length} processes, and ${nlpAnalysis.relationships.length} relationships.`
         );
       },
-      next: 'bounded-context-mapping'
+      next: 'bounded-context-mapping',
     };
   }
 
@@ -234,7 +244,7 @@ export class DomainBuilderWorkflow {
       title: '🗺️ Bounded Context Mapping',
       description: 'Intelligent bounded context identification and relationship mapping',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Mapping bounded contexts...'));
         console.log('');
 
@@ -243,7 +253,10 @@ export class DomainBuilderWorkflow {
         // Generate bounded contexts from NLP analysis or config
         let boundedContexts;
         if (this.config.boundedContexts.length > 0) {
-          boundedContexts = await this.contextMapper.validateContexts(this.config.boundedContexts, nlpAnalysis);
+          boundedContexts = await this.contextMapper.validateContexts(
+            this.config.boundedContexts,
+            nlpAnalysis
+          );
         } else {
           boundedContexts = await this.contextMapper.generateContexts(nlpAnalysis);
         }
@@ -254,11 +267,12 @@ export class DomainBuilderWorkflow {
         this.displayBoundedContextMap(boundedContexts);
 
         // Record context mapping
-        await chatHistory.addMessage('assistant',
+        await chatHistory.addMessage(
+          'assistant',
           `Bounded context mapping completed. Identified ${boundedContexts.contexts.length} contexts with ${boundedContexts.relationships.length} relationships.`
         );
       },
-      next: this.config.guided ? 'architecture-selection' : 'pattern-orchestration'
+      next: this.config.guided ? 'architecture-selection' : 'pattern-orchestration',
     };
   }
 
@@ -283,13 +297,13 @@ export class DomainBuilderWorkflow {
             choices.push({
               name: 'Clean Architecture (AI Recommended)',
               value: 'clean-architecture',
-              description: 'Best for complex domains with clear separation of concerns'
+              description: 'Best for complex domains with clear separation of concerns',
             });
           } else {
             choices.push({
               name: 'Clean Architecture',
               value: 'clean-architecture',
-              description: 'Clear separation with domain/application/infrastructure layers'
+              description: 'Clear separation with domain/application/infrastructure layers',
             });
           }
 
@@ -297,13 +311,13 @@ export class DomainBuilderWorkflow {
             choices.push({
               name: 'Modular Monolith (AI Recommended)',
               value: 'modular-monolith',
-              description: 'Good for large domains with clear module boundaries'
+              description: 'Good for large domains with clear module boundaries',
             });
           } else {
             choices.push({
               name: 'Modular Monolith',
               value: 'modular-monolith',
-              description: 'Module-based organization within single deployable unit'
+              description: 'Module-based organization within single deployable unit',
             });
           }
 
@@ -311,13 +325,13 @@ export class DomainBuilderWorkflow {
             choices.push({
               name: 'Microservices (AI Recommended)',
               value: 'microservices',
-              description: 'Suitable for multiple bounded contexts with clear boundaries'
+              description: 'Suitable for multiple bounded contexts with clear boundaries',
             });
           } else {
             choices.push({
               name: 'Microservices',
               value: 'microservices',
-              description: 'Distributed architecture with service-per-bounded-context'
+              description: 'Distributed architecture with service-per-bounded-context',
             });
           }
 
@@ -325,19 +339,19 @@ export class DomainBuilderWorkflow {
             {
               name: 'Hexagonal Architecture',
               value: 'hexagonal',
-              description: 'Ports and adapters pattern for external integration focus'
+              description: 'Ports and adapters pattern for external integration focus',
             },
             {
               name: 'Onion Architecture',
               value: 'onion',
-              description: 'Concentric layers with domain at the center'
+              description: 'Concentric layers with domain at the center',
             }
           );
 
           return choices;
-        }
+        },
       },
-      next: 'pattern-orchestration'
+      next: 'pattern-orchestration',
     };
   }
 
@@ -350,7 +364,7 @@ export class DomainBuilderWorkflow {
       title: '🚀 Advanced Pattern Orchestration',
       description: 'AI-powered selection of DDD patterns and enterprise features',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Orchestrating DDD patterns...'));
         console.log('');
 
@@ -370,11 +384,12 @@ export class DomainBuilderWorkflow {
         this.displayPatternOrchestration(patternRecommendations);
 
         // Record pattern selection
-        await chatHistory.addMessage('assistant',
+        await chatHistory.addMessage(
+          'assistant',
           `Pattern orchestration completed. Selected ${patternRecommendations.core.length} core patterns and ${patternRecommendations.advanced.length} advanced patterns.`
         );
       },
-      next: 'framework-integration'
+      next: 'framework-integration',
     };
   }
 
@@ -387,7 +402,7 @@ export class DomainBuilderWorkflow {
       title: '⚙️ Framework Integration',
       description: 'Setting up framework-specific integrations and configurations',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info(`Setting up ${this.config.framework} integration...`));
         console.log('');
 
@@ -397,9 +412,10 @@ export class DomainBuilderWorkflow {
 
         console.log(Colors.success(`✅ ${this.config.framework} integration configured`));
       },
-      next: this.config.compliance.length > 0 || this.config.security.length > 0
-        ? 'security-compliance'
-        : 'generation-plan'
+      next:
+        this.config.compliance.length > 0 || this.config.security.length > 0
+          ? 'security-compliance'
+          : 'generation-plan',
     };
   }
 
@@ -412,7 +428,7 @@ export class DomainBuilderWorkflow {
       title: '🔒 Security & Compliance',
       description: 'Implementing security features and compliance standards',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Setting up security and compliance features...'));
         console.log('');
 
@@ -436,10 +452,10 @@ export class DomainBuilderWorkflow {
 
         context.securityConfig = {
           features: this.config.security,
-          compliance: this.config.compliance
+          compliance: this.config.compliance,
         };
       },
-      next: 'generation-plan'
+      next: 'generation-plan',
     };
   }
 
@@ -452,7 +468,7 @@ export class DomainBuilderWorkflow {
       title: '📋 Generation Plan',
       description: 'Creating comprehensive file generation plan',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Creating generation plan...'));
         console.log('');
 
@@ -463,8 +479,12 @@ export class DomainBuilderWorkflow {
         // Display plan summary
         console.log(Colors.bold('📊 Generation Plan Summary:'));
         console.log(`  Files to generate: ${Colors.cyan(generationPlan.files.length.toString())}`);
-        console.log(`  Bounded contexts: ${Colors.cyan(context.boundedContexts.contexts.length.toString())}`);
-        console.log(`  Patterns: ${Colors.cyan(context.patternRecommendations.core.length + context.patternRecommendations.advanced.length)}`);
+        console.log(
+          `  Bounded contexts: ${Colors.cyan(context.boundedContexts.contexts.length.toString())}`
+        );
+        console.log(
+          `  Patterns: ${Colors.cyan(context.patternRecommendations.core.length + context.patternRecommendations.advanced.length)}`
+        );
         console.log(`  Framework: ${Colors.cyan(this.config.framework)}`);
         console.log(`  Structure: ${Colors.cyan(this.config.structure)}`);
         console.log('');
@@ -475,7 +495,7 @@ export class DomainBuilderWorkflow {
           console.log('');
         }
       },
-      next: this.config.dryRun ? 'completion' : 'file-generation'
+      next: this.config.dryRun ? 'completion' : 'file-generation',
     };
   }
 
@@ -488,7 +508,7 @@ export class DomainBuilderWorkflow {
       title: '⚡ File Generation',
       description: 'Generating complete domain implementation',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.bold('🎯 Generating Domain Implementation'));
         console.log('');
 
@@ -516,8 +536,9 @@ export class DomainBuilderWorkflow {
 
             // Show progress
             const progress = Math.round((completed / total) * 100);
-            process.stdout.write(`\r  Progress: ${Colors.cyan(`${progress}%`)} (${completed}/${total})`);
-
+            process.stdout.write(
+              `\r  Progress: ${Colors.cyan(`${progress}%`)} (${completed}/${total})`
+            );
           } catch (error) {
             console.error(`\n  ${Colors.error(`Failed to generate ${fileSpec.path}: ${error}`)}`);
           }
@@ -528,7 +549,7 @@ export class DomainBuilderWorkflow {
 
         console.log(Colors.success(`✅ Generated ${generatedFiles.length} files successfully`));
       },
-      next: 'claude-code-integration'
+      next: 'claude-code-integration',
     };
   }
 
@@ -541,7 +562,7 @@ export class DomainBuilderWorkflow {
       title: '🤖 Claude Code Integration',
       description: 'Setting up Claude Code integration for enhanced development experience',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Setting up Claude Code integration...'));
         console.log('');
 
@@ -552,7 +573,7 @@ export class DomainBuilderWorkflow {
           projectPath,
           entryPoints: this.getEntryPoints(context),
           documentation: this.generateDocumentation(context),
-          setupInstructions: this.generateSetupInstructions(context)
+          setupInstructions: this.generateSetupInstructions(context),
         };
 
         // Create CLAUDE.md file for optimal Claude Code experience
@@ -580,7 +601,7 @@ export class DomainBuilderWorkflow {
         context.claudeCodeIntegration = claudeIntegration;
         console.log('');
       },
-      next: 'completion'
+      next: 'completion',
     };
   }
 
@@ -593,22 +614,34 @@ export class DomainBuilderWorkflow {
       title: '🎉 Domain Generation Complete!',
       description: 'Your enterprise domain has been successfully generated',
       type: 'completion',
-      action: async (context) => {
+      action: async context => {
         console.log('');
         console.log(Colors.bold(Colors.green('🎉 Complete Domain Generated Successfully!')));
         console.log('');
 
         // Show comprehensive summary
         console.log(Colors.bold('📊 Final Summary:'));
-        console.log(`  ${Colors.cyan('•')} Domain: ${this.config.domainName || 'Generated Domain'}`);
-        console.log(`  ${Colors.cyan('•')} Architecture: ${context.answers['architecture-selection'] || this.config.structure}`);
+        console.log(
+          `  ${Colors.cyan('•')} Domain: ${this.config.domainName || 'Generated Domain'}`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Architecture: ${context.answers['architecture-selection'] || this.config.structure}`
+        );
         console.log(`  ${Colors.cyan('•')} Framework: ${this.config.framework}`);
-        console.log(`  ${Colors.cyan('•')} Bounded Contexts: ${context.boundedContexts?.contexts.length || 0}`);
-        console.log(`  ${Colors.cyan('•')} Core Patterns: ${context.patternRecommendations?.core.length || 0}`);
-        console.log(`  ${Colors.cyan('•')} Advanced Patterns: ${context.patternRecommendations?.advanced.length || 0}`);
+        console.log(
+          `  ${Colors.cyan('•')} Bounded Contexts: ${context.boundedContexts?.contexts.length || 0}`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Core Patterns: ${context.patternRecommendations?.core.length || 0}`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Advanced Patterns: ${context.patternRecommendations?.advanced.length || 0}`
+        );
 
         if (!this.config.dryRun) {
-          console.log(`  ${Colors.cyan('•')} Generated Files: ${context.generatedFiles?.length || 0}`);
+          console.log(
+            `  ${Colors.cyan('•')} Generated Files: ${context.generatedFiles?.length || 0}`
+          );
           console.log(`  ${Colors.cyan('•')} Claude Code Integration: ${Colors.green('✓ Ready')}`);
         }
 
@@ -617,17 +650,27 @@ export class DomainBuilderWorkflow {
         // Show AI insights
         if (context.nlpAnalysis) {
           console.log(Colors.bold('🧠 AI Insights:'));
-          console.log(`  ${Colors.cyan('•')} Domain Complexity: ${Math.round(context.nlpAnalysis.complexity * 100)}%`);
-          console.log(`  ${Colors.cyan('•')} Entities Identified: ${context.nlpAnalysis.entities.length}`);
-          console.log(`  ${Colors.cyan('•')} Business Processes: ${context.nlpAnalysis.processes.length}`);
-          console.log(`  ${Colors.cyan('•')} Relationships Mapped: ${context.nlpAnalysis.relationships.length}`);
+          console.log(
+            `  ${Colors.cyan('•')} Domain Complexity: ${Math.round(context.nlpAnalysis.complexity * 100)}%`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Entities Identified: ${context.nlpAnalysis.entities.length}`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Business Processes: ${context.nlpAnalysis.processes.length}`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Relationships Mapped: ${context.nlpAnalysis.relationships.length}`
+          );
           console.log('');
         }
 
         // Show development workflow with Claude Code
         console.log(Colors.bold('🚀 Development Workflow:'));
         console.log(`  ${Colors.green('1.')} Open in Claude Code: ${Colors.dim('claude-code .')}`);
-        console.log(`  ${Colors.green('2.')} Review CLAUDE.md: ${Colors.dim('Generated project documentation')}`);
+        console.log(
+          `  ${Colors.green('2.')} Review CLAUDE.md: ${Colors.dim('Generated project documentation')}`
+        );
         console.log(`  ${Colors.green('3.')} Install dependencies: ${Colors.dim('pnpm install')}`);
         console.log(`  ${Colors.green('4.')} Start development: ${Colors.dim('pnpm dev')}`);
         console.log(`  ${Colors.green('5.')} Run tests: ${Colors.dim('pnpm test')}`);
@@ -635,10 +678,18 @@ export class DomainBuilderWorkflow {
 
         // Claude Code specific tips
         console.log(Colors.bold('🤖 Claude Code Tips:'));
-        console.log(`  ${Colors.cyan('•')} Use ${Colors.dim('"Analyze domain model"')} to understand the architecture`);
-        console.log(`  ${Colors.cyan('•')} Use ${Colors.dim('"Add new aggregate"')} to extend the domain`);
-        console.log(`  ${Colors.cyan('•')} Use ${Colors.dim('"Review bounded contexts"')} to understand module boundaries`);
-        console.log(`  ${Colors.cyan('•')} Use ${Colors.dim('"Generate tests for [component]"')} to add test coverage`);
+        console.log(
+          `  ${Colors.cyan('•')} Use ${Colors.dim('"Analyze domain model"')} to understand the architecture`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Use ${Colors.dim('"Add new aggregate"')} to extend the domain`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Use ${Colors.dim('"Review bounded contexts"')} to understand module boundaries`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Use ${Colors.dim('"Generate tests for [component]"')} to add test coverage`
+        );
         console.log('');
 
         // Chat history export offer
@@ -647,7 +698,7 @@ export class DomainBuilderWorkflow {
           console.log(`   ${Colors.dim(`vytches-ddd chat export ${this.sessionId}`)}`);
           console.log('');
         }
-      }
+      },
     };
   }
 
@@ -716,7 +767,7 @@ export class DomainBuilderWorkflow {
     return {
       framework: this.config.framework,
       dependencies: [],
-      configuration: {}
+      configuration: {},
     };
   }
 
@@ -743,42 +794,32 @@ export class DomainBuilderWorkflow {
       case 'domain-exports':
         return `// Domain layer exports\n// Generated by VytchesDDD CLI\n\nexport * from './aggregates';\nexport * from './entities';\nexport * from './events';\n`;
       case 'package-config':
-        return JSON.stringify({
-          name: this.config.domainName?.toLowerCase().replace(/\s+/g, '-') || 'domain-project',
-          version: '1.0.0',
-          dependencies: {
-            '@vytches-ddd/core': '^1.0.0'
-          }
-        }, null, 2);
+        return JSON.stringify(
+          {
+            name: this.config.domainName?.toLowerCase().replace(/\s+/g, '-') || 'domain-project',
+            version: '1.0.0',
+            dependencies: {
+              '@vytches-ddd/core': '^1.0.0',
+            },
+          },
+          null,
+          2
+        );
       default:
         return `// ${fileSpec.type} - Generated by VytchesDDD CLI\n`;
     }
   }
 
   private getEntryPoints(context: WorkflowContext): string[] {
-    return [
-      'src/domain/index.ts',
-      'src/application/index.ts',
-      'src/infrastructure/index.ts'
-    ];
+    return ['src/domain/index.ts', 'src/application/index.ts', 'src/infrastructure/index.ts'];
   }
 
   private generateDocumentation(context: WorkflowContext): string[] {
-    return [
-      'README.md',
-      'docs/architecture.md',
-      'docs/domain-model.md',
-      'docs/getting-started.md'
-    ];
+    return ['README.md', 'docs/architecture.md', 'docs/domain-model.md', 'docs/getting-started.md'];
   }
 
   private generateSetupInstructions(context: WorkflowContext): string[] {
-    return [
-      'pnpm install',
-      'pnpm build',
-      'pnpm test',
-      'pnpm dev'
-    ];
+    return ['pnpm install', 'pnpm build', 'pnpm test', 'pnpm dev'];
   }
 
   private generateClaudeMdContent(context: WorkflowContext, integration: any): string {

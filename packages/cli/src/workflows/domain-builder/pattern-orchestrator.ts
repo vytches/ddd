@@ -4,7 +4,7 @@
  */
 
 import type { NLPAnalysis } from './natural-language-processor';
-import type { BoundedContextMap } from './bounded-context-mapper';
+import type { BoundedContext, BoundedContextMap } from './bounded-context-mapper';
 /**
  * Pattern recommendation result
  */
@@ -51,7 +51,7 @@ export interface InfrastructurePattern {
   confidence: number;
   reasoning: string;
   implementation: string[];
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
 }
 
 /**
@@ -109,9 +109,12 @@ export class PatternOrchestrator {
     boundedContexts: BoundedContextMap,
     requestedPatterns: string[] = []
   ): Promise<PatternRecommendations> {
-
     const core = await this.recommendCorePatterns(nlpAnalysis, boundedContexts);
-    const advanced = await this.recommendAdvancedPatterns(nlpAnalysis, boundedContexts, requestedPatterns);
+    const advanced = await this.recommendAdvancedPatterns(
+      nlpAnalysis,
+      boundedContexts,
+      requestedPatterns
+    );
     const infrastructure = await this.recommendInfrastructurePatterns(nlpAnalysis, boundedContexts);
     const enterprise = await this.recommendEnterprisePatterns(nlpAnalysis, boundedContexts);
     const reasoning = this.generatePatternReasoning(core, advanced, infrastructure, enterprise);
@@ -121,7 +124,7 @@ export class PatternOrchestrator {
       advanced,
       infrastructure,
       enterprise,
-      reasoning
+      reasoning,
     };
   }
 
@@ -144,7 +147,7 @@ export class PatternOrchestrator {
             confidence: 0.9,
             reasoning: `${entity} is a core domain entity with business rules and state management`,
             dependencies: [`${entity}Entity`, `${entity}Repository`],
-            contexts: [context.name]
+            contexts: [context.name],
           });
         }
       });
@@ -159,7 +162,7 @@ export class PatternOrchestrator {
         confidence: 0.8,
         reasoning: `${vo} represents a domain concept without identity`,
         dependencies: [],
-        contexts: this.findContextsForConcept(vo, boundedContexts)
+        contexts: this.findContextsForConcept(vo, boundedContexts),
       });
     });
 
@@ -173,7 +176,7 @@ export class PatternOrchestrator {
         confidence: 0.95,
         reasoning: `Repository interface for ${entityName} aggregate persistence`,
         dependencies: [aggregate.name],
-        contexts: aggregate.contexts
+        contexts: aggregate.contexts,
       });
     });
 
@@ -186,7 +189,7 @@ export class PatternOrchestrator {
           confidence: 0.7,
           reasoning: `Business rule: ${rule.description}`,
           dependencies: rule.entities.map(e => `${e}Aggregate`),
-          contexts: this.findContextsForEntities(rule.entities, boundedContexts)
+          contexts: this.findContextsForEntities(rule.entities, boundedContexts),
         });
       }
     });
@@ -200,7 +203,7 @@ export class PatternOrchestrator {
         confidence: service.confidence,
         reasoning: service.reasoning,
         dependencies: service.dependencies,
-        contexts: service.contexts
+        contexts: service.contexts,
       });
     });
 
@@ -227,12 +230,15 @@ export class PatternOrchestrator {
         requirements: ['Command handlers', 'Query handlers', 'Read models', 'Command/Query bus'],
         benefits: ['Optimized read models', 'Scalable queries', 'Clear separation of concerns'],
         complexity: 0.7,
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       });
     }
 
     // Event Sourcing - For audit requirements or complex state changes
-    if (this.shouldUseEventSourcing(nlpAnalysis, boundedContexts) || requestedPatterns.includes('event-sourcing')) {
+    if (
+      this.shouldUseEventSourcing(nlpAnalysis, boundedContexts) ||
+      requestedPatterns.includes('event-sourcing')
+    ) {
       patterns.push({
         name: 'Event Sourcing',
         type: 'event-sourcing',
@@ -241,7 +247,7 @@ export class PatternOrchestrator {
         requirements: ['Event store', 'Event handlers', 'Snapshots', 'Event versioning'],
         benefits: ['Complete audit trail', 'Time travel debugging', 'Event replay capability'],
         complexity: 0.9,
-        contexts: this.getEventSourcingContexts(nlpAnalysis, boundedContexts)
+        contexts: this.getEventSourcingContexts(nlpAnalysis, boundedContexts),
       });
     }
 
@@ -255,9 +261,13 @@ export class PatternOrchestrator {
           confidence: saga.confidence,
           reasoning: saga.reasoning,
           requirements: ['Saga orchestrator', 'Compensation handlers', 'State persistence'],
-          benefits: ['Distributed transaction coordination', 'Compensation logic', 'Process resilience'],
+          benefits: [
+            'Distributed transaction coordination',
+            'Compensation logic',
+            'Process resilience',
+          ],
           complexity: 0.8,
-          contexts: saga.contexts
+          contexts: saga.contexts,
         });
       });
     }
@@ -274,7 +284,7 @@ export class PatternOrchestrator {
           requirements: ['Event handlers', 'Read model storage', 'Projection rebuilding'],
           benefits: ['Optimized queries', 'Denormalized data', 'View-specific models'],
           complexity: 0.6,
-          contexts: projection.contexts
+          contexts: projection.contexts,
         });
       });
     }
@@ -291,7 +301,7 @@ export class PatternOrchestrator {
           requirements: ['Policy engine', 'Rule composition', 'Validation framework'],
           benefits: ['Flexible business rules', 'Rule composition', 'Dynamic policies'],
           complexity: 0.5,
-          contexts: policy.contexts
+          contexts: policy.contexts,
         });
       });
     }
@@ -306,7 +316,7 @@ export class PatternOrchestrator {
         requirements: ['Outbox table', 'Message publisher', 'Transactional guarantees'],
         benefits: ['Reliable message delivery', 'At-least-once semantics', 'Transaction safety'],
         complexity: 0.6,
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       });
     }
 
@@ -320,7 +330,7 @@ export class PatternOrchestrator {
         requirements: ['Adapter interfaces', 'Translation services', 'External API clients'],
         benefits: ['Domain model protection', 'Clean integration', 'Legacy system isolation'],
         complexity: 0.7,
-        contexts: ['Integration']
+        contexts: ['Integration'],
       });
     }
 
@@ -343,12 +353,16 @@ export class PatternOrchestrator {
         type: 'resilience',
         confidence: 0.8,
         reasoning: 'Complex domain requires resilience against external service failures',
-        implementation: ['@vytches-ddd/resilience CircuitBreaker', 'Failure detection', 'Automatic recovery'],
+        implementation: [
+          '@vytches-ddd/resilience CircuitBreaker',
+          'Failure detection',
+          'Automatic recovery',
+        ],
         configuration: {
           failureThreshold: 5,
           timeout: 60000,
-          halfOpenRetryDelay: 30000
-        }
+          halfOpenRetryDelay: 30000,
+        },
       });
 
       patterns.push({
@@ -360,8 +374,8 @@ export class PatternOrchestrator {
         configuration: {
           maxAttempts: 3,
           baseDelay: 1000,
-          maxDelay: 30000
-        }
+          maxDelay: 30000,
+        },
       });
     }
 
@@ -372,12 +386,16 @@ export class PatternOrchestrator {
         type: 'messaging',
         confidence: 0.9,
         reasoning: 'Multiple bounded contexts require event-driven communication',
-        implementation: ['@vytches-ddd/messaging EventBus', 'Message routing', 'Dead letter handling'],
+        implementation: [
+          '@vytches-ddd/messaging EventBus',
+          'Message routing',
+          'Dead letter handling',
+        ],
         configuration: {
           provider: 'redis',
           retryAttempts: 3,
-          deadLetterQueue: true
-        }
+          deadLetterQueue: true,
+        },
       });
     }
 
@@ -392,8 +410,8 @@ export class PatternOrchestrator {
         configuration: {
           provider: 'redis',
           defaultTTL: 3600,
-          keyPrefix: 'domain'
-        }
+          keyPrefix: 'domain',
+        },
       });
     }
 
@@ -407,8 +425,8 @@ export class PatternOrchestrator {
       configuration: {
         provider: 'prometheus',
         businessMetrics: true,
-        performanceMetrics: true
-      }
+        performanceMetrics: true,
+      },
     });
 
     // Security Patterns
@@ -422,8 +440,8 @@ export class PatternOrchestrator {
         configuration: {
           provider: 'rbac',
           auditEnabled: true,
-          permissions: 'domain-based'
-        }
+          permissions: 'domain-based',
+        },
       });
     }
 
@@ -437,8 +455,8 @@ export class PatternOrchestrator {
       configuration: {
         provider: 'postgresql',
         orm: 'typeorm',
-        transactions: true
-      }
+        transactions: true,
+      },
     });
 
     return patterns;
@@ -449,7 +467,7 @@ export class PatternOrchestrator {
    */
   private async recommendEnterprisePatterns(
     nlpAnalysis: NLPAnalysis,
-    boundedContexts: BoundedContextMap
+    _boundedContexts: BoundedContextMap
   ): Promise<EnterprisePattern[]> {
     const patterns: EnterprisePattern[] = [];
 
@@ -463,7 +481,7 @@ export class PatternOrchestrator {
           confidence: 0.9,
           reasoning: `${compliance.toUpperCase()} compliance requirements detected in domain`,
           standards: [compliance.toUpperCase()],
-          requirements: this.getComplianceRequirements(compliance)
+          requirements: this.getComplianceRequirements(compliance),
         });
       });
     }
@@ -476,7 +494,7 @@ export class PatternOrchestrator {
         confidence: 0.85,
         reasoning: 'Audit requirements for domain operations and state changes',
         standards: ['Audit logging', 'Change tracking', 'User attribution'],
-        requirements: ['Audit event store', 'Audit queries', 'Compliance reporting']
+        requirements: ['Audit event store', 'Audit queries', 'Compliance reporting'],
       });
     }
 
@@ -488,19 +506,23 @@ export class PatternOrchestrator {
         confidence: 0.8,
         reasoning: 'Multi-tenant architecture required for domain isolation',
         standards: ['Tenant isolation', 'Data segregation', 'Tenant routing'],
-        requirements: ['Tenant context', 'Isolated storage', 'Tenant-aware queries']
+        requirements: ['Tenant context', 'Isolated storage', 'Tenant-aware queries'],
       });
     }
 
     // Analytics Patterns
-    if (nlpAnalysis.processes.some(p => p.toLowerCase().includes('analytic') || p.toLowerCase().includes('report'))) {
+    if (
+      nlpAnalysis.processes.some(
+        p => p.toLowerCase().includes('analytic') || p.toLowerCase().includes('report')
+      )
+    ) {
       patterns.push({
         name: 'Domain Analytics',
         type: 'analytics',
         confidence: 0.7,
         reasoning: 'Analytics and reporting requirements detected',
         standards: ['Business intelligence', 'Data warehouse', 'Real-time analytics'],
-        requirements: ['Analytics projections', 'Data marts', 'Reporting APIs']
+        requirements: ['Analytics projections', 'Data marts', 'Reporting APIs'],
       });
     }
 
@@ -513,8 +535,8 @@ export class PatternOrchestrator {
   private generatePatternReasoning(
     core: CorePattern[],
     advanced: AdvancedPattern[],
-    infrastructure: InfrastructurePattern[],
-    enterprise: EnterprisePattern[]
+    _infrastructure: InfrastructurePattern[],
+    _enterprise: EnterprisePattern[]
   ): PatternReasoning[] {
     const reasoning: PatternReasoning[] = [];
 
@@ -529,11 +551,11 @@ export class PatternOrchestrator {
             factor: 'Domain Modeling',
             weight: 0.9,
             evidence: pattern.reasoning,
-            impact: 'positive'
-          }
+            impact: 'positive',
+          },
         ],
         alternatives: this.getAlternatives(pattern.type),
-        tradeoffs: this.getTradeoffs(pattern.type)
+        tradeoffs: this.getTradeoffs(pattern.type),
       });
     });
 
@@ -548,17 +570,17 @@ export class PatternOrchestrator {
             factor: 'Complexity Management',
             weight: 0.8,
             evidence: pattern.reasoning,
-            impact: 'positive'
+            impact: 'positive',
           },
           {
             factor: 'Implementation Complexity',
             weight: pattern.complexity,
             evidence: `Complexity score: ${pattern.complexity}`,
-            impact: 'negative'
-          }
+            impact: 'negative',
+          },
         ],
         alternatives: this.getAdvancedAlternatives(pattern.type),
-        tradeoffs: [`Increased complexity: ${pattern.complexity}`, ...pattern.requirements]
+        tradeoffs: [`Increased complexity: ${pattern.complexity}`, ...pattern.requirements],
       });
     });
 
@@ -576,56 +598,81 @@ export class PatternOrchestrator {
   }
 
   // Helper methods (implementations would be detailed based on specific logic)
-  private shouldCreateAggregate(entity: string, nlpAnalysis: NLPAnalysis, context: any): boolean {
+  private shouldCreateAggregate(
+    entity: string,
+    nlpAnalysis: NLPAnalysis,
+    context: BoundedContext
+  ): boolean {
     // Logic to determine if entity should be an aggregate
-    return context.entities.includes(entity) &&
-           nlpAnalysis.businessRules.some(rule => rule.entities.includes(entity));
+    return (
+      context.entities.includes(entity) &&
+      nlpAnalysis.businessRules.some(rule => rule.entities.includes(entity))
+    );
   }
 
   private identifyValueObjects(nlpAnalysis: NLPAnalysis): string[] {
     // Extract potential value objects from domain analysis
     const valueObjectPatterns = ['id', 'email', 'phone', 'address', 'money', 'date', 'time'];
-    return nlpAnalysis.entities.filter(entity =>
-      valueObjectPatterns.some(pattern => entity.toLowerCase().includes(pattern))
-    ).slice(0, 5);
+    return nlpAnalysis.entities
+      .filter(entity => valueObjectPatterns.some(pattern => entity.toLowerCase().includes(pattern)))
+      .slice(0, 5);
   }
 
   private shouldUseCQRS(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): boolean {
-    return nlpAnalysis.complexity > 0.6 ||
-           boundedContexts.contexts.length > 2 ||
-           nlpAnalysis.processes.length > 8;
+    return (
+      nlpAnalysis.complexity > 0.6 ||
+      boundedContexts.contexts.length > 2 ||
+      nlpAnalysis.processes.length > 8
+    );
   }
 
-  private shouldUseEventSourcing(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): boolean {
-    const hasAuditRequirements = nlpAnalysis.businessRules.some(rule =>
-      rule.description.toLowerCase().includes('audit') ||
-      rule.description.toLowerCase().includes('track') ||
-      rule.description.toLowerCase().includes('history')
+  private shouldUseEventSourcing(
+    nlpAnalysis: NLPAnalysis,
+    _boundedContexts: BoundedContextMap
+  ): boolean {
+    const hasAuditRequirements = nlpAnalysis.businessRules.some(
+      rule =>
+        rule.description.toLowerCase().includes('audit') ||
+        rule.description.toLowerCase().includes('track') ||
+        rule.description.toLowerCase().includes('history')
     );
 
     return hasAuditRequirements || nlpAnalysis.events.length > 10;
   }
 
   private shouldUseSagas(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): boolean {
-    const hasLongRunningProcesses = nlpAnalysis.processes.some(process =>
-      process.toLowerCase().includes('workflow') ||
-      process.toLowerCase().includes('orchestrat') ||
-      process.toLowerCase().includes('process')
+    const hasLongRunningProcesses = nlpAnalysis.processes.some(
+      process =>
+        process.toLowerCase().includes('workflow') ||
+        process.toLowerCase().includes('orchestrat') ||
+        process.toLowerCase().includes('process')
     );
 
     return hasLongRunningProcesses || boundedContexts.contexts.length > 2;
   }
 
-  private identifyDomainServices(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): any[] {
+  private identifyDomainServices(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): Array<{
+    name: string;
+    confidence: number;
+    reasoning: string;
+    dependencies: string[];
+    contexts: string[];
+  }> {
     // Identify complex business logic that doesn't belong to a single aggregate
     return nlpAnalysis.processes
-      .filter(process => process.toLowerCase().includes('calculat') || process.toLowerCase().includes('validat'))
+      .filter(
+        process =>
+          process.toLowerCase().includes('calculat') || process.toLowerCase().includes('validat')
+      )
       .map(process => ({
         name: process,
         confidence: 0.7,
         reasoning: `Complex business logic: ${process}`,
         dependencies: [],
-        contexts: [boundedContexts.contexts[0]?.name || 'Core']
+        contexts: [boundedContexts.contexts[0]?.name || 'Core'],
       }))
       .slice(0, 3);
   }
@@ -638,55 +685,75 @@ export class PatternOrchestrator {
       .map(context => context.name);
   }
 
-  private findContextsForEntities(entities: string[], boundedContexts: BoundedContextMap): string[] {
+  private findContextsForEntities(
+    entities: string[],
+    boundedContexts: BoundedContextMap
+  ): string[] {
     return boundedContexts.contexts
-      .filter(context =>
-        entities.some(entity => context.entities.includes(entity))
-      )
+      .filter(context => entities.some(entity => context.entities.includes(entity)))
       .map(context => context.name);
   }
 
-  private getEventSourcingContexts(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): string[] {
+  private getEventSourcingContexts(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): string[] {
     // Return contexts that would benefit from event sourcing
     return boundedContexts.contexts
       .filter(context => context.complexity > 0.7)
       .map(context => context.name);
   }
 
-  private identifySagaProcesses(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): any[] {
+  private identifySagaProcesses(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): Array<{ name: string; confidence: number; reasoning: string; contexts: string[] }> {
     return nlpAnalysis.processes
-      .filter(process =>
-        process.toLowerCase().includes('order') ||
-        process.toLowerCase().includes('payment') ||
-        process.toLowerCase().includes('fulfillment')
+      .filter(
+        process =>
+          process.toLowerCase().includes('order') ||
+          process.toLowerCase().includes('payment') ||
+          process.toLowerCase().includes('fulfillment')
       )
       .map(process => ({
         name: process,
         confidence: 0.8,
         reasoning: `Long-running business process: ${process}`,
-        contexts: boundedContexts.contexts.map(c => c.name)
+        contexts: boundedContexts.contexts.map(c => c.name),
       }))
       .slice(0, 2);
   }
 
-  private identifyProjections(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): any[] {
-    return ['Summary', 'Detail', 'Analytics']
-      .map(type => ({
-        name: `${type}View`,
-        confidence: 0.7,
-        reasoning: `${type} projection for optimized read queries`,
-        contexts: boundedContexts.contexts.map(c => c.name)
-      }));
+  private identifyProjections(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): Array<{ name: string; confidence: number; reasoning: string; contexts: string[] }> {
+    return ['Summary', 'Detail', 'Analytics'].map(type => ({
+      name: `${type}View`,
+      confidence: 0.7,
+      reasoning: `${type} projection for optimized read queries`,
+      contexts: boundedContexts.contexts.map(c => c.name),
+    }));
   }
 
-  private identifyPolicies(nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap): any[] {
+  private identifyPolicies(
+    nlpAnalysis: NLPAnalysis,
+    boundedContexts: BoundedContextMap
+  ): Array<{
+    name: string;
+    confidence: number;
+    reasoning: string;
+    rule: unknown;
+    contexts: string[];
+  }> {
     return nlpAnalysis.businessRules
       .filter(rule => rule.type === 'policy')
       .map(rule => ({
         name: rule.name.replace('Rule', ''),
         confidence: 0.8,
         reasoning: `Business policy: ${rule.description}`,
-        contexts: this.findContextsForEntities(rule.entities, boundedContexts)
+        rule,
+        contexts: this.findContextsForEntities(rule.entities, boundedContexts),
       }));
   }
 
@@ -696,10 +763,11 @@ export class PatternOrchestrator {
   }
 
   private hasReadHeavyScenarios(nlpAnalysis: NLPAnalysis): boolean {
-    return nlpAnalysis.processes.some(process =>
-      process.toLowerCase().includes('search') ||
-      process.toLowerCase().includes('query') ||
-      process.toLowerCase().includes('report')
+    return nlpAnalysis.processes.some(
+      process =>
+        process.toLowerCase().includes('search') ||
+        process.toLowerCase().includes('query') ||
+        process.toLowerCase().includes('report')
     );
   }
 
@@ -720,7 +788,9 @@ export class PatternOrchestrator {
 
   private hasMultiTenancyRequirements(nlpAnalysis: NLPAnalysis): boolean {
     const text = [...nlpAnalysis.entities, ...nlpAnalysis.processes].join(' ').toLowerCase();
-    return text.includes('tenant') || text.includes('multi-tenant') || text.includes('organization');
+    return (
+      text.includes('tenant') || text.includes('multi-tenant') || text.includes('organization')
+    );
   }
 
   private identifyComplianceTypes(nlpAnalysis: NLPAnalysis): string[] {
@@ -740,7 +810,7 @@ export class PatternOrchestrator {
       gdpr: ['Data encryption', 'Right to be forgotten', 'Consent management', 'Data portability'],
       hipaa: ['PHI encryption', 'Access controls', 'Audit logging', 'Risk assessment'],
       sox: ['Financial controls', 'Change management', 'Documentation', 'Segregation of duties'],
-      pci: ['Payment data encryption', 'Network security', 'Access controls', 'Regular testing']
+      pci: ['Payment data encryption', 'Network security', 'Access controls', 'Regular testing'],
     };
 
     return requirements[compliance] || ['General compliance controls'];
@@ -750,7 +820,7 @@ export class PatternOrchestrator {
     const alternatives: Record<string, string[]> = {
       aggregate: ['Entity with services', 'Anemic model with services'],
       repository: ['Data access layer', 'Active record pattern'],
-      specification: ['Validation services', 'Business rule services']
+      specification: ['Validation services', 'Business rule services'],
     };
 
     return alternatives[type] || [];
@@ -760,7 +830,7 @@ export class PatternOrchestrator {
     const tradeoffs: Record<string, string[]> = {
       aggregate: ['Increased complexity', 'Learning curve'],
       repository: ['Abstraction overhead', 'Additional interfaces'],
-      specification: ['Pattern overhead', 'Composition complexity']
+      specification: ['Pattern overhead', 'Composition complexity'],
     };
 
     return tradeoffs[type] || [];
@@ -770,7 +840,7 @@ export class PatternOrchestrator {
     const alternatives: Record<string, string[]> = {
       cqrs: ['Simple CRUD', 'Repository pattern only'],
       'event-sourcing': ['Traditional state storage', 'Audit tables'],
-      saga: ['Two-phase commit', 'Manual coordination']
+      saga: ['Two-phase commit', 'Manual coordination'],
     };
 
     return alternatives[type] || [];
@@ -782,6 +852,6 @@ export class PatternOrchestrator {
  */
 interface PatternRule {
   condition: (nlpAnalysis: NLPAnalysis, boundedContexts: BoundedContextMap) => boolean;
-  pattern: any;
+  pattern: CorePattern | AdvancedPattern | InfrastructurePattern | EnterprisePattern;
   priority: number;
 }

@@ -18,27 +18,27 @@ export const suggestCommand: Command = {
   options: [
     {
       flags: '--quick',
-      description: 'Show only the top suggestion'
+      description: 'Show only the top suggestion',
     },
     {
       flags: '--category <type>',
       description: 'Filter by suggestion category',
-      choices: ['next-step', 'improvement', 'fix', 'enhancement']
+      choices: ['next-step', 'improvement', 'fix', 'enhancement'],
     },
     {
       flags: '--analysis',
-      description: 'Show detailed project analysis before suggestions'
+      description: 'Show detailed project analysis before suggestions',
     },
     {
       flags: '--path <path>',
-      description: 'Path to analyze (default: current directory)'
-    }
+      description: 'Path to analyze (default: current directory)',
+    },
   ],
   examples: [
     'vytches-ddd suggest',
     'vytches-ddd suggest --quick',
     'vytches-ddd suggest --category next-step',
-    'vytches-ddd suggest --analysis'
+    'vytches-ddd suggest --analysis',
   ],
   action: async (_args: string[], options: Record<string, unknown>) => {
     try {
@@ -62,12 +62,15 @@ export const suggestCommand: Command = {
       } else {
         await showAllSuggestions(suggester, path, options.category as string);
       }
-
     } catch (error) {
-      console.error(Colors.error(`Failed to generate suggestions: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(
+          `Failed to generate suggestions: ${error instanceof Error ? error.message : error}`
+        )
+      );
       process.exit(1);
     }
-  }
+  },
 };
 
 /**
@@ -92,7 +95,11 @@ function showInitializationSuggestions(): void {
   console.log(`   ${Colors.cyan('pnpm add @vytches-ddd/core @vytches-ddd/events')}`);
   console.log('');
 
-  console.log(Colors.dim('💡 Use "vytches-ddd suggest" again after initialization for more specific suggestions.'));
+  console.log(
+    Colors.dim(
+      '💡 Use "vytches-ddd suggest" again after initialization for more specific suggestions.'
+    )
+  );
 }
 
 /**
@@ -110,10 +117,10 @@ async function showProjectAnalysis(path: string): Promise<void> {
         projectStructure: 'clean-architecture',
         framework: 'nestjs',
         patterns: [],
-        plugins: []
+        plugins: [],
       },
       answers: {},
-      outputPath: path
+      outputPath: path,
     });
 
     promptEngine.displayAnalysis(analysis);
@@ -130,7 +137,9 @@ async function showQuickSuggestion(suggester: CommandSuggester, path: string): P
 
   if (!suggestion) {
     console.log(Colors.green('🎉 Great! Your project looks well structured.'));
-    console.log(Colors.dim('Use "vytches-ddd suggest" (without --quick) for enhancement suggestions.'));
+    console.log(
+      Colors.dim('Use "vytches-ddd suggest" (without --quick) for enhancement suggestions.')
+    );
     return;
   }
 
@@ -140,7 +149,7 @@ async function showQuickSuggestion(suggester: CommandSuggester, path: string): P
   const priorityColor = {
     high: Colors.red,
     medium: Colors.yellow,
-    low: Colors.green
+    low: Colors.green,
   };
 
   console.log(`${priorityColor[suggestion.priority]('▶')} ${Colors.bold(suggestion.command)}`);
@@ -172,7 +181,11 @@ async function showAllSuggestions(
       console.log(Colors.yellow(`No suggestions found in category: ${category}`));
     } else {
       console.log(Colors.green('🎉 Great! Your project looks well structured.'));
-      console.log(Colors.dim('Your project follows DDD best practices. Consider running analysis for deeper insights:'));
+      console.log(
+        Colors.dim(
+          'Your project follows DDD best practices. Consider running analysis for deeper insights:'
+        )
+      );
       console.log(Colors.dim('vytches-ddd analyze --type architecture'));
     }
     return;
@@ -184,6 +197,8 @@ async function showAllSuggestions(
   console.log('');
   console.log(Colors.dim('💡 Tips:'));
   console.log(Colors.dim('• Use "vytches-ddd suggest --quick" for the most important suggestion'));
-  console.log(Colors.dim('• Use "vytches-ddd suggest --analysis" to see detailed project analysis'));
+  console.log(
+    Colors.dim('• Use "vytches-ddd suggest --analysis" to see detailed project analysis')
+  );
   console.log(Colors.dim('• Use "vytches-ddd workflow" for interactive guided development'));
 }

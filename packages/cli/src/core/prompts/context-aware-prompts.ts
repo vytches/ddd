@@ -13,7 +13,7 @@ import type {
   DetectedPattern,
   DependencyInfo,
   FrameworkInfo,
-  SmartPromptEngine
+  SmartPromptEngine,
 } from '../../types';
 import { FileSystem } from '../utils/file-system';
 import { Colors } from '../utils/colors';
@@ -48,7 +48,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
       dependencies: await this.analyzeDependencies(projectPath),
       frameworks: await this.detectFrameworks(projectPath),
       conventions: await this.analyzeNamingConventions(projectPath),
-      suggestions: []
+      suggestions: [],
     };
 
     // Generate project-level suggestions
@@ -81,18 +81,13 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
     suggestions.push(...contextSuggestions);
 
     // Sort by confidence and limit results
-    return suggestions
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, 10);
+    return suggestions.sort((a, b) => b.confidence - a.confidence).slice(0, 10);
   }
 
   /**
    * Adapt prompt based on context
    */
-  async adaptPrompt(
-    prompt: ContextAwarePrompt,
-    context: WorkflowContext
-  ): Promise<PromptConfig> {
+  async adaptPrompt(prompt: ContextAwarePrompt, context: WorkflowContext): Promise<PromptConfig> {
     const adaptedPrompt: PromptConfig = { ...prompt };
 
     // Check if prompt should be shown
@@ -113,7 +108,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
         const enhancedChoices = suggestions.map(suggestion => ({
           name: `${suggestion.title} (${Math.round(suggestion.confidence * 100)}% confidence)`,
           value: suggestion.value,
-          description: suggestion.description
+          description: suggestion.description,
         }));
 
         adaptedPrompt.choices = enhancedChoices;
@@ -133,7 +128,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
       hasApplicationDir: false,
       hasInfrastructureDir: false,
       hasTestsDir: false,
-      architecture: 'unknown'
+      architecture: 'unknown',
     };
 
     try {
@@ -143,18 +138,22 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
       if (structure.hasSourceDir) {
         const srcEntries = await FileSystem.listDirectory(srcPath);
 
-        structure.hasDomainDir = srcEntries.some(entry =>
-          entry.toLowerCase().includes('domain')
+        structure.hasDomainDir = srcEntries.some(entry => entry.toLowerCase().includes('domain'));
+        structure.hasApplicationDir = srcEntries.some(
+          entry =>
+            entry.toLowerCase().includes('application') || entry.toLowerCase().includes('app')
         );
-        structure.hasApplicationDir = srcEntries.some(entry =>
-          entry.toLowerCase().includes('application') || entry.toLowerCase().includes('app')
-        );
-        structure.hasInfrastructureDir = srcEntries.some(entry =>
-          entry.toLowerCase().includes('infrastructure') || entry.toLowerCase().includes('infra')
+        structure.hasInfrastructureDir = srcEntries.some(
+          entry =>
+            entry.toLowerCase().includes('infrastructure') || entry.toLowerCase().includes('infra')
         );
 
         // Detect architecture pattern
-        if (structure.hasDomainDir && structure.hasApplicationDir && structure.hasInfrastructureDir) {
+        if (
+          structure.hasDomainDir &&
+          structure.hasApplicationDir &&
+          structure.hasInfrastructureDir
+        ) {
           structure.architecture = 'clean';
         } else if (srcEntries.some(entry => entry.toLowerCase().includes('adapters'))) {
           structure.architecture = 'hexagonal';
@@ -199,7 +198,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           name: 'CQRS',
           confidence: 0.9,
           evidence: ['Commands found', 'Queries found', 'Handlers found'],
-          suggestions: ['Consider adding command/query validation', 'Add result patterns']
+          suggestions: ['Consider adding command/query validation', 'Add result patterns'],
         });
       }
 
@@ -212,7 +211,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           name: 'Event Sourcing',
           confidence: 0.85,
           evidence: ['Domain events found', 'Event store implementation'],
-          suggestions: ['Add event versioning', 'Consider snapshots for performance']
+          suggestions: ['Add event versioning', 'Consider snapshots for performance'],
         });
       }
 
@@ -227,13 +226,13 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           evidence: hasInterfaces
             ? ['Repository implementations', 'Interface abstractions']
             : ['Repository implementations'],
-          suggestions: ['Ensure repository interfaces are separated from implementations']
+          suggestions: ['Ensure repository interfaces are separated from implementations'],
         });
       }
 
       // Value Objects Pattern
-      const hasValueObjects = files.some(f =>
-        f.includes('value-object') || f.includes('value.object')
+      const hasValueObjects = files.some(
+        f => f.includes('value-object') || f.includes('value.object')
       );
 
       if (hasValueObjects) {
@@ -241,22 +240,20 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           name: 'Value Objects',
           confidence: 0.7,
           evidence: ['Value object implementations found'],
-          suggestions: ['Ensure value objects are immutable', 'Add proper validation']
+          suggestions: ['Ensure value objects are immutable', 'Add proper validation'],
         });
       }
 
       // Saga Pattern
       const hasSagas = files.some(f => f.includes('saga'));
-      const hasOrchestration = files.some(f =>
-        f.includes('orchestrat') || f.includes('workflow')
-      );
+      const hasOrchestration = files.some(f => f.includes('orchestrat') || f.includes('workflow'));
 
       if (hasSagas || hasOrchestration) {
         patterns.push({
           name: 'Saga Pattern',
           confidence: 0.75,
           evidence: ['Saga implementations found'],
-          suggestions: ['Add compensation logic', 'Consider saga state persistence']
+          suggestions: ['Add compensation logic', 'Consider saga state persistence'],
         });
       }
     } catch (error) {
@@ -285,7 +282,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
             name,
             version: version as string,
             type: 'production',
-            category: this.categorizeDependency(name)
+            category: this.categorizeDependency(name),
           });
         }
 
@@ -295,7 +292,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
             name,
             version: version as string,
             type: 'development',
-            category: this.categorizeDependency(name)
+            category: this.categorizeDependency(name),
           });
         }
       }
@@ -325,15 +322,15 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
             pattern: '*.controller.ts',
             description: 'Controllers handle HTTP requests',
             examples: ['user.controller.ts', 'order.controller.ts'],
-            confidence: 0.9
+            confidence: 0.9,
           },
           {
             pattern: '*.service.ts',
             description: 'Services contain business logic',
             examples: ['user.service.ts', 'order.service.ts'],
-            confidence: 0.9
-          }
-        ]
+            confidence: 0.9,
+          },
+        ],
       });
     }
 
@@ -349,9 +346,9 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
             pattern: '*.routes.ts',
             description: 'Route definitions',
             examples: ['user.routes.ts', 'api.routes.ts'],
-            confidence: 0.7
-          }
-        ]
+            confidence: 0.7,
+          },
+        ],
       });
     }
 
@@ -367,9 +364,9 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
             pattern: '*.entity.ts',
             description: 'Database entities',
             examples: ['user.entity.ts', 'order.entity.ts'],
-            confidence: 0.9
-          }
-        ]
+            confidence: 0.9,
+          },
+        ],
       });
     }
 
@@ -403,8 +400,9 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
 
       // Convert to conventions
       for (const [pattern, count] of patterns.entries()) {
-        if (count >= 2) { // Pattern used at least twice
-          const confidence = Math.min(0.9, count / files.length * 10);
+        if (count >= 2) {
+          // Pattern used at least twice
+          const confidence = Math.min(0.9, (count / files.length) * 10);
           conventions.push({
             pattern,
             description: `Files following ${pattern} pattern`,
@@ -412,7 +410,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
               .filter(f => f.endsWith(pattern))
               .slice(0, 3)
               .map(f => FileSystem.getBaseName(f) + FileSystem.getExtension(f)),
-            confidence
+            confidence,
           });
         }
       }
@@ -441,7 +439,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           description: `Continue with ${framework.name} (detected in project)`,
           value: framework.name.toLowerCase(),
           confidence: 0.8,
-          reasoning: `${framework.name} is already in use in this project`
+          reasoning: `${framework.name} is already in use in this project`,
         });
       });
     }
@@ -454,7 +452,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           description: `Continue with ${analysis.structure.architecture} architecture (detected)`,
           value: analysis.structure.architecture,
           confidence: 0.85,
-          reasoning: 'Project structure indicates this architecture is already in use'
+          reasoning: 'Project structure indicates this architecture is already in use',
         });
       }
     }
@@ -467,7 +465,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           description: `Use ${pattern.name} (already implemented)`,
           value: pattern.name.toLowerCase().replace(/\s+/g, '-'),
           confidence: pattern.confidence,
-          reasoning: `Evidence: ${pattern.evidence.join(', ')}`
+          reasoning: `Evidence: ${pattern.evidence.join(', ')}`,
         });
       });
     }
@@ -481,7 +479,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
           description: `${word} (found in project context)`,
           value: word,
           confidence: Math.max(0.3, 0.8 - index * 0.1),
-          reasoning: 'Extracted from existing project files and naming patterns'
+          reasoning: 'Extracted from existing project files and naming patterns',
         });
       });
     }
@@ -503,7 +501,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
         priority: 'high',
         effort: 'low',
         impact: 'high',
-        category: 'testing'
+        category: 'testing',
       });
     }
 
@@ -514,7 +512,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
         priority: 'high',
         effort: 'medium',
         impact: 'high',
-        category: 'structure'
+        category: 'structure',
       });
     }
 
@@ -529,7 +527,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
         priority: 'medium',
         effort: 'medium',
         impact: 'medium',
-        category: 'patterns'
+        category: 'patterns',
       });
     }
 
@@ -540,7 +538,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
         priority: 'low',
         effort: 'high',
         impact: 'medium',
-        category: 'patterns'
+        category: 'patterns',
       });
     }
 
@@ -613,7 +611,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
     try {
       const srcPath = FileSystem.joinPath(projectPath, 'src');
       if (FileSystem.exists(srcPath)) {
-        files.push(...await this.scanDirectory(srcPath));
+        files.push(...(await this.scanDirectory(srcPath)));
       }
     } catch (error) {
       // Continue with empty files
@@ -659,8 +657,12 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
     // Structure
     console.log(Colors.bold('🏗️ Project Structure:'));
     console.log(`  Architecture: ${Colors.cyan(analysis.structure.architecture)}`);
-    console.log(`  Source Directory: ${analysis.structure.hasSourceDir ? Colors.green('✓') : Colors.red('✗')}`);
-    console.log(`  Domain Layer: ${analysis.structure.hasDomainDir ? Colors.green('✓') : Colors.red('✗')}`);
+    console.log(
+      `  Source Directory: ${analysis.structure.hasSourceDir ? Colors.green('✓') : Colors.red('✗')}`
+    );
+    console.log(
+      `  Domain Layer: ${analysis.structure.hasDomainDir ? Colors.green('✓') : Colors.red('✗')}`
+    );
     console.log(`  Tests: ${analysis.structure.hasTestsDir ? Colors.green('✓') : Colors.red('✗')}`);
     console.log('');
 
@@ -731,7 +733,7 @@ export class SmartPrompts {
                   title: name.charAt(0).toUpperCase() + name.slice(1),
                   description: `Based on existing ${framework.name} conventions`,
                   value: name.charAt(0).toUpperCase() + name.slice(1),
-                  confidence: convention.confidence * 0.7
+                  confidence: convention.confidence * 0.7,
                 });
               }
             });
@@ -739,7 +741,7 @@ export class SmartPrompts {
         });
 
         return suggestions;
-      }
+      },
     };
   }
 
@@ -754,7 +756,7 @@ export class SmartPrompts {
         { name: 'NestJS', value: 'nestjs', description: 'Enterprise Node.js framework' },
         { name: 'Express', value: 'express', description: 'Minimal web framework' },
         { name: 'Fastify', value: 'fastify', description: 'Fast web framework' },
-        { name: 'Standalone', value: 'standalone', description: 'No web framework' }
+        { name: 'Standalone', value: 'standalone', description: 'No web framework' },
       ],
       dynamicDefault: async (context: WorkflowContext) => {
         const engine = ContextAwarePromptEngine.create();
@@ -766,7 +768,7 @@ export class SmartPrompts {
         }
 
         return 'nestjs'; // Default to NestJS
-      }
+      },
     };
   }
 
@@ -778,10 +780,26 @@ export class SmartPrompts {
       type: 'select',
       message: 'Select architecture pattern:',
       choices: [
-        { name: 'Clean Architecture', value: 'clean', description: 'Dependency inversion with clear boundaries' },
-        { name: 'Hexagonal Architecture', value: 'hexagonal', description: 'Ports and adapters pattern' },
-        { name: 'Onion Architecture', value: 'onion', description: 'Concentric layers with domain at center' },
-        { name: 'Layered Architecture', value: 'layered', description: 'Traditional layered approach' }
+        {
+          name: 'Clean Architecture',
+          value: 'clean',
+          description: 'Dependency inversion with clear boundaries',
+        },
+        {
+          name: 'Hexagonal Architecture',
+          value: 'hexagonal',
+          description: 'Ports and adapters pattern',
+        },
+        {
+          name: 'Onion Architecture',
+          value: 'onion',
+          description: 'Concentric layers with domain at center',
+        },
+        {
+          name: 'Layered Architecture',
+          value: 'layered',
+          description: 'Traditional layered approach',
+        },
       ],
       dynamicDefault: async (context: WorkflowContext) => {
         const engine = ContextAwarePromptEngine.create();
@@ -792,7 +810,7 @@ export class SmartPrompts {
         }
 
         return 'clean'; // Default to Clean Architecture
-      }
+      },
     };
   }
 }

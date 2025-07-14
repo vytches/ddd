@@ -53,7 +53,9 @@ export class FileSystem {
     try {
       await fs.promises.mkdir(dirPath, { recursive: true });
     } catch (error) {
-      throw new CLIError(`Failed to create directory ${dirPath}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to create directory ${dirPath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -64,7 +66,9 @@ export class FileSystem {
     try {
       return await fs.promises.readFile(filePath, 'utf-8');
     } catch (error) {
-      throw new CLIError(`Failed to read file ${filePath}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to read file ${filePath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -79,7 +83,9 @@ export class FileSystem {
 
       await fs.promises.writeFile(filePath, content, 'utf-8');
     } catch (error) {
-      throw new CLIError(`Failed to write file ${filePath}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to write file ${filePath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -94,7 +100,9 @@ export class FileSystem {
 
       await fs.promises.copyFile(source, destination);
     } catch (error) {
-      throw new CLIError(`Failed to copy file from ${source} to ${destination}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to copy file from ${source} to ${destination}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -105,7 +113,9 @@ export class FileSystem {
     try {
       return await fs.promises.readdir(dirPath);
     } catch (error) {
-      throw new CLIError(`Failed to list directory ${dirPath}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to list directory ${dirPath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -116,7 +126,9 @@ export class FileSystem {
     try {
       return await fs.promises.stat(filePath);
     } catch (error) {
-      throw new CLIError(`Failed to get stats for ${filePath}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to get stats for ${filePath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -144,7 +156,9 @@ export class FileSystem {
 
       return found;
     } catch (error) {
-      throw new CLIError(`Failed to find files in ${directory}: ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to find files in ${directory}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 

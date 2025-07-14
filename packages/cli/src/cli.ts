@@ -21,14 +21,14 @@ async function main(): Promise<void> {
   try {
     // Parse arguments
     const parsed = SimpleArgsParser.parse(process.argv);
-    
+
     // Show help if requested
     if (parsed.options.help || parsed.options.h) {
       SimpleArgsParser.showHelp(parsed.command);
       return;
     }
 
-    // Show version if requested  
+    // Show version if requested
     if (parsed.options.version || parsed.options.v) {
       console.log('🎯 VytchesDDD CLI v1.0.0');
       return;
@@ -46,12 +46,12 @@ async function main(): Promise<void> {
       case 'g':
         await generateCommand.action(parsed.args, parsed.options);
         break;
-        
+
       case 'domain':
       case 'domain-builder':
         await domainBuilderCommand.action(parsed.args, parsed.options);
         break;
-        
+
       default:
         if (!parsed.command) {
           console.log(Colors.yellow('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'));
@@ -73,7 +73,6 @@ async function main(): Promise<void> {
     if (config.debug) {
       console.log(Colors.dim(`\n⚡ Completed in ${duration}ms`));
     }
-
   } catch (error) {
     console.error(Colors.red('❌ CLI Error:'), error instanceof Error ? error.message : error);
     process.exit(1);

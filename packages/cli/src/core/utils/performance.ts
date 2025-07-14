@@ -55,20 +55,22 @@ export class Performance {
    */
   static async measure<T>(fn: () => Promise<T>): Promise<{ result: T; duration: number }>;
   static measure<T>(fn: () => T): { result: T; duration: number };
-  static measure<T>(fn: () => T | Promise<T>): { result: T; duration: number } | Promise<{ result: T; duration: number }> {
+  static measure<T>(
+    fn: () => T | Promise<T>
+  ): { result: T; duration: number } | Promise<{ result: T; duration: number }> {
     const startTime = this.now();
     const result = fn();
 
     if (result instanceof Promise) {
       return result.then(res => ({
         result: res,
-        duration: this.since(startTime)
+        duration: this.since(startTime),
       }));
     }
 
     return {
       result,
-      duration: this.since(startTime)
+      duration: this.since(startTime),
     };
   }
 
@@ -111,17 +113,17 @@ export class Performance {
    * Memory usage information
    */
   static getMemoryUsage(): {
-    rss: number;      // Resident Set Size
+    rss: number; // Resident Set Size
     heapTotal: number; // Total heap allocated
-    heapUsed: number;  // Heap actually used
-    external: number;  // External memory
+    heapUsed: number; // Heap actually used
+    external: number; // External memory
   } {
     const usage = process.memoryUsage();
     return {
-      rss: Math.round(usage.rss / 1024 / 1024 * 100) / 100,
-      heapTotal: Math.round(usage.heapTotal / 1024 / 1024 * 100) / 100,
-      heapUsed: Math.round(usage.heapUsed / 1024 / 1024 * 100) / 100,
-      external: Math.round(usage.external / 1024 / 1024 * 100) / 100,
+      rss: Math.round((usage.rss / 1024 / 1024) * 100) / 100,
+      heapTotal: Math.round((usage.heapTotal / 1024 / 1024) * 100) / 100,
+      heapUsed: Math.round((usage.heapUsed / 1024 / 1024) * 100) / 100,
+      external: Math.round((usage.external / 1024 / 1024) * 100) / 100,
     };
   }
 
@@ -156,7 +158,7 @@ export class Performance {
       uptime: this.formatDuration(uptime * 1000),
       memory: `${this.formatMemory(memory.heapUsed)} / ${this.formatMemory(memory.heapTotal)}`,
       cpu: `${process.arch}`,
-      platform: `${process.platform} ${process.version}`
+      platform: `${process.platform} ${process.version}`,
     };
   }
 
@@ -172,10 +174,14 @@ export class Performance {
     if (!enabled) {
       // No-op implementation when profiling is disabled
       return {
-        mark: () => {},
+        mark: () => {
+          return;
+        },
         measure: () => 0,
         getEntries: () => [],
-        clear: () => {}
+        clear: () => {
+          return;
+        },
       };
     }
 
@@ -208,7 +214,7 @@ export class Performance {
       clear: () => {
         marks.clear();
         measurements.length = 0;
-      }
+      },
     };
   }
 }

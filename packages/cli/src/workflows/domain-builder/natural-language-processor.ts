@@ -23,7 +23,13 @@ export interface NLPAnalysis {
 export interface Relationship {
   from: string;
   to: string;
-  type: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many' | 'aggregation' | 'composition';
+  type:
+    | 'one-to-one'
+    | 'one-to-many'
+    | 'many-to-one'
+    | 'many-to-many'
+    | 'aggregation'
+    | 'composition';
   description: string;
 }
 
@@ -43,48 +49,239 @@ export interface BusinessRule {
  */
 export class NaturalLanguageProcessor {
   private entityKeywords: string[] = [
-    'order', 'customer', 'user', 'product', 'payment', 'account', 'invoice',
-    'shipment', 'inventory', 'booking', 'appointment', 'reservation', 'contract',
-    'policy', 'claim', 'transaction', 'transfer', 'document', 'report', 'notification',
-    'subscription', 'membership', 'cart', 'item', 'category', 'brand', 'supplier',
-    'employee', 'department', 'project', 'task', 'milestone', 'resource', 'asset',
-    'portfolio', 'campaign', 'promotion', 'discount', 'coupon', 'review', 'rating',
-    'comment', 'feedback', 'ticket', 'issue', 'request', 'approval', 'workflow',
-    'patient', 'doctor', 'nurse', 'treatment', 'diagnosis', 'prescription', 'medical',
-    'student', 'teacher', 'course', 'lesson', 'exam', 'grade', 'assignment',
-    'vehicle', 'driver', 'route', 'delivery', 'package', 'tracking', 'warehouse'
+    'order',
+    'customer',
+    'user',
+    'product',
+    'payment',
+    'account',
+    'invoice',
+    'shipment',
+    'inventory',
+    'booking',
+    'appointment',
+    'reservation',
+    'contract',
+    'policy',
+    'claim',
+    'transaction',
+    'transfer',
+    'document',
+    'report',
+    'notification',
+    'subscription',
+    'membership',
+    'cart',
+    'item',
+    'category',
+    'brand',
+    'supplier',
+    'employee',
+    'department',
+    'project',
+    'task',
+    'milestone',
+    'resource',
+    'asset',
+    'portfolio',
+    'campaign',
+    'promotion',
+    'discount',
+    'coupon',
+    'review',
+    'rating',
+    'comment',
+    'feedback',
+    'ticket',
+    'issue',
+    'request',
+    'approval',
+    'workflow',
+    'patient',
+    'doctor',
+    'nurse',
+    'treatment',
+    'diagnosis',
+    'prescription',
+    'medical',
+    'student',
+    'teacher',
+    'course',
+    'lesson',
+    'exam',
+    'grade',
+    'assignment',
+    'vehicle',
+    'driver',
+    'route',
+    'delivery',
+    'package',
+    'tracking',
+    'warehouse',
   ];
 
   private processKeywords: string[] = [
-    'create', 'update', 'delete', 'submit', 'approve', 'reject', 'cancel', 'process',
-    'validate', 'verify', 'confirm', 'authorize', 'authenticate', 'login', 'logout',
-    'register', 'activate', 'deactivate', 'suspend', 'restore', 'archive', 'backup',
-    'import', 'export', 'sync', 'migrate', 'transform', 'calculate', 'generate',
-    'send', 'receive', 'publish', 'subscribe', 'notify', 'alert', 'remind',
-    'schedule', 'book', 'reserve', 'allocate', 'assign', 'transfer', 'exchange',
-    'refund', 'charge', 'bill', 'invoice', 'pay', 'collect', 'deposit', 'withdraw',
-    'ship', 'deliver', 'track', 'route', 'dispatch', 'fulfill', 'return',
-    'diagnose', 'treat', 'prescribe', 'examine', 'test', 'analyze', 'evaluate',
-    'teach', 'learn', 'study', 'practice', 'exercise', 'train', 'educate'
+    'create',
+    'update',
+    'delete',
+    'submit',
+    'approve',
+    'reject',
+    'cancel',
+    'process',
+    'validate',
+    'verify',
+    'confirm',
+    'authorize',
+    'authenticate',
+    'login',
+    'logout',
+    'register',
+    'activate',
+    'deactivate',
+    'suspend',
+    'restore',
+    'archive',
+    'backup',
+    'import',
+    'export',
+    'sync',
+    'migrate',
+    'transform',
+    'calculate',
+    'generate',
+    'send',
+    'receive',
+    'publish',
+    'subscribe',
+    'notify',
+    'alert',
+    'remind',
+    'schedule',
+    'book',
+    'reserve',
+    'allocate',
+    'assign',
+    'transfer',
+    'exchange',
+    'refund',
+    'charge',
+    'bill',
+    'invoice',
+    'pay',
+    'collect',
+    'deposit',
+    'withdraw',
+    'ship',
+    'deliver',
+    'track',
+    'route',
+    'dispatch',
+    'fulfill',
+    'return',
+    'diagnose',
+    'treat',
+    'prescribe',
+    'examine',
+    'test',
+    'analyze',
+    'evaluate',
+    'teach',
+    'learn',
+    'study',
+    'practice',
+    'exercise',
+    'train',
+    'educate',
   ];
 
   private eventKeywords: string[] = [
-    'created', 'updated', 'deleted', 'submitted', 'approved', 'rejected', 'cancelled',
-    'processed', 'completed', 'failed', 'started', 'finished', 'paused', 'resumed',
-    'activated', 'deactivated', 'suspended', 'restored', 'archived', 'expired',
-    'scheduled', 'booked', 'reserved', 'confirmed', 'verified', 'validated',
-    'sent', 'received', 'delivered', 'returned', 'refunded', 'charged', 'paid',
-    'assigned', 'transferred', 'allocated', 'released', 'locked', 'unlocked'
+    'created',
+    'updated',
+    'deleted',
+    'submitted',
+    'approved',
+    'rejected',
+    'cancelled',
+    'processed',
+    'completed',
+    'failed',
+    'started',
+    'finished',
+    'paused',
+    'resumed',
+    'activated',
+    'deactivated',
+    'suspended',
+    'restored',
+    'archived',
+    'expired',
+    'scheduled',
+    'booked',
+    'reserved',
+    'confirmed',
+    'verified',
+    'validated',
+    'sent',
+    'received',
+    'delivered',
+    'returned',
+    'refunded',
+    'charged',
+    'paid',
+    'assigned',
+    'transferred',
+    'allocated',
+    'released',
+    'locked',
+    'unlocked',
   ];
 
   private complexityIndicators: string[] = [
-    'workflow', 'saga', 'orchestration', 'compensation', 'async', 'asynchronous',
-    'parallel', 'concurrent', 'distributed', 'microservice', 'event-driven',
-    'real-time', 'streaming', 'queue', 'batch', 'transaction', 'acid', 'consistency',
-    'eventual', 'compensation', 'rollback', 'retry', 'circuit-breaker', 'timeout',
-    'multi-tenant', 'scalable', 'high-availability', 'fault-tolerant', 'resilient',
-    'compliance', 'audit', 'gdpr', 'hipaa', 'sox', 'pci', 'security', 'encryption',
-    'authentication', 'authorization', 'rbac', 'oauth', 'jwt', 'saml', 'sso'
+    'workflow',
+    'saga',
+    'orchestration',
+    'compensation',
+    'async',
+    'asynchronous',
+    'parallel',
+    'concurrent',
+    'distributed',
+    'microservice',
+    'event-driven',
+    'real-time',
+    'streaming',
+    'queue',
+    'batch',
+    'transaction',
+    'acid',
+    'consistency',
+    'eventual',
+    'compensation',
+    'rollback',
+    'retry',
+    'circuit-breaker',
+    'timeout',
+    'multi-tenant',
+    'scalable',
+    'high-availability',
+    'fault-tolerant',
+    'resilient',
+    'compliance',
+    'audit',
+    'gdpr',
+    'hipaa',
+    'sox',
+    'pci',
+    'security',
+    'encryption',
+    'authentication',
+    'authorization',
+    'rbac',
+    'oauth',
+    'jwt',
+    'saml',
+    'sso',
   ];
 
   /**
@@ -93,7 +290,7 @@ export class NaturalLanguageProcessor {
   async analyzeDescription(description: string): Promise<NLPAnalysis> {
     const lower = description.toLowerCase();
     const words = lower.split(/\s+/);
-    const sentences = description.split(/[.!?]+/);
+    const _sentences = description.split(/[.!?]+/);
 
     // Extract entities
     const entities = this.extractEntities(lower, words);
@@ -117,7 +314,12 @@ export class NaturalLanguageProcessor {
     const domainType = this.determineDomainType(complexity, entities.length, processes.length);
 
     // Generate recommendations
-    const recommendations = this.generateRecommendations(complexity, entities, processes, businessRules);
+    const recommendations = this.generateRecommendations(
+      complexity,
+      entities,
+      processes,
+      businessRules
+    );
 
     return {
       entities,
@@ -127,14 +329,14 @@ export class NaturalLanguageProcessor {
       businessRules,
       complexity,
       domainType,
-      recommendations
+      recommendations,
     };
   }
 
   /**
    * Extract domain entities from description
    */
-  private extractEntities(lower: string, words: string[]): string[] {
+  private extractEntities(lower: string, _words: string[]): string[] {
     const entities = new Set<string>();
 
     // Find entity keywords
@@ -149,7 +351,7 @@ export class NaturalLanguageProcessor {
       /(\w+)(?:\s+(?:has|have|contains?|includes?|manages?|handles?))/g,
       /(?:create|add|new|register)\s+(\w+)/g,
       /(\w+)\s+(?:can|may|should|must|will)/g,
-      /(?:the|a|an)\s+(\w+)\s+(?:is|are|has|have)/g
+      /(?:the|a|an)\s+(\w+)\s+(?:is|are|has|have)/g,
     ];
 
     entityPatterns.forEach(pattern => {
@@ -171,7 +373,7 @@ export class NaturalLanguageProcessor {
   /**
    * Extract business processes from description
    */
-  private extractProcesses(lower: string, words: string[]): string[] {
+  private extractProcesses(lower: string, _words: string[]): string[] {
     const processes = new Set<string>();
 
     // Find process keywords
@@ -186,7 +388,7 @@ export class NaturalLanguageProcessor {
       /(\w+(?:\s+\w+)?)\s+(?:process|workflow|procedure|operation)/g,
       /(?:when|if)\s+(\w+(?:\s+\w+)?)\s+(?:happens|occurs|is)/g,
       /(\w+(?:\s+\w+)?)\s+(?:can be|is|are)\s+(?:processed|handled|managed)/g,
-      /(?:customer|user|system)\s+(?:can|may|should)\s+(\w+(?:\s+\w+)?)/g
+      /(?:customer|user|system)\s+(?:can|may|should)\s+(\w+(?:\s+\w+)?)/g,
     ];
 
     processPatterns.forEach(pattern => {
@@ -221,7 +423,7 @@ export class NaturalLanguageProcessor {
     const eventPatterns = [
       /when\s+(\w+(?:\s+\w+)?)\s+(?:happens|occurs|is\s+\w+)/g,
       /after\s+(\w+(?:\s+\w+)?)/g,
-      /(\w+)\s+(?:event|notification|alert|signal)/g
+      /(\w+)\s+(?:event|notification|alert|signal)/g,
     ];
 
     eventPatterns.forEach(pattern => {
@@ -248,20 +450,20 @@ export class NaturalLanguageProcessor {
     const relationshipPatterns = [
       {
         pattern: /(\w+)\s+(?:has|have|contains?|includes?)\s+(?:one|many|multiple)?\s*(\w+)/g,
-        type: 'one-to-many' as const
+        type: 'one-to-many' as const,
       },
       {
         pattern: /(\w+)\s+belongs?\s+to\s+(\w+)/g,
-        type: 'many-to-one' as const
+        type: 'many-to-one' as const,
       },
       {
         pattern: /(\w+)\s+(?:is\s+part\s+of|consists?\s+of)\s+(\w+)/g,
-        type: 'composition' as const
+        type: 'composition' as const,
       },
       {
         pattern: /(\w+)\s+(?:uses?|utilizes?|depends?\s+on)\s+(\w+)/g,
-        type: 'aggregation' as const
-      }
+        type: 'aggregation' as const,
+      },
     ];
 
     relationshipPatterns.forEach(({ pattern, type }) => {
@@ -275,7 +477,7 @@ export class NaturalLanguageProcessor {
             from,
             to,
             type,
-            description: match[0]
+            description: match[0],
           });
         }
       }
@@ -296,39 +498,37 @@ export class NaturalLanguageProcessor {
       {
         pattern: /(\w+(?:\s+\w+)?)\s+(?:must|should|cannot|can't|may not|is not allowed)/g,
         type: 'constraint' as const,
-        priority: 'high' as const
+        priority: 'high' as const,
       },
       {
         pattern: /(?:only|at least|at most|minimum|maximum|within)\s+(\w+(?:\s+\w+)?)/g,
         type: 'validation' as const,
-        priority: 'medium' as const
+        priority: 'medium' as const,
       },
       {
         pattern: /(?:if|when)\s+(\w+(?:\s+\w+)?)\s+then/g,
         type: 'policy' as const,
-        priority: 'medium' as const
+        priority: 'medium' as const,
       },
       {
         pattern: /(\w+(?:\s+\w+)?)\s+(?:always|never|invariant)/g,
         type: 'invariant' as const,
-        priority: 'high' as const
-      }
+        priority: 'high' as const,
+      },
     ];
 
     rulePatterns.forEach(({ pattern, type, priority }) => {
       let match;
       while ((match = pattern.exec(lower)) !== null) {
         const ruleName = this.capitalizeWords(match[1]?.trim().replace(/\s+/g, '') || '');
-        const relatedEntities = entities.filter(entity =>
-          lower.includes(entity.toLowerCase())
-        );
+        const relatedEntities = entities.filter(entity => lower.includes(entity.toLowerCase()));
 
         businessRules.push({
           name: `${ruleName}Rule`,
           description: match[0],
           type,
           entities: relatedEntities,
-          priority
+          priority,
         });
       }
     });
@@ -339,7 +539,12 @@ export class NaturalLanguageProcessor {
   /**
    * Calculate domain complexity score
    */
-  private calculateComplexity(lower: string, words: string[], entities: string[], processes: string[]): number {
+  private calculateComplexity(
+    lower: string,
+    words: string[],
+    entities: string[],
+    processes: string[]
+  ): number {
     let score = 0;
 
     // Base complexity from entity count
@@ -368,10 +573,13 @@ export class NaturalLanguageProcessor {
     }
 
     // Compliance/security complexity
-    if (this.complexityIndicators.some(indicator =>
-      ['compliance', 'audit', 'gdpr', 'hipaa', 'security'].includes(indicator) &&
-      lower.includes(indicator)
-    )) {
+    if (
+      this.complexityIndicators.some(
+        indicator =>
+          ['compliance', 'audit', 'gdpr', 'hipaa', 'security'].includes(indicator) &&
+          lower.includes(indicator)
+      )
+    ) {
       score += 0.15;
     }
 
@@ -381,7 +589,11 @@ export class NaturalLanguageProcessor {
   /**
    * Determine domain type based on analysis
    */
-  private determineDomainType(complexity: number, entityCount: number, processCount: number): NLPAnalysis['domainType'] {
+  private determineDomainType(
+    complexity: number,
+    entityCount: number,
+    processCount: number
+  ): NLPAnalysis['domainType'] {
     if (complexity >= 0.8 || entityCount >= 15 || processCount >= 12) {
       return 'enterprise';
     } else if (complexity >= 0.6 || entityCount >= 10 || processCount >= 8) {
@@ -449,17 +661,68 @@ export class NaturalLanguageProcessor {
   }
 
   private capitalizeWords(str: string): string {
-    return str.split(' ').map(word => this.capitalizeFirst(word)).join('');
+    return str
+      .split(' ')
+      .map(word => this.capitalizeFirst(word))
+      .join('');
   }
 
   private isCommonWord(word: string): boolean {
     const commonWords = [
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of',
-      'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had',
-      'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might',
-      'can', 'cannot', 'this', 'that', 'these', 'those', 'it', 'its', 'they',
-      'them', 'their', 'we', 'us', 'our', 'you', 'your', 'he', 'him', 'his',
-      'she', 'her', 'hers'
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'can',
+      'cannot',
+      'this',
+      'that',
+      'these',
+      'those',
+      'it',
+      'its',
+      'they',
+      'them',
+      'their',
+      'we',
+      'us',
+      'our',
+      'you',
+      'your',
+      'he',
+      'him',
+      'his',
+      'she',
+      'her',
+      'hers',
     ];
     return commonWords.includes(word);
   }

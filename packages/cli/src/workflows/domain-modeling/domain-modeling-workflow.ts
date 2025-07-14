@@ -5,11 +5,9 @@
 
 import { WorkflowEngine } from '../../core/engines/workflow-engine';
 import type { WorkflowStep, WorkflowContext, ChoiceOption, ValidationContext } from '../../types';
-import { ComponentType } from '../../types';
 import { Colors } from '../../core/utils/colors';
 import { TemplateEngine } from '../../core/engines/template-engine';
 import { ConfigManager } from '../../core/engines/config-manager';
-import { FileSystem } from '../../core/utils/file-system';
 import { Performance } from '../../core/utils/performance';
 import { chatHistory } from '../../core/utils/chat-history';
 import { ComponentValidator } from '../../core/validation';
@@ -40,7 +38,7 @@ export class DomainModelingWorkflow {
     // Start chat session for this workflow
     this.sessionId = await chatHistory.startSession('Domain Modeling Workflow', {
       workflowType: 'domain-modeling',
-      startedAt: new Date().toISOString()
+      startedAt: new Date().toISOString(),
     });
 
     await chatHistory.addMessage('system', 'Started domain modeling workflow');
@@ -49,11 +47,17 @@ export class DomainModelingWorkflow {
       const context = await this.workflow.start('welcome');
 
       // Record completion
-      await chatHistory.addMessage('system', `Domain modeling completed successfully. Generated ${context.generatedFiles?.length || 0} files.`);
+      await chatHistory.addMessage(
+        'system',
+        `Domain modeling completed successfully. Generated ${context.generatedFiles?.length || 0} files.`
+      );
 
       return context;
     } catch (error) {
-      await chatHistory.addMessage('system', `Domain modeling failed: ${error instanceof Error ? error.message : error}`);
+      await chatHistory.addMessage(
+        'system',
+        `Domain modeling failed: ${error instanceof Error ? error.message : error}`
+      );
       throw error;
     }
   }
@@ -73,7 +77,7 @@ export class DomainModelingWorkflow {
       this.createAdvancedPatternsStep(),
       this.createSmartValidationStep(),
       this.createGenerationStep(),
-      this.createCompletionStep()
+      this.createCompletionStep(),
     ]);
   }
 
@@ -88,10 +92,11 @@ export class DomainModelingWorkflow {
       type: 'prompt',
       prompt: {
         type: 'confirm',
-        message: 'Ready to start domain modeling? This will guide you through creating a complete DDD implementation.',
-        default: true
+        message:
+          'Ready to start domain modeling? This will guide you through creating a complete DDD implementation.',
+        default: true,
       },
-      next: (context) => context.answers.welcome ? 'project-analysis' : 'cancelled'
+      next: context => (context.answers.welcome ? 'project-analysis' : 'cancelled'),
     };
   }
 
@@ -104,7 +109,7 @@ export class DomainModelingWorkflow {
       title: '📊 Project Analysis',
       description: 'Analyzing project context for intelligent suggestions',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Analyzing project context...'));
         console.log('');
 
@@ -116,9 +121,12 @@ export class DomainModelingWorkflow {
         this.promptEngine.displayAnalysis(analysis);
 
         // Record analysis in chat history
-        await chatHistory.addMessage('assistant', `Project analysis completed. Detected ${analysis.frameworks.length} frameworks and ${analysis.patterns.length} patterns.`);
+        await chatHistory.addMessage(
+          'assistant',
+          `Project analysis completed. Detected ${analysis.frameworks.length} frameworks and ${analysis.patterns.length} patterns.`
+        );
       },
-      next: 'domain-description'
+      next: 'domain-description',
     };
   }
 
@@ -133,7 +141,8 @@ export class DomainModelingWorkflow {
       type: 'prompt',
       prompt: {
         type: 'input',
-        message: 'Describe your business domain (e.g., "E-commerce platform with orders, customers can cancel within 24 hours, payments are processed asynchronously")',
+        message:
+          'Describe your business domain (e.g., "E-commerce platform with orders, customers can cancel within 24 hours, payments are processed asynchronously")',
         validate: (input: string) => {
           if (input.length < 20) {
             return 'Please provide a more detailed description (at least 20 characters)';
@@ -142,9 +151,9 @@ export class DomainModelingWorkflow {
             return 'Description is too long (max 500 characters)';
           }
           return true;
-        }
+        },
       },
-      next: 'domain-analysis'
+      next: 'domain-analysis',
     };
   }
 
@@ -157,7 +166,7 @@ export class DomainModelingWorkflow {
       title: '🧠 Domain Analysis',
       description: 'Analyzing your domain for suggested components and patterns',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         const description = context.answers['domain-description'];
 
         // Record user input in chat history
@@ -174,9 +183,12 @@ export class DomainModelingWorkflow {
         this.displayDomainAnalysis(analysis);
 
         // Record analysis in chat history
-        await chatHistory.addMessage('assistant', `Domain analysis completed. Suggested ${analysis.aggregates.length} aggregates, ${analysis.events.length} events, and ${analysis.patterns.length} patterns.`);
+        await chatHistory.addMessage(
+          'assistant',
+          `Domain analysis completed. Suggested ${analysis.aggregates.length} aggregates, ${analysis.events.length} events, and ${analysis.patterns.length} patterns.`
+        );
       },
-      next: 'architecture-selection'
+      next: 'architecture-selection',
     };
   }
 
@@ -190,7 +202,7 @@ export class DomainModelingWorkflow {
       description: 'Choose the architecture pattern that best fits your domain',
       type: 'prompt',
       prompt: SmartPrompts.architectureSelection(),
-      next: 'framework-selection'
+      next: 'framework-selection',
     };
   }
 
@@ -204,7 +216,7 @@ export class DomainModelingWorkflow {
       description: 'Choose the application framework based on your requirements',
       type: 'prompt',
       prompt: SmartPrompts.frameworkSelection(),
-      next: 'component-selection'
+      next: 'component-selection',
     };
   }
 
@@ -229,7 +241,7 @@ export class DomainModelingWorkflow {
             choices.push({
               name: `Aggregates (${analysis.aggregates.length} suggested)`,
               value: 'aggregates',
-              description: `Generate: ${analysis.aggregates.join(', ')}`
+              description: `Generate: ${analysis.aggregates.join(', ')}`,
             });
           }
 
@@ -238,7 +250,7 @@ export class DomainModelingWorkflow {
             choices.push({
               name: `Domain Events (${analysis.events.length} suggested)`,
               value: 'events',
-              description: `Generate: ${analysis.events.join(', ')}`
+              description: `Generate: ${analysis.events.join(', ')}`,
             });
           }
 
@@ -246,14 +258,14 @@ export class DomainModelingWorkflow {
           choices.push({
             name: 'CQRS Commands & Queries',
             value: 'cqrs',
-            description: 'Generate commands, queries, and handlers'
+            description: 'Generate commands, queries, and handlers',
           });
 
           // Add repositories
           choices.push({
             name: 'Repositories',
             value: 'repositories',
-            description: 'Generate repository interfaces and implementations'
+            description: 'Generate repository interfaces and implementations',
           });
 
           // Add specifications
@@ -261,14 +273,14 @@ export class DomainModelingWorkflow {
             choices.push({
               name: 'Specifications',
               value: 'specifications',
-              description: `Business rules: ${analysis.businessRules.join(', ')}`
+              description: `Business rules: ${analysis.businessRules.join(', ')}`,
             });
           }
 
           return choices;
-        }
+        },
       },
-      next: 'advanced-patterns'
+      next: 'advanced-patterns',
     };
   }
 
@@ -293,13 +305,13 @@ export class DomainModelingWorkflow {
             choices.push({
               name: 'CQRS (Recommended)',
               value: 'cqrs',
-              description: 'Command Query Responsibility Segregation - good for complex domains'
+              description: 'Command Query Responsibility Segregation - good for complex domains',
             });
           } else {
             choices.push({
               name: 'CQRS',
               value: 'cqrs',
-              description: 'Command Query Responsibility Segregation'
+              description: 'Command Query Responsibility Segregation',
             });
           }
 
@@ -308,13 +320,13 @@ export class DomainModelingWorkflow {
             choices.push({
               name: 'Event Sourcing (Recommended)',
               value: 'event-sourcing',
-              description: 'Store events as source of truth - excellent for audit trails'
+              description: 'Store events as source of truth - excellent for audit trails',
             });
           } else {
             choices.push({
               name: 'Event Sourcing',
               value: 'event-sourcing',
-              description: 'Store events as source of truth'
+              description: 'Store events as source of truth',
             });
           }
 
@@ -323,29 +335,29 @@ export class DomainModelingWorkflow {
             {
               name: 'Saga Orchestration',
               value: 'saga',
-              description: 'Long-running business processes with compensation'
+              description: 'Long-running business processes with compensation',
             },
             {
               name: 'Projections',
               value: 'projections',
-              description: 'Read model generation from events'
+              description: 'Read model generation from events',
             },
             {
               name: 'Outbox Pattern',
               value: 'outbox',
-              description: 'Reliable event publishing'
+              description: 'Reliable event publishing',
             },
             {
               name: 'Anti-Corruption Layer',
               value: 'acl',
-              description: 'Legacy system integration protection'
+              description: 'Legacy system integration protection',
             }
           );
 
           return choices;
-        }
+        },
       },
-      next: 'smart-validation'
+      next: 'smart-validation',
     };
   }
 
@@ -358,7 +370,7 @@ export class DomainModelingWorkflow {
       title: '🧠 Smart Component Validation',
       description: 'AI-powered validation with intelligent suggestions',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         console.log(Colors.info('Running smart validation...'));
         console.log('');
 
@@ -376,7 +388,7 @@ export class DomainModelingWorkflow {
           outputPath: context.config.outputDir || './src',
           framework: context.answers['framework-selection'],
           patterns: context.answers['advanced-patterns'] || [],
-          existingComponents: []
+          existingComponents: [],
         };
 
         let totalWarnings = 0;
@@ -406,8 +418,12 @@ export class DomainModelingWorkflow {
 
         // Overall validation summary
         console.log(Colors.bold('📋 Validation Summary:'));
-        console.log(`  Errors: ${totalErrors > 0 ? Colors.red(totalErrors.toString()) : Colors.green(totalErrors.toString())}`);
-        console.log(`  Warnings: ${totalWarnings > 0 ? Colors.yellow(totalWarnings.toString()) : Colors.green(totalWarnings.toString())}`);
+        console.log(
+          `  Errors: ${totalErrors > 0 ? Colors.red(totalErrors.toString()) : Colors.green(totalErrors.toString())}`
+        );
+        console.log(
+          `  Warnings: ${totalWarnings > 0 ? Colors.yellow(totalWarnings.toString()) : Colors.green(totalWarnings.toString())}`
+        );
         console.log(`  Suggestions: ${Colors.cyan(totalSuggestions.toString())}`);
         console.log('');
 
@@ -416,15 +432,16 @@ export class DomainModelingWorkflow {
           totalErrors,
           totalWarnings,
           totalSuggestions,
-          isValid: totalErrors === 0
+          isValid: totalErrors === 0,
         };
 
         // Record validation in chat history
-        await chatHistory.addMessage('assistant',
+        await chatHistory.addMessage(
+          'assistant',
           `Smart validation completed. ${totalErrors} errors, ${totalWarnings} warnings, ${totalSuggestions} suggestions.`
         );
       },
-      next: 'generation'
+      next: 'generation',
     };
   }
 
@@ -437,7 +454,7 @@ export class DomainModelingWorkflow {
       title: '⚡ Generating Domain Implementation',
       description: 'Generating your complete domain implementation',
       type: 'action',
-      action: async (context) => {
+      action: async context => {
         const startTime = Performance.now();
 
         console.log(Colors.bold('🎯 Generating Domain Implementation'));
@@ -450,7 +467,11 @@ export class DomainModelingWorkflow {
           const duration = Performance.since(startTime);
 
           console.log('');
-          console.log(Colors.success(`✅ Generated ${generatedFiles.length} files in ${duration.toFixed(1)}ms`));
+          console.log(
+            Colors.success(
+              `✅ Generated ${generatedFiles.length} files in ${duration.toFixed(1)}ms`
+            )
+          );
 
           // Show generated files
           console.log('');
@@ -458,14 +479,15 @@ export class DomainModelingWorkflow {
           generatedFiles.forEach(file => {
             console.log(`  ${Colors.green('✓')} ${file}`);
           });
-
         } catch (error) {
           console.log('');
-          console.error(Colors.error(`❌ Generation failed: ${error instanceof Error ? error.message : error}`));
+          console.error(
+            Colors.error(`❌ Generation failed: ${error instanceof Error ? error.message : error}`)
+          );
           throw error;
         }
       },
-      next: 'completion'
+      next: 'completion',
     };
   }
 
@@ -478,27 +500,43 @@ export class DomainModelingWorkflow {
       title: '🎉 Domain Generation Complete!',
       description: 'Your domain has been successfully generated',
       type: 'completion',
-      action: async (context) => {
+      action: async context => {
         console.log('');
         console.log(Colors.bold(Colors.green('🎉 Domain Generation Complete!')));
         console.log('');
 
         // Show summary
         console.log(Colors.bold('📊 Generation Summary:'));
-        console.log(`  ${Colors.cyan('•')} Architecture: ${context.answers['architecture-selection']}`);
+        console.log(
+          `  ${Colors.cyan('•')} Architecture: ${context.answers['architecture-selection']}`
+        );
         console.log(`  ${Colors.cyan('•')} Framework: ${context.answers['framework-selection']}`);
-        console.log(`  ${Colors.cyan('•')} Components: ${context.answers['component-selection']?.length || 0} types`);
-        console.log(`  ${Colors.cyan('•')} Advanced Patterns: ${context.answers['advanced-patterns']?.length || 0}`);
-        console.log(`  ${Colors.cyan('•')} Generated Files: ${context.generatedFiles?.length || 0}`);
+        console.log(
+          `  ${Colors.cyan('•')} Components: ${context.answers['component-selection']?.length || 0} types`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Advanced Patterns: ${context.answers['advanced-patterns']?.length || 0}`
+        );
+        console.log(
+          `  ${Colors.cyan('•')} Generated Files: ${context.generatedFiles?.length || 0}`
+        );
 
         // Show validation summary
         if (context.smartValidation) {
           console.log('');
           console.log(Colors.bold('🧠 Smart Validation Summary:'));
-          console.log(`  ${Colors.cyan('•')} Errors: ${context.smartValidation.totalErrors > 0 ? Colors.red(context.smartValidation.totalErrors) : Colors.green(context.smartValidation.totalErrors)}`);
-          console.log(`  ${Colors.cyan('•')} Warnings: ${context.smartValidation.totalWarnings > 0 ? Colors.yellow(context.smartValidation.totalWarnings) : Colors.green(context.smartValidation.totalWarnings)}`);
-          console.log(`  ${Colors.cyan('•')} Suggestions: ${Colors.cyan(context.smartValidation.totalSuggestions)}`);
-          console.log(`  ${Colors.cyan('•')} Status: ${context.smartValidation.isValid ? Colors.green('✓ Valid') : Colors.red('✗ Has Issues')}`);
+          console.log(
+            `  ${Colors.cyan('•')} Errors: ${context.smartValidation.totalErrors > 0 ? Colors.red(context.smartValidation.totalErrors) : Colors.green(context.smartValidation.totalErrors)}`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Warnings: ${context.smartValidation.totalWarnings > 0 ? Colors.yellow(context.smartValidation.totalWarnings) : Colors.green(context.smartValidation.totalWarnings)}`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Suggestions: ${Colors.cyan(context.smartValidation.totalSuggestions)}`
+          );
+          console.log(
+            `  ${Colors.cyan('•')} Status: ${context.smartValidation.isValid ? Colors.green('✓ Valid') : Colors.red('✗ Has Issues')}`
+          );
         }
         console.log('');
 
@@ -507,16 +545,18 @@ export class DomainModelingWorkflow {
         console.log(`  ${Colors.green('1.')} Install dependencies: ${Colors.dim('npm install')}`);
         console.log(`  ${Colors.green('2.')} Run tests: ${Colors.dim('npm test')}`);
         console.log(`  ${Colors.green('3.')} Start development: ${Colors.dim('npm run dev')}`);
-        console.log(`  ${Colors.green('4.')} View documentation: ${Colors.dim('see generated README.md')}`);
+        console.log(
+          `  ${Colors.green('4.')} View documentation: ${Colors.dim('see generated README.md')}`
+        );
         console.log('');
 
         // Chat history export offer
         if (this.sessionId) {
           console.log(Colors.info('💬 Chat history has been saved. Export with:'));
-          console.log(`   ${Colors.dim(`vytches-ddd chat export ${  this.sessionId}`)}`);
+          console.log(`   ${Colors.dim(`vytches-ddd chat export ${this.sessionId}`)}`);
           console.log('');
         }
-      }
+      },
     };
   }
 
@@ -525,6 +565,8 @@ export class DomainModelingWorkflow {
    */
   private analyzeDomain(description: string): {
     aggregates: string[];
+    entities: string[];
+    valueObjects: string[];
     events: string[];
     businessRules: string[];
     patterns: string[];
@@ -534,21 +576,74 @@ export class DomainModelingWorkflow {
     const lower = description.toLowerCase();
 
     // Extract potential aggregates (nouns)
-    const aggregateKeywords = ['order', 'customer', 'payment', 'product', 'user', 'account', 'invoice', 'shipment', 'inventory'];
-    const aggregates = aggregateKeywords.filter(keyword => lower.includes(keyword))
+    const aggregateKeywords = [
+      'order',
+      'customer',
+      'payment',
+      'product',
+      'user',
+      'account',
+      'invoice',
+      'shipment',
+      'inventory',
+    ];
+    const aggregates = aggregateKeywords
+      .filter(keyword => lower.includes(keyword))
       .map(keyword => keyword.charAt(0).toUpperCase() + keyword.slice(1));
 
     // Extract potential events
-    const eventKeywords = ['created', 'updated', 'deleted', 'processed', 'cancelled', 'approved', 'rejected'];
+    const eventKeywords = [
+      'created',
+      'updated',
+      'deleted',
+      'processed',
+      'cancelled',
+      'approved',
+      'rejected',
+    ];
     const events: string[] = [];
 
     aggregates.forEach(aggregate => {
       eventKeywords.forEach(event => {
-        if (lower.includes(event) || lower.includes(`can ${  event}`) || lower.includes(`will ${  event}`)) {
+        if (
+          lower.includes(event) ||
+          lower.includes(`can ${event}`) ||
+          lower.includes(`will ${event}`)
+        ) {
           events.push(`${aggregate}${event.charAt(0).toUpperCase() + event.slice(1)}`);
         }
       });
     });
+
+    // Extract potential entities
+    const entityKeywords = [
+      'item',
+      'detail',
+      'record',
+      'entry',
+      'member',
+      'participant',
+      'document',
+      'file',
+    ];
+    const entities = entityKeywords
+      .filter(keyword => lower.includes(keyword))
+      .map(keyword => keyword.charAt(0).toUpperCase() + keyword.slice(1));
+
+    // Extract potential value objects
+    const valueObjectKeywords = [
+      'email',
+      'address',
+      'phone',
+      'id',
+      'status',
+      'type',
+      'code',
+      'number',
+    ];
+    const valueObjects = valueObjectKeywords
+      .filter(keyword => lower.includes(keyword))
+      .map(keyword => keyword.charAt(0).toUpperCase() + keyword.slice(1));
 
     // Extract business rules
     const businessRules = [];
@@ -575,25 +670,42 @@ export class DomainModelingWorkflow {
     }
 
     // Calculate complexity score
-    const complexity = Math.min(1.0, (aggregates.length * 0.2) + (events.length * 0.1) + (businessRules.length * 0.15));
+    const complexity = Math.min(
+      1.0,
+      aggregates.length * 0.2 + events.length * 0.1 + businessRules.length * 0.15
+    );
 
     // Check if audit is needed
-    const needsAudit = lower.includes('audit') || lower.includes('track') || lower.includes('history') || lower.includes('compliance');
+    const needsAudit =
+      lower.includes('audit') ||
+      lower.includes('track') ||
+      lower.includes('history') ||
+      lower.includes('compliance');
 
     return {
       aggregates,
+      entities,
+      valueObjects,
       events,
       businessRules,
       patterns,
       complexity,
-      needsAudit
+      needsAudit,
     };
   }
 
   /**
    * Display domain analysis results
    */
-  private displayDomainAnalysis(analysis: any): void {
+  private displayDomainAnalysis(analysis: {
+    aggregates: string[];
+    entities: string[];
+    valueObjects: string[];
+    events: string[];
+    businessRules: string[];
+    patterns: string[];
+    complexity: number;
+  }): void {
     console.log(Colors.bold('🧠 Domain Analysis Results:'));
     console.log('');
 
@@ -607,7 +719,8 @@ export class DomainModelingWorkflow {
 
     if (analysis.events.length > 0) {
       console.log(Colors.bold('📢 Suggested Events:'));
-      analysis.events.slice(0, 8).forEach((event: string) => { // Limit display
+      analysis.events.slice(0, 8).forEach((event: string) => {
+        // Limit display
         console.log(`  ${Colors.blue('•')} ${event}`);
       });
       if (analysis.events.length > 8) {
@@ -705,17 +818,27 @@ export class DomainModelingWorkflow {
     // Generate CQRS components
     if (selectedComponents.includes('cqrs')) {
       for (const aggregate of analysis.aggregates) {
-        generatedFiles.push(`${config.outputDir}/application/commands/create-${aggregate.toLowerCase()}.command.ts`);
-        generatedFiles.push(`${config.outputDir}/application/handlers/create-${aggregate.toLowerCase()}.handler.ts`);
-        generatedFiles.push(`${config.outputDir}/application/queries/get-${aggregate.toLowerCase()}.query.ts`);
+        generatedFiles.push(
+          `${config.outputDir}/application/commands/create-${aggregate.toLowerCase()}.command.ts`
+        );
+        generatedFiles.push(
+          `${config.outputDir}/application/handlers/create-${aggregate.toLowerCase()}.handler.ts`
+        );
+        generatedFiles.push(
+          `${config.outputDir}/application/queries/get-${aggregate.toLowerCase()}.query.ts`
+        );
       }
     }
 
     // Generate repositories
     if (selectedComponents.includes('repositories')) {
       for (const aggregate of analysis.aggregates) {
-        generatedFiles.push(`${config.outputDir}/domain/repositories/i${aggregate.toLowerCase()}.repository.ts`);
-        generatedFiles.push(`${config.outputDir}/infrastructure/repositories/${aggregate.toLowerCase()}.repository.ts`);
+        generatedFiles.push(
+          `${config.outputDir}/domain/repositories/i${aggregate.toLowerCase()}.repository.ts`
+        );
+        generatedFiles.push(
+          `${config.outputDir}/infrastructure/repositories/${aggregate.toLowerCase()}.repository.ts`
+        );
       }
     }
 

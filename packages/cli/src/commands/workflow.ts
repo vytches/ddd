@@ -21,28 +21,33 @@ export const workflowCommand: Command = {
     {
       flags: '-t, --type <type>',
       description: 'Workflow type to start',
-      choices: ['domain-modeling', 'component-generation', 'enterprise-setup', 'migration-planning'],
-      defaultValue: 'domain-modeling'
+      choices: [
+        'domain-modeling',
+        'component-generation',
+        'enterprise-setup',
+        'migration-planning',
+      ],
+      defaultValue: 'domain-modeling',
     },
     {
       flags: '--resume <sessionId>',
-      description: 'Resume a previous chat session'
+      description: 'Resume a previous chat session',
     },
     {
       flags: '--list-sessions',
-      description: 'List available chat sessions'
+      description: 'List available chat sessions',
     },
     {
       flags: '--export <sessionId>',
-      description: 'Export chat session to file'
-    }
+      description: 'Export chat session to file',
+    },
   ],
   examples: [
     'vytches-ddd workflow',
     'vytches-ddd workflow --type domain-modeling',
     'vytches-ddd workflow --resume session-123',
     'vytches-ddd workflow --list-sessions',
-    'vytches-ddd workflow --export session-123'
+    'vytches-ddd workflow --export session-123',
   ],
   action: async (_args: string[], options: Record<string, unknown>) => {
     try {
@@ -69,12 +74,13 @@ export const workflowCommand: Command = {
       // Start workflow
       const workflowType = (options.type as string) || 'domain-modeling';
       await startWorkflow(workflowType, config);
-
     } catch (error) {
-      console.error(Colors.error(`Workflow failed: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(`Workflow failed: ${error instanceof Error ? error.message : error}`)
+      );
       process.exit(1);
     }
-  }
+  },
 };
 
 /**
@@ -116,7 +122,9 @@ async function startWorkflow(type: string, config: CLIConfig): Promise<void> {
       return;
 
     default:
-      throw new Error(`Unknown workflow type: ${type}. Available: domain-modeling, component-generation, enterprise-setup, migration-planning`);
+      throw new Error(
+        `Unknown workflow type: ${type}. Available: domain-modeling, component-generation, enterprise-setup, migration-planning`
+      );
   }
 
   // Show completion summary
@@ -140,7 +148,9 @@ async function handleListSessions(): Promise<void> {
   const sessions = chatHistory.getSessionHistory(10);
 
   if (sessions.length === 0) {
-    console.log(Colors.dim('No chat sessions found. Start a workflow to create your first session.'));
+    console.log(
+      Colors.dim('No chat sessions found. Start a workflow to create your first session.')
+    );
     return;
   }
 
@@ -183,7 +193,6 @@ async function handleExportSession(sessionId: string): Promise<void> {
     console.log(Colors.success('📄 Session exported successfully:'));
     console.log(`  ${Colors.cyan('JSON:')} ${jsonPath}`);
     console.log(`  ${Colors.cyan('Markdown:')} ${markdownPath}`);
-
   } catch (error) {
     throw new Error(`Failed to export session: ${error instanceof Error ? error.message : error}`);
   }
@@ -219,10 +228,18 @@ async function handleResumeSession(sessionId: string): Promise<void> {
       const recentMessages = session.messages.slice(-3);
 
       recentMessages.forEach(message => {
-        const roleIcon = message.role === 'user' ? '👤' : message.role === 'assistant' ? '🤖' : '⚙️';
-        const roleColor = message.role === 'user' ? Colors.blue : message.role === 'assistant' ? Colors.green : Colors.dim;
+        const roleIcon =
+          message.role === 'user' ? '👤' : message.role === 'assistant' ? '🤖' : '⚙️';
+        const roleColor =
+          message.role === 'user'
+            ? Colors.blue
+            : message.role === 'assistant'
+              ? Colors.green
+              : Colors.dim;
 
-        console.log(`${roleIcon} ${roleColor(message.role)}: ${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}`);
+        console.log(
+          `${roleIcon} ${roleColor(message.role)}: ${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}`
+        );
       });
 
       console.log('');
@@ -231,11 +248,14 @@ async function handleResumeSession(sessionId: string): Promise<void> {
     // Determine next action based on session context
     if (session.context?.workflowType) {
       console.log(Colors.info(`🔄 Ready to continue ${session.context.workflowType} workflow`));
-      console.log(Colors.dim('Note: Currently resuming workflows requires restarting. Use the context above to continue manually.'));
+      console.log(
+        Colors.dim(
+          'Note: Currently resuming workflows requires restarting. Use the context above to continue manually.'
+        )
+      );
     } else {
       console.log(Colors.info('📝 Session loaded. You can continue from where you left off.'));
     }
-
   } catch (error) {
     throw new Error(`Failed to resume session: ${error instanceof Error ? error.message : error}`);
   }

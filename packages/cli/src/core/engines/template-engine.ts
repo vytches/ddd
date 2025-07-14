@@ -4,7 +4,7 @@
  */
 
 import * as Handlebars from 'handlebars';
-import type { TemplateContext} from '../../types';
+import type { TemplateContext } from '../../types';
 import { Template, TemplateError } from '../../types';
 import { FileSystem } from '../utils/file-system';
 
@@ -35,7 +35,7 @@ export class TemplateEngine {
     // String transformation helpers
     this.handlebars.registerHelper('uppercase', (str: string) => str?.toUpperCase() || '');
     this.handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase() || '');
-    this.handlebars.registerHelper('capitalize', (str: string) => 
+    this.handlebars.registerHelper('capitalize', (str: string) =>
       str ? str.charAt(0).toUpperCase() + str.slice(1) : ''
     );
     this.handlebars.registerHelper('camelCase', (str: string) => this.toCamelCase(str || ''));
@@ -62,7 +62,7 @@ export class TemplateEngine {
     });
 
     // Default value helper
-    this.handlebars.registerHelper('default', (value: any, defaultValue: any) => 
+    this.handlebars.registerHelper('default', (value: any, defaultValue: any) =>
       value != null && value !== '' ? value : defaultValue
     );
 
@@ -78,7 +78,9 @@ export class TemplateEngine {
       const compiled = this.handlebars.compile(content);
       this.templates.set(name, compiled);
     } catch (error) {
-      throw new TemplateError(`Failed to compile template ${name}: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Failed to compile template ${name}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -89,7 +91,9 @@ export class TemplateEngine {
     try {
       this.handlebars.registerPartial(name, content);
     } catch (error) {
-      throw new TemplateError(`Failed to register partial ${name}: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Failed to register partial ${name}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -101,7 +105,9 @@ export class TemplateEngine {
       const content = await FileSystem.readFile(filePath);
       this.registerTemplate(name, content);
     } catch (error) {
-      throw new TemplateError(`Failed to load template ${name} from ${filePath}: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Failed to load template ${name} from ${filePath}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -120,7 +126,9 @@ export class TemplateEngine {
         await this.loadTemplate(name, file);
       }
     } catch (error) {
-      throw new TemplateError(`Failed to load templates from ${directory}: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Failed to load templates from ${directory}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -131,7 +139,9 @@ export class TemplateEngine {
     const template = this.templates.get(templateName);
     if (!template) {
       const availableTemplates = Array.from(this.templates.keys()).join(', ');
-      throw new TemplateError(`Template not found: ${templateName}. Available: ${availableTemplates}`);
+      throw new TemplateError(
+        `Template not found: ${templateName}. Available: ${availableTemplates}`
+      );
     }
 
     try {
@@ -139,7 +149,9 @@ export class TemplateEngine {
       const enhancedContext = this.enhanceContext(context);
       return template(enhancedContext);
     } catch (error) {
-      throw new TemplateError(`Template rendering failed for ${templateName}: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Template rendering failed for ${templateName}: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -152,7 +164,9 @@ export class TemplateEngine {
       const enhancedContext = this.enhanceContext(context);
       return compiled(enhancedContext);
     } catch (error) {
-      throw new TemplateError(`Template string rendering failed: ${error instanceof Error ? error.message : error}`);
+      throw new TemplateError(
+        `Template string rendering failed: ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -203,7 +217,7 @@ export class TemplateEngine {
    * Convert string to camelCase
    */
   private toCamelCase(str: string): string {
-    return str.replace(/[_-\s]+(.)?/g, (_, char) => char ? char.toUpperCase() : '');
+    return str.replace(/[_-\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ''));
   }
 
   /**
@@ -218,18 +232,19 @@ export class TemplateEngine {
    * Convert string to kebab-case
    */
   private toKebabCase(str: string): string {
-    return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
-              .replace(/[_\s]+/g, '-')
-              .replace(/^-+|-+$/g, '');
+    return str
+      .replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
+      .replace(/[_\s]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   /**
    * Convert string to snake_case
    */
   private toSnakeCase(str: string): string {
-    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
-              .replace(/[-\s]+/g, '_')
-              .replace(/^_+|_+$/g, '');
+    return str
+      .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+      .replace(/[-\s]+/g, '_')
+      .replace(/^_+|_+$/g, '');
   }
-
 }

@@ -1,9 +1,10 @@
+/* eslint-disable no-case-declarations */
 /**
  * @fileoverview Workflow Engine - Interactive workflow system
  * AI-assisted workflow management for complex CLI operations
  */
 
-import type { WorkflowStep, WorkflowContext} from '../../types';
+import type { WorkflowStep, WorkflowContext } from '../../types';
 import { CLIError } from '../../types';
 import { Prompts } from '../utils/prompts';
 import { Colors } from '../utils/colors';
@@ -23,7 +24,7 @@ export class WorkflowEngine {
       answers: {},
       config: {} as any, // Will be injected
       outputPath: './src',
-      ...initialContext
+      ...initialContext,
     };
   }
 
@@ -70,10 +71,11 @@ export class WorkflowEngine {
       console.log(Colors.success('Workflow completed successfully!'));
 
       return this.context;
-
     } catch (error) {
       console.log('');
-      console.error(Colors.error(`Workflow failed: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(`Workflow failed: ${error instanceof Error ? error.message : error}`)
+      );
       throw error;
     } finally {
       Prompts.close();
@@ -135,9 +137,10 @@ export class WorkflowEngine {
       }
 
       console.log('');
-
     } catch (error) {
-      throw new CLIError(`Failed to execute step '${step.title}': ${error instanceof Error ? error.message : error}`);
+      throw new CLIError(
+        `Failed to execute step '${step.title}': ${error instanceof Error ? error.message : error}`
+      );
     }
   }
 
@@ -157,7 +160,7 @@ export class WorkflowEngine {
         answer = await Prompts.ask({
           message: prompt.message,
           ...(prompt.default && { default: prompt.default }),
-          ...(prompt.validate && { validate: prompt.validate })
+          ...(prompt.validate && { validate: prompt.validate }),
         });
         break;
 
@@ -166,22 +169,19 @@ export class WorkflowEngine {
           throw new CLIError(`Select prompt '${step.id}' missing choices`);
         }
 
-        const rawChoices = typeof prompt.choices === 'function'
-          ? prompt.choices(this.context)
-          : prompt.choices;
+        const rawChoices =
+          typeof prompt.choices === 'function' ? prompt.choices(this.context) : prompt.choices;
 
         const choices = Array.isArray(rawChoices)
           ? rawChoices.map(choice =>
-              typeof choice === 'string'
-                ? { name: choice, value: choice }
-                : choice
+              typeof choice === 'string' ? { name: choice, value: choice } : choice
             )
           : [];
 
         answer = await Prompts.select({
           message: prompt.message,
           choices,
-          default: prompt.default
+          default: prompt.default,
         });
         break;
 
@@ -190,35 +190,32 @@ export class WorkflowEngine {
           throw new CLIError(`Multi-select prompt '${step.id}' missing choices`);
         }
 
-        const rawMultiChoices = typeof prompt.choices === 'function'
-          ? prompt.choices(this.context)
-          : prompt.choices;
+        const rawMultiChoices =
+          typeof prompt.choices === 'function' ? prompt.choices(this.context) : prompt.choices;
 
         const multiChoices = Array.isArray(rawMultiChoices)
           ? rawMultiChoices.map(choice =>
-              typeof choice === 'string'
-                ? { name: choice, value: choice }
-                : choice
+              typeof choice === 'string' ? { name: choice, value: choice } : choice
             )
           : [];
 
         answer = await Prompts.multiSelect({
           message: prompt.message,
-          choices: multiChoices
+          choices: multiChoices,
         });
         break;
 
       case 'confirm':
         answer = await Prompts.confirm({
           message: prompt.message,
-          default: prompt.default
+          default: prompt.default,
         });
         break;
 
       case 'password':
         answer = await Prompts.password({
           message: prompt.message,
-          ...(prompt.validate && { validate: prompt.validate })
+          ...(prompt.validate && { validate: prompt.validate }),
         });
         break;
 
@@ -324,7 +321,7 @@ export class WorkflowEngine {
       total,
       completed,
       current: this.currentStep,
-      percentage
+      percentage,
     };
   }
 
@@ -352,9 +349,10 @@ export class WorkflowEngine {
         prompt: {
           type: 'input',
           message: 'Describe your business domain',
-          validate: (input) => input.length > 10 || 'Please provide a detailed description (at least 10 characters)'
+          validate: input =>
+            input.length > 10 || 'Please provide a detailed description (at least 10 characters)',
         },
-        next: 'domain-name'
+        next: 'domain-name',
       },
       {
         id: 'domain-name',
@@ -364,9 +362,11 @@ export class WorkflowEngine {
         prompt: {
           type: 'input',
           message: 'What is the name of your domain?',
-          validate: (input) => /^[A-Za-z][A-Za-z0-9\s]*$/.test(input) || 'Domain name must start with a letter and contain only letters, numbers, and spaces'
+          validate: input =>
+            /^[A-Za-z][A-Za-z0-9\s]*$/.test(input) ||
+            'Domain name must start with a letter and contain only letters, numbers, and spaces',
         },
-        next: 'architecture-type'
+        next: 'architecture-type',
       },
       {
         id: 'architecture-type',
@@ -377,15 +377,35 @@ export class WorkflowEngine {
           type: 'select',
           message: 'Choose architecture pattern',
           choices: [
-            { name: 'Clean Architecture', value: 'clean-architecture', description: 'Dependency inversion with clear boundaries' },
-            { name: 'Hexagonal Architecture', value: 'hexagonal', description: 'Ports and adapters pattern' },
-            { name: 'Onion Architecture', value: 'onion', description: 'Concentric layers with domain at center' },
-            { name: 'Modular Monolith', value: 'modular-monolith', description: 'Single deployment with module boundaries' },
-            { name: 'Microservices', value: 'microservices', description: 'Distributed services architecture' }
+            {
+              name: 'Clean Architecture',
+              value: 'clean-architecture',
+              description: 'Dependency inversion with clear boundaries',
+            },
+            {
+              name: 'Hexagonal Architecture',
+              value: 'hexagonal',
+              description: 'Ports and adapters pattern',
+            },
+            {
+              name: 'Onion Architecture',
+              value: 'onion',
+              description: 'Concentric layers with domain at center',
+            },
+            {
+              name: 'Modular Monolith',
+              value: 'modular-monolith',
+              description: 'Single deployment with module boundaries',
+            },
+            {
+              name: 'Microservices',
+              value: 'microservices',
+              description: 'Distributed services architecture',
+            },
           ],
-          default: 0
+          default: 0,
         },
-        next: 'framework-selection'
+        next: 'framework-selection',
       },
       {
         id: 'framework-selection',
@@ -396,14 +416,30 @@ export class WorkflowEngine {
           type: 'select',
           message: 'Select application framework',
           choices: [
-            { name: 'NestJS', value: 'nestjs', description: 'Enterprise Node.js framework with decorators' },
-            { name: 'Express.js', value: 'express', description: 'Minimal and flexible Node.js framework' },
-            { name: 'Fastify', value: 'fastify', description: 'Fast and low overhead web framework' },
-            { name: 'Standalone', value: 'standalone', description: 'No specific framework, pure TypeScript' }
+            {
+              name: 'NestJS',
+              value: 'nestjs',
+              description: 'Enterprise Node.js framework with decorators',
+            },
+            {
+              name: 'Express.js',
+              value: 'express',
+              description: 'Minimal and flexible Node.js framework',
+            },
+            {
+              name: 'Fastify',
+              value: 'fastify',
+              description: 'Fast and low overhead web framework',
+            },
+            {
+              name: 'Standalone',
+              value: 'standalone',
+              description: 'No specific framework, pure TypeScript',
+            },
           ],
-          default: 0
+          default: 0,
         },
-        next: 'advanced-patterns'
+        next: 'advanced-patterns',
       },
       {
         id: 'advanced-patterns',
@@ -414,34 +450,54 @@ export class WorkflowEngine {
           type: 'multiselect',
           message: 'Select advanced patterns (optional)',
           choices: [
-            { name: 'CQRS', value: 'cqrs', description: 'Command Query Responsibility Segregation' },
-            { name: 'Event Sourcing', value: 'event-sourcing', description: 'Store events as source of truth' },
-            { name: 'Saga Orchestration', value: 'saga', description: 'Long-running business processes' },
-            { name: 'Projections', value: 'projections', description: 'Read model generation from events' },
+            {
+              name: 'CQRS',
+              value: 'cqrs',
+              description: 'Command Query Responsibility Segregation',
+            },
+            {
+              name: 'Event Sourcing',
+              value: 'event-sourcing',
+              description: 'Store events as source of truth',
+            },
+            {
+              name: 'Saga Orchestration',
+              value: 'saga',
+              description: 'Long-running business processes',
+            },
+            {
+              name: 'Projections',
+              value: 'projections',
+              description: 'Read model generation from events',
+            },
             { name: 'Outbox Pattern', value: 'outbox', description: 'Reliable event publishing' },
-            { name: 'Anti-Corruption Layer', value: 'acl', description: 'Legacy system integration' }
-          ]
+            {
+              name: 'Anti-Corruption Layer',
+              value: 'acl',
+              description: 'Legacy system integration',
+            },
+          ],
         },
-        next: 'generate-domain'
+        next: 'generate-domain',
       },
       {
         id: 'generate-domain',
         title: 'Generate Domain',
         description: 'Generate the complete domain implementation',
         type: 'action',
-        action: async (context) => {
+        action: async context => {
           // Domain generation logic will be implemented here
           console.log(Colors.info('Generating domain with configuration:'));
           console.log(JSON.stringify(context.answers, null, 2));
         },
-        next: 'completion'
+        next: 'completion',
       },
       {
         id: 'completion',
         title: '🎉 Domain Generation Complete!',
         description: 'Your domain has been successfully generated',
-        type: 'completion'
-      }
+        type: 'completion',
+      },
     ]);
 
     return workflow;
@@ -463,17 +519,25 @@ export class WorkflowEngine {
           type: 'select',
           message: 'What type of component would you like to generate?',
           choices: [
-            { name: 'Aggregate', value: 'aggregate', description: 'Domain aggregate with business logic' },
+            {
+              name: 'Aggregate',
+              value: 'aggregate',
+              description: 'Domain aggregate with business logic',
+            },
             { name: 'Entity', value: 'entity', description: 'Domain entity with identity' },
             { name: 'Value Object', value: 'value-object', description: 'Immutable value object' },
-            { name: 'Specification', value: 'specification', description: 'Business rule specification' },
+            {
+              name: 'Specification',
+              value: 'specification',
+              description: 'Business rule specification',
+            },
             { name: 'Policy', value: 'policy', description: 'Business policy' },
             { name: 'Command', value: 'command', description: 'CQRS command' },
             { name: 'Query', value: 'query', description: 'CQRS query' },
-            { name: 'Event', value: 'event', description: 'Domain event' }
-          ]
+            { name: 'Event', value: 'event', description: 'Domain event' },
+          ],
         },
-        next: 'component-name'
+        next: 'component-name',
       },
       {
         id: 'component-name',
@@ -483,28 +547,30 @@ export class WorkflowEngine {
         prompt: {
           type: 'input',
           message: 'Component name (PascalCase)',
-          validate: (input) => /^[A-Z][a-zA-Z0-9]*$/.test(input) || 'Name must be in PascalCase (e.g., OrderAggregate)'
+          validate: input =>
+            /^[A-Z][a-zA-Z0-9]*$/.test(input) ||
+            'Name must be in PascalCase (e.g., OrderAggregate)',
         },
-        next: 'generate-component'
+        next: 'generate-component',
       },
       {
         id: 'generate-component',
         title: 'Generate Component',
         description: 'Generating your component',
         type: 'action',
-        action: async (context) => {
+        action: async context => {
           // Component generation logic will be implemented here
           const { 'component-type': type, 'component-name': name } = context.answers;
           console.log(Colors.info(`Generating ${type}: ${name}`));
         },
-        next: 'completion'
+        next: 'completion',
       },
       {
         id: 'completion',
         title: '✅ Component Generated Successfully!',
         description: 'Your component has been created',
-        type: 'completion'
-      }
+        type: 'completion',
+      },
     ]);
 
     return workflow;

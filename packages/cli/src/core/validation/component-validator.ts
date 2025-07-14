@@ -3,7 +3,13 @@
  * Smart validation system for DDD components with context awareness
  */
 
-import type { ComponentType, ValidationResult, ValidationRule, ValidationContext, ProjectContext as ProjectContextType } from '../../types';
+import type {
+  ComponentType,
+  ValidationResult,
+  ValidationRule,
+  ValidationContext,
+  ProjectContext as ProjectContextType,
+} from '../../types';
 import { Colors } from '../utils/colors';
 import { FileSystem } from '../utils/file-system';
 
@@ -73,8 +79,8 @@ export class ComponentValidator {
         componentType: type,
         componentName: name,
         projectContext,
-        confidence: this.calculateConfidence(warnings, errors, suggestions)
-      }
+        confidence: this.calculateConfidence(warnings, errors, suggestions),
+      },
     };
   }
 
@@ -107,7 +113,7 @@ export class ComponentValidator {
           }
 
           return { warnings, errors: [], suggestions };
-        }
+        },
       },
       {
         name: 'aggregate-repository-pattern',
@@ -124,8 +130,8 @@ export class ComponentValidator {
           }
 
           return { warnings: [], errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
 
     // Entity validation rules
@@ -146,8 +152,8 @@ export class ComponentValidator {
           }
 
           return { warnings, errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
 
     // Value Object validation rules
@@ -165,8 +171,8 @@ export class ComponentValidator {
           suggestions.push('Ensure value object is immutable with validation in constructor');
 
           return { warnings: [], errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
 
     // Event validation rules
@@ -183,7 +189,9 @@ export class ComponentValidator {
           }
 
           if (!name.includes('ed') && !name.includes('Created') && !name.includes('Updated')) {
-            suggestions.push('Use past tense for event names (e.g., OrderCreated, PaymentProcessed)');
+            suggestions.push(
+              'Use past tense for event names (e.g., OrderCreated, PaymentProcessed)'
+            );
           }
 
           if (!projectContext.hasEventBus) {
@@ -191,8 +199,8 @@ export class ComponentValidator {
           }
 
           return { warnings, errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
 
     // Command validation rules
@@ -216,8 +224,8 @@ export class ComponentValidator {
           }
 
           return { warnings: [], errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
 
     // Query validation rules
@@ -241,8 +249,8 @@ export class ComponentValidator {
           }
 
           return { warnings: [], errors: [], suggestions };
-        }
-      }
+        },
+      },
     ]);
   }
 
@@ -303,7 +311,7 @@ export class ComponentValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -327,9 +335,10 @@ export class ComponentValidator {
         if (exactMatch) {
           errors.push(`Component "${name}" already exists at ${exactMatch.path}`);
         } else {
-          const similarNames = conflicts.filter(c =>
-            c.name.toLowerCase().includes(name.toLowerCase()) ||
-            name.toLowerCase().includes(c.name.toLowerCase())
+          const similarNames = conflicts.filter(
+            c =>
+              c.name.toLowerCase().includes(name.toLowerCase()) ||
+              name.toLowerCase().includes(c.name.toLowerCase())
           );
 
           if (similarNames.length > 0) {
@@ -346,7 +355,7 @@ export class ComponentValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -370,7 +379,7 @@ export class ComponentValidator {
       hasReadModels: false,
       hasTypeORM: false,
       frameworks: [],
-      followsNamingConvention: true
+      followsNamingConvention: true,
     };
 
     try {
@@ -393,17 +402,23 @@ export class ComponentValidator {
 
         context.hasAggregates = files.some(f => f.includes('aggregate'));
         context.hasEntities = files.some(f => f.includes('entity'));
-        context.hasValueObjects = files.some(f => f.includes('value-object') || f.includes('value.object'));
+        context.hasValueObjects = files.some(
+          f => f.includes('value-object') || f.includes('value.object')
+        );
         context.hasEvents = files.some(f => f.includes('event'));
         context.hasCommands = files.some(f => f.includes('command'));
         context.hasQueries = files.some(f => f.includes('query'));
         context.hasRepositories = files.some(f => f.includes('repository'));
-        context.hasCommandHandlers = files.some(f => f.includes('handler') && f.includes('command'));
+        context.hasCommandHandlers = files.some(
+          f => f.includes('handler') && f.includes('command')
+        );
         context.hasQueryHandlers = files.some(f => f.includes('handler') && f.includes('query'));
         context.hasEventBus = files.some(f => f.includes('event-bus') || f.includes('event.bus'));
         context.hasEntityId = files.some(f => f.includes('entity-id') || f.includes('entity.id'));
         context.hasCQRS = context.hasCommands && context.hasQueries;
-        context.hasReadModels = files.some(f => f.includes('read-model') || f.includes('projection'));
+        context.hasReadModels = files.some(
+          f => f.includes('read-model') || f.includes('projection')
+        );
       }
     } catch (error) {
       // Continue with default context if analysis fails
@@ -467,11 +482,7 @@ export class ComponentValidator {
   /**
    * Calculate confidence score for validation
    */
-  private calculateConfidence(
-    warnings: string[],
-    errors: string[],
-    suggestions: string[]
-  ): number {
+  private calculateConfidence(warnings: string[], errors: string[], suggestions: string[]): number {
     let confidence = 1.0;
 
     // Reduce confidence for errors
@@ -511,7 +522,7 @@ export class ComponentValidator {
           components.push({
             name: componentName,
             path: file,
-            type: this.detectComponentType(fileName)
+            type: this.detectComponentType(fileName),
           });
         }
       }
@@ -623,7 +634,8 @@ export class ComponentValidator {
 
     if (result.metadata?.confidence !== undefined) {
       const confidence = Math.round(result.metadata.confidence * 100);
-      const confidenceColor = confidence >= 80 ? Colors.green : confidence >= 60 ? Colors.yellow : Colors.red;
+      const confidenceColor =
+        confidence >= 80 ? Colors.green : confidence >= 60 ? Colors.yellow : Colors.red;
       console.log('');
       console.log(`${Colors.bold('Confidence:')} ${confidenceColor(`${confidence}%`)}`);
     }
@@ -631,4 +643,3 @@ export class ComponentValidator {
     console.log('');
   }
 }
-

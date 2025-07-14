@@ -7,17 +7,27 @@
 
 ## Overview
 
-VytchesDDD CLI is a revolutionary command-line tool that generates complete domain implementations using Domain-Driven Design patterns. It features AI-powered analysis, intelligent pattern recommendations, and comprehensive code generation for enterprise-grade applications.
+VytchesDDD CLI is a revolutionary command-line tool that generates complete
+domain implementations using Domain-Driven Design patterns. It features
+AI-powered analysis, intelligent pattern recommendations, and comprehensive code
+generation for enterprise-grade applications.
 
 ### ✨ Key Features
 
-- **🧠 AI-Powered Domain Analysis** - Natural language processing to extract entities, processes, and relationships
-- **🎯 Complete Pattern Support** - All VytchesDDD patterns including Aggregates, Entities, Value Objects, CQRS, Event Sourcing, Sagas, and more
-- **🏗️ Multiple Architectures** - Clean Architecture, Hexagonal, Onion, Modular Monolith, and Microservices
-- **⚡ Framework Integration** - Built-in support for NestJS, Express, Fastify, or standalone TypeScript
-- **🗺️ Bounded Context Mapping** - Intelligent context identification with relationship mapping
-- **🚀 Enterprise Features** - Security, compliance, monitoring, and resilience patterns out of the box
-- **🤖 Claude Code Integration** - Optimized for AI-assisted development with CLAUDE.md generation
+- **🧠 AI-Powered Domain Analysis** - Natural language processing to extract
+  entities, processes, and relationships
+- **🎯 Complete Pattern Support** - All VytchesDDD patterns including
+  Aggregates, Entities, Value Objects, CQRS, Event Sourcing, Sagas, and more
+- **🏗️ Multiple Architectures** - Clean Architecture, Hexagonal, Onion, Modular
+  Monolith, and Microservices
+- **⚡ Framework Integration** - Built-in support for NestJS, Express, Fastify,
+  or standalone TypeScript
+- **🗺️ Bounded Context Mapping** - Intelligent context identification with
+  relationship mapping
+- **🚀 Enterprise Features** - Security, compliance, monitoring, and resilience
+  patterns out of the box
+- **🤖 Claude Code Integration** - Optimized for AI-assisted development with
+  CLAUDE.md generation
 
 ## Installation
 
@@ -129,10 +139,13 @@ vytches-ddd g -t entity -n Customer
 ```
 
 **Options:**
-- `-t, --type <type>` - Component type (aggregate, entity, value-object, specification, policy, command, query, event, repository, domain-service)
+
+- `-t, --type <type>` - Component type (aggregate, entity, value-object,
+  specification, policy, command, query, event, repository, domain-service)
 - `-n, --name <name>` - Component name
 - `-o, --output <path>` - Output directory (default: ./src)
-- `-f, --framework <framework>` - Target framework (nestjs, express, fastify, standalone)
+- `-f, --framework <framework>` - Target framework (nestjs, express, fastify,
+  standalone)
 - `--domain <domain>` - Domain name for the component
 - `--with-tests` - Generate tests (default: true)
 - `--dry-run` - Preview without creating files
@@ -178,11 +191,15 @@ vytches-ddd domain \
 ```
 
 **Options:**
+
 - `-n, --name <name>` - Domain name
-- `-s, --structure <type>` - Architecture structure (clean-architecture, hexagonal, onion, modular-monolith, microservices)
-- `-f, --framework <framework>` - Target framework (nestjs, express, fastify, standalone)
+- `-s, --structure <type>` - Architecture structure (clean-architecture,
+  hexagonal, onion, modular-monolith, microservices)
+- `-f, --framework <framework>` - Target framework (nestjs, express, fastify,
+  standalone)
 - `--guided` - Use guided workflow with AI assistance
-- `--patterns <patterns>` - Comma-separated patterns (cqrs, event-sourcing, saga, outbox, etc.)
+- `--patterns <patterns>` - Comma-separated patterns (cqrs, event-sourcing,
+  saga, outbox, etc.)
 - `--contexts <contexts>` - Comma-separated bounded contexts
 - `--compliance <standards>` - Compliance standards (gdpr, hipaa, sox, pci)
 - `--security <features>` - Security features (auth, rbac, encryption, audit)
@@ -216,9 +233,9 @@ vytches-ddd domain
 # 6. Complete domain is generated
 
 # Example domain description:
-"An e-commerce platform where customers can browse products, add items to cart, 
-place orders with multiple payment methods. Orders go through fulfillment process 
-with inventory management. Customers can track shipments and request returns within 
+"An e-commerce platform where customers can browse products, add items to cart,
+place orders with multiple payment methods. Orders go through fulfillment process
+with inventory management. Customers can track shipments and request returns within
 30 days. Platform includes seller management with commission calculations."
 ```
 
@@ -238,6 +255,7 @@ vytches-ddd analyze --output report.md --verbose
 ```
 
 **Options:**
+
 - `-p, --path <path>` - Path to analyze (default: current directory)
 - `-o, --output <file>` - Output report file
 - `--patterns <patterns>` - Specific patterns to check
@@ -344,6 +362,7 @@ The CLI generates optimized files for AI-assisted development:
 ### CLAUDE.md
 
 Automatically generated documentation for Claude Code:
+
 - Project structure overview
 - Architecture decisions
 - Domain model explanation
@@ -353,6 +372,7 @@ Automatically generated documentation for Claude Code:
 ### .cursorrules
 
 Rules for Cursor IDE integration:
+
 - DDD principles enforcement
 - Code style guidelines
 - Testing patterns
@@ -407,12 +427,14 @@ vytches-ddd domain \
 ### Common Issues
 
 1. **TTY Detection Error**
+
    ```bash
    # Use non-interactive mode
    vytches-ddd generate --type aggregate --name Order
    ```
 
 2. **Permission Errors**
+
    ```bash
    # Use sudo for global installation
    sudo npm install -g @vytches-ddd/cli
@@ -426,7 +448,8 @@ vytches-ddd domain \
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ## License
 

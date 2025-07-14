@@ -98,7 +98,10 @@ export class ChatHistory {
         await this.cleanup();
       }
     } catch (error) {
-      console.warn('Failed to initialize chat history:', error instanceof Error ? error.message : error);
+      console.warn(
+        'Failed to initialize chat history:',
+        error instanceof Error ? error.message : error
+      );
     }
   }
 
@@ -166,7 +169,9 @@ export class ChatHistory {
 
     // Trim messages if exceeding limit
     if (this.currentSession.messages.length > this.config.maxMessagesPerSession) {
-      this.currentSession.messages = this.currentSession.messages.slice(-this.config.maxMessagesPerSession);
+      this.currentSession.messages = this.currentSession.messages.slice(
+        -this.config.maxMessagesPerSession
+      );
     }
 
     await this.saveSession(this.currentSession);
@@ -246,9 +251,7 @@ export class ChatHistory {
   getConversationContext(maxMessages = 20): ChatMessage[] {
     if (!this.currentSession) return [];
 
-    return this.currentSession.messages
-      .slice(-maxMessages)
-      .filter(msg => msg.role !== 'system');
+    return this.currentSession.messages.slice(-maxMessages).filter(msg => msg.role !== 'system');
   }
 
   /**
@@ -296,7 +299,7 @@ export class ChatHistory {
     if (!this.config.enabled) return;
 
     const now = new Date();
-    const cutoffDate = new Date(now.getTime() - (this.config.maxHistoryDays * 24 * 60 * 60 * 1000));
+    const cutoffDate = new Date(now.getTime() - this.config.maxHistoryDays * 24 * 60 * 60 * 1000);
 
     const sessionsToDelete: string[] = [];
 
@@ -307,8 +310,9 @@ export class ChatHistory {
     }
 
     // Keep only the most recent sessions if exceeding max
-    const sessionsByActivity = Array.from(this.sessions.values())
-      .sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
+    const sessionsByActivity = Array.from(this.sessions.values()).sort(
+      (a, b) => b.lastActivity.getTime() - a.lastActivity.getTime()
+    );
 
     if (sessionsByActivity.length > this.config.maxSessions) {
       const excessSessions = sessionsByActivity.slice(this.config.maxSessions);
@@ -410,7 +414,10 @@ export class ChatHistory {
       this.sessions.set(sessionId, session);
       return true;
     } catch (error) {
-      console.warn(`Failed to load session ${sessionId}:`, error instanceof Error ? error.message : error);
+      console.warn(
+        `Failed to load session ${sessionId}:`,
+        error instanceof Error ? error.message : error
+      );
       return false;
     }
   }
@@ -425,7 +432,10 @@ export class ChatHistory {
       }
       fs.writeFileSync(filepath, JSON.stringify(session, null, 2), 'utf-8');
     } catch (error) {
-      console.warn(`Failed to save session ${session.id}:`, error instanceof Error ? error.message : error);
+      console.warn(
+        `Failed to save session ${session.id}:`,
+        error instanceof Error ? error.message : error
+      );
     }
   }
 
@@ -492,7 +502,7 @@ export class ChatHistory {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 }
 

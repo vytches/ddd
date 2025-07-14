@@ -311,7 +311,8 @@ describe('UserService', () => {
 
 ### TypeScript Typing Guidelines
 
-**CRITICAL**: When creating functionality, avoid using the `any` type whenever possible.
+**CRITICAL**: When creating functionality, avoid using the `any` type whenever
+possible.
 
 - ❌ **AVOID**: Using `any` type unless there's a strong business justification
 - ✅ **PREFER**: Proper typing with specific interfaces, types, or generics
@@ -340,8 +341,10 @@ function handleUnknownData(data: unknown): void {
 ```
 
 **Exceptions**: Only use `any` when:
+
 - Integrating with third-party libraries that lack proper types
-- Creating temporary workarounds that will be properly typed later (add TODO comment)
+- Creating temporary workarounds that will be properly typed later (add TODO
+  comment)
 - The business logic explicitly requires dynamic typing (document the reason)
 
 ## Enterprise Features

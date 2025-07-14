@@ -54,9 +54,17 @@ export class CommandSuggester {
   async getSuggestions(projectPath?: string): Promise<CommandSuggestionType[]> {
     const path = projectPath || process.cwd();
     const analysis = await this.promptEngine.analyzeContext({
-      config: { outputDir: path, debug: false, templateDir: '', projectStructure: 'clean-architecture', framework: 'nestjs', patterns: [], plugins: [] },
+      config: {
+        outputDir: path,
+        debug: false,
+        templateDir: '',
+        projectStructure: 'clean-architecture',
+        framework: 'nestjs',
+        patterns: [],
+        plugins: [],
+      },
       answers: {},
-      outputPath: path
+      outputPath: path,
     });
 
     const suggestions: CommandSuggestionType[] = [];
@@ -121,95 +129,106 @@ export class CommandSuggester {
   private setupSuggestionRules(): void {
     // No aggregates but has domain directory
     this.suggestionRules.push({
-      condition: (analysis) =>
+      condition: analysis =>
         analysis.structure.hasDomainDir &&
         !analysis.patterns.some(p => p.name.includes('Aggregate')),
-      suggestions: [{
-        command: 'vytches-ddd generate aggregate Order',
-        description: 'Create your first aggregate',
-        reason: 'Domain directory exists but no aggregates found',
-        priority: 'high',
-        category: 'next-step',
-        confidence: 0.9
-      }],
-      priority: 10
+      suggestions: [
+        {
+          command: 'vytches-ddd generate aggregate Order',
+          description: 'Create your first aggregate',
+          reason: 'Domain directory exists but no aggregates found',
+          priority: 'high',
+          category: 'next-step',
+          confidence: 0.9,
+        },
+      ],
+      priority: 10,
     });
 
     // Has aggregates but no commands
     this.suggestionRules.push({
-      condition: (analysis) =>
+      condition: analysis =>
         analysis.patterns.some(p => p.name.includes('Aggregate')) &&
         !analysis.patterns.some(p => p.name === 'CQRS'),
-      suggestions: [{
-        command: 'vytches-ddd generate command CreateOrder',
-        description: 'Add CQRS commands for your aggregates',
-        reason: 'Aggregates exist but no CQRS commands found',
-        priority: 'medium',
-        category: 'next-step',
-        confidence: 0.8
-      }],
-      priority: 8
+      suggestions: [
+        {
+          command: 'vytches-ddd generate command CreateOrder',
+          description: 'Add CQRS commands for your aggregates',
+          reason: 'Aggregates exist but no CQRS commands found',
+          priority: 'medium',
+          category: 'next-step',
+          confidence: 0.8,
+        },
+      ],
+      priority: 8,
     });
 
     // No tests directory
     this.suggestionRules.push({
-      condition: (analysis) => !analysis.structure.hasTestsDir,
-      suggestions: [{
-        command: 'vytches-ddd analyze --type test-coverage',
-        description: 'Analyze test coverage and generate test structure',
-        reason: 'No tests directory found',
-        priority: 'high',
-        category: 'fix',
-        confidence: 0.95
-      }],
-      priority: 9
+      condition: analysis => !analysis.structure.hasTestsDir,
+      suggestions: [
+        {
+          command: 'vytches-ddd analyze --type test-coverage',
+          description: 'Analyze test coverage and generate test structure',
+          reason: 'No tests directory found',
+          priority: 'high',
+          category: 'fix',
+          confidence: 0.95,
+        },
+      ],
+      priority: 9,
     });
 
     // Has events but no event bus
     this.suggestionRules.push({
-      condition: (analysis) =>
+      condition: analysis =>
         analysis.patterns.some(p => p.name.includes('Event')) &&
         !analysis.dependencies.some(d => d.name.includes('event')),
-      suggestions: [{
-        command: 'pnpm add @vytches-ddd/events',
-        description: 'Add event bus for domain events',
-        reason: 'Domain events found but no event bus implementation',
-        priority: 'medium',
-        category: 'improvement',
-        confidence: 0.85
-      }],
-      priority: 7
+      suggestions: [
+        {
+          command: 'pnpm add @vytches-ddd/events',
+          description: 'Add event bus for domain events',
+          reason: 'Domain events found but no event bus implementation',
+          priority: 'medium',
+          category: 'improvement',
+          confidence: 0.85,
+        },
+      ],
+      priority: 7,
     });
 
     // Using TypeORM
     this.suggestionRules.push({
-      condition: (analysis) =>
-        analysis.dependencies.some(d => d.name === 'typeorm'),
-      suggestions: [{
-        command: 'vytches-ddd generate repository --orm typeorm',
-        description: 'Generate TypeORM repository implementations',
-        reason: 'TypeORM detected in dependencies',
-        priority: 'medium',
-        category: 'enhancement',
-        confidence: 0.75
-      }],
-      priority: 6
+      condition: analysis => analysis.dependencies.some(d => d.name === 'typeorm'),
+      suggestions: [
+        {
+          command: 'vytches-ddd generate repository --orm typeorm',
+          description: 'Generate TypeORM repository implementations',
+          reason: 'TypeORM detected in dependencies',
+          priority: 'medium',
+          category: 'enhancement',
+          confidence: 0.75,
+        },
+      ],
+      priority: 6,
     });
 
     // Clean architecture without proper structure
     this.suggestionRules.push({
-      condition: (analysis) =>
+      condition: analysis =>
         analysis.structure.architecture === 'clean' &&
         (!analysis.structure.hasApplicationDir || !analysis.structure.hasInfrastructureDir),
-      suggestions: [{
-        command: 'vytches-ddd scaffold clean-architecture',
-        description: 'Complete Clean Architecture structure',
-        reason: 'Clean Architecture detected but missing layers',
-        priority: 'high',
-        category: 'fix',
-        confidence: 0.9
-      }],
-      priority: 9
+      suggestions: [
+        {
+          command: 'vytches-ddd scaffold clean-architecture',
+          description: 'Complete Clean Architecture structure',
+          reason: 'Clean Architecture detected but missing layers',
+          priority: 'high',
+          category: 'fix',
+          confidence: 0.9,
+        },
+      ],
+      priority: 9,
     });
   }
 
@@ -228,7 +247,7 @@ export class CommandSuggester {
           reason: 'NestJS detected but domain modules not found',
           priority: 'medium',
           category: 'improvement',
-          confidence: 0.8
+          confidence: 0.8,
         });
       }
     }
@@ -242,7 +261,7 @@ export class CommandSuggester {
           reason: 'Event Sourcing pattern detected but no event store',
           priority: 'high',
           category: 'next-step',
-          confidence: 0.85
+          confidence: 0.85,
         });
       }
     }
@@ -255,7 +274,7 @@ export class CommandSuggester {
         reason: 'Limited DDD patterns detected - workflow can help design your domain',
         priority: 'high',
         category: 'next-step',
-        confidence: 0.7
+        confidence: 0.7,
       });
     }
 
@@ -266,26 +285,30 @@ export class CommandSuggester {
    * Prioritize suggestions
    */
   private prioritizeSuggestions(suggestions: CommandSuggestionType[]): CommandSuggestionType[] {
-    return suggestions.sort((a, b) => {
-      // First by priority
-      const priorityOrder = { high: 3, medium: 2, low: 1 };
-      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-      if (priorityDiff !== 0) return priorityDiff;
+    return suggestions
+      .sort((a, b) => {
+        // First by priority
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+        if (priorityDiff !== 0) return priorityDiff;
 
-      // Then by confidence
-      return b.confidence - a.confidence;
-    }).slice(0, 5); // Limit to top 5
+        // Then by confidence
+        return b.confidence - a.confidence;
+      })
+      .slice(0, 5); // Limit to top 5
   }
 
   /**
    * Categorize suggestions
    */
-  private categorizeSuggestions(suggestions: CommandSuggestionType[]): Record<string, CommandSuggestionType[]> {
+  private categorizeSuggestions(
+    suggestions: CommandSuggestionType[]
+  ): Record<string, CommandSuggestionType[]> {
     const categorized: Record<string, CommandSuggestionType[]> = {
       'next-step': [],
-      'improvement': [],
-      'fix': [],
-      'enhancement': []
+      improvement: [],
+      fix: [],
+      enhancement: [],
     };
 
     suggestions.forEach(suggestion => {
@@ -302,7 +325,7 @@ export class CommandSuggester {
     const priorityIcon = {
       high: '🔴',
       medium: '🟡',
-      low: '🟢'
+      low: '🟢',
     };
 
     console.log(`  ${priorityIcon[suggestion.priority]} ${Colors.bold(suggestion.command)}`);

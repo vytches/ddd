@@ -64,14 +64,16 @@ export class Prompts {
       const promptText = this.formatPrompt(options.message, options.default);
 
       const askQuestion = () => {
-        rl.question(promptText, (answer) => {
+        rl.question(promptText, answer => {
           const input = answer.trim() || options.default || '';
 
           // Validate input
           if (options.validate) {
             const validation = options.validate(input);
             if (validation !== true) {
-              console.log(Colors.red(`❌ ${typeof validation === 'string' ? validation : 'Invalid input'}`));
+              console.log(
+                Colors.red(`❌ ${typeof validation === 'string' ? validation : 'Invalid input'}`)
+              );
               askQuestion(); // Ask again
               return;
             }
@@ -89,7 +91,7 @@ export class Prompts {
    * Ask for password input (hidden)
    */
   static async password(options: Omit<PromptOptions, 'mask'>): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const promptText = this.formatPrompt(options.message);
 
       process.stdout.write(promptText);
@@ -134,19 +136,17 @@ export class Prompts {
    * Ask for confirmation (yes/no)
    */
   static async confirm(options: ConfirmOptions): Promise<boolean> {
-    const defaultText = options.default !== undefined
-      ? (options.default ? 'Y/n' : 'y/N')
-      : 'y/n';
+    const defaultText = options.default !== undefined ? (options.default ? 'Y/n' : 'y/N') : 'y/n';
 
     const defaultValue = options.default !== undefined ? (options.default ? 'y' : 'n') : undefined;
 
     const answer = await this.ask({
       message: `${options.message} (${defaultText})`,
       ...(defaultValue && { default: defaultValue }),
-      validate: (input) => {
+      validate: input => {
         const normalized = input.toLowerCase();
         return ['y', 'yes', 'n', 'no'].includes(normalized) || 'Please answer y/yes or n/no';
-      }
+      },
     });
 
     const normalized = answer.toLowerCase();
@@ -174,11 +174,13 @@ export class Prompts {
     const answer = await this.ask({
       message: 'Select option',
       ...(defaultValue && { default: defaultValue }),
-      validate: (input) => {
+      validate: input => {
         const num = parseInt(input, 10);
-        return (num >= 1 && num <= options.choices.length) ||
-               `Please select a number between 1 and ${options.choices.length}`;
-      }
+        return (
+          (num >= 1 && num <= options.choices.length) ||
+          `Please select a number between 1 and ${options.choices.length}`
+        );
+      },
     });
 
     const selectedIndex = parseInt(answer, 10) - 1;
@@ -200,15 +202,17 @@ export class Prompts {
 
     const answer = await this.ask({
       message: 'Select options',
-      validate: (input) => {
+      validate: input => {
         if (!input.trim()) return 'Please select at least one option';
 
         const indices = input.split(',').map(s => parseInt(s.trim(), 10));
         const invalid = indices.find(num => isNaN(num) || num < 1 || num > options.choices.length);
 
-        return invalid === undefined ||
-               `Invalid selection: ${invalid}. Please use numbers between 1 and ${options.choices.length}`;
-      }
+        return (
+          invalid === undefined ||
+          `Invalid selection: ${invalid}. Please use numbers between 1 and ${options.choices.length}`
+        );
+      },
     });
 
     const selectedIndices = answer.split(',').map(s => parseInt(s.trim(), 10) - 1);
@@ -242,13 +246,13 @@ export class Prompts {
         if (interval) {
           clearInterval(interval);
           interval = null;
-          process.stdout.write(`\r${  ' '.repeat((currentMessage?.length || 0) + 2)  }\r`);
+          process.stdout.write(`\r${' '.repeat((currentMessage?.length || 0) + 2)}\r`);
         }
       },
 
       update: (newMessage: string) => {
         currentMessage = newMessage;
-      }
+      },
     };
   }
 
@@ -306,12 +310,16 @@ export class Prompts {
  */
 export async function promptForInput(
   message: string,
-  options: { defaultValue?: string; required?: boolean; validate?: (input: string) => boolean | string } = {}
+  options: {
+    defaultValue?: string;
+    required?: boolean;
+    validate?: (input: string) => boolean | string;
+  } = {}
 ): Promise<string> {
   const promptOptions: PromptOptions = {
     message,
     ...(options.defaultValue && { default: options.defaultValue }),
-    ...(options.validate && { validate: options.validate })
+    ...(options.validate && { validate: options.validate }),
   };
 
   const result = await Prompts.ask(promptOptions);
@@ -334,7 +342,7 @@ export async function promptForChoice(
   const selectOptions: SelectOptions = {
     message,
     choices,
-    ...(defaultIndex !== undefined && { default: defaultIndex })
+    ...(defaultIndex !== undefined && { default: defaultIndex }),
   };
 
   return await Prompts.select(selectOptions);
@@ -349,7 +357,7 @@ export async function promptForConfirmation(
 ): Promise<boolean> {
   const confirmOptions: ConfirmOptions = {
     message,
-    ...(defaultValue !== undefined && { default: defaultValue })
+    ...(defaultValue !== undefined && { default: defaultValue }),
   };
 
   return await Prompts.confirm(confirmOptions);
@@ -364,6 +372,6 @@ export async function promptForMultiSelect(
 ): Promise<any[]> {
   return await Prompts.multiSelect({
     message,
-    choices
+    choices,
   });
 }

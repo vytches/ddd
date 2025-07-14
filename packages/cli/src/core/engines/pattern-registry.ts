@@ -3,7 +3,7 @@
  * Central registry for all DDD patterns and their metadata
  */
 
-import type { ComponentType} from '../../types';
+import type { ComponentType } from '../../types';
 import { CLIError } from '../../types';
 
 export interface PatternDefinition {
@@ -49,7 +49,7 @@ export class PatternRegistry {
       templates: ['aggregates/aggregate.ts.template', 'aggregates/aggregate.test.ts.template'],
       examples: ['OrderAggregate', 'CustomerAggregate', 'ProductAggregate'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('entity', {
@@ -61,7 +61,7 @@ export class PatternRegistry {
       templates: ['entities/entity.ts.template', 'entities/entity.test.ts.template'],
       examples: ['OrderItem', 'Customer', 'Product'],
       complexity: 'basic',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('value-object', {
@@ -70,10 +70,13 @@ export class PatternRegistry {
       description: 'Immutable value object that describes characteristics',
       category: 'domain',
       dependencies: [],
-      templates: ['value-objects/value-object.ts.template', 'value-objects/value-object.test.ts.template'],
+      templates: [
+        'value-objects/value-object.ts.template',
+        'value-objects/value-object.test.ts.template',
+      ],
       examples: ['Money', 'Address', 'Email'],
       complexity: 'basic',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('specification', {
@@ -82,10 +85,13 @@ export class PatternRegistry {
       description: 'Business rule specification for domain validation',
       category: 'domain',
       dependencies: [],
-      templates: ['specifications/specification.ts.template', 'specifications/specification.test.ts.template'],
+      templates: [
+        'specifications/specification.ts.template',
+        'specifications/specification.test.ts.template',
+      ],
       examples: ['CustomerEligibilitySpec', 'OrderValidationSpec'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('policy', {
@@ -97,7 +103,7 @@ export class PatternRegistry {
       templates: ['policies/policy.ts.template'],
       examples: ['PricingPolicy', 'DiscountPolicy', 'RefundPolicy'],
       complexity: 'advanced',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     // Application Layer Patterns
@@ -110,7 +116,7 @@ export class PatternRegistry {
       templates: ['commands/command.ts.template'],
       examples: ['CreateOrderCommand', 'UpdateCustomerCommand'],
       complexity: 'basic',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('query', {
@@ -122,7 +128,7 @@ export class PatternRegistry {
       templates: ['queries/query.ts.template'],
       examples: ['GetOrderQuery', 'GetCustomerQuery'],
       complexity: 'basic',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('handler', {
@@ -134,19 +140,19 @@ export class PatternRegistry {
       templates: ['command-handler.ts.template', 'query-handler.ts.template'],
       examples: ['CreateOrderHandler', 'GetOrderHandler'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('service', {
       name: 'service',
       displayName: 'Domain Service',
-      description: 'Domain service for operations that don\'t belong to entities',
+      description: "Domain service for operations that don't belong to entities",
       category: 'application',
       dependencies: [],
       templates: ['domain-services/domain-service.ts.template'],
       examples: ['PricingService', 'NotificationService'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('event', {
@@ -158,7 +164,7 @@ export class PatternRegistry {
       templates: ['events/domain-event.ts.template'],
       examples: ['OrderCreatedEvent', 'CustomerRegisteredEvent'],
       complexity: 'basic',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     // Infrastructure Layer Patterns
@@ -171,7 +177,7 @@ export class PatternRegistry {
       templates: ['repositories/repository.ts.template'],
       examples: ['OrderRepository', 'CustomerRepository'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('middleware', {
@@ -183,7 +189,7 @@ export class PatternRegistry {
       templates: ['middleware.ts.template', 'middleware.test.ts.template'],
       examples: ['ValidationMiddleware', 'LoggingMiddleware'],
       complexity: 'intermediate',
-      frameworks: ['nestjs', 'express']
+      frameworks: ['nestjs', 'express'],
     });
 
     this.patterns.set('processor', {
@@ -195,7 +201,7 @@ export class PatternRegistry {
       templates: ['event-processor.ts.template', 'processor.test.ts.template'],
       examples: ['EmailProcessor', 'NotificationProcessor'],
       complexity: 'advanced',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('saga', {
@@ -207,7 +213,7 @@ export class PatternRegistry {
       templates: ['saga.ts.template', 'saga.test.ts.template'],
       examples: ['OrderProcessingSaga', 'PaymentSaga'],
       complexity: 'advanced',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
 
     this.patterns.set('projection', {
@@ -219,7 +225,7 @@ export class PatternRegistry {
       templates: ['projection.ts.template', 'projection.test.ts.template'],
       examples: ['OrderSummaryProjection', 'CustomerViewProjection'],
       complexity: 'advanced',
-      frameworks: ['nestjs', 'express', 'standalone']
+      frameworks: ['nestjs', 'express', 'standalone'],
     });
   }
 
@@ -244,7 +250,9 @@ export class PatternRegistry {
   /**
    * Get patterns by category
    */
-  getPatternsByCategory(category: 'domain' | 'application' | 'infrastructure' | 'patterns'): PatternDefinition[] {
+  getPatternsByCategory(
+    category: 'domain' | 'application' | 'infrastructure' | 'patterns'
+  ): PatternDefinition[] {
     return this.getAllPatterns().filter(pattern => pattern.category === category);
   }
 
@@ -376,7 +384,7 @@ export class PatternRegistry {
     return {
       isValid: missingDependencies.length === 0 && conflicts.length === 0,
       missingDependencies: [...new Set(missingDependencies)],
-      conflicts
+      conflicts,
     };
   }
 
@@ -437,7 +445,7 @@ export class PatternRegistry {
       ['policy', 'middleware', 'processor'],
 
       // Expert patterns
-      ['saga', 'projection']
+      ['saga', 'projection'],
     ];
   }
 }
