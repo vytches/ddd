@@ -309,6 +309,41 @@ describe('UserService', () => {
 - Follow established patterns for new components
 - Maintain consistency with existing code style
 
+### TypeScript Typing Guidelines
+
+**CRITICAL**: When creating functionality, avoid using the `any` type whenever possible.
+
+- ❌ **AVOID**: Using `any` type unless there's a strong business justification
+- ✅ **PREFER**: Proper typing with specific interfaces, types, or generics
+- ✅ **USE**: `unknown` instead of `any` when the type is truly unknown
+- ✅ **USE**: Generic types `<T>` for flexible but type-safe code
+
+**Examples:**
+
+```typescript
+// ❌ WRONG: Avoid any
+function processData(data: any): any {
+  return data.value;
+}
+
+// ✅ CORRECT: Use proper types
+function processData<T extends { value: string }>(data: T): string {
+  return data.value;
+}
+
+// ✅ CORRECT: Use unknown for truly unknown types
+function handleUnknownData(data: unknown): void {
+  if (typeof data === 'object' && data !== null && 'value' in data) {
+    console.log(data.value);
+  }
+}
+```
+
+**Exceptions**: Only use `any` when:
+- Integrating with third-party libraries that lack proper types
+- Creating temporary workarounds that will be properly typed later (add TODO comment)
+- The business logic explicitly requires dynamic typing (document the reason)
+
 ## Enterprise Features
 
 ### Bundle Strategies
