@@ -1,7 +1,8 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { dirname, join } from 'path';
 import dts from 'vite-plugin-dts';
 
 // Package type detection - determines build configuration
@@ -51,6 +52,45 @@ function getPackageDependencies(): Record<string, string> {
 
 const buildAliases = getPackageDependencies();
 
+// Custom plugin to copy templates to dist
+function copyTemplatesPlugin() {
+  return {
+    name: 'copy-templates',
+    generateBundle() {
+      // Copy templates directory to dist
+      const templatesDir = resolve(__dirname, 'templates');
+      const distTemplatesDir = resolve(__dirname, 'dist', 'templates');
+
+      // Create dist/templates directory
+      mkdirSync(distTemplatesDir, { recursive: true });
+
+      // Recursively copy template files
+      copyDirectory(templatesDir, distTemplatesDir);
+    },
+  };
+}
+
+// Helper function to recursively copy directories
+function copyDirectory(src: string, dest: string) {
+  const entries = readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = join(src, entry.name);
+    const destPath = join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      mkdirSync(destPath, { recursive: true });
+      copyDirectory(srcPath, destPath);
+    } else {
+      try {
+        copyFileSync(srcPath, destPath);
+      } catch (error) {
+        console.warn(`Failed to copy ${srcPath}:`, error);
+      }
+    }
+  }
+}
+
 export default defineConfig({
   plugins: [
     dts({
@@ -59,6 +99,7 @@ export default defineConfig({
       outDir: 'dist',
       entryRoot: 'src',
     }),
+    copyTemplatesPlugin(),
   ],
   resolve: {
     alias: buildAliases,
@@ -66,13 +107,31 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        cli: resolve(__dirname, 'src/bin.ts'),
+      },
       name: `VytchesDDD${packageName.charAt(0).toUpperCase() + packageName.slice(1).replace(/-([a-z])/g, (_match: string, letter: string) => letter.toUpperCase())}`,
       formats: ['es', 'cjs'],
-      fileName: format => `index.${format === 'es' ? 'js' : format}`,
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : format}`,
     },
     rollupOptions: {
       external: id => {
+        // Externalize Node.js built-ins
+        const nodeBuiltins = [
+          'fs',
+          'path',
+          'readline',
+          'child_process',
+          'os',
+          'crypto',
+          'stream',
+          'util',
+          'events',
+        ];
+        if (nodeBuiltins.includes(id)) {
+          return true;
+        }
         // External all @vytches-ddd packages that are not source files
         return id.startsWith('@vytches-ddd/') && !id.includes('src/');
       },

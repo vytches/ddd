@@ -241,7 +241,19 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
+      chalk:
+        specifier: ^5.3.0
+        version: 5.4.1
+      commander:
+        specifier: ^11.0.0
+        version: 11.1.0
+      handlebars:
+        specifier: ^4.7.8
+        version: 4.7.8
     devDependencies:
+      '@types/handlebars':
+        specifier: ^4.1.0
+        version: 4.1.0
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
@@ -6226,6 +6238,16 @@ packages:
       '@types/node': 20.19.1
     dev: true
 
+  /@types/handlebars@4.1.0:
+    resolution:
+      {
+        integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==,
+      }
+    deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
+    dependencies:
+      handlebars: 4.7.8
+    dev: true
+
   /@types/istanbul-lib-coverage@2.0.6:
     resolution:
       {
@@ -8347,7 +8369,6 @@ packages:
         integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==,
       }
     engines: { node: ^12.17.0 || ^14.13 || >=16.0.0 }
-    dev: true
 
   /char-regex@1.0.2:
     resolution:
@@ -8667,6 +8688,14 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
     dev: true
+
+  /commander@11.1.0:
+    resolution:
+      {
+        integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==,
+      }
+    engines: { node: '>=16' }
+    dev: false
 
   /commander@13.1.0:
     resolution:
@@ -11932,7 +11961,6 @@ packages:
       wordwrap: 1.0.0
     optionalDependencies:
       uglify-js: 3.19.3
-    dev: true
 
   /hard-rejection@2.1.0:
     resolution:
@@ -15104,7 +15132,6 @@ packages:
       {
         integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==,
       }
-    dev: true
 
   /minipass-collect@2.0.1:
     resolution:
@@ -15347,7 +15374,6 @@ packages:
       {
         integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==,
       }
-    dev: true
 
   /nerf-dart@1.0.0:
     resolution:
@@ -18277,7 +18303,6 @@ packages:
         integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==,
       }
     engines: { node: '>=0.10.0' }
-    dev: true
 
   /source-map@0.7.4:
     resolution:
@@ -19556,7 +19581,6 @@ packages:
     engines: { node: '>=0.8.0' }
     hasBin: true
     requiresBuild: true
-    dev: true
     optional: true
 
   /unbox-primitive@1.1.0:
@@ -20515,7 +20539,6 @@ packages:
       {
         integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==,
       }
-    dev: true
 
   /wrap-ansi@6.2.0:
     resolution:

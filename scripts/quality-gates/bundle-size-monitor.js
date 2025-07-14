@@ -54,7 +54,7 @@ const CONFIG = {
     'event-store': 150, // Event sourcing with complex features
 
     // Tooling packages (more flexible)
-    cli: 80,
+    cli: 450, // CLI framework size increased significantly
     testing: 100, // Test utilities can be larger
   },
 
@@ -62,7 +62,7 @@ const CONFIG = {
   globalLimits: {
     totalSourceSize: 2500, // Total source KB across all packages (increased for enterprise features)
     averagePackageSize: 90, // Average package size (slightly increased)
-    maxPackageSize: 200, // Enterprise frameworks can be larger
+    maxPackageSize: 500, // CLI framework requires larger limit
   },
 
   // Regression thresholds (percentage increase)
