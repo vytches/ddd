@@ -1,0 +1,104 @@
+{
+  "extends": ["./.eslintrc.json"],
+  "plugins": ["jsdoc"],
+  "rules": {
+    "jsdoc/require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        },
+        "contexts": [
+          "ExportNamedDeclaration[declaration.type='FunctionDeclaration']",
+          "ExportNamedDeclaration[declaration.type='ClassDeclaration']",
+          "ExportNamedDeclaration[declaration.type='InterfaceDeclaration']",
+          "ExportNamedDeclaration[declaration.type='TypeAliasDeclaration']",
+          "ExportNamedDeclaration[declaration.type='EnumDeclaration']"
+        ]
+      }
+    ],
+    "jsdoc/check-tag-names": [
+      "error",
+      {
+        "definedTags": [
+          "llm-summary",
+          "llm-domain", 
+          "llm-complexity",
+          "llm-contract",
+          "llm-sideeffects", 
+          "llm-pure",
+          "llm-usage"
+        ]
+      }
+    ],
+    "jsdoc/require-description": [
+      "error",
+      {
+        "contexts": ["any"]
+      }
+    ],
+    "jsdoc/require-param": "error",
+    "jsdoc/require-param-description": "error",
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns": [
+      "error",
+      {
+        "contexts": ["any"],
+        "exemptedBy": ["inheritdoc"]
+      }
+    ],
+    "jsdoc/require-returns-description": "error",
+    "jsdoc/require-returns-type": "off",
+    "jsdoc/require-example": [
+      "error",
+      {
+        "contexts": [
+          "ExportNamedDeclaration[declaration.type='FunctionDeclaration']",
+          "ExportNamedDeclaration[declaration.type='ClassDeclaration']",
+          "MethodDefinition[kind='method'][key.name!=/^_/]"
+        ]
+      }
+    ],
+    "jsdoc/check-examples": "error",
+    "jsdoc/check-param-names": "error",
+    "jsdoc/check-syntax": "error",
+    "jsdoc/check-types": "error",
+    "jsdoc/valid-types": "error",
+    "jsdoc/match-description": [
+      "error",
+      {
+        "matchDescription": "^[A-Z].*\\.$"
+      }
+    ],
+    "jsdoc/newline-after-description": "error",
+    "jsdoc/require-hyphen-before-param-description": ["error", "always"],
+    "jsdoc/check-line-alignment": [
+      "error",
+      "always",
+      {
+        "tags": ["param", "returns", "throws", "example"]
+      }
+    ],
+    "jsdoc/no-bad-blocks": "error",
+    "jsdoc/no-undefined-types": "error",
+    "jsdoc/require-asterisk-prefix": "error"
+  },
+  "settings": {
+    "jsdoc": {
+      "mode": "typescript",
+      "preferredTypes": {
+        "object": "Object",
+        "array": "Array",
+        "function": "Function"
+      },
+      "tagNamePreference": {
+        "returns": "returns",
+        "yields": "yields"
+      }
+    }
+  }
+}

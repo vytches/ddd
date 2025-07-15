@@ -8,6 +8,59 @@ directory, NOT in `src/`.**
 - ✅ CORRECT: `packages/[package]/tests/my-component.test.ts`
 - ❌ WRONG: `packages/[package]/src/my-component.test.ts`
 
+## CRITICAL: Documentation Updates
+
+**When creating or updating functionality, ALWAYS update the corresponding README.md file.**
+
+- ✅ **REQUIRED**: Update `packages/[package]/README.md` when modifying package code
+- ✅ **REQUIRED**: Include code examples showing new/updated functionality
+- ✅ **REQUIRED**: Update API sections if public interfaces change
+- ✅ **REQUIRED**: Keep LLM-METADATA sections current with actual exports
+- ⚠️ **NOTE**: Focus on the specific package being changed, not all packages
+
+## CRITICAL: JSDoc Documentation
+
+**When creating or updating code, ALWAYS add comprehensive JSDoc documentation.**
+
+- ✅ **REQUIRED**: Add JSDoc to all exported classes, interfaces, functions, and types
+- ✅ **REQUIRED**: Use LLM-optimized template from `.jsdoc-template.md`
+- ✅ **REQUIRED**: Include `@llm-summary` and `@llm-domain` tags for LLM consumption
+- ✅ **REQUIRED**: Provide minimum 2 `@example` blocks per public API
+- ✅ **REQUIRED**: Use `safeRun` pattern in error handling examples
+- ✅ **REQUIRED**: Document all `@param`, `@returns`, and `@throws`
+- ⚠️ **VALIDATION**: Run `pnpm jsdoc:validate` to check compliance
+- 📖 **REFERENCE**: See `.jsdoc-template.md` for exact format requirements
+
+### JSDoc Template Example:
+```typescript
+/**
+ * @llm-summary Brief one-line description
+ * @llm-domain Core|Pattern|Architecture|Integration|Infrastructure
+ * @llm-complexity Simple|Medium|Complex|Expert
+ * 
+ * @description
+ * Detailed description with business context.
+ * 
+ * @param {Type} param - Description
+ * @returns {Type} Description
+ * 
+ * @throws {ErrorType} When validation fails
+ * 
+ * @example
+ * ```typescript
+ * const result = new ClassName(params);
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * const [error, result] = safeRun(() => new ClassName(params));
+ * ```
+ * 
+ * @since 1.0.0
+ * @public
+ */
+```
+
 ## Development Commands
 
 ```bash
@@ -131,7 +184,7 @@ import { AggregateRoot } from '@vytches-ddd/core';
 
 Each package follows this structure:
 
-```
+```text
 packages/<package-name>/
 ├── src/
 │   ├── index.ts           # Main export file

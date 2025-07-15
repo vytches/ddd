@@ -1,11 +1,48 @@
 # @vytches-ddd/di
 
-Global Service Locator with Optional Context Isolation for Dependency Injection.
+[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fdi.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fdi)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+> **Enterprise-grade dependency injection system for Domain-Driven Design**
 
-The `@vytches-ddd/di` package implements a **hybrid dependency injection
-architecture** that provides:
+Global Service Locator with Optional Context Isolation for Dependency Injection following MediatR pattern.
+
+## 📋 Table of Contents
+
+- [Installation](#installation)
+- [Key Features](#key-features)
+- [Core Concepts](#core-concepts)
+- [Quick Start](#quick-start)
+- [Service Registration](#service-registration)
+- [Auto-Discovery](#auto-discovery)
+- [Context Isolation](#context-isolation)
+- [Framework Integration](#framework-integration)
+- [Advanced Features](#advanced-features)
+- [Testing](#testing)
+- [Performance](#performance)
+- [Best Practices](#best-practices)
+- [Migration Guide](#migration-guide)
+- [Contributing](#contributing)
+
+## 🚀 Installation
+
+```bash
+# npm
+npm install @vytches-ddd/di
+
+# yarn
+yarn add @vytches-ddd/di
+
+# pnpm
+pnpm add @vytches-ddd/di
+```
+
+## ✨ Key Features
+
+### Hybrid Dependency Injection Architecture
+
+The `@vytches-ddd/di` package implements a **hybrid dependency injection architecture** that provides:
 
 1. **Global service locator by default** (following MediatR pattern)
 2. **Optional context isolation** for DDD bounded context scenarios
@@ -13,14 +50,7 @@ architecture** that provides:
 4. **Plugin-based handler discovery** for CQRS, Events, and custom handlers
 5. **Progressive enhancement** from simple to complex scenarios
 
-This implementation follows **ADR-0006: Adopt Global Service Locator with
-Optional Context Isolation for Dependency Injection**.
-
-## Installation
-
-```bash
-pnpm add @vytches-ddd/di
-```
+This implementation follows **ADR-0006: Adopt Global Service Locator with Optional Context Isolation for Dependency Injection**.
 
 ## Philosophy: Natural Framework Integration
 
