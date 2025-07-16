@@ -37,7 +37,7 @@ const CONFIG = {
     policies: 40,
     projections: 20,
     acl: 14,
-    messaging: 14,
+    messaging: 25,
     resilience: 8,
     enterprise: 5,
     cli: 80, // CLI tools can have more flexibility
