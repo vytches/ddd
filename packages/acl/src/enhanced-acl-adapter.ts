@@ -12,6 +12,32 @@ import type {
 } from './acl.interfaces';
 import type { TypedOperation } from './typed-operations';
 
+/**
+ * @llm-summary EnhancedACLAdapter class for enhanced a c l adapter operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * EnhancedACLAdapter class implementing integration layer component for enhanced a c l adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EnhancedACLAdapter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EnhancedACLAdapter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
   extends SimpleACLAdapter<TDomain, TExternal, TResult>
   implements IEnhancedACLAdapter<TDomain, TExternal, TResult>

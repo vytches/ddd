@@ -9,7 +9,20 @@ import { CommandSuggester } from '../core/suggestions/command-suggester';
 import { ContextAwarePromptEngine } from '../core/prompts/context-aware-prompts';
 
 /**
- * Suggest command implementation
+ * @llm-summary suggestCommand constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * suggestCommand constant implementing infrastructure service for suggest command operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(suggestCommand);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const suggestCommand: Command = {
   name: 'suggest',

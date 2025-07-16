@@ -10,8 +10,30 @@ import type {
 import { SagaStatus } from '../interfaces';
 
 /**
- * Base saga definition implementation
- * Provides structure and validation for saga types
+ * @llm-summary SagaDefinition class for saga definition operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaDefinition class implementing integration layer component for saga definition operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaDefinition();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaDefinition());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class SagaDefinition implements ISagaDefinition {
   protected readonly logger: ReturnType<typeof Logger.forContext>;

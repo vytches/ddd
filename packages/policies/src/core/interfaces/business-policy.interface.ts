@@ -3,8 +3,23 @@ import type { PolicyViolation } from '../models/policy-violation';
 import type { PolicyMetadata } from '../models/policy-metadata';
 
 /**
- * Core business policy interface - unified Promise-based API
- * All policies return Promise<Result> for consistency and future-proofing
+ * @llm-summary Contract for business policy functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * BusinessPolicy interface implementing domain pattern implementation for business policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBusinessPolicy implements IBusinessPolicy {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IBusinessPolicy<T> {
   /**
@@ -54,8 +69,23 @@ export interface IBusinessPolicy<T> {
 }
 
 /**
- * Request object for policy evaluation
- * Includes entity, required context, and optional metadata
+ * @llm-summary Contract for policy request functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyRequest interface implementing domain pattern implementation for policy request operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyRequest implements PolicyRequest {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyRequest<T> {
   /**
@@ -75,8 +105,23 @@ export interface PolicyRequest<T> {
 }
 
 /**
- * Required context for all policy evaluations
- * Supports enterprise requirements: audit trails, multi-tenancy, compliance
+ * @llm-summary Contract for policy context functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyContext interface implementing domain pattern implementation for policy context operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyContext implements PolicyContext {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyContext {
   /**
@@ -116,7 +161,23 @@ export interface PolicyContext {
 }
 
 /**
- * Policy composer interface for fluent combinations
+ * @llm-summary Contract for policy composer functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyComposer interface implementing domain pattern implementation for policy composer operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyComposer implements IPolicyComposer {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyComposer<T> extends IBusinessPolicy<T> {
   /**
@@ -136,7 +197,23 @@ export interface IPolicyComposer<T> extends IBusinessPolicy<T> {
 }
 
 /**
- * Grouped policy composer for complex precedence
+ * @llm-summary Contract for grouped policy composer functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * GroupedPolicyComposer interface implementing domain pattern implementation for grouped policy composer operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteGroupedPolicyComposer implements IGroupedPolicyComposer {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IGroupedPolicyComposer<T> extends IPolicyComposer<T> {
   /**
@@ -146,7 +223,23 @@ export interface IGroupedPolicyComposer<T> extends IPolicyComposer<T> {
 }
 
 /**
- * Conditional policy builder for when/then logic
+ * @llm-summary Contract for policy conditional builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyConditionalBuilder interface implementing domain pattern implementation for policy conditional builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyConditionalBuilder implements IPolicyConditionalBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyConditionalBuilder<T> {
   /**
@@ -161,7 +254,23 @@ export interface IPolicyConditionalBuilder<T> {
 }
 
 /**
- * Conditional policy else clause
+ * @llm-summary Contract for policy conditional else functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyConditionalElse interface implementing domain pattern implementation for policy conditional else operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyConditionalElse implements IPolicyConditionalElse {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyConditionalElse<T> {
   /**
@@ -186,12 +295,42 @@ export interface IPolicyConditionalElse<T> {
 }
 
 /**
- * Policy condition function type
+ * @llm-summary Type definition for policy condition
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * PolicyCondition type implementing domain pattern implementation for policy condition operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: PolicyCondition = {} as PolicyCondition;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type PolicyCondition<T> = (entity: T, context: PolicyContext) => boolean | Promise<boolean>;
 
 /**
- * Policy definition for registry
+ * @llm-summary Contract for policy definition functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyDefinition interface implementing domain pattern implementation for policy definition operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyDefinition implements PolicyDefinition {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyDefinition<T> {
   readonly id: string;

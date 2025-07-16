@@ -4,8 +4,31 @@ import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
 /**
- * CommandHandler decorator - pure metadata, no registry
- * Framework agnostic - works with any DI container
+ * @llm-summary command handler function
+ * @llm-domain Architecture
+ * @llm-pure false
+ *
+ * @description
+ * CommandHandler function implementing architectural component for command handler operations.
+ *
+ *
+ * @param {new (...args: unknown[]} commandType - commandType parameter
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = CommandHandler(commandType);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => CommandHandler(commandType));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function CommandHandler<T extends ICommand>(
   commandType: new (...args: unknown[]) => T,

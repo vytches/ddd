@@ -4,8 +4,30 @@ import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Type-safe event sourcing capability implementation
- * Handles loading and saving aggregates from/to event store
+ * @llm-summary EventSourcingCapability class for event sourcing capability operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * EventSourcingCapability class implementing domain pattern implementation for event sourcing capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EventSourcingCapability();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EventSourcingCapability());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EventSourcingCapability
   extends Capability<'eventSourcing'>

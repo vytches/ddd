@@ -14,9 +14,13 @@ Integration Points: All packages use these utilities for error handling and vali
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Essential utilities and helper functions for functional programming and Domain-Driven Design**
+> **Essential utilities and helper functions for functional programming and
+> Domain-Driven Design**
 
-Core utility package providing the Result pattern for functional error handling, safeRun testing utility, and LibUtils for validation and type checking. These utilities form the foundation for all other packages in the VytchesDDD ecosystem.
+Core utility package providing the Result pattern for functional error handling,
+safeRun testing utility, and LibUtils for validation and type checking. These
+utilities form the foundation for all other packages in the VytchesDDD
+ecosystem.
 
 ## 📋 Table of Contents
 
@@ -58,18 +62,21 @@ npm install uuid
 ## ✨ Key Features
 
 ### Result Pattern
+
 - **Functional Error Handling**: Avoid exceptions with Result<T, E> pattern
 - **Composable Operations**: Chain operations with map, flatMap, and match
 - **Async Support**: Full async/await support with tryAsync and mapAsync
 - **Type Safety**: Strict TypeScript typing for success and error cases
 
 ### Testing Utilities
+
 - **SafeRun**: Functional error handling for tests without try/catch
 - **Type-Safe Testing**: Proper error handling in test scenarios
 - **Async Support**: Works with both sync and async operations
 - **Clean Test Code**: Eliminates boilerplate try/catch blocks
 
 ### LibUtils
+
 - **Validation**: UUID, integer, bigint, and text ID validation
 - **Type Checking**: Comprehensive empty/truthy/falsy checking
 - **Utilities**: Sleep, deep equality, and normalization functions
@@ -86,19 +93,19 @@ The Result pattern provides a functional approach to error handling:
 class Result<TValue, TError = Error> {
   readonly isSuccess: boolean;
   readonly isFailure: boolean;
-  readonly value: TValue;      // Available if isSuccess
-  readonly error: TError;      // Available if isFailure
-  
+  readonly value: TValue; // Available if isSuccess
+  readonly error: TError; // Available if isFailure
+
   // Factory methods
-  static ok<T>(value: T): Result<T, Error>
-  static fail<T>(error: Error): Result<T, Error>
-  static try<T>(fn: () => T): Result<T, Error>
-  static tryAsync<T>(fn: () => Promise<T>): Promise<Result<T, Error>>
-  
+  static ok<T>(value: T): Result<T, Error>;
+  static fail<T>(error: Error): Result<T, Error>;
+  static try<T>(fn: () => T): Result<T, Error>;
+  static tryAsync<T>(fn: () => Promise<T>): Promise<Result<T, Error>>;
+
   // Transformation methods
-  map<U>(fn: (value: TValue) => U): Result<U, TError>
-  flatMap<U>(fn: (value: TValue) => Result<U, TError>): Result<U, TError>
-  match<U>(onSuccess: (value: TValue) => U, onFailure: (error: TError) => U): U
+  map<U>(fn: (value: TValue) => U): Result<U, TError>;
+  flatMap<U>(fn: (value: TValue) => Result<U, TError>): Result<U, TError>;
+  match<U>(onSuccess: (value: TValue) => U, onFailure: (error: TError) => U): U;
 }
 ```
 
@@ -108,10 +115,14 @@ SafeRun provides error handling for testing scenarios:
 
 ```typescript
 // Synchronous version
-function safeRun<E extends Error, T>(fn: () => T): readonly [E | undefined, T | undefined]
+function safeRun<E extends Error, T>(
+  fn: () => T
+): readonly [E | undefined, T | undefined];
 
-// Asynchronous version  
-function safeRun<E extends Error, T>(fn: () => Promise<T>): Promise<readonly [E | undefined, T | undefined]>
+// Asynchronous version
+function safeRun<E extends Error, T>(
+  fn: () => Promise<T>
+): Promise<readonly [E | undefined, T | undefined]>;
 ```
 
 ### LibUtils
@@ -121,24 +132,24 @@ LibUtils provides essential utility functions:
 ```typescript
 class LibUtils {
   // UUID utilities
-  static getUUID(type?: 'v4'): string
-  static isValidUUID(value: string): boolean
-  
+  static getUUID(type?: 'v4'): string;
+  static isValidUUID(value: string): boolean;
+
   // Validation utilities
-  static isValidInteger(value: number): boolean
-  static isValidBigInt(value: string): boolean
-  static isValidTextId(value: string): boolean
-  
+  static isValidInteger(value: number): boolean;
+  static isValidBigInt(value: string): boolean;
+  static isValidTextId(value: string): boolean;
+
   // Type checking utilities
-  static isEmpty(input: unknown): boolean
-  static hasValue(input: unknown): boolean
-  static isTruthy(input: unknown): boolean
-  static isFalsy(input: unknown): boolean
-  
+  static isEmpty(input: unknown): boolean;
+  static hasValue(input: unknown): boolean;
+  static isTruthy(input: unknown): boolean;
+  static isFalsy(input: unknown): boolean;
+
   // Utility functions
-  static sleep(ms: number): Promise<void>
-  static deepEqual(obj1: unknown, obj2: unknown): boolean
-  static normalizeIdToString(value: string | number | bigint): string
+  static sleep(ms: number): Promise<void>;
+  static deepEqual(obj1: unknown, obj2: unknown): boolean;
+  static normalizeIdToString(value: string | number | bigint): string;
 }
 ```
 
@@ -278,13 +289,13 @@ import { Result } from '@vytches-ddd/utils';
 
 // Async transformation
 const dataResult = Result.ok({ id: 123 });
-const enrichedResult = await dataResult.mapAsync(async (data) => {
+const enrichedResult = await dataResult.mapAsync(async data => {
   const additionalData = await fetchAdditionalData(data.id);
   return { ...data, ...additionalData };
 });
 
 // Async chaining
-const processedResult = await dataResult.flatMapAsync(async (data) => {
+const processedResult = await dataResult.flatMapAsync(async data => {
   try {
     const processed = await processData(data);
     return Result.ok(processed);
@@ -329,7 +340,10 @@ import { safeRun } from '@vytches-ddd/utils';
 describe('UserService', () => {
   it('should create user successfully', () => {
     const [error, user] = safeRun(() => {
-      return userService.createUser({ name: 'John', email: 'john@example.com' });
+      return userService.createUser({
+        name: 'John',
+        email: 'john@example.com',
+      });
     });
 
     expect(error).toBeUndefined();
@@ -385,7 +399,7 @@ import { safeRun } from '@vytches-ddd/utils';
 describe('PaymentService', () => {
   it('should process payment with retry logic', async () => {
     let attemptCount = 0;
-    
+
     const [error, result] = await safeRun(async () => {
       attemptCount++;
       if (attemptCount < 3) {
@@ -593,7 +607,9 @@ class UserRepository implements IUserRepository {
 import { Result, LibUtils } from '@vytches-ddd/utils';
 
 class UserRegistrationService {
-  async registerUser(userData: UserRegistrationData): Promise<Result<User, Error>> {
+  async registerUser(
+    userData: UserRegistrationData
+  ): Promise<Result<User, Error>> {
     // Validate input
     if (LibUtils.isEmpty(userData.email)) {
       return Result.fail(new Error('Email is required'));
@@ -605,7 +621,9 @@ class UserRegistrationService {
 
     return await Result.tryAsync(async () => {
       // Check if user already exists
-      const existingUserResult = await this.userRepository.findByEmail(userData.email);
+      const existingUserResult = await this.userRepository.findByEmail(
+        userData.email
+      );
       if (existingUserResult.isSuccess) {
         throw new Error('User already exists');
       }
@@ -613,7 +631,7 @@ class UserRegistrationService {
       // Create new user
       const user = User.create(userData.name, userData.email);
       const saveResult = await this.userRepository.save(user);
-      
+
       if (saveResult.isFailure) {
         throw saveResult.error;
       }
@@ -643,7 +661,7 @@ class CreateUserHandler {
       // Execute business logic
       const user = User.create(command.name, command.email);
       const saveResult = await this.userRepository.save(user);
-      
+
       if (saveResult.isFailure) {
         throw saveResult.error;
       }
@@ -653,7 +671,9 @@ class CreateUserHandler {
     });
   }
 
-  private async validateCommand(command: CreateUserCommand): Promise<Result<void, Error>> {
+  private async validateCommand(
+    command: CreateUserCommand
+  ): Promise<Result<void, Error>> {
     if (LibUtils.isEmpty(command.name)) {
       return Result.fail(new Error('Name is required'));
     }
@@ -679,7 +699,7 @@ describe('Result', () => {
   describe('creation', () => {
     it('should create success result', () => {
       const result = Result.ok('success');
-      
+
       expect(result.isSuccess).toBe(true);
       expect(result.isFailure).toBe(false);
       expect(result.value).toBe('success');
@@ -688,7 +708,7 @@ describe('Result', () => {
     it('should create failure result', () => {
       const error = new Error('failure');
       const result = Result.fail(error);
-      
+
       expect(result.isSuccess).toBe(false);
       expect(result.isFailure).toBe(true);
       expect(result.error).toBe(error);
@@ -699,7 +719,7 @@ describe('Result', () => {
     it('should map success value', () => {
       const result = Result.ok(42);
       const mapped = result.map(x => x.toString());
-      
+
       expect(mapped.isSuccess).toBe(true);
       expect(mapped.value).toBe('42');
     });
@@ -708,7 +728,7 @@ describe('Result', () => {
       const error = new Error('test');
       const result = Result.fail<number>(error);
       const mapped = result.map(x => x.toString());
-      
+
       expect(mapped.isFailure).toBe(true);
       expect(mapped.error).toBe(error);
     });
@@ -719,7 +739,7 @@ describe('Result', () => {
       const result = await Result.tryAsync(async () => {
         return await Promise.resolve('async success');
       });
-      
+
       expect(result.isSuccess).toBe(true);
       expect(result.value).toBe('async success');
     });
@@ -728,7 +748,7 @@ describe('Result', () => {
       const result = await Result.tryAsync(async () => {
         throw new Error('async failure');
       });
-      
+
       expect(result.isFailure).toBe(true);
       expect(result.error.message).toBe('async failure');
     });
@@ -801,7 +821,9 @@ describe('LibUtils', () => {
     });
 
     it('should validate UUID format', () => {
-      expect(LibUtils.isValidUUID('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
+      expect(LibUtils.isValidUUID('550e8400-e29b-41d4-a716-446655440000')).toBe(
+        true
+      );
       expect(LibUtils.isValidUUID('not-a-uuid')).toBe(false);
     });
   });
@@ -846,19 +868,25 @@ describe('LibUtils', () => {
 
 ### Result Pattern Usage
 
-1. **Use Result for Domain Operations**: Always return Results from domain operations that can fail
-2. **Chain Operations**: Use map and flatMap to chain operations without nested error handling
-3. **Match Pattern**: Use match() to handle both success and failure cases explicitly
+1. **Use Result for Domain Operations**: Always return Results from domain
+   operations that can fail
+2. **Chain Operations**: Use map and flatMap to chain operations without nested
+   error handling
+3. **Match Pattern**: Use match() to handle both success and failure cases
+   explicitly
 4. **Avoid Throwing**: Don't throw exceptions from Result-returning functions
-5. **Type Safety**: Use specific error types instead of generic Error when possible
+5. **Type Safety**: Use specific error types instead of generic Error when
+   possible
 
 ### SafeRun Testing
 
 1. **Use in Tests Only**: SafeRun is specifically designed for testing scenarios
-2. **Clear Variable Names**: Use descriptive variable names for errors (e.g., `validationError`, `dbError`)
+2. **Clear Variable Names**: Use descriptive variable names for errors (e.g.,
+   `validationError`, `dbError`)
 3. **Check Both Cases**: Always check both error and success cases
 4. **Async Handling**: Use `await safeRun()` for async operations
-5. **Specific Error Types**: Test for specific error types, not just generic errors
+5. **Specific Error Types**: Test for specific error types, not just generic
+   errors
 
 ### LibUtils Best Practices
 
@@ -870,15 +898,18 @@ describe('LibUtils', () => {
 
 ### Integration Guidelines
 
-1. **Consistent Error Handling**: Use the same error handling patterns throughout your application
-2. **Domain Alignment**: Use Result pattern for domain operations, exceptions for infrastructure
+1. **Consistent Error Handling**: Use the same error handling patterns
+   throughout your application
+2. **Domain Alignment**: Use Result pattern for domain operations, exceptions
+   for infrastructure
 3. **Test Coverage**: Test both success and failure paths thoroughly
 4. **Type Safety**: Leverage TypeScript's type system with these utilities
 5. **Documentation**: Document expected error types and success values
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -902,10 +933,12 @@ pnpm test:packages:utils
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

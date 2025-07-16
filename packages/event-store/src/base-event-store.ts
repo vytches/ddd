@@ -23,8 +23,30 @@ import { Logger } from '@vytches-ddd/logging';
 import type { ILogger } from '@vytches-ddd/logging';
 
 /**
- * Base abstract class for Event Store implementations
- * Provides common functionality and enforces consistent behavior
+ * @llm-summary BaseEventStore class for base event store operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseEventStore class implementing infrastructure service for base event store operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseEventStore();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseEventStore());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseEventStore implements IAdvancedEventStore {
   protected readonly logger: ILogger;

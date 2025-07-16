@@ -14,9 +14,14 @@ Integration Points: Single entry point for core DDD patterns; provides stable AP
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise API stability meta-package for core Domain-Driven Design building blocks**
+> **Enterprise API stability meta-package for core Domain-Driven Design building
+> blocks**
 
-The Core package is a carefully crafted meta-package that provides enterprise-grade API stability by aggregating and re-exporting the essential DDD building blocks. It serves as the stable entry point for core domain patterns, ensuring consistent access to aggregates, entities, value objects, repositories, and error handling across your entire application.
+The Core package is a carefully crafted meta-package that provides
+enterprise-grade API stability by aggregating and re-exporting the essential DDD
+building blocks. It serves as the stable entry point for core domain patterns,
+ensuring consistent access to aggregates, entities, value objects, repositories,
+and error handling across your entire application.
 
 ## 📋 Table of Contents
 
@@ -68,18 +73,22 @@ The core package automatically pulls in all necessary dependencies:
 ## ✨ Key Features
 
 ### Enterprise API Stability
+
 - **Stable Interface**: Single, consistent API for all core DDD patterns
 - **Version Management**: Coordinated versioning across all core packages
-- **Breaking Change Protection**: Shields applications from internal package changes
+- **Breaking Change Protection**: Shields applications from internal package
+  changes
 - **Dependency Coordination**: Manages complex inter-package dependencies
 
 ### Meta-Package Architecture
+
 - **Modular Foundation**: Built on specialized, focused packages
 - **Tree-Shaking Optimized**: Only imports what you use
 - **Zero Redundancy**: No duplicate code or functionality
 - **Lightweight**: Minimal overhead with maximum functionality
 
 ### Core Building Blocks
+
 - **Aggregate Root**: Complete aggregate pattern implementation
 - **Entity Identification**: Enterprise-grade EntityId system
 - **Value Objects**: Immutable value object base classes
@@ -87,6 +96,7 @@ The core package automatically pulls in all necessary dependencies:
 - **Error Handling**: Comprehensive domain error system
 
 ### Developer Experience
+
 - **Single Import**: Access all core patterns from one package
 - **IntelliSense**: Rich IDE support with comprehensive documentation
 - **Type Safety**: Full TypeScript support with excellent type inference
@@ -100,13 +110,21 @@ The core package aggregates specialized packages:
 
 ```typescript
 // From @vytches-ddd/aggregates
-export { AggregateRoot, AggregateBuilder, AggregateError } from '@vytches-ddd/aggregates';
+export {
+  AggregateRoot,
+  AggregateBuilder,
+  AggregateError,
+} from '@vytches-ddd/aggregates';
 
 // From @vytches-ddd/contracts (Foundation)
 export { EntityId } from '@vytches-ddd/contracts';
 
 // From @vytches-ddd/domain-primitives
-export { BaseError, InvalidParameterError, NotFoundError } from '@vytches-ddd/domain-primitives';
+export {
+  BaseError,
+  InvalidParameterError,
+  NotFoundError,
+} from '@vytches-ddd/domain-primitives';
 
 // From @vytches-ddd/value-objects
 export { BaseValueObject } from '@vytches-ddd/value-objects';
@@ -144,7 +162,7 @@ import {
   BaseValueObject,
   IBaseRepository,
   BaseError,
-  InvalidParameterError
+  InvalidParameterError,
 } from '@vytches-ddd/core';
 
 // Create Entity ID
@@ -186,16 +204,18 @@ class Order extends AggregateRoot {
       data.total,
       OrderStatus.PENDING
     );
-    
+
     order.addDomainEvent(new OrderCreatedEvent(orderId, data));
     return order;
   }
 
   confirm(): void {
     if (this.status !== OrderStatus.PENDING) {
-      throw new InvalidParameterError('Order cannot be confirmed in current status');
+      throw new InvalidParameterError(
+        'Order cannot be confirmed in current status'
+      );
     }
-    
+
     this.status = OrderStatus.CONFIRMED;
     this.addDomainEvent(new OrderConfirmedEvent(this.id));
   }
@@ -217,7 +237,7 @@ import {
   BaseValueObject,
   IBaseRepository,
   BaseError,
-  IActor
+  IActor,
 } from '@vytches-ddd/core';
 
 // Value Objects
@@ -240,14 +260,27 @@ class Address extends BaseValueObject<{
   country: string;
   postalCode: string;
 }> {
-  constructor(props: { street: string; city: string; country: string; postalCode: string }) {
+  constructor(props: {
+    street: string;
+    city: string;
+    country: string;
+    postalCode: string;
+  }) {
     super(props);
   }
 
-  get street(): string { return this.props.street; }
-  get city(): string { return this.props.city; }
-  get country(): string { return this.props.country; }
-  get postalCode(): string { return this.props.postalCode; }
+  get street(): string {
+    return this.props.street;
+  }
+  get city(): string {
+    return this.props.city;
+  }
+  get country(): string {
+    return this.props.country;
+  }
+  get postalCode(): string {
+    return this.props.postalCode;
+  }
 }
 
 // Aggregate
@@ -270,31 +303,43 @@ class Customer extends AggregateRoot {
       new Email(data.email),
       new Address(data.address)
     );
-    
+
     customer.addDomainEvent(new CustomerCreatedEvent(customerId, data));
     return customer;
   }
 
   updateAddress(newAddress: Address, actor: IActor): void {
     this.address = newAddress;
-    this.addDomainEvent(new CustomerAddressUpdatedEvent(this.id, newAddress, actor));
+    this.addDomainEvent(
+      new CustomerAddressUpdatedEvent(this.id, newAddress, actor)
+    );
   }
 
   deactivate(actor: IActor): void {
     if (!this.isActive) {
       throw new InvalidParameterError('Customer is already inactive');
     }
-    
+
     this.isActive = false;
     this.addDomainEvent(new CustomerDeactivatedEvent(this.id, actor));
   }
 
   // Getters
-  get customerId(): EntityId { return this.id; }
-  get customerName(): string { return this.name; }
-  get customerEmail(): Email { return this.email; }
-  get customerAddress(): Address { return this.address; }
-  get active(): boolean { return this.isActive; }
+  get customerId(): EntityId {
+    return this.id;
+  }
+  get customerName(): string {
+    return this.name;
+  }
+  get customerEmail(): Email {
+    return this.email;
+  }
+  get customerAddress(): Address {
+    return this.address;
+  }
+  get active(): boolean {
+    return this.isActive;
+  }
 }
 
 // Repository
@@ -332,7 +377,7 @@ class Product extends AggregateRoot {
       data.price,
       data.inventory
     );
-    
+
     product.addDomainEvent(new ProductCreatedEvent(productId, data));
     return product;
   }
@@ -340,19 +385,31 @@ class Product extends AggregateRoot {
   updatePrice(newPrice: Money): void {
     const oldPrice = this.price;
     this.price = newPrice;
-    this.addDomainEvent(new ProductPriceUpdatedEvent(this.id, oldPrice, newPrice));
+    this.addDomainEvent(
+      new ProductPriceUpdatedEvent(this.id, oldPrice, newPrice)
+    );
   }
 
   adjustInventory(quantity: number): void {
     this.inventory += quantity;
-    this.addDomainEvent(new ProductInventoryAdjustedEvent(this.id, quantity, this.inventory));
+    this.addDomainEvent(
+      new ProductInventoryAdjustedEvent(this.id, quantity, this.inventory)
+    );
   }
 
   // Getters
-  get productId(): EntityId { return this.id; }
-  get productName(): string { return this.name; }
-  get productPrice(): Money { return this.price; }
-  get availableInventory(): number { return this.inventory; }
+  get productId(): EntityId {
+    return this.id;
+  }
+  get productName(): string {
+    return this.name;
+  }
+  get productPrice(): Money {
+    return this.price;
+  }
+  get availableInventory(): number {
+    return this.inventory;
+  }
 }
 ```
 
@@ -400,15 +457,15 @@ Immutable value objects with validation:
 ```typescript
 import { BaseValueObject, InvalidParameterError } from '@vytches-ddd/core';
 
-class PhoneNumber extends BaseValueObject<{ 
-  countryCode: string; 
-  number: string; 
+class PhoneNumber extends BaseValueObject<{
+  countryCode: string;
+  number: string;
 }> {
   constructor(countryCode: string, number: string) {
     if (!countryCode || !number) {
       throw new InvalidParameterError('Country code and number are required');
     }
-    
+
     super({ countryCode, number });
   }
 
@@ -429,7 +486,7 @@ class PhoneNumber extends BaseValueObject<{
     if (!match) {
       throw new InvalidParameterError('Invalid phone number format');
     }
-    
+
     return new PhoneNumber(match[1], match[2]);
   }
 }
@@ -482,8 +539,10 @@ class ProductRepository implements IProductRepository {
   async findByPriceRange(minPrice: Money, maxPrice: Money): Promise<Product[]> {
     const products: Product[] = [];
     for (const product of this.products.values()) {
-      if (product.productPrice.amount >= minPrice.amount && 
-          product.productPrice.amount <= maxPrice.amount) {
+      if (
+        product.productPrice.amount >= minPrice.amount &&
+        product.productPrice.amount <= maxPrice.amount
+      ) {
         products.push(product);
       }
     }
@@ -507,12 +566,12 @@ class ProductRepository implements IProductRepository {
 Comprehensive domain error system:
 
 ```typescript
-import { 
-  BaseError, 
-  InvalidParameterError, 
-  NotFoundError, 
+import {
+  BaseError,
+  InvalidParameterError,
+  NotFoundError,
   DuplicateError,
-  MissingValueError 
+  MissingValueError,
 } from '@vytches-ddd/core';
 
 class OrderService {
@@ -536,21 +595,26 @@ class OrderService {
       if (!product) {
         throw new NotFoundError('Product not found', 'PRODUCT_NOT_FOUND');
       }
-      
+
       if (product.availableInventory < item.quantity) {
         throw new InvalidParameterError(
           `Insufficient inventory for product ${product.productName}`,
           'INSUFFICIENT_INVENTORY'
         );
       }
-      
+
       products.push(product);
     }
 
     // Check for duplicate order
-    const existingOrder = await this.orderRepository.findByCustomerId(data.customerId);
+    const existingOrder = await this.orderRepository.findByCustomerId(
+      data.customerId
+    );
     if (existingOrder.some(o => o.orderNumber === data.orderNumber)) {
-      throw new DuplicateError('Order with this number already exists', 'DUPLICATE_ORDER');
+      throw new DuplicateError(
+        'Order with this number already exists',
+        'DUPLICATE_ORDER'
+      );
     }
 
     // Create order
@@ -560,7 +624,10 @@ class OrderService {
     return order;
   }
 
-  async updateOrderStatus(orderId: EntityId, newStatus: OrderStatus): Promise<void> {
+  async updateOrderStatus(
+    orderId: EntityId,
+    newStatus: OrderStatus
+  ): Promise<void> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
       throw new NotFoundError('Order not found', 'ORDER_NOT_FOUND');
@@ -573,7 +640,10 @@ class OrderService {
       if (error instanceof BaseError) {
         throw error;
       }
-      throw new InvalidParameterError('Failed to update order status', 'UPDATE_FAILED');
+      throw new InvalidParameterError(
+        'Failed to update order status',
+        'UPDATE_FAILED'
+      );
     }
   }
 }
@@ -583,7 +653,8 @@ class OrderService {
 
 ### Stable Interface Commitment
 
-The core package provides a stable API that shields applications from internal changes:
+The core package provides a stable API that shields applications from internal
+changes:
 
 ```typescript
 // ✅ Stable - Will not change in breaking ways
@@ -618,20 +689,20 @@ The core package evolves with backward compatibility:
 export { AggregateRoot, EntityId } from '@vytches-ddd/core';
 
 // v0.2.x (backward compatible)
-export { 
-  AggregateRoot, 
+export {
+  AggregateRoot,
   EntityId,
   // New additions
   EnhancedAggregate,
-  CompositeEntityId 
+  CompositeEntityId,
 } from '@vytches-ddd/core';
 
 // v1.0.x (breaking changes handled gracefully)
-export { 
+export {
   AggregateRoot,
   EntityId,
   // Deprecated items still available
-  LegacyAggregate // @deprecated Use AggregateRoot instead
+  LegacyAggregate, // @deprecated Use AggregateRoot instead
 } from '@vytches-ddd/core';
 ```
 
@@ -643,20 +714,20 @@ The core package provides optimal bundle sizes:
 
 ```typescript
 // Before: Multiple package imports
-import { AggregateRoot } from '@vytches-ddd/aggregates';      // 82KB
-import { EntityId } from '@vytches-ddd/contracts';           // 2KB
+import { AggregateRoot } from '@vytches-ddd/aggregates'; // 82KB
+import { EntityId } from '@vytches-ddd/contracts'; // 2KB
 import { BaseValueObject } from '@vytches-ddd/value-objects'; // 36KB
-import { IBaseRepository } from '@vytches-ddd/repositories';  // 40KB
-import { BaseError } from '@vytches-ddd/domain-primitives';   // 40KB
+import { IBaseRepository } from '@vytches-ddd/repositories'; // 40KB
+import { BaseError } from '@vytches-ddd/domain-primitives'; // 40KB
 // Total: 200KB
 
 // After: Single core import
-import { 
-  AggregateRoot, 
-  EntityId, 
-  BaseValueObject, 
-  IBaseRepository, 
-  BaseError 
+import {
+  AggregateRoot,
+  EntityId,
+  BaseValueObject,
+  IBaseRepository,
+  BaseError,
 } from '@vytches-ddd/core';
 // Total: 1.4KB meta-package + tree-shaken dependencies
 ```
@@ -693,7 +764,7 @@ import {
   EntityId,
   BaseValueObject,
   IBaseRepository,
-  BaseError
+  BaseError,
 } from '@vytches-ddd/core';
 ```
 
@@ -708,7 +779,7 @@ import {
     // "@vytches-ddd/value-objects": "^0.1.0",
     // "@vytches-ddd/repositories": "^0.1.0",
     // "@vytches-ddd/domain-primitives": "^0.1.0",
-    
+
     // Add core package
     "@vytches-ddd/core": "^0.1.4"
   }
@@ -735,12 +806,12 @@ import { AggregateRoot, EntityId } from '@vytches-ddd/core';
 
 ```typescript
 // ✅ Recommended: Named imports for better tree shaking
-import { 
-  AggregateRoot, 
-  EntityId, 
-  BaseValueObject, 
+import {
+  AggregateRoot,
+  EntityId,
+  BaseValueObject,
   IBaseRepository,
-  BaseError 
+  BaseError,
 } from '@vytches-ddd/core';
 
 // ✅ Also good: Specific imports for single use
@@ -767,18 +838,18 @@ import { SomeClass } from '@vytches-ddd/aggregates';
 
 ```typescript
 // ✅ Good: Type-only imports for interfaces
-import type { 
-  IAggregateRoot, 
+import type {
+  IAggregateRoot,
   IBaseRepository,
-  DomainErrorOptions 
+  DomainErrorOptions,
 } from '@vytches-ddd/core';
 
 // ✅ Good: Mixed imports with type imports
-import { 
-  AggregateRoot, 
+import {
+  AggregateRoot,
   EntityId,
   type IAggregateRoot,
-  type IBaseRepository
+  type IBaseRepository,
 } from '@vytches-ddd/core';
 ```
 
@@ -835,11 +906,11 @@ async function loadAdvancedFeatures() {
 ### Application Setup
 
 ```typescript
-import { 
-  AggregateRoot, 
-  EntityId, 
+import {
+  AggregateRoot,
+  EntityId,
   IBaseRepository,
-  BaseError 
+  BaseError,
 } from '@vytches-ddd/core';
 
 // Domain layer
@@ -852,11 +923,11 @@ class OrderRepository implements IBaseRepository<Order> {
   async findById(id: EntityId): Promise<Order | null> {
     // Implementation
   }
-  
+
   async save(order: Order): Promise<void> {
     // Implementation
   }
-  
+
   async delete(id: EntityId): Promise<void> {
     // Implementation
   }
@@ -865,7 +936,7 @@ class OrderRepository implements IBaseRepository<Order> {
 // Service layer
 class OrderService {
   constructor(private orderRepository: OrderRepository) {}
-  
+
   async createOrder(data: CreateOrderData): Promise<Order> {
     try {
       const order = Order.create(data);
@@ -890,10 +961,8 @@ import { AggregateRoot, EntityId, IBaseRepository } from '@vytches-ddd/core';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private orderRepository: IBaseRepository<Order>
-  ) {}
-  
+  constructor(private orderRepository: IBaseRepository<Order>) {}
+
   async getOrder(id: string): Promise<Order | null> {
     const orderId = EntityId.createText(id);
     return await this.orderRepository.findById(orderId);
@@ -910,11 +979,11 @@ app.get('/orders/:id', async (req, res) => {
   try {
     const orderId = EntityId.createText(req.params.id);
     const order = await orderService.getOrder(orderId);
-    
+
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
-    
+
     res.json(order);
   } catch (error) {
     if (error instanceof BaseError) {
@@ -929,19 +998,21 @@ app.get('/orders/:id', async (req, res) => {
 
 ### Import Consistency
 
-1. **Use Core Package**: Always import from `@vytches-ddd/core` for core patterns
+1. **Use Core Package**: Always import from `@vytches-ddd/core` for core
+   patterns
 2. **Named Imports**: Use named imports for better tree shaking
 3. **Type Imports**: Use type-only imports for interfaces
-4. **Consistent Patterns**: Maintain consistent import patterns across your codebase
+4. **Consistent Patterns**: Maintain consistent import patterns across your
+   codebase
 
 ```typescript
 // ✅ Good: Consistent core imports
-import { 
-  AggregateRoot, 
-  EntityId, 
+import {
+  AggregateRoot,
+  EntityId,
   BaseValueObject,
   type IAggregateRoot,
-  type IBaseRepository
+  type IBaseRepository,
 } from '@vytches-ddd/core';
 
 // ❌ Bad: Mixed package imports
@@ -977,7 +1048,11 @@ const OrderModule = lazy(() => import('./order-module'));
 
 ```typescript
 // ✅ Good: Type-safe implementation
-import { AggregateRoot, EntityId, type IAggregateRoot } from '@vytches-ddd/core';
+import {
+  AggregateRoot,
+  EntityId,
+  type IAggregateRoot,
+} from '@vytches-ddd/core';
 
 class Order extends AggregateRoot implements IAggregateRoot {
   constructor(id: EntityId) {
@@ -1000,7 +1075,11 @@ function isOrder(obj: unknown): obj is Order {
 
 ```typescript
 // ✅ Good: Domain error handling
-import { BaseError, InvalidParameterError, NotFoundError } from '@vytches-ddd/core';
+import {
+  BaseError,
+  InvalidParameterError,
+  NotFoundError,
+} from '@vytches-ddd/core';
 
 class OrderService {
   async processOrder(orderId: EntityId): Promise<void> {
@@ -1009,14 +1088,17 @@ class OrderService {
       if (!order) {
         throw new NotFoundError('Order not found', 'ORDER_NOT_FOUND');
       }
-      
+
       order.process();
       await this.orderRepository.save(order);
     } catch (error) {
       if (error instanceof BaseError) {
         throw error;
       }
-      throw new InvalidParameterError('Failed to process order', 'PROCESS_FAILED');
+      throw new InvalidParameterError(
+        'Failed to process order',
+        'PROCESS_FAILED'
+      );
     }
   }
 }
@@ -1024,7 +1106,8 @@ class OrderService {
 
 ## 📚 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1046,4 +1129,6 @@ pnpm build
 
 **Built with ❤️ by the VytchesDDD Team**
 
-*The stable foundation of the [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your enterprise-grade API for Domain-Driven Design*
+_The stable foundation of the
+[@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your
+enterprise-grade API for Domain-Driven Design_

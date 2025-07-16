@@ -102,6 +102,11 @@ jobs:
       - name: Type check affected projects
         run: pnpm nx affected --target=type-check --parallel=3
 
+      - name: JSDoc validation
+        run: node scripts/jsdoc-validator.js
+        env:
+          CI: true
+
       - name: Test affected projects
         run: pnpm nx affected --target=test --parallel=3 --verbose
         env:

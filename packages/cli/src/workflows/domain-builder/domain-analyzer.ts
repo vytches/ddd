@@ -7,7 +7,23 @@ import type { NLPAnalysis } from './natural-language-processor';
 import type { BoundedContextMap } from './bounded-context-mapper';
 
 /**
- * Domain analysis result
+ * @llm-summary Contract for domain analysis functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainAnalysis interface implementing infrastructure service for domain analysis operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainAnalysis implements DomainAnalysis {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainAnalysis {
   complexity: ComplexityAnalysis;
@@ -19,7 +35,23 @@ export interface DomainAnalysis {
 }
 
 /**
- * Complexity analysis breakdown
+ * @llm-summary Contract for complexity analysis functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ComplexityAnalysis interface implementing infrastructure service for complexity analysis operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteComplexityAnalysis implements ComplexityAnalysis {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ComplexityAnalysis {
   overall: number;
@@ -36,7 +68,23 @@ export interface ComplexityAnalysis {
 }
 
 /**
- * Complexity factor contributing to overall score
+ * @llm-summary Contract for complexity factor functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ComplexityFactor interface implementing infrastructure service for complexity factor operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteComplexityFactor implements ComplexityFactor {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ComplexityFactor {
   name: string;
@@ -48,7 +96,23 @@ export interface ComplexityFactor {
 }
 
 /**
- * Architecture recommendation
+ * @llm-summary Contract for architecture recommendation functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ArchitectureRecommendation interface implementing infrastructure service for architecture recommendation operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteArchitectureRecommendation implements ArchitectureRecommendation {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ArchitectureRecommendation {
   primary: string;
@@ -60,7 +124,23 @@ export interface ArchitectureRecommendation {
 }
 
 /**
- * Migration strategy for existing systems
+ * @llm-summary Contract for migration strategy functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * MigrationStrategy interface implementing infrastructure service for migration strategy operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteMigrationStrategy implements MigrationStrategy {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface MigrationStrategy {
   approach: 'big-bang' | 'strangler-fig' | 'branch-by-abstraction' | 'incremental';
@@ -71,7 +151,23 @@ export interface MigrationStrategy {
 }
 
 /**
- * Migration phase
+ * @llm-summary Contract for migration phase functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * MigrationPhase interface implementing infrastructure service for migration phase operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteMigrationPhase implements MigrationPhase {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface MigrationPhase {
   name: string;
@@ -83,7 +179,23 @@ export interface MigrationPhase {
 }
 
 /**
- * Domain risk assessment
+ * @llm-summary Contract for domain risk functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainRisk interface implementing infrastructure service for domain risk operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainRisk implements DomainRisk {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainRisk {
   type: 'technical' | 'business' | 'operational' | 'security' | 'compliance';
@@ -96,7 +208,23 @@ export interface DomainRisk {
 }
 
 /**
- * Domain opportunity identification
+ * @llm-summary Contract for domain opportunity functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainOpportunity interface implementing infrastructure service for domain opportunity operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainOpportunity implements DomainOpportunity {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainOpportunity {
   type: 'optimization' | 'automation' | 'integration' | 'innovation' | 'cost-reduction';
@@ -109,7 +237,23 @@ export interface DomainOpportunity {
 }
 
 /**
- * Domain metrics and KPIs
+ * @llm-summary Contract for domain metrics functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainMetrics interface implementing infrastructure service for domain metrics operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainMetrics implements DomainMetrics {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainMetrics {
   size: {
@@ -139,7 +283,23 @@ export interface DomainMetrics {
 }
 
 /**
- * Domain recommendation
+ * @llm-summary Contract for domain recommendation functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainRecommendation interface implementing infrastructure service for domain recommendation operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainRecommendation implements DomainRecommendation {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainRecommendation {
   category: 'architecture' | 'patterns' | 'technology' | 'process' | 'governance';
@@ -154,7 +314,30 @@ export interface DomainRecommendation {
 }
 
 /**
- * Domain Analyzer for comprehensive domain assessment
+ * @llm-summary DomainAnalyzer class for domain analyzer operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * DomainAnalyzer class implementing infrastructure service for domain analyzer operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DomainAnalyzer();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DomainAnalyzer());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DomainAnalyzer {
   /**

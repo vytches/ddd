@@ -10,7 +10,23 @@ import type {
 import { PolicyViolation } from '../core/models/policy-violation';
 
 /**
- * Business calendar configuration for temporal policies
+ * @llm-summary Contract for business calendar functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * BusinessCalendar interface implementing domain pattern implementation for business calendar operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBusinessCalendar implements BusinessCalendar {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface BusinessCalendar {
   /**
@@ -38,7 +54,21 @@ export interface BusinessCalendar {
 }
 
 /**
- * Temporal condition function type
+ * @llm-summary Type definition for temporal condition
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * TemporalCondition type implementing domain pattern implementation for temporal condition operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: TemporalCondition = {} as TemporalCondition;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type TemporalCondition<T> = (
   entity: T,
@@ -47,7 +77,23 @@ export type TemporalCondition<T> = (
 ) => boolean | Promise<boolean>;
 
 /**
- * Temporal information provided to conditions and policies
+ * @llm-summary Contract for temporal info functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * TemporalInfo interface implementing domain pattern implementation for temporal info operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTemporalInfo implements TemporalInfo {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface TemporalInfo {
   timestamp: Date;
@@ -60,7 +106,23 @@ export interface TemporalInfo {
 }
 
 /**
- * Configuration for temporal policy decorator
+ * @llm-summary Contract for temporal policy config functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * TemporalPolicyConfig interface implementing domain pattern implementation for temporal policy config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTemporalPolicyConfig implements TemporalPolicyConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface TemporalPolicyConfig {
   /**
@@ -109,8 +171,30 @@ export interface TemporalPolicyConfig {
 }
 
 /**
- * Temporal policy decorator - applies different policies based on time
- * Business-focused temporal rules - NOT generic time handling
+ * @llm-summary PolicyTemporalBehavior class for policy temporal behavior operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyTemporalBehavior class implementing domain pattern implementation for policy temporal behavior operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyTemporalBehavior();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyTemporalBehavior());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
   public readonly id: string;
@@ -336,7 +420,30 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
 }
 
 /**
- * Builder for temporal policy configuration
+ * @llm-summary PolicyTemporalBehaviorBuilder class for policy temporal behavior builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyTemporalBehaviorBuilder class implementing domain pattern implementation for policy temporal behavior builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyTemporalBehaviorBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyTemporalBehaviorBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyTemporalBehaviorBuilder<T> {
   private config: Partial<TemporalPolicyConfig> = {};
@@ -484,7 +591,30 @@ export class PolicyTemporalBehaviorBuilder<T> {
 }
 
 /**
- * Factory for common temporal policy patterns
+ * @llm-summary PolicyTemporalBehaviorFactory class for policy temporal behavior factory operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyTemporalBehaviorFactory class implementing domain pattern implementation for policy temporal behavior factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyTemporalBehaviorFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyTemporalBehaviorFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyTemporalBehaviorFactory {
   /**

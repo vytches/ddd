@@ -1,5 +1,24 @@
 import type { ResilienceContext } from '../core/resilience-context';
 
+/**
+ * @llm-summary Contract for bulkhead config functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * BulkheadConfig interface implementing infrastructure service for bulkhead config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBulkheadConfig implements BulkheadConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface BulkheadConfig {
   readonly maxConcurrency: number;
   readonly queueCapacity: number;
@@ -7,6 +26,25 @@ export interface BulkheadConfig {
   readonly name?: string;
 }
 
+/**
+ * @llm-summary Contract for bulkhead metrics functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * BulkheadMetrics interface implementing infrastructure service for bulkhead metrics operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBulkheadMetrics implements BulkheadMetrics {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface BulkheadMetrics {
   readonly activeTasks: number;
   readonly queuedTasks: number;
@@ -15,6 +53,32 @@ export interface BulkheadMetrics {
   readonly avgExecutionTime: number;
 }
 
+/**
+ * @llm-summary BulkheadRejectedException class for bulkhead rejected exception operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Expert
+ *
+ * @description
+ * BulkheadRejectedException class implementing infrastructure service for bulkhead rejected exception operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BulkheadRejectedException();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BulkheadRejectedException());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class BulkheadRejectedException extends Error {
   constructor(bulkheadName: string, reason: 'QUEUE_FULL' | 'MAX_CONCURRENCY') {
     super(`Bulkhead '${bulkheadName}' rejected request: ${reason}`);
@@ -30,6 +94,32 @@ interface QueuedTask<T = unknown> {
   startTime: number;
 }
 
+/**
+ * @llm-summary Bulkhead class for bulkhead operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Expert
+ *
+ * @description
+ * Bulkhead class implementing infrastructure service for bulkhead operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new Bulkhead();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new Bulkhead());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class Bulkhead {
   private activeTasks = 0;
   private queue: QueuedTask[] = [];

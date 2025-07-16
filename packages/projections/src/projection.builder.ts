@@ -18,6 +18,32 @@ import type {
   IProjectionStore,
 } from './projection-interfaces';
 
+/**
+ * @llm-summary ProjectionBuilder class for projection builder operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * ProjectionBuilder class implementing architectural component for projection builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ProjectionBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ProjectionBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class ProjectionBuilder<TReadModel> {
   protected engine: ProjectionEngine<TReadModel>; // zmiana z private na protected
   protected projection: IProjection<TReadModel>; // dodane
@@ -52,6 +78,33 @@ export class ProjectionBuilder<TReadModel> {
 }
 
 // projection-builder-enhanced.ts
+
+/**
+ * @llm-summary EnhancedProjectionBuilder class for enhanced projection builder operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * EnhancedProjectionBuilder class implementing architectural component for enhanced projection builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EnhancedProjectionBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EnhancedProjectionBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class EnhancedProjectionBuilder<TReadModel> extends ProjectionBuilder<TReadModel> {
   withRetryStrategy(config: IProjectionRetryConfig, strategy?: IProjectionErrorStrategy): this {
     // Teraz this.projection i this.store są dostępne

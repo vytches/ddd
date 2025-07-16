@@ -8,7 +8,30 @@ export type { PolicyDefinition };
 // PolicyDefinition is already defined in interfaces, no need to redefine
 
 /**
- * Builder for creating policy definitions
+ * @llm-summary PolicyDefinitionBuilder class for policy definition builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyDefinitionBuilder class implementing domain pattern implementation for policy definition builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyDefinitionBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyDefinitionBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyDefinitionBuilder<T> {
   private id?: string;

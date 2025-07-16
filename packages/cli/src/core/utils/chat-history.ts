@@ -8,7 +8,23 @@ import * as path from 'path';
 import { Performance } from './performance';
 
 /**
- * Chat message interface
+ * @llm-summary Contract for chat message functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ChatMessage interface implementing infrastructure service for chat message operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteChatMessage implements ChatMessage {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ChatMessage {
   id: string;
@@ -25,7 +41,23 @@ export interface ChatMessage {
 }
 
 /**
- * Chat session interface
+ * @llm-summary Contract for chat session functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ChatSession interface implementing infrastructure service for chat session operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteChatSession implements ChatSession {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ChatSession {
   id: string;
@@ -42,7 +74,23 @@ export interface ChatSession {
 }
 
 /**
- * Chat history configuration
+ * @llm-summary Contract for chat history config functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ChatHistoryConfig interface implementing infrastructure service for chat history config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteChatHistoryConfig implements ChatHistoryConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ChatHistoryConfig {
   enabled: boolean;
@@ -66,7 +114,30 @@ const DEFAULT_CONFIG: ChatHistoryConfig = {
 };
 
 /**
- * Chat History Manager for local conversation persistence
+ * @llm-summary ChatHistory class for chat history operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Simple
+ *
+ * @description
+ * ChatHistory class implementing infrastructure service for chat history operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ChatHistory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ChatHistory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ChatHistory {
   private config: ChatHistoryConfig;
@@ -507,6 +578,19 @@ export class ChatHistory {
 }
 
 /**
- * Global chat history instance
+ * @llm-summary chatHistory constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * chatHistory constant implementing infrastructure service for chat history operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(chatHistory);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const chatHistory = new ChatHistory();

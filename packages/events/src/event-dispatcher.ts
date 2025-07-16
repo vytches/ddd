@@ -10,13 +10,30 @@ import { UnifiedEventBus } from './unified-event-bus';
 import { Logger } from '@vytches-ddd/logging';
 
 /**
- * Universal Event Dispatcher - Repository-compatible implementation
+ * @llm-summary UniversalEventDispatcher class for universal event dispatcher operations
+ * @llm-domain Architecture
+ * @llm-complexity Simple
  *
- * Integrates with IBaseRepository to provide complete event publishing pipeline:
- * - Middleware support for cross-cutting concerns
- * - Event processors for specialized handling
- * - Automatic aggregate commit after successful dispatch
- * - Integration with UnifiedEventBus for actual event routing
+ * @description
+ * UniversalEventDispatcher class implementing architectural component for universal event dispatcher operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UniversalEventDispatcher();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UniversalEventDispatcher());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   private middlewares: EventMiddleware[] = [];

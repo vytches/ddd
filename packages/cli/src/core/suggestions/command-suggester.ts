@@ -18,7 +18,23 @@ interface SuggestionRule {
 }
 
 /**
- * Command suggestion with metadata
+ * @llm-summary Contract for command suggestion functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * CommandSuggestion interface implementing infrastructure service for command suggestion operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCommandSuggestion implements CommandSuggestion {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface CommandSuggestion {
   command: string;
@@ -30,7 +46,30 @@ export interface CommandSuggestion {
 }
 
 /**
- * Intelligent command suggester
+ * @llm-summary CommandSuggester class for command suggester operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * CommandSuggester class implementing infrastructure service for command suggester operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CommandSuggester();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CommandSuggester());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class CommandSuggester {
   private suggestionRules: SuggestionRule[] = [];

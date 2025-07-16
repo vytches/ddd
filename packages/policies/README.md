@@ -14,9 +14,12 @@ Integration Points: @vytches-ddd/validation, @vytches-ddd/cqrs, @vytches-ddd/dom
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade business policy validation with fluent API, temporal support, and sophisticated rule composition**
+> **Enterprise-grade business policy validation with fluent API, temporal
+> support, and sophisticated rule composition**
 
-Complete business policy framework with fluent builder API, temporal validation, policy behaviors, and comprehensive violation reporting. Designed for complex business rules with enterprise-grade context management.
+Complete business policy framework with fluent builder API, temporal validation,
+policy behaviors, and comprehensive violation reporting. Designed for complex
+business rules with enterprise-grade context management.
 
 ## 📋 Table of Contents
 
@@ -59,18 +62,21 @@ npm install @vytches-ddd/domain-primitives @vytches-ddd/validation @vytches-ddd/
 ## ✨ Key Features
 
 ### Business Policy Framework
+
 - **Fluent API**: Intuitive fluent builder for policy creation
 - **Temporal Support**: Time-aware policy validation with business hours
 - **Policy Composition**: Complex policy groups with AND/OR logic
 - **Violation Reporting**: Rich violation details with severity levels
 
 ### Advanced Features
+
 - **Policy Behaviors**: MediatR-style behaviors for cross-cutting concerns
 - **Context Management**: Enterprise-grade context propagation
 - **Specification Integration**: Direct support for DDD specifications
 - **Event-Driven**: Automatic policy evaluation events
 
 ### Enterprise Quality
+
 - **Audit Trails**: Complete audit logging for policy evaluations
 - **Multi-Tenancy**: Tenant-aware policy resolution
 - **Performance**: Optimized for high-throughput scenarios
@@ -219,14 +225,17 @@ const result = await orderPolicy.check({ entity: order, context });
 import { PolicyGroup } from '@vytches-ddd/policies';
 
 // Create policy groups for complex logic
-const excellentCreditGroup = PolicyGroup.create<LoanApplication>('excellent-credit')
-  .mustSatisfy(
-    app => app.creditScore >= 800,
-    'CREDIT_NOT_EXCELLENT',
-    'Excellent credit required'
-  );
+const excellentCreditGroup = PolicyGroup.create<LoanApplication>(
+  'excellent-credit'
+).mustSatisfy(
+  app => app.creditScore >= 800,
+  'CREDIT_NOT_EXCELLENT',
+  'Excellent credit required'
+);
 
-const goodCreditWithCollateralGroup = PolicyGroup.create<LoanApplication>('good-credit-collateral')
+const goodCreditWithCollateralGroup = PolicyGroup.create<LoanApplication>(
+  'good-credit-collateral'
+)
   .mustSatisfy(
     app => app.creditScore >= 650,
     'CREDIT_NOT_GOOD',
@@ -262,24 +271,26 @@ const comprehensivePolicy = PolicyBuilder.create<User>()
   .withId('comprehensive-user-policy')
   .withDomain('user-management')
   .withName('Comprehensive User Validation')
-  .withDescription('Complete user validation including age, email, and security checks')
+  .withDescription(
+    'Complete user validation including age, email, and security checks'
+  )
   .withVersion('1.2.0')
   .withTags(['security', 'validation', 'user'])
-  
+
   // Basic validations
   .must(new AgeSpecification(18))
   .withCode('AGE_TOO_LOW')
   .withMessage('User must be at least 18 years old')
   .withSeverity('ERROR')
   .withField('age')
-  
+
   .and()
   .must(new EmailSpecification())
   .withCode('INVALID_EMAIL')
   .withMessage('Valid email address required')
   .withSeverity('ERROR')
   .withField('email')
-  
+
   // Conditional validations
   .when(user => user.role === UserRole.ADMIN)
   .then()
@@ -287,17 +298,17 @@ const comprehensivePolicy = PolicyBuilder.create<User>()
   .withCode('ADMIN_SECURITY_FAILED')
   .withMessage('Admin users require additional security validation')
   .withSeverity('ERROR')
-  
+
   // Warning-level validations
   .should(new ProfileCompletnessSpecification())
   .withCode('PROFILE_INCOMPLETE')
   .withMessage('Consider completing your profile')
   .withSeverity('WARNING')
-  
+
   // Events and audit
   .withEvents({ enabled: true })
   .withAuditTrail(true)
-  
+
   .build();
 ```
 
@@ -320,7 +331,7 @@ const asyncPolicy = PolicyBuilder.create<User>()
 // External specification example
 class EmailUniquenessSpecification implements IAsyncSpecification<User> {
   constructor(private readonly userRepository: IUserRepository) {}
-  
+
   async isSatisfiedByAsync(user: User): Promise<boolean> {
     const existingUser = await this.userRepository.findByEmail(user.email);
     return existingUser === null;
@@ -335,7 +346,7 @@ class EmailUniquenessSpecification implements IAsyncSpecification<User> {
 const ruleBasedPolicy = PolicyBuilder.create<User>()
   .withId('rule-based-user-policy')
   .withDomain('user-management')
-  .mustSatisfyRules(rules => 
+  .mustSatisfyRules(rules =>
     rules
       .forProperty('name', Rules.required().minLength(2).maxLength(50))
       .forProperty('email', Rules.required().email())
@@ -367,7 +378,7 @@ import { PolicyTemporalBehavior } from '@vytches-ddd/policies';
 const temporalPolicy = PolicyTemporalBehavior.create(strictPolicy, {
   businessHours: { start: '09:00', end: '17:00' },
   workingDays: [1, 2, 3, 4, 5], // Monday to Friday
-  timezone: 'America/New_York'
+  timezone: 'America/New_York',
 });
 
 // Alternative policies for different times
@@ -439,7 +450,9 @@ const creditCheckGroup = PolicyGroup.create<LoanApplication>('credit-check')
     'At least 2 years of credit history required'
   );
 
-const incomeVerificationGroup = PolicyGroup.create<LoanApplication>('income-verification')
+const incomeVerificationGroup = PolicyGroup.create<LoanApplication>(
+  'income-verification'
+)
   .mustSatisfy(
     app => app.annualIncome >= 50000,
     'INCOME_TOO_LOW',
@@ -452,26 +465,27 @@ const incomeVerificationGroup = PolicyGroup.create<LoanApplication>('income-veri
     'Applicant must be employed'
   );
 
-const collateralGroup = PolicyGroup.create<LoanApplication>('collateral')
-  .mustSatisfy(
-    app => app.collateralValue >= app.requestedAmount * 0.8,
-    'INSUFFICIENT_COLLATERAL',
-    'Collateral must be at least 80% of loan amount'
-  );
+const collateralGroup = PolicyGroup.create<LoanApplication>(
+  'collateral'
+).mustSatisfy(
+  app => app.collateralValue >= app.requestedAmount * 0.8,
+  'INSUFFICIENT_COLLATERAL',
+  'Collateral must be at least 80% of loan amount'
+);
 
 // Combine groups with complex logic
 const loanApprovalPolicy = PolicyBuilder.create<LoanApplication>()
   .withId('loan-approval-policy')
   .withDomain('lending')
   .withName('Loan Approval Policy')
-  
+
   // Must satisfy credit check AND income verification
   .mustSatisfyAll(creditCheckGroup, incomeVerificationGroup)
-  
+
   // OR have sufficient collateral
   .or()
   .mustSatisfy(collateralGroup)
-  
+
   .build();
 ```
 
@@ -479,13 +493,13 @@ const loanApprovalPolicy = PolicyBuilder.create<LoanApplication>()
 
 ```typescript
 // Compose groups for different scenarios
-const individualApplicantGroups = PolicyGroup.create<LoanApplication>('individual-applicant')
-  .mustSatisfyAll(
-    creditCheckGroup,
-    incomeVerificationGroup
-  );
+const individualApplicantGroups = PolicyGroup.create<LoanApplication>(
+  'individual-applicant'
+).mustSatisfyAll(creditCheckGroup, incomeVerificationGroup);
 
-const businessApplicantGroups = PolicyGroup.create<LoanApplication>('business-applicant')
+const businessApplicantGroups = PolicyGroup.create<LoanApplication>(
+  'business-applicant'
+)
   .mustSatisfy(
     app => app.businessRevenue >= 100000,
     'BUSINESS_REVENUE_TOO_LOW',
@@ -526,7 +540,7 @@ const retryPolicy = PolicyRetryBehavior.create(basePolicy, {
   shouldRetry: violation => violation.code.includes('TIMEOUT'),
   onRetry: (attempt, violation) => {
     console.log(`Retry attempt ${attempt} for violation: ${violation.code}`);
-  }
+  },
 });
 
 // Factory methods for common scenarios
@@ -554,7 +568,7 @@ const cachedPolicy = PolicyCachingBehavior.create(basePolicy, {
   ttl: 60000, // 1 minute
   keyGenerator: request => `${request.entity.id}_${request.context.userId}`,
   namespace: 'user-validation',
-  maxSize: 500
+  maxSize: 500,
 });
 
 // Simple TTL-based caching
@@ -579,7 +593,7 @@ const temporalPolicy = PolicyTemporalBehavior.create(basePolicy, {
   timezone: 'America/New_York',
   duringBusinessHours: strictPolicy,
   duringAfterHours: relaxedPolicy,
-  duringWeekends: weekendPolicy
+  duringWeekends: weekendPolicy,
 });
 
 // Factory methods
@@ -633,8 +647,8 @@ registry.register({
   tags: ['security', 'validation'],
   metadata: {
     author: 'Security Team',
-    lastUpdated: new Date()
-  }
+    lastUpdated: new Date(),
+  },
 });
 
 // Register with factory
@@ -647,7 +661,7 @@ registry.registerFactory({
     return context.environment === 'production'
       ? strictLoanPolicy
       : relaxedLoanPolicy;
-  }
+  },
 });
 ```
 
@@ -657,14 +671,17 @@ registry.registerFactory({
 // Resolve policies
 const policy = registry.resolve<User>({
   domain: 'authentication',
-  id: 'user-validation'
+  id: 'user-validation',
 });
 
 // Resolve with context
-const contextualPolicy = registry.resolveWithContext<LoanApplication>({
-  domain: 'lending',
-  id: 'dynamic-loan-policy'
-}, context);
+const contextualPolicy = registry.resolveWithContext<LoanApplication>(
+  {
+    domain: 'lending',
+    id: 'dynamic-loan-policy',
+  },
+  context
+);
 
 // Query policies
 const authenticationPolicies = registry.findByDomain('authentication');
@@ -720,22 +737,22 @@ const result = await policy.check({ entity: user, context });
 
 if (result.isFailure()) {
   const violations = result.violations;
-  
+
   // Separate by severity
   const errors = violations.filter(v => v.severity === 'ERROR');
   const warnings = violations.filter(v => v.severity === 'WARNING');
   const info = violations.filter(v => v.severity === 'INFO');
-  
+
   // Handle errors
   if (errors.length > 0) {
     throw new PolicyViolationError('Policy validation failed', errors);
   }
-  
+
   // Log warnings
   warnings.forEach(warning => {
     console.warn(`Warning: ${warning.message}`, warning.details);
   });
-  
+
   // Process info
   info.forEach(infoItem => {
     console.info(`Info: ${infoItem.message}`, infoItem.details);
@@ -763,36 +780,36 @@ class PolicyViolationHandler {
       }
     }
   }
-  
+
   private async handleError(violation: PolicyViolation): Promise<void> {
     // Log error
     this.logger.error('Policy violation', violation);
-    
+
     // Send notification
     await this.notificationService.sendAlert({
       type: 'policy_violation',
       severity: 'error',
       message: violation.message,
-      details: violation.details
+      details: violation.details,
     });
-    
+
     // Update metrics
     this.metrics.incrementCounter('policy_violations_error', {
       code: violation.code,
-      domain: violation.context?.domain
+      domain: violation.context?.domain,
     });
   }
-  
+
   private async handleWarning(violation: PolicyViolation): Promise<void> {
     // Log warning
     this.logger.warn('Policy warning', violation);
-    
+
     // Update metrics
     this.metrics.incrementCounter('policy_violations_warning', {
-      code: violation.code
+      code: violation.code,
     });
   }
-  
+
   private async handleInfo(violation: PolicyViolation): Promise<void> {
     // Log info
     this.logger.info('Policy info', violation);
@@ -892,30 +909,39 @@ export class CreateUserCommandHandler {
     private readonly userRepository: IUserRepository,
     private readonly policyRegistry: PolicyRegistry
   ) {}
-  
-  async handle(command: CreateUserCommand, context: ExecutionContext): Promise<void> {
+
+  async handle(
+    command: CreateUserCommand,
+    context: ExecutionContext
+  ): Promise<void> {
     // Resolve policy
     const policy = this.policyRegistry.resolve<User>({
       domain: 'user-management',
-      id: 'user-creation-policy'
+      id: 'user-creation-policy',
     });
-    
+
     // Create user entity
     const user = User.create(command.name, command.email, command.age);
-    
+
     // Validate with policy
     const policyContext = PolicyContext.create()
       .withUserId(context.userId)
       .withRequestId(context.requestId)
       .withTenantId(context.tenantId)
       .build();
-    
-    const policyResult = await policy.check({ entity: user, context: policyContext });
-    
+
+    const policyResult = await policy.check({
+      entity: user,
+      context: policyContext,
+    });
+
     if (policyResult.isFailure()) {
-      throw new PolicyViolationError('User creation policy failed', policyResult.violations);
+      throw new PolicyViolationError(
+        'User creation policy failed',
+        policyResult.violations
+      );
     }
-    
+
     // Save user
     await this.userRepository.save(user);
   }
@@ -928,24 +954,27 @@ export class CreateUserCommandHandler {
 // Domain service with policy validation
 class UserRegistrationService implements IDomainService {
   readonly serviceName = 'UserRegistrationService';
-  
+
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly policyRegistry: PolicyRegistry,
     private readonly emailService: IEmailService
   ) {}
-  
+
   async registerUser(userData: UserRegistrationData): Promise<User> {
     // Create user
     const user = User.create(userData.name, userData.email, userData.age);
-    
+
     // Validate with policies
     const policies = this.policyRegistry.findByDomain('user-management');
-    
+
     for (const policyInfo of policies) {
       const policy = this.policyRegistry.resolve<User>(policyInfo);
-      const result = await policy.check({ entity: user, context: userData.context });
-      
+      const result = await policy.check({
+        entity: user,
+        context: userData.context,
+      });
+
       if (result.isFailure()) {
         throw new PolicyViolationError(
           `Policy ${policyInfo.id} failed`,
@@ -953,13 +982,13 @@ class UserRegistrationService implements IDomainService {
         );
       }
     }
-    
+
     // Save user
     await this.userRepository.save(user);
-    
+
     // Send welcome email
     await this.emailService.sendWelcomeEmail(user.email);
-    
+
     return user;
   }
 }
@@ -976,7 +1005,7 @@ import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
 describe('UserValidationPolicy', () => {
   let policy: IPolicy<User>;
   let context: PolicyContext;
-  
+
   beforeEach(() => {
     policy = PolicyBuilder.create<User>()
       .withId('test-user-policy')
@@ -987,45 +1016,45 @@ describe('UserValidationPolicy', () => {
       .must(new EmailSpecification())
       .withCode('INVALID_EMAIL')
       .build();
-    
+
     context = PolicyContext.create()
       .withUserId('test-user')
       .withRequestId('test-request')
       .build();
   });
-  
+
   it('should pass with valid user', async () => {
     // Arrange
     const user = new User('John Doe', 'john@example.com', 25);
-    
+
     // Act
     const result = await policy.check({ entity: user, context });
-    
+
     // Assert
     expect(result.isSuccess()).toBe(true);
     expect(result.violations).toHaveLength(0);
   });
-  
+
   it('should fail with underage user', async () => {
     // Arrange
     const user = new User('John Doe', 'john@example.com', 17);
-    
+
     // Act
     const result = await policy.check({ entity: user, context });
-    
+
     // Assert
     expect(result.isFailure()).toBe(true);
     expect(result.violations).toHaveLength(1);
     expect(result.violations[0].code).toBe('AGE_TOO_LOW');
   });
-  
+
   it('should fail with invalid email', async () => {
     // Arrange
     const user = new User('John Doe', 'invalid-email', 25);
-    
+
     // Act
     const result = await policy.check({ entity: user, context });
-    
+
     // Assert
     expect(result.isFailure()).toBe(true);
     expect(result.violations).toHaveLength(1);
@@ -1040,28 +1069,30 @@ describe('UserValidationPolicy', () => {
 describe('PolicyRetryBehavior', () => {
   let basePolicy: IPolicy<User>;
   let retryPolicy: IPolicy<User>;
-  
+
   beforeEach(() => {
     basePolicy = createMockPolicy();
     retryPolicy = PolicyRetryBehavior.create(basePolicy, {
       maxAttempts: 3,
       baseDelay: 100,
-      shouldRetry: violation => violation.code === 'TRANSIENT_ERROR'
+      shouldRetry: violation => violation.code === 'TRANSIENT_ERROR',
     });
   });
-  
+
   it('should retry on transient failures', async () => {
     // Arrange
     const user = new User('John Doe', 'john@example.com', 25);
     basePolicy.check
-      .mockResolvedValueOnce(PolicyResult.failure([
-        new PolicyViolation('TRANSIENT_ERROR', 'Temporary failure', 'ERROR')
-      ]))
+      .mockResolvedValueOnce(
+        PolicyResult.failure([
+          new PolicyViolation('TRANSIENT_ERROR', 'Temporary failure', 'ERROR'),
+        ])
+      )
       .mockResolvedValueOnce(PolicyResult.success(user));
-    
+
     // Act
     const result = await retryPolicy.check({ entity: user, context });
-    
+
     // Assert
     expect(result.isSuccess()).toBe(true);
     expect(basePolicy.check).toHaveBeenCalledTimes(2);
@@ -1078,37 +1109,37 @@ function createMockPolicy<T>(): jest.Mocked<IPolicy<T>> {
     check: jest.fn(),
     getId: jest.fn().mockReturnValue('mock-policy'),
     getDomain: jest.fn().mockReturnValue('mock-domain'),
-    getName: jest.fn().mockReturnValue('Mock Policy')
+    getName: jest.fn().mockReturnValue('Mock Policy'),
   };
 }
 
 // Test builder for policies
 class PolicyTestBuilder<T> {
   private policy: IPolicy<T>;
-  
+
   static create<T>(): PolicyTestBuilder<T> {
     return new PolicyTestBuilder<T>();
   }
-  
+
   withPolicy(policy: IPolicy<T>): PolicyTestBuilder<T> {
     this.policy = policy;
     return this;
   }
-  
+
   withSuccessResult(entity: T): PolicyTestBuilder<T> {
     (this.policy.check as jest.Mock).mockResolvedValue(
       PolicyResult.success(entity)
     );
     return this;
   }
-  
+
   withFailureResult(violations: PolicyViolation[]): PolicyTestBuilder<T> {
     (this.policy.check as jest.Mock).mockResolvedValue(
       PolicyResult.failure(violations)
     );
     return this;
   }
-  
+
   build(): jest.Mocked<IPolicy<T>> {
     return this.policy as jest.Mocked<IPolicy<T>>;
   }
@@ -1151,9 +1182,14 @@ const everythingPolicy = PolicyBuilder.create<User>()
 try {
   const result = await policy.check({ entity: user, context });
   if (result.isFailure()) {
-    const errorViolations = result.violations.filter(v => v.severity === 'ERROR');
+    const errorViolations = result.violations.filter(
+      v => v.severity === 'ERROR'
+    );
     if (errorViolations.length > 0) {
-      throw new PolicyViolationError('Policy validation failed', errorViolations);
+      throw new PolicyViolationError(
+        'Policy validation failed',
+        errorViolations
+      );
     }
   }
 } catch (error) {
@@ -1187,7 +1223,7 @@ const context = PolicyContext.create()
   .withMetadata({
     userAgent: request.headers['user-agent'],
     ipAddress: request.ip,
-    feature: 'user-registration'
+    feature: 'user-registration',
   })
   .build();
 
@@ -1197,7 +1233,8 @@ const context = PolicyContext.create().build();
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1221,10 +1258,12 @@ pnpm dev --filter=@vytches-ddd/policies
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd) ecosystem**
+**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
+ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

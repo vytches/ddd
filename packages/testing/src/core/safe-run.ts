@@ -7,17 +7,121 @@
 
 import { IDomainError } from '@vytches-ddd/domain-primitives';
 
+/**
+ * @llm-summary Type definition for safe run result
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * SafeRunResult type implementing infrastructure service for safe run result operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: SafeRunResult = {} as SafeRunResult;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export type SafeRunResult<T, E extends Error = Error> = readonly [E | undefined, T | undefined];
 
 // Synchronous version
+
+/**
+ * @llm-summary safe run function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * safeRun function implementing infrastructure service for safe run operations.
+ *
+ *
+ * @param {(} fn - fn parameter
+ * @returns {SafeRunResult<T, E>} Returns SafeRunResult<T, E>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = safeRun(fn);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => safeRun(fn));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function safeRun<T, E extends Error = Error>(fn: () => T): SafeRunResult<T, E>;
 
 // Asynchronous version
+
+/**
+ * @llm-summary safe run function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * safeRun function implementing infrastructure service for safe run operations.
+ *
+ *
+ * @param {(} fn - fn parameter
+ * @returns {Promise<SafeRunResult<T, E>>} Returns Promise<SafeRunResult<T, E>>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = safeRun(fn);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => safeRun(fn));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function safeRun<T, E extends Error = Error>(
   fn: () => Promise<T>
 ): Promise<SafeRunResult<T, E>>;
 
 // Implementation
+
+/**
+ * @llm-summary safe run function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * safeRun function implementing infrastructure service for safe run operations.
+ *
+ *
+ * @param {(} fn - fn parameter
+ * @returns {SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>} Returns SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = safeRun(fn);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => safeRun(fn));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function safeRun<T, E extends Error = Error>(
   fn: () => T | Promise<T>
 ): SafeRunResult<T, E> | Promise<SafeRunResult<T, E>> {
@@ -37,8 +141,32 @@ export function safeRun<T, E extends Error = Error>(
 }
 
 /**
- * Enhanced version of safeRun with testing-specific features.
- * Provides better error context and DDD-specific error handling.
+ * @llm-summary safe run test function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * safeRunTest function implementing infrastructure service for safe run test operations.
+ *
+ *
+ * @param {(} fn - fn parameter
+ * @returns {SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>} Returns SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = safeRunTest(fn);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => safeRunTest(fn));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function safeRunTest<T, E extends Error = Error>(
   fn: () => T | Promise<T>,
@@ -69,8 +197,32 @@ export function safeRunTest<T, E extends Error = Error>(
 }
 
 /**
- * Utility for testing error scenarios with specific error types.
- * Ensures the error is of the expected type and provides type-safe access.
+ * @llm-summary expect error function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * expectError function implementing infrastructure service for expect error operations.
+ *
+ *
+ * @param {new (...args: any[]} errorType - errorType parameter
+ * @returns {(result: SafeRunResult<any, E>) => E} Returns (result: SafeRunResult<any, E>) => E
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = expectError(errorType);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => expectError(errorType));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function expectError<E extends Error>(
   errorType: new (...args: any[]) => E
@@ -95,8 +247,32 @@ export function expectError<E extends Error>(
 }
 
 /**
- * Utility for testing success scenarios with specific value types.
- * Ensures the operation succeeded and provides type-safe access to the value.
+ * @llm-summary expect success function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * expectSuccess function implementing infrastructure service for expect success operations.
+ *
+ *
+ * @param {SafeRunResult<T>} result - result parameter
+ * @returns {T} Returns T
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = expectSuccess(result);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => expectSuccess(result));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function expectSuccess<T>(result: SafeRunResult<T>): T {
   const [error, value] = result;
@@ -113,8 +289,32 @@ export function expectSuccess<T>(result: SafeRunResult<T>): T {
 }
 
 /**
- * Utility for testing async operations with timeout.
- * Combines safeRun with timeout functionality for testing time-sensitive operations.
+ * @llm-summary safe run with timeout function
+ * @llm-domain Infrastructure
+ * @llm-pure false
+ *
+ * @description
+ * safeRunWithTimeout function implementing infrastructure service for safe run with timeout operations.
+ *
+ *
+ * @param {(} fn - fn parameter
+ * @returns {Promise<SafeRunResult<T, E | Error>>} Returns Promise<SafeRunResult<T, E | Error>>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = safeRunWithTimeout(fn);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => safeRunWithTimeout(fn));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function safeRunWithTimeout<T, E extends Error = Error>(
   fn: () => Promise<T>,

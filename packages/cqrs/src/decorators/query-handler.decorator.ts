@@ -4,8 +4,31 @@ import type { IQuery, IQueryHandler } from '../interfaces';
 import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
 
 /**
- * QueryHandler decorator - pure metadata, no registry
- * Framework agnostic - works with any DI container
+ * @llm-summary query handler function
+ * @llm-domain Architecture
+ * @llm-pure false
+ *
+ * @description
+ * QueryHandler function implementing architectural component for query handler operations.
+ *
+ *
+ * @param {new (...args: unknown[]} queryType - queryType parameter
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = QueryHandler(queryType);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => QueryHandler(queryType));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function QueryHandler<T extends IQuery<R>, R>(
   queryType: new (...args: unknown[]) => T,

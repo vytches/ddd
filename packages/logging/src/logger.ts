@@ -4,6 +4,32 @@ import { ConsoleProvider } from './providers/console-provider';
 import { ContextDetector } from './utils/context-detector';
 import { DataMasker } from './utils/data-masker';
 
+/**
+ * @llm-summary DefaultLogger class for default logger operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * DefaultLogger class implementing infrastructure service for default logger operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DefaultLogger();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DefaultLogger());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class DefaultLogger implements Logger {
   private static globalConfig: LoggerConfiguration = {
     level: 'info',

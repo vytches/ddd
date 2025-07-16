@@ -15,7 +15,23 @@ import { NaturalLanguageProcessor } from './natural-language-processor';
 import { FileSystem } from '../../core/utils/file-system';
 
 /**
- * Domain builder configuration
+ * @llm-summary Contract for domain builder config functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainBuilderConfig interface implementing infrastructure service for domain builder config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainBuilderConfig implements DomainBuilderConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainBuilderConfig {
   domainName: string | undefined;
@@ -31,7 +47,23 @@ export interface DomainBuilderConfig {
 }
 
 /**
- * Domain builder result
+ * @llm-summary Contract for domain builder result functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DomainBuilderResult interface implementing infrastructure service for domain builder result operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainBuilderResult implements DomainBuilderResult {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainBuilderResult {
   generatedFiles: string[];
@@ -49,7 +81,30 @@ export interface DomainBuilderResult {
 }
 
 /**
- * Complete domain builder workflow with AI assistance
+ * @llm-summary DomainBuilderWorkflow class for domain builder workflow operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * DomainBuilderWorkflow class implementing infrastructure service for domain builder workflow operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DomainBuilderWorkflow();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DomainBuilderWorkflow());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DomainBuilderWorkflow {
   private workflow: WorkflowEngine;

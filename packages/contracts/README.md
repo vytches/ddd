@@ -16,7 +16,11 @@ Integration Points: Foundation package used by all other packages; provides core
 
 > **Foundation contracts and interfaces for the entire VytchesDDD ecosystem**
 
-The Contracts package provides the fundamental interfaces, types, and base implementations that serve as the foundation for all other VytchesDDD packages. It includes core domain concepts like EntityId, event interfaces, validation contracts, and capability definitions that ensure consistency across the entire framework.
+The Contracts package provides the fundamental interfaces, types, and base
+implementations that serve as the foundation for all other VytchesDDD packages.
+It includes core domain concepts like EntityId, event interfaces, validation
+contracts, and capability definitions that ensure consistency across the entire
+framework.
 
 ## 📋 Table of Contents
 
@@ -52,7 +56,8 @@ pnpm add @vytches-ddd/contracts
 
 ### Zero Dependencies
 
-This package has zero runtime dependencies, making it perfect as a foundation layer:
+This package has zero runtime dependencies, making it perfect as a foundation
+layer:
 
 ```json
 {
@@ -68,24 +73,30 @@ This package has zero runtime dependencies, making it perfect as a foundation la
 ## ✨ Key Features
 
 ### Foundation Layer
+
 - **Zero Dependencies**: No runtime dependencies for maximum compatibility
-- **Circular Dependency Prevention**: Breaks circular dependencies between packages
+- **Circular Dependency Prevention**: Breaks circular dependencies between
+  packages
 - **Type Safety**: Full TypeScript support with comprehensive type definitions
 - **Enterprise Grade**: Production-ready contracts for large-scale applications
 
 ### Core Domain Concepts
+
 - **EntityId Foundation**: Base EntityId implementation with factory methods
 - **Event Interfaces**: Comprehensive event system contracts
 - **Validation Contracts**: Specification and validation interfaces
 - **Aggregate Interfaces**: Core aggregate behavior contracts
 
 ### Extensibility
-- **Capability System**: Extensible capability pattern for aggregates and projections
+
+- **Capability System**: Extensible capability pattern for aggregates and
+  projections
 - **Event Store Contracts**: Complete event sourcing interfaces
 - **Scheduling Interfaces**: Job and event scheduling contracts
 - **Integration Patterns**: Contracts for external system integration
 
 ### Developer Experience
+
 - **IntelliSense Support**: Rich IDE support with comprehensive documentation
 - **Type Inference**: Excellent TypeScript type inference
 - **Minimal API**: Clean, focused API surface
@@ -128,7 +139,10 @@ interface IDomainEvent {
 
 interface IEventBus {
   publish(event: IDomainEvent): Promise<void>;
-  subscribe<T extends IDomainEvent>(eventType: string, handler: IEventHandler<T>): void;
+  subscribe<T extends IDomainEvent>(
+    eventType: string,
+    handler: IEventHandler<T>
+  ): void;
   unsubscribe(eventType: string, handler: IEventHandler): void;
 }
 ```
@@ -206,7 +220,11 @@ console.log(userIdUuid.isType('text')); // false
 ### Event Contract Implementation
 
 ```typescript
-import { IDomainEvent, IEventMetadata, createDomainEvent } from '@vytches-ddd/contracts';
+import {
+  IDomainEvent,
+  IEventMetadata,
+  createDomainEvent,
+} from '@vytches-ddd/contracts';
 
 // Create domain event
 const orderCreated = createDomainEvent({
@@ -215,16 +233,14 @@ const orderCreated = createDomainEvent({
   aggregateVersion: 1,
   eventData: {
     customerId: 'customer-456',
-    orderItems: [
-      { productId: 'product-789', quantity: 2, price: 29.99 }
-    ],
-    total: 59.98
+    orderItems: [{ productId: 'product-789', quantity: 2, price: 29.99 }],
+    total: 59.98,
   },
   metadata: {
     causationId: 'command-create-order-123',
     correlationId: 'session-abc-def',
-    userId: 'user-789'
-  }
+    userId: 'user-789',
+  },
 });
 
 // Event handler implementation
@@ -413,13 +429,20 @@ interface IEventMetadata {
 ### Event Bus Contracts
 
 ```typescript
-import { IEventBus, IEventDispatcher, IEventHandler } from '@vytches-ddd/contracts';
+import {
+  IEventBus,
+  IEventDispatcher,
+  IEventHandler,
+} from '@vytches-ddd/contracts';
 
 // Event bus implementation requirements
 interface IEventBus {
   publish(event: IDomainEvent): Promise<void>;
   publishMany(events: IDomainEvent[]): Promise<void>;
-  subscribe<T extends IDomainEvent>(eventType: string, handler: IEventHandler<T>): void;
+  subscribe<T extends IDomainEvent>(
+    eventType: string,
+    handler: IEventHandler<T>
+  ): void;
   unsubscribe(eventType: string, handler: IEventHandler): void;
   clear(): void;
 }
@@ -442,13 +465,13 @@ interface IEventHandler<T extends IDomainEvent = IDomainEvent> {
 ### Event Store Contracts
 
 ```typescript
-import { 
-  IEventStore, 
-  IAdvancedEventStore, 
+import {
+  IEventStore,
+  IAdvancedEventStore,
   IEventStoreConfig,
   IAppendResult,
   IStoredEvent,
-  IEventStream
+  IEventStream,
 } from '@vytches-ddd/contracts';
 
 // Basic event store interface
@@ -458,12 +481,12 @@ interface IEventStore {
     events: IStoredDomainEvent[],
     expectedVersion?: number
   ): Promise<IAppendResult>;
-  
+
   readStream<T = unknown>(
     streamId: string,
     options?: IReadStreamOptions
   ): Promise<IEventStream<T>>;
-  
+
   readAll<T = unknown>(
     options?: IReadAllOptions
   ): Promise<IGlobalEventStream<T>>;
@@ -471,13 +494,21 @@ interface IEventStore {
 
 // Advanced event store with snapshots and replay
 interface IAdvancedEventStore extends IEventStore {
-  getSnapshot<T = unknown>(streamId: string): Promise<IAggregateSnapshot<T> | null>;
-  saveSnapshot<T = unknown>(streamId: string, snapshot: IAggregateSnapshot<T>): Promise<void>;
-  
+  getSnapshot<T = unknown>(
+    streamId: string
+  ): Promise<IAggregateSnapshot<T> | null>;
+  saveSnapshot<T = unknown>(
+    streamId: string,
+    snapshot: IAggregateSnapshot<T>
+  ): Promise<void>;
+
   createEventReplay(): IEventReplay;
   createAdvancedEventReplay(): IAdvancedEventReplay;
-  
-  replayStream(streamId: string, handler: (event: IStoredEvent) => Promise<void>): Promise<void>;
+
+  replayStream(
+    streamId: string,
+    handler: (event: IStoredEvent) => Promise<void>
+  ): Promise<void>;
   replayAll(handler: (event: IStoredEvent) => Promise<void>): Promise<void>;
 }
 ```
@@ -500,8 +531,8 @@ class CompositeSpecification<T> implements ISpecification<T> {
   isSatisfiedBy(entity: T): boolean {
     const leftResult = this.left.isSatisfiedBy(entity);
     const rightResult = this.right.isSatisfiedBy(entity);
-    
-    return this.operator === 'and' 
+
+    return this.operator === 'and'
       ? leftResult && rightResult
       : leftResult || rightResult;
   }
@@ -530,10 +561,10 @@ class AsyncCompositeSpecification<T> implements IAsyncSpecification<T> {
   async isSatisfiedByAsync(entity: T): Promise<boolean> {
     const [leftResult, rightResult] = await Promise.all([
       this.left.isSatisfiedByAsync(entity),
-      this.right.isSatisfiedByAsync(entity)
+      this.right.isSatisfiedByAsync(entity),
     ]);
-    
-    return this.operator === 'and' 
+
+    return this.operator === 'and'
       ? leftResult && rightResult
       : leftResult || rightResult;
   }
@@ -577,26 +608,26 @@ interface IValidationError {
 class EmailValidationRule implements IValidationRule<string> {
   validate(email: string): IValidationError[] {
     const errors: IValidationError[] = [];
-    
+
     if (!email) {
       errors.push({
         message: 'Email is required',
         code: 'EMAIL_REQUIRED',
         field: 'email',
-        value: email
+        value: email,
       });
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
       errors.push({
         message: 'Email format is invalid',
         code: 'EMAIL_INVALID_FORMAT',
         field: 'email',
-        value: email
+        value: email,
       });
     }
-    
+
     return errors;
   }
 
@@ -633,7 +664,7 @@ class VersioningCapability implements IAggregateCapability<AggregateRoot> {
     } else {
       aggregate.version++;
     }
-    
+
     return aggregate;
   }
 }
@@ -652,9 +683,9 @@ class AuditCapability implements IAggregateCapability<AggregateRoot> {
     aggregate.auditInfo = {
       lastModified: new Date(),
       lastModifiedBy: 'system',
-      version: aggregate.version || 1
+      version: aggregate.version || 1,
     };
-    
+
     return aggregate;
   }
 }
@@ -679,9 +710,9 @@ class CheckpointCapability implements IProjectionCapability<BaseProjection> {
     projection.checkpoint = {
       position: 0,
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
-    
+
     return projection;
   }
 }
@@ -700,9 +731,9 @@ class SnapshotCapability implements IProjectionCapability<BaseProjection> {
     projection.snapshotting = {
       enabled: true,
       frequency: 1000,
-      lastSnapshot: null
+      lastSnapshot: null,
     };
-    
+
     return projection;
   }
 }
@@ -711,7 +742,10 @@ class SnapshotCapability implements IProjectionCapability<BaseProjection> {
 ### Capability Registry
 
 ```typescript
-import { CapabilityRegistry, createCapabilityRegistry } from '@vytches-ddd/contracts';
+import {
+  CapabilityRegistry,
+  createCapabilityRegistry,
+} from '@vytches-ddd/contracts';
 
 // Create capability registry
 const registry = createCapabilityRegistry();
@@ -743,7 +777,7 @@ interface IAggregateWithEvents {
   id: IEntityId;
   version: number;
   uncommittedEvents: IDomainEvent[];
-  
+
   addDomainEvent(event: IDomainEvent): void;
   clearDomainEvents(): void;
   getUncommittedEvents(): IDomainEvent[];
@@ -755,7 +789,7 @@ interface IExtendedAggregate extends IAggregateWithEvents {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-  
+
   isDeleted(): boolean;
   delete(): void;
   restore(): void;
@@ -765,11 +799,15 @@ interface IExtendedAggregate extends IAggregateWithEvents {
 ### Aggregate Implementation
 
 ```typescript
-import { IAggregateWithEvents, IDomainEvent, IEntityId } from '@vytches-ddd/contracts';
+import {
+  IAggregateWithEvents,
+  IDomainEvent,
+  IEntityId,
+} from '@vytches-ddd/contracts';
 
 class BaseAggregate implements IAggregateWithEvents {
   private _uncommittedEvents: IDomainEvent[] = [];
-  
+
   constructor(
     public readonly id: IEntityId,
     public version: number = 0
@@ -807,19 +845,25 @@ class BaseAggregate implements IAggregateWithEvents {
 ### Event Scheduling
 
 ```typescript
-import { 
-  IEventScheduler, 
-  IScheduledEvent, 
+import {
+  IEventScheduler,
+  IScheduledEvent,
   IScheduleOptions,
   JobStatus,
-  SchedulePriority 
+  SchedulePriority,
 } from '@vytches-ddd/contracts';
 
 // Event scheduler interface
 interface IEventScheduler {
-  schedule(event: IDomainEvent, options: IScheduleOptions): Promise<IScheduledEvent>;
+  schedule(
+    event: IDomainEvent,
+    options: IScheduleOptions
+  ): Promise<IScheduledEvent>;
   cancel(jobId: string): Promise<boolean>;
-  reschedule(jobId: string, newOptions: IScheduleOptions): Promise<IScheduledEvent>;
+  reschedule(
+    jobId: string,
+    newOptions: IScheduleOptions
+  ): Promise<IScheduledEvent>;
   getJob(jobId: string): Promise<IScheduledEvent | null>;
   query(filter: IJobFilter): Promise<IJobQueryResult>;
 }
@@ -855,7 +899,11 @@ interface IScheduleOptions {
 ### Job Management
 
 ```typescript
-import { IScheduledJob, IJobFilter, IJobQueryResult } from '@vytches-ddd/contracts';
+import {
+  IScheduledJob,
+  IJobFilter,
+  IJobQueryResult,
+} from '@vytches-ddd/contracts';
 
 // Job filter for querying
 interface IJobFilter {
@@ -893,7 +941,8 @@ interface IRecurringPattern {
 
 ### Circular Dependency Prevention
 
-The contracts package serves as a foundation layer that prevents circular dependencies:
+The contracts package serves as a foundation layer that prevents circular
+dependencies:
 
 ```typescript
 // ✅ Good: All packages can depend on contracts
@@ -956,7 +1005,7 @@ import { IEntityId } from '@vytches-ddd/contracts';
 
 export abstract class Entity {
   constructor(protected readonly _id: IEntityId) {}
-  
+
   get id(): IEntityId {
     return this._id;
   }
@@ -965,9 +1014,12 @@ export abstract class Entity {
 // In aggregates package
 import { IAggregateWithEvents, IDomainEvent } from '@vytches-ddd/contracts';
 
-export abstract class AggregateRoot extends Entity implements IAggregateWithEvents {
+export abstract class AggregateRoot
+  extends Entity
+  implements IAggregateWithEvents
+{
   private _uncommittedEvents: IDomainEvent[] = [];
-  
+
   // Implementation using contracts
 }
 
@@ -996,7 +1048,7 @@ import { IEventBus, IDomainEvent } from '@vytches-ddd/contracts';
 
 export class DomainService {
   constructor(private eventBus: IEventBus) {}
-  
+
   async performAction(): Promise<void> {
     const event: IDomainEvent = {
       eventId: EntityId.createWithRandomUUID().toString(),
@@ -1004,9 +1056,9 @@ export class DomainService {
       aggregateId: 'service-123',
       aggregateVersion: 1,
       occurredOn: new Date(),
-      eventData: { action: 'performed' }
+      eventData: { action: 'performed' },
     };
-    
+
     await this.eventBus.publish(event);
   }
 }
@@ -1066,7 +1118,9 @@ describe('EntityId Contract', () => {
       expect(invalidError).toBeInstanceOf(Error);
       expect(invalidError?.message).toContain('valid UUID');
 
-      const [validError] = safeRun(() => EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000'));
+      const [validError] = safeRun(() =>
+        EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000')
+      );
       expect(validError).toBeUndefined();
     });
 
@@ -1125,57 +1179,59 @@ class TestSpecification implements ISpecification<string> {
 
   and(spec: ISpecification<string>): ISpecification<string> {
     return new TestSpecification(
-      (value) => this.isSatisfiedBy(value) && spec.isSatisfiedBy(value)
+      value => this.isSatisfiedBy(value) && spec.isSatisfiedBy(value)
     );
   }
 
   or(spec: ISpecification<string>): ISpecification<string> {
     return new TestSpecification(
-      (value) => this.isSatisfiedBy(value) || spec.isSatisfiedBy(value)
+      value => this.isSatisfiedBy(value) || spec.isSatisfiedBy(value)
     );
   }
 
   not(): ISpecification<string> {
-    return new TestSpecification(
-      (value) => !this.isSatisfiedBy(value)
-    );
+    return new TestSpecification(value => !this.isSatisfiedBy(value));
   }
 }
 
 describe('Specification Interface', () => {
   it('should satisfy basic specification', () => {
-    const spec = new TestSpecification((value) => value.length > 3);
-    
+    const spec = new TestSpecification(value => value.length > 3);
+
     expect(spec.isSatisfiedBy('test')).toBe(true);
     expect(spec.isSatisfiedBy('hi')).toBe(false);
   });
 
   it('should combine specifications with AND', () => {
-    const lengthSpec = new TestSpecification((value) => value.length > 3);
-    const startsWithSpec = new TestSpecification((value) => value.startsWith('test'));
-    
+    const lengthSpec = new TestSpecification(value => value.length > 3);
+    const startsWithSpec = new TestSpecification(value =>
+      value.startsWith('test')
+    );
+
     const combined = lengthSpec.and(startsWithSpec);
-    
+
     expect(combined.isSatisfiedBy('testing')).toBe(true);
     expect(combined.isSatisfiedBy('test')).toBe(true);
     expect(combined.isSatisfiedBy('other')).toBe(false);
   });
 
   it('should combine specifications with OR', () => {
-    const lengthSpec = new TestSpecification((value) => value.length > 10);
-    const startsWithSpec = new TestSpecification((value) => value.startsWith('test'));
-    
+    const lengthSpec = new TestSpecification(value => value.length > 10);
+    const startsWithSpec = new TestSpecification(value =>
+      value.startsWith('test')
+    );
+
     const combined = lengthSpec.or(startsWithSpec);
-    
+
     expect(combined.isSatisfiedBy('test')).toBe(true);
     expect(combined.isSatisfiedBy('very long string')).toBe(true);
     expect(combined.isSatisfiedBy('short')).toBe(false);
   });
 
   it('should negate specifications', () => {
-    const spec = new TestSpecification((value) => value.length > 3);
+    const spec = new TestSpecification(value => value.length > 3);
     const negated = spec.not();
-    
+
     expect(negated.isSatisfiedBy('hi')).toBe(true);
     expect(negated.isSatisfiedBy('test')).toBe(false);
   });
@@ -1235,7 +1291,9 @@ class CustomEntityId implements IEntityId<string> {
   }
 
   equals(other: IEntityId<string>): boolean {
-    return other.getValue() === this.value && other.getType() === this.getType();
+    return (
+      other.getValue() === this.value && other.getType() === this.getType()
+    );
   }
 
   toString(): string {
@@ -1279,7 +1337,8 @@ interface IEntityIdCapability<T = string> {
 
 ## 📚 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1301,4 +1360,6 @@ pnpm build
 
 **Built with ❤️ by the VytchesDDD Team**
 
-*The foundation of the [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Providing enterprise-grade contracts and interfaces for Domain-Driven Design*
+_The foundation of the [@vytches-ddd](https://github.com/vytches/vytches-ddd)
+ecosystem - Providing enterprise-grade contracts and interfaces for
+Domain-Driven Design_

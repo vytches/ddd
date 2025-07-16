@@ -6,7 +6,23 @@ import { MessageStatus, MessagePriority } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
 /**
- * Configuration options for the OutboxProcessor
+ * @llm-summary Contract for outbox processor options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * OutboxProcessorOptions interface implementing integration layer component for outbox processor options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteOutboxProcessorOptions implements OutboxProcessorOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface OutboxProcessorOptions {
   /** Maximum number of messages to process in one batch */
@@ -24,8 +40,30 @@ export interface OutboxProcessorOptions {
 }
 
 /**
- * OutboxProcessor handles the async processing of outbox messages
- * It retrieves pending messages and publishes them using registered handlers
+ * @llm-summary OutboxProcessor class for outbox processor operations
+ * @llm-domain Integration
+ * @llm-complexity Complex
+ *
+ * @description
+ * OutboxProcessor class implementing integration layer component for outbox processor operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OutboxProcessor();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OutboxProcessor());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class OutboxProcessor {
   private readonly repository: IOutboxRepository;
@@ -250,7 +288,30 @@ export class OutboxProcessor {
 }
 
 /**
- * Default event bus handler that publishes messages to an event bus
+ * @llm-summary EventBusOutboxHandler class for event bus outbox handler operations
+ * @llm-domain Integration
+ * @llm-complexity Complex
+ *
+ * @description
+ * EventBusOutboxHandler class implementing integration layer component for event bus outbox handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EventBusOutboxHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EventBusOutboxHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EventBusOutboxHandler implements IOutboxMessageHandler {
   constructor(private readonly eventBus: IEventBus) {}

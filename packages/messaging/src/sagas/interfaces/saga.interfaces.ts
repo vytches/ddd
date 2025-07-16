@@ -1,8 +1,23 @@
 import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
 
 /**
- * Enterprise-grade saga state interface
- * Provides comprehensive state management for long-running business processes
+ * @llm-summary Contract for saga state functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaState interface implementing integration layer component for saga state operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaState implements ISagaState {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaState {
   /** Unique identifier for the saga instance */
@@ -51,8 +66,21 @@ export interface ISagaState {
 }
 
 /**
- * Enhanced saga status enumeration
- * Covers all possible states in saga lifecycle
+ * @llm-summary Enumeration of saga status values
+ * @llm-domain Integration
+ * @llm-usage Frequent
+ *
+ * @description
+ * SagaStatus enum implementing integration layer component for saga status operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: SagaStatus = SagaStatus.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum SagaStatus {
   /** Saga has been started and is in progress */
@@ -84,7 +112,23 @@ export enum SagaStatus {
 }
 
 /**
- * Core saga interface - minimal contract for all sagas
+ * @llm-summary Contract for saga functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * Saga interface implementing integration layer component for saga operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSaga implements ISaga {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISaga {
   /** Unique identifier for the saga instance */
@@ -129,8 +173,23 @@ export interface ISaga {
 }
 
 /**
- * Saga execution context
- * Provides runtime environment and services for saga execution
+ * @llm-summary Contract for saga execution context functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaExecutionContext interface implementing integration layer component for saga execution context operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaExecutionContext implements ISagaExecutionContext {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaExecutionContext {
   /** Correlation identifier for tracing */
@@ -159,7 +218,23 @@ export interface ISagaExecutionContext {
 }
 
 /**
- * Result of saga action execution
+ * @llm-summary Contract for saga action result functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaActionResult interface implementing integration layer component for saga action result operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaActionResult implements ISagaActionResult {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaActionResult {
   /** Whether the action was successful */
@@ -195,8 +270,23 @@ export interface ISagaActionResult {
 }
 
 /**
- * Saga step definition
- * Represents a single step in saga execution flow
+ * @llm-summary Contract for saga step functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaStep interface implementing integration layer component for saga step operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaStep implements ISagaStep {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaStep {
   /** Unique name of the step */
@@ -251,8 +341,23 @@ export interface ISagaStep {
 }
 
 /**
- * Saga definition interface
- * Defines the structure and behavior of a saga type
+ * @llm-summary Contract for saga definition functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaDefinition interface implementing integration layer component for saga definition operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaDefinition implements ISagaDefinition {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaDefinition {
   /** Type identifier for this saga */
@@ -296,7 +401,23 @@ export interface ISagaDefinition {
 }
 
 /**
- * Factory interface for creating saga instances
+ * @llm-summary Contract for saga factory functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaFactory interface implementing integration layer component for saga factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaFactory implements ISagaFactory {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaFactory {
   /**

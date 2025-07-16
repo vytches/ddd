@@ -30,7 +30,30 @@ const DEFAULT_REPLAY_CONFIG: Required<IReplayConfig> = {
 };
 
 /**
- * Event replay engine implementation
+ * @llm-summary EventReplayEngine class for event replay engine operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * EventReplayEngine class implementing infrastructure service for event replay engine operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EventReplayEngine();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EventReplayEngine());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EventReplayEngine implements IAdvancedEventReplay {
   private readonly logger: ILogger;

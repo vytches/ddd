@@ -40,8 +40,30 @@ import type {
 import { JobStatus } from '@vytches-ddd/contracts';
 
 /**
- * Base abstract class for scheduler adapters
- * Provides common functionality and enforces interface implementation
+ * @llm-summary BaseSchedulerAdapter class for base scheduler adapter operations
+ * @llm-domain Core
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseSchedulerAdapter class implementing core domain functionality for base scheduler adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseSchedulerAdapter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseSchedulerAdapter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseSchedulerAdapter implements IEventScheduler {
   protected readonly logger: ILogger;

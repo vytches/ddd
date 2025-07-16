@@ -5,7 +5,23 @@ import { isSagaClass, getSagaMetadata, getSagaType } from '../decorators';
 import { SagaDiscoveryError } from '../errors';
 
 /**
- * Discovery result for saga components
+ * @llm-summary Contract for saga discovery result functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaDiscoveryResult interface implementing integration layer component for saga discovery result operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaDiscoveryResult implements SagaDiscoveryResult {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaDiscoveryResult {
   /** Saga class constructor */
@@ -31,8 +47,30 @@ export interface SagaDiscoveryResult {
 }
 
 /**
- * Saga discovery plugin for VytchesDDD dependency injection system
- * Automatically discovers and registers saga definitions
+ * @llm-summary SagaDiscoveryPlugin class for saga discovery plugin operations
+ * @llm-domain Integration
+ * @llm-complexity Simple
+ *
+ * @description
+ * SagaDiscoveryPlugin class implementing integration layer component for saga discovery plugin operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaDiscoveryPlugin();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaDiscoveryPlugin());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaDiscoveryPlugin {
   private readonly logger: ReturnType<typeof Logger.forContext>;
@@ -308,6 +346,19 @@ export class SagaDiscoveryPlugin {
 }
 
 /**
- * Default saga discovery plugin instance
+ * @llm-summary sagaDiscoveryPlugin constant
+ * @llm-domain Integration
+ *
+ * @description
+ * sagaDiscoveryPlugin constant implementing integration layer component for saga discovery plugin operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(sagaDiscoveryPlugin);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const sagaDiscoveryPlugin = new SagaDiscoveryPlugin();

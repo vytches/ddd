@@ -23,6 +23,32 @@ import type {
 import { ExponentialBackoffStrategy } from './error-strategy';
 import { ProjectionRebuilder, type IProjectionRebuildConfig } from './projection-rebuilder';
 
+/**
+ * @llm-summary ProjectionEngine class for projection engine operations
+ * @llm-domain Architecture
+ * @llm-complexity Expert
+ *
+ * @description
+ * ProjectionEngine class implementing architectural component for projection engine operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ProjectionEngine();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ProjectionEngine());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadModel> {
   private capabilities = new CapabilityRegistry();
   protected projection: IProjection<TReadModel>;
@@ -230,6 +256,32 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
   }
 }
 
+/**
+ * @llm-summary EnhancedProjectionEngine class for enhanced projection engine operations
+ * @llm-domain Architecture
+ * @llm-complexity Expert
+ *
+ * @description
+ * EnhancedProjectionEngine class implementing architectural component for enhanced projection engine operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EnhancedProjectionEngine();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EnhancedProjectionEngine());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TReadModel> {
   constructor(
     projection: IProjection<TReadModel>,

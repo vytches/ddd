@@ -3,8 +3,30 @@ import type { PolicyMetadata } from '../core/models/policy-metadata';
 import { PolicyContextBuilder } from './policy-context-builder';
 
 /**
- * Fluent builder for creating PolicyRequest instances
- * Provides a convenient way to build requests with entity, context, and metadata
+ * @llm-summary PolicyRequestBuilder class for policy request builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyRequestBuilder class implementing domain pattern implementation for policy request builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyRequestBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyRequestBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyRequestBuilder<T> {
   private entity?: T;
@@ -153,7 +175,30 @@ export class PolicyRequestBuilder<T> {
 }
 
 /**
- * Quick factory functions for common request scenarios
+ * @llm-summary PolicyRequestFactory class for policy request factory operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyRequestFactory class implementing domain pattern implementation for policy request factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyRequestFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyRequestFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyRequestFactory {
   /**

@@ -1,12 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * Service lifetime enumeration for DI integration
+ * @llm-summary Type definition for service lifetime
+ * @llm-domain Architecture
+ * @llm-usage Frequent
+ *
+ * @description
+ * ServiceLifetime type implementing architectural component for service lifetime operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: ServiceLifetime = {} as ServiceLifetime;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type ServiceLifetime = 'transient' | 'singleton' | 'scoped';
 
 /**
- * DI decorator options interface
+ * @llm-summary Contract for d i decorator options functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * DIDecoratorOptions interface implementing architectural component for d i decorator options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDIDecoratorOptions implements DIDecoratorOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DIDecoratorOptions {
   /** Service lifetime for DI registration */
@@ -23,7 +53,23 @@ export interface DIDecoratorOptions {
 }
 
 /**
- * Options for EventHandler decorator with DI integration
+ * @llm-summary Contract for event handler options functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * EventHandlerOptions interface implementing architectural component for event handler options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventHandlerOptions implements EventHandlerOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface EventHandlerOptions extends DIDecoratorOptions {
   /** Whether handler is active */
@@ -43,7 +89,23 @@ export interface EventHandlerOptions extends DIDecoratorOptions {
 }
 
 /**
- * DI Handler metadata stored by enhanced decorators
+ * @llm-summary Contract for d i handler metadata functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * DIHandlerMetadata interface implementing architectural component for d i handler metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDIHandlerMetadata implements DIHandlerMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DIHandlerMetadata {
   /** Handler type identifier */

@@ -9,6 +9,33 @@ import type { IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
 import { EventHandler } from './event-handler.decorator';
 
 // Example domain events
+
+/**
+ * @llm-summary UserRegisteredEvent class for user registered event operations
+ * @llm-domain Architecture
+ * @llm-complexity Simple
+ *
+ * @description
+ * UserRegisteredEvent class implementing architectural component for user registered event operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UserRegisteredEvent();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UserRegisteredEvent());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class UserRegisteredEvent implements IDomainEvent {
   public readonly eventType = 'UserRegisteredEvent';
 
@@ -21,6 +48,32 @@ export class UserRegisteredEvent implements IDomainEvent {
   ) {}
 }
 
+/**
+ * @llm-summary OrderCreatedEvent class for order created event operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * OrderCreatedEvent class implementing architectural component for order created event operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OrderCreatedEvent();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OrderCreatedEvent());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class OrderCreatedEvent implements IDomainEvent {
   public readonly eventType = 'OrderCreatedEvent';
 
@@ -34,6 +87,32 @@ export class OrderCreatedEvent implements IDomainEvent {
   ) {}
 }
 
+/**
+ * @llm-summary PaymentProcessedEvent class for payment processed event operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * PaymentProcessedEvent class implementing architectural component for payment processed event operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PaymentProcessedEvent();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PaymentProcessedEvent());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class PaymentProcessedEvent implements IDomainEvent {
   public readonly eventType = 'PaymentProcessedEvent';
 
@@ -54,6 +133,33 @@ export class PaymentProcessedEvent implements IDomainEvent {
   tags: ['user', 'notification'],
   priority: 100,
 })
+
+/**
+ * @llm-summary UserRegistrationNotificationHandler class for user registration notification handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Simple
+ *
+ * @description
+ * UserRegistrationNotificationHandler class implementing architectural component for user registration notification handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UserRegistrationNotificationHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UserRegistrationNotificationHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class UserRegistrationNotificationHandler implements IEventHandler<UserRegisteredEvent> {
   async handle(event: UserRegisteredEvent): Promise<void> {
     // In real implementation, you would use VytchesDDD.resolve() to get dependencies
@@ -73,6 +179,33 @@ export class UserRegistrationNotificationHandler implements IEventHandler<UserRe
   tags: ['order', 'inventory'],
   priority: 200,
 })
+
+/**
+ * @llm-summary OrderInventoryUpdateHandler class for order inventory update handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * OrderInventoryUpdateHandler class implementing architectural component for order inventory update handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OrderInventoryUpdateHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OrderInventoryUpdateHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class OrderInventoryUpdateHandler implements IEventHandler<OrderCreatedEvent> {
   async handle(event: OrderCreatedEvent): Promise<void> {
     console.log(`Updating inventory for order ${event.orderId}`);
@@ -91,6 +224,33 @@ export class OrderInventoryUpdateHandler implements IEventHandler<OrderCreatedEv
   priority: 500,
   active: true,
 })
+
+/**
+ * @llm-summary PaymentConfirmationHandler class for payment confirmation handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * PaymentConfirmationHandler class implementing architectural component for payment confirmation handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PaymentConfirmationHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PaymentConfirmationHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class PaymentConfirmationHandler implements IEventHandler<PaymentProcessedEvent> {
   async handle(event: PaymentProcessedEvent): Promise<void> {
     console.log(`Processing payment confirmation for ${event.paymentId}`);
@@ -108,6 +268,33 @@ export class PaymentConfirmationHandler implements IEventHandler<PaymentProcesse
   tags: ['order', 'analytics'],
   priority: 50, // Lower priority than inventory handler
 })
+
+/**
+ * @llm-summary OrderAnalyticsHandler class for order analytics handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * OrderAnalyticsHandler class implementing architectural component for order analytics handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OrderAnalyticsHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OrderAnalyticsHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class OrderAnalyticsHandler implements IEventHandler<OrderCreatedEvent> {
   async handle(event: OrderCreatedEvent): Promise<void> {
     console.log(`Recording analytics for order ${event.orderId}`);
@@ -119,6 +306,33 @@ export class OrderAnalyticsHandler implements IEventHandler<OrderCreatedEvent> {
 
 // Legacy event handler (backward compatibility)
 @EventHandler(UserRegisteredEvent)
+
+/**
+ * @llm-summary LegacyUserHandler class for legacy user handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * LegacyUserHandler class implementing architectural component for legacy user handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new LegacyUserHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new LegacyUserHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class LegacyUserHandler implements IEventHandler<UserRegisteredEvent> {
   handle(event: UserRegisteredEvent): void {
     console.log(`Legacy handling for user ${event.userId}`);
@@ -128,6 +342,33 @@ export class LegacyUserHandler implements IEventHandler<UserRegisteredEvent> {
 
 // Manual registration event handler (not auto-registered)
 @EventHandler(PaymentProcessedEvent, { autoRegister: false })
+
+/**
+ * @llm-summary ManualPaymentHandler class for manual payment handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * ManualPaymentHandler class implementing architectural component for manual payment handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ManualPaymentHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ManualPaymentHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class ManualPaymentHandler implements IEventHandler<PaymentProcessedEvent> {
   handle(event: PaymentProcessedEvent): void {
     console.log(`Manual payment handling for ${event.paymentId}`);
@@ -136,7 +377,29 @@ export class ManualPaymentHandler implements IEventHandler<PaymentProcessedEvent
 }
 
 /**
- * Example setup showing how to configure event handlers with DI
+ * @llm-summary setup event handlers example function
+ * @llm-domain Architecture
+ * @llm-pure false
+ *
+ * @description
+ * setupEventHandlersExample function implementing architectural component for setup event handlers example operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = setupEventHandlersExample();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => setupEventHandlersExample());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function setupEventHandlersExample() {
   // This function would be called during application startup
@@ -161,7 +424,29 @@ export function setupEventHandlersExample() {
 }
 
 /**
- * Example of how handlers would be resolved and used
+ * @llm-summary example event handling function
+ * @llm-domain Architecture
+ * @llm-pure false
+ *
+ * @description
+ * exampleEventHandling function implementing architectural component for example event handling operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = exampleEventHandling();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => exampleEventHandling());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function exampleEventHandling() {
   // Create sample events

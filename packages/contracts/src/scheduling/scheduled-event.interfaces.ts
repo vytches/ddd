@@ -1,7 +1,21 @@
 import type { IExtendedDomainEvent } from '../events/domain-event-interfaces';
 
 /**
- * Priority levels for scheduled events
+ * @llm-summary Enumeration of schedule priority values
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * SchedulePriority enum implementing core domain functionality for schedule priority operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: SchedulePriority = SchedulePriority.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum SchedulePriority {
   LOW = 0,
@@ -11,7 +25,21 @@ export enum SchedulePriority {
 }
 
 /**
- * Backoff strategy for retry logic
+ * @llm-summary Enumeration of backoff strategy values
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * BackoffStrategy enum implementing core domain functionality for backoff strategy operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: BackoffStrategy = BackoffStrategy.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum BackoffStrategy {
   FIXED = 'fixed',
@@ -20,7 +48,23 @@ export enum BackoffStrategy {
 }
 
 /**
- * Recurring pattern for scheduled events
+ * @llm-summary Contract for recurring pattern functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * RecurringPattern interface implementing core domain functionality for recurring pattern operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteRecurringPattern implements IRecurringPattern {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IRecurringPattern {
   /**
@@ -45,7 +89,23 @@ export interface IRecurringPattern {
 }
 
 /**
- * Options for scheduling an event
+ * @llm-summary Contract for schedule options functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * ScheduleOptions interface implementing core domain functionality for schedule options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteScheduleOptions implements IScheduleOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IScheduleOptions {
   /**
@@ -90,7 +150,23 @@ export interface IScheduleOptions {
 }
 
 /**
- * A domain event that should be processed at a specific time
+ * @llm-summary Contract for scheduled event functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * ScheduledEvent interface implementing core domain functionality for scheduled event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteScheduledEvent implements IScheduledEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IScheduledEvent extends IExtendedDomainEvent {
   /**
@@ -120,7 +196,21 @@ export interface IScheduledEvent extends IExtendedDomainEvent {
 }
 
 /**
- * Job status in the scheduler
+ * @llm-summary Enumeration of job status values
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * JobStatus enum implementing core domain functionality for job status operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: JobStatus = JobStatus.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum JobStatus {
   PENDING = 'pending',
@@ -133,7 +223,23 @@ export enum JobStatus {
 }
 
 /**
- * Represents a scheduled job in the system
+ * @llm-summary Contract for scheduled job functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * ScheduledJob interface implementing core domain functionality for scheduled job operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteScheduledJob implements IScheduledJob {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IScheduledJob {
   /**
@@ -193,7 +299,23 @@ export interface IScheduledJob {
 }
 
 /**
- * Filter options for listing jobs
+ * @llm-summary Contract for job filter functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * JobFilter interface implementing core domain functionality for job filter operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteJobFilter implements IJobFilter {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IJobFilter {
   /**
@@ -240,7 +362,23 @@ export interface IJobFilter {
 }
 
 /**
- * Result of a job query
+ * @llm-summary Contract for job query result functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * JobQueryResult interface implementing core domain functionality for job query result operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteJobQueryResult implements IJobQueryResult {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IJobQueryResult {
   /**

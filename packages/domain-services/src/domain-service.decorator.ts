@@ -22,10 +22,23 @@ const DOMAIN_SERVICE_METADATA_KEY = Symbol('DomainService');
 const DI_DOMAIN_SERVICE_METADATA_KEY = Symbol('DIDomainService');
 
 /**
- * Comprehensive configuration options for domain services.
- * These options control how a service behaves and integrates with the DDD infrastructure.
+ * @llm-summary Contract for domain service options functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface DomainServiceOptions
+ * @description
+ * DomainServiceOptions interface implementing domain pattern implementation for domain service options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainServiceOptions implements DomainServiceOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DomainServiceOptions {
   /**
@@ -97,42 +110,31 @@ export interface DomainServiceOptions {
 }
 
 /**
- * Decorator for marking a class as a domain service with optional DI integration.
- * Attaches metadata to the class that can be used for registration and configuration.
+ * @llm-summary domain service function
+ * @llm-domain Pattern
+ * @llm-pure false
  *
- * This decorator supports multiple usage patterns:
- * 1. Simple: @DomainService('serviceId')
- * 2. Legacy: @DomainService({ serviceId: 'id', dependencies: [...], ... })
- * 3. DI Enhanced: @DomainService({ serviceId: 'id', lifetime: 'singleton', context: 'OrderManagement', ... })
+ * @description
+ * DomainService function implementing domain pattern implementation for domain service operations.
  *
- * @param {string | DomainServiceOptions | EnhancedDomainServiceOptions} options - Service configuration
- * @returns {ClassDecorator} A decorator function that adds metadata to the target class
+ *
+ * @param {string | DomainServiceOptions | EnhancedDomainServiceOptions} options - options parameter
+ * @throws {Error} When validation fails
+ *
  * @example
- * // Simple usage (backward compatible)
- * @DomainService('orderService')
- * class OrderService extends BaseDomainService {...}
+ * ```typescript
+ * // Basic usage
+ * const result = DomainService(options);
+ * ```
  *
- * // Legacy usage (backward compatible)
- * @DomainService({
- *   serviceId: 'orderService',
- *   dependencies: ['productRepository', 'userService'],
- *   transactional: true,
- *   publishesEvents: true
- * })
- * class OrderService extends UnitOfWorkAwareDomainService {...}
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => DomainService(options));
+ * ```
  *
- * // DI Enhanced usage (new)
- * @DomainService({
- *   serviceId: 'orderService',
- *   lifetime: 'singleton',
- *   context: 'OrderManagement',
- *   tags: ['order', 'business'],
- *   autoRegister: true,
- *   dependencies: ['productRepository', 'userService'],
- *   transactional: true,
- *   publishesEvents: true
- * })
- * class OrderService extends UnitOfWorkAwareDomainService {...}
+ * @since 1.0.0
+ * @public
  */
 export function DomainService(
   options: string | DomainServiceOptions | EnhancedDomainServiceOptions
@@ -227,11 +229,32 @@ export function getDIDomainServiceMetadata(target: unknown): DIServiceMetadata |
 }
 
 /**
- * Checks if a class is marked for DI auto-registration.
- * Used by discovery plugins to identify services that should be registered.
+ * @llm-summary is domain service pending d i registration function
+ * @llm-domain Pattern
+ * @llm-pure true
  *
- * @param {unknown} target - The service class to inspect
- * @returns {boolean} True if the service is pending DI registration
+ * @description
+ * isDomainServicePendingDIRegistration function implementing domain pattern implementation for is domain service pending d i registration operations.
+ *
+ *
+ * @param {unknown} target - target parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = isDomainServicePendingDIRegistration(target);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => isDomainServicePendingDIRegistration(target));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function isDomainServicePendingDIRegistration(target: unknown): boolean {
   return Reflect.getMetadata('di:registration-pending', target as object) === true;

@@ -1,8 +1,11 @@
 # LLM-Friendly Documentation Guide
 
-This guide provides standards and best practices for creating documentation that is optimized for both human developers and AI assistants (LLMs) in the VytchesDDD ecosystem.
+This guide provides standards and best practices for creating documentation that
+is optimized for both human developers and AI assistants (LLMs) in the
+VytchesDDD ecosystem.
 
-> **Note:** This guide implements the decisions documented in [ADR-0013: Enterprise Documentation Standards and LLM Optimization](../adr/0013-enterprise-documentation-standards-and-llm-optimization.md).
+> **Note:** This guide implements the decisions documented in
+> [ADR-0013: Enterprise Documentation Standards and LLM Optimization](../adr/0013-enterprise-documentation-standards-and-llm-optimization.md).
 
 ## Table of Contents
 
@@ -17,13 +20,17 @@ This guide provides standards and best practices for creating documentation that
 
 ## Philosophy
 
-The VytchesDDD documentation follows these principles for AI-friendly documentation:
+The VytchesDDD documentation follows these principles for AI-friendly
+documentation:
 
-1. **Structured Consistency**: Use consistent patterns that LLMs can recognize and learn from
-2. **Complete Context**: Provide full context for each feature, including when and why to use it
+1. **Structured Consistency**: Use consistent patterns that LLMs can recognize
+   and learn from
+2. **Complete Context**: Provide full context for each feature, including when
+   and why to use it
 3. **Executable Examples**: All code examples should be complete and runnable
 4. **Relationship Mapping**: Clearly show how components relate to each other
-5. **Pattern Recognition**: Use repeatable patterns for similar concepts across packages
+5. **Pattern Recognition**: Use repeatable patterns for similar concepts across
+   packages
 
 ## Structured Metadata
 
@@ -85,22 +92,25 @@ For code examples, include context metadata:
 
 Every concept should be documented using this pattern:
 
-```markdown
+````markdown
 ### [Concept Name]
 
 [Brief description of what it is]
 
 **When to use:**
+
 - [Scenario 1]
 - [Scenario 2]
 - [Scenario 3]
 
 **Key benefits:**
+
 - [Benefit 1]
 - [Benefit 2]
 - [Benefit 3]
 
 **Example:**
+
 ```typescript
 // Complete, runnable example
 import { ExampleClass } from '@vytches-ddd/package-name';
@@ -118,11 +128,14 @@ if (result.isSuccess()) {
   // Error case
 }
 ```
+````
 
 **Related concepts:**
+
 - [Link to related concept 1]
 - [Link to related concept 2]
-```
+
+````
 
 ### 2. Pattern Recognition Structure
 
@@ -140,7 +153,7 @@ validate(data: DataType): ValidationResult
 
 // Always use this pattern for event handling
 handle(event: EventType): Promise<void>
-```
+````
 
 ### 3. Integration Pattern
 
@@ -156,10 +169,10 @@ import { CommandHandler } from '@vytches-ddd/cqrs';
 class Order extends AggregateRoot {
   static create(data: OrderData): Order {
     const order = new Order(data);
-    
+
     // Show event integration
     order.addDomainEvent(new OrderCreatedEvent(data));
-    
+
     return order;
   }
 }
@@ -170,7 +183,7 @@ class CreateOrderHandler {
   async execute(command: CreateOrderCommand): Promise<void> {
     // Show aggregate integration
     const order = Order.create(command.orderData);
-    
+
     // Show repository integration
     await this.orderRepository.save(order);
   }
@@ -204,7 +217,7 @@ const addItemResult = order.addItem(
 
 if (addItemResult.isSuccess()) {
   const confirmResult = order.confirm();
-  
+
   if (confirmResult.isSuccess()) {
     console.log('Order confirmed:', order.getId().value);
   } else {
@@ -235,19 +248,19 @@ const user = userResult.value;
 class CreateUserHandler {
   async execute(command: CreateUserCommand): Promise<void> {
     const userResult = User.create(command.name, command.email);
-    
+
     if (userResult.isFailure()) {
       throw new ValidationError(userResult.error.message);
     }
-    
+
     const user = userResult.value;
-    
+
     // Add business logic
     user.activate();
-    
+
     // Save through repository
     await this.userRepository.save(user);
-    
+
     // Publish integration event
     await this.eventBus.publish(new UserCreatedEvent(user.getId().value));
   }
@@ -258,19 +271,19 @@ class CreateUserHandler {
 
 ### Function Documentation
 
-```typescript
+````typescript
 /**
  * Creates a new order with the specified items and customer information.
- * 
+ *
  * This method implements the Order Creation use case from the Order Management
  * bounded context. It validates the input data, creates the order aggregate,
  * and returns a Result type for proper error handling.
- * 
+ *
  * @param customerId - The unique identifier of the customer placing the order
  * @param items - Array of order items with product details and quantities
  * @param shippingAddress - The shipping address for the order
  * @returns Result containing the created Order or validation errors
- * 
+ *
  * @example
  * ```typescript
  * const result = OrderService.createOrder(
@@ -280,17 +293,17 @@ class CreateUserHandler {
  *   ],
  *   new Address('123 Main St', 'City', 'State', '12345')
  * );
- * 
+ *
  * if (result.isSuccess()) {
  *   console.log('Order created:', result.value.getId().value);
  * } else {
  *   console.error('Order creation failed:', result.error.message);
  * }
  * ```
- * 
+ *
  * @throws {ValidationError} When input data is invalid
  * @throws {BusinessRuleError} When business rules are violated
- * 
+ *
  * @since 1.0.0
  * @category Core
  * @ddd-pattern Domain Service
@@ -303,33 +316,33 @@ static createOrder(
 ): Result<Order, Error> {
   // Implementation
 }
-```
+````
 
 ### Class Documentation
 
-```typescript
+````typescript
 /**
  * Represents an Order aggregate root in the Order Management bounded context.
- * 
+ *
  * The Order aggregate maintains consistency for all order-related operations
  * including item management, status changes, and payment processing. It
  * implements the Aggregate Root pattern from Domain-Driven Design.
- * 
+ *
  * @example
  * ```typescript
  * // Create a new order
  * const order = Order.create(customerId, items, shippingAddress);
- * 
+ *
  * // Add items
  * const addResult = order.addItem(productId, quantity, price);
- * 
+ *
  * // Confirm the order
  * const confirmResult = order.confirm();
- * 
+ *
  * // Handle domain events
  * const events = order.getUncommittedEvents();
  * ```
- * 
+ *
  * @public
  * @since 1.0.0
  * @category Aggregate
@@ -340,7 +353,7 @@ static createOrder(
 export class Order extends AggregateRoot {
   // Implementation
 }
-```
+````
 
 ## Context and Relationships
 
@@ -351,24 +364,24 @@ Always document how components relate to each other:
 ```typescript
 /**
  * Order Management Domain Model Relationships
- * 
+ *
  * Core Entities:
  * - Order (Aggregate Root)
  *   ├── OrderItem (Entity)
  *   ├── OrderStatus (Value Object)
  *   └── ShippingAddress (Value Object)
- * 
+ *
  * Domain Events:
  * - OrderCreatedEvent → triggers inventory reservation
  * - OrderConfirmedEvent → triggers payment processing
  * - OrderShippedEvent → triggers notification sending
- * 
+ *
  * Integration Points:
  * - OrderRepository → for persistence
  * - PaymentService → for payment processing
  * - InventoryService → for stock management
  * - NotificationService → for customer updates
- * 
+ *
  * Business Rules:
  * - Order must have at least one item
  * - Order total must be positive
@@ -384,19 +397,19 @@ Provide context for when to use each feature:
 ```typescript
 /**
  * When to use OrderAggregate:
- * 
+ *
  * ✅ Use when:
  * - Managing order lifecycle (create, confirm, ship, cancel)
  * - Enforcing order business rules
  * - Tracking order state changes
  * - Publishing order-related domain events
- * 
+ *
  * ❌ Don't use when:
  * - Querying order data for reports (use read models)
  * - Bulk operations across multiple orders
  * - Simple data transfer operations
  * - Integration with external systems (use ACL)
- * 
+ *
  * Related patterns:
  * - Use OrderRepository for persistence
  * - Use OrderService for complex business logic
@@ -422,28 +435,32 @@ describe('Order Creation', () => {
     // Arrange
     const customerId = EntityId.create();
     const items = [
-      { productId: EntityId.create(), quantity: 2, price: Money.create(29.99, 'USD') }
+      {
+        productId: EntityId.create(),
+        quantity: 2,
+        price: Money.create(29.99, 'USD'),
+      },
     ];
     const address = new Address('123 Main St', 'City', 'State', '12345');
-    
+
     // Act
     const result = Order.create(customerId, items, address);
-    
+
     // Assert
     expect(result.isSuccess()).toBe(true);
     expect(result.value.getItems()).toHaveLength(1);
     expect(result.value.getStatus()).toBe(OrderStatus.PENDING);
   });
-  
+
   it('should fail with empty items', () => {
     // Arrange
     const customerId = EntityId.create();
     const items: OrderItemData[] = [];
     const address = new Address('123 Main St', 'City', 'State', '12345');
-    
+
     // Act
     const result = Order.create(customerId, items, address);
-    
+
     // Assert
     expect(result.isFailure()).toBe(true);
     expect(result.error.message).toBe('Order must have at least one item');
@@ -463,22 +480,22 @@ Show how to validate usage:
 // Validate before using
 const validateOrderData = (data: OrderData): ValidationResult => {
   const errors: string[] = [];
-  
+
   if (!data.customerId) {
     errors.push('Customer ID is required');
   }
-  
+
   if (!data.items || data.items.length === 0) {
     errors.push('Order must have at least one item');
   }
-  
+
   if (data.items.some(item => item.quantity <= 0)) {
     errors.push('All items must have positive quantity');
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
@@ -488,7 +505,11 @@ if (!validation.isValid) {
   throw new ValidationError(validation.errors.join(', '));
 }
 
-const order = Order.create(orderData.customerId, orderData.items, orderData.address);
+const order = Order.create(
+  orderData.customerId,
+  orderData.items,
+  orderData.address
+);
 ```
 
 ## Automation
@@ -533,22 +554,22 @@ interface PackageMetadata {
 const validatePackageMetadata = (filePath: string): boolean => {
   const content = readFileSync(filePath, 'utf-8');
   const metadataMatch = content.match(/<!-- LLM-METADATA([\s\S]*?)-->/);
-  
+
   if (!metadataMatch) {
     console.error(`Missing LLM-METADATA in ${filePath}`);
     return false;
   }
-  
+
   const metadata = metadataMatch[1];
   const required = ['Package:', 'Category:', 'Purpose:', 'Complexity:'];
-  
+
   for (const field of required) {
     if (!metadata.includes(field)) {
       console.error(`Missing ${field} in ${filePath}`);
       return false;
     }
   }
-  
+
   return true;
 };
 
@@ -581,4 +602,6 @@ Use this checklist to ensure documentation is AI-friendly:
 - [ ] Migration guides provided (if applicable)
 - [ ] Troubleshooting section included
 
-This guide ensures that VytchesDDD documentation is optimized for both human developers and AI assistants, enabling better code generation, understanding, and assistance.
+This guide ensures that VytchesDDD documentation is optimized for both human
+developers and AI assistants, enabling better code generation, understanding,
+and assistance.

@@ -4,11 +4,33 @@ import { Logger } from '@vytches-ddd/logging';
 import type { IAuditable } from './audible.interface';
 
 /**
- * Decorator for capturing entity/aggregate state before changes
- * Works with any class implementing IAuditable interface
+ * @llm-summary capture state function
+ * @llm-domain Architecture
+ * @llm-pure false
  *
- * @param conditionOrSpecification Optional specification or function that determines
- *                                when to capture state. If not provided, always captures.
+ * @description
+ * captureState function implementing architectural component for capture state operations.
+ *
+ *
+ * @param {ISpecification<T> | ((instance: T} conditionOrSpecification? - conditionOrSpecification? parameter
+ * @param {any[]} args - args parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = captureState(conditionOrSpecification?, args);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => captureState(conditionOrSpecification?, args));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function captureState<T extends IAuditable>(
   conditionOrSpecification?: ISpecification<T> | ((instance: T, args: any[]) => boolean)

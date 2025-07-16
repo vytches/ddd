@@ -35,7 +35,21 @@ interface DIHandlerInfo {
 }
 
 /**
- * Event handler function type
+ * @llm-summary Type definition for unified event handler
+ * @llm-domain Architecture
+ * @llm-usage Frequent
+ *
+ * @description
+ * UnifiedEventHandler type implementing architectural component for unified event handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: UnifiedEventHandler = {} as UnifiedEventHandler;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type UnifiedEventHandler<T extends BaseEvent = BaseEvent> = (
   event: T
@@ -50,17 +64,30 @@ interface HandlerEntry {
 }
 
 /**
- * Unified Event Bus - Single implementation for all event types
+ * @llm-summary UnifiedEventBus class for unified event bus operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
  *
- * Consolidates domain, integration, and audit event buses into one
- * implementation with context-aware routing and subscriptions.
+ * @description
+ * UnifiedEventBus class implementing architectural component for unified event bus operations.
  *
- * Features:
- * - Auto-routing based on event type
- * - Context-aware subscriptions
- * - Flexible subscription patterns (single context, multiple contexts, all contexts)
- * - Full DI integration with auto-discovery
- * - Backward compatibility with existing event bus interface
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UnifiedEventBus();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UnifiedEventBus());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBus<BaseEvent> {
   private readonly handlerRegistry = new Map<string, HandlerEntry[]>();

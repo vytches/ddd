@@ -14,9 +14,13 @@ Integration Points: Meta-package providing single entry point to entire DDD ecos
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Complete Enterprise Bundle for Domain-Driven Design applications with all VytchesDDD packages**
+> **Complete Enterprise Bundle for Domain-Driven Design applications with all
+> VytchesDDD packages**
 
-The Enterprise package is a comprehensive meta-package that aggregates all VytchesDDD packages into a single, unified API surface. It provides enterprise-grade features, advanced capabilities, and a complete DDD ecosystem for building robust, scalable applications.
+The Enterprise package is a comprehensive meta-package that aggregates all
+VytchesDDD packages into a single, unified API surface. It provides
+enterprise-grade features, advanced capabilities, and a complete DDD ecosystem
+for building robust, scalable applications.
 
 ## 📋 Table of Contents
 
@@ -67,24 +71,28 @@ npm install @vytches-ddd/enterprise
 ## ✨ Key Features
 
 ### Complete DDD Ecosystem
+
 - **All Patterns**: Every DDD pattern and building block in one package
 - **Unified API**: Single import surface for all VytchesDDD capabilities
 - **Enterprise Grade**: Production-ready features with enterprise scalability
 - **Zero Conflicts**: Resolved naming conflicts between packages
 
 ### Enterprise Architecture
+
 - **Bundle Management**: Optimized package bundling with tree-shaking support
 - **Deployment Ready**: Production deployment configurations and optimizations
 - **Monitoring Integration**: Built-in observability and monitoring capabilities
 - **Security Features**: Enterprise security patterns and compliance support
 
 ### Advanced Capabilities
+
 - **Health Checks**: Comprehensive health monitoring and status reporting
 - **Performance Monitoring**: Real-time performance metrics and alerting
 - **Resilience Patterns**: Circuit breakers, retry logic, and fault tolerance
 - **Event Sourcing**: Complete event sourcing with snapshots and replay
 
 ### Developer Experience
+
 - **Single Import**: Access all features through one package
 - **Type Safety**: Full TypeScript support with comprehensive type definitions
 - **Documentation**: Complete API documentation and examples
@@ -154,36 +162,36 @@ import {
   EntityId,
   ValueObject,
   DomainEvent,
-  
+
   // CQRS
   CommandHandler,
   QueryHandler,
   Command,
   Query,
-  
+
   // Event-driven architecture
   EventStore,
   EventBus,
   EventProjection,
-  
+
   // Validation and policies
   Specification,
   PolicyBuilder,
   ValidationFacade,
-  
+
   // Infrastructure
   UnitOfWork,
   Repository,
   CircuitBreaker,
-  
+
   // Dependency injection
   VytchesDDD,
   DomainService,
-  
+
   // Utilities
   Result,
   Logger,
-  safeRun
+  safeRun,
 } from '@vytches-ddd/enterprise';
 
 // Complete application setup
@@ -198,7 +206,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
     return this.executeInTransaction(async () => {
       const order = Order.create(command.orderData);
       await this.orderRepository.save(order);
-      
+
       this.publishEvent(new OrderCreatedEvent(order.id));
       return Result.ok(void 0);
     });
@@ -222,7 +230,7 @@ import {
   CircuitBreaker,
   UnitOfWork,
   Repository,
-  Result
+  Result,
 } from '@vytches-ddd/enterprise';
 
 // Domain model
@@ -243,7 +251,7 @@ class Order extends AggregateRoot {
       data.items,
       OrderStatus.PENDING
     );
-    
+
     order.addDomainEvent(new OrderCreatedEvent(order.id));
     return order;
   }
@@ -282,16 +290,16 @@ class CreateOrderHandler extends UnitOfWorkAwareDomainService {
       // Validate with policy
       const policyResult = await orderPolicy.check({
         entity: command.orderData,
-        context: { userId: command.userId }
+        context: { userId: command.userId },
       });
-      
+
       if (policyResult.isFailure()) {
         return Result.fail(new Error('Order validation failed'));
       }
 
       // Create order
       const order = Order.create(command.orderData);
-      
+
       // Save with circuit breaker protection
       await this.circuitBreaker.execute(async () => {
         await this.orderRepository.save(order);
@@ -305,28 +313,28 @@ class CreateOrderHandler extends UnitOfWorkAwareDomainService {
 // Application setup
 async function setupApplication() {
   const container = new SimpleContainer();
-  
+
   // Configure DI
   VytchesDDD.configure(container);
-  
+
   // Register repositories
   container.register('orderRepository', OrderRepository);
-  
+
   // Setup resilience
   const circuitBreaker = new CircuitBreaker({
     name: 'order-service',
     threshold: 5,
-    timeout: 30000
+    timeout: 30000,
   });
-  
+
   container.registerInstance('circuitBreaker', circuitBreaker);
-  
+
   // Initialize logger
   Logger.configure({
     level: 'info',
-    format: 'json'
+    format: 'json',
   });
-  
+
   console.log('Enterprise DDD application initialized');
 }
 ```
@@ -343,7 +351,7 @@ import {
   AggregateRoot,
   EntityId,
   DomainEvent,
-  DomainError
+  DomainError,
 } from '@vytches-ddd/enterprise';
 
 // Repositories and Unit of Work
@@ -352,7 +360,7 @@ import {
   UnitOfWork,
   IBaseRepository,
   IUnitOfWork,
-  RepositoryError
+  RepositoryError,
 } from '@vytches-ddd/enterprise';
 
 // Specifications and Validation
@@ -360,7 +368,7 @@ import {
   Specification,
   CompositeSpecification,
   ValidationFacade,
-  BusinessRuleValidator
+  BusinessRuleValidator,
 } from '@vytches-ddd/enterprise';
 ```
 
@@ -375,7 +383,7 @@ import {
   QueryHandler,
   CommandBus,
   QueryBus,
-  Mediator
+  Mediator,
 } from '@vytches-ddd/enterprise';
 
 // Event sourcing and projections
@@ -385,7 +393,7 @@ import {
   EventProjection,
   ProjectionEngine,
   EventReplay,
-  Snapshot
+  Snapshot,
 } from '@vytches-ddd/enterprise';
 
 // Messaging and integration
@@ -394,7 +402,7 @@ import {
   MessageBus,
   IntegrationEvent,
   SagaOrchestrator,
-  EventDispatcher
+  EventDispatcher,
 } from '@vytches-ddd/enterprise';
 ```
 
@@ -407,7 +415,7 @@ import {
   RetryPolicy,
   Bulkhead,
   Timeout,
-  ResilienceStrategy
+  ResilienceStrategy,
 } from '@vytches-ddd/enterprise';
 
 // Logging and monitoring
@@ -416,7 +424,7 @@ import {
   ILogger,
   LogLevel,
   LogContext,
-  StructuredLogging
+  StructuredLogging,
 } from '@vytches-ddd/enterprise';
 
 // Dependency injection
@@ -425,7 +433,7 @@ import {
   DomainService,
   ServiceLifetime,
   Container,
-  ServiceLocator
+  ServiceLocator,
 } from '@vytches-ddd/enterprise';
 ```
 
@@ -438,7 +446,7 @@ import {
   PolicyGroup,
   PolicyRegistry,
   PolicyViolation,
-  PolicyBehavior
+  PolicyBehavior,
 } from '@vytches-ddd/enterprise';
 
 // Domain services
@@ -446,7 +454,7 @@ import {
   IDomainService,
   EventAwareDomainService,
   UnitOfWorkAwareDomainService,
-  AsyncDomainService
+  AsyncDomainService,
 } from '@vytches-ddd/enterprise';
 
 // Anti-corruption layer
@@ -454,7 +462,7 @@ import {
   ACLAdapter,
   ModelTranslator,
   ExternalSystemAdapter,
-  IntegrationMiddleware
+  IntegrationMiddleware,
 } from '@vytches-ddd/enterprise';
 ```
 
@@ -463,11 +471,11 @@ import {
 ### Health Checks and Monitoring
 
 ```typescript
-import { 
-  HealthChecker, 
-  HealthStatus, 
+import {
+  HealthChecker,
+  HealthStatus,
   MetricsCollector,
-  PerformanceMonitor 
+  PerformanceMonitor,
 } from '@vytches-ddd/enterprise';
 
 // Application health monitoring
@@ -480,7 +488,7 @@ class ApplicationHealthChecker {
       this.checkDatabase(),
       this.checkEventStore(),
       this.checkExternalServices(),
-      this.checkCircuitBreakers()
+      this.checkCircuitBreakers(),
     ]);
 
     return this.healthChecker.aggregate(checks);
@@ -515,7 +523,7 @@ import {
   PerformanceProfiler,
   CacheManager,
   ConnectionPoolManager,
-  ResourceOptimizer
+  ResourceOptimizer,
 } from '@vytches-ddd/enterprise';
 
 class PerformanceOptimizer {
@@ -526,7 +534,7 @@ class PerformanceOptimizer {
   async optimizeApplication(): Promise<void> {
     // Profile application performance
     const profile = await this.profiler.profile();
-    
+
     // Optimize based on profile
     await this.optimizeQueries(profile);
     await this.optimizeEventProcessing(profile);
@@ -537,11 +545,15 @@ class PerformanceOptimizer {
     // Query optimization logic
   }
 
-  private async optimizeEventProcessing(profile: PerformanceProfile): Promise<void> {
+  private async optimizeEventProcessing(
+    profile: PerformanceProfile
+  ): Promise<void> {
     // Event processing optimization
   }
 
-  private async optimizeResourceUsage(profile: PerformanceProfile): Promise<void> {
+  private async optimizeResourceUsage(
+    profile: PerformanceProfile
+  ): Promise<void> {
     // Resource usage optimization
   }
 }
@@ -559,7 +571,7 @@ import {
   ValueObject,
   Repository,
   UnitOfWork,
-  DomainEvent
+  DomainEvent,
 } from '@vytches-ddd/enterprise';
 
 // Basic application with core patterns
@@ -568,7 +580,7 @@ class CoreApplication {
     // Minimal setup with core patterns
     const unitOfWork = new UnitOfWork();
     const repository = new OrderRepository(unitOfWork);
-    
+
     // Basic domain logic
     const order = Order.create(orderData);
     await repository.save(order);
@@ -589,7 +601,7 @@ import {
   EventStore,
   EventBus,
   EventProjection,
-  CQRS
+  CQRS,
 } from '@vytches-ddd/enterprise';
 
 // Event-driven application
@@ -599,14 +611,14 @@ class EventDrivenApplication {
     const eventStore = new EventStore();
     const eventBus = new EventBus();
     const projectionEngine = new ProjectionEngine();
-    
+
     // Configure CQRS
     const cqrs = new CQRS({
       eventStore,
       eventBus,
-      projectionEngine
+      projectionEngine,
     });
-    
+
     await cqrs.initialize();
   }
 }
@@ -621,7 +633,7 @@ import {
   AggregateRoot,
   EventStore,
   CommandHandler,
-  
+
   // Plus enterprise features
   CircuitBreaker,
   PolicyBuilder,
@@ -629,7 +641,7 @@ import {
   HealthChecker,
   MetricsCollector,
   SagaOrchestrator,
-  VytchesDDD
+  VytchesDDD,
 } from '@vytches-ddd/enterprise';
 
 // Full enterprise application
@@ -638,32 +650,32 @@ class EnterpriseApplication {
     // Complete enterprise setup
     const container = new SimpleContainer();
     VytchesDDD.configure(container);
-    
+
     // Health monitoring
     const healthChecker = new HealthChecker();
-    
+
     // Performance monitoring
     const metrics = new MetricsCollector();
-    
+
     // Business policies
     const policies = PolicyBuilder.create();
-    
+
     // Resilience patterns
     const circuitBreaker = new CircuitBreaker({
       name: 'enterprise-app',
       threshold: 10,
-      timeout: 30000
+      timeout: 30000,
     });
-    
+
     // Saga orchestration
     const sagaOrchestrator = new SagaOrchestrator();
-    
+
     // Initialize all components
     await Promise.all([
       healthChecker.initialize(),
       metrics.initialize(),
       circuitBreaker.initialize(),
-      sagaOrchestrator.initialize()
+      sagaOrchestrator.initialize(),
     ]);
   }
 }
@@ -687,7 +699,7 @@ import {
   EntityId,
   CommandHandler,
   EventStore,
-  CircuitBreaker
+  CircuitBreaker,
 } from '@vytches-ddd/enterprise';
 ```
 
@@ -696,9 +708,9 @@ import {
 ```typescript
 // Handle naming conflicts
 import {
-  RetryPolicy as ResilienceRetryPolicy,  // From resilience
-  PolicyRetryBehavior,                    // From policies
-  PolicyBuilder
+  RetryPolicy as ResilienceRetryPolicy, // From resilience
+  PolicyRetryBehavior, // From policies
+  PolicyBuilder,
 } from '@vytches-ddd/enterprise';
 
 // Use qualified names
@@ -716,7 +728,7 @@ const policyRetry = PolicyRetryBehavior.create(basePolicy, { maxAttempts: 3 });
     // "@vytches-ddd/core": "^0.1.0",
     // "@vytches-ddd/cqrs": "^0.1.0",
     // "@vytches-ddd/events": "^0.1.0",
-    
+
     // Add enterprise bundle
     "@vytches-ddd/enterprise": "^0.2.0"
   }
@@ -729,10 +741,10 @@ const policyRetry = PolicyRetryBehavior.create(basePolicy, { maxAttempts: 3 });
 
 ```typescript
 // Import only what you need for optimal bundle size
-import { 
+import {
   AggregateRoot,
   EntityId,
-  CommandHandler 
+  CommandHandler,
 } from '@vytches-ddd/enterprise';
 
 // Avoid importing entire modules
@@ -763,13 +775,13 @@ const poolManager = new ConnectionPoolManager({
   database: {
     min: 5,
     max: 20,
-    acquireTimeout: 30000
+    acquireTimeout: 30000,
   },
   eventStore: {
     min: 2,
     max: 10,
-    acquireTimeout: 15000
-  }
+    acquireTimeout: 15000,
+  },
 });
 ```
 
@@ -784,7 +796,7 @@ import {
   MetricsCollector,
   CircuitBreaker,
   EventStore,
-  VytchesDDD
+  VytchesDDD,
 } from '@vytches-ddd/enterprise';
 
 // Production-ready configuration
@@ -794,20 +806,20 @@ class ProductionSetup {
     Logger.configure({
       level: 'info',
       format: 'json',
-      transports: ['console', 'file', 'elasticsearch']
+      transports: ['console', 'file', 'elasticsearch'],
     });
 
     // Configure health checks
     const healthChecker = new HealthChecker({
       interval: 30000,
       timeout: 5000,
-      retries: 3
+      retries: 3,
     });
 
     // Configure metrics
     const metrics = new MetricsCollector({
       interval: 10000,
-      exporters: ['prometheus', 'datadog']
+      exporters: ['prometheus', 'datadog'],
     });
 
     // Configure circuit breakers
@@ -815,7 +827,7 @@ class ProductionSetup {
       name: 'production-app',
       threshold: 50,
       timeout: 60000,
-      resetTimeout: 300000
+      resetTimeout: 300000,
     });
 
     // Configure event store
@@ -824,15 +836,15 @@ class ProductionSetup {
       connectionString: process.env.DATABASE_URL,
       pool: {
         min: 10,
-        max: 50
-      }
+        max: 50,
+      },
     });
 
     await Promise.all([
       healthChecker.start(),
       metrics.start(),
       circuitBreaker.initialize(),
-      eventStore.connect()
+      eventStore.connect(),
     ]);
   }
 }
@@ -855,7 +867,7 @@ services:
       - db
       - redis
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -876,10 +888,10 @@ services:
 ### Metrics Collection
 
 ```typescript
-import { 
-  MetricsCollector, 
+import {
+  MetricsCollector,
   PerformanceMonitor,
-  AlertManager 
+  AlertManager,
 } from '@vytches-ddd/enterprise';
 
 class ObservabilitySetup {
@@ -893,14 +905,14 @@ class ObservabilitySetup {
       namespace: 'vytches-ddd',
       labels: {
         service: 'order-service',
-        environment: 'production'
-      }
+        environment: 'production',
+      },
     });
 
     // Setup performance monitoring
     this.monitor.track('command-execution', {
       threshold: 1000, // 1 second
-      percentiles: [50, 95, 99]
+      percentiles: [50, 95, 99],
     });
 
     // Configure alerts
@@ -908,7 +920,7 @@ class ObservabilitySetup {
       name: 'high-error-rate',
       condition: 'error_rate > 0.05',
       severity: 'critical',
-      channels: ['slack', 'email']
+      channels: ['slack', 'email'],
     });
   }
 }
@@ -917,10 +929,10 @@ class ObservabilitySetup {
 ### Distributed Tracing
 
 ```typescript
-import { 
-  TracingManager, 
+import {
+  TracingManager,
   SpanBuilder,
-  TraceContext 
+  TraceContext,
 } from '@vytches-ddd/enterprise';
 
 class TracingSetup {
@@ -931,7 +943,7 @@ class TracingSetup {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = this.tracer.startSpan(commandName);
-    
+
     try {
       const result = await operation();
       span.setStatus('success');
@@ -956,7 +968,7 @@ import {
   SecurityManager,
   EncryptionService,
   AuditLogger,
-  ComplianceChecker
+  ComplianceChecker,
 } from '@vytches-ddd/enterprise';
 
 class SecuritySetup {
@@ -970,21 +982,21 @@ class SecuritySetup {
     this.encryption.configure({
       algorithm: 'aes-256-gcm',
       keyRotationInterval: 86400000, // 24 hours
-      keyDerivation: 'pbkdf2'
+      keyDerivation: 'pbkdf2',
     });
 
     // Configure audit logging
     this.audit.configure({
       events: ['command-execution', 'data-access', 'authentication'],
       retention: 2592000000, // 30 days
-      encryption: true
+      encryption: true,
     });
 
     // Configure compliance
     this.compliance.configure({
       standards: ['SOC2', 'GDPR', 'HIPAA'],
       dataClassification: true,
-      retentionPolicies: true
+      retentionPolicies: true,
     });
   }
 }
@@ -996,7 +1008,7 @@ class SecuritySetup {
 import {
   AuthorizationService,
   RoleBasedAccessControl,
-  PolicyBasedAccessControl
+  PolicyBasedAccessControl,
 } from '@vytches-ddd/enterprise';
 
 class AccessControlSetup {
@@ -1009,7 +1021,7 @@ class AccessControlSetup {
     this.rbac.defineRoles({
       admin: ['create', 'read', 'update', 'delete'],
       user: ['read', 'update_own'],
-      guest: ['read']
+      guest: ['read'],
     });
 
     // Configure PBAC
@@ -1018,8 +1030,8 @@ class AccessControlSetup {
       rules: [
         { effect: 'allow', subject: 'user', action: 'read', resource: 'order' },
         { effect: 'allow', subject: 'owner', action: '*', resource: 'order' },
-        { effect: 'deny', subject: '*', action: 'delete', resource: 'order' }
-      ]
+        { effect: 'deny', subject: '*', action: 'delete', resource: 'order' },
+      ],
     });
   }
 }
@@ -1031,12 +1043,12 @@ class AccessControlSetup {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { 
+import {
   TestHarness,
   MockContainer,
   TestEventStore,
   TestMetrics,
-  safeRun
+  safeRun,
 } from '@vytches-ddd/enterprise';
 
 describe('Enterprise Order Service', () => {
@@ -1052,7 +1064,7 @@ describe('Enterprise Order Service', () => {
     await harness.setup({
       container,
       eventStore,
-      metrics: new TestMetrics()
+      metrics: new TestMetrics(),
     });
   });
 
@@ -1061,7 +1073,7 @@ describe('Enterprise Order Service', () => {
       // Arrange
       const orderData = {
         customerId: EntityId.generate(),
-        items: [{ productId: 'product-1', quantity: 2 }]
+        items: [{ productId: 'product-1', quantity: 2 }],
       };
 
       // Act
@@ -1081,7 +1093,7 @@ describe('Enterprise Order Service', () => {
       // Arrange
       const invalidOrderData = {
         customerId: EntityId.generate(),
-        items: [] // Empty items should fail validation
+        items: [], // Empty items should fail validation
       };
 
       // Act
@@ -1101,11 +1113,11 @@ describe('Enterprise Order Service', () => {
 ### Integration Testing
 
 ```typescript
-import { 
+import {
   IntegrationTestHarness,
   TestDatabase,
   TestEventStore,
-  TestMessageBus
+  TestMessageBus,
 } from '@vytches-ddd/enterprise';
 
 describe('Integration Tests', () => {
@@ -1122,7 +1134,7 @@ describe('Integration Tests', () => {
     harness = new IntegrationTestHarness({
       database,
       eventStore,
-      messageBus
+      messageBus,
     });
 
     await harness.initialize();
@@ -1135,7 +1147,7 @@ describe('Integration Tests', () => {
   it('should handle complete order fulfillment saga', async () => {
     // Test complete saga flow
     const orderData = createTestOrderData();
-    
+
     const [error, result] = await safeRun(async () => {
       return await harness.executeSaga('OrderFulfillmentSaga', orderData);
     });
@@ -1162,7 +1174,7 @@ import {
   CommandHandler,
   EventStore,
   CircuitBreaker,
-  Logger
+  Logger,
 } from '@vytches-ddd/enterprise';
 
 // ✅ Good: Comprehensive monitoring
@@ -1173,12 +1185,12 @@ class EnterpriseService {
 
   async processRequest(request: Request): Promise<Response> {
     const span = this.tracer.startSpan('processRequest');
-    
+
     try {
       const result = await this.circuitBreaker.execute(async () => {
         return await this.handleRequest(request);
       });
-      
+
       this.metrics.increment('request.success');
       return result;
     } catch (error) {
@@ -1201,10 +1213,7 @@ class EnterpriseService {
 
 ```typescript
 // ✅ Good: Optimized imports
-import { 
-  AggregateRoot,
-  CommandHandler 
-} from '@vytches-ddd/enterprise';
+import { AggregateRoot, CommandHandler } from '@vytches-ddd/enterprise';
 
 // ✅ Good: Lazy loading
 const loadEventStore = async () => {
@@ -1215,7 +1224,7 @@ const loadEventStore = async () => {
 // ✅ Good: Connection pooling
 const poolManager = new ConnectionPoolManager({
   database: { min: 5, max: 20 },
-  eventStore: { min: 2, max: 10 }
+  eventStore: { min: 2, max: 10 },
 });
 ```
 
@@ -1236,16 +1245,16 @@ class SecureOrderService {
   async createOrder(orderData: OrderData, user: User): Promise<Order> {
     // Check authorization
     await this.authz.check(user, 'create', 'order');
-    
+
     // Encrypt sensitive data
     const encryptedData = await this.encryption.encrypt(orderData);
-    
+
     // Audit the action
     this.audit.log({
       action: 'create_order',
       user: user.id,
       resource: 'order',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return await this.processOrder(encryptedData);
@@ -1255,7 +1264,8 @@ class SecureOrderService {
 
 ## 📚 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1277,4 +1287,6 @@ pnpm build:enterprise
 
 **Built with ❤️ by the VytchesDDD Team**
 
-*The complete Enterprise bundle for [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your complete Domain-Driven Design solution for TypeScript*
+_The complete Enterprise bundle for
+[@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your complete
+Domain-Driven Design solution for TypeScript_

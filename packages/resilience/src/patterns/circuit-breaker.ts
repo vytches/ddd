@@ -1,11 +1,47 @@
 import type { ResilienceContext } from '../core/resilience-context';
 
+/**
+ * @llm-summary Enumeration of circuit breaker state values
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * CircuitBreakerState enum implementing infrastructure service for circuit breaker state operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: CircuitBreakerState = CircuitBreakerState.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export enum CircuitBreakerState {
   CLOSED = 'CLOSED',
   OPEN = 'OPEN',
   HALF_OPEN = 'HALF_OPEN',
 }
 
+/**
+ * @llm-summary Contract for circuit breaker config functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * CircuitBreakerConfig interface implementing infrastructure service for circuit breaker config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCircuitBreakerConfig implements CircuitBreakerConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface CircuitBreakerConfig {
   readonly failureThreshold: number;
   readonly recoveryTimeout: number;
@@ -14,6 +50,25 @@ export interface CircuitBreakerConfig {
   readonly name?: string | undefined;
 }
 
+/**
+ * @llm-summary Contract for circuit breaker metrics functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * CircuitBreakerMetrics interface implementing infrastructure service for circuit breaker metrics operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCircuitBreakerMetrics implements CircuitBreakerMetrics {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface CircuitBreakerMetrics {
   readonly state: CircuitBreakerState;
   readonly failureCount: number;
@@ -23,6 +78,32 @@ export interface CircuitBreakerMetrics {
   readonly nextAttemptTime?: Date | undefined;
 }
 
+/**
+ * @llm-summary CircuitBreakerOpenError class for circuit breaker open error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Expert
+ *
+ * @description
+ * CircuitBreakerOpenError class implementing infrastructure service for circuit breaker open error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CircuitBreakerOpenError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CircuitBreakerOpenError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class CircuitBreakerOpenError extends Error {
   constructor(circuitName: string, nextAttemptTime: Date) {
     super(
@@ -32,6 +113,32 @@ export class CircuitBreakerOpenError extends Error {
   }
 }
 
+/**
+ * @llm-summary CircuitBreaker class for circuit breaker operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Expert
+ *
+ * @description
+ * CircuitBreaker class implementing infrastructure service for circuit breaker operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CircuitBreaker();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CircuitBreaker());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class CircuitBreaker {
   private state: CircuitBreakerState = CircuitBreakerState.CLOSED;
   private failureCount = 0;

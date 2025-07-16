@@ -14,9 +14,13 @@ Integration Points: @vytches-ddd/cqrs, @vytches-ddd/messaging, @vytches-ddd/repo
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade resilience patterns for building fault-tolerant distributed systems**
+> **Enterprise-grade resilience patterns for building fault-tolerant distributed
+> systems**
 
-Comprehensive resilience framework with circuit breakers, retry policies, bulkheads, and timeout strategies. Designed for high-availability systems requiring robust error handling and fault tolerance. Includes comprehensive observability and metrics collection.
+Comprehensive resilience framework with circuit breakers, retry policies,
+bulkheads, and timeout strategies. Designed for high-availability systems
+requiring robust error handling and fault tolerance. Includes comprehensive
+observability and metrics collection.
 
 ## 📋 Table of Contents
 
@@ -59,28 +63,41 @@ npm install @vytches-ddd/core @vytches-ddd/logging
 ## ✨ Key Features
 
 ### Resilience Patterns
-- **Circuit Breaker**: Three-state circuit breaker (CLOSED/OPEN/HALF_OPEN) with automatic recovery
-- **Retry Policy**: Exponential backoff with jitter and configurable retry conditions
-- **Bulkhead Pattern**: Resource isolation with concurrency limits and queue management
+
+- **Circuit Breaker**: Three-state circuit breaker (CLOSED/OPEN/HALF_OPEN) with
+  automatic recovery
+- **Retry Policy**: Exponential backoff with jitter and configurable retry
+  conditions
+- **Bulkhead Pattern**: Resource isolation with concurrency limits and queue
+  management
 - **Timeout Strategy**: Operation timeouts with AbortSignal integration
 
 ### Advanced Features
-- **Strategy Composition**: Combine multiple resilience patterns via CompositeResilienceStrategy
-- **Fluent Policy Builder**: Chainable pattern configuration with ResiliencePolicyBuilder
-- **Resilience Context**: Correlation tracking, attempt counting, and metadata propagation
+
+- **Strategy Composition**: Combine multiple resilience patterns via
+  CompositeResilienceStrategy
+- **Fluent Policy Builder**: Chainable pattern configuration with
+  ResiliencePolicyBuilder
+- **Resilience Context**: Correlation tracking, attempt counting, and metadata
+  propagation
 - **Decorator System**: Method decorators for applying resilience patterns
 
 ### Enterprise Quality
-- **Comprehensive Observability**: Metrics collection, event bus, and multiple export formats
-- **Zero Dependencies**: Pure TypeScript implementation with no external runtime dependencies
-- **Type Safety**: Full TypeScript support with strict typing and generic constraints
+
+- **Comprehensive Observability**: Metrics collection, event bus, and multiple
+  export formats
+- **Zero Dependencies**: Pure TypeScript implementation with no external runtime
+  dependencies
+- **Type Safety**: Full TypeScript support with strict typing and generic
+  constraints
 - **Performance**: Optimized for high-throughput scenarios with minimal overhead
 
 ## 🎯 Core Concepts
 
 ### Resilience Context
 
-The resilience context provides execution context and metadata for resilience operations:
+The resilience context provides execution context and metadata for resilience
+operations:
 
 ```typescript
 // Core resilience context interface
@@ -90,7 +107,7 @@ interface ResilienceContext {
   startTime: Date;
   timeout?: AbortSignal;
   metadata: Record<string, unknown>;
-  
+
   withTimeout(timeoutMs: number): ResilienceContext;
   withAttempt(attempt: number): ResilienceContext;
   withMetadata(metadata: Record<string, unknown>): ResilienceContext;
@@ -103,17 +120,17 @@ Circuit breakers maintain state to prevent cascading failures:
 
 ```typescript
 enum CircuitBreakerState {
-  CLOSED = 'CLOSED',     // Normal operation
-  OPEN = 'OPEN',         // Failing fast
-  HALF_OPEN = 'HALF_OPEN' // Testing recovery
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Failing fast
+  HALF_OPEN = 'HALF_OPEN', // Testing recovery
 }
 
 interface CircuitBreakerConfig {
-  failureThreshold: number;     // Failures before opening
-  recoveryTimeout: number;      // Time before attempting recovery
-  successThreshold: number;     // Successes needed to close
-  timeout: number;              // Operation timeout
-  name?: string;                // Circuit breaker name
+  failureThreshold: number; // Failures before opening
+  recoveryTimeout: number; // Time before attempting recovery
+  successThreshold: number; // Successes needed to close
+  timeout: number; // Operation timeout
+  name?: string; // Circuit breaker name
 }
 ```
 
@@ -123,11 +140,11 @@ Retry policies support various backoff strategies:
 
 ```typescript
 interface RetryConfig {
-  maxAttempts: number;          // Maximum retry attempts
-  baseDelay: number;           // Base delay between retries
-  maxDelay: number;            // Maximum delay cap
-  backoffMultiplier: number;   // Exponential backoff multiplier
-  jitter: boolean;             // Add randomness to delays
+  maxAttempts: number; // Maximum retry attempts
+  baseDelay: number; // Base delay between retries
+  maxDelay: number; // Maximum delay cap
+  backoffMultiplier: number; // Exponential backoff multiplier
+  jitter: boolean; // Add randomness to delays
   retryableErrors?: (error: Error) => boolean; // Custom retry logic
 }
 ```
@@ -138,10 +155,10 @@ Bulkheads provide resource isolation and concurrency control:
 
 ```typescript
 interface BulkheadConfig {
-  maxConcurrency: number;       // Maximum concurrent operations
-  queueCapacity: number;        // Queue size for waiting operations
-  timeout?: number;             // Queue timeout
-  name?: string;                // Bulkhead name
+  maxConcurrency: number; // Maximum concurrent operations
+  queueCapacity: number; // Queue size for waiting operations
+  timeout?: number; // Queue timeout
+  name?: string; // Bulkhead name
 }
 ```
 
@@ -154,22 +171,22 @@ import { CircuitBreaker, CircuitBreakerState } from '@vytches-ddd/resilience';
 
 // Create circuit breaker
 const circuitBreaker = new CircuitBreaker({
-  failureThreshold: 5,        // Open after 5 failures
-  recoveryTimeout: 60000,     // Try recovery after 1 minute
-  successThreshold: 3,        // Close after 3 successful attempts
-  timeout: 30000,             // 30 second operation timeout
-  name: 'external-service'
+  failureThreshold: 5, // Open after 5 failures
+  recoveryTimeout: 60000, // Try recovery after 1 minute
+  successThreshold: 3, // Close after 3 successful attempts
+  timeout: 30000, // 30 second operation timeout
+  name: 'external-service',
 });
 
 // Use circuit breaker
 const context = new DefaultResilienceContext();
 
 try {
-  const result = await circuitBreaker.execute(async (ctx) => {
+  const result = await circuitBreaker.execute(async ctx => {
     // Your operation here
     return await externalService.getData();
   }, context);
-  
+
   console.log('Operation succeeded:', result);
 } catch (error) {
   if (error instanceof CircuitBreakerOpenError) {
@@ -188,20 +205,20 @@ import { RetryPolicy, MaxRetriesExceededError } from '@vytches-ddd/resilience';
 // Create retry policy
 const retryPolicy = new RetryPolicy({
   maxAttempts: 3,
-  baseDelay: 1000,            // 1 second base delay
-  maxDelay: 10000,            // 10 second max delay
-  backoffMultiplier: 2,       // Exponential backoff
-  jitter: true,               // Add randomness
-  retryableErrors: (error) => error.name === 'NetworkError'
+  baseDelay: 1000, // 1 second base delay
+  maxDelay: 10000, // 10 second max delay
+  backoffMultiplier: 2, // Exponential backoff
+  jitter: true, // Add randomness
+  retryableErrors: error => error.name === 'NetworkError',
 });
 
 // Use retry policy
 try {
-  const result = await retryPolicy.execute(async (ctx) => {
+  const result = await retryPolicy.execute(async ctx => {
     console.log(`Attempt ${ctx.attemptNumber}`);
     return await unstableOperation();
   }, context);
-  
+
   console.log('Operation succeeded:', result);
 } catch (error) {
   if (error instanceof MaxRetriesExceededError) {
@@ -217,18 +234,18 @@ import { Bulkhead, BulkheadRejectedException } from '@vytches-ddd/resilience';
 
 // Create bulkhead
 const bulkhead = new Bulkhead({
-  maxConcurrency: 10,         // Max 10 concurrent operations
-  queueCapacity: 50,          // Queue up to 50 waiting operations
-  timeout: 5000,              // 5 second queue timeout
-  name: 'database-operations'
+  maxConcurrency: 10, // Max 10 concurrent operations
+  queueCapacity: 50, // Queue up to 50 waiting operations
+  timeout: 5000, // 5 second queue timeout
+  name: 'database-operations',
 });
 
 // Use bulkhead
 try {
-  const result = await bulkhead.execute(async (ctx) => {
+  const result = await bulkhead.execute(async ctx => {
     return await databaseOperation();
   }, context);
-  
+
   console.log('Operation completed:', result);
 } catch (error) {
   if (error instanceof BulkheadRejectedException) {
@@ -253,24 +270,23 @@ class PaymentServiceCircuitBreaker {
       recoveryTimeout: 30000,
       successThreshold: 2,
       timeout: 15000,
-      name: 'payment-service'
+      name: 'payment-service',
     });
   }
 
   async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
-    const context = new DefaultResilienceContext()
-      .withMetadata({
-        operation: 'processPayment',
-        paymentId: paymentData.id,
-        amount: paymentData.amount
-      });
+    const context = new DefaultResilienceContext().withMetadata({
+      operation: 'processPayment',
+      paymentId: paymentData.id,
+      amount: paymentData.amount,
+    });
 
-    return await this.circuitBreaker.execute(async (ctx) => {
+    return await this.circuitBreaker.execute(async ctx => {
       // Call external payment service
       const response = await fetch('/api/payments', {
         method: 'POST',
         body: JSON.stringify(paymentData),
-        signal: ctx.timeout // Use context timeout
+        signal: ctx.timeout, // Use context timeout
       });
 
       if (!response.ok) {
@@ -294,7 +310,10 @@ class PaymentServiceCircuitBreaker {
 ### Circuit Breaker with Custom Error Handling
 
 ```typescript
-import { CircuitBreaker, CircuitBreakerOpenError } from '@vytches-ddd/resilience';
+import {
+  CircuitBreaker,
+  CircuitBreakerOpenError,
+} from '@vytches-ddd/resilience';
 
 class ResilientApiClient {
   private circuitBreaker: CircuitBreaker;
@@ -305,19 +324,21 @@ class ResilientApiClient {
       recoveryTimeout: 60000,
       successThreshold: 1,
       timeout: 10000,
-      name: 'api-client'
+      name: 'api-client',
     });
   }
 
   async makeRequest<T>(endpoint: string, options: RequestOptions): Promise<T> {
-    const context = new DefaultResilienceContext()
-      .withMetadata({ endpoint, method: options.method });
+    const context = new DefaultResilienceContext().withMetadata({
+      endpoint,
+      method: options.method,
+    });
 
     try {
-      return await this.circuitBreaker.execute(async (ctx) => {
+      return await this.circuitBreaker.execute(async ctx => {
         const response = await fetch(endpoint, {
           ...options,
-          signal: ctx.timeout
+          signal: ctx.timeout,
         });
 
         if (response.status >= 500) {
@@ -359,25 +380,29 @@ const retryPolicy = new RetryPolicy({
   maxDelay: 30000,
   backoffMultiplier: 2,
   jitter: true,
-  retryableErrors: (error) => {
+  retryableErrors: error => {
     // Only retry on specific errors
-    return error.name === 'NetworkError' || 
-           error.name === 'TimeoutError' ||
-           (error.name === 'HttpError' && error.status >= 500);
-  }
+    return (
+      error.name === 'NetworkError' ||
+      error.name === 'TimeoutError' ||
+      (error.name === 'HttpError' && error.status >= 500)
+    );
+  },
 });
 
 // Usage with comprehensive error handling
 async function fetchWithRetry(url: string): Promise<any> {
-  const context = new DefaultResilienceContext()
-    .withMetadata({ url, operation: 'fetch' });
+  const context = new DefaultResilienceContext().withMetadata({
+    url,
+    operation: 'fetch',
+  });
 
   try {
-    return await retryPolicy.execute(async (ctx) => {
+    return await retryPolicy.execute(async ctx => {
       console.log(`Attempt ${ctx.attemptNumber} for ${url}`);
-      
+
       const response = await fetch(url, {
-        signal: ctx.timeout
+        signal: ctx.timeout,
       });
 
       if (!response.ok) {
@@ -410,7 +435,7 @@ class CustomRetryPolicy extends RetryPolicy {
     // Custom backoff calculation
     const baseDelay = this.config.baseDelay;
     const multiplier = this.config.backoffMultiplier;
-    
+
     // Fibonacci-like backoff
     let delay = baseDelay;
     for (let i = 1; i < attempt; i++) {
@@ -432,7 +457,7 @@ const customRetry = new CustomRetryPolicy({
   baseDelay: 500,
   maxDelay: 20000,
   backoffMultiplier: 1.5,
-  jitter: true
+  jitter: true,
 });
 ```
 
@@ -453,31 +478,33 @@ class DatabaseBulkhead {
       maxConcurrency: 50,
       queueCapacity: 100,
       timeout: 10000,
-      name: 'database-reads'
+      name: 'database-reads',
     });
 
     this.writeBulkhead = new Bulkhead({
       maxConcurrency: 20,
       queueCapacity: 50,
       timeout: 15000,
-      name: 'database-writes'
+      name: 'database-writes',
     });
   }
 
   async executeRead<T>(operation: () => Promise<T>): Promise<T> {
-    const context = new DefaultResilienceContext()
-      .withMetadata({ operationType: 'read' });
+    const context = new DefaultResilienceContext().withMetadata({
+      operationType: 'read',
+    });
 
-    return await this.readBulkhead.execute(async (ctx) => {
+    return await this.readBulkhead.execute(async ctx => {
       return await operation();
     }, context);
   }
 
   async executeWrite<T>(operation: () => Promise<T>): Promise<T> {
-    const context = new DefaultResilienceContext()
-      .withMetadata({ operationType: 'write' });
+    const context = new DefaultResilienceContext().withMetadata({
+      operationType: 'write',
+    });
 
-    return await this.writeBulkhead.execute(async (ctx) => {
+    return await this.writeBulkhead.execute(async ctx => {
       return await operation();
     }, context);
   }
@@ -485,7 +512,7 @@ class DatabaseBulkhead {
   getMetrics(): { read: BulkheadMetrics; write: BulkheadMetrics } {
     return {
       read: this.readBulkhead.getMetrics(),
-      write: this.writeBulkhead.getMetrics()
+      write: this.writeBulkhead.getMetrics(),
     };
   }
 }
@@ -512,7 +539,7 @@ class PriorityBulkhead extends Bulkhead {
         resolve,
         reject,
         startTime: Date.now(),
-        priority
+        priority,
       };
 
       if (priority === 'high') {
@@ -528,8 +555,9 @@ class PriorityBulkhead extends Bulkhead {
   private processNextTask(): void {
     if (this.activeTasks < this.config.maxConcurrency) {
       // Process high priority tasks first
-      const task = this.highPriorityQueue.shift() || this.normalPriorityQueue.shift();
-      
+      const task =
+        this.highPriorityQueue.shift() || this.normalPriorityQueue.shift();
+
       if (task) {
         this.executeTask(task);
       }
@@ -543,11 +571,11 @@ class PriorityBulkhead extends Bulkhead {
 ### Composite Resilience Strategy
 
 ```typescript
-import { 
+import {
   CompositeResilienceStrategy,
   CircuitBreakerStrategy,
   RetryStrategy,
-  BulkheadStrategy
+  BulkheadStrategy,
 } from '@vytches-ddd/resilience';
 
 // Create composite strategy
@@ -557,25 +585,25 @@ const compositeStrategy = new CompositeResilienceStrategy([
     recoveryTimeout: 60000,
     successThreshold: 3,
     timeout: 30000,
-    name: 'external-api'
+    name: 'external-api',
   }),
   new RetryStrategy({
     maxAttempts: 3,
     baseDelay: 1000,
     maxDelay: 10000,
     backoffMultiplier: 2,
-    jitter: true
+    jitter: true,
   }),
   new BulkheadStrategy({
     maxConcurrency: 10,
     queueCapacity: 50,
     timeout: 5000,
-    name: 'api-calls'
-  })
+    name: 'api-calls',
+  }),
 ]);
 
 // Execute with all strategies
-const result = await compositeStrategy.execute(async (ctx) => {
+const result = await compositeStrategy.execute(async ctx => {
   return await externalApiCall();
 }, context);
 ```
@@ -586,14 +614,13 @@ const result = await compositeStrategy.execute(async (ctx) => {
 import { ResiliencePolicyBuilder } from '@vytches-ddd/resilience';
 
 // Build policy with fluent API
-const policy = ResiliencePolicyBuilder
-  .create()
+const policy = ResiliencePolicyBuilder.create()
   .withCircuitBreaker({
     failureThreshold: 3,
     recoveryTimeout: 30000,
     successThreshold: 2,
     timeout: 15000,
-    name: 'payment-service'
+    name: 'payment-service',
   })
   .withRetry({
     maxAttempts: 3,
@@ -601,19 +628,19 @@ const policy = ResiliencePolicyBuilder
     maxDelay: 8000,
     backoffMultiplier: 2,
     jitter: true,
-    retryableErrors: (error) => error.name === 'NetworkError'
+    retryableErrors: error => error.name === 'NetworkError',
   })
   .withBulkhead({
     maxConcurrency: 5,
     queueCapacity: 20,
     timeout: 10000,
-    name: 'payment-operations'
+    name: 'payment-operations',
   })
   .withTimeout(25000)
   .build();
 
 // Use the policy
-const result = await policy.execute(async (ctx) => {
+const result = await policy.execute(async ctx => {
   return await complexOperation();
 }, context);
 ```
@@ -623,11 +650,11 @@ const result = await policy.execute(async (ctx) => {
 ### Method Decorators
 
 ```typescript
-import { 
+import {
   CircuitBreakerDecorator,
   RetryDecorator,
   BulkheadDecorator,
-  TimeoutDecorator 
+  TimeoutDecorator,
 } from '@vytches-ddd/resilience';
 
 class PaymentService {
@@ -636,20 +663,20 @@ class PaymentService {
     recoveryTimeout: 60000,
     successThreshold: 3,
     timeout: 30000,
-    name: 'payment-processing'
+    name: 'payment-processing',
   })
   @RetryDecorator({
     maxAttempts: 3,
     baseDelay: 1000,
     maxDelay: 10000,
     backoffMultiplier: 2,
-    jitter: true
+    jitter: true,
   })
   @BulkheadDecorator({
     maxConcurrency: 10,
     queueCapacity: 50,
     timeout: 15000,
-    name: 'payment-bulkhead'
+    name: 'payment-bulkhead',
   })
   @TimeoutDecorator(30000)
   async processPayment(paymentData: PaymentData): Promise<PaymentResult> {
@@ -662,7 +689,7 @@ class PaymentService {
     recoveryTimeout: 30000,
     successThreshold: 2,
     timeout: 10000,
-    name: 'payment-validation'
+    name: 'payment-validation',
   })
   async validatePayment(paymentData: PaymentData): Promise<boolean> {
     return await this.externalValidationService.validate(paymentData);
@@ -681,21 +708,21 @@ import { ResilienceDecorator } from '@vytches-ddd/resilience';
     recoveryTimeout: 60000,
     successThreshold: 3,
     timeout: 30000,
-    name: 'user-service'
+    name: 'user-service',
   },
   retry: {
     maxAttempts: 3,
     baseDelay: 1000,
     maxDelay: 10000,
     backoffMultiplier: 2,
-    jitter: true
+    jitter: true,
   },
   bulkhead: {
     maxConcurrency: 20,
     queueCapacity: 100,
     timeout: 15000,
-    name: 'user-operations'
-  }
+    name: 'user-operations',
+  },
 })
 class UserService {
   async createUser(userData: UserData): Promise<User> {
@@ -714,11 +741,11 @@ class UserService {
 ### Metrics Collection
 
 ```typescript
-import { 
+import {
   GlobalMetricRegistry,
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
-  BulkheadMetricCollector
+  BulkheadMetricCollector,
 } from '@vytches-ddd/resilience';
 
 // Setup metrics collection
@@ -735,11 +762,11 @@ const circuitBreaker = new CircuitBreaker({
   recoveryTimeout: 60000,
   successThreshold: 3,
   timeout: 30000,
-  name: 'instrumented-service'
+  name: 'instrumented-service',
 });
 
 // Execute operation (metrics automatically collected)
-await circuitBreaker.execute(async (ctx) => {
+await circuitBreaker.execute(async ctx => {
   return await operationWithMetrics();
 }, context);
 
@@ -753,11 +780,11 @@ console.log('Bulkhead Metrics:', metrics.bulkhead);
 ### Custom Metrics Export
 
 ```typescript
-import { 
+import {
   JsonMetricExporter,
   PrometheusMetricExporter,
   CsvMetricExporter,
-  CompositeMetricExporter
+  CompositeMetricExporter,
 } from '@vytches-ddd/resilience';
 
 // Create exporters
@@ -769,7 +796,7 @@ const csvExporter = new CsvMetricExporter('./metrics.csv');
 const compositeExporter = new CompositeMetricExporter([
   jsonExporter,
   prometheusExporter,
-  csvExporter
+  csvExporter,
 ]);
 
 // Export metrics
@@ -780,25 +807,25 @@ await compositeExporter.export(registry.getMetrics());
 ### Event Bus Integration
 
 ```typescript
-import { 
+import {
   GlobalObservabilityEventBus,
-  ObservabilityEventListener
+  ObservabilityEventListener,
 } from '@vytches-ddd/resilience';
 
 // Create event listener
 const eventListener: ObservabilityEventListener = {
-  onEvent: (event) => {
+  onEvent: event => {
     console.log(`Resilience Event: ${event.type}`, event.data);
-    
+
     // Send to monitoring system
     if (event.type === 'circuit-breaker-opened') {
       alerting.sendAlert({
         level: 'warning',
         message: `Circuit breaker ${event.data.name} opened`,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
       });
     }
-  }
+  },
 };
 
 // Register listener
@@ -821,15 +848,15 @@ import { ResilienceDecorator } from '@vytches-ddd/resilience';
     recoveryTimeout: 60000,
     successThreshold: 3,
     timeout: 30000,
-    name: 'payment-command'
+    name: 'payment-command',
   },
   retry: {
     maxAttempts: 3,
     baseDelay: 1000,
     maxDelay: 10000,
     backoffMultiplier: 2,
-    jitter: true
-  }
+    jitter: true,
+  },
 })
 class ProcessPaymentHandler {
   async execute(command: ProcessPaymentCommand): Promise<void> {
@@ -845,14 +872,14 @@ class ProcessPaymentHandler {
     recoveryTimeout: 30000,
     successThreshold: 2,
     timeout: 10000,
-    name: 'user-query'
+    name: 'user-query',
   },
   bulkhead: {
     maxConcurrency: 50,
     queueCapacity: 200,
     timeout: 5000,
-    name: 'user-queries'
-  }
+    name: 'user-queries',
+  },
 })
 class GetUserHandler {
   async execute(query: GetUserQuery): Promise<User> {
@@ -873,7 +900,7 @@ import { ResilienceDecorator } from '@vytches-ddd/resilience';
     recoveryTimeout: 60000,
     successThreshold: 5,
     timeout: 30000,
-    name: 'user-repository'
+    name: 'user-repository',
   },
   retry: {
     maxAttempts: 3,
@@ -881,14 +908,14 @@ import { ResilienceDecorator } from '@vytches-ddd/resilience';
     maxDelay: 5000,
     backoffMultiplier: 2,
     jitter: true,
-    retryableErrors: (error) => error.name === 'DatabaseConnectionError'
+    retryableErrors: error => error.name === 'DatabaseConnectionError',
   },
   bulkhead: {
     maxConcurrency: 30,
     queueCapacity: 100,
     timeout: 20000,
-    name: 'database-operations'
-  }
+    name: 'database-operations',
+  },
 })
 class UserRepository extends IBaseRepository<User> {
   async findById(id: EntityId): Promise<User | null> {
@@ -915,18 +942,20 @@ import { ResilienceDecorator } from '@vytches-ddd/resilience';
     recoveryTimeout: 60000,
     successThreshold: 3,
     timeout: 15000,
-    name: 'payment-validation'
+    name: 'payment-validation',
   },
   retry: {
     maxAttempts: 2,
     baseDelay: 1000,
     maxDelay: 5000,
     backoffMultiplier: 2,
-    jitter: true
-  }
+    jitter: true,
+  },
 })
 class PaymentValidationService {
-  async validatePaymentMethod(paymentMethod: PaymentMethod): Promise<ValidationResult> {
+  async validatePaymentMethod(
+    paymentMethod: PaymentMethod
+  ): Promise<ValidationResult> {
     // External validation service call with resilience
     return await this.externalValidationService.validate(paymentMethod);
   }
@@ -944,7 +973,11 @@ class PaymentValidationService {
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import { CircuitBreaker, CircuitBreakerState, CircuitBreakerOpenError } from '@vytches-ddd/resilience';
+import {
+  CircuitBreaker,
+  CircuitBreakerState,
+  CircuitBreakerOpenError,
+} from '@vytches-ddd/resilience';
 
 describe('CircuitBreaker', () => {
   let circuitBreaker: CircuitBreaker;
@@ -956,15 +989,15 @@ describe('CircuitBreaker', () => {
       recoveryTimeout: 1000,
       successThreshold: 2,
       timeout: 5000,
-      name: 'test-circuit'
+      name: 'test-circuit',
     });
     context = new DefaultResilienceContext();
   });
 
   describe('normal operation', () => {
     it('should execute successfully when closed', async () => {
-      const [error, result] = await safeRun(async () => 
-        await circuitBreaker.execute(async () => 'success', context)
+      const [error, result] = await safeRun(
+        async () => await circuitBreaker.execute(async () => 'success', context)
       );
 
       expect(error).toBeUndefined();
@@ -986,10 +1019,11 @@ describe('CircuitBreaker', () => {
     it('should open circuit after failure threshold', async () => {
       // Generate failures to exceed threshold
       for (let i = 0; i < 3; i++) {
-        const [error] = await safeRun(async () => 
-          await circuitBreaker.execute(async () => {
-            throw new Error(`Failure ${i + 1}`);
-          }, context)
+        const [error] = await safeRun(
+          async () =>
+            await circuitBreaker.execute(async () => {
+              throw new Error(`Failure ${i + 1}`);
+            }, context)
         );
         expect(error).toBeInstanceOf(Error);
       }
@@ -1000,20 +1034,27 @@ describe('CircuitBreaker', () => {
     it('should fail fast when circuit is open', async () => {
       // Open the circuit
       for (let i = 0; i < 3; i++) {
-        await safeRun(async () => 
-          await circuitBreaker.execute(async () => {
-            throw new Error('Failure');
-          }, context)
+        await safeRun(
+          async () =>
+            await circuitBreaker.execute(async () => {
+              throw new Error('Failure');
+            }, context)
         );
       }
 
       // Should fail fast
-      const [openError] = await safeRun(async () => 
-        await circuitBreaker.execute(async () => 'should not execute', context)
+      const [openError] = await safeRun(
+        async () =>
+          await circuitBreaker.execute(
+            async () => 'should not execute',
+            context
+          )
       );
 
       expect(openError).toBeInstanceOf(CircuitBreakerOpenError);
-      expect(openError?.message).toContain('Circuit breaker \'test-circuit\' is open');
+      expect(openError?.message).toContain(
+        "Circuit breaker 'test-circuit' is open"
+      );
     });
   });
 
@@ -1021,10 +1062,11 @@ describe('CircuitBreaker', () => {
     it('should transition to half-open after recovery timeout', async () => {
       // Open the circuit
       for (let i = 0; i < 3; i++) {
-        await safeRun(async () => 
-          await circuitBreaker.execute(async () => {
-            throw new Error('Failure');
-          }, context)
+        await safeRun(
+          async () =>
+            await circuitBreaker.execute(async () => {
+              throw new Error('Failure');
+            }, context)
         );
       }
 
@@ -1034,8 +1076,9 @@ describe('CircuitBreaker', () => {
       await new Promise(resolve => setTimeout(resolve, 1100));
 
       // Next call should attempt recovery
-      const [error] = await safeRun(async () => 
-        await circuitBreaker.execute(async () => 'recovery attempt', context)
+      const [error] = await safeRun(
+        async () =>
+          await circuitBreaker.execute(async () => 'recovery attempt', context)
       );
 
       expect(error).toBeUndefined();
@@ -1062,15 +1105,15 @@ describe('RetryPolicy', () => {
       baseDelay: 100,
       maxDelay: 1000,
       backoffMultiplier: 2,
-      jitter: false
+      jitter: false,
     });
     context = new DefaultResilienceContext();
   });
 
   describe('successful operations', () => {
     it('should execute successfully on first attempt', async () => {
-      const [error, result] = await safeRun(async () => 
-        await retryPolicy.execute(async () => 'success', context)
+      const [error, result] = await safeRun(
+        async () => await retryPolicy.execute(async () => 'success', context)
       );
 
       expect(error).toBeUndefined();
@@ -1079,15 +1122,16 @@ describe('RetryPolicy', () => {
 
     it('should retry and succeed on second attempt', async () => {
       let attemptCount = 0;
-      
-      const [error, result] = await safeRun(async () => 
-        await retryPolicy.execute(async (ctx) => {
-          attemptCount++;
-          if (attemptCount === 1) {
-            throw new Error('First attempt fails');
-          }
-          return 'success on retry';
-        }, context)
+
+      const [error, result] = await safeRun(
+        async () =>
+          await retryPolicy.execute(async ctx => {
+            attemptCount++;
+            if (attemptCount === 1) {
+              throw new Error('First attempt fails');
+            }
+            return 'success on retry';
+          }, context)
       );
 
       expect(error).toBeUndefined();
@@ -1098,10 +1142,11 @@ describe('RetryPolicy', () => {
 
   describe('failure handling', () => {
     it('should exhaust all retries and fail', async () => {
-      const [retryError] = await safeRun(async () => 
-        await retryPolicy.execute(async () => {
-          throw new Error('Persistent failure');
-        }, context)
+      const [retryError] = await safeRun(
+        async () =>
+          await retryPolicy.execute(async () => {
+            throw new Error('Persistent failure');
+          }, context)
       );
 
       expect(retryError).toBeInstanceOf(MaxRetriesExceededError);
@@ -1116,15 +1161,16 @@ describe('RetryPolicy', () => {
         maxDelay: 1000,
         backoffMultiplier: 2,
         jitter: false,
-        retryableErrors: (error) => error.name === 'RetryableError'
+        retryableErrors: error => error.name === 'RetryableError',
       });
 
-      const [nonRetryableError] = await safeRun(async () => 
-        await conditionalRetry.execute(async () => {
-          const error = new Error('Non-retryable');
-          error.name = 'NonRetryableError';
-          throw error;
-        }, context)
+      const [nonRetryableError] = await safeRun(
+        async () =>
+          await conditionalRetry.execute(async () => {
+            const error = new Error('Non-retryable');
+            error.name = 'NonRetryableError';
+            throw error;
+          }, context)
       );
 
       expect(nonRetryableError).toBeInstanceOf(Error);
@@ -1138,39 +1184,50 @@ describe('RetryPolicy', () => {
 
 ### Circuit Breaker Configuration
 
-1. **Set Appropriate Thresholds**: Configure failure thresholds based on your system's tolerance
-2. **Monitor Circuit State**: Implement monitoring and alerting for circuit breaker state changes
+1. **Set Appropriate Thresholds**: Configure failure thresholds based on your
+   system's tolerance
+2. **Monitor Circuit State**: Implement monitoring and alerting for circuit
+   breaker state changes
 3. **Design Fallbacks**: Always have fallback mechanisms when circuits are open
 4. **Test Recovery**: Regularly test circuit breaker recovery mechanisms
-5. **Use Meaningful Names**: Name circuit breakers descriptively for better monitoring
+5. **Use Meaningful Names**: Name circuit breakers descriptively for better
+   monitoring
 
 ### Retry Strategy
 
-1. **Exponential Backoff**: Use exponential backoff with jitter to prevent thundering herd
-2. **Limit Retry Attempts**: Set reasonable maximum retry attempts to avoid infinite loops
+1. **Exponential Backoff**: Use exponential backoff with jitter to prevent
+   thundering herd
+2. **Limit Retry Attempts**: Set reasonable maximum retry attempts to avoid
+   infinite loops
 3. **Classify Errors**: Only retry on transient errors, not permanent failures
-4. **Monitor Retry Patterns**: Track retry success rates and adjust policies accordingly
-5. **Consider Business Impact**: Balance retry attempts with business requirements
+4. **Monitor Retry Patterns**: Track retry success rates and adjust policies
+   accordingly
+5. **Consider Business Impact**: Balance retry attempts with business
+   requirements
 
 ### Bulkhead Design
 
 1. **Resource Isolation**: Separate bulkheads for different resource types
 2. **Queue Management**: Configure appropriate queue sizes and timeouts
 3. **Priority Handling**: Implement priority queues for critical operations
-4. **Capacity Planning**: Size bulkheads based on expected load and resource capacity
+4. **Capacity Planning**: Size bulkheads based on expected load and resource
+   capacity
 5. **Graceful Degradation**: Handle bulkhead rejection gracefully
 
 ### Observability
 
-1. **Comprehensive Metrics**: Collect detailed metrics for all resilience patterns
+1. **Comprehensive Metrics**: Collect detailed metrics for all resilience
+   patterns
 2. **Real-time Monitoring**: Set up real-time dashboards and alerting
 3. **Correlation Tracking**: Use correlation IDs for distributed tracing
 4. **Performance Impact**: Monitor the performance impact of resilience patterns
-5. **Business Metrics**: Track business-relevant metrics alongside technical ones
+5. **Business Metrics**: Track business-relevant metrics alongside technical
+   ones
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1194,10 +1251,12 @@ pnpm test:packages:resilience
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

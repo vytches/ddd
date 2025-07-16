@@ -3,8 +3,23 @@ import type { PolicyContext } from '../core/interfaces';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
 /**
- * Event emitted when a policy is evaluated
- * Provides comprehensive observability into policy execution
+ * @llm-summary Contract for policy evaluation event functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyEvaluationEvent interface implementing domain pattern implementation for policy evaluation event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyEvaluationEvent implements PolicyEvaluationEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyEvaluationEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATED';
@@ -23,8 +38,23 @@ export interface PolicyEvaluationEvent<T = unknown> {
 }
 
 /**
- * Event emitted when a policy evaluation fails due to system error
- * Different from business rule violations
+ * @llm-summary Contract for policy evaluation error event functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyEvaluationErrorEvent interface implementing domain pattern implementation for policy evaluation error event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyEvaluationErrorEvent implements PolicyEvaluationErrorEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyEvaluationErrorEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATION_ERROR';
@@ -41,8 +71,23 @@ export interface PolicyEvaluationErrorEvent<T = unknown> {
 }
 
 /**
- * Event emitted when policy evaluation starts
- * Useful for tracking long-running evaluations
+ * @llm-summary Contract for policy evaluation started event functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyEvaluationStartedEvent interface implementing domain pattern implementation for policy evaluation started event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyEvaluationStartedEvent implements PolicyEvaluationStartedEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyEvaluationStartedEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATION_STARTED';
@@ -57,7 +102,21 @@ export interface PolicyEvaluationStartedEvent<T = unknown> {
 }
 
 /**
- * Policy events union type
+ * @llm-summary Type definition for policy event
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * PolicyEvent type implementing domain pattern implementation for policy event operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: PolicyEvent = {} as PolicyEvent;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type PolicyEvent<T = unknown> =
   | PolicyEvaluationEvent<T>
@@ -65,7 +124,30 @@ export type PolicyEvent<T = unknown> =
   | PolicyEvaluationStartedEvent<T>;
 
 /**
- * Event builder for creating policy events
+ * @llm-summary PolicyEventBuilder class for policy event builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyEventBuilder class implementing domain pattern implementation for policy event builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyEventBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyEventBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyEventBuilder<T> {
   private constructor(
@@ -178,7 +260,23 @@ export class PolicyEventBuilder<T> {
 }
 
 /**
- * Metrics extracted from policy evaluation events
+ * @llm-summary Contract for policy execution metrics functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyExecutionMetrics interface implementing domain pattern implementation for policy execution metrics operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyExecutionMetrics implements PolicyExecutionMetrics {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyExecutionMetrics {
   readonly policyId: string;
@@ -195,7 +293,30 @@ export interface PolicyExecutionMetrics {
 }
 
 /**
- * Policy event metrics aggregator
+ * @llm-summary PolicyMetricsAggregator class for policy metrics aggregator operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyMetricsAggregator class implementing domain pattern implementation for policy metrics aggregator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyMetricsAggregator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyMetricsAggregator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyMetricsAggregator {
   private readonly metrics = new Map<string, PolicyExecutionMetrics>();

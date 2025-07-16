@@ -2,8 +2,23 @@
 // This creates a dependency on core, but repositories are typically used with aggregates
 
 /**
- * Interface for basic repository operations
- * Provides a minimal contract for aggregate persistence
+ * @llm-summary Contract for repository functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * Repository interface implementing domain pattern implementation for repository operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteRepository implements IRepository {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IRepository<T extends { getId(): unknown }> {
   /**
@@ -30,13 +45,47 @@ export interface IRepository<T extends { getId(): unknown }> {
   delete?(aggregate: T): Promise<void>;
 }
 
+/**
+ * @llm-summary Contract for repository provider functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * RepositoryProvider interface implementing domain pattern implementation for repository provider operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteRepositoryProvider implements IRepositoryProvider {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface IRepositoryProvider {
   getRepository<T>(name: string): T | undefined;
 }
 
 /**
- * Extended repository interface with additional operations
- * Provides more advanced functionality while remaining optional
+ * @llm-summary Contract for extended repository functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * ExtendedRepository interface implementing domain pattern implementation for extended repository operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteExtendedRepository implements IExtendedRepository {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IExtendedRepository<T extends { getId(): unknown }> extends IRepository<T> {
   /**

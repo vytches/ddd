@@ -14,7 +14,30 @@ import { Colors } from '../utils/colors';
 import { FileSystem } from '../utils/file-system';
 
 /**
- * Smart component validator with domain intelligence
+ * @llm-summary ComponentValidator class for component validator operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * ComponentValidator class implementing infrastructure service for component validator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ComponentValidator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ComponentValidator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ComponentValidator {
   private validationRules = new Map<ComponentType, ValidationRule[]>();

@@ -14,9 +14,13 @@ Integration Points: Protects domain model from external systems; integrates with
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Anti-Corruption Layer for external system integration with domain model protection**
+> **Anti-Corruption Layer for external system integration with domain model
+> protection**
 
-Enterprise-grade Anti-Corruption Layer implementation for Domain-Driven Design applications. Provides model translation, adapter patterns, middleware support, and comprehensive integration capabilities while protecting your domain model from external system changes.
+Enterprise-grade Anti-Corruption Layer implementation for Domain-Driven Design
+applications. Provides model translation, adapter patterns, middleware support,
+and comprehensive integration capabilities while protecting your domain model
+from external system changes.
 
 ## 📋 Table of Contents
 
@@ -60,30 +64,38 @@ npm install @vytches-ddd/core @vytches-ddd/validation
 ## ✨ Key Features
 
 ### Domain Model Protection
+
 - **Anti-Corruption Layer**: Isolates domain model from external system changes
-- **Model Translation**: Bidirectional translation between domain and external models
-- **Validation Integration**: Comprehensive validation for both domain and external models
+- **Model Translation**: Bidirectional translation between domain and external
+  models
+- **Validation Integration**: Comprehensive validation for both domain and
+  external models
 - **Type Safety**: Full TypeScript support with strict type checking
 
 ### Adapter Pattern
+
 - **Base ACL Adapter**: Foundation for all external system integrations
-- **Enhanced ACL Adapter**: Advanced features with middleware and typed operations
+- **Enhanced ACL Adapter**: Advanced features with middleware and typed
+  operations
 - **Simple ACL Adapter**: Lightweight implementation for basic scenarios
 - **Context Information**: Rich metadata about external system integration
 
 ### Middleware System
+
 - **Request/Response Middleware**: Intercept and modify requests/responses
 - **Error Handling Middleware**: Centralized error handling and transformation
 - **Logging Middleware**: Comprehensive logging for integration operations
 - **Retry Middleware**: Automatic retry logic for transient failures
 
 ### Registry Management
+
 - **ACL Registry**: Centralized management of ACL adapters
 - **Context Registry**: Bounded context-specific adapter management
 - **Versioned Registry**: Support for multiple adapter versions
 - **Dynamic Registration**: Runtime adapter registration and discovery
 
 ### Typed Operations
+
 - **Type-Safe Operations**: Strongly typed operation definitions
 - **Business Rule Validation**: Operation-specific business rule validation
 - **Operation Metadata**: Rich metadata for operation documentation
@@ -102,7 +114,7 @@ interface IACLAdapter<TDomainModel, TExternalModel, TResult = any> {
     domainModel: TDomainModel,
     options?: ExecuteOptions
   ): Promise<Result<TResult, ACLError>>;
-  
+
   fetch(identifier: string): Promise<Result<TDomainModel, ACLError>>;
   supportsOperation(operation: string): boolean;
   getContextInfo(): ACLContextInfo;
@@ -173,7 +185,7 @@ class UserTranslator extends BaseModelTranslator<User, ExternalUser> {
       user_id: user.id,
       full_name: user.name,
       email_address: user.email,
-      status: user.isActive ? 'active' : 'inactive'
+      status: user.isActive ? 'active' : 'inactive',
     };
   }
 
@@ -182,7 +194,7 @@ class UserTranslator extends BaseModelTranslator<User, ExternalUser> {
       id: externalUser.user_id,
       name: externalUser.full_name,
       email: externalUser.email_address,
-      isActive: externalUser.status === 'active'
+      isActive: externalUser.status === 'active',
     };
   }
 }
@@ -218,7 +230,7 @@ class UserAPI implements IExternalAPI<ExternalUser, any> {
     const response = await fetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: JSON.stringify(user),
     });
     return await response.json();
   }
@@ -227,7 +239,7 @@ class UserAPI implements IExternalAPI<ExternalUser, any> {
     const response = await fetch(`/api/users/${user.user_id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: JSON.stringify(user),
     });
     return await response.json();
   }
@@ -253,7 +265,7 @@ const user: User = {
   id: '123',
   name: 'John Doe',
   email: 'john@example.com',
-  isActive: true
+  isActive: true,
 };
 
 const [error, result] = await safeRun(async () => {
@@ -285,7 +297,10 @@ if (fetchError) {
 ```typescript
 import { BaseACLAdapter } from '@vytches-ddd/acl';
 
-class CustomACLAdapter<TDomain, TExternal> extends BaseACLAdapter<TDomain, TExternal> {
+class CustomACLAdapter<TDomain, TExternal> extends BaseACLAdapter<
+  TDomain,
+  TExternal
+> {
   constructor(
     contextInfo: ACLContextInfo,
     translator: IModelTranslator<TDomain, TExternal>,
@@ -344,7 +359,7 @@ const createUserOperation = new TypedOperation<User, { id: string }>({
       return Result.fail(new Error('Invalid email format'));
     }
     return Result.ok();
-  }
+  },
 });
 
 const [error, result] = await safeRun(async () => {
@@ -367,11 +382,11 @@ class OrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
       items: order.items.map(item => ({
         product_id: item.productId,
         quantity: item.quantity,
-        unit_price: item.unitPrice
+        unit_price: item.unitPrice,
       })),
       total_amount: order.totalAmount,
       status: order.status.toLowerCase(),
-      created_at: order.createdAt.toISOString()
+      created_at: order.createdAt.toISOString(),
     };
   }
 
@@ -382,11 +397,11 @@ class OrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
       items: externalOrder.items.map(item => ({
         productId: item.product_id,
         quantity: item.quantity,
-        unitPrice: item.unit_price
+        unitPrice: item.unit_price,
       })),
       totalAmount: externalOrder.total_amount,
       status: externalOrder.status.toUpperCase() as OrderStatus,
-      createdAt: new Date(externalOrder.created_at)
+      createdAt: new Date(externalOrder.created_at),
     });
   }
 }
@@ -398,7 +413,10 @@ class OrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
 import { BaseModelTranslator } from '@vytches-ddd/acl';
 import { Result } from '@vytches-ddd/utils';
 
-class ValidatedOrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
+class ValidatedOrderTranslator extends BaseModelTranslator<
+  Order,
+  ExternalOrder
+> {
   toExternal(order: Order): ExternalOrder {
     // Translation logic here
     return externalOrder;
@@ -413,15 +431,15 @@ class ValidatedOrderTranslator extends BaseModelTranslator<Order, ExternalOrder>
     if (!order.id) {
       return Result.fail(new Error('Order ID is required'));
     }
-    
+
     if (order.items.length === 0) {
       return Result.fail(new Error('Order must have at least one item'));
     }
-    
+
     if (order.totalAmount <= 0) {
       return Result.fail(new Error('Order total must be positive'));
     }
-    
+
     return Result.ok();
   }
 
@@ -429,11 +447,11 @@ class ValidatedOrderTranslator extends BaseModelTranslator<Order, ExternalOrder>
     if (!externalOrder.order_id) {
       return Result.fail(new Error('External order ID is required'));
     }
-    
+
     if (!externalOrder.items || externalOrder.items.length === 0) {
       return Result.fail(new Error('External order must have items'));
     }
-    
+
     return Result.ok();
   }
 }
@@ -454,26 +472,26 @@ class LoggingMiddleware extends BaseACLMiddleware {
     next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     const startTime = Date.now();
-    
+
     console.log(`[ACL] Starting operation: ${operation}`, {
       correlationId: options.correlationId,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
 
     const result = await next();
-    
+
     const duration = Date.now() - startTime;
-    
+
     if (result.isSuccess) {
       console.log(`[ACL] Operation completed: ${operation}`, {
         duration,
-        correlationId: options.correlationId
+        correlationId: options.correlationId,
       });
     } else {
       console.error(`[ACL] Operation failed: ${operation}`, {
         duration,
         error: result.error.message,
-        correlationId: options.correlationId
+        correlationId: options.correlationId,
       });
     }
 
@@ -503,16 +521,16 @@ class RetryMiddleware extends BaseACLMiddleware {
     next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     let lastError: ACLError | null = null;
-    
+
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       const result = await next();
-      
+
       if (result.isSuccess) {
         return result;
       }
-      
+
       lastError = result.error;
-      
+
       // Don't retry on the last attempt
       if (attempt < this.maxRetries) {
         // Check if error is retryable
@@ -525,15 +543,17 @@ class RetryMiddleware extends BaseACLMiddleware {
         }
       }
     }
-    
+
     return Result.fail(lastError!);
   }
 
   private isRetryableError(error: ACLError): boolean {
-    return error.message.includes('timeout') || 
-           error.message.includes('network') ||
-           error.message.includes('503') ||
-           error.message.includes('502');
+    return (
+      error.message.includes('timeout') ||
+      error.message.includes('network') ||
+      error.message.includes('503') ||
+      error.message.includes('502')
+    );
   }
 
   private calculateDelay(attempt: number): number {
@@ -560,8 +580,12 @@ class ValidationMiddleware extends BaseACLMiddleware {
     next: () => Promise<Result<T, ACLError>>
   ): Promise<Result<T, ACLError>> {
     // Pre-execution validation
-    const validationResult = await this.validateRequest(operation, domainModel, options);
-    
+    const validationResult = await this.validateRequest(
+      operation,
+      domainModel,
+      options
+    );
+
     if (validationResult.isFailure) {
       return Result.fail(
         new ACLError(
@@ -576,8 +600,11 @@ class ValidationMiddleware extends BaseACLMiddleware {
 
     // Post-execution validation
     if (result.isSuccess) {
-      const responseValidation = await this.validateResponse(operation, result.value);
-      
+      const responseValidation = await this.validateResponse(
+        operation,
+        result.value
+      );
+
       if (responseValidation.isFailure) {
         return Result.fail(
           new ACLError(
@@ -601,11 +628,11 @@ class ValidationMiddleware extends BaseACLMiddleware {
     if (!domainModel) {
       return Result.fail(new Error('Domain model is required'));
     }
-    
+
     if (!operation) {
       return Result.fail(new Error('Operation is required'));
     }
-    
+
     return Result.ok();
   }
 
@@ -617,7 +644,7 @@ class ValidationMiddleware extends BaseACLMiddleware {
     if (response === null || response === undefined) {
       return Result.fail(new Error('Response cannot be null or undefined'));
     }
-    
+
     return Result.ok();
   }
 }
@@ -637,8 +664,14 @@ registry.register('UserManagement', 'ExternalUserAPI', userAdapter);
 registry.register('OrderManagement', 'ExternalOrderAPI', orderAdapter);
 
 // Resolve adapters
-const userACL = registry.resolve<User, ExternalUser>('UserManagement', 'ExternalUserAPI');
-const orderACL = registry.resolve<Order, ExternalOrder>('OrderManagement', 'ExternalOrderAPI');
+const userACL = registry.resolve<User, ExternalUser>(
+  'UserManagement',
+  'ExternalUserAPI'
+);
+const orderACL = registry.resolve<Order, ExternalOrder>(
+  'OrderManagement',
+  'ExternalOrderAPI'
+);
 
 // Use resolved adapter
 const [error, result] = await safeRun(async () => {
@@ -654,9 +687,21 @@ import { ContextACLRegistry } from '@vytches-ddd/acl';
 const contextRegistry = new ContextACLRegistry();
 
 // Register adapters for specific contexts
-contextRegistry.registerForContext('UserManagement', 'production', userProdAdapter);
-contextRegistry.registerForContext('UserManagement', 'staging', userStagingAdapter);
-contextRegistry.registerForContext('UserManagement', 'development', userDevAdapter);
+contextRegistry.registerForContext(
+  'UserManagement',
+  'production',
+  userProdAdapter
+);
+contextRegistry.registerForContext(
+  'UserManagement',
+  'staging',
+  userStagingAdapter
+);
+contextRegistry.registerForContext(
+  'UserManagement',
+  'development',
+  userDevAdapter
+);
 
 // Resolve adapter for specific context
 const currentEnv = process.env.NODE_ENV || 'development';
@@ -678,8 +723,14 @@ versionedRegistry.registerVersion('UserAPI', 'v1', userAdapterV1);
 versionedRegistry.registerVersion('UserAPI', 'v2', userAdapterV2);
 
 // Resolve specific version
-const userACLV1 = versionedRegistry.resolveVersion<User, ExternalUser>('UserAPI', 'v1');
-const userACLV2 = versionedRegistry.resolveVersion<User, ExternalUser>('UserAPI', 'v2');
+const userACLV1 = versionedRegistry.resolveVersion<User, ExternalUser>(
+  'UserAPI',
+  'v1'
+);
+const userACLV2 = versionedRegistry.resolveVersion<User, ExternalUser>(
+  'UserAPI',
+  'v2'
+);
 
 // Use with version option
 const [error, result] = await safeRun(async () => {
@@ -695,20 +746,23 @@ const [error, result] = await safeRun(async () => {
 import { TypedOperation } from '@vytches-ddd/acl';
 
 // Define typed operation
-const createUserOperation = new TypedOperation<User, { id: string; status: string }>({
+const createUserOperation = new TypedOperation<
+  User,
+  { id: string; status: string }
+>({
   name: 'create',
   description: 'Create a new user in the external system',
   validateBusinessRules: (user: User) => {
     if (!user.email || !user.email.includes('@')) {
       return Result.fail(new Error('Valid email is required'));
     }
-    
+
     if (!user.name || user.name.length < 2) {
       return Result.fail(new Error('Name must be at least 2 characters'));
     }
-    
+
     return Result.ok();
-  }
+  },
 });
 
 // Use typed operation
@@ -734,25 +788,25 @@ const processOrderOperation = new TypedOperation<Order, OrderProcessingResult>({
     if (!order.customerId) {
       return Result.fail(new Error('Customer ID is required'));
     }
-    
+
     if (order.items.length === 0) {
       return Result.fail(new Error('Order must have at least one item'));
     }
-    
+
     // Validate business rules
     if (order.totalAmount > 10000 && !order.isApproved) {
       return Result.fail(new Error('Large orders require approval'));
     }
-    
+
     // Validate inventory
     for (const item of order.items) {
       if (item.quantity <= 0) {
         return Result.fail(new Error('Item quantity must be positive'));
       }
     }
-    
+
     return Result.ok();
-  }
+  },
 });
 
 // Use complex operation
@@ -772,7 +826,11 @@ if (processingResult) {
 ### ACL Error Types
 
 ```typescript
-import { ACLError, TranslationError, AdapterNotFoundError } from '@vytches-ddd/acl';
+import {
+  ACLError,
+  TranslationError,
+  AdapterNotFoundError,
+} from '@vytches-ddd/acl';
 
 // Handle specific error types
 const [error, result] = await safeRun(async () => {
@@ -824,7 +882,7 @@ class CustomUserAdapter extends BaseACLAdapter<User, ExternalUser> {
       return Result.ok(result);
     } catch (error) {
       const isRetryable = error.status >= 500 && error.status < 600;
-      
+
       return Result.fail(
         new CustomACLError(
           error.message,
@@ -858,46 +916,49 @@ class UserApplicationService extends BaseApplicationService {
     return await this.executeWithTransaction(async () => {
       // Create domain user
       const user = User.create(userData);
-      
+
       // Save to repository
       const savedUser = await this.userRepository.save(user);
-      
+
       // Sync with external system
       const [syncError] = await safeRun(async () => {
         return await this.userACL.execute('create', savedUser);
       });
-      
+
       if (syncError) {
         throw new Error(`Failed to sync user: ${syncError.message}`);
       }
-      
+
       return savedUser;
     });
   }
 
-  async updateUser(userId: string, updates: UpdateUserData): Promise<Result<User, Error>> {
+  async updateUser(
+    userId: string,
+    updates: UpdateUserData
+  ): Promise<Result<User, Error>> {
     return await this.executeWithTransaction(async () => {
       // Get existing user
       const existingUser = await this.userRepository.findById(userId);
       if (!existingUser) {
         throw new Error('User not found');
       }
-      
+
       // Apply updates
       const updatedUser = existingUser.update(updates);
-      
+
       // Save to repository
       const savedUser = await this.userRepository.save(updatedUser);
-      
+
       // Sync with external system
       const [syncError] = await safeRun(async () => {
         return await this.userACL.execute('update', savedUser);
       });
-      
+
       if (syncError) {
         throw new Error(`Failed to sync user updates: ${syncError.message}`);
       }
-      
+
       return savedUser;
     });
   }
@@ -917,67 +978,73 @@ class OrderApplicationService extends BaseApplicationService {
     super();
   }
 
-  async processOrder(orderData: ProcessOrderData): Promise<Result<OrderProcessingResult, Error>> {
+  async processOrder(
+    orderData: ProcessOrderData
+  ): Promise<Result<OrderProcessingResult, Error>> {
     return await this.executeWithTransaction(async () => {
       // Create order
       const order = Order.create(orderData);
-      
+
       // Reserve inventory
       const [inventoryError, inventoryResult] = await safeRun(async () => {
         return await this.inventoryACL.execute('reserve', {
           items: order.items,
-          orderId: order.id
+          orderId: order.id,
         });
       });
-      
+
       if (inventoryError) {
-        throw new Error(`Inventory reservation failed: ${inventoryError.message}`);
+        throw new Error(
+          `Inventory reservation failed: ${inventoryError.message}`
+        );
       }
-      
+
       // Process payment
       const [paymentError, paymentResult] = await safeRun(async () => {
         return await this.paymentACL.execute('process', {
           amount: order.totalAmount,
           customerId: order.customerId,
-          orderId: order.id
+          orderId: order.id,
         });
       });
-      
+
       if (paymentError) {
         // Rollback inventory reservation
         await this.inventoryACL.execute('release', {
           items: order.items,
-          orderId: order.id
+          orderId: order.id,
         });
-        
+
         throw new Error(`Payment processing failed: ${paymentError.message}`);
       }
-      
+
       // Update order status
       order.markAsPaid();
-      
+
       // Save order
       const savedOrder = await this.orderRepository.save(order);
-      
+
       // Send notification
       const [notificationError] = await safeRun(async () => {
         return await this.notificationACL.execute('send', {
           customerId: order.customerId,
           type: 'order_confirmed',
-          orderId: order.id
+          orderId: order.id,
         });
       });
-      
+
       if (notificationError) {
         // Log but don't fail the order
-        console.warn(`Failed to send notification: ${notificationError.message}`);
+        console.warn(
+          `Failed to send notification: ${notificationError.message}`
+        );
       }
-      
+
       return {
         orderId: savedOrder.id,
         paymentStatus: paymentResult.status,
         inventoryReserved: inventoryResult.reserved,
-        notificationSent: !notificationError
+        notificationSent: !notificationError,
       };
     });
   }
@@ -998,35 +1065,37 @@ class UserRepositoryWithACL implements IUserRepository {
   async save(user: User): Promise<User> {
     // Save to local repository
     const savedUser = await this.baseRepository.save(user);
-    
+
     // Sync with external system
     const [syncError] = await safeRun(async () => {
       return await this.userACL.execute('sync', savedUser);
     });
-    
+
     if (syncError) {
-      console.warn(`Failed to sync user to external system: ${syncError.message}`);
+      console.warn(
+        `Failed to sync user to external system: ${syncError.message}`
+      );
     }
-    
+
     return savedUser;
   }
 
   async findById(id: string): Promise<User | null> {
     // Try local repository first
     let user = await this.baseRepository.findById(id);
-    
+
     if (!user) {
       // Try external system
       const [fetchError, externalUser] = await safeRun(async () => {
         return await this.userACL.fetch(id);
       });
-      
+
       if (!fetchError && externalUser) {
         // Save to local repository for future use
         user = await this.baseRepository.save(externalUser);
       }
     }
-    
+
     return user;
   }
 }
@@ -1045,9 +1114,11 @@ class UserCreatedEventHandler {
     const [error] = await safeRun(async () => {
       return await this.userACL.execute('create', event.user);
     });
-    
+
     if (error) {
-      console.error(`Failed to sync user creation to external system: ${error.message}`);
+      console.error(
+        `Failed to sync user creation to external system: ${error.message}`
+      );
       // Could emit a failure event or trigger retry logic
     }
   }
@@ -1061,9 +1132,11 @@ class UserUpdatedEventHandler {
     const [error] = await safeRun(async () => {
       return await this.userACL.execute('update', event.user);
     });
-    
+
     if (error) {
-      console.error(`Failed to sync user update to external system: ${error.message}`);
+      console.error(
+        `Failed to sync user update to external system: ${error.message}`
+      );
     }
   }
 }
@@ -1085,26 +1158,26 @@ class CreateUserCommandHandler {
     const [error, result] = await safeRun(async () => {
       // Create user in domain
       const user = User.create(command.userData);
-      
+
       // Save to repository
       const savedUser = await this.userRepository.save(user);
-      
+
       // Sync with external system
       const [syncError] = await safeRun(async () => {
         return await this.userACL.execute('create', savedUser);
       });
-      
+
       if (syncError) {
         throw new Error(`External system sync failed: ${syncError.message}`);
       }
-      
+
       return savedUser.id;
     });
-    
+
     if (error) {
       return Result.fail(error);
     }
-    
+
     return Result.ok(result);
   }
 }
@@ -1120,29 +1193,29 @@ class GetUserQueryHandler {
     const [error, user] = await safeRun(async () => {
       // Try local repository first
       let user = await this.userRepository.findById(query.userId);
-      
+
       if (!user) {
         // Try external system
         const [fetchError, externalUser] = await safeRun(async () => {
           return await this.userACL.fetch(query.userId);
         });
-        
+
         if (!fetchError && externalUser) {
           user = externalUser;
         }
       }
-      
+
       return user;
     });
-    
+
     if (error) {
       return Result.fail(error);
     }
-    
+
     if (!user) {
       return Result.fail(new Error('User not found'));
     }
-    
+
     return Result.ok(user);
   }
 }
@@ -1165,11 +1238,11 @@ describe('UserACLAdapter', () => {
     mockAPI = {
       execute: jest.fn(),
       fetch: jest.fn(),
-      healthCheck: jest.fn()
+      healthCheck: jest.fn(),
     };
-    
+
     translator = new UserTranslator();
-    
+
     adapter = SimpleACLAdapter.create(
       'TestContext',
       'TestAPI',
@@ -1185,7 +1258,7 @@ describe('UserACLAdapter', () => {
         id: '123',
         name: 'John Doe',
         email: 'john@example.com',
-        isActive: true
+        isActive: true,
       };
 
       mockAPI.execute.mockResolvedValue({ id: '123', status: 'created' });
@@ -1200,7 +1273,7 @@ describe('UserACLAdapter', () => {
         user_id: '123',
         full_name: 'John Doe',
         email_address: 'john@example.com',
-        status: 'active'
+        status: 'active',
       });
     });
 
@@ -1209,7 +1282,7 @@ describe('UserACLAdapter', () => {
         id: '123',
         name: 'John Doe',
         email: 'john@example.com',
-        isActive: true
+        isActive: true,
       };
 
       const [error] = await safeRun(async () => {
@@ -1227,7 +1300,7 @@ describe('UserACLAdapter', () => {
         user_id: '123',
         full_name: 'John Doe',
         email_address: 'john@example.com',
-        status: 'active'
+        status: 'active',
       };
 
       mockAPI.fetch.mockResolvedValue(externalUser);
@@ -1241,7 +1314,7 @@ describe('UserACLAdapter', () => {
         id: '123',
         name: 'John Doe',
         email: 'john@example.com',
-        isActive: true
+        isActive: true,
       });
     });
 
@@ -1276,7 +1349,7 @@ describe('User Integration with External System', () => {
       setupFn: async () => {
         // Setup test database
         await setupTestDatabase();
-        
+
         // Setup external API mock
         const mockAPI = new MockExternalUserAPI();
         userACL = SimpleACLAdapter.create(
@@ -1286,13 +1359,13 @@ describe('User Integration with External System', () => {
           mockAPI,
           ['create', 'update']
         );
-        
+
         // Setup application service
         userService = new UserApplicationService(
           new TestUserRepository(),
           userACL
         );
-      }
+      },
     });
 
     await harness.initialize();
@@ -1303,7 +1376,7 @@ describe('User Integration with External System', () => {
     const userData = {
       name: 'John Doe',
       email: 'john@example.com',
-      isActive: true
+      isActive: true,
     };
 
     const [error, result] = await harness.safeExecute(async () => {
@@ -1313,7 +1386,7 @@ describe('User Integration with External System', () => {
     expect(error).toBeUndefined();
     expect(result).toBeDefined();
     expect(result?.name).toBe('John Doe');
-    
+
     // Verify external system was called
     const externalUser = await mockAPI.getCreatedUser(result!.id);
     expect(externalUser).toBeDefined();
@@ -1324,7 +1397,7 @@ describe('User Integration with External System', () => {
     const userData = {
       name: 'John Doe',
       email: 'john@example.com',
-      isActive: true
+      isActive: true,
     };
 
     // Configure external API to fail
@@ -1344,8 +1417,10 @@ describe('User Integration with External System', () => {
 
 ### ACL Design Principles
 
-1. **Domain Model Protection**: Always protect your domain model from external changes
-2. **Translation Layer**: Use dedicated translators for all external integrations
+1. **Domain Model Protection**: Always protect your domain model from external
+   changes
+2. **Translation Layer**: Use dedicated translators for all external
+   integrations
 3. **Error Isolation**: Isolate external system errors from domain logic
 4. **Middleware Usage**: Use middleware for cross-cutting concerns
 5. **Type Safety**: Leverage TypeScript for compile-time safety
@@ -1376,7 +1451,8 @@ describe('User Integration with External System', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1400,10 +1476,12 @@ pnpm test:packages:acl
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

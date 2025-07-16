@@ -1,8 +1,30 @@
 import { BaseError } from '@vytches-ddd/domain-primitives';
 
 /**
- * Base error class for saga-related errors
- * Provides enterprise-grade error handling with context and debugging information
+ * @llm-summary SagaError class for saga error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaError class implementing integration layer component for saga error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class SagaError extends BaseError {
   public readonly timestamp: Date;
@@ -45,7 +67,30 @@ export abstract class SagaError extends BaseError {
 }
 
 /**
- * Error thrown when saga execution fails
+ * @llm-summary SagaExecutionError class for saga execution error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaExecutionError class implementing integration layer component for saga execution error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaExecutionError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaExecutionError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaExecutionError extends SagaError {
   constructor(
@@ -72,7 +117,30 @@ export class SagaExecutionError extends SagaError {
 }
 
 /**
- * Error thrown when saga step cannot be executed
+ * @llm-summary SagaStepError class for saga step error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaStepError class implementing integration layer component for saga step error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaStepError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaStepError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaStepError extends SagaError {
   constructor(
@@ -91,7 +159,30 @@ export class SagaStepError extends SagaError {
 }
 
 /**
- * Error thrown when saga configuration is invalid
+ * @llm-summary SagaConfigurationError class for saga configuration error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaConfigurationError class implementing integration layer component for saga configuration error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaConfigurationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaConfigurationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaConfigurationError extends BaseError {
   public readonly timestamp: Date;
@@ -127,7 +218,30 @@ export class SagaConfigurationError extends BaseError {
 }
 
 /**
- * Error thrown when event processing fails
+ * @llm-summary SagaEventProcessingError class for saga event processing error operations
+ * @llm-domain Integration
+ * @llm-complexity Complex
+ *
+ * @description
+ * SagaEventProcessingError class implementing integration layer component for saga event processing error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaEventProcessingError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaEventProcessingError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaEventProcessingError extends SagaError {
   constructor(
@@ -148,7 +262,30 @@ export class SagaEventProcessingError extends SagaError {
 }
 
 /**
- * Error thrown when saga compensation fails
+ * @llm-summary SagaCompensationError class for saga compensation error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaCompensationError class implementing integration layer component for saga compensation error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaCompensationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaCompensationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaCompensationError extends SagaError {
   constructor(
@@ -175,7 +312,30 @@ export class SagaCompensationError extends SagaError {
 }
 
 /**
- * Error thrown when saga discovery fails
+ * @llm-summary SagaDiscoveryError class for saga discovery error operations
+ * @llm-domain Integration
+ * @llm-complexity Simple
+ *
+ * @description
+ * SagaDiscoveryError class implementing integration layer component for saga discovery error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaDiscoveryError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaDiscoveryError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaDiscoveryError extends BaseError {
   public readonly timestamp: Date;
@@ -209,7 +369,30 @@ export class SagaDiscoveryError extends BaseError {
 }
 
 /**
- * Error thrown when saga orchestration fails
+ * @llm-summary SagaOrchestrationError class for saga orchestration error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaOrchestrationError class implementing integration layer component for saga orchestration error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaOrchestrationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaOrchestrationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaOrchestrationError extends SagaError {
   constructor(
@@ -228,7 +411,30 @@ export class SagaOrchestrationError extends SagaError {
 }
 
 /**
- * Error thrown when saga instance limit is exceeded
+ * @llm-summary SagaInstanceLimitExceededError class for saga instance limit exceeded error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaInstanceLimitExceededError class implementing integration layer component for saga instance limit exceeded error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaInstanceLimitExceededError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaInstanceLimitExceededError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaInstanceLimitExceededError extends SagaError {
   constructor(
@@ -245,7 +451,30 @@ export class SagaInstanceLimitExceededError extends SagaError {
 }
 
 /**
- * Error thrown when no saga definition found for event
+ * @llm-summary SagaDefinitionNotFoundError class for saga definition not found error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaDefinitionNotFoundError class implementing integration layer component for saga definition not found error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaDefinitionNotFoundError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaDefinitionNotFoundError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaDefinitionNotFoundError extends BaseError {
   public readonly timestamp: Date;

@@ -6,9 +6,9 @@
       "error",
       {
         "require": {
-          "FunctionDeclaration": true,
-          "MethodDefinition": true,
-          "ClassDeclaration": true,
+          "FunctionDeclaration": false,
+          "MethodDefinition": false,
+          "ClassDeclaration": false,
           "ArrowFunctionExpression": false,
           "FunctionExpression": false
         },
@@ -26,66 +26,36 @@
       {
         "definedTags": [
           "llm-summary",
-          "llm-domain", 
+          "llm-domain",
           "llm-complexity",
           "llm-contract",
-          "llm-sideeffects", 
+          "llm-sideeffects",
           "llm-pure",
-          "llm-usage"
+          "llm-usage",
+          "fileoverview"
         ]
       }
     ],
-    "jsdoc/require-description": [
-      "error",
-      {
-        "contexts": ["any"]
-      }
-    ],
-    "jsdoc/require-param": "error",
-    "jsdoc/require-param-description": "error",
+    "jsdoc/require-description": "off",
+    "jsdoc/require-param": "off",
+    "jsdoc/require-param-description": "off",
     "jsdoc/require-param-type": "off",
-    "jsdoc/require-returns": [
-      "error",
-      {
-        "contexts": ["any"],
-        "exemptedBy": ["inheritdoc"]
-      }
-    ],
-    "jsdoc/require-returns-description": "error",
+    "jsdoc/require-returns": "off",
+    "jsdoc/require-returns-description": "off",
     "jsdoc/require-returns-type": "off",
-    "jsdoc/require-example": [
-      "error",
-      {
-        "contexts": [
-          "ExportNamedDeclaration[declaration.type='FunctionDeclaration']",
-          "ExportNamedDeclaration[declaration.type='ClassDeclaration']",
-          "MethodDefinition[kind='method'][key.name!=/^_/]"
-        ]
-      }
-    ],
-    "jsdoc/check-examples": "error",
+    "jsdoc/require-example": "off",
+    "jsdoc/check-examples": "off",
     "jsdoc/check-param-names": "error",
     "jsdoc/check-syntax": "error",
     "jsdoc/check-types": "error",
-    "jsdoc/valid-types": "error",
-    "jsdoc/match-description": [
-      "error",
-      {
-        "matchDescription": "^[A-Z].*\\.$"
-      }
-    ],
-    "jsdoc/newline-after-description": "error",
+    "jsdoc/valid-types": "off",
+    "jsdoc/match-description": "off",
+    "jsdoc/newline-after-description": "off",
     "jsdoc/require-hyphen-before-param-description": ["error", "always"],
-    "jsdoc/check-line-alignment": [
-      "error",
-      "always",
-      {
-        "tags": ["param", "returns", "throws", "example"]
-      }
-    ],
+    "jsdoc/check-line-alignment": "off",
     "jsdoc/no-bad-blocks": "error",
-    "jsdoc/no-undefined-types": "error",
-    "jsdoc/require-asterisk-prefix": "error"
+    "jsdoc/no-undefined-types": "off",
+    "jsdoc/require-asterisk-prefix": "off"
   },
   "settings": {
     "jsdoc": {

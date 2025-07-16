@@ -8,8 +8,21 @@
 import type { ServiceLifetime } from '@vytches-ddd/di';
 
 /**
- * Context resolution strategy for domain services.
- * Determines how bounded context should be resolved for service registration.
+ * @llm-summary Type definition for context resolution strategy
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * ContextResolutionStrategy type implementing domain pattern implementation for context resolution strategy operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: ContextResolutionStrategy = {} as ContextResolutionStrategy;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type ContextResolutionStrategy =
   | 'auto' // Auto-detect from call stack or class location
@@ -18,8 +31,23 @@ export type ContextResolutionStrategy =
   | 'inherit'; // Inherit context from parent service
 
 /**
- * Extended DI options for domain service decorators.
- * These options control dependency injection behavior for domain services.
+ * @llm-summary Contract for d i decorator options functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * DIDecoratorOptions interface implementing domain pattern implementation for d i decorator options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDIDecoratorOptions implements DIDecoratorOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DIDecoratorOptions {
   /**
@@ -74,8 +102,23 @@ export interface DIDecoratorOptions {
 }
 
 /**
- * Enhanced domain service options that include both traditional options and DI integration.
- * Extends the original DomainServiceOptions with DI-specific capabilities.
+ * @llm-summary Contract for enhanced domain service options functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * EnhancedDomainServiceOptions interface implementing domain pattern implementation for enhanced domain service options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEnhancedDomainServiceOptions implements EnhancedDomainServiceOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   /**
@@ -125,8 +168,23 @@ export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
 }
 
 /**
- * Metadata stored for DI-enhanced domain service handlers.
- * Contains both original domain service metadata and DI-specific information.
+ * @llm-summary Contract for d i service metadata functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * DIServiceMetadata interface implementing domain pattern implementation for d i service metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDIServiceMetadata implements DIServiceMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface DIServiceMetadata extends EnhancedDomainServiceOptions {
   /**
@@ -154,8 +212,30 @@ export interface DIServiceMetadata extends EnhancedDomainServiceOptions {
 }
 
 /**
- * Registry for DI-enhanced domain service metadata.
- * Maintains metadata for services that have DI integration enabled.
+ * @llm-summary DIDomainServiceMetadataRegistry class for d i domain service metadata registry operations
+ * @llm-domain Pattern
+ * @llm-complexity Simple
+ *
+ * @description
+ * DIDomainServiceMetadataRegistry class implementing domain pattern implementation for d i domain service metadata registry operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DIDomainServiceMetadataRegistry();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DIDomainServiceMetadataRegistry());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DIDomainServiceMetadataRegistry {
   private static services = new Map<string, DIServiceMetadata>();

@@ -6,7 +6,9 @@
 
 > **Enterprise-grade event-driven architecture for Domain-Driven Design**
 
-Complete event system implementation with unified event bus, domain events, integration events, and audit events. Built for high-throughput scenarios with transaction safety and optimistic concurrency control.
+Complete event system implementation with unified event bus, domain events,
+integration events, and audit events. Built for high-throughput scenarios with
+transaction safety and optimistic concurrency control.
 
 ## 📋 Table of Contents
 
@@ -113,23 +115,23 @@ interface IAuditEvent extends IEvent {
 // Unified event bus handles all event types
 class UnifiedEventBus {
   // Single event publishing
-  async publish(event: IEvent): Promise<void>
-  
+  async publish(event: IEvent): Promise<void>;
+
   // Batch event publishing
-  async publishMany(events: IEvent[]): Promise<void>
-  
+  async publishMany(events: IEvent[]): Promise<void>;
+
   // Context-aware subscription
   subscribe<T extends IEvent>(
     eventType: string,
     handler: IEventHandler<T>,
     options?: SubscriptionOptions
-  ): void
-  
+  ): void;
+
   // Aggregate event publishing
   async publishEventsForAggregate(
     aggregateId: string,
     events: IDomainEvent[]
-  ): Promise<void>
+  ): Promise<void>;
 }
 ```
 
@@ -138,10 +140,10 @@ class UnifiedEventBus {
 ### 1. Basic Event Publishing
 
 ```typescript
-import { 
-  UnifiedEventBus, 
-  DomainEvent, 
-  EventHandler 
+import {
+  UnifiedEventBus,
+  DomainEvent,
+  EventHandler,
 } from '@vytches-ddd/events';
 
 // Define domain event
@@ -169,7 +171,7 @@ const event = new OrderCreatedEvent({
   orderId: 'order-123',
   customerId: 'customer-456',
   totalAmount: 99.99,
-  currency: 'USD'
+  currency: 'USD',
 });
 
 await eventBus.publish(event);
@@ -183,10 +185,12 @@ await eventBus.publish(event);
 class OrderCreatedHandler {
   async handle(event: OrderCreatedEvent): Promise<void> {
     console.log('Order created:', event.payload);
-    
+
     // Business logic here
     await this.inventoryService.reserveItems(event.payload.orderId);
-    await this.notificationService.sendOrderConfirmation(event.payload.customerId);
+    await this.notificationService.sendOrderConfirmation(
+      event.payload.customerId
+    );
   }
 }
 
@@ -203,15 +207,17 @@ import { IBaseRepository } from '@vytches-ddd/repositories';
 class Order extends AggregateRoot {
   static create(customerId: string, items: OrderItem[]): Order {
     const order = new Order(EntityId.create(), customerId, items);
-    
+
     // Add domain event
-    order.addDomainEvent(new OrderCreatedEvent({
-      orderId: order.id.value,
-      customerId,
-      totalAmount: order.calculateTotal(),
-      currency: 'USD'
-    }));
-    
+    order.addDomainEvent(
+      new OrderCreatedEvent({
+        orderId: order.id.value,
+        customerId,
+        totalAmount: order.calculateTotal(),
+        currency: 'USD',
+      })
+    );
+
     return order;
   }
 }
@@ -221,13 +227,13 @@ class OrderRepository implements IBaseRepository<Order> {
   async save(order: Order): Promise<void> {
     // 1. Persist aggregate
     await this.dataStore.save(order);
-    
+
     // 2. Publish events (automatic)
     await this.eventBus.publishEventsForAggregate(
       order.id.value,
       order.getUncommittedEvents()
     );
-    
+
     // 3. Mark events as committed
     order.markEventsAsCommitted();
   }
@@ -242,7 +248,7 @@ graph TB
         A[Command Handler] --> B[Domain Service]
         B --> C[Aggregate Root]
     end
-    
+
     subgraph "Event System"
         C --> D[Domain Events]
         D --> E[Unified Event Bus]
@@ -250,14 +256,14 @@ graph TB
         E --> G[Integration Events]
         E --> H[Audit Events]
     end
-    
+
     subgraph "Infrastructure"
         E --> I[Event Store]
         E --> J[Message Bus]
         E --> K[Projections]
         F --> L[External Services]
     end
-    
+
     subgraph "Cross-Cutting"
         M[Middleware Pipeline]
         N[Error Handling]
@@ -274,24 +280,27 @@ graph TB
 ```typescript
 class UnifiedEventBus {
   // Event publishing
-  async publish(event: IEvent): Promise<void>
-  async publishMany(events: IEvent[]): Promise<void>
-  async publishEventsForAggregate(aggregateId: string, events: IDomainEvent[]): Promise<void>
-  
+  async publish(event: IEvent): Promise<void>;
+  async publishMany(events: IEvent[]): Promise<void>;
+  async publishEventsForAggregate(
+    aggregateId: string,
+    events: IDomainEvent[]
+  ): Promise<void>;
+
   // Event subscription
   subscribe<T extends IEvent>(
     eventType: string,
     handler: IEventHandler<T>,
     options?: SubscriptionOptions
-  ): void
-  
+  ): void;
+
   // Context management
-  createContext(contextId: string): EventContext
-  publishInContext(contextId: string, event: IEvent): Promise<void>
-  
+  createContext(contextId: string): EventContext;
+  publishInContext(contextId: string, event: IEvent): Promise<void>;
+
   // Lifecycle
-  start(): Promise<void>
-  stop(): Promise<void>
+  start(): Promise<void>;
+  stop(): Promise<void>;
 }
 ```
 
@@ -300,20 +309,20 @@ class UnifiedEventBus {
 ```typescript
 interface EventBusConfig {
   // Performance settings
-  maxConcurrency: number;           // Default: 10
-  batchSize: number;                // Default: 100
-  retryPolicy: RetryPolicy;         // Default: exponential backoff
-  
+  maxConcurrency: number; // Default: 10
+  batchSize: number; // Default: 100
+  retryPolicy: RetryPolicy; // Default: exponential backoff
+
   // Context settings
-  defaultContext: string;           // Default: 'default'
-  contextIsolation: boolean;        // Default: true
-  
+  defaultContext: string; // Default: 'default'
+  contextIsolation: boolean; // Default: true
+
   // Middleware
-  middleware: EventMiddleware[];    // Default: []
-  
+  middleware: EventMiddleware[]; // Default: []
+
   // Error handling
-  errorHandler: ErrorHandler;       // Default: console.error
-  deadLetterQueue: boolean;         // Default: true
+  errorHandler: ErrorHandler; // Default: console.error
+  deadLetterQueue: boolean; // Default: true
 }
 ```
 
@@ -328,7 +337,7 @@ abstract class DomainEvent<T = any> implements IDomainEvent {
   readonly version: number;
   readonly eventType: string;
   readonly payload: T;
-  
+
   constructor(eventType: string, payload: T) {
     this.id = EntityId.create().value;
     this.occurredAt = new Date();
@@ -388,7 +397,7 @@ class IntegrationEvent<T = any> implements IIntegrationEvent {
   readonly source: string;
   readonly destination?: string;
   readonly payload: T;
-  
+
   constructor(
     eventType: string,
     source: string,
@@ -418,7 +427,12 @@ class InventoryReservationRequested extends IntegrationEvent<{
   }>;
 }> {
   constructor(payload: InventoryReservationData) {
-    super('InventoryReservationRequested', 'OrderManagement', payload, 'Inventory');
+    super(
+      'InventoryReservationRequested',
+      'OrderManagement',
+      payload,
+      'Inventory'
+    );
   }
 }
 
@@ -447,7 +461,7 @@ class InventoryReserved extends IntegrationEvent<{
 @EventHandler(OrderCreatedEvent, {
   eventContext: 'order-management',
   retry: { maxAttempts: 3, backoff: 'exponential' },
-  timeout: 30000
+  timeout: 30000,
 })
 class OrderCreatedHandler {
   async handle(event: OrderCreatedEvent): Promise<void> {
@@ -458,7 +472,7 @@ class OrderCreatedHandler {
 // Manual registration
 eventBus.subscribe('OrderCreated', new OrderCreatedHandler(), {
   eventContext: 'order-management',
-  retry: { maxAttempts: 3, backoff: 'exponential' }
+  retry: { maxAttempts: 3, backoff: 'exponential' },
 });
 ```
 
@@ -466,11 +480,11 @@ eventBus.subscribe('OrderCreated', new OrderCreatedHandler(), {
 
 ```typescript
 interface EventHandlerOptions {
-  eventContext?: string | string[];    // Context filtering
-  retry?: RetryOptions;                // Retry configuration
-  timeout?: number;                    // Handler timeout
-  deadLetterQueue?: boolean;           // Dead letter on failure
-  middleware?: EventMiddleware[];      // Handler-specific middleware
+  eventContext?: string | string[]; // Context filtering
+  retry?: RetryOptions; // Retry configuration
+  timeout?: number; // Handler timeout
+  deadLetterQueue?: boolean; // Dead letter on failure
+  middleware?: EventMiddleware[]; // Handler-specific middleware
 }
 ```
 
@@ -488,7 +502,7 @@ class AuditEvent implements IAuditEvent {
   readonly resource: string;
   readonly outcome: 'SUCCESS' | 'FAILURE';
   readonly details?: Record<string, any>;
-  
+
   constructor(
     action: string,
     resource: string,
@@ -521,10 +535,10 @@ class LoggingMiddleware implements EventMiddleware {
     next: NextFunction
   ): Promise<void> {
     console.log(`Processing event: ${event.eventType}`);
-    
+
     const startTime = Date.now();
     await next();
-    
+
     console.log(`Event processed in ${Date.now() - startTime}ms`);
   }
 }
@@ -537,7 +551,7 @@ class TransactionMiddleware implements EventMiddleware {
     next: NextFunction
   ): Promise<void> {
     const transaction = await this.db.beginTransaction();
-    
+
     try {
       await next();
       await transaction.commit();
@@ -566,7 +580,7 @@ await inventoryContext.publish(new InventoryUpdatedEvent(data));
 
 // Cross-context event routing
 eventBus.subscribe('OrderCreated', inventoryHandler, {
-  eventContext: ['order-management', 'inventory-management']
+  eventContext: ['order-management', 'inventory-management'],
 });
 ```
 
@@ -576,12 +590,12 @@ eventBus.subscribe('OrderCreated', inventoryHandler, {
 // Global error handler
 eventBus.onError((error, event, context) => {
   console.error('Event processing failed:', error);
-  
+
   // Send to dead letter queue
   if (error.retryable) {
     return 'RETRY';
   }
-  
+
   // Log and continue
   auditService.logEventFailure(event, error);
   return 'CONTINUE';
@@ -594,9 +608,9 @@ eventBus.onError((error, event, context) => {
       // Send to validation error queue
       return 'DEAD_LETTER';
     }
-    
+
     return 'RETRY';
-  }
+  },
 })
 class OrderCreatedHandler {
   async handle(event: OrderCreatedEvent): Promise<void> {
@@ -612,7 +626,7 @@ class OrderCreatedHandler {
 const events = [
   new OrderCreatedEvent(orderData1),
   new OrderCreatedEvent(orderData2),
-  new OrderCreatedEvent(orderData3)
+  new OrderCreatedEvent(orderData3),
 ];
 
 await eventBus.publishMany(events);
@@ -620,7 +634,7 @@ await eventBus.publishMany(events);
 // Batch handler
 @EventHandler(OrderCreatedEvent, {
   batchSize: 50,
-  batchTimeout: 5000
+  batchTimeout: 5000,
 })
 class BatchOrderHandler {
   async handleBatch(events: OrderCreatedEvent[]): Promise<void> {
@@ -642,29 +656,22 @@ abstract class BaseRepository<T extends AggregateRoot> {
     private eventBus: UnifiedEventBus,
     private eventStore: IEventStore
   ) {}
-  
+
   async save(aggregate: T): Promise<void> {
     const events = aggregate.getUncommittedEvents();
-    
+
     // Transactional save
-    await this.db.transaction(async (trx) => {
+    await this.db.transaction(async trx => {
       // 1. Save aggregate state
       await this.persistAggregate(aggregate, trx);
-      
+
       // 2. Save events
-      await this.eventStore.append(
-        aggregate.id.value,
-        events,
-        trx
-      );
-      
+      await this.eventStore.append(aggregate.id.value, events, trx);
+
       // 3. Publish events
-      await this.eventBus.publishEventsForAggregate(
-        aggregate.id.value,
-        events
-      );
+      await this.eventBus.publishEventsForAggregate(aggregate.id.value, events);
     });
-    
+
     // 4. Mark events as committed
     aggregate.markEventsAsCommitted();
   }
@@ -679,11 +686,8 @@ abstract class BaseRepository<T extends AggregateRoot> {
 class CreateOrderHandler {
   async execute(command: CreateOrderCommand): Promise<void> {
     // Create aggregate
-    const order = Order.create(
-      command.customerId,
-      command.items
-    );
-    
+    const order = Order.create(command.customerId, command.items);
+
     // Repository automatically publishes events
     await this.orderRepository.save(order);
   }
@@ -699,7 +703,7 @@ class OrderProjectionHandler {
       customerId: event.payload.customerId,
       status: 'PENDING',
       totalAmount: event.payload.totalAmount,
-      createdAt: event.occurredAt
+      createdAt: event.occurredAt,
     });
   }
 }
@@ -713,28 +717,34 @@ class OrderProjectionHandler {
 class OrderProcessingSaga {
   async handle(event: OrderCreatedEvent): Promise<void> {
     // Step 1: Reserve inventory
-    await this.eventBus.publish(new InventoryReservationRequested({
-      orderId: event.payload.orderId,
-      items: event.payload.items
-    }));
+    await this.eventBus.publish(
+      new InventoryReservationRequested({
+        orderId: event.payload.orderId,
+        items: event.payload.items,
+      })
+    );
   }
-  
+
   @EventHandler(InventoryReserved)
   async onInventoryReserved(event: InventoryReserved): Promise<void> {
     // Step 2: Process payment
-    await this.eventBus.publish(new PaymentRequested({
-      orderId: event.payload.orderId,
-      amount: event.payload.totalAmount
-    }));
+    await this.eventBus.publish(
+      new PaymentRequested({
+        orderId: event.payload.orderId,
+        amount: event.payload.totalAmount,
+      })
+    );
   }
-  
+
   @EventHandler(PaymentFailed)
   async onPaymentFailed(event: PaymentFailed): Promise<void> {
     // Compensate: Release inventory
-    await this.eventBus.publish(new InventoryReleaseRequested({
-      orderId: event.payload.orderId,
-      reservationId: event.payload.reservationId
-    }));
+    await this.eventBus.publish(
+      new InventoryReleaseRequested({
+        orderId: event.payload.orderId,
+        reservationId: event.payload.reservationId,
+      })
+    );
   }
 }
 ```
@@ -749,14 +759,14 @@ const benchmarks = {
   // Single event publishing
   publishLatency: '< 1ms',
   publishThroughput: '10,000+ events/second',
-  
+
   // Batch publishing
   batchLatency: '< 5ms for 100 events',
   batchThroughput: '50,000+ events/second',
-  
+
   // Memory usage
   memoryPerEvent: '< 1KB',
-  memoryPerSubscriber: '< 100KB'
+  memoryPerSubscriber: '< 100KB',
 };
 ```
 
@@ -769,13 +779,13 @@ await eventBus.publishMany(events);
 
 // 2. Configure appropriate concurrency
 const eventBus = new UnifiedEventBus({
-  maxConcurrency: 20,      // Adjust based on system resources
-  batchSize: 100          // Optimize for your event size
+  maxConcurrency: 20, // Adjust based on system resources
+  batchSize: 100, // Optimize for your event size
 });
 
 // 3. Use context filtering to reduce handler overhead
 @EventHandler(OrderCreatedEvent, {
-  eventContext: 'order-management'  // Only process relevant events
+  eventContext: 'order-management', // Only process relevant events
 })
 class OrderHandler {
   async handle(event: OrderCreatedEvent): Promise<void> {
@@ -789,7 +799,7 @@ eventBus.onError((error, event) => {
   if (error.retryable && error.attempts < 3) {
     return 'RETRY';
   }
-  
+
   // Fail fast for non-retryable errors
   return 'DEAD_LETTER';
 });
@@ -807,47 +817,49 @@ describe('OrderCreatedHandler', () => {
   let eventBus: UnifiedEventBus;
   let testHarness: EventTestHarness;
   let handler: OrderCreatedHandler;
-  
+
   beforeEach(() => {
     eventBus = new UnifiedEventBus();
     testHarness = new EventTestHarness(eventBus);
     handler = new OrderCreatedHandler();
   });
-  
+
   it('should handle order created event', async () => {
     // Arrange
     const event = new OrderCreatedEvent({
       orderId: 'order-123',
       customerId: 'customer-456',
       totalAmount: 99.99,
-      currency: 'USD'
+      currency: 'USD',
     });
-    
+
     // Act
     await handler.handle(event);
-    
+
     // Assert
     expect(testHarness.publishedEvents).toHaveLength(1);
-    expect(testHarness.publishedEvents[0]).toBeInstanceOf(InventoryReservationRequested);
+    expect(testHarness.publishedEvents[0]).toBeInstanceOf(
+      InventoryReservationRequested
+    );
   });
-  
+
   it('should publish events in correct order', async () => {
     // Arrange
     const order = Order.create('customer-123', [
-      { productId: 'product-1', quantity: 2 }
+      { productId: 'product-1', quantity: 2 },
     ]);
-    
+
     // Act
     await this.orderRepository.save(order);
-    
+
     // Assert
     expect(testHarness.publishedEvents).toEqual([
       expect.objectContaining({
         eventType: 'OrderCreated',
         payload: expect.objectContaining({
-          orderId: order.id.value
-        })
-      })
+          orderId: order.id.value,
+        }),
+      }),
     ]);
   });
 });
@@ -860,33 +872,33 @@ import { EventIntegrationTestHarness } from '@vytches-ddd/events';
 
 describe('Order Processing Integration', () => {
   let testHarness: EventIntegrationTestHarness;
-  
+
   beforeEach(async () => {
     testHarness = new EventIntegrationTestHarness();
     await testHarness.start();
   });
-  
+
   afterEach(async () => {
     await testHarness.stop();
   });
-  
+
   it('should process order creation workflow', async () => {
     // Arrange
     const order = {
       customerId: 'customer-123',
-      items: [{ productId: 'product-1', quantity: 2 }]
+      items: [{ productId: 'product-1', quantity: 2 }],
     };
-    
+
     // Act
     await testHarness.publishEvent(new OrderCreatedEvent(order));
-    
+
     // Assert - wait for event processing
     await testHarness.waitForEvent('InventoryReservationRequested');
     await testHarness.waitForEvent('PaymentRequested');
-    
+
     expect(testHarness.handledEvents).toContainEqual(
       expect.objectContaining({
-        eventType: 'OrderCreated'
+        eventType: 'OrderCreated',
       })
     );
   });
@@ -897,38 +909,42 @@ describe('Order Processing Integration', () => {
 
 ### From v1.x to v2.x
 
-The events package underwent a major refactor in v2.x with the introduction of the unified event system:
+The events package underwent a major refactor in v2.x with the introduction of
+the unified event system:
 
 #### Breaking Changes
 
 1. **Event Bus Consolidation**
+
    ```typescript
    // v1.x - Multiple event buses
    const domainEventBus = new DomainEventBus();
    const integrationEventBus = new IntegrationEventBus();
-   
+
    // v2.x - Single unified event bus
    const eventBus = new UnifiedEventBus();
    ```
 
 2. **Handler Registration**
+
    ```typescript
    // v1.x - Separate registration
    domainEventBus.subscribe('OrderCreated', handler);
    integrationEventBus.subscribe('OrderCreated', handler);
-   
+
    // v2.x - Unified registration with context
    eventBus.subscribe('OrderCreated', handler, {
-     eventContext: 'order-management'
+     eventContext: 'order-management',
    });
    ```
 
 3. **Event Publishing**
+
    ```typescript
    // v1.x - Type-specific publishing
    await domainEventBus.publish(domainEvent);
    await integrationEventBus.publish(integrationEvent);
-   
+
    // v2.x - Unified publishing
    await eventBus.publish(event);
    ```
@@ -936,36 +952,40 @@ The events package underwent a major refactor in v2.x with the introduction of t
 #### Migration Steps
 
 1. **Update Dependencies**
+
    ```bash
    npm install @vytches-ddd/events@^2.0.0
    ```
 
 2. **Replace Event Bus Instances**
+
    ```typescript
    // Before
    const domainEventBus = new DomainEventBus();
    const integrationEventBus = new IntegrationEventBus();
-   
+
    // After
    const eventBus = new UnifiedEventBus();
    ```
 
 3. **Update Handler Registration**
+
    ```typescript
    // Before
    domainEventBus.subscribe('OrderCreated', orderHandler);
-   
+
    // After
    eventBus.subscribe('OrderCreated', orderHandler, {
-     eventContext: 'order-management'
+     eventContext: 'order-management',
    });
    ```
 
 4. **Update Repository Integration**
+
    ```typescript
    // Before
    await this.domainEventBus.publishMany(aggregate.getUncommittedEvents());
-   
+
    // After
    await this.eventBus.publishEventsForAggregate(
      aggregate.id.value,
@@ -985,7 +1005,7 @@ const migrationHelper = new EventBusMigrationHelper();
 migrationHelper.migrateHandlerRegistrations({
   domainEventBus: oldDomainEventBus,
   integrationEventBus: oldIntegrationEventBus,
-  targetEventBus: newUnifiedEventBus
+  targetEventBus: newUnifiedEventBus,
 });
 
 // Validate migration
@@ -997,7 +1017,8 @@ if (!validationResult.isValid) {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1028,10 +1049,12 @@ pnpm dev --filter=@vytches-ddd/events
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd) ecosystem**
+**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
+ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

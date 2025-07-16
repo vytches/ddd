@@ -1,8 +1,28 @@
 /**
- * Generic Result class for handling success/failure outcomes
- * Provides a more functional approach to error handling than exceptions
- * @template TValue - The type of the success value
- * @template TError - The type of the error value
+ * @llm-summary Result class for result operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * Result class implementing infrastructure service for result operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new Result();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new Result());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class Result<TValue, TError = Error> {
   private readonly _isSuccess: boolean;

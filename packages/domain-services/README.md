@@ -14,9 +14,13 @@ Integration Points: Essential for complex business workflows; integrates with re
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade Domain Services implementation for complex business logic coordination**
+> **Enterprise-grade Domain Services implementation for complex business logic
+> coordination**
 
-Comprehensive Domain Services package providing base classes, decorators, and patterns for encapsulating complex business logic that doesn't naturally fit within a single aggregate or entity. Supports transactional operations, event publishing, and dependency injection integration.
+Comprehensive Domain Services package providing base classes, decorators, and
+patterns for encapsulating complex business logic that doesn't naturally fit
+within a single aggregate or entity. Supports transactional operations, event
+publishing, and dependency injection integration.
 
 ## 📋 Table of Contents
 
@@ -58,28 +62,43 @@ npm install @vytches-ddd/core @vytches-ddd/validation @vytches-ddd/contracts
 ## ✨ Key Features
 
 ### Service Coordination
-- **Business Logic Encapsulation**: Encapsulate complex business operations that span multiple aggregates
-- **Stateless Operations**: Maintain stateless service design following DDD principles
-- **Cross-Aggregate Workflows**: Coordinate operations across multiple domain boundaries
-- **Service Composition**: Compose complex operations from simpler service building blocks
+
+- **Business Logic Encapsulation**: Encapsulate complex business operations that
+  span multiple aggregates
+- **Stateless Operations**: Maintain stateless service design following DDD
+  principles
+- **Cross-Aggregate Workflows**: Coordinate operations across multiple domain
+  boundaries
+- **Service Composition**: Compose complex operations from simpler service
+  building blocks
 
 ### Transactional Support
-- **Unit of Work Integration**: Seamless integration with Unit of Work pattern for consistency
-- **Transaction Management**: Automatic transaction handling with commit/rollback capabilities
-- **Repository Access**: Direct access to repositories within transactional boundaries
+
+- **Unit of Work Integration**: Seamless integration with Unit of Work pattern
+  for consistency
+- **Transaction Management**: Automatic transaction handling with
+  commit/rollback capabilities
+- **Repository Access**: Direct access to repositories within transactional
+  boundaries
 - **Event Coordination**: Coordinate events with transactional operations
 
 ### Event Publishing
+
 - **Domain Event Support**: Native support for publishing domain events
 - **Event Bus Integration**: Automatic event bus configuration and publishing
 - **Transactional Events**: Publish events within transactional boundaries
-- **Event Lifecycle Management**: Manage event publishing lifecycle with service operations
+- **Event Lifecycle Management**: Manage event publishing lifecycle with service
+  operations
 
 ### Dependency Injection
-- **Auto-Discovery**: Automatic service discovery and registration with DI container
+
+- **Auto-Discovery**: Automatic service discovery and registration with DI
+  container
 - **Dependency Management**: Declare and inject service dependencies
-- **Lifecycle Management**: Support for singleton, transient, and scoped service lifetimes
-- **Context Isolation**: Bounded context-aware service registration and resolution
+- **Lifecycle Management**: Support for singleton, transient, and scoped service
+  lifetimes
+- **Context Isolation**: Bounded context-aware service registration and
+  resolution
 
 ## 🎯 Core Concepts
 
@@ -119,18 +138,27 @@ abstract class IBaseDomainService implements IDomainService {
 }
 
 // Event-aware service
-abstract class EventAwareDomainService extends IBaseDomainService implements IEventBusAware {
+abstract class EventAwareDomainService
+  extends IBaseDomainService
+  implements IEventBusAware
+{
   protected publishEvent<T extends IDomainEvent>(event: T): void;
 }
 
 // Transactional service
-abstract class UnitOfWorkAwareDomainService extends EventAwareDomainService implements IUnitOfWorkAware {
+abstract class UnitOfWorkAwareDomainService
+  extends EventAwareDomainService
+  implements IUnitOfWorkAware
+{
   protected getRepository<T>(name: string): T;
   protected executeInTransaction<T>(operation: () => Promise<T>): Promise<T>;
 }
 
 // Async lifecycle service
-abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDomainService {
+abstract class AsyncDomainService
+  extends IBaseDomainService
+  implements IAsyncDomainService
+{
   async initialize(): Promise<void>;
   async dispose(): Promise<void>;
 }
@@ -141,7 +169,10 @@ abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDo
 ### Basic Domain Service
 
 ```typescript
-import { IBaseDomainService, DomainService } from '@vytches-ddd/domain-services';
+import {
+  IBaseDomainService,
+  DomainService,
+} from '@vytches-ddd/domain-services';
 
 @DomainService('orderCalculationService')
 class OrderCalculationService extends IBaseDomainService {
@@ -166,7 +197,7 @@ class OrderCalculationService extends IBaseDomainService {
 
   private getShippingCost(weight: Weight, destination: Address): Money {
     // Implementation details...
-    return Money.fromAmount(10.00);
+    return Money.fromAmount(10.0);
   }
 }
 ```
@@ -174,12 +205,15 @@ class OrderCalculationService extends IBaseDomainService {
 ### Event-Aware Service
 
 ```typescript
-import { EventAwareDomainService, DomainService } from '@vytches-ddd/domain-services';
+import {
+  EventAwareDomainService,
+  DomainService,
+} from '@vytches-ddd/domain-services';
 import { OrderProcessedEvent } from '../events/order-processed.event';
 
 @DomainService({
   serviceId: 'orderProcessingService',
-  publishesEvents: true
+  publishesEvents: true,
 })
 class OrderProcessingService extends EventAwareDomainService {
   constructor() {
@@ -191,14 +225,16 @@ class OrderProcessingService extends EventAwareDomainService {
     await this.validateOrder(order);
     await this.reserveInventory(order);
     await this.chargePayment(order);
-    
+
     // Publish domain event
-    this.publishEvent(new OrderProcessedEvent({
-      orderId: order.id,
-      customerId: order.customerId,
-      total: order.total,
-      processedAt: new Date()
-    }));
+    this.publishEvent(
+      new OrderProcessedEvent({
+        orderId: order.id,
+        customerId: order.customerId,
+        total: order.total,
+        processedAt: new Date(),
+      })
+    );
   }
 
   private async validateOrder(order: Order): Promise<void> {
@@ -218,7 +254,10 @@ class OrderProcessingService extends EventAwareDomainService {
 ### Transactional Service
 
 ```typescript
-import { UnitOfWorkAwareDomainService, DomainService } from '@vytches-ddd/domain-services';
+import {
+  UnitOfWorkAwareDomainService,
+  DomainService,
+} from '@vytches-ddd/domain-services';
 import { IOrderRepository } from '../repositories/order.repository';
 import { ICustomerRepository } from '../repositories/customer.repository';
 
@@ -226,18 +265,22 @@ import { ICustomerRepository } from '../repositories/customer.repository';
   serviceId: 'orderManagementService',
   transactional: true,
   publishesEvents: true,
-  dependencies: ['orderRepository', 'customerRepository']
+  dependencies: ['orderRepository', 'customerRepository'],
 })
 class OrderManagementService extends UnitOfWorkAwareDomainService {
   constructor() {
     super('orderManagementService');
   }
 
-  async createOrderForCustomer(customerId: string, items: OrderItem[]): Promise<Order> {
+  async createOrderForCustomer(
+    customerId: string,
+    items: OrderItem[]
+  ): Promise<Order> {
     return this.executeInTransaction(async () => {
       // Get repositories from Unit of Work
       const orderRepo = this.getRepository<IOrderRepository>('orderRepository');
-      const customerRepo = this.getRepository<ICustomerRepository>('customerRepository');
+      const customerRepo =
+        this.getRepository<ICustomerRepository>('customerRepository');
 
       // Load customer
       const customer = await customerRepo.findById(customerId);
@@ -249,7 +292,7 @@ class OrderManagementService extends UnitOfWorkAwareDomainService {
       const order = Order.create({
         customerId: customer.id,
         items,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Update customer order history
@@ -266,7 +309,7 @@ class OrderManagementService extends UnitOfWorkAwareDomainService {
   async cancelOrder(orderId: string): Promise<void> {
     return this.executeInTransaction(async () => {
       const orderRepo = this.getRepository<IOrderRepository>('orderRepository');
-      
+
       const order = await orderRepo.findById(orderId);
       if (!order) {
         throw new Error('Order not found');
@@ -325,13 +368,15 @@ class NotificationService extends EventAwareDomainService {
   async sendWelcomeNotification(user: User): Promise<void> {
     // Send notification logic
     await this.deliverNotification(user, 'welcome');
-    
+
     // Publish event
-    this.publishEvent(new NotificationSentEvent({
-      userId: user.id,
-      type: 'welcome',
-      sentAt: new Date()
-    }));
+    this.publishEvent(
+      new NotificationSentEvent({
+        userId: user.id,
+        type: 'welcome',
+        sentAt: new Date(),
+      })
+    );
   }
 
   private async deliverNotification(user: User, type: string): Promise<void> {
@@ -352,9 +397,14 @@ class TransferService extends UnitOfWorkAwareDomainService {
     super('transferService');
   }
 
-  async transferFunds(fromAccountId: string, toAccountId: string, amount: Money): Promise<void> {
+  async transferFunds(
+    fromAccountId: string,
+    toAccountId: string,
+    amount: Money
+  ): Promise<void> {
     return this.executeInTransaction(async () => {
-      const accountRepo = this.getRepository<IAccountRepository>('accountRepository');
+      const accountRepo =
+        this.getRepository<IAccountRepository>('accountRepository');
 
       const fromAccount = await accountRepo.findById(fromAccountId);
       const toAccount = await accountRepo.findById(toAccountId);
@@ -372,12 +422,14 @@ class TransferService extends UnitOfWorkAwareDomainService {
       await accountRepo.save(toAccount);
 
       // Publish transfer event
-      this.publishEvent(new FundsTransferredEvent({
-        fromAccountId,
-        toAccountId,
-        amount,
-        transferredAt: new Date()
-      }));
+      this.publishEvent(
+        new FundsTransferredEvent({
+          fromAccountId,
+          toAccountId,
+          amount,
+          transferredAt: new Date(),
+        })
+      );
     });
   }
 }
@@ -401,7 +453,7 @@ class CacheService extends AsyncDomainService {
   async initialize(): Promise<void> {
     // Initialize cache
     await this.loadInitialData();
-    
+
     // Start cleanup routine
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredEntries();
@@ -413,7 +465,7 @@ class CacheService extends AsyncDomainService {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }
-    
+
     // Clear cache
     this.cache.clear();
   }
@@ -450,8 +502,8 @@ class UserService extends IBaseDomainService {
   async: true,
   caching: {
     enabled: true,
-    ttl: 300 // 5 minutes
-  }
+    ttl: 300, // 5 minutes
+  },
 })
 class OrderService extends UnitOfWorkAwareDomainService {
   // Implementation
@@ -470,7 +522,7 @@ import { DomainService, ServiceLifetime } from '@vytches-ddd/domain-services';
   autoRegister: true,
   dependencies: ['paymentGateway', 'auditLogger'],
   tags: ['payment', 'financial'],
-  transactional: true
+  transactional: true,
 })
 class PaymentService extends UnitOfWorkAwareDomainService {
   async processPayment(payment: Payment): Promise<PaymentResult> {
@@ -483,9 +535,9 @@ class PaymentService extends UnitOfWorkAwareDomainService {
 ### Metadata Retrieval
 
 ```typescript
-import { 
-  getDomainServiceMetadata, 
-  getDIDomainServiceMetadata 
+import {
+  getDomainServiceMetadata,
+  getDIDomainServiceMetadata,
 } from '@vytches-ddd/domain-services';
 
 const metadata = getDomainServiceMetadata(OrderService);
@@ -510,7 +562,9 @@ class OrderFulfillmentService extends UnitOfWorkAwareDomainService {
   async fulfillOrder(orderId: string): Promise<void> {
     return this.executeInTransaction(async () => {
       const orderRepo = this.getRepository<IOrderRepository>('orderRepository');
-      const inventoryRepo = this.getRepository<IInventoryRepository>('inventoryRepository');
+      const inventoryRepo = this.getRepository<IInventoryRepository>(
+        'inventoryRepository'
+      );
 
       // Load order
       const order = await orderRepo.findById(orderId);
@@ -522,9 +576,11 @@ class OrderFulfillmentService extends UnitOfWorkAwareDomainService {
       for (const item of order.items) {
         const inventory = await inventoryRepo.findByProductId(item.productId);
         if (!inventory || inventory.quantity < item.quantity) {
-          throw new Error(`Insufficient inventory for product ${item.productId}`);
+          throw new Error(
+            `Insufficient inventory for product ${item.productId}`
+          );
         }
-        
+
         inventory.reserve(item.quantity);
         await inventoryRepo.save(inventory);
       }
@@ -534,10 +590,12 @@ class OrderFulfillmentService extends UnitOfWorkAwareDomainService {
       await orderRepo.save(order);
 
       // Publish event
-      this.publishEvent(new OrderFulfilledEvent({
-        orderId: order.id,
-        fulfilledAt: new Date()
-      }));
+      this.publishEvent(
+        new OrderFulfilledEvent({
+          orderId: order.id,
+          fulfilledAt: new Date(),
+        })
+      );
     });
   }
 }
@@ -551,9 +609,12 @@ class CustomerOrderService extends UnitOfWorkAwareDomainService {
     super('customerOrderService');
   }
 
-  async getCustomerOrderHistory(customerId: string): Promise<CustomerOrderHistory> {
+  async getCustomerOrderHistory(
+    customerId: string
+  ): Promise<CustomerOrderHistory> {
     return this.executeInTransaction(async () => {
-      const customerRepo = this.getRepository<ICustomerRepository>('customerRepository');
+      const customerRepo =
+        this.getRepository<ICustomerRepository>('customerRepository');
       const orderRepo = this.getRepository<IOrderRepository>('orderRepository');
 
       const customer = await customerRepo.findById(customerId);
@@ -562,12 +623,17 @@ class CustomerOrderService extends UnitOfWorkAwareDomainService {
       }
 
       const orders = await orderRepo.findByCustomerId(customerId);
-      
+
       return new CustomerOrderHistory({
         customer,
-        orders: orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+        orders: orders.sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        ),
         totalOrders: orders.length,
-        totalSpent: orders.reduce((sum, order) => sum.add(order.total), Money.zero())
+        totalSpent: orders.reduce(
+          (sum, order) => sum.add(order.total),
+          Money.zero()
+        ),
       });
     });
   }
@@ -588,26 +654,30 @@ class InventoryService extends EventAwareDomainService {
     // Update inventory logic
     const inventory = await this.getInventory(productId);
     const previousQuantity = inventory.quantity;
-    
+
     inventory.updateQuantity(quantity);
     await this.saveInventory(inventory);
 
     // Publish inventory updated event
-    this.publishEvent(new InventoryUpdatedEvent({
-      productId,
-      previousQuantity,
-      newQuantity: quantity,
-      updatedAt: new Date()
-    }));
+    this.publishEvent(
+      new InventoryUpdatedEvent({
+        productId,
+        previousQuantity,
+        newQuantity: quantity,
+        updatedAt: new Date(),
+      })
+    );
 
     // Publish low stock alert if needed
     if (inventory.isLowStock()) {
-      this.publishEvent(new LowStockAlertEvent({
-        productId,
-        currentQuantity: quantity,
-        threshold: inventory.lowStockThreshold,
-        alertedAt: new Date()
-      }));
+      this.publishEvent(
+        new LowStockAlertEvent({
+          productId,
+          currentQuantity: quantity,
+          threshold: inventory.lowStockThreshold,
+          alertedAt: new Date(),
+        })
+      );
     }
   }
 
@@ -642,10 +712,12 @@ class OrderProcessingService extends EventAwareDomainService {
     this.publishEvent(new PaymentProcessedEvent({ orderId: order.id }));
 
     order.markAsProcessed();
-    this.publishEvent(new OrderProcessedEvent({ 
-      orderId: order.id, 
-      processedAt: new Date() 
-    }));
+    this.publishEvent(
+      new OrderProcessedEvent({
+        orderId: order.id,
+        processedAt: new Date(),
+      })
+    );
   }
 
   private async validateOrder(order: Order): Promise<void> {
@@ -731,7 +803,7 @@ class DatabaseService extends AsyncDomainService {
     this.connection = await createConnection({
       host: 'localhost',
       port: 5432,
-      database: 'myapp'
+      database: 'myapp',
     });
 
     // Run migrations
@@ -759,16 +831,12 @@ class ServiceManager {
 
   async initializeServices(): Promise<void> {
     // Initialize all async services
-    await Promise.all(
-      this.services.map(service => service.initialize())
-    );
+    await Promise.all(this.services.map(service => service.initialize()));
   }
 
   async shutdownServices(): Promise<void> {
     // Dispose all async services
-    await Promise.all(
-      this.services.map(service => service.dispose())
-    );
+    await Promise.all(this.services.map(service => service.dispose()));
   }
 
   registerService(service: AsyncDomainService): void {
@@ -782,10 +850,10 @@ class ServiceManager {
 ### Service Errors
 
 ```typescript
-import { 
-  ServiceNotFoundError, 
-  ServiceDuplicateError, 
-  ServiceCircularError 
+import {
+  ServiceNotFoundError,
+  ServiceDuplicateError,
+  ServiceCircularError,
 } from '@vytches-ddd/domain-services';
 
 class ServiceRegistry {
@@ -825,14 +893,16 @@ class OrderService extends UnitOfWorkAwareDomainService {
     } catch (error) {
       // Log error
       console.error('Order processing failed:', error);
-      
+
       // Publish error event
-      this.publishEvent(new OrderProcessingFailedEvent({
-        orderId: order.id,
-        error: error.message,
-        failedAt: new Date()
-      }));
-      
+      this.publishEvent(
+        new OrderProcessingFailedEvent({
+          orderId: order.id,
+          error: error.message,
+          failedAt: new Date(),
+        })
+      );
+
       throw error;
     }
   }
@@ -863,7 +933,7 @@ describe('OrderCalculationService', () => {
     it('should calculate total for multiple items', () => {
       const items = [
         { price: Money.fromAmount(10), quantity: 2 },
-        { price: Money.fromAmount(5), quantity: 3 }
+        { price: Money.fromAmount(5), quantity: 3 },
       ];
 
       const [error, total] = safeRun(() => service.calculateTotal(items));
@@ -885,7 +955,9 @@ describe('OrderCalculationService', () => {
       const subtotal = Money.fromAmount(100);
       const taxRate = 0.08;
 
-      const [error, tax] = safeRun(() => service.calculateTax(subtotal, taxRate));
+      const [error, tax] = safeRun(() =>
+        service.calculateTax(subtotal, taxRate)
+      );
 
       expect(error).toBeUndefined();
       expect(tax?.amount).toBe(8);
@@ -914,15 +986,24 @@ describe('TransferService', () => {
 
   describe('transferFunds', () => {
     it('should transfer funds successfully', async () => {
-      const fromAccount = Account.create({ id: 'acc1', balance: Money.fromAmount(100) });
-      const toAccount = Account.create({ id: 'acc2', balance: Money.fromAmount(50) });
+      const fromAccount = Account.create({
+        id: 'acc1',
+        balance: Money.fromAmount(100),
+      });
+      const toAccount = Account.create({
+        id: 'acc2',
+        balance: Money.fromAmount(50),
+      });
       const amount = Money.fromAmount(30);
 
-      const accountRepo = mockUnitOfWork.getMockRepository<IAccountRepository>('accountRepository');
+      const accountRepo =
+        mockUnitOfWork.getMockRepository<IAccountRepository>(
+          'accountRepository'
+        );
       accountRepo.findById.mockResolvedValueOnce(fromAccount);
       accountRepo.findById.mockResolvedValueOnce(toAccount);
 
-      const [error] = await safeRun(() => 
+      const [error] = await safeRun(() =>
         service.transferFunds('acc1', 'acc2', amount)
       );
 
@@ -933,10 +1014,13 @@ describe('TransferService', () => {
     });
 
     it('should rollback on error', async () => {
-      const accountRepo = mockUnitOfWork.getMockRepository<IAccountRepository>('accountRepository');
+      const accountRepo =
+        mockUnitOfWork.getMockRepository<IAccountRepository>(
+          'accountRepository'
+        );
       accountRepo.findById.mockResolvedValueOnce(null); // Account not found
 
-      const [error] = await safeRun(() => 
+      const [error] = await safeRun(() =>
         service.transferFunds('acc1', 'acc2', Money.fromAmount(30))
       );
 
@@ -969,13 +1053,15 @@ describe('NotificationService', () => {
     it('should send notification and publish event', async () => {
       const user = User.create({ id: 'user1', email: 'test@example.com' });
 
-      const [error] = await safeRun(() => 
+      const [error] = await safeRun(() =>
         service.sendWelcomeNotification(user)
       );
 
       expect(error).toBeUndefined();
       expect(mockEventBus.publishedEvents).toHaveLength(1);
-      expect(mockEventBus.publishedEvents[0]).toBeInstanceOf(NotificationSentEvent);
+      expect(mockEventBus.publishedEvents[0]).toBeInstanceOf(
+        NotificationSentEvent
+      );
     });
   });
 });
@@ -985,7 +1071,8 @@ describe('NotificationService', () => {
 
 ### Service Design
 
-1. **Keep Services Stateless**: Domain services should be stateless and focus on behavior
+1. **Keep Services Stateless**: Domain services should be stateless and focus on
+   behavior
 2. **Single Responsibility**: Each service should have one clear responsibility
 3. **Avoid Anemic Services**: Services should contain meaningful business logic
 4. **Use Composition**: Compose complex operations from simpler service methods
@@ -1005,16 +1092,23 @@ class PricingService extends IBaseDomainService {
 // ❌ Bad: Stateful service with multiple responsibilities
 class OrderService extends IBaseDomainService {
   private currentOrder?: Order; // Stateful!
-  
-  processOrder(order: Order): void { /* ... */ }
-  sendEmail(email: string): void { /* ... */ } // Wrong responsibility
-  calculateTax(amount: Money): Money { /* ... */ }
+
+  processOrder(order: Order): void {
+    /* ... */
+  }
+  sendEmail(email: string): void {
+    /* ... */
+  } // Wrong responsibility
+  calculateTax(amount: Money): Money {
+    /* ... */
+  }
 }
 ```
 
 ### Transaction Management
 
-1. **Use Transactions for Consistency**: Wrap multi-aggregate operations in transactions
+1. **Use Transactions for Consistency**: Wrap multi-aggregate operations in
+   transactions
 2. **Keep Transactions Short**: Minimize transaction scope and duration
 3. **Handle Rollbacks**: Properly handle transaction failures
 4. **Event Publishing**: Publish events within transaction boundaries
@@ -1028,7 +1122,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
       await this.validateOrder(order);
       await this.reserveInventory(order);
       await this.updateOrder(order);
-      
+
       // Events published within transaction
       this.publishEvent(new OrderProcessedEvent({ orderId: order.id }));
     });
@@ -1054,18 +1148,20 @@ class PaymentService extends EventAwareDomainService {
       }
 
       await this.chargePayment(payment);
-      
+
       this.publishEvent(new PaymentProcessedEvent({ paymentId: payment.id }));
     } catch (error) {
       // Log error
       console.error('Payment processing failed:', error);
-      
+
       // Publish error event
-      this.publishEvent(new PaymentFailedEvent({
-        paymentId: payment.id,
-        error: error.message
-      }));
-      
+      this.publishEvent(
+        new PaymentFailedEvent({
+          paymentId: payment.id,
+          error: error.message,
+        })
+      );
+
       throw error;
     }
   }
@@ -1087,7 +1183,7 @@ class PaymentService extends EventAwareDomainService {
   context: 'OrderManagement',
   dependencies: ['orderRepository', 'inventoryService'],
   transactional: true,
-  publishesEvents: true
+  publishesEvents: true,
 })
 class OrderService extends UnitOfWorkAwareDomainService {
   // Implementation
@@ -1096,7 +1192,8 @@ class OrderService extends UnitOfWorkAwareDomainService {
 
 ## 📚 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1118,4 +1215,5 @@ pnpm build
 
 **Built with ❤️ by the VytchesDDD Team**
 
-*Part of the [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - A comprehensive Domain-Driven Design framework for TypeScript*
+_Part of the [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem -
+A comprehensive Domain-Driven Design framework for TypeScript_

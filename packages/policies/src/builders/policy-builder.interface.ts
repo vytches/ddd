@@ -3,7 +3,23 @@ import type { IBusinessPolicy } from '../core/interfaces/business-policy.interfa
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 
 /**
- * Main policy builder interface for fluent API construction
+ * @llm-summary Contract for policy builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyBuilder interface implementing domain pattern implementation for policy builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyBuilder implements IPolicyBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyBuilder<T> {
   /**
@@ -90,7 +106,23 @@ export interface IPolicyBuilder<T> {
 }
 
 /**
- * Policy step builder for configuring individual policy steps
+ * @llm-summary Contract for policy step builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyStepBuilder interface implementing domain pattern implementation for policy step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyStepBuilder implements IPolicyStepBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyStepBuilder<T> {
   /**
@@ -135,7 +167,23 @@ export interface IPolicyStepBuilder<T> {
 }
 
 /**
- * Policy group for complex AND/OR logic
+ * @llm-summary Contract for policy group functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyGroup interface implementing domain pattern implementation for policy group operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyGroup implements IPolicyGroup {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyGroup<T> {
   /**
@@ -164,7 +212,23 @@ export interface IPolicyGroup<T> {
 }
 
 /**
- * Policy group step builder for configuring group steps
+ * @llm-summary Contract for policy group step builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyGroupStepBuilder interface implementing domain pattern implementation for policy group step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyGroupStepBuilder implements IPolicyGroupStepBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IPolicyGroupStepBuilder<T> extends IPolicyGroup<T> {
   /**
@@ -189,7 +253,23 @@ export interface IPolicyGroupStepBuilder<T> extends IPolicyGroup<T> {
 }
 
 /**
- * Conditional policy builder for when/then/otherwise logic
+ * @llm-summary Contract for conditional policy builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * ConditionalPolicyBuilder interface implementing domain pattern implementation for conditional policy builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteConditionalPolicyBuilder implements IConditionalPolicyBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IConditionalPolicyBuilder<T> {
   /**
@@ -209,7 +289,23 @@ export interface IConditionalPolicyBuilder<T> {
 }
 
 /**
- * Conditional policy then step builder
+ * @llm-summary Contract for conditional policy then step builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * ConditionalPolicyThenStepBuilder interface implementing domain pattern implementation for conditional policy then step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteConditionalPolicyThenStepBuilder implements IConditionalPolicyThenStepBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IConditionalPolicyThenStepBuilder<T> {
   /**
@@ -249,7 +345,23 @@ export interface IConditionalPolicyThenStepBuilder<T> {
 }
 
 /**
- * Conditional policy else clause
+ * @llm-summary Contract for conditional policy else functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * ConditionalPolicyElse interface implementing domain pattern implementation for conditional policy else operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteConditionalPolicyElse implements IConditionalPolicyElse {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IConditionalPolicyElse<T> {
   /**
@@ -259,7 +371,23 @@ export interface IConditionalPolicyElse<T> {
 }
 
 /**
- * Conditional policy else step builder
+ * @llm-summary Contract for conditional policy else step builder functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * ConditionalPolicyElseStepBuilder interface implementing domain pattern implementation for conditional policy else step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteConditionalPolicyElseStepBuilder implements IConditionalPolicyElseStepBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IConditionalPolicyElseStepBuilder<T> {
   /**
@@ -284,7 +412,23 @@ export interface IConditionalPolicyElseStepBuilder<T> {
 }
 
 /**
- * Policy builder configuration options
+ * @llm-summary Contract for policy builder config functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyBuilderConfig interface implementing domain pattern implementation for policy builder config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyBuilderConfig implements PolicyBuilderConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyBuilderConfig<T> {
   /**

@@ -6,7 +6,8 @@
 
 > **Enterprise-grade dependency injection system for Domain-Driven Design**
 
-Global Service Locator with Optional Context Isolation for Dependency Injection following MediatR pattern.
+Global Service Locator with Optional Context Isolation for Dependency Injection
+following MediatR pattern.
 
 ## 📋 Table of Contents
 
@@ -42,7 +43,8 @@ pnpm add @vytches-ddd/di
 
 ### Hybrid Dependency Injection Architecture
 
-The `@vytches-ddd/di` package implements a **hybrid dependency injection architecture** that provides:
+The `@vytches-ddd/di` package implements a **hybrid dependency injection
+architecture** that provides:
 
 1. **Global service locator by default** (following MediatR pattern)
 2. **Optional context isolation** for DDD bounded context scenarios
@@ -50,7 +52,8 @@ The `@vytches-ddd/di` package implements a **hybrid dependency injection archite
 4. **Plugin-based handler discovery** for CQRS, Events, and custom handlers
 5. **Progressive enhancement** from simple to complex scenarios
 
-This implementation follows **ADR-0006: Adopt Global Service Locator with Optional Context Isolation for Dependency Injection**.
+This implementation follows **ADR-0006: Adopt Global Service Locator with
+Optional Context Isolation for Dependency Injection**.
 
 ## Philosophy: Natural Framework Integration
 

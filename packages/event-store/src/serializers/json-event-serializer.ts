@@ -4,8 +4,30 @@ import type { ILogger } from '@vytches-ddd/logging';
 import { EventSerializationError, EventDeserializationError } from '../errors';
 
 /**
- * JSON Event Serializer
- * Default serializer that converts events to/from JSON
+ * @llm-summary JsonEventSerializer class for json event serializer operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * JsonEventSerializer class implementing infrastructure service for json event serializer operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new JsonEventSerializer();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new JsonEventSerializer());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class JsonEventSerializer implements IEventSerializer {
   private readonly logger: ILogger;

@@ -10,8 +10,30 @@ import type { PolicyRequest } from '../core/interfaces/business-policy.interface
 import type { PolicyViolation } from '../core/models/policy-violation';
 
 /**
- * Adapter that converts BusinessRuleValidator to ISpecification for policy use
- * Allows seamless integration of existing validation logic into policies
+ * @llm-summary BusinessRuleValidatorAdapter class for business rule validator adapter operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BusinessRuleValidatorAdapter class implementing domain pattern implementation for business rule validator adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BusinessRuleValidatorAdapter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BusinessRuleValidatorAdapter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
   public readonly name?: string;
@@ -106,8 +128,30 @@ export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
 }
 
 /**
- * Policy that integrates BusinessRuleValidator directly
- * Provides seamless bridge between validation and policy systems
+ * @llm-summary BusinessRuleValidatorPolicy class for business rule validator policy operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BusinessRuleValidatorPolicy class implementing domain pattern implementation for business rule validator policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BusinessRuleValidatorPolicy();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BusinessRuleValidatorPolicy());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class BusinessRuleValidatorPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
@@ -185,7 +229,30 @@ export class BusinessRuleValidatorPolicy<T> extends BaseBusinessPolicy<T> {
 }
 
 /**
- * Factory for creating policies from various specification types
+ * @llm-summary PolicySpecificationFactory class for policy specification factory operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicySpecificationFactory class implementing domain pattern implementation for policy specification factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicySpecificationFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicySpecificationFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicySpecificationFactory {
   /**

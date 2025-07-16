@@ -2,8 +2,23 @@
 import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interfaces';
 
 /**
- * Interface for event upcaster
- * Transforms event payloads between versions
+ * @llm-summary Contract for event upcaster functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EventUpcaster interface implementing core domain functionality for event upcaster operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventUpcaster implements IEventUpcaster {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
   /**
@@ -13,8 +28,23 @@ export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
 }
 
 /**
- * Audit event interface
- * Represents an audit log entry for domain events
+ * @llm-summary Contract for audit event functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * AuditEvent interface implementing core domain functionality for audit event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditEvent implements IAuditEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditEvent {
   eventId: string;
@@ -30,8 +60,23 @@ export interface IAuditEvent {
 }
 
 /**
- * Event store interface
- * Defines the contract for event storage and retrieval
+ * @llm-summary Contract for event store functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EventStore interface implementing core domain functionality for event store operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventStore implements IEventStore {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventStore {
   /**

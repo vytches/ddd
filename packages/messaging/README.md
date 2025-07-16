@@ -14,9 +14,13 @@ Integration Points: @vytches-ddd/events, @vytches-ddd/repositories, @vytches-ddd
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade messaging patterns with outbox pattern and saga orchestration for reliable message delivery**
+> **Enterprise-grade messaging patterns with outbox pattern and saga
+> orchestration for reliable message delivery**
 
-Complete messaging solution with outbox pattern for reliable message delivery, saga orchestration for long-running business processes, and comprehensive middleware support. Designed for distributed systems requiring guaranteed message delivery and complex workflow orchestration.
+Complete messaging solution with outbox pattern for reliable message delivery,
+saga orchestration for long-running business processes, and comprehensive
+middleware support. Designed for distributed systems requiring guaranteed
+message delivery and complex workflow orchestration.
 
 ## 📋 Table of Contents
 
@@ -58,18 +62,24 @@ npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/logging
 ## ✨ Key Features
 
 ### Outbox Pattern
+
 - **Reliable Delivery**: Guaranteed message delivery with transactional outbox
-- **Priority Processing**: Configurable message priorities (LOW/NORMAL/HIGH/CRITICAL)
+- **Priority Processing**: Configurable message priorities
+  (LOW/NORMAL/HIGH/CRITICAL)
 - **Delayed Messages**: Support for scheduled message processing
 - **Batch Operations**: Efficient bulk message handling
 
 ### Saga Orchestration
-- **Long-running Processes**: Complete saga orchestration for complex business workflows
+
+- **Long-running Processes**: Complete saga orchestration for complex business
+  workflows
 - **Compensation Logic**: Automatic compensation for failed transactions
-- **State Management**: Persistent saga state with optimistic concurrency control
+- **State Management**: Persistent saga state with optimistic concurrency
+  control
 - **Correlation Support**: Event correlation for distributed process tracking
 
 ### Enterprise Features
+
 - **Middleware Pipeline**: Extensible message processing pipeline
 - **Retry Logic**: Configurable retry policies with exponential backoff
 - **Circuit Breaker**: Fault tolerance with circuit breaker pattern
@@ -79,7 +89,8 @@ npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/logging
 
 ### Outbox Pattern
 
-The outbox pattern ensures reliable message delivery by storing messages in a transactional outbox:
+The outbox pattern ensures reliable message delivery by storing messages in a
+transactional outbox:
 
 ```typescript
 // Message interface
@@ -124,9 +135,15 @@ interface ISaga {
   readonly sagaType: string;
   readonly status: SagaStatus;
   readonly state: ISagaState;
-  
-  handleEvent(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult>;
-  compensate(stepName: string, context: ISagaExecutionContext): Promise<ISagaActionResult>;
+
+  handleEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult>;
+  compensate(
+    stepName: string,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult>;
   canHandle(event: IExtendedDomainEvent): boolean;
   getCorrelationData(): Record<string, unknown>;
 }
@@ -150,18 +167,18 @@ enum SagaStatus {
 ### Basic Outbox Usage
 
 ```typescript
-import { 
-  OutboxService, 
-  OutboxProcessor, 
+import {
+  OutboxService,
+  OutboxProcessor,
   OutboxMessageFactory,
-  MessagePriority 
+  MessagePriority,
 } from '@vytches-ddd/messaging';
 
 // Create outbox service
 const outboxService = new OutboxService({
   maxRetries: 3,
   retryDelay: 1000,
-  batchSize: 100
+  batchSize: 100,
 });
 
 // Create and store a message
@@ -170,7 +187,7 @@ const message = messageFactory.createMessage({
   messageType: 'OrderCreated',
   payload: { orderId: '123', customerId: '456' },
   priority: MessagePriority.HIGH,
-  metadata: { source: 'OrderService' }
+  metadata: { source: 'OrderService' },
 });
 
 await outboxService.storeMessage(message);
@@ -178,7 +195,7 @@ await outboxService.storeMessage(message);
 // Process messages
 const processor = new OutboxProcessor(outboxService, {
   processingInterval: 5000,
-  maxConcurrency: 10
+  maxConcurrency: 10,
 });
 
 await processor.start();
@@ -187,32 +204,35 @@ await processor.start();
 ### Basic Saga Usage
 
 ```typescript
-import { 
-  BaseSaga, 
-  SagaOrchestrator, 
+import {
+  BaseSaga,
+  SagaOrchestrator,
   InMemorySagaRepository,
   Saga,
-  SagaEventHandler 
+  SagaEventHandler,
 } from '@vytches-ddd/messaging';
 
 // Define a saga
 @Saga('OrderProcessingSaga')
 class OrderProcessingSaga extends BaseSaga {
   constructor(sagaId: string, correlationId: string) {
-    super({
-      sagaId,
-      sagaType: 'OrderProcessingSaga',
-      status: SagaStatus.STARTED,
-      currentStep: 'ProcessPayment',
-      stepData: {},
-      compensationData: {},
-      correlationId,
-      metadata: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      timeoutAt: undefined,
-      version: 1
-    }, 'OrderProcessingSaga');
+    super(
+      {
+        sagaId,
+        sagaType: 'OrderProcessingSaga',
+        status: SagaStatus.STARTED,
+        currentStep: 'ProcessPayment',
+        stepData: {},
+        compensationData: {},
+        correlationId,
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        timeoutAt: undefined,
+        version: 1,
+      },
+      'OrderProcessingSaga'
+    );
   }
 
   @SagaEventHandler('OrderCreated')
@@ -223,13 +243,13 @@ class OrderProcessingSaga extends BaseSaga {
     // Process order creation
     this.updateState({
       currentStep: 'ProcessPayment',
-      stepData: { orderId: event.payload.orderId }
+      stepData: { orderId: event.payload.orderId },
     });
 
     return {
       success: true,
       commands: [{ type: 'ProcessPayment', payload: event.payload }],
-      events: [{ eventType: 'PaymentRequested', payload: event.payload }]
+      events: [{ eventType: 'PaymentRequested', payload: event.payload }],
     };
   }
 
@@ -241,13 +261,13 @@ class OrderProcessingSaga extends BaseSaga {
     // Process payment completion
     this.updateState({
       currentStep: 'ReserveInventory',
-      stepData: { ...this.state.stepData, paymentId: event.payload.paymentId }
+      stepData: { ...this.state.stepData, paymentId: event.payload.paymentId },
     });
 
     return {
       success: true,
       commands: [{ type: 'ReserveInventory', payload: event.payload }],
-      completesSaga: false
+      completesSaga: false,
     };
   }
 
@@ -266,15 +286,21 @@ class OrderProcessingSaga extends BaseSaga {
   }
 
   canHandle(event: IExtendedDomainEvent): boolean {
-    return ['OrderCreated', 'PaymentProcessed', 'InventoryReserved'].includes(event.eventType);
+    return ['OrderCreated', 'PaymentProcessed', 'InventoryReserved'].includes(
+      event.eventType
+    );
   }
 
-  private async refundPayment(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async refundPayment(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     // Implement refund logic
     return { success: true };
   }
 
-  private async releaseInventory(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async releaseInventory(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     // Implement inventory release logic
     return { success: true };
   }
@@ -284,14 +310,17 @@ class OrderProcessingSaga extends BaseSaga {
 ### Saga Orchestration
 
 ```typescript
-import { SagaOrchestrator, InMemorySagaRepository } from '@vytches-ddd/messaging';
+import {
+  SagaOrchestrator,
+  InMemorySagaRepository,
+} from '@vytches-ddd/messaging';
 
 // Setup saga infrastructure
 const sagaRepository = new InMemorySagaRepository();
 const orchestrator = new SagaOrchestrator(sagaRepository, {
   maxConcurrentExecutions: 50,
   enableMetrics: true,
-  enableAutoRetry: true
+  enableAutoRetry: true,
 });
 
 // Register saga definition
@@ -303,23 +332,21 @@ const orderSagaDefinition = {
   defaultTimeout: 3600000, // 1 hour
   maxInstances: 100,
   steps: [],
-  createInstance: async (event, context) => new OrderProcessingSaga(
-    generateId(),
-    event.correlationId || generateId()
-  ),
+  createInstance: async (event, context) =>
+    new OrderProcessingSaga(generateId(), event.correlationId || generateId()),
   getCorrelationData: event => ({ orderId: event.payload.orderId }),
-  validate: () => []
+  validate: () => [],
 };
 
 orchestrator.registerSagaDefinition(orderSagaDefinition);
 
 // Process events
 const event = createOrderCreatedEvent();
-const context = { 
-  correlationId: 'order-123', 
+const context = {
+  correlationId: 'order-123',
   userId: 'user-456',
   metadata: {},
-  timestamp: new Date()
+  timestamp: new Date(),
 };
 
 const results = await orchestrator.processEvent(event, context);
@@ -339,21 +366,21 @@ const message = factory.createMessage({
   messageType: 'UserRegistered',
   payload: { userId: '123', email: 'user@example.com' },
   priority: MessagePriority.HIGH,
-  metadata: { source: 'UserService' }
+  metadata: { source: 'UserService' },
 });
 
 // Create delayed message
 const delayedMessage = factory.createMessage({
   messageType: 'SendWelcomeEmail',
   payload: { userId: '123' },
-  processAfter: new Date(Date.now() + 60000) // 1 minute delay
+  processAfter: new Date(Date.now() + 60000), // 1 minute delay
 });
 
 // Create batch of messages
 const messages = factory.createBatch([
   { messageType: 'Event1', payload: { data: 'test1' } },
   { messageType: 'Event2', payload: { data: 'test2' } },
-  { messageType: 'Event3', payload: { data: 'test3' } }
+  { messageType: 'Event3', payload: { data: 'test3' } },
 ]);
 ```
 
@@ -394,15 +421,15 @@ class EmailMessageHandler implements IOutboxMessageHandler {
 import { OutboxProcessor, OutboxService } from '@vytches-ddd/messaging';
 
 const processor = new OutboxProcessor(outboxService, {
-  processingInterval: 5000,        // Process every 5 seconds
-  maxConcurrency: 10,              // Process up to 10 messages concurrently
-  maxRetries: 3,                   // Retry failed messages up to 3 times
-  retryDelay: 1000,                // Wait 1 second between retries
-  batchSize: 100,                  // Process 100 messages per batch
-  enableMetrics: true,             // Enable performance metrics
+  processingInterval: 5000, // Process every 5 seconds
+  maxConcurrency: 10, // Process up to 10 messages concurrently
+  maxRetries: 3, // Retry failed messages up to 3 times
+  retryDelay: 1000, // Wait 1 second between retries
+  batchSize: 100, // Process 100 messages per batch
+  enableMetrics: true, // Enable performance metrics
   errorHandler: (error, message) => {
     console.error('Message processing failed:', error);
-  }
+  },
 });
 
 await processor.start();
@@ -413,17 +440,18 @@ await processor.start();
 ### Saga Definition
 
 ```typescript
-import { 
-  BaseSaga, 
-  SagaDefinition, 
-  SagaStep, 
-  SagaStatus 
+import {
+  BaseSaga,
+  SagaDefinition,
+  SagaStep,
+  SagaStatus,
 } from '@vytches-ddd/messaging';
 
 const orderProcessingDefinition = new SagaDefinition({
   sagaType: 'OrderProcessingSaga',
   displayName: 'Order Processing Workflow',
-  description: 'Comprehensive order processing with payment, inventory, and shipping',
+  description:
+    'Comprehensive order processing with payment, inventory, and shipping',
   startEvents: ['OrderCreated'],
   defaultTimeout: 3600000,
   maxInstances: 1000,
@@ -434,7 +462,7 @@ const orderProcessingDefinition = new SagaDefinition({
       compensatable: true,
       timeout: 30000,
       triggerEvents: ['OrderCreated'],
-      completionEvents: ['PaymentProcessed', 'PaymentFailed']
+      completionEvents: ['PaymentProcessed', 'PaymentFailed'],
     }),
     new SagaStep({
       name: 'ReserveInventory',
@@ -442,7 +470,7 @@ const orderProcessingDefinition = new SagaDefinition({
       compensatable: true,
       timeout: 15000,
       triggerEvents: ['PaymentProcessed'],
-      completionEvents: ['InventoryReserved', 'InventoryNotAvailable']
+      completionEvents: ['InventoryReserved', 'InventoryNotAvailable'],
     }),
     new SagaStep({
       name: 'ArrangeShipping',
@@ -450,9 +478,9 @@ const orderProcessingDefinition = new SagaDefinition({
       compensatable: true,
       timeout: 60000,
       triggerEvents: ['InventoryReserved'],
-      completionEvents: ['ShippingArranged', 'ShippingFailed']
-    })
-  ]
+      completionEvents: ['ShippingArranged', 'ShippingFailed'],
+    }),
+  ],
 });
 ```
 
@@ -465,22 +493,27 @@ class OrderProcessingSaga extends BaseSaga {
       ...this._state,
       ...updates,
       updatedAt: new Date(),
-      version: this._state.version + 1
+      version: this._state.version + 1,
     };
   }
 
-  protected addCompensationData(stepName: string, data: Record<string, unknown>): void {
+  protected addCompensationData(
+    stepName: string,
+    data: Record<string, unknown>
+  ): void {
     this._state.compensationData[stepName] = data;
   }
 
-  protected getCompensationData(stepName: string): Record<string, unknown> | undefined {
+  protected getCompensationData(
+    stepName: string
+  ): Record<string, unknown> | undefined {
     return this._state.compensationData[stepName];
   }
 
   protected markCompleted(): void {
     this.updateState({
       status: SagaStatus.COMPLETED,
-      currentStep: 'COMPLETED'
+      currentStep: 'COMPLETED',
     });
   }
 
@@ -490,8 +523,8 @@ class OrderProcessingSaga extends BaseSaga {
       error: {
         message: error,
         step,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 }
@@ -509,8 +542,8 @@ const repository = new InMemorySagaRepository({
   retentionPolicy: {
     completedAfterDays: 30,
     compensatedAfterDays: 60,
-    failedAfterDays: 90
-  }
+    failedAfterDays: 90,
+  },
 });
 
 // Save saga state
@@ -518,7 +551,7 @@ await repository.save(sagaInstance);
 
 // Find sagas by correlation
 const relatedSagas = await repository.findByCorrelation({
-  orderId: 'order-123'
+  orderId: 'order-123',
 });
 
 // Find timed out sagas
@@ -531,7 +564,7 @@ const queryResult = await repository.query({
   createdBetween: { start: yesterday, end: today },
   limit: 50,
   sortBy: 'createdAt',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
 });
 ```
 
@@ -540,11 +573,11 @@ const queryResult = await repository.query({
 ### Built-in Middleware
 
 ```typescript
-import { 
-  RetryMiddleware, 
-  CircuitBreakerMiddleware, 
+import {
+  RetryMiddleware,
+  CircuitBreakerMiddleware,
   PerformanceMonitoringMiddleware,
-  SecurityMiddleware 
+  SecurityMiddleware,
 } from '@vytches-ddd/messaging';
 
 // Retry middleware
@@ -552,28 +585,28 @@ const retryMiddleware = new RetryMiddleware({
   maxAttempts: 3,
   baseDelay: 1000,
   maxDelay: 30000,
-  retryCondition: (error) => error.code === 'TRANSIENT_ERROR'
+  retryCondition: error => error.code === 'TRANSIENT_ERROR',
 });
 
 // Circuit breaker middleware
 const circuitBreakerMiddleware = new CircuitBreakerMiddleware({
   failureThreshold: 5,
   resetTimeout: 60000,
-  monitoredServices: ['payment-service', 'inventory-service']
+  monitoredServices: ['payment-service', 'inventory-service'],
 });
 
 // Performance monitoring
 const performanceMiddleware = new PerformanceMonitoringMiddleware({
   enableMetrics: true,
   slowExecutionThreshold: 5000,
-  memoryUsageTracking: true
+  memoryUsageTracking: true,
 });
 
 // Security middleware
 const securityMiddleware = new SecurityMiddleware({
   validateCorrelationId: true,
   requireAuthentication: true,
-  allowedOrigins: ['order-service', 'payment-service']
+  allowedOrigins: ['order-service', 'payment-service'],
 });
 ```
 
@@ -595,17 +628,17 @@ class AuditMiddleware extends BaseSagaMiddleware {
       sagaType: saga.sagaType,
       eventType: event.eventType,
       correlationId: context.correlationId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     try {
       const result = await next();
-      
+
       // Post-execution audit
       await this.auditService.logSagaResult({
         sagaId: saga.sagaId,
         success: result.success,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return result;
@@ -614,9 +647,9 @@ class AuditMiddleware extends BaseSagaMiddleware {
       await this.auditService.logSagaError({
         sagaId: saga.sagaId,
         error: error.message,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      
+
       throw error;
     }
   }
@@ -628,10 +661,10 @@ class AuditMiddleware extends BaseSagaMiddleware {
 ### Saga Error Handling
 
 ```typescript
-import { 
-  SagaError, 
-  SagaExecutionError, 
-  SagaCompensationError 
+import {
+  SagaError,
+  SagaExecutionError,
+  SagaCompensationError,
 } from '@vytches-ddd/messaging';
 
 class OrderProcessingSaga extends BaseSaga {
@@ -645,22 +678,24 @@ class OrderProcessingSaga extends BaseSaga {
       if (error instanceof SagaExecutionError) {
         // Handle execution errors
         this.markFailed(error.message, this.state.currentStep);
-        
+
         if (error.requiresCompensation) {
           return await this.startCompensation(context);
         }
       }
-      
+
       throw error;
     }
   }
 
-  private async startCompensation(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async startCompensation(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     this.updateState({ status: SagaStatus.COMPENSATING });
-    
+
     // Execute compensation in reverse order
     const completedSteps = this.getCompletedSteps();
-    
+
     for (const step of completedSteps.reverse()) {
       try {
         await this.compensateStep(step, context);
@@ -671,9 +706,9 @@ class OrderProcessingSaga extends BaseSaga {
         );
       }
     }
-    
+
     this.updateState({ status: SagaStatus.COMPENSATED });
-    
+
     return { success: true };
   }
 }
@@ -687,7 +722,7 @@ import { OutboxProcessor } from '@vytches-ddd/messaging';
 const processor = new OutboxProcessor(outboxService, {
   errorHandler: async (error, message) => {
     console.error(`Failed to process message ${message.id}:`, error);
-    
+
     // Custom error handling logic
     if (error.code === 'RATE_LIMIT_EXCEEDED') {
       // Reschedule message for later
@@ -704,9 +739,9 @@ const processor = new OutboxProcessor(outboxService, {
     await notificationService.notifyAdmins({
       type: 'DEAD_LETTER_MESSAGE',
       messageId: message.id,
-      error: error.message
+      error: error.message,
     });
-  }
+  },
 });
 ```
 
@@ -722,8 +757,8 @@ const orchestrator = new SagaOrchestrator(repository, {
   metricsConfig: {
     collectExecutionTimes: true,
     collectMemoryUsage: true,
-    collectCorrelationStats: true
-  }
+    collectCorrelationStats: true,
+  },
 });
 
 // Get comprehensive statistics
@@ -734,16 +769,18 @@ console.log('Saga Statistics:', {
   completedInstances: stats.completedInstances,
   failedInstances: stats.failedInstances,
   averageExecutionTime: stats.averageExecutionTime,
-  memoryUsage: stats.memoryUsage
+  memoryUsage: stats.memoryUsage,
 });
 
 // Get metrics by saga type
-const typeMetrics = await orchestrator.getMetricsBySagaType('OrderProcessingSaga');
+const typeMetrics = await orchestrator.getMetricsBySagaType(
+  'OrderProcessingSaga'
+);
 console.log('Order Processing Metrics:', {
   instanceCount: typeMetrics.instanceCount,
   successRate: typeMetrics.successRate,
   averageSteps: typeMetrics.averageSteps,
-  compensationRate: typeMetrics.compensationRate
+  compensationRate: typeMetrics.compensationRate,
 });
 ```
 
@@ -759,8 +796,8 @@ const performanceMiddleware = new PerformanceMonitoringMiddleware({
   customMetrics: {
     trackCorrelationCounts: true,
     trackEventProcessingTimes: true,
-    trackCompensationRates: true
-  }
+    trackCompensationRates: true,
+  },
 });
 
 // Get performance metrics
@@ -770,7 +807,7 @@ console.log('Performance Metrics:', {
   averageExecutionTime: metrics.averageExecutionTime,
   slowExecutions: metrics.slowExecutions,
   memoryUsage: metrics.memoryUsage,
-  errorRate: metrics.errorRate
+  errorRate: metrics.errorRate,
 });
 ```
 
@@ -787,14 +824,14 @@ const eventBus = new UnifiedEventBus();
 const outboxHandler = new EventBusOutboxHandler(eventBus);
 
 // Register handler for specific message types
-outboxHandler.registerHandler('DomainEvent', async (message) => {
+outboxHandler.registerHandler('DomainEvent', async message => {
   const domainEvent = message.payload;
   await eventBus.publish(domainEvent);
 });
 
 // Process outbox messages through event bus
 const processor = new OutboxProcessor(outboxService, {
-  messageHandler: outboxHandler
+  messageHandler: outboxHandler,
 });
 ```
 
@@ -815,10 +852,10 @@ class OrderRepository extends IBaseRepository<OrderAggregate> {
   async save(order: OrderAggregate): Promise<void> {
     // Save aggregate
     await super.save(order);
-    
+
     // Store events in outbox for reliable delivery
     const events = order.getUncommittedEvents();
-    
+
     for (const event of events) {
       const message = OutboxMessageFactory.fromDomainEvent(event);
       await this.outboxService.storeMessage(message);
@@ -835,9 +872,7 @@ import { SagaOrchestrator } from '@vytches-ddd/messaging';
 
 @CommandHandler(ProcessOrderCommand)
 class ProcessOrderHandler {
-  constructor(
-    private sagaOrchestrator: SagaOrchestrator
-  ) {}
+  constructor(private sagaOrchestrator: SagaOrchestrator) {}
 
   async execute(command: ProcessOrderCommand): Promise<void> {
     // Create order processing saga
@@ -846,7 +881,7 @@ class ProcessOrderHandler {
       correlationId: command.correlationId,
       userId: command.userId,
       metadata: { source: 'OrderService' },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await this.sagaOrchestrator.processEvent(event, context);
@@ -874,16 +909,16 @@ describe('OrderProcessingSaga', () => {
       correlationId: 'correlation-456',
       userId: 'user-123',
       metadata: {},
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   });
 
   describe('handleOrderCreated', () => {
     it('should transition to payment processing', async () => {
       const event = createOrderCreatedEvent();
-      
-      const [error, result] = await safeRun(async () => 
-        await saga.handleEvent(event, context)
+
+      const [error, result] = await safeRun(
+        async () => await saga.handleEvent(event, context)
       );
 
       expect(error).toBeUndefined();
@@ -895,9 +930,9 @@ describe('OrderProcessingSaga', () => {
 
     it('should handle invalid event gracefully', async () => {
       const invalidEvent = createInvalidEvent();
-      
-      const [error] = await safeRun(async () => 
-        await saga.handleEvent(invalidEvent, context)
+
+      const [error] = await safeRun(
+        async () => await saga.handleEvent(invalidEvent, context)
       );
 
       expect(error).toBeInstanceOf(SagaEventProcessingError);
@@ -911,13 +946,13 @@ describe('OrderProcessingSaga', () => {
       saga.updateState({
         currentStep: 'ReserveInventory',
         stepData: { paymentId: 'payment-123' },
-        compensationData: { 
-          ProcessPayment: { paymentId: 'payment-123' }
-        }
+        compensationData: {
+          ProcessPayment: { paymentId: 'payment-123' },
+        },
       });
 
-      const [error, result] = await safeRun(async () => 
-        await saga.compensate('ProcessPayment', context)
+      const [error, result] = await safeRun(
+        async () => await saga.compensate('ProcessPayment', context)
       );
 
       expect(error).toBeUndefined();
@@ -932,7 +967,11 @@ describe('OrderProcessingSaga', () => {
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import { OutboxService, OutboxMessageFactory, MessageStatus } from '@vytches-ddd/messaging';
+import {
+  OutboxService,
+  OutboxMessageFactory,
+  MessageStatus,
+} from '@vytches-ddd/messaging';
 
 describe('OutboxService', () => {
   let service: OutboxService;
@@ -947,15 +986,15 @@ describe('OutboxService', () => {
     it('should store message successfully', async () => {
       const message = factory.createMessage({
         messageType: 'TestEvent',
-        payload: { data: 'test' }
+        payload: { data: 'test' },
       });
 
-      const [error] = await safeRun(async () => 
-        await service.storeMessage(message)
+      const [error] = await safeRun(
+        async () => await service.storeMessage(message)
       );
 
       expect(error).toBeUndefined();
-      
+
       const stored = await service.getMessageById(message.id);
       expect(stored).toBeDefined();
       expect(stored?.status).toBe(MessageStatus.PENDING);
@@ -964,13 +1003,13 @@ describe('OutboxService', () => {
     it('should handle duplicate message IDs', async () => {
       const message = factory.createMessage({
         messageType: 'TestEvent',
-        payload: { data: 'test' }
+        payload: { data: 'test' },
       });
 
       await service.storeMessage(message);
-      
-      const [duplicateError] = await safeRun(async () => 
-        await service.storeMessage(message)
+
+      const [duplicateError] = await safeRun(
+        async () => await service.storeMessage(message)
       );
 
       expect(duplicateError).toBeInstanceOf(OutboxError);
@@ -981,8 +1020,14 @@ describe('OutboxService', () => {
   describe('processMessages', () => {
     it('should process pending messages', async () => {
       const messages = [
-        factory.createMessage({ messageType: 'Event1', payload: { data: '1' } }),
-        factory.createMessage({ messageType: 'Event2', payload: { data: '2' } })
+        factory.createMessage({
+          messageType: 'Event1',
+          payload: { data: '1' },
+        }),
+        factory.createMessage({
+          messageType: 'Event2',
+          payload: { data: '2' },
+        }),
       ];
 
       for (const message of messages) {
@@ -1032,7 +1077,8 @@ describe('OutboxService', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1056,10 +1102,12 @@ pnpm test:packages:messaging
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

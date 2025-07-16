@@ -7,7 +7,20 @@ import { BusinessRuleValidator } from './business-rules/business-rule-validator'
 import { CompositeSpecification as Specification } from './specifications/composite-specification';
 
 /**
- * Fabryki i narzędzia do pracy z walidatorami i specyfikacjami
+ * @llm-summary Validation constant
+ * @llm-domain Pattern
+ *
+ * @description
+ * Validation constant implementing domain pattern implementation for validation operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(Validation);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const Validation = {
   /**

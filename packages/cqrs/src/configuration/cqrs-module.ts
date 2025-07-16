@@ -2,6 +2,32 @@ import { CQRSConfiguration } from './cqrs-configuration';
 import type { CQRSOptions } from './cqrs-options.interface';
 import type { IDependencyContainer } from '@vytches-ddd/di';
 
+/**
+ * @llm-summary CQRSModule class for c q r s module operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * CQRSModule class implementing architectural component for c q r s module operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CQRSModule();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CQRSModule());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class CQRSModule {
   static create(container: IDependencyContainer, options: CQRSOptions = {}): CQRSConfiguration {
     return new CQRSConfiguration(container, options);

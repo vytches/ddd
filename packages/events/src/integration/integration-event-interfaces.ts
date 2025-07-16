@@ -2,8 +2,23 @@
 import type { IActor } from '@vytches-ddd/core';
 
 /**
- * Metadata for integration events
- * Contains additional information relevant for inter-bounded context communication
+ * @llm-summary Contract for integration event metadata functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * IntegrationEventMetadata interface implementing architectural component for integration event metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteIntegrationEventMetadata implements IIntegrationEventMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IIntegrationEventMetadata {
   /** Unique identifier for the event */
@@ -41,8 +56,23 @@ export interface IIntegrationEventMetadata {
 }
 
 /**
- * Base interface for integration events
- * Represents an event communicated between bounded contexts
+ * @llm-summary Contract for integration event functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * IntegrationEvent interface implementing architectural component for integration event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteIntegrationEvent implements IIntegrationEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IIntegrationEvent<P = unknown> {
   /** Type of the event */
@@ -56,8 +86,23 @@ export interface IIntegrationEvent<P = unknown> {
 }
 
 /**
- * Interface for domain to integration event transformer
- * Responsible for transforming domain events to integration events
+ * @llm-summary Contract for domain to integration event transformer functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * DomainToIntegrationEventTransformer interface implementing architectural component for domain to integration event transformer operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainToIntegrationEventTransformer implements IDomainToIntegrationEventTransformer {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDomainToIntegrationEventTransformer<D = unknown, I = unknown> {
   /**

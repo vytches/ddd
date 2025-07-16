@@ -11,8 +11,30 @@ import type {
 import { JobStatus } from '@vytches-ddd/contracts';
 
 /**
- * In-memory scheduler adapter for development and testing
- * Stores all scheduled jobs in memory and processes them using timers
+ * @llm-summary InMemorySchedulerAdapter class for in memory scheduler adapter operations
+ * @llm-domain Core
+ * @llm-complexity Medium
+ *
+ * @description
+ * InMemorySchedulerAdapter class implementing core domain functionality for in memory scheduler adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new InMemorySchedulerAdapter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new InMemorySchedulerAdapter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
   private jobs: Map<string, IScheduledJob> = new Map();

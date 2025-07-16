@@ -7,7 +7,30 @@ import type {
 import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
 
 /**
- * Version error for repository operations
+ * @llm-summary VersionError class for version error operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * VersionError class implementing domain pattern implementation for version error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new VersionError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new VersionError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(
@@ -25,13 +48,55 @@ export class VersionError extends IDomainError {
 }
 
 /**
- * Base aggregate interface for repository operations
+ * @llm-summary Contract for repository aggregate functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * RepositoryAggregate interface implementing domain pattern implementation for repository aggregate operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteRepositoryAggregate implements IRepositoryAggregate {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IRepositoryAggregate extends IAggregateWithEvents {
   getId(): EntityId;
   getInitialVersion(): number;
 }
 
+/**
+ * @llm-summary BaseRepository class for base repository operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseRepository class implementing domain pattern implementation for base repository operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IBaseRepository();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IBaseRepository());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export abstract class IBaseRepository {
   constructor(
     protected readonly eventDispatcher: IEnhancedEventDispatcher,

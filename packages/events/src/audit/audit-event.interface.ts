@@ -2,7 +2,21 @@
 import type { IActor } from '@vytches-ddd/core';
 
 /**
- * Enum dla typów akcji audytowych
+ * @llm-summary Enumeration of audit action type values
+ * @llm-domain Architecture
+ * @llm-usage Frequent
+ *
+ * @description
+ * AuditActionType enum implementing architectural component for audit action type operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AuditActionType = AuditActionType.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum AuditActionType {
   /** Dodanie nowego zasobu */
@@ -28,7 +42,21 @@ export enum AuditActionType {
 }
 
 /**
- * Enum dla statusów operacji audytowej
+ * @llm-summary Enumeration of audit status values
+ * @llm-domain Architecture
+ * @llm-usage Frequent
+ *
+ * @description
+ * AuditStatus enum implementing architectural component for audit status operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AuditStatus = AuditStatus.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum AuditStatus {
   /** Operacja zakończona sukcesem */
@@ -42,8 +70,23 @@ export enum AuditStatus {
 }
 
 /**
- * Metadata dla eventów audytowych
- * Zawiera dodatkowe informacje istotne dla rejestrowania i analizy działań w systemie
+ * @llm-summary Contract for audit event metadata functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * AuditEventMetadata interface implementing architectural component for audit event metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditEventMetadata implements IAuditEventMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditEventMetadata {
   /** Unikalny identyfikator eventu */
@@ -102,8 +145,23 @@ export interface IAuditEventMetadata {
 }
 
 /**
- * Podstawowy interfejs dla eventów audytowych
- * Reprezentuje zapis działania w systemie
+ * @llm-summary Contract for audit event functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * AuditEvent interface implementing architectural component for audit event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditEvent implements IAuditEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditEvent<P = unknown> {
   /** Typ eventu */
@@ -117,8 +175,23 @@ export interface IAuditEvent<P = unknown> {
 }
 
 /**
- * Interfejs dla transformera eventów domenowych na audytowe
- * Odpowiada za transformację eventów domenowych na eventy audytowe
+ * @llm-summary Contract for domain to audit event transformer functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * DomainToAuditEventTransformer interface implementing architectural component for domain to audit event transformer operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainToAuditEventTransformer implements IDomainToAuditEventTransformer {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDomainToAuditEventTransformer<D = unknown, A = unknown> {
   /**
@@ -130,8 +203,23 @@ export interface IDomainToAuditEventTransformer<D = unknown, A = unknown> {
 }
 
 /**
- * Interfejs dla filtra eventów audytowych
- * Określa, czy event powinien być przetworzony czy nie
+ * @llm-summary Contract for audit event filter functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * AuditEventFilter interface implementing architectural component for audit event filter operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditEventFilter implements IAuditEventFilter {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditEventFilter {
   /**
@@ -143,8 +231,23 @@ export interface IAuditEventFilter {
 }
 
 /**
- * Interfejs dla usługi audytu
- * Definiuje metody do rejestrowania zdarzeń audytowych
+ * @llm-summary Contract for audit service functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * AuditService interface implementing architectural component for audit service operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditService implements IAuditService {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditService {
   /**

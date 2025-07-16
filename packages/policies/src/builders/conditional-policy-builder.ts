@@ -22,7 +22,30 @@ import type { Result } from '@vytches-ddd/utils';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
 /**
- * Conditional policy builder for when/then/otherwise logic
+ * @llm-summary ConditionalPolicyBuilder class for conditional policy builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * ConditionalPolicyBuilder class implementing domain pattern implementation for conditional policy builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ConditionalPolicyBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ConditionalPolicyBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ConditionalPolicyBuilder<T> implements IConditionalPolicyBuilder<T> {
   constructor(
@@ -71,7 +94,30 @@ export class ConditionalPolicyBuilder<T> implements IConditionalPolicyBuilder<T>
 }
 
 /**
- * Conditional policy then step builder
+ * @llm-summary ConditionalPolicyThenStepBuilder class for conditional policy then step builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * ConditionalPolicyThenStepBuilder class implementing domain pattern implementation for conditional policy then step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ConditionalPolicyThenStepBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ConditionalPolicyThenStepBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ConditionalPolicyThenStepBuilder<T> implements IConditionalPolicyThenStepBuilder<T> {
   constructor(
@@ -190,7 +236,30 @@ export class ConditionalPolicyThenStepBuilder<T> implements IConditionalPolicyTh
 }
 
 /**
- * Conditional policy else step builder
+ * @llm-summary ConditionalPolicyElseStepBuilder class for conditional policy else step builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * ConditionalPolicyElseStepBuilder class implementing domain pattern implementation for conditional policy else step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ConditionalPolicyElseStepBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ConditionalPolicyElseStepBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyElseStepBuilder<T> {
   constructor(
@@ -265,7 +334,30 @@ export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyEl
 }
 
 /**
- * Conditional policy else clause
+ * @llm-summary ConditionalPolicyElse class for conditional policy else operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * ConditionalPolicyElse class implementing domain pattern implementation for conditional policy else operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ConditionalPolicyElse();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ConditionalPolicyElse());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ConditionalPolicyElse<T> implements IConditionalPolicyElse<T> {
   constructor(

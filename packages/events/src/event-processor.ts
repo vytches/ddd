@@ -2,8 +2,23 @@ import type { IDomainEvent } from '@vytches-ddd/contracts';
 import type { UnifiedEventBus } from './unified-event-bus';
 
 /**
- * Interface for event processors
- * Processors handle domain events and may publish events to other buses
+ * @llm-summary Contract for event processor functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * EventProcessor interface implementing architectural component for event processor operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventProcessor implements IEventProcessor {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventProcessor {
   /**

@@ -17,6 +17,33 @@ import { DomainServiceDiscoveryPlugin } from './domain-service-discovery-plugin'
   autoRegister: true,
   tags: ['validation', 'user'],
 })
+
+/**
+ * @llm-summary UserValidationService class for user validation service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * UserValidationService class implementing domain pattern implementation for user validation service operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UserValidationService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UserValidationService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class UserValidationService extends IBaseDomainService {
   constructor() {
     super('userValidationService');
@@ -39,6 +66,33 @@ export class UserValidationService extends IBaseDomainService {
   transactional: true,
   publishesEvents: true,
 })
+
+/**
+ * @llm-summary OrderProcessingService class for order processing service operations
+ * @llm-domain Pattern
+ * @llm-complexity Complex
+ *
+ * @description
+ * OrderProcessingService class implementing domain pattern implementation for order processing service operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OrderProcessingService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OrderProcessingService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class OrderProcessingService extends IBaseDomainService {
   constructor() {
     super('orderProcessingService');
@@ -66,6 +120,33 @@ export class OrderProcessingService extends IBaseDomainService {
 
 // Legacy domain service (backward compatibility)
 @DomainService('legacyInventoryService')
+
+/**
+ * @llm-summary LegacyInventoryService class for legacy inventory service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * LegacyInventoryService class implementing domain pattern implementation for legacy inventory service operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new LegacyInventoryService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new LegacyInventoryService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class LegacyInventoryService extends IBaseDomainService {
   constructor() {
     super('legacyInventoryService');
@@ -78,7 +159,29 @@ export class LegacyInventoryService extends IBaseDomainService {
 }
 
 /**
- * Example setup function showing how to configure DI container with domain services
+ * @llm-summary setup domain services with d i function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * setupDomainServicesWithDI function implementing domain pattern implementation for setup domain services with d i operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = setupDomainServicesWithDI();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => setupDomainServicesWithDI());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function setupDomainServicesWithDI() {
   // Create and configure container
@@ -115,7 +218,29 @@ export async function setupDomainServicesWithDI() {
 }
 
 /**
- * Example usage function
+ * @llm-summary example usage function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * exampleUsage function implementing domain pattern implementation for example usage operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = exampleUsage();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => exampleUsage());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function exampleUsage() {
   // Setup DI

@@ -14,9 +14,13 @@ Integration Points: All packages use testing utilities; special patterns for agg
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Comprehensive testing utilities and DDD-specific testing helpers for Domain-Driven Design patterns**
+> **Comprehensive testing utilities and DDD-specific testing helpers for
+> Domain-Driven Design patterns**
 
-Testing infrastructure specifically designed for Domain-Driven Design applications. Provides safe execution utilities, test harnesses, test data builders, time control mechanisms, and specialized testing patterns for aggregates, domain events, CQRS operations, and repositories.
+Testing infrastructure specifically designed for Domain-Driven Design
+applications. Provides safe execution utilities, test harnesses, test data
+builders, time control mechanisms, and specialized testing patterns for
+aggregates, domain events, CQRS operations, and repositories.
 
 ## 📋 Table of Contents
 
@@ -59,30 +63,36 @@ npm install @vytches-ddd/utils
 ## ✨ Key Features
 
 ### Safe Execution
+
 - **SafeRun Pattern**: Functional error handling for tests without try/catch
 - **Type-Safe Error Testing**: Proper error handling with specific error types
-- **Enhanced Error Context**: DDD-specific error handling with context information
+- **Enhanced Error Context**: DDD-specific error handling with context
+  information
 - **Timeout Support**: Safe execution with configurable timeouts
 
 ### Test Harness System
+
 - **Base Test Harness**: Foundation for all testing scenarios
 - **Lifecycle Management**: Proper setup/teardown with resource management
 - **Resource Tracking**: Automatic cleanup of test resources
 - **State Management**: Track harness state and errors
 
 ### Time Control
+
 - **Test Clock**: Deterministic time control for testing
 - **Time Scenarios**: Builder pattern for complex time-based tests
 - **Time Freezing**: Freeze time for consistent test execution
 - **Time Advancement**: Controlled time progression in tests
 
 ### Test Data Builders
+
 - **Entity Builders**: Create test entities with realistic data
 - **Domain Event Builders**: Generate domain events for testing
 - **User Builders**: Create test users with various scenarios
 - **Sequence Generation**: Generate sequential test data
 
 ### DDD-Specific Testing
+
 - **Aggregate Testing**: Specialized patterns for aggregate testing
 - **Domain Event Testing**: Test domain event publication and handling
 - **CQRS Testing**: Command and query handler testing utilities
@@ -96,26 +106,31 @@ The SafeRun pattern provides functional error handling for tests:
 
 ```typescript
 // SafeRun result type
-type SafeRunResult<T, E extends Error = Error> = readonly [E | undefined, T | undefined];
+type SafeRunResult<T, E extends Error = Error> = readonly [
+  E | undefined,
+  T | undefined,
+];
 
 // Synchronous version
-function safeRun<T, E extends Error = Error>(fn: () => T): SafeRunResult<T, E>
+function safeRun<T, E extends Error = Error>(fn: () => T): SafeRunResult<T, E>;
 
 // Asynchronous version
-function safeRun<T, E extends Error = Error>(fn: () => Promise<T>): Promise<SafeRunResult<T, E>>
+function safeRun<T, E extends Error = Error>(
+  fn: () => Promise<T>
+): Promise<SafeRunResult<T, E>>;
 
 // Enhanced testing version with context
 function safeRunTest<T, E extends Error = Error>(
   fn: () => T | Promise<T>,
   context?: string
-): SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>
+): SafeRunResult<T, E> | Promise<SafeRunResult<T, E>>;
 
 // With timeout support
 function safeRunWithTimeout<T, E extends Error = Error>(
   fn: () => Promise<T>,
   timeoutMs: number,
   context?: string
-): Promise<SafeRunResult<T, E | Error>>
+): Promise<SafeRunResult<T, E | Error>>;
 ```
 
 ### Test Harness Interface
@@ -183,7 +198,10 @@ import { safeRun } from '@vytches-ddd/testing';
 describe('UserService', () => {
   it('should create user successfully', () => {
     const [error, user] = safeRun(() => {
-      return userService.createUser({ name: 'John', email: 'john@example.com' });
+      return userService.createUser({
+        name: 'John',
+        email: 'john@example.com',
+      });
     });
 
     expect(error).toBeUndefined();
@@ -222,7 +240,7 @@ describe('OrderService', () => {
       teardownFn: async () => {
         // Custom teardown logic
         await database.disconnect();
-      }
+      },
     });
 
     await harness.initialize();
@@ -298,7 +316,10 @@ describe('UserRepository', () => {
       return await userRepository.save(testUser);
     }, 'database-connection-test');
 
-    const connectionError = expectError(DatabaseConnectionError)([dbError, undefined]);
+    const connectionError = expectError(DatabaseConnectionError)([
+      dbError,
+      undefined,
+    ]);
     expect(connectionError.data?.testContext).toBe('database-connection-test');
   });
 });
@@ -354,14 +375,14 @@ class DatabaseTestHarness extends TestHarness {
   protected async performInitialization(): Promise<void> {
     // Initialize database connection
     this.database = await Database.connect(testConfig);
-    
+
     // Register database as a resource
     const dbResource = TestResourceBuilder.create('database', 'main')
       .withDisposal(async () => {
         await this.database?.close();
       })
       .build();
-    
+
     this.registerResource(dbResource);
   }
 
@@ -369,14 +390,17 @@ class DatabaseTestHarness extends TestHarness {
     // Start transaction for test isolation
     const transaction = await this.database!.beginTransaction();
     this.transactions.push(transaction);
-    
+
     // Register transaction as a resource
-    const txResource = TestResourceBuilder.create('transaction', `tx-${Date.now()}`)
+    const txResource = TestResourceBuilder.create(
+      'transaction',
+      `tx-${Date.now()}`
+    )
       .withDisposal(async () => {
         await transaction.rollback();
       })
       .build();
-    
+
     this.registerResource(txResource);
   }
 
@@ -425,7 +449,7 @@ describe('User Integration Tests', () => {
   beforeEach(async () => {
     harness = new DatabaseTestHarness({
       autoCleanup: true,
-      verbose: process.env.NODE_ENV === 'development'
+      verbose: process.env.NODE_ENV === 'development',
     });
 
     await harness.initialize();
@@ -439,7 +463,10 @@ describe('User Integration Tests', () => {
 
   it('should create and retrieve user', async () => {
     const [createError, user] = await harness.safeExecute(async () => {
-      return await harness.createTestUser({ name: 'John', email: 'john@test.com' });
+      return await harness.createTestUser({
+        name: 'John',
+        email: 'john@test.com',
+      });
     });
 
     expect(createError).toBeUndefined();
@@ -468,30 +495,30 @@ describe('TimeBasedService', () => {
   it('should handle time-based operations', () => {
     const testClock = TestClock.create();
     const startTime = new Date('2023-01-01T00:00:00Z');
-    
+
     testClock.setTime(startTime);
-    
+
     const service = new TimeBasedService();
     const result = service.processTimeBasedOperation();
-    
+
     expect(result.timestamp).toEqual(startTime);
-    
+
     // Advance time by 1 hour
     testClock.advance({ hours: 1 });
-    
+
     const laterResult = service.processTimeBasedOperation();
     expect(laterResult.timestamp).toEqual(new Date('2023-01-01T01:00:00Z'));
-    
+
     testClock.restore();
   });
 
   it('should test with automatic time restoration', () => {
     withTestClock(testClock => {
       testClock.setTime(new Date('2023-01-01T00:00:00Z'));
-      
+
       const service = new TimeBasedService();
       const result = service.getCurrentTime();
-      
+
       expect(result).toEqual(new Date('2023-01-01T00:00:00Z'));
     }); // Clock automatically restored here
   });
@@ -537,13 +564,19 @@ describe('ScheduledTaskService', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { EntityIdBuilder, UserBuilder, TestDataBuilder } from '@vytches-ddd/testing';
+import {
+  EntityIdBuilder,
+  UserBuilder,
+  TestDataBuilder,
+} from '@vytches-ddd/testing';
 
 describe('User Management', () => {
   it('should create users with different ID types', () => {
     // UUID-based entity ID
     const uuidId = EntityIdBuilder.uuid().build();
-    expect(uuidId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(uuidId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    );
 
     // Integer-based entity ID
     const intId = EntityIdBuilder.integer(42).build();
@@ -574,7 +607,7 @@ describe('User Management', () => {
     const builder = TestDataBuilder.sequence({
       start: 1,
       prefix: 'user_',
-      suffix: '@test.com'
+      suffix: '@test.com',
     });
 
     const user1 = builder.build<{ id: string; email: string }>();
@@ -600,7 +633,7 @@ describe('Domain Events', () => {
       .withAggregateId('user-123')
       .withPayload({
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       })
       .withVersion(1)
       .withTimestamp(new Date('2023-01-01T00:00:00Z'))
@@ -640,7 +673,7 @@ describe('OrderAggregate', () => {
     const [error, order] = safeRun(() => {
       return OrderAggregate.create({
         customerId: 'customer-123',
-        items: [{ productId: 'product-1', quantity: 2, price: 10.00 }]
+        items: [{ productId: 'product-1', quantity: 2, price: 10.0 }],
       });
     });
 
@@ -654,11 +687,14 @@ describe('OrderAggregate', () => {
     const [businessError] = safeRun(() => {
       return OrderAggregate.create({
         customerId: 'customer-123',
-        items: [] // Invalid: empty items
+        items: [], // Invalid: empty items
       });
     });
 
-    const validationError = expectError(BusinessRuleViolationError)([businessError, undefined]);
+    const validationError = expectError(BusinessRuleViolationError)([
+      businessError,
+      undefined,
+    ]);
     expect(validationError.rule).toBe('ORDER_MUST_HAVE_ITEMS');
   });
 
@@ -666,13 +702,13 @@ describe('OrderAggregate', () => {
     const [error, order] = safeRun(() => {
       return OrderAggregate.create({
         customerId: 'customer-123',
-        items: [{ productId: 'product-1', quantity: 1, price: 10.00 }]
+        items: [{ productId: 'product-1', quantity: 1, price: 10.0 }],
       });
     });
 
     const createdOrder = expectSuccess([error, order]);
     const events = createdOrder.getUncommittedEvents();
-    
+
     expect(events).toHaveLength(1);
     expect(events[0].eventType).toBe('OrderCreated');
     expect(events[0].aggregateId).toBe(createdOrder.id);
@@ -694,13 +730,13 @@ describe('UserRepository', () => {
     harness = new DatabaseTestHarness();
     await harness.initialize();
     await harness.setup();
-    
+
     repository = new UserRepository(harness.getDatabase());
   });
 
   it('should save and retrieve user', async () => {
     const user = User.create('John Doe', 'john@example.com');
-    
+
     const [saveError, savedUser] = await safeRun(async () => {
       return await repository.save(user);
     });
@@ -765,7 +801,10 @@ describe('CreateUserHandler', () => {
       return await handler.handle(invalidCommand);
     });
 
-    const commandError = expectError(CommandValidationError)([validationError, undefined]);
+    const commandError = expectError(CommandValidationError)([
+      validationError,
+      undefined,
+    ]);
     expect(commandError.field).toBe('name');
   });
 });
@@ -791,7 +830,10 @@ describe('GetUserHandler', () => {
       return await handler.handle(query);
     });
 
-    const userNotFoundError = expectError(UserNotFoundError)([notFoundError, undefined]);
+    const userNotFoundError = expectError(UserNotFoundError)([
+      notFoundError,
+      undefined,
+    ]);
     expect(userNotFoundError.userId).toBe('nonexistent-user');
   });
 });
@@ -803,7 +845,11 @@ describe('GetUserHandler', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { SimpleTestHarness, safeRun, expectSuccess } from '@vytches-ddd/testing';
+import {
+  SimpleTestHarness,
+  safeRun,
+  expectSuccess,
+} from '@vytches-ddd/testing';
 
 describe('Order Processing E2E', () => {
   let harness: SimpleTestHarness;
@@ -816,7 +862,7 @@ describe('Order Processing E2E', () => {
         await setupTestDatabase();
         await setupTestEventBus();
         await setupTestServices();
-      }
+      },
     });
 
     await harness.initialize();
@@ -828,7 +874,7 @@ describe('Order Processing E2E', () => {
     const [customerError, customer] = await harness.safeExecute(async () => {
       return await customerService.createCustomer({
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
     });
 
@@ -838,7 +884,7 @@ describe('Order Processing E2E', () => {
     const [orderError, order] = await harness.safeExecute(async () => {
       return await orderService.createOrder({
         customerId: createdCustomer.id,
-        items: [{ productId: 'product-1', quantity: 2, price: 10.00 }]
+        items: [{ productId: 'product-1', quantity: 2, price: 10.0 }],
       });
     });
 
@@ -849,8 +895,8 @@ describe('Order Processing E2E', () => {
     const [paymentError, payment] = await harness.safeExecute(async () => {
       return await paymentService.processPayment({
         orderId: createdOrder.id,
-        amount: 20.00,
-        method: 'credit_card'
+        amount: 20.0,
+        method: 'credit_card',
       });
     });
 
@@ -858,9 +904,11 @@ describe('Order Processing E2E', () => {
     expect(processedPayment.status).toBe('completed');
 
     // Verify order is paid
-    const [updatedOrderError, updatedOrder] = await harness.safeExecute(async () => {
-      return await orderService.getOrder(createdOrder.id);
-    });
+    const [updatedOrderError, updatedOrder] = await harness.safeExecute(
+      async () => {
+        return await orderService.getOrder(createdOrder.id);
+      }
+    );
 
     const finalOrder = expectSuccess([updatedOrderError, updatedOrder]);
     expect(finalOrder.status).toBe('paid');
@@ -878,13 +926,13 @@ describe('Event-Driven Workflow', () => {
   it('should handle event chain', async () => {
     const eventBus = new TestEventBus();
     const eventStore = new TestEventStore();
-    
+
     // Create initial event
     const orderCreatedEvent = DomainEventBuilder.create('OrderCreated')
       .withAggregateId('order-123')
       .withPayload({
         customerId: 'customer-123',
-        totalAmount: 100.00
+        totalAmount: 100.0,
       })
       .build();
 
@@ -937,7 +985,11 @@ class CustomBusinessError extends Error {
 describe('Custom Error Handling', () => {
   it('should handle custom error types', () => {
     const [error] = safeRun(() => {
-      throw new CustomBusinessError('Invalid operation', 'INVALID_OP', 'operation');
+      throw new CustomBusinessError(
+        'Invalid operation',
+        'INVALID_OP',
+        'operation'
+      );
     });
 
     const businessError = expectError(CustomBusinessError)([error, undefined]);
@@ -956,7 +1008,7 @@ import { safeRunWithTimeout, TestClock } from '@vytches-ddd/testing';
 describe('Performance Testing', () => {
   it('should complete operations within time limit', async () => {
     const startTime = performance.now();
-    
+
     const [error, result] = await safeRunWithTimeout(
       async () => {
         return await heavyComputationService.processLargeDataset();
@@ -978,10 +1030,10 @@ describe('Performance Testing', () => {
     testClock.setTime(new Date('2023-01-01T00:00:00Z'));
 
     const startTime = testClock.now();
-    
+
     // Simulate time-consuming operation
     testClock.advance({ seconds: 30 });
-    
+
     const service = new TimeBasedService(testClock);
     const result = service.processWithTimeout(60000); // 60 second timeout
 
@@ -997,10 +1049,12 @@ describe('Performance Testing', () => {
 
 ### Error Testing Best Practices
 
-1. **Use SafeRun Consistently**: Always use safeRun instead of try/catch in tests
+1. **Use SafeRun Consistently**: Always use safeRun instead of try/catch in
+   tests
 2. **Specific Error Types**: Test for specific error types, not generic Error
 3. **Error Context**: Use safeRunTest with context for better error messages
-4. **Descriptive Variable Names**: Use descriptive names like `validationError`, `dbError`
+4. **Descriptive Variable Names**: Use descriptive names like `validationError`,
+   `dbError`
 5. **Test Both Cases**: Always test both success and error scenarios
 
 ### Test Harness Best Practices
@@ -1042,7 +1096,7 @@ import {
   UserBuilder,
   DomainEventBuilder,
   TestClock,
-  withTestClock
+  withTestClock,
 } from '@vytches-ddd/testing';
 
 describe('User Domain - Complete Test Suite', () => {
@@ -1055,7 +1109,7 @@ describe('User Domain - Complete Test Suite', () => {
     harness = new SimpleTestHarness({
       autoCleanup: true,
       enableTimeFreezing: true,
-      verbose: false
+      verbose: false,
     });
 
     await harness.initialize();
@@ -1125,7 +1179,7 @@ describe('User Domain - Complete Test Suite', () => {
 
         // Advance time to expiration
         testClock.advance({ days: 1 });
-        
+
         expect(user.isExpired()).toBe(true);
       });
     });
@@ -1167,7 +1221,10 @@ describe('User Domain - Complete Test Suite', () => {
         return await userService.createUser(user2);
       });
 
-      const error = expectError(DuplicateEmailError)([duplicateError, undefined]);
+      const error = expectError(DuplicateEmailError)([
+        duplicateError,
+        undefined,
+      ]);
       expect(error.email).toBe('same@example.com');
     });
   });
@@ -1176,7 +1233,8 @@ describe('User Domain - Complete Test Suite', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1200,10 +1258,12 @@ pnpm test:packages:testing
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

@@ -5,6 +5,33 @@ import type { ICapabilityContext, IProjectionLifecycleCapability } from '../proj
 import { ProjectionError } from '../projection-errors';
 
 // base-capability.ts
+
+/**
+ * @llm-summary BaseIntervalCapability class for base interval capability operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseIntervalCapability class implementing architectural component for base interval capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseIntervalCapability();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseIntervalCapability());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export abstract class BaseIntervalCapability<T extends string, TReadModel>
   extends Capability<T>
   implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>

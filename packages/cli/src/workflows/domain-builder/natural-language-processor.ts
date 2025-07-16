@@ -4,7 +4,23 @@
  */
 
 /**
- * NLP Analysis result
+ * @llm-summary Contract for n l p analysis functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * NLPAnalysis interface implementing infrastructure service for n l p analysis operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteNLPAnalysis implements NLPAnalysis {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface NLPAnalysis {
   entities: string[];
@@ -18,7 +34,23 @@ export interface NLPAnalysis {
 }
 
 /**
- * Relationship between entities
+ * @llm-summary Contract for relationship functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * Relationship interface implementing infrastructure service for relationship operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteRelationship implements Relationship {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface Relationship {
   from: string;
@@ -34,7 +66,23 @@ export interface Relationship {
 }
 
 /**
- * Business rule extracted from description
+ * @llm-summary Contract for business rule functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * BusinessRule interface implementing infrastructure service for business rule operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBusinessRule implements BusinessRule {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface BusinessRule {
   name: string;
@@ -45,7 +93,30 @@ export interface BusinessRule {
 }
 
 /**
- * Natural Language Processor for domain analysis
+ * @llm-summary NaturalLanguageProcessor class for natural language processor operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Complex
+ *
+ * @description
+ * NaturalLanguageProcessor class implementing infrastructure service for natural language processor operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new NaturalLanguageProcessor();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new NaturalLanguageProcessor());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class NaturalLanguageProcessor {
   private entityKeywords: string[] = [

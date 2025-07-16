@@ -14,9 +14,13 @@ Integration Points: Integrates with event stores, domain events, and CQRS query 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Event projections and read model capabilities for CQRS and Event Sourcing applications**
+> **Event projections and read model capabilities for CQRS and Event Sourcing
+> applications**
 
-Enterprise-grade event projection system for building and maintaining read models in CQRS and Event Sourcing architectures. Provides advanced features like snapshots, checkpoints, rebuilding, error handling, and capability-based extensibility.
+Enterprise-grade event projection system for building and maintaining read
+models in CQRS and Event Sourcing architectures. Provides advanced features like
+snapshots, checkpoints, rebuilding, error handling, and capability-based
+extensibility.
 
 ## 📋 Table of Contents
 
@@ -60,12 +64,14 @@ npm install @vytches-ddd/core @vytches-ddd/events
 ## ✨ Key Features
 
 ### Event Projections
+
 - **Read Model Generation**: Transform domain events into optimized read models
 - **Event Filtering**: Process only relevant events for each projection
 - **State Management**: Maintain projection state with persistence
 - **Lifecycle Hooks**: Before/after event processing hooks
 
 ### Advanced Capabilities
+
 - **Snapshots**: Create snapshots for performance optimization
 - **Checkpoints**: Track processing position with checkpoint persistence
 - **Circuit Breaker**: Prevent cascading failures with circuit breaker pattern
@@ -73,12 +79,14 @@ npm install @vytches-ddd/core @vytches-ddd/events
 - **Rebuilding**: Rebuild projections from event history
 
 ### Extensibility
+
 - **Capability System**: Extensible architecture with pluggable capabilities
 - **Middleware Support**: Add custom behavior through capability system
 - **Builder Pattern**: Fluent API for projection configuration
 - **Type Safety**: Full TypeScript support with generic types
 
 ### Performance
+
 - **Lazy Loading**: Load projection state only when needed
 - **Batch Processing**: Process multiple events efficiently
 - **Retry Logic**: Configurable retry strategies for transient failures
@@ -94,9 +102,12 @@ The core interface for all projections:
 interface IProjection<TReadModel> {
   readonly name: string;
   readonly eventTypes: string[];
-  
+
   createInitialState(): TReadModel | Promise<TReadModel>;
-  apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel | Promise<TReadModel>;
+  apply(
+    readModel: TReadModel,
+    event: IExtendedDomainEvent
+  ): TReadModel | Promise<TReadModel>;
   handles(eventType: string): boolean;
 }
 ```
@@ -127,7 +138,9 @@ interface IProjectionEngine<TReadModel> {
   isInterestedIn(event: IExtendedDomainEvent): boolean;
   getState(): Promise<TReadModel | null>;
   reset(): Promise<void>;
-  addCapability<T extends Capability & IProjectionCapability>(capability: T): this;
+  addCapability<T extends Capability & IProjectionCapability>(
+    capability: T
+  ): this;
 }
 ```
 
@@ -157,29 +170,32 @@ class UserStatsProjection extends BaseProjection<UserStatsReadModel> {
       totalUsers: 0,
       activeUsers: 0,
       usersByStatus: {},
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
-  apply(readModel: UserStatsReadModel, event: IExtendedDomainEvent): UserStatsReadModel {
+  apply(
+    readModel: UserStatsReadModel,
+    event: IExtendedDomainEvent
+  ): UserStatsReadModel {
     const newState = { ...readModel };
-    
+
     switch (event.eventType) {
       case 'UserCreated':
         newState.totalUsers++;
-        newState.usersByStatus[event.payload.status] = 
+        newState.usersByStatus[event.payload.status] =
           (newState.usersByStatus[event.payload.status] || 0) + 1;
         break;
-        
+
       case 'UserActivated':
         newState.activeUsers++;
         break;
-        
+
       case 'UserDeactivated':
         newState.activeUsers--;
         break;
     }
-    
+
     newState.lastUpdated = new Date();
     return newState;
   }
@@ -221,7 +237,7 @@ const userCreatedEvent = {
   aggregateId: 'user-123',
   payload: { name: 'John Doe', status: 'active' },
   timestamp: new Date(),
-  version: 1
+  version: 1,
 };
 
 await engine.processEvent(userCreatedEvent);
@@ -268,7 +284,7 @@ const retryConfig = {
   maxDelayMs: 5000,
   backoffMultiplier: 2,
   retryableErrors: ['NetworkError', 'TimeoutError'],
-  nonRetryableErrors: ['ValidationError']
+  nonRetryableErrors: ['ValidationError'],
 };
 
 const enhancedEngine = new EnhancedProjectionEngine(
@@ -289,7 +305,10 @@ try {
 
 ```typescript
 // Process multiple events
-async function processEventBatch(engine: ProjectionEngine<any>, events: IExtendedDomainEvent[]) {
+async function processEventBatch(
+  engine: ProjectionEngine<any>,
+  events: IExtendedDomainEvent[]
+) {
   for (const event of events) {
     if (engine.isInterestedIn(event)) {
       await engine.processEvent(event);
@@ -298,7 +317,10 @@ async function processEventBatch(engine: ProjectionEngine<any>, events: IExtende
 }
 
 // Process events from stream
-async function processEventStream(engine: ProjectionEngine<any>, eventStream: AsyncIterable<IExtendedDomainEvent>) {
+async function processEventStream(
+  engine: ProjectionEngine<any>,
+  eventStream: AsyncIterable<IExtendedDomainEvent>
+) {
   for await (const event of eventStream) {
     if (engine.isInterestedIn(event)) {
       await engine.processEvent(event);
@@ -327,11 +349,11 @@ await engine.processEvent(event);
 ### Advanced Builder Configuration
 
 ```typescript
-import { 
-  ProjectionBuilder, 
-  CheckpointCapability, 
+import {
+  ProjectionBuilder,
+  CheckpointCapability,
   SnapshotProjectionCapability,
-  CircuitBreakerCapability 
+  CircuitBreakerCapability,
 } from '@vytches-ddd/projections';
 
 // Create with custom capabilities
@@ -339,19 +361,19 @@ const customCapability = new CustomLoggingCapability();
 const circuitBreaker = new CircuitBreakerCapability({
   failureThreshold: 5,
   recoveryTimeoutMs: 30000,
-  halfOpenMaxAttempts: 3
+  halfOpenMaxAttempts: 3,
 });
 
 const engine = new ProjectionBuilder(projection, store)
-  .withCheckpoints(checkpointStore, { 
-    interval: 100, 
-    saveOnRebuildComplete: true 
+  .withCheckpoints(checkpointStore, {
+    interval: 100,
+    saveOnRebuildComplete: true,
   })
-  .withSnapshots(snapshotStore, { 
+  .withSnapshots(snapshotStore, {
     interval: 1000,
     maxSnapshots: 10,
-    compressState: (state) => JSON.stringify(state),
-    decompressState: (compressed) => JSON.parse(compressed as string)
+    compressState: state => JSON.stringify(state),
+    decompressState: compressed => JSON.parse(compressed as string),
   })
   .withCustomCapability(customCapability)
   .withCustomCapability(circuitBreaker)
@@ -374,11 +396,13 @@ class DatabaseCheckpointStore implements IProjectionCheckpointStore {
     // Save checkpoint to database
     await this.database.saveCheckpoint({
       projectionName,
-      ...checkpoint
+      ...checkpoint,
     });
   }
 
-  async load<TState>(projectionName: string): Promise<IProjectionCheckpoint<TState> | null> {
+  async load<TState>(
+    projectionName: string
+  ): Promise<IProjectionCheckpoint<TState> | null> {
     // Load checkpoint from database
     const checkpoint = await this.database.loadCheckpoint(projectionName);
     return checkpoint || null;
@@ -394,7 +418,7 @@ class DatabaseCheckpointStore implements IProjectionCheckpointStore {
 const checkpointStore = new DatabaseCheckpointStore();
 const checkpointCapability = new CheckpointCapability(checkpointStore, {
   interval: 100, // Save checkpoint every 100 events
-  saveOnRebuildComplete: true
+  saveOnRebuildComplete: true,
 });
 
 engine.addCapability(checkpointCapability);
@@ -414,17 +438,21 @@ class DatabaseSnapshotStore implements IProjectionSnapshotStore {
     // Save snapshot to database
     await this.database.saveSnapshot({
       projectionName,
-      ...snapshot
+      ...snapshot,
     });
   }
 
-  async load<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null> {
+  async load<TState>(
+    projectionName: string
+  ): Promise<IProjectionSnapshot<TState> | null> {
     // Load snapshot from database
     const snapshot = await this.database.loadSnapshot(projectionName);
     return snapshot || null;
   }
 
-  async loadLatest<TState>(projectionName: string): Promise<IProjectionSnapshot<TState> | null> {
+  async loadLatest<TState>(
+    projectionName: string
+  ): Promise<IProjectionSnapshot<TState> | null> {
     // Load latest snapshot from database
     const snapshot = await this.database.loadLatestSnapshot(projectionName);
     return snapshot || null;
@@ -446,14 +474,14 @@ const snapshotStore = new DatabaseSnapshotStore();
 const snapshotCapability = new SnapshotProjectionCapability(snapshotStore, {
   interval: 1000, // Create snapshot every 1000 events
   maxSnapshots: 10, // Keep maximum 10 snapshots
-  compressState: (state) => {
+  compressState: state => {
     // Custom compression logic
     return JSON.stringify(state);
   },
-  decompressState: (compressed) => {
+  decompressState: compressed => {
     // Custom decompression logic
     return JSON.parse(compressed as string);
-  }
+  },
 });
 
 engine.addCapability(snapshotCapability);
@@ -468,7 +496,7 @@ import { CircuitBreakerCapability } from '@vytches-ddd/projections';
 const circuitBreaker = new CircuitBreakerCapability({
   failureThreshold: 5, // Open circuit after 5 failures
   recoveryTimeoutMs: 30000, // Try to recover after 30 seconds
-  halfOpenMaxAttempts: 3 // Max 3 attempts in half-open state
+  halfOpenMaxAttempts: 3, // Max 3 attempts in half-open state
 });
 
 engine.addCapability(circuitBreaker);
@@ -529,7 +557,7 @@ class LoggingCapability extends BaseProjectionCapability {
     this.logger.info('Processing event', {
       projection: this.getProjectionName(),
       eventType: event.eventType,
-      aggregateId: event.aggregateId
+      aggregateId: event.aggregateId,
     });
   }
 
@@ -537,7 +565,7 @@ class LoggingCapability extends BaseProjectionCapability {
     this.logger.info('Event processed successfully', {
       projection: this.getProjectionName(),
       eventType: event.eventType,
-      aggregateId: event.aggregateId
+      aggregateId: event.aggregateId,
     });
   }
 
@@ -546,7 +574,7 @@ class LoggingCapability extends BaseProjectionCapability {
       projection: this.getProjectionName(),
       error: error.message,
       eventType: event?.eventType,
-      aggregateId: event?.aggregateId
+      aggregateId: event?.aggregateId,
     });
   }
 }
@@ -570,7 +598,7 @@ const checkpointStore = new DatabaseCheckpointStore();
 const engine = new ProjectionBuilder(projection, store)
   .withCheckpoints(checkpointStore, {
     interval: 100, // Save checkpoint every 100 events
-    saveOnRebuildComplete: true
+    saveOnRebuildComplete: true,
   })
   .build();
 
@@ -589,15 +617,15 @@ const checkpointCapability = engine.getCapability(CheckpointCapability);
 if (checkpointCapability) {
   // Load checkpoint
   const checkpoint = await checkpointCapability.loadCheckpoint();
-  
+
   if (checkpoint) {
     console.log('Loaded checkpoint:', {
       position: checkpoint.position,
       state: checkpoint.state,
-      timestamp: checkpoint.timestamp
+      timestamp: checkpoint.timestamp,
     });
   }
-  
+
   // Save checkpoint manually
   const currentState = await engine.getState();
   await checkpointCapability.saveCheckpoint(currentState, 500);
@@ -608,16 +636,19 @@ if (checkpointCapability) {
 
 ```typescript
 // Recover projection from checkpoint
-async function recoverFromCheckpoint(engine: ProjectionEngine<any>, eventStream: AsyncIterable<IExtendedDomainEvent>) {
+async function recoverFromCheckpoint(
+  engine: ProjectionEngine<any>,
+  eventStream: AsyncIterable<IExtendedDomainEvent>
+) {
   const checkpointCapability = engine.getCapability(CheckpointCapability);
-  
+
   if (checkpointCapability) {
     const checkpoint = await checkpointCapability.loadCheckpoint();
-    
+
     if (checkpoint) {
       // Restore state from checkpoint
       await engine.saveState(checkpoint.state);
-      
+
       // Process events from checkpoint position
       let position = checkpoint.position;
       for await (const event of eventStream) {
@@ -646,8 +677,8 @@ const engine = new ProjectionBuilder(projection, store)
   .withSnapshots(snapshotStore, {
     interval: 1000, // Create snapshot every 1000 events
     maxSnapshots: 10, // Keep maximum 10 snapshots
-    compressState: (state) => JSON.stringify(state),
-    decompressState: (compressed) => JSON.parse(compressed as string)
+    compressState: state => JSON.stringify(state),
+    decompressState: compressed => JSON.parse(compressed as string),
   })
   .build();
 
@@ -668,15 +699,15 @@ if (snapshotCapability) {
   // Create snapshot manually
   const currentState = await engine.getState();
   await snapshotCapability.createSnapshot(currentState, 1500);
-  
+
   // Load latest snapshot
   const snapshot = await snapshotCapability.loadLatestSnapshot();
-  
+
   if (snapshot) {
     console.log('Latest snapshot:', {
       position: snapshot.position,
       timestamp: snapshot.timestamp,
-      version: snapshot.version
+      version: snapshot.version,
     });
   }
 }
@@ -686,16 +717,19 @@ if (snapshotCapability) {
 
 ```typescript
 // Recover projection from snapshot
-async function recoverFromSnapshot(engine: ProjectionEngine<any>, eventStream: AsyncIterable<IExtendedDomainEvent>) {
+async function recoverFromSnapshot(
+  engine: ProjectionEngine<any>,
+  eventStream: AsyncIterable<IExtendedDomainEvent>
+) {
   const snapshotCapability = engine.getCapability(SnapshotProjectionCapability);
-  
+
   if (snapshotCapability) {
     const snapshot = await snapshotCapability.loadLatestSnapshot();
-    
+
     if (snapshot) {
       // Restore state from snapshot
       await engine.saveState(snapshot.state);
-      
+
       // Process events from snapshot position
       let position = 0;
       for await (const event of eventStream) {
@@ -727,7 +761,7 @@ console.log('Rebuild result:', {
   processedEvents: result.processedEvents,
   errors: result.errors,
   startTime: result.startTime,
-  endTime: result.endTime
+  endTime: result.endTime,
 });
 ```
 
@@ -738,12 +772,12 @@ console.log('Rebuild result:', {
 const result = await rebuilder.rebuild({
   eventTypes: ['UserCreated', 'UserUpdated'],
   fromTimestamp: new Date('2023-01-01'),
-  toTimestamp: new Date('2023-12-31')
+  toTimestamp: new Date('2023-12-31'),
 });
 
 // Rebuild from specific stream
 const streamResult = await rebuilder.rebuildFromStream('user-stream-123', {
-  eventTypes: ['UserCreated', 'UserUpdated']
+  eventTypes: ['UserCreated', 'UserUpdated'],
 });
 ```
 
@@ -754,13 +788,13 @@ const streamResult = await rebuilder.rebuildFromStream('user-stream-123', {
 const result = await rebuilder.rebuild(
   {
     eventTypes: ['UserCreated', 'UserUpdated'],
-    fromTimestamp: new Date('2023-01-01')
+    fromTimestamp: new Date('2023-01-01'),
   },
   {
     batchSize: 100,
     concurrency: 4,
     skipErrors: false,
-    resetBeforeRebuild: true
+    resetBeforeRebuild: true,
   }
 );
 ```
@@ -773,11 +807,11 @@ const result = await engine.rebuild(
   eventStore,
   {
     eventTypes: ['UserCreated', 'UserUpdated'],
-    fromTimestamp: new Date('2023-01-01')
+    fromTimestamp: new Date('2023-01-01'),
   },
   {
     batchSize: 100,
-    resetBeforeRebuild: true
+    resetBeforeRebuild: true,
   }
 );
 
@@ -786,7 +820,7 @@ const streamResult = await engine.rebuildFromStream(
   eventStore,
   'user-stream-123',
   {
-    eventTypes: ['UserCreated']
+    eventTypes: ['UserCreated'],
   }
 );
 ```
@@ -800,28 +834,35 @@ import { ExponentialBackoffStrategy } from '@vytches-ddd/projections';
 
 // Create custom retry strategy
 class CustomRetryStrategy implements IProjectionErrorStrategy {
-  shouldRetry(error: Error, attempt: number, config?: IProjectionRetryConfig): boolean {
+  shouldRetry(
+    error: Error,
+    attempt: number,
+    config?: IProjectionRetryConfig
+  ): boolean {
     if (!config || attempt >= config.maxAttempts) {
       return false;
     }
-    
+
     // Don't retry validation errors
     if (error.name === 'ValidationError') {
       return false;
     }
-    
+
     // Retry network and timeout errors
     return error.name === 'NetworkError' || error.name === 'TimeoutError';
   }
 
   getRetryDelay(attempt: number, config: IProjectionRetryConfig): number {
-    const delay = config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
+    const delay =
+      config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
     return Math.min(delay, config.maxDelayMs);
   }
 
   isRetryableError(error: Error, config: IProjectionRetryConfig): boolean {
-    return config.retryableErrors.includes(error.name) ||
-           !config.nonRetryableErrors.includes(error.name);
+    return (
+      config.retryableErrors.includes(error.name) ||
+      !config.nonRetryableErrors.includes(error.name)
+    );
   }
 }
 
@@ -832,7 +873,7 @@ const retryConfig = {
   maxDelayMs: 5000,
   backoffMultiplier: 2,
   retryableErrors: ['NetworkError', 'TimeoutError'],
-  nonRetryableErrors: ['ValidationError']
+  nonRetryableErrors: ['ValidationError'],
 };
 
 const customStrategy = new CustomRetryStrategy();
@@ -853,29 +894,35 @@ class ErrorHandlingCapability extends BaseProjectionCapability {
 
   async onError(error: Error, event?: IExtendedDomainEvent): Promise<void> {
     this.errorCount++;
-    
+
     // Log error
     console.error('Projection error:', {
       projection: this.getProjectionName(),
       error: error.message,
       eventType: event?.eventType,
-      errorCount: this.errorCount
+      errorCount: this.errorCount,
     });
-    
+
     // Send to monitoring system
     await this.sendToMonitoring(error, event);
-    
+
     // Send to dead letter queue if too many errors
     if (this.errorCount > 10) {
       await this.sendToDeadLetter(event, error);
     }
   }
 
-  private async sendToMonitoring(error: Error, event?: IExtendedDomainEvent): Promise<void> {
+  private async sendToMonitoring(
+    error: Error,
+    event?: IExtendedDomainEvent
+  ): Promise<void> {
     // Send error to monitoring system
   }
 
-  private async sendToDeadLetter(event: IExtendedDomainEvent | undefined, error: Error): Promise<void> {
+  private async sendToDeadLetter(
+    event: IExtendedDomainEvent | undefined,
+    error: Error
+  ): Promise<void> {
     // Send event to dead letter queue
   }
 }
@@ -891,31 +938,40 @@ class GlobalProjectionErrorHandler {
 
   static getInstance(): GlobalProjectionErrorHandler {
     if (!GlobalProjectionErrorHandler.instance) {
-      GlobalProjectionErrorHandler.instance = new GlobalProjectionErrorHandler();
+      GlobalProjectionErrorHandler.instance =
+        new GlobalProjectionErrorHandler();
     }
     return GlobalProjectionErrorHandler.instance;
   }
 
-  async handleError(projectionName: string, error: Error, event?: IExtendedDomainEvent): Promise<void> {
+  async handleError(
+    projectionName: string,
+    error: Error,
+    event?: IExtendedDomainEvent
+  ): Promise<void> {
     // Update error statistics
     const currentCount = this.errorStats.get(projectionName) || 0;
     this.errorStats.set(projectionName, currentCount + 1);
-    
+
     // Log error
     console.error(`Projection ${projectionName} error:`, {
       error: error.message,
       eventType: event?.eventType,
       aggregateId: event?.aggregateId,
-      totalErrors: currentCount + 1
+      totalErrors: currentCount + 1,
     });
-    
+
     // Send alert if error count exceeds threshold
     if (currentCount > 5) {
       await this.sendAlert(projectionName, error, currentCount);
     }
   }
 
-  private async sendAlert(projectionName: string, error: Error, errorCount: number): Promise<void> {
+  private async sendAlert(
+    projectionName: string,
+    error: Error,
+    errorCount: number
+  ): Promise<void> {
     // Send alert to monitoring system
   }
 
@@ -935,17 +991,15 @@ import { QueryHandler } from '@vytches-ddd/cqrs';
 // Query handler using projection
 @QueryHandler(GetUserStatsQuery)
 class GetUserStatsQueryHandler {
-  constructor(
-    private userStatsEngine: ProjectionEngine<UserStatsReadModel>
-  ) {}
+  constructor(private userStatsEngine: ProjectionEngine<UserStatsReadModel>) {}
 
   async handle(query: GetUserStatsQuery): Promise<UserStatsReadModel> {
     const stats = await this.userStatsEngine.getState();
-    
+
     if (!stats) {
       throw new Error('User stats not available');
     }
-    
+
     return stats;
   }
 }
@@ -953,9 +1007,7 @@ class GetUserStatsQueryHandler {
 // Event handler for projection updates
 @DomainEventHandler(UserCreatedEvent)
 class UserCreatedEventHandler {
-  constructor(
-    private userStatsEngine: ProjectionEngine<UserStatsReadModel>
-  ) {}
+  constructor(private userStatsEngine: ProjectionEngine<UserStatsReadModel>) {}
 
   async handle(event: UserCreatedEvent): Promise<void> {
     // Convert domain event to extended domain event
@@ -964,9 +1016,9 @@ class UserCreatedEventHandler {
       aggregateId: event.aggregateId,
       payload: event.payload,
       timestamp: event.timestamp,
-      version: event.version
+      version: event.version,
     };
-    
+
     await this.userStatsEngine.processEvent(extendedEvent);
   }
 }
@@ -984,14 +1036,17 @@ class EventStoreProjectionRunner {
 
   async startProjections(): Promise<void> {
     // Subscribe to event store
-    await this.eventStore.subscribe(async (event) => {
+    await this.eventStore.subscribe(async event => {
       // Process event through all interested projections
       for (const projection of this.projections) {
         if (projection.isInterestedIn(event)) {
           try {
             await projection.processEvent(event);
           } catch (error) {
-            console.error(`Projection ${projection.getProjectionName()} failed:`, error);
+            console.error(
+              `Projection ${projection.getProjectionName()} failed:`,
+              error
+            );
           }
         }
       }
@@ -1002,14 +1057,14 @@ class EventStoreProjectionRunner {
     // Rebuild all projections from event store
     for (const projection of this.projections) {
       console.log(`Rebuilding projection: ${projection.getProjectionName()}`);
-      
+
       const result = await projection.rebuild(this.eventStore);
-      
+
       console.log(`Rebuild completed:`, {
         projection: projection.getProjectionName(),
         totalEvents: result.totalEvents,
         processedEvents: result.processedEvents,
-        errors: result.errors.length
+        errors: result.errors.length,
       });
     }
   }
@@ -1029,7 +1084,7 @@ class UserRepository {
   async save(user: User): Promise<User> {
     // Save to base repository
     const savedUser = await this.baseRepository.save(user);
-    
+
     // Update projections
     const events = user.getUncommittedEvents();
     for (const event of events) {
@@ -1038,22 +1093,22 @@ class UserRepository {
         aggregateId: event.aggregateId,
         payload: event.payload,
         timestamp: event.timestamp,
-        version: event.version
+        version: event.version,
       };
-      
+
       await this.userStatsEngine.processEvent(extendedEvent);
     }
-    
+
     return savedUser;
   }
 
   async getUserStats(): Promise<UserStatsReadModel> {
     const stats = await this.userStatsEngine.getState();
-    
+
     if (!stats) {
       throw new Error('User stats not available');
     }
-    
+
     return stats;
   }
 }
@@ -1085,7 +1140,7 @@ describe('UserStatsProjection', () => {
         aggregateId: 'user-123',
         payload: { name: 'John Doe', status: 'active' },
         timestamp: new Date(),
-        version: 1
+        version: 1,
       };
 
       await engine.processEvent(event);
@@ -1102,7 +1157,7 @@ describe('UserStatsProjection', () => {
         aggregateId: 'user-123',
         payload: { name: 'John Doe', status: 'inactive' },
         timestamp: new Date(),
-        version: 1
+        version: 1,
       });
 
       const activatedEvent: IExtendedDomainEvent = {
@@ -1110,7 +1165,7 @@ describe('UserStatsProjection', () => {
         aggregateId: 'user-123',
         payload: { userId: 'user-123' },
         timestamp: new Date(),
-        version: 2
+        version: 2,
       };
 
       await engine.processEvent(activatedEvent);
@@ -1123,7 +1178,7 @@ describe('UserStatsProjection', () => {
   describe('projection lifecycle', () => {
     it('should create initial state', async () => {
       const state = await engine.getState();
-      
+
       expect(state).toBeDefined();
       expect(state?.totalUsers).toBe(0);
       expect(state?.activeUsers).toBe(0);
@@ -1137,7 +1192,7 @@ describe('UserStatsProjection', () => {
         aggregateId: 'user-123',
         payload: { name: 'John Doe', status: 'active' },
         timestamp: new Date(),
-        version: 1
+        version: 1,
       });
 
       let state = await engine.getState();
@@ -1173,7 +1228,7 @@ describe('Projection Integration', () => {
         const projection = new UserStatsProjection();
         const store = new InMemoryProjectionStore<UserStatsReadModel>();
         engine = new ProjectionEngine(projection, store);
-      }
+      },
     });
 
     await harness.initialize();
@@ -1188,9 +1243,21 @@ describe('Projection Integration', () => {
   it('should rebuild projection from event store', async () => {
     // Store events in event store
     const events = [
-      { eventType: 'UserCreated', aggregateId: 'user-1', payload: { status: 'active' } },
-      { eventType: 'UserCreated', aggregateId: 'user-2', payload: { status: 'inactive' } },
-      { eventType: 'UserActivated', aggregateId: 'user-2', payload: { userId: 'user-2' } }
+      {
+        eventType: 'UserCreated',
+        aggregateId: 'user-1',
+        payload: { status: 'active' },
+      },
+      {
+        eventType: 'UserCreated',
+        aggregateId: 'user-2',
+        payload: { status: 'inactive' },
+      },
+      {
+        eventType: 'UserActivated',
+        aggregateId: 'user-2',
+        payload: { userId: 'user-2' },
+      },
     ];
 
     for (const event of events) {
@@ -1220,9 +1287,21 @@ describe('Projection Integration', () => {
 
     // Process events
     const events = [
-      { eventType: 'UserCreated', aggregateId: 'user-1', payload: { status: 'active' } },
-      { eventType: 'UserCreated', aggregateId: 'user-2', payload: { status: 'active' } },
-      { eventType: 'UserCreated', aggregateId: 'user-3', payload: { status: 'active' } }
+      {
+        eventType: 'UserCreated',
+        aggregateId: 'user-1',
+        payload: { status: 'active' },
+      },
+      {
+        eventType: 'UserCreated',
+        aggregateId: 'user-2',
+        payload: { status: 'active' },
+      },
+      {
+        eventType: 'UserCreated',
+        aggregateId: 'user-3',
+        payload: { status: 'active' },
+      },
     ];
 
     for (const event of events) {
@@ -1230,9 +1309,10 @@ describe('Projection Integration', () => {
     }
 
     // Verify checkpoint was created
-    const checkpointCapability = enhancedEngine.getCapability(CheckpointCapability);
+    const checkpointCapability =
+      enhancedEngine.getCapability(CheckpointCapability);
     const checkpoint = await checkpointCapability?.loadCheckpoint();
-    
+
     expect(checkpoint).toBeDefined();
     expect(checkpoint?.position).toBe(2);
     expect(checkpoint?.state.totalUsers).toBe(2);
@@ -1260,14 +1340,16 @@ describe('Projection Capabilities', () => {
         aggregateId: `user-${i}`,
         payload: { name: `User ${i}`, status: 'active' },
         timestamp: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
     // Verify snapshot was created
-    const snapshotCapability = engine.getCapability(SnapshotProjectionCapability);
+    const snapshotCapability = engine.getCapability(
+      SnapshotProjectionCapability
+    );
     const snapshot = await snapshotCapability?.loadLatestSnapshot();
-    
+
     expect(snapshot).toBeDefined();
     expect(snapshot?.position).toBe(3);
     expect(snapshot?.state.totalUsers).toBe(3);
@@ -1277,7 +1359,7 @@ describe('Projection Capabilities', () => {
     const circuitBreaker = new CircuitBreakerCapability({
       failureThreshold: 2,
       recoveryTimeoutMs: 1000,
-      halfOpenMaxAttempts: 1
+      halfOpenMaxAttempts: 1,
     });
 
     const engine = new ProjectionBuilder(
@@ -1295,7 +1377,7 @@ describe('Projection Capabilities', () => {
           aggregateId: `test-${i}`,
           payload: {},
           timestamp: new Date(),
-          version: 1
+          version: 1,
         });
       } catch (error) {
         // Expected to fail
@@ -1312,8 +1394,10 @@ describe('Projection Capabilities', () => {
 
 ### Projection Design
 
-1. **Single Responsibility**: Each projection should have a single, well-defined purpose
-2. **Immutable Updates**: Always create new state objects rather than mutating existing ones
+1. **Single Responsibility**: Each projection should have a single, well-defined
+   purpose
+2. **Immutable Updates**: Always create new state objects rather than mutating
+   existing ones
 3. **Event Filtering**: Only process events that are relevant to the projection
 4. **Error Handling**: Implement proper error handling and recovery mechanisms
 5. **Performance**: Use snapshots and checkpoints for large projections
@@ -1328,8 +1412,10 @@ describe('Projection Capabilities', () => {
 
 ### Capability Usage
 
-1. **Appropriate Intervals**: Choose appropriate intervals for checkpoints and snapshots
-2. **Error Strategies**: Implement appropriate retry strategies for your use case
+1. **Appropriate Intervals**: Choose appropriate intervals for checkpoints and
+   snapshots
+2. **Error Strategies**: Implement appropriate retry strategies for your use
+   case
 3. **Circuit Breaker**: Use circuit breaker for external dependencies
 4. **Dead Letter**: Implement dead letter handling for failed events
 5. **Monitoring**: Add monitoring capabilities for observability
@@ -1344,7 +1430,8 @@ describe('Projection Capabilities', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1368,10 +1455,12 @@ pnpm test:packages:projections
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
 **Part of the VytchesDDD Enterprise Suite**
 
-For more information about the complete VytchesDDD ecosystem, visit our [main documentation](../../README.md).
+For more information about the complete VytchesDDD ecosystem, visit our
+[main documentation](../../README.md).

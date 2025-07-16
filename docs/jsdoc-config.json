@@ -1,0 +1,31 @@
+{
+  "source": {
+    "include": ["./packages/"],
+    "includePattern": "\\.(js|ts)$",
+    "exclude": ["node_modules/", "dist/", "build/", "tests/", "**/*.test.ts", "**/*.spec.ts"]
+  },
+  "opts": {
+    "destination": "./docs/api/",
+    "recurse": true,
+    "readme": "./README.md"
+  },
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true,
+      "includeDate": true
+    }
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "metadata": {
+    "title": "VytchesDDD API Documentation",
+    "description": "Enterprise Domain-Driven Design Library for TypeScript",
+    "version": "1.0.0",
+    "url": "https://github.com/PawelGozdz/vytches-ddd"
+  }
+}

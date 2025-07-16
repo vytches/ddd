@@ -6,7 +6,30 @@ import { ValidationErrors, ValidationError } from '../validation-error';
 import { BusinessRuleValidator } from './business-rule-validator';
 
 /**
- * Extension for BusinessRuleValidator with additional specification integration
+ * @llm-summary BusinessRuleValidatorExtension class for business rule validator extension operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BusinessRuleValidatorExtension class implementing domain pattern implementation for business rule validator extension operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BusinessRuleValidatorExtension();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BusinessRuleValidatorExtension());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class BusinessRuleValidatorExtension<T> {
   constructor(private validator: BusinessRuleValidator<T>) {}

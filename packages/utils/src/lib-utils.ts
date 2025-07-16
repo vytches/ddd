@@ -3,6 +3,32 @@ import { v4 as uuidV4, validate } from 'uuid';
 
 type UUID = 'v4';
 
+/**
+ * @llm-summary LibUtils class for lib utils operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * LibUtils class implementing infrastructure service for lib utils operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new LibUtils();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new LibUtils());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class LibUtils {
   static getUUID(type?: UUID) {
     if (type === 'v4') {

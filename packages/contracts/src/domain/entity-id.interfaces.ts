@@ -1,13 +1,41 @@
 /**
- * Core Entity ID interfaces and types for DDD
- * These are fundamental contracts that other packages can depend on
+ * @llm-summary Type definition for id type
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * IdType type implementing core domain functionality for id type operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: IdType = {} as IdType;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 
 export type IdType = 'uuid' | 'integer' | 'text' | 'bigint';
 
 /**
- * Core Entity ID interface - fundamental DDD building block
- * This interface represents the contract for all entity identifiers
+ * @llm-summary Contract for entity id functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EntityId interface implementing core domain functionality for entity id operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEntityId implements IEntityId {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEntityId<T = unknown> {
   /**
@@ -52,7 +80,23 @@ export interface IEntityId<T = unknown> {
 }
 
 /**
- * Entity ID constructor parameters
+ * @llm-summary Contract for entity id constructor params functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EntityIdConstructorParams interface implementing core domain functionality for entity id constructor params operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEntityIdConstructorParams implements IEntityIdConstructorParams {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEntityIdConstructorParams<T = unknown> {
   value: T;
@@ -60,7 +104,23 @@ export interface IEntityIdConstructorParams<T = unknown> {
 }
 
 /**
- * Static factory methods for Entity IDs
+ * @llm-summary Contract for entity id factory functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EntityIdFactory interface implementing core domain functionality for entity id factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEntityIdFactory implements IEntityIdFactory {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEntityIdFactory {
   /**
@@ -90,6 +150,20 @@ export interface IEntityIdFactory {
 }
 
 /**
- * Type alias for the most common Entity ID type
+ * @llm-summary Type definition for entity id
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * EntityId type implementing core domain functionality for entity id operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: EntityId = {} as EntityId;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type EntityId<T = string> = IEntityId<T>;

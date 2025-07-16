@@ -7,7 +7,23 @@ import { OutboxMessageFactory } from './outbox-message-factory';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
 /**
- * Configuration options for OutboxService
+ * @llm-summary Contract for outbox service options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * OutboxServiceOptions interface implementing integration layer component for outbox service options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteOutboxServiceOptions implements OutboxServiceOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface OutboxServiceOptions {
   /** Default priority for messages */
@@ -23,8 +39,30 @@ export interface OutboxServiceOptions {
 }
 
 /**
- * High-level service for managing outbox operations
- * Provides convenient methods for saving, scheduling, and managing outbox messages
+ * @llm-summary OutboxService class for outbox service operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * OutboxService class implementing integration layer component for outbox service operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OutboxService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OutboxService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class OutboxService {
   private readonly repository: IOutboxRepository;

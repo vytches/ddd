@@ -7,7 +7,30 @@
 import { AggregateRoot, EntityId } from '@vytches-ddd/core';
 
 /**
- * Customer aggregate
+ * @llm-summary Customer class for customer operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * Customer class implementing infrastructure service for customer operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new Customer();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new Customer());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class Customer extends AggregateRoot {
   private constructor(id: EntityId) {
@@ -50,7 +73,23 @@ export class Customer extends AggregateRoot {
 }
 
 /**
- * Aggregate snapshot for persistence
+ * @llm-summary Contract for customer snapshot functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * CustomerSnapshot interface implementing infrastructure service for customer snapshot operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCustomerSnapshot implements CustomerSnapshot {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface CustomerSnapshot {
   id: string;

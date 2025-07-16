@@ -10,7 +10,23 @@ import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry
 import type { IHandlerDiscoveryPlugin, HandlerInfo } from './discovery/handler-discovery.interface';
 
 /**
- * Global service locator interface
+ * @llm-summary Contract for service locator functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ServiceLocator interface implementing infrastructure service for service locator operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteServiceLocator implements IServiceLocator {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IServiceLocator {
   /**
@@ -85,8 +101,30 @@ export interface IServiceLocator {
 }
 
 /**
- * VytchesDDD global service locator implementation
- * Provides global service locator with optional context isolation
+ * @llm-summary ServiceLocator class for service locator operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * ServiceLocator class implementing infrastructure service for service locator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ServiceLocator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ServiceLocator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ServiceLocator implements IServiceLocator {
   private static instance: ServiceLocator;
@@ -494,8 +532,30 @@ export class ServiceLocator implements IServiceLocator {
 }
 
 /**
- * VytchesDDD global service locator facade
- * Provides static methods for global service locator operations
+ * @llm-summary VytchesDDD class for vytches d d d operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * VytchesDDD class implementing infrastructure service for vytches d d d operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new VytchesDDD();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new VytchesDDD());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class VytchesDDD {
   private static get serviceLocator(): ServiceLocator {

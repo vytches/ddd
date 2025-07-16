@@ -3,6 +3,32 @@ import type { ICommandBus, IQueryBus } from '../abstracts';
 import { CommandBus, QueryBus, EnhancedCommandBus, EnhancedQueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 
+/**
+ * @llm-summary CQRSConfiguration class for c q r s configuration operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * CQRSConfiguration class implementing architectural component for c q r s configuration operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CQRSConfiguration();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CQRSConfiguration());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class CQRSConfiguration {
   public readonly commandBus: ICommandBus;
   public readonly queryBus: IQueryBus;

@@ -16,7 +16,9 @@ Integration Points: Used by all domain models and aggregates
 
 > **Common value object implementations for Domain-Driven Design**
 
-Collection of battle-tested value objects including EntityId, Money, Email, Address, and other common domain primitives. Built with validation, immutability, and rich behavior patterns.
+Collection of battle-tested value objects including EntityId, Money, Email,
+Address, and other common domain primitives. Built with validation,
+immutability, and rich behavior patterns.
 
 ## 📋 Table of Contents
 
@@ -60,18 +62,21 @@ npm install @vytches-ddd/domain-primitives @vytches-ddd/contracts
 ## ✨ Key Features
 
 ### Rich Value Objects
+
 - **EntityId**: Strongly-typed entity identifiers with multiple formats
 - **Money**: Currency-aware monetary values with arithmetic operations
 - **Email**: Validated email addresses with domain extraction
 - **Address**: Structured address representation with validation
 
 ### Advanced Features
+
 - **Immutability**: All value objects are immutable by design
 - **Validation**: Built-in validation with meaningful error messages
 - **Serialization**: JSON serialization and deserialization support
 - **Comparison**: Proper equality comparison and hash code generation
 
 ### Developer Experience
+
 - **Type Safety**: Full TypeScript support with strict typing
 - **Factory Methods**: Convenient creation methods for common patterns
 - **Rich Behavior**: Domain-specific methods and operations
@@ -81,7 +86,8 @@ npm install @vytches-ddd/domain-primitives @vytches-ddd/contracts
 
 ### Value Object Pattern
 
-Value objects are immutable objects that are defined by their value rather than their identity:
+Value objects are immutable objects that are defined by their value rather than
+their identity:
 
 ```typescript
 // Value objects are compared by value, not reference
@@ -153,7 +159,7 @@ import { Money } from '@vytches-ddd/value-objects';
 
 // Create money values
 const price = new Money(99.99, 'USD');
-const tax = new Money(8.50, 'USD');
+const tax = new Money(8.5, 'USD');
 
 // Arithmetic operations
 const total = price.add(tax);
@@ -202,13 +208,7 @@ console.log(email.isPersonalEmail()); // false (not gmail, yahoo, etc.)
 import { Address } from '@vytches-ddd/value-objects';
 
 // Create address
-const address = new Address(
-  '123 Main St',
-  'Anytown',
-  'NY',
-  '12345',
-  'USA'
-);
+const address = new Address('123 Main St', 'Anytown', 'NY', '12345', 'USA');
 
 // Access components
 console.log(address.street); // "123 Main St"
@@ -323,7 +323,7 @@ import { Money } from '@vytches-ddd/value-objects';
 
 // Create money values
 const price = new Money(99.99, 'USD');
-const discount = new Money(10.00, 'USD');
+const discount = new Money(10.0, 'USD');
 
 // Arithmetic operations
 const discountedPrice = price.subtract(discount);
@@ -405,10 +405,12 @@ console.log(money.format('en-GB')); // "US$1,234.56"
 console.log(money.format('de-DE')); // "1.234,56 $"
 
 // Custom formatting
-console.log(money.format('en-US', {
-  minimumFractionDigits: 3,
-  maximumFractionDigits: 3
-})); // "$1,234.560"
+console.log(
+  money.format('en-US', {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  })
+); // "$1,234.560"
 ```
 
 ## 📧 Email
@@ -469,7 +471,7 @@ const personalEmails = [
   'user@gmail.com',
   'user@yahoo.com',
   'user@hotmail.com',
-  'user@outlook.com'
+  'user@outlook.com',
 ];
 
 personalEmails.forEach(emailStr => {
@@ -525,13 +527,7 @@ console.log(extendedAddress.apartment); // "Suite 100"
 ### Address Formatting
 
 ```typescript
-const address = new Address(
-  '123 Main St',
-  'Anytown',
-  'NY',
-  '12345',
-  'USA'
-);
+const address = new Address('123 Main St', 'Anytown', 'NY', '12345', 'USA');
 
 // Full address formatting
 console.log(address.getFullAddress());
@@ -660,15 +656,9 @@ try {
 ### Range Operations
 
 ```typescript
-const range1 = new DateRange(
-  new Date('2023-01-01'),
-  new Date('2023-06-30')
-);
+const range1 = new DateRange(new Date('2023-01-01'), new Date('2023-06-30'));
 
-const range2 = new DateRange(
-  new Date('2023-04-01'),
-  new Date('2023-09-30')
-);
+const range2 = new DateRange(new Date('2023-04-01'), new Date('2023-09-30'));
 
 // Overlap detection
 console.log(range1.overlaps(range2)); // true
@@ -718,48 +708,48 @@ import { ValueObject } from '@vytches-ddd/domain-primitives';
 // Custom value object for Social Security Number
 class SocialSecurityNumber extends ValueObject {
   private readonly value: string;
-  
+
   constructor(ssn: string) {
     super();
     this.value = this.normalize(ssn);
   }
-  
+
   public get Value(): string {
     return this.value;
   }
-  
+
   public format(): string {
     return `${this.value.slice(0, 3)}-${this.value.slice(3, 5)}-${this.value.slice(5)}`;
   }
-  
+
   public getAreaNumber(): string {
     return this.value.slice(0, 3);
   }
-  
+
   public getGroupNumber(): string {
     return this.value.slice(3, 5);
   }
-  
+
   public getSerialNumber(): string {
     return this.value.slice(5);
   }
-  
+
   protected getEqualityComponents(): any[] {
     return [this.value];
   }
-  
+
   private normalize(ssn: string): string {
     // Remove all non-digit characters
     const digits = ssn.replace(/\D/g, '');
-    
+
     if (digits.length !== 9) {
       throw new ValidationError('SSN must be 9 digits', 'ssn', ssn);
     }
-    
+
     if (digits === '000000000' || digits === '123456789') {
       throw new ValidationError('Invalid SSN pattern', 'ssn', ssn);
     }
-    
+
     return digits;
   }
 }
@@ -783,55 +773,65 @@ class Coordinates extends ValueObject {
     super();
     this.validate();
   }
-  
+
   public get Latitude(): number {
     return this.latitude;
   }
-  
+
   public get Longitude(): number {
     return this.longitude;
   }
-  
+
   public distanceTo(other: Coordinates): number {
     // Haversine formula for distance calculation
     const R = 6371; // Earth's radius in kilometers
     const dLat = this.toRadians(other.latitude - this.latitude);
     const dLon = this.toRadians(other.longitude - this.longitude);
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(this.toRadians(this.latitude)) *
-              Math.cos(this.toRadians(other.latitude)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(this.latitude)) *
+        Math.cos(this.toRadians(other.latitude)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
-  
+
   public format(): string {
     return `${this.latitude.toFixed(6)}, ${this.longitude.toFixed(6)}`;
   }
-  
+
   protected getEqualityComponents(): any[] {
     return [this.latitude, this.longitude];
   }
-  
+
   private validate(): void {
     if (this.latitude < -90 || this.latitude > 90) {
-      throw new ValidationError('Latitude must be between -90 and 90', 'latitude', this.latitude);
+      throw new ValidationError(
+        'Latitude must be between -90 and 90',
+        'latitude',
+        this.latitude
+      );
     }
-    
+
     if (this.longitude < -180 || this.longitude > 180) {
-      throw new ValidationError('Longitude must be between -180 and 180', 'longitude', this.longitude);
+      throw new ValidationError(
+        'Longitude must be between -180 and 180',
+        'longitude',
+        this.longitude
+      );
     }
   }
-  
+
   private toRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
   }
 }
 
 // Usage
-const newYork = new Coordinates(40.7128, -74.0060);
+const newYork = new Coordinates(40.7128, -74.006);
 const london = new Coordinates(51.5074, -0.1278);
 
 console.log(newYork.format()); // "40.712800, -74.006000"
@@ -843,11 +843,11 @@ console.log(newYork.distanceTo(london)); // 5585.27 km
 ### Built-in Validators
 
 ```typescript
-import { 
+import {
   EmailValidator,
   PhoneNumberValidator,
   CurrencyValidator,
-  ZipCodeValidator
+  ZipCodeValidator,
 } from '@vytches-ddd/value-objects';
 
 // Email validation
@@ -879,39 +879,39 @@ class CreditCardValidator {
   public static isValid(cardNumber: string): boolean {
     // Remove spaces and hyphens
     const cleaned = cardNumber.replace(/[\s-]/g, '');
-    
+
     // Check if all digits
     if (!/^\d+$/.test(cleaned)) {
       return false;
     }
-    
+
     // Check length
     if (cleaned.length < 13 || cleaned.length > 19) {
       return false;
     }
-    
+
     // Luhn algorithm
     return this.luhnCheck(cleaned);
   }
-  
+
   private static luhnCheck(cardNumber: string): boolean {
     let sum = 0;
     let alternate = false;
-    
+
     for (let i = cardNumber.length - 1; i >= 0; i--) {
       let digit = parseInt(cardNumber.charAt(i));
-      
+
       if (alternate) {
         digit *= 2;
         if (digit > 9) {
           digit = (digit % 10) + 1;
         }
       }
-      
+
       sum += digit;
       alternate = !alternate;
     }
-    
+
     return sum % 10 === 0;
   }
 }
@@ -939,7 +939,7 @@ const emailJson = email.toJSON();
 console.log(emailJson); // { value: 'user@example.com' }
 
 const addressJson = address.toJSON();
-console.log(addressJson); 
+console.log(addressJson);
 // { street: '123 Main St', city: 'City', state: 'NY', zipCode: '12345', country: 'USA' }
 ```
 
@@ -969,19 +969,19 @@ class PersonName extends ValueObject {
   ) {
     super();
   }
-  
+
   public get FirstName(): string {
     return this.firstName;
   }
-  
+
   public get LastName(): string {
     return this.lastName;
   }
-  
+
   public get MiddleName(): string | undefined {
     return this.middleName;
   }
-  
+
   public getFullName(): string {
     const parts = [this.firstName];
     if (this.middleName) {
@@ -990,24 +990,20 @@ class PersonName extends ValueObject {
     parts.push(this.lastName);
     return parts.join(' ');
   }
-  
+
   public toJSON(): object {
     return {
       firstName: this.firstName,
       lastName: this.lastName,
       middleName: this.middleName,
-      fullName: this.getFullName()
+      fullName: this.getFullName(),
     };
   }
-  
+
   public static fromJSON(json: any): PersonName {
-    return new PersonName(
-      json.firstName,
-      json.lastName,
-      json.middleName
-    );
+    return new PersonName(json.firstName, json.lastName, json.middleName);
   }
-  
+
   protected getEqualityComponents(): any[] {
     return [this.firstName, this.lastName, this.middleName];
   }
@@ -1026,32 +1022,34 @@ describe('Money', () => {
   it('should create money with valid amount and currency', () => {
     // Arrange & Act
     const money = new Money(100, 'USD');
-    
+
     // Assert
     expect(money.amount).toBe(100);
     expect(money.currency).toBe('USD');
   });
-  
+
   it('should add money with same currency', () => {
     // Arrange
     const money1 = new Money(100, 'USD');
     const money2 = new Money(50, 'USD');
-    
+
     // Act
     const result = money1.add(money2);
-    
+
     // Assert
     expect(result.amount).toBe(150);
     expect(result.currency).toBe('USD');
   });
-  
+
   it('should throw error when adding different currencies', () => {
     // Arrange
     const money1 = new Money(100, 'USD');
     const money2 = new Money(50, 'EUR');
-    
+
     // Act & Assert
-    expect(() => money1.add(money2)).toThrow('Cannot operate on different currencies');
+    expect(() => money1.add(money2)).toThrow(
+      'Cannot operate on different currencies'
+    );
   });
 });
 
@@ -1059,21 +1057,21 @@ describe('Email', () => {
   it('should create email with valid address', () => {
     // Arrange & Act
     const email = new Email('user@example.com');
-    
+
     // Assert
     expect(email.value).toBe('user@example.com');
     expect(email.localPart).toBe('user');
     expect(email.domain).toBe('example.com');
   });
-  
+
   it('should normalize email to lowercase', () => {
     // Arrange & Act
     const email = new Email('USER@EXAMPLE.COM');
-    
+
     // Assert
     expect(email.value).toBe('user@example.com');
   });
-  
+
   it('should throw error for invalid email', () => {
     // Act & Assert
     expect(() => new Email('invalid-email')).toThrow('Invalid email format');
@@ -1091,34 +1089,40 @@ class AddressBuilder {
   private state: string = 'NY';
   private zipCode: string = '12345';
   private country: string = 'USA';
-  
+
   public withStreet(street: string): AddressBuilder {
     this.street = street;
     return this;
   }
-  
+
   public withCity(city: string): AddressBuilder {
     this.city = city;
     return this;
   }
-  
+
   public withState(state: string): AddressBuilder {
     this.state = state;
     return this;
   }
-  
+
   public withZipCode(zipCode: string): AddressBuilder {
     this.zipCode = zipCode;
     return this;
   }
-  
+
   public withCountry(country: string): AddressBuilder {
     this.country = country;
     return this;
   }
-  
+
   public build(): Address {
-    return new Address(this.street, this.city, this.state, this.zipCode, this.country);
+    return new Address(
+      this.street,
+      this.city,
+      this.state,
+      this.zipCode,
+      this.country
+    );
   }
 }
 
@@ -1132,7 +1136,7 @@ describe('Address', () => {
       .withState('IL')
       .withZipCode('62701')
       .build();
-    
+
     // Assert
     expect(address.street).toBe('456 Oak Ave');
     expect(address.city).toBe('Springfield');
@@ -1150,23 +1154,25 @@ import { fc } from 'fast-check';
 // Property-based testing for Money
 describe('Money Properties', () => {
   it('should be associative for addition', () => {
-    fc.assert(fc.property(
-      fc.float({ min: 0, max: 1000000 }),
-      fc.float({ min: 0, max: 1000000 }),
-      fc.float({ min: 0, max: 1000000 }),
-      fc.constantFrom('USD', 'EUR', 'GBP'),
-      (a, b, c, currency) => {
-        const money1 = new Money(a, currency);
-        const money2 = new Money(b, currency);
-        const money3 = new Money(c, currency);
-        
-        // (a + b) + c = a + (b + c)
-        const left = money1.add(money2).add(money3);
-        const right = money1.add(money2.add(money3));
-        
-        expect(left.equals(right)).toBe(true);
-      }
-    ));
+    fc.assert(
+      fc.property(
+        fc.float({ min: 0, max: 1000000 }),
+        fc.float({ min: 0, max: 1000000 }),
+        fc.float({ min: 0, max: 1000000 }),
+        fc.constantFrom('USD', 'EUR', 'GBP'),
+        (a, b, c, currency) => {
+          const money1 = new Money(a, currency);
+          const money2 = new Money(b, currency);
+          const money3 = new Money(c, currency);
+
+          // (a + b) + c = a + (b + c)
+          const left = money1.add(money2).add(money3);
+          const right = money1.add(money2.add(money3));
+
+          expect(left.equals(right)).toBe(true);
+        }
+      )
+    );
   });
 });
 ```
@@ -1179,24 +1185,24 @@ describe('Money Properties', () => {
 // ✅ Good: Immutable, validated, rich behavior
 class ISBN extends ValueObject {
   private readonly value: string;
-  
+
   constructor(isbn: string) {
     super();
     this.value = this.normalize(isbn);
   }
-  
+
   public get Value(): string {
     return this.value;
   }
-  
+
   public isISBN10(): boolean {
     return this.value.length === 10;
   }
-  
+
   public isISBN13(): boolean {
     return this.value.length === 13;
   }
-  
+
   public format(): string {
     if (this.isISBN13()) {
       return `${this.value.slice(0, 3)}-${this.value.slice(3, 4)}-${this.value.slice(4, 6)}-${this.value.slice(6, 12)}-${this.value.slice(12)}`;
@@ -1204,18 +1210,18 @@ class ISBN extends ValueObject {
       return `${this.value.slice(0, 1)}-${this.value.slice(1, 4)}-${this.value.slice(4, 9)}-${this.value.slice(9)}`;
     }
   }
-  
+
   protected getEqualityComponents(): any[] {
     return [this.value];
   }
-  
+
   private normalize(isbn: string): string {
     const cleaned = isbn.replace(/[\s-]/g, '');
-    
+
     if (!/^[\d]{9}[\dX]$/.test(cleaned) && !/^[\d]{13}$/.test(cleaned)) {
       throw new ValidationError('Invalid ISBN format', 'isbn', isbn);
     }
-    
+
     return cleaned;
   }
 }
@@ -1223,7 +1229,7 @@ class ISBN extends ValueObject {
 // ❌ Bad: Mutable, no validation
 class ISBN {
   public value: string;
-  
+
   constructor(isbn: string) {
     this.value = isbn; // No validation
   }
@@ -1237,56 +1243,69 @@ class ISBN {
 class CreditCard extends ValueObject {
   private readonly number: string;
   private readonly type: CreditCardType;
-  
+
   constructor(cardNumber: string) {
     super();
     this.number = this.normalize(cardNumber);
     this.type = this.detectType(this.number);
   }
-  
+
   public get Number(): string {
     return this.number;
   }
-  
+
   public get Type(): CreditCardType {
     return this.type;
   }
-  
+
   public getMaskedNumber(): string {
     const last4 = this.number.slice(-4);
     const masked = '*'.repeat(this.number.length - 4);
     return `${masked}${last4}`;
   }
-  
+
   protected getEqualityComponents(): any[] {
     return [this.number];
   }
-  
+
   private normalize(cardNumber: string): string {
     const cleaned = cardNumber.replace(/[\s-]/g, '');
-    
+
     if (!/^\d+$/.test(cleaned)) {
-      throw new ValidationError('Credit card number must contain only digits', 'cardNumber', cardNumber);
+      throw new ValidationError(
+        'Credit card number must contain only digits',
+        'cardNumber',
+        cardNumber
+      );
     }
-    
+
     if (cleaned.length < 13 || cleaned.length > 19) {
-      throw new ValidationError('Credit card number must be between 13 and 19 digits', 'cardNumber', cardNumber);
+      throw new ValidationError(
+        'Credit card number must be between 13 and 19 digits',
+        'cardNumber',
+        cardNumber
+      );
     }
-    
+
     if (!this.luhnCheck(cleaned)) {
-      throw new ValidationError('Invalid credit card number', 'cardNumber', cardNumber);
+      throw new ValidationError(
+        'Invalid credit card number',
+        'cardNumber',
+        cardNumber
+      );
     }
-    
+
     return cleaned;
   }
-  
+
   private detectType(number: string): CreditCardType {
     if (number.startsWith('4')) return CreditCardType.VISA;
-    if (number.startsWith('5') || number.startsWith('2')) return CreditCardType.MASTERCARD;
+    if (number.startsWith('5') || number.startsWith('2'))
+      return CreditCardType.MASTERCARD;
     if (number.startsWith('3')) return CreditCardType.AMEX;
     return CreditCardType.UNKNOWN;
   }
-  
+
   private luhnCheck(number: string): boolean {
     // Implementation details...
     return true;
@@ -1300,27 +1319,27 @@ class CreditCard extends ValueObject {
 // ✅ Good: Specific error types and messages
 class TaxId extends ValueObject {
   private readonly value: string;
-  
+
   constructor(taxId: string) {
     super();
     this.value = this.validate(taxId);
   }
-  
+
   private validate(taxId: string): string {
     if (!taxId) {
       throw new ValidationError('Tax ID cannot be empty', 'taxId', taxId);
     }
-    
+
     const cleaned = taxId.replace(/[\s-]/g, '');
-    
+
     if (!/^\d{9}$/.test(cleaned)) {
       throw new ValidationError('Tax ID must be 9 digits', 'taxId', taxId);
     }
-    
+
     if (cleaned === '000000000') {
       throw new ValidationError('Tax ID cannot be all zeros', 'taxId', taxId);
     }
-    
+
     return cleaned;
   }
 }
@@ -1337,7 +1356,8 @@ class TaxId {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -1361,10 +1381,12 @@ pnpm dev --filter=@vytches-ddd/value-objects
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd) ecosystem**
+**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
+ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

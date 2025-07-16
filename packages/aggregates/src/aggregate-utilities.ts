@@ -23,18 +23,103 @@ import type { AggregateRoot } from './aggregate-root';
 // ==========================================
 
 /**
- * Helper type to extract aggregate with specific capabilities
+ * @llm-summary Type definition for aggregate with capability
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * AggregateWithCapability type implementing domain pattern implementation for aggregate with capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AggregateWithCapability = {} as AggregateWithCapability;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type AggregateWithCapability<TId, TCap extends Capability> = AggregateRoot<TId> & {
   getCapability<T extends TCap>(CapabilityClass: CapabilityConstructor<T>): T;
 };
 
+/**
+ * @llm-summary Type definition for aggregate with snapshot capability
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * AggregateWithSnapshotCapability type implementing domain pattern implementation for aggregate with snapshot capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AggregateWithSnapshotCapability = {} as AggregateWithSnapshotCapability;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export type AggregateWithSnapshotCapability<TId> = AggregateWithCapability<TId, SnapshotCapability>;
+
+/**
+ * @llm-summary Type definition for aggregate with versioning capability
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * AggregateWithVersioningCapability type implementing domain pattern implementation for aggregate with versioning capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AggregateWithVersioningCapability = {} as AggregateWithVersioningCapability;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<
   TId,
   VersioningCapability
 >;
+
+/**
+ * @llm-summary Type definition for aggregate with audit capability
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * AggregateWithAuditCapability type implementing domain pattern implementation for aggregate with audit capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AggregateWithAuditCapability = {} as AggregateWithAuditCapability;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export type AggregateWithAuditCapability<TId> = AggregateWithCapability<TId, AuditCapability>;
+
+/**
+ * @llm-summary Type definition for aggregate with event sourcing capability
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * AggregateWithEventSourcingCapability type implementing domain pattern implementation for aggregate with event sourcing capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: AggregateWithEventSourcingCapability = {} as AggregateWithEventSourcingCapability;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
   TId,
   EventSourcingCapability
@@ -45,7 +130,32 @@ export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
 // ==========================================
 
 /**
- * Type guard to check if aggregate has snapshot capability
+ * @llm-summary has snapshot capability function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasSnapshotCapability function implementing domain pattern implementation for has snapshot capability operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {aggregate is AggregateWithSnapshotCapability<TId>} Returns aggregate is AggregateWithSnapshotCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasSnapshotCapability(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasSnapshotCapability(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasSnapshotCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -54,7 +164,32 @@ export function hasSnapshotCapability<TId>(
 }
 
 /**
- * Type guard to check if aggregate has versioning capability
+ * @llm-summary has versioning capability function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasVersioningCapability function implementing domain pattern implementation for has versioning capability operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {aggregate is AggregateWithVersioningCapability<TId>} Returns aggregate is AggregateWithVersioningCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasVersioningCapability(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasVersioningCapability(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasVersioningCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -63,7 +198,32 @@ export function hasVersioningCapability<TId>(
 }
 
 /**
- * Type guard to check if aggregate has audit capability
+ * @llm-summary has audit capability function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasAuditCapability function implementing domain pattern implementation for has audit capability operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {aggregate is AggregateWithAuditCapability<TId>} Returns aggregate is AggregateWithAuditCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasAuditCapability(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasAuditCapability(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasAuditCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -72,7 +232,32 @@ export function hasAuditCapability<TId>(
 }
 
 /**
- * Type guard to check if aggregate has event sourcing capability
+ * @llm-summary has event sourcing capability function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasEventSourcingCapability function implementing domain pattern implementation for has event sourcing capability operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {aggregate is AggregateWithEventSourcingCapability<TId>} Returns aggregate is AggregateWithEventSourcingCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasEventSourcingCapability(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasEventSourcingCapability(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasEventSourcingCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -85,7 +270,32 @@ export function hasEventSourcingCapability<TId>(
 // ==========================================
 
 /**
- * Helper function to cast aggregate to specific capability type
+ * @llm-summary as snapshot aggregate function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * asSnapshotAggregate function implementing domain pattern implementation for as snapshot aggregate operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {AggregateWithSnapshotCapability<TId>} Returns AggregateWithSnapshotCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = asSnapshotAggregate(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => asSnapshotAggregate(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function asSnapshotAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -96,6 +306,34 @@ export function asSnapshotAggregate<TId>(
   return aggregate;
 }
 
+/**
+ * @llm-summary as versioning aggregate function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * asVersioningAggregate function implementing domain pattern implementation for as versioning aggregate operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {AggregateWithVersioningCapability<TId>} Returns AggregateWithVersioningCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = asVersioningAggregate(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => asVersioningAggregate(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function asVersioningAggregate<TId>(
   aggregate: AggregateRoot<TId>
 ): AggregateWithVersioningCapability<TId> {
@@ -105,6 +343,34 @@ export function asVersioningAggregate<TId>(
   return aggregate;
 }
 
+/**
+ * @llm-summary as audit aggregate function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * asAuditAggregate function implementing domain pattern implementation for as audit aggregate operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {AggregateWithAuditCapability<TId>} Returns AggregateWithAuditCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = asAuditAggregate(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => asAuditAggregate(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function asAuditAggregate<TId>(
   aggregate: AggregateRoot<TId>
 ): AggregateWithAuditCapability<TId> {
@@ -114,6 +380,34 @@ export function asAuditAggregate<TId>(
   return aggregate;
 }
 
+/**
+ * @llm-summary as event sourcing aggregate function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * asEventSourcingAggregate function implementing domain pattern implementation for as event sourcing aggregate operations.
+ *
+ *
+ * @param {AggregateRoot<TId>} aggregate - aggregate parameter
+ * @returns {AggregateWithEventSourcingCapability<TId>} Returns AggregateWithEventSourcingCapability<TId>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = asEventSourcingAggregate(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => asEventSourcingAggregate(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function asEventSourcingAggregate<TId>(
   aggregate: AggregateRoot<TId>
 ): AggregateWithEventSourcingCapability<TId> {
@@ -128,14 +422,65 @@ export function asEventSourcingAggregate<TId>(
 // ==========================================
 
 /**
- * Gets a list of all capabilities attached to an aggregate
+ * @llm-summary get aggregate capabilities function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * getAggregateCapabilities function implementing domain pattern implementation for get aggregate capabilities operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @returns {string[]} Returns string[]
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getAggregateCapabilities(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getAggregateCapabilities(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): string[] {
   return aggregate.getCapabilityTypes();
 }
 
 /**
- * Checks if aggregate has all specified capabilities
+ * @llm-summary has all capabilities function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasAllCapabilities function implementing domain pattern implementation for has all capabilities operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasAllCapabilities(aggregate, capabilities);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasAllCapabilities(aggregate, capabilities));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -145,7 +490,33 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * Checks if aggregate has any of the specified capabilities
+ * @llm-summary has any capability function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * hasAnyCapability function implementing domain pattern implementation for has any capability operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = hasAnyCapability(aggregate, capabilities);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => hasAnyCapability(aggregate, capabilities));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function hasAnyCapability<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -155,7 +526,31 @@ export function hasAnyCapability<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * Gets detailed information about aggregate capabilities
+ * @llm-summary get aggregate info function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * getAggregateInfo function implementing domain pattern implementation for get aggregate info operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getAggregateInfo(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getAggregateInfo(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
   id: unknown;
@@ -195,7 +590,34 @@ export function createSnapshotIfCapable<TState>(
 }
 
 /**
- * Restores from snapshot if the aggregate has snapshot capability
+ * @llm-summary restore from snapshot if capable function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * restoreFromSnapshotIfCapable function implementing domain pattern implementation for restore from snapshot if capable operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @param {IAggregateSnapshot<unknown} snapshot - snapshot parameter
+ * @param {(state: TState} deserializer - deserializer parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = restoreFromSnapshotIfCapable(aggregate, snapshot, deserializer);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => restoreFromSnapshotIfCapable(aggregate, snapshot, deserializer));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function restoreFromSnapshotIfCapable<TState = unknown>(
   aggregate: AggregateRoot<unknown>,
@@ -220,7 +642,32 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
 // ==========================================
 
 /**
- * Gets audit log if the aggregate has audit capability
+ * @llm-summary get audit log if capable function
+ * @llm-domain Pattern
+ * @llm-pure true
+ *
+ * @description
+ * getAuditLogIfCapable function implementing domain pattern implementation for get audit log if capable operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @returns {unknown[]} Returns unknown[]
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getAuditLogIfCapable(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getAuditLogIfCapable(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown[] {
   if (hasAuditCapability(aggregate)) {
@@ -246,7 +693,33 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
 // ==========================================
 
 /**
- * Loads from event store if the aggregate has event sourcing capability
+ * @llm-summary load from event store if capable function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * loadFromEventStoreIfCapable function implementing domain pattern implementation for load from event store if capable operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @param {string | number} aggregateId - aggregateId parameter
+ * @returns {Promise<boolean>} Returns Promise<boolean>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = loadFromEventStoreIfCapable(aggregate, aggregateId);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => loadFromEventStoreIfCapable(aggregate, aggregateId));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function loadFromEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>,
@@ -263,7 +736,32 @@ export async function loadFromEventStoreIfCapable(
 }
 
 /**
- * Saves to event store if the aggregate has event sourcing capability
+ * @llm-summary save to event store if capable function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * saveToEventStoreIfCapable function implementing domain pattern implementation for save to event store if capable operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @returns {Promise<boolean>} Returns Promise<boolean>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = saveToEventStoreIfCapable(aggregate);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => saveToEventStoreIfCapable(aggregate));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function saveToEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>
@@ -283,7 +781,36 @@ export async function saveToEventStoreIfCapable(
 // ==========================================
 
 /**
- * Registers an upcaster if the aggregate has versioning capability
+ * @llm-summary register upcaster if capable function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * registerUpcasterIfCapable function implementing domain pattern implementation for register upcaster if capable operations.
+ *
+ *
+ * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
+ * @param {string} eventType - eventType parameter
+ * @param {number} sourceVersion - sourceVersion parameter
+ * @param {{ upcast(payload: TFrom} upcaster - upcaster parameter
+ * @param {unknown} metadata? - metadata? parameter
+ * @returns {TTo }} Returns TTo }
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = registerUpcasterIfCapable(aggregate, eventType, sourceVersion, upcaster, metadata?);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => registerUpcasterIfCapable(aggregate, eventType, sourceVersion, upcaster, metadata?));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function registerUpcasterIfCapable<TFrom, TTo>(
   aggregate: AggregateRoot<unknown>,
@@ -321,7 +848,29 @@ export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): u
 // ==========================================
 
 /**
- * Processes multiple aggregates with type-safe capability checking
+ * @llm-summary process aggregates with capabilities function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * processAggregatesWithCapabilities function implementing domain pattern implementation for process aggregates with capabilities operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = processAggregatesWithCapabilities();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => processAggregatesWithCapabilities());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export async function processAggregatesWithCapabilities<TId>(
   aggregates: AggregateRoot<TId>[],
@@ -356,7 +905,29 @@ export async function processAggregatesWithCapabilities<TId>(
 }
 
 /**
- * Clones capabilities from one aggregate to another
+ * @llm-summary clone aggregate capabilities function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * cloneAggregateCapabilities function implementing domain pattern implementation for clone aggregate capabilities operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = cloneAggregateCapabilities();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => cloneAggregateCapabilities());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
   sourceAggregate: AggregateRoot<TIdFrom>,

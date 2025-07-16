@@ -9,7 +9,20 @@ import { DomainBuilderWorkflow } from '../workflows/domain-builder/domain-builde
 import { Performance } from '../core/utils/performance';
 
 /**
- * Complete domain builder command implementation
+ * @llm-summary domainBuilderCommand constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * domainBuilderCommand constant implementing infrastructure service for domain builder command operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(domainBuilderCommand);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const domainBuilderCommand: Command = {
   name: 'create-domain',

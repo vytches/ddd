@@ -18,7 +18,30 @@ import { ConditionalPolicyBuilder } from './conditional-policy-builder';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 
 /**
- * Main policy builder implementing fluent API for policy construction
+ * @llm-summary PolicyBuilder class for policy builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyBuilder class implementing domain pattern implementation for policy builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   private id?: string;
@@ -362,7 +385,23 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
 }
 
 /**
- * Internal representation of a policy build step
+ * @llm-summary Contract for policy build step functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyBuildStep interface implementing domain pattern implementation for policy build step operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyBuildStep implements PolicyBuildStep {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyBuildStep<T> {
   type:

@@ -5,8 +5,25 @@
 
 import type { NLPAnalysis } from './natural-language-processor';
 import type { BoundedContext, BoundedContextMap } from './bounded-context-mapper';
+
 /**
- * Pattern recommendation result
+ * @llm-summary Contract for pattern recommendations functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * PatternRecommendations interface implementing infrastructure service for pattern recommendations operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePatternRecommendations implements PatternRecommendations {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PatternRecommendations {
   core: CorePattern[];
@@ -17,7 +34,23 @@ export interface PatternRecommendations {
 }
 
 /**
- * Core DDD patterns
+ * @llm-summary Contract for core pattern functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * CorePattern interface implementing infrastructure service for core pattern operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCorePattern implements CorePattern {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface CorePattern {
   name: string;
@@ -29,7 +62,23 @@ export interface CorePattern {
 }
 
 /**
- * Advanced DDD patterns
+ * @llm-summary Contract for advanced pattern functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * AdvancedPattern interface implementing infrastructure service for advanced pattern operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAdvancedPattern implements AdvancedPattern {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface AdvancedPattern {
   name: string;
@@ -43,7 +92,23 @@ export interface AdvancedPattern {
 }
 
 /**
- * Infrastructure patterns
+ * @llm-summary Contract for infrastructure pattern functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * InfrastructurePattern interface implementing infrastructure service for infrastructure pattern operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretenfrastructurePattern implements InfrastructurePattern {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface InfrastructurePattern {
   name: string;
@@ -55,7 +120,23 @@ export interface InfrastructurePattern {
 }
 
 /**
- * Enterprise patterns
+ * @llm-summary Contract for enterprise pattern functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * EnterprisePattern interface implementing infrastructure service for enterprise pattern operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEnterprisePattern implements EnterprisePattern {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface EnterprisePattern {
   name: string;
@@ -67,7 +148,23 @@ export interface EnterprisePattern {
 }
 
 /**
- * Pattern reasoning for transparency
+ * @llm-summary Contract for pattern reasoning functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * PatternReasoning interface implementing infrastructure service for pattern reasoning operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePatternReasoning implements PatternReasoning {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PatternReasoning {
   pattern: string;
@@ -79,7 +176,23 @@ export interface PatternReasoning {
 }
 
 /**
- * Reasoning factor
+ * @llm-summary Contract for reasoning factor functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ReasoningFactor interface implementing infrastructure service for reasoning factor operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteReasoningFactor implements ReasoningFactor {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ReasoningFactor {
   factor: string;
@@ -89,7 +202,30 @@ export interface ReasoningFactor {
 }
 
 /**
- * Pattern Orchestrator for intelligent pattern selection
+ * @llm-summary PatternOrchestrator class for pattern orchestrator operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * PatternOrchestrator class implementing infrastructure service for pattern orchestrator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PatternOrchestrator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PatternOrchestrator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PatternOrchestrator {
   private corePatternRules: PatternRule[] = [];

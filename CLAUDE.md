@@ -10,9 +10,11 @@ directory, NOT in `src/`.**
 
 ## CRITICAL: Documentation Updates
 
-**When creating or updating functionality, ALWAYS update the corresponding README.md file.**
+**When creating or updating functionality, ALWAYS update the corresponding
+README.md file.**
 
-- ✅ **REQUIRED**: Update `packages/[package]/README.md` when modifying package code
+- ✅ **REQUIRED**: Update `packages/[package]/README.md` when modifying package
+  code
 - ✅ **REQUIRED**: Include code examples showing new/updated functionality
 - ✅ **REQUIRED**: Update API sections if public interfaces change
 - ✅ **REQUIRED**: Keep LLM-METADATA sections current with actual exports
@@ -20,46 +22,57 @@ directory, NOT in `src/`.**
 
 ## CRITICAL: JSDoc Documentation
 
-**When creating or updating code, ALWAYS add comprehensive JSDoc documentation.**
+**When creating or updating code, ALWAYS add comprehensive JSDoc
+documentation.**
 
-- ✅ **REQUIRED**: Add JSDoc to all exported classes, interfaces, functions, and types
+- ✅ **REQUIRED**: Add JSDoc to all exported classes, interfaces, functions, and
+  types
 - ✅ **REQUIRED**: Use LLM-optimized template from `.jsdoc-template.md`
-- ✅ **REQUIRED**: Include `@llm-summary` and `@llm-domain` tags for LLM consumption
+- ✅ **REQUIRED**: Include `@llm-summary` and `@llm-domain` tags for LLM
+  consumption
 - ✅ **REQUIRED**: Provide minimum 2 `@example` blocks per public API
-- ✅ **REQUIRED**: Use `safeRun` pattern in error handling examples
 - ✅ **REQUIRED**: Document all `@param`, `@returns`, and `@throws`
 - ⚠️ **VALIDATION**: Run `pnpm jsdoc:validate` to check compliance
 - 📖 **REFERENCE**: See `.jsdoc-template.md` for exact format requirements
 
 ### JSDoc Template Example:
-```typescript
+
+````typescript
 /**
  * @llm-summary Brief one-line description
  * @llm-domain Core|Pattern|Architecture|Integration|Infrastructure
  * @llm-complexity Simple|Medium|Complex|Expert
- * 
+ *
  * @description
  * Detailed description with business context.
- * 
+ *
  * @param {Type} param - Description
  * @returns {Type} Description
- * 
+ *
  * @throws {ErrorType} When validation fails
- * 
+ *
  * @example
  * ```typescript
+ * // Basic usage
  * const result = new ClassName(params);
+ * console.log(result.value);
  * ```
- * 
+ *
  * @example
  * ```typescript
- * const [error, result] = safeRun(() => new ClassName(params));
+ * // With error handling
+ * try {
+ *   const result = new ClassName(params);
+ *   await processResult(result);
+ * } catch (error) {
+ *   console.error('Failed:', error.message);
+ * }
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
-```
+````
 
 ## Development Commands
 
@@ -72,6 +85,13 @@ pnpm build         # Build all packages
 pnpm lint          # Lint code
 pnpm type-check    # Type checking
 pnpm quality       # Run quality checks
+
+# JSDoc Documentation
+pnpm jsdoc:validate   # Validate JSDoc compliance
+pnpm jsdoc:generate   # Generate JSDoc for packages
+pnpm jsdoc:publish    # Generate HTML documentation
+pnpm jsdoc:serve      # Generate and serve locally
+pnpm jsdoc:watch      # Watch for changes and regenerate
 ```
 
 ### Architecture Decision Records
@@ -233,6 +253,10 @@ TypeScript frameworks like Jest, Vitest, and others.
 
 **CRITICAL**: All test files MUST use `safeRun` from `@vytches-ddd/utils` for
 error testing. Never use Jest/Vitest `toThrow` patterns.
+
+**NOTE**: `safeRun` is specifically designed for testing scenarios. In normal
+implementation code, use standard try/catch blocks or Result patterns from
+`@vytches-ddd/utils` for error handling.
 
 **Required Patterns:**
 

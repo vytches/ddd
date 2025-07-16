@@ -1,8 +1,11 @@
 # Package Documentation Template
 
-This template provides a consistent structure for documenting VytchesDDD packages. It's designed to be both human-readable and LLM-friendly for optimal AI assistance.
+This template provides a consistent structure for documenting VytchesDDD
+packages. It's designed to be both human-readable and LLM-friendly for optimal
+AI assistance.
 
-> **Note:** This template implements the standards defined in [ADR-0013: Enterprise Documentation Standards and LLM Optimization](../adr/0013-enterprise-documentation-standards-and-llm-optimization.md).
+> **Note:** This template implements the standards defined in
+> [ADR-0013: Enterprise Documentation Standards and LLM Optimization](../adr/0013-enterprise-documentation-standards-and-llm-optimization.md).
 
 ## File Structure
 
@@ -21,7 +24,7 @@ packages/[package-name]/
 
 ## README.md Template
 
-```markdown
+````markdown
 # @vytches-ddd/[package-name]
 
 [![npm version](https://badge.fury.io/js/%40vytches-ddd%2F[package-name].svg)](https://badge.fury.io/js/%40vytches-ddd%2F[package-name])
@@ -30,7 +33,8 @@ packages/[package-name]/
 
 > **[One-line description of the package purpose]**
 
-[2-3 sentence description explaining what the package does, its role in DDD, and key benefits]
+[2-3 sentence description explaining what the package does, its role in DDD, and
+key benefits]
 
 ## 📋 Table of Contents
 
@@ -58,6 +62,7 @@ yarn add @vytches-ddd/[package-name]
 # pnpm
 pnpm add @vytches-ddd/[package-name]
 ```
+````
 
 ### Peer Dependencies
 
@@ -69,16 +74,19 @@ npm install [peer-dependencies]
 ## ✨ Key Features
 
 ### [Feature Category 1]
+
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
 
 ### [Feature Category 2]
+
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
 
 ### [Feature Category 3]
+
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
 - **[Feature Name]**: Description of the feature and its benefits
@@ -244,7 +252,7 @@ type ReturnType = {
 const benchmarks = {
   throughput: 'X operations/second',
   latency: '< Xms',
-  memoryUsage: '< XMB'
+  memoryUsage: '< XMB',
 };
 ```
 
@@ -277,7 +285,8 @@ describe('MainClass', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -301,14 +310,17 @@ pnpm dev --filter=@vytches-ddd/[package-name]
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+This project is licensed under the MIT License - see the
+[LICENSE](../../LICENSE) file for details.
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd) ecosystem**
+**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
+ecosystem**
 
 For more information, visit the [main documentation](../../README.md).
-```
+
+````
 
 ## JSDoc/TSDoc Standards
 
@@ -349,7 +361,7 @@ export class ExampleClass {
     // Implementation
   }
 }
-```
+````
 
 ## LLM-Friendly Documentation Guidelines
 
@@ -448,4 +460,5 @@ pnpm exec markdown-link-check README.md
 pnpm exec cspell "**/*.md"
 ```
 
-This template ensures consistency across all packages while being optimized for both human developers and AI assistance.
+This template ensures consistency across all packages while being optimized for
+both human developers and AI assistance.

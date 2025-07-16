@@ -2,8 +2,30 @@
 import type { IOutboxMessage, MessageStatus, MessagePriority } from './outbox-interfaces';
 
 /**
- * Abstract class for outbox repository
- * Defines operations on the outbox independent of concrete implementation
+ * @llm-summary OutboxRepository class for outbox repository operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * OutboxRepository class implementing integration layer component for outbox repository operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IOutboxRepository();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IOutboxRepository());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class IOutboxRepository {
   /**

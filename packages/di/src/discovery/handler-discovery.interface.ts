@@ -2,7 +2,23 @@
 import type { Constructor } from '../types';
 
 /**
- * Information about a discovered handler for DI registration
+ * @llm-summary Contract for handler info functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * HandlerInfo interface implementing infrastructure service for handler info operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteHandlerInfo implements HandlerInfo {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface HandlerInfo {
   /** Handler type (command/query/event/domain-service) */
@@ -19,7 +35,23 @@ export interface HandlerInfo {
 }
 
 /**
- * Plugin interface for discovering handlers in specific packages
+ * @llm-summary Contract for handler discovery plugin functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * HandlerDiscoveryPlugin interface implementing infrastructure service for handler discovery plugin operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteHandlerDiscoveryPlugin implements IHandlerDiscoveryPlugin {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IHandlerDiscoveryPlugin {
   /**
@@ -42,7 +74,23 @@ export interface IHandlerDiscoveryPlugin {
 }
 
 /**
- * Registry for handler discovery plugins
+ * @llm-summary Contract for handler discovery registry functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * HandlerDiscoveryRegistry interface implementing infrastructure service for handler discovery registry operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteHandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IHandlerDiscoveryRegistry {
   /**
