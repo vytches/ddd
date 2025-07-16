@@ -2,11 +2,34 @@ import { LibUtils } from '@vytches-ddd/utils';
 import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interfaces';
 
 /**
- * Creates a new domain event with basic metadata
- * @param eventType Type of the event
- * @param payload Event payload
- * @param metadata Optional additional metadata
- * @returns A complete domain event with metadata
+ * @llm-summary create domain event function
+ * @llm-domain Core
+ * @llm-pure false
+ *
+ * @description
+ * createDomainEvent function implementing core domain functionality for create domain event operations.
+ *
+ *
+ * @param {string} eventType - eventType parameter
+ * @param {P} payload - payload parameter
+ * @param {Partial<IEventMetadata>} metadata? - metadata? parameter
+ * @returns {IExtendedDomainEvent<P>} Returns IExtendedDomainEvent<P>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = createDomainEvent(eventType, payload, metadata?);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => createDomainEvent(eventType, payload, metadata?));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function createDomainEvent<P = unknown>(
   eventType: string,

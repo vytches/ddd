@@ -31,4 +31,21 @@ export { DomainAnalyzer } from './workflows/domain-builder/domain-analyzer';
 export * from './types';
 
 // Version
+
+/**
+ * @llm-summary CLI_VERSION constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * CLI_VERSION constant implementing infrastructure service for c l i_ v e r s i o n operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(CLI_VERSION);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export const CLI_VERSION = '1.0.0';

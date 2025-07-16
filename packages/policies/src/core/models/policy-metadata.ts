@@ -1,6 +1,21 @@
 /**
- * Optional metadata for policy requests
- * Provides additional context for policy evaluation
+ * @llm-summary Contract for policy metadata functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyMetadata interface implementing domain pattern implementation for policy metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyMetadata implements PolicyMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyMetadata {
   /**
@@ -35,7 +50,30 @@ export interface PolicyMetadata {
 }
 
 /**
- * Builder for creating policy metadata
+ * @llm-summary PolicyMetadataBuilder class for policy metadata builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyMetadataBuilder class implementing domain pattern implementation for policy metadata builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyMetadataBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyMetadataBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyMetadataBuilder {
   private correlationId?: string;

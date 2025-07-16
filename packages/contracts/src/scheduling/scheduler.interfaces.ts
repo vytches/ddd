@@ -7,8 +7,23 @@ import type {
 } from './scheduled-event.interfaces';
 
 /**
- * Core interface for event scheduling
- * This interface should be implemented by concrete scheduler adapters
+ * @llm-summary Contract for event scheduler functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EventScheduler interface implementing core domain functionality for event scheduler operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventScheduler implements IEventScheduler {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventScheduler {
   /**
@@ -65,7 +80,23 @@ export interface IEventScheduler {
 }
 
 /**
- * Extended scheduler interface with bulk operations
+ * @llm-summary Contract for bulk event scheduler functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * BulkEventScheduler interface implementing core domain functionality for bulk event scheduler operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBulkEventScheduler implements IBulkEventScheduler {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IBulkEventScheduler extends IEventScheduler {
   /**
@@ -84,7 +115,23 @@ export interface IBulkEventScheduler extends IEventScheduler {
 }
 
 /**
- * Scheduler lifecycle hooks
+ * @llm-summary Contract for scheduler lifecycle functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * SchedulerLifecycle interface implementing core domain functionality for scheduler lifecycle operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSchedulerLifecycle implements ISchedulerLifecycle {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISchedulerLifecycle {
   /**
@@ -114,7 +161,23 @@ export interface ISchedulerLifecycle {
 }
 
 /**
- * Configuration for scheduler adapters
+ * @llm-summary Contract for scheduler config functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * SchedulerConfig interface implementing core domain functionality for scheduler config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSchedulerConfig implements ISchedulerConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISchedulerConfig {
   /**
@@ -149,7 +212,23 @@ export interface ISchedulerConfig {
 }
 
 /**
- * Factory for creating scheduler instances
+ * @llm-summary Contract for scheduler factory functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * SchedulerFactory interface implementing core domain functionality for scheduler factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSchedulerFactory implements ISchedulerFactory {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISchedulerFactory {
   /**

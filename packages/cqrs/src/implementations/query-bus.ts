@@ -8,6 +8,32 @@ import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
 
+/**
+ * @llm-summary QueryBus class for query bus operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * QueryBus class implementing architectural component for query bus operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new QueryBus();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new QueryBus());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class QueryBus extends IQueryBus {
   private middlewares: ICQRSMiddleware[] = [];
 

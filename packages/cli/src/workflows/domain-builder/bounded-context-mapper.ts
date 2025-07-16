@@ -6,7 +6,23 @@
 import type { NLPAnalysis } from './natural-language-processor';
 
 /**
- * Bounded context definition
+ * @llm-summary Contract for bounded context functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * BoundedContext interface implementing infrastructure service for bounded context operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBoundedContext implements BoundedContext {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface BoundedContext {
   name: string;
@@ -20,7 +36,23 @@ export interface BoundedContext {
 }
 
 /**
- * Context relationship definition
+ * @llm-summary Contract for context relationship functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ContextRelationship interface implementing infrastructure service for context relationship operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteContextRelationship implements ContextRelationship {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ContextRelationship {
   upstream: string;
@@ -36,7 +68,23 @@ export interface ContextRelationship {
 }
 
 /**
- * Bounded context map result
+ * @llm-summary Contract for bounded context map functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * BoundedContextMap interface implementing infrastructure service for bounded context map operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteBoundedContextMap implements BoundedContextMap {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface BoundedContextMap {
   contexts: BoundedContext[];
@@ -45,7 +93,23 @@ export interface BoundedContextMap {
 }
 
 /**
- * Context insight for recommendations
+ * @llm-summary Contract for context insight functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ContextInsight interface implementing infrastructure service for context insight operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteContextInsight implements ContextInsight {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ContextInsight {
   type: 'warning' | 'suggestion' | 'opportunity';
@@ -56,7 +120,30 @@ export interface ContextInsight {
 }
 
 /**
- * Bounded Context Mapper for intelligent context identification
+ * @llm-summary BoundedContextMapper class for bounded context mapper operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * BoundedContextMapper class implementing infrastructure service for bounded context mapper operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BoundedContextMapper();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BoundedContextMapper());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class BoundedContextMapper {
   private domainPatterns: Record<string, string[]> = {

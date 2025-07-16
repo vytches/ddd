@@ -1,16 +1,49 @@
 import type { PolicyContext } from '../interfaces/business-policy.interface';
 
 /**
- * Severity levels for policy violations
- * ERROR: Policy failure that should prevent operation
- * WARNING: Policy concern that should be logged but not prevent operation
- * INFO: Informational policy result for tracking/analytics
+ * @llm-summary Type definition for policy violation severity
+ * @llm-domain Pattern
+ * @llm-usage Frequent
+ *
+ * @description
+ * PolicyViolationSeverity type implementing domain pattern implementation for policy violation severity operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: PolicyViolationSeverity = {} as PolicyViolationSeverity;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type PolicyViolationSeverity = 'ERROR' | 'WARNING' | 'INFO';
 
 /**
- * Rich policy violation with severity, context, and extensibility
- * Provides comprehensive information about policy failures
+ * @llm-summary PolicyViolation class for policy violation operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyViolation class implementing domain pattern implementation for policy violation operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyViolation();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyViolation());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyViolation extends Error {
   /**
@@ -199,7 +232,23 @@ export class PolicyViolation extends Error {
 }
 
 /**
- * Options for creating a PolicyViolation
+ * @llm-summary Contract for policy violation options functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyViolationOptions interface implementing domain pattern implementation for policy violation options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyViolationOptions implements PolicyViolationOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyViolationOptions {
   /**
@@ -249,7 +298,23 @@ export interface PolicyViolationOptions {
 }
 
 /**
- * Serializable representation of a PolicyViolation
+ * @llm-summary Contract for policy violation data functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyViolationData interface implementing domain pattern implementation for policy violation data operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyViolationData implements PolicyViolationData {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyViolationData {
   readonly name: string;
@@ -265,7 +330,30 @@ export interface PolicyViolationData {
 }
 
 /**
- * Collection of policy violations with utility methods
+ * @llm-summary PolicyViolationCollection class for policy violation collection operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyViolationCollection class implementing domain pattern implementation for policy violation collection operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyViolationCollection();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyViolationCollection());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyViolationCollection {
   private readonly violations: PolicyViolation[] = [];

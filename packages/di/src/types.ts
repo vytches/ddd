@@ -1,5 +1,19 @@
 /**
- * Service lifetime enumeration for dependency injection
+ * @llm-summary Enumeration of service lifetime values
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * ServiceLifetime enum implementing infrastructure service for service lifetime operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: ServiceLifetime = ServiceLifetime.VALUE;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export enum ServiceLifetime {
   /** New instance created for each resolution */
@@ -11,22 +25,80 @@ export enum ServiceLifetime {
 }
 
 /**
- * Service registration token - can be string, symbol, or constructor function
+ * @llm-summary Type definition for service token
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * ServiceToken type implementing infrastructure service for service token operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: ServiceToken = {} as ServiceToken;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type ServiceToken<T = any> = string | symbol | Constructor<T>;
 
 /**
- * Constructor function type
+ * @llm-summary Type definition for constructor
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * Constructor type implementing infrastructure service for constructor operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: Constructor = {} as Constructor;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type Constructor<T = any> = new (...args: any[]) => T;
 
 /**
- * Service factory function for creating instances
+ * @llm-summary Type definition for service factory
+ * @llm-domain Infrastructure
+ * @llm-usage Frequent
+ *
+ * @description
+ * ServiceFactory type implementing infrastructure service for service factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: ServiceFactory = {} as ServiceFactory;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type ServiceFactory<T = any> = (container: IDependencyContainer) => T;
 
 /**
- * Service registration options
+ * @llm-summary Contract for service registration options functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ServiceRegistrationOptions interface implementing infrastructure service for service registration options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteServiceRegistrationOptions implements ServiceRegistrationOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ServiceRegistrationOptions {
   /** Service lifetime management */
@@ -38,7 +110,23 @@ export interface ServiceRegistrationOptions {
 }
 
 /**
- * Service registration descriptor
+ * @llm-summary Contract for service descriptor functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ServiceDescriptor interface implementing infrastructure service for service descriptor operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteServiceDescriptor implements ServiceDescriptor {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ServiceDescriptor<T = any> {
   token: ServiceToken<T>;
@@ -51,7 +139,23 @@ export interface ServiceDescriptor<T = any> {
 }
 
 /**
- * Minimal, framework-agnostic dependency container interface
+ * @llm-summary Contract for dependency container functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * DependencyContainer interface implementing infrastructure service for dependency container operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDependencyContainer implements IDependencyContainer {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDependencyContainer {
   /**
@@ -131,7 +235,23 @@ export interface IDependencyContainer {
 }
 
 /**
- * Container resolution context for debugging and tracing
+ * @llm-summary Contract for resolution context functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ResolutionContext interface implementing infrastructure service for resolution context operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteResolutionContext implements ResolutionContext {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ResolutionContext {
   /** Token being resolved */
@@ -145,7 +265,23 @@ export interface ResolutionContext {
 }
 
 /**
- * Container builder interface for fluent configuration
+ * @llm-summary Contract for container builder functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ContainerBuilder interface implementing infrastructure service for container builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteContainerBuilder implements IContainerBuilder {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IContainerBuilder {
   /**

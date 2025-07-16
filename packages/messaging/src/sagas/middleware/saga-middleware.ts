@@ -9,8 +9,30 @@ import type {
 } from '../interfaces';
 
 /**
- * Base saga middleware implementation
- * Provides common middleware patterns for saga processing
+ * @llm-summary BaseSagaMiddleware class for base saga middleware operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * BaseSagaMiddleware class implementing integration layer component for base saga middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseSagaMiddleware();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseSagaMiddleware());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseSagaMiddleware implements ISagaMiddleware {
   protected readonly logger: ReturnType<typeof Logger.forContext>;
@@ -73,8 +95,30 @@ export abstract class BaseSagaMiddleware implements ISagaMiddleware {
 }
 
 /**
- * Performance monitoring middleware
- * Tracks execution times and performance metrics
+ * @llm-summary PerformanceMonitoringMiddleware class for performance monitoring middleware operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * PerformanceMonitoringMiddleware class implementing integration layer component for performance monitoring middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PerformanceMonitoringMiddleware();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PerformanceMonitoringMiddleware());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PerformanceMonitoringMiddleware extends BaseSagaMiddleware {
   private readonly performanceData: Map<string, number> = new Map();
@@ -154,8 +198,30 @@ export class PerformanceMonitoringMiddleware extends BaseSagaMiddleware {
 }
 
 /**
- * Retry middleware
- * Provides automatic retry logic for failed saga steps
+ * @llm-summary RetryMiddleware class for retry middleware operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * RetryMiddleware class implementing integration layer component for retry middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new RetryMiddleware();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new RetryMiddleware());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class RetryMiddleware extends BaseSagaMiddleware {
   private readonly retryAttempts: Map<string, number> = new Map();
@@ -246,8 +312,30 @@ export class RetryMiddleware extends BaseSagaMiddleware {
 }
 
 /**
- * Circuit breaker middleware
- * Implements circuit breaker pattern for saga processing
+ * @llm-summary CircuitBreakerMiddleware class for circuit breaker middleware operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * CircuitBreakerMiddleware class implementing integration layer component for circuit breaker middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CircuitBreakerMiddleware();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CircuitBreakerMiddleware());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
   private readonly circuitStates: Map<
@@ -374,8 +462,30 @@ export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
 }
 
 /**
- * Security middleware
- * Provides authorization and security checks for saga operations
+ * @llm-summary SecurityMiddleware class for security middleware operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * SecurityMiddleware class implementing integration layer component for security middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SecurityMiddleware();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SecurityMiddleware());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SecurityMiddleware extends BaseSagaMiddleware {
   constructor(private readonly authorizer?: (context: ISagaMiddlewareContext) => Promise<boolean>) {
@@ -412,8 +522,30 @@ export class SecurityMiddleware extends BaseSagaMiddleware {
 }
 
 /**
- * Saga middleware pipeline
- * Orchestrates execution of multiple middleware components
+ * @llm-summary SagaMiddlewarePipeline class for saga middleware pipeline operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaMiddlewarePipeline class implementing integration layer component for saga middleware pipeline operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaMiddlewarePipeline();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaMiddlewarePipeline());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaMiddlewarePipeline {
   private readonly logger: ReturnType<typeof Logger.forContext>;

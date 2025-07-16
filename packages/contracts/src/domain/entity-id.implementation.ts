@@ -6,9 +6,30 @@
 import type { IEntityId, IEntityIdConstructorParams, IdType } from './entity-id.interfaces';
 
 /**
- * Base EntityId implementation
- * This provides a minimal, dependency-free EntityId that serves as the foundation
- * for all entity identifiers across the framework
+ * @llm-summary EntityId class for entity id operations
+ * @llm-domain Core
+ * @llm-complexity Medium
+ *
+ * @description
+ * EntityId class implementing core domain functionality for entity id operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EntityId();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EntityId());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EntityId<T = string> implements IEntityId<T> {
   constructor(

@@ -2,16 +2,23 @@ import type { IEventBus } from '@vytches-ddd/contracts';
 import type { IRepository } from './base-repository.interface';
 
 /**
- * Interface for the Unit of Work pattern in Domain-Driven Design.
+ * @llm-summary Contract for unit of work functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * The Unit of Work tracks changes made during a business transaction and coordinates
- * the persistence of those changes. It manages transaction boundaries, ensuring all operations
- * within a transaction either complete successfully or fail entirely, maintaining data consistency.
+ * @description
+ * UnitOfWork interface implementing domain pattern implementation for unit of work operations.
  *
- * Additionally, it coordinates event publication after successful transactions and provides
- * access to repositories within the transaction context.
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteUnitOfWork implements IUnitOfWork {
+ *   // Implementation
+ * }
+ * ```
  *
- * @interface IUnitOfWork
+ * @since 1.0.0
+ * @public
  */
 export interface IUnitOfWork {
   /**

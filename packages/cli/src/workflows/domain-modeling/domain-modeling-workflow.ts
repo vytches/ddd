@@ -14,7 +14,30 @@ import { ComponentValidator } from '../../core/validation';
 import { ContextAwarePromptEngine, SmartPrompts } from '../../core/prompts';
 
 /**
- * Domain modeling workflow with AI assistance
+ * @llm-summary DomainModelingWorkflow class for domain modeling workflow operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * DomainModelingWorkflow class implementing infrastructure service for domain modeling workflow operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DomainModelingWorkflow();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DomainModelingWorkflow());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DomainModelingWorkflow {
   private workflow: WorkflowEngine;

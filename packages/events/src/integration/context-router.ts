@@ -1,10 +1,56 @@
 import type { IExtendedDomainEvent, ISpecification } from '@vytches-ddd/contracts';
 
+/**
+ * @llm-summary Contract for context router functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * ContextRouter interface implementing architectural component for context router operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteContextRouter implements IContextRouter {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface IContextRouter {
   determineTargetContexts(event: IExtendedDomainEvent): string[];
 }
 
 // Implementacja z różnymi opcjami konfiguracji
+
+/**
+ * @llm-summary ContextRouter class for context router operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * ContextRouter class implementing architectural component for context router operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ContextRouter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ContextRouter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class ContextRouter implements IContextRouter {
   private readonly routingRules: Array<{
     targetContexts: string[];

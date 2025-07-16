@@ -11,7 +11,30 @@ import { EventSourcingCapability } from './capabilities/event-sourcing-capabilit
 import { AuditCapability } from './capabilities/audit-capability';
 
 /**
- * Type-safe builder for creating aggregates with capabilities
+ * @llm-summary AggregateBuilder class for aggregate builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * AggregateBuilder class implementing domain pattern implementation for aggregate builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AggregateBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AggregateBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
@@ -141,7 +164,29 @@ export class AggregateBuilder<TId = string> {
 }
 
 /**
- * Convenience function to create a builder
+ * @llm-summary aggregate builder function
+ * @llm-domain Pattern
+ * @llm-pure false
+ *
+ * @description
+ * aggregateBuilder function implementing domain pattern implementation for aggregate builder operations.
+ *
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = aggregateBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => aggregateBuilder());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function aggregateBuilder<TId = string>(params: {
   id: TId | EntityId<TId>;

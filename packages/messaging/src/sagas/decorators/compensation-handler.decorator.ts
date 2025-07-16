@@ -4,13 +4,93 @@ import { SAGA_METADATA_KEY } from './saga.decorator';
 import { SagaConfigurationError } from '../errors';
 
 /**
- * Compensation handler decorator - marks a method as a compensation handler
- * Provides declarative compensation logic for saga steps
+ * @llm-summary compensation handler function
+ * @llm-domain Integration
+ * @llm-pure false
  *
- * @param options - Compensation handler configuration
+ * @description
+ * CompensationHandler function implementing integration layer component for compensation handler operations.
+ *
+ *
+ * @param {CompensationHandlerOptions} options - options parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = CompensationHandler(options);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => CompensationHandler(options));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function CompensationHandler(options: CompensationHandlerOptions): MethodDecorator;
+
+/**
+ * @llm-summary compensation handler function
+ * @llm-domain Integration
+ * @llm-pure false
+ *
+ * @description
+ * CompensationHandler function implementing integration layer component for compensation handler operations.
+ *
+ *
+ * @param {string} stepName - stepName parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = CompensationHandler(stepName);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => CompensationHandler(stepName));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function CompensationHandler(stepName: string): MethodDecorator;
+
+/**
+ * @llm-summary compensation handler function
+ * @llm-domain Integration
+ * @llm-pure false
+ *
+ * @description
+ * CompensationHandler function implementing integration layer component for compensation handler operations.
+ *
+ *
+ * @param {CompensationHandlerOptions | string} optionsOrStepName - optionsOrStepName parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = CompensationHandler(optionsOrStepName);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => CompensationHandler(optionsOrStepName));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function CompensationHandler(
   optionsOrStepName: CompensationHandlerOptions | string
 ): MethodDecorator {
@@ -75,8 +155,32 @@ export function getCompensationHandlerMetadata(
 }
 
 /**
- * Get all compensation handler methods from a class
- * @param target - Target class
+ * @llm-summary get compensation handler methods function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * getCompensationHandlerMethods function implementing integration layer component for get compensation handler methods operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @returns {Map<string, CompensationHandlerOptions>} Returns Map<string, CompensationHandlerOptions>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getCompensationHandlerMethods(target);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getCompensationHandlerMethods(target));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getCompensationHandlerMethods(
   target: any
@@ -86,9 +190,33 @@ export function getCompensationHandlerMethods(
 }
 
 /**
- * Check if a method is decorated with @CompensationHandler
- * @param target - Target class
- * @param methodName - Method name
+ * @llm-summary is compensation handler method function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * isCompensationHandlerMethod function implementing integration layer component for is compensation handler method operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @param {string} methodName - methodName parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = isCompensationHandlerMethod(target, methodName);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => isCompensationHandlerMethod(target, methodName));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function isCompensationHandlerMethod(target: any, methodName: string): boolean {
   const methodMetadataKey = `saga:compensationHandler:${methodName}`;
@@ -96,9 +224,33 @@ export function isCompensationHandlerMethod(target: any, methodName: string): bo
 }
 
 /**
- * Get compensation handler for a specific step
- * @param target - Target class
- * @param stepName - Step name to find compensation handler for
+ * @llm-summary get compensation handler for step function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * getCompensationHandlerForStep function implementing integration layer component for get compensation handler for step operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @param {string} stepName - stepName parameter
+ * @returns {|} Returns |
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getCompensationHandlerForStep(target, stepName);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getCompensationHandlerForStep(target, stepName));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getCompensationHandlerForStep(
   target: any,
@@ -121,8 +273,32 @@ export function getCompensationHandlerForStep(
 }
 
 /**
- * Get all compensation handlers sorted by execution order
- * @param target - Target class
+ * @llm-summary get ordered compensation handlers function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * getOrderedCompensationHandlers function implementing integration layer component for get ordered compensation handlers operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @returns {Array<} Returns Array<
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getOrderedCompensationHandlers(target);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getOrderedCompensationHandlers(target));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getOrderedCompensationHandlers(target: any): Array<{
   methodName: string;

@@ -2,8 +2,30 @@ import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contract
 import { LibUtils } from '@vytches-ddd/utils';
 
 /**
- * Base implementation of a domain event
- * Provides core functionality for all domain events
+ * @llm-summary DomainEvent class for domain event operations
+ * @llm-domain Architecture
+ * @llm-complexity Medium
+ *
+ * @description
+ * DomainEvent class implementing architectural component for domain event operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DomainEvent();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DomainEvent());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class DomainEvent<T = unknown> implements IExtendedDomainEvent<T> {
   /**

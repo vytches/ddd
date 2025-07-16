@@ -1,243 +1,1099 @@
 # VytchesDDD
 
-> Enterprise-grade TypeScript library implementing Domain-Driven Design patterns
-> with full event-driven architecture support.
+<div align="center">
+
+![VytchesDDD Logo](https://img.shields.io/badge/VytchesDDD-Enterprise%20DDD-blue?style=for-the-badge)
+
+**Enterprise-Grade TypeScript Domain-Driven Design Framework**
 
 [![CI](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/ci.yml/badge.svg)](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/ci.yml)
 [![Release](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/release.yml/badge.svg)](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/release.yml)
-[![codecov](https://codecov.io/gh/yourusername/vytches-ddd/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/vytches-ddd)
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcore.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fcore)
+[![codecov](https://codecov.io/gh/PawelGozdz/vytches-ddd/branch/main/graph/badge.svg)](https://codecov.io/gh/PawelGozdz/vytches-ddd)
+[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcore.svg)](https://www.npmjs.com/org/vytches-ddd)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🎯 Philosophy
+[Documentation](./docs) • [Examples](./examples) • [API Reference](./docs/api) •
+[Contributing](./CONTRIBUTING.md)
 
-VytchesDDD provides a complete toolkit for building scalable, maintainable
-applications using tactical and strategic DDD patterns, including:
+</div>
 
-- **AI-First Design**: Documentation and structure optimized for LLM
-  understanding
-- **Modular Architecture**: Use only what you need, compose as required
-- **Enterprise DI System**: Auto-discovery with context isolation and framework
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Package Ecosystem](#-package-ecosystem)
+- [Quick Start](#-quick-start)
+- [Core Concepts](#-core-concepts)
+- [Advanced Patterns](#-advanced-patterns)
+- [LLM Integration Guide](#-llm-integration-guide)
+- [Development](#-development)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+
+## 🎯 Overview
+
+VytchesDDD is a comprehensive TypeScript framework for implementing
+Domain-Driven Design patterns in enterprise applications. Built with modern
+TypeScript and designed for both human developers and AI assistants, it provides
+a complete toolkit for building scalable, maintainable, and testable
+domain-centric applications.
+
+### Philosophy
+
+- **🤖 AI-First Documentation**: Structured for optimal LLM understanding and
+  code generation
+- **📦 Modular Architecture**: Use only what you need with tree-shakeable
+  packages
+- **🏢 Enterprise-Ready**: Production-grade patterns including CQRS, Event
+  Sourcing, and Saga orchestration
+- **🔒 Type-Safe**: Full TypeScript support with strict typing and inference
+- **🔌 Framework Agnostic**: Works with any framework or as standalone
+- **🛡️ Boundary Protection**: Built-in Anti-Corruption Layer for external system
   integration
-- **Production-Ready**: Enterprise features like circuit breakers, resilience
-  patterns, ACL
-- **TypeScript Native**: Full type safety and modern TS features
-- **Framework Agnostic**: Works with any framework or standalone
-- **External System Isolation**: Robust Anti-Corruption Layer patterns
 
-## 📦 Packages
+## ✨ Key Features
 
-| Package                                            | Version                                                       | Description                                                    |
-| -------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
-| [@vytches-ddd/core](./packages/core)               | ![npm](https://img.shields.io/npm/v/@vytches-ddd/core)        | Core DDD building blocks (Value Objects, Entities, Aggregates) |
-| [@vytches-ddd/di](./packages/di)                   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/di)          | Enterprise dependency injection with auto-discovery            |
-| [@vytches-ddd/utils](./packages/utils)             | ![npm](https://img.shields.io/npm/v/@vytches-ddd/utils)       | Common utilities and helpers                                   |
-| [@vytches-ddd/validation](./packages/validation)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/validation)  | Business rules, specifications, and validation patterns        |
-| [@vytches-ddd/policies](./packages/policies)       | ![npm](https://img.shields.io/npm/v/@vytches-ddd/policies)    | Business policies and domain policies                          |
-| [@vytches-ddd/events](./packages/events)           | ![npm](https://img.shields.io/npm/v/@vytches-ddd/events)      | Event-driven architecture components                           |
-| [@vytches-ddd/cqrs](./packages/cqrs)               | ![npm](https://img.shields.io/npm/v/@vytches-ddd/cqrs)        | Command Query Responsibility Segregation                       |
-| [@vytches-ddd/acl](./packages/acl)                 | ![npm](https://img.shields.io/npm/v/@vytches-ddd/acl)         | Anti-Corruption Layer for external systems                     |
-| [@vytches-ddd/projections](./packages/projections) | ![npm](https://img.shields.io/npm/v/@vytches-ddd/projections) | Event projections and read models                              |
-| [@vytches-ddd/messaging](./packages/messaging)     | ![npm](https://img.shields.io/npm/v/@vytches-ddd/messaging)   | Outbox pattern, sagas, and messaging patterns                  |
-| [@vytches-ddd/resilience](./packages/resilience)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/resilience)  | Circuit breakers, retry patterns, timeouts                     |
-| [@vytches-ddd/testing](./packages/testing)         | ![npm](https://img.shields.io/npm/v/@vytches-ddd/testing)     | Test utilities for DDD patterns                                |
-| [@vytches-ddd/enterprise](./packages/enterprise)   | ![npm](https://img.shields.io/npm/v/@vytches-ddd/enterprise)  | All-in-one enterprise bundle                                   |
+### Core DDD Building Blocks
+
+- **Value Objects**: Immutable, self-validating domain primitives
+- **Entities**: Objects with identity and lifecycle
+- **Aggregates**: Consistency boundaries with built-in event sourcing
+- **Domain Events**: First-class event-driven architecture support
+- **Repositories**: Abstract persistence with Unit of Work pattern
+- **Domain Services**: Business logic that doesn't belong to entities
+
+### Advanced Patterns
+
+- **CQRS**: Complete Command/Query separation with middleware pipeline
+- **Event Sourcing**: Built-in event store with snapshots and projections
+- **Saga Orchestration**: Long-running business processes with compensation
+- **Anti-Corruption Layer**: Protect your domain from external systems
+- **Business Policies**: Declarative business rules with temporal support
+- **Specifications**: Composable business rules and validation
+
+### Enterprise Features
+
+- **Dependency Injection**: Auto-discovery with context isolation
+- **Resilience Patterns**: Circuit breakers, retry policies, bulkheads
+- **Observability**: Structured logging, distributed tracing, metrics
+- **Testing Utilities**: DDD-specific test helpers and builders
+- **Multi-tenancy**: Built-in support for isolated contexts
+- **Performance**: Optimized for high-throughput scenarios
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph "Application Layer"
+        A[Commands/Queries] --> B[Command/Query Handlers]
+        B --> C[Application Services]
+    end
+
+    subgraph "Domain Layer"
+        C --> D[Domain Services]
+        D --> E[Aggregates/Entities]
+        E --> F[Domain Events]
+        E --> G[Value Objects]
+        D --> H[Specifications/Policies]
+    end
+
+    subgraph "Infrastructure Layer"
+        E --> I[Repositories]
+        F --> J[Event Store]
+        B --> K[Event Bus]
+        C --> L[ACL Adapters]
+    end
+
+    subgraph "Cross-Cutting"
+        M[DI Container]
+        N[Logging]
+        O[Resilience]
+        P[Monitoring]
+    end
+```
+
+## 📦 Package Ecosystem
+
+The library is organized into focused, single-responsibility packages:
+
+### Foundation Layer
+
+| Package                                                          | Description                           | Size  | Dependencies         |
+| ---------------------------------------------------------------- | ------------------------------------- | ----- | -------------------- |
+| [`@vytches-ddd/contracts`](./packages/contracts)                 | Core interfaces and contracts         | ~5KB  | None                 |
+| [`@vytches-ddd/domain-primitives`](./packages/domain-primitives) | Base DDD classes (Entity, VO, etc.)   | ~40KB | contracts            |
+| [`@vytches-ddd/value-objects`](./packages/value-objects)         | Enhanced value object implementations | ~36KB | domain-primitives    |
+| [`@vytches-ddd/repositories`](./packages/repositories)           | Repository pattern & Unit of Work     | ~40KB | domain-primitives    |
+| [`@vytches-ddd/aggregates`](./packages/aggregates)               | Aggregate roots with capabilities     | ~82KB | repositories, events |
+
+### Pattern Layer
+
+| Package                                                      | Description              | Key Features                             |
+| ------------------------------------------------------------ | ------------------------ | ---------------------------------------- |
+| [`@vytches-ddd/validation`](./packages/validation)           | Business rule validation | Specifications, composite validators     |
+| [`@vytches-ddd/policies`](./packages/policies)               | Business policy engine   | Fluent API, temporal policies, behaviors |
+| [`@vytches-ddd/domain-services`](./packages/domain-services) | Domain service patterns  | Transaction support, logging             |
+
+### Architecture Layer
+
+| Package                                              | Description               | Key Features                           |
+| ---------------------------------------------------- | ------------------------- | -------------------------------------- |
+| [`@vytches-ddd/events`](./packages/events)           | Event-driven architecture | Unified bus, domain/integration events |
+| [`@vytches-ddd/cqrs`](./packages/cqrs)               | Command/Query separation  | Middleware pipeline, decorators        |
+| [`@vytches-ddd/projections`](./packages/projections) | Event projections         | Automated state management             |
+| [`@vytches-ddd/event-store`](./packages/event-store) | Event persistence         | Snapshots, streams, adapters           |
+
+### Integration Layer
+
+| Package                                          | Description           | Key Features                          |
+| ------------------------------------------------ | --------------------- | ------------------------------------- |
+| [`@vytches-ddd/acl`](./packages/acl)             | Anti-Corruption Layer | Model translation, operation registry |
+| [`@vytches-ddd/messaging`](./packages/messaging) | Messaging patterns    | Outbox, Saga orchestration            |
+
+### Infrastructure Layer
+
+| Package                                            | Description          | Key Features                       |
+| -------------------------------------------------- | -------------------- | ---------------------------------- |
+| [`@vytches-ddd/di`](./packages/di)                 | Dependency injection | Auto-discovery, framework adapters |
+| [`@vytches-ddd/resilience`](./packages/resilience) | Resilience patterns  | Circuit breaker, retry, bulkhead   |
+| [`@vytches-ddd/logging`](./packages/logging)       | Structured logging   | DDD-aware, automatic context       |
+
+### Utility Layer
+
+| Package                                      | Description      | Key Features                 |
+| -------------------------------------------- | ---------------- | ---------------------------- |
+| [`@vytches-ddd/utils`](./packages/utils)     | Common utilities | Result pattern, type guards  |
+| [`@vytches-ddd/testing`](./packages/testing) | Test utilities   | DDD test builders, mocks     |
+| [`@vytches-ddd/cli`](./packages/cli)         | CLI tools        | Code generation, scaffolding |
+
+### Meta Packages
+
+| Package                                            | Description       | Includes              |
+| -------------------------------------------------- | ----------------- | --------------------- |
+| [`@vytches-ddd/core`](./packages/core)             | Core meta-package | Foundation + patterns |
+| [`@vytches-ddd/enterprise`](./packages/enterprise) | Full suite        | All packages          |
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-# Install core package
+# Core functionality only
 npm install @vytches-ddd/core
 
-# Or install the full enterprise bundle
+# Full enterprise suite
 npm install @vytches-ddd/enterprise
 
-# For specific features
-npm install @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd/acl
+# Specific features
+npm install @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd/resilience
 ```
 
-### Basic Usage
+### Basic Example: E-Commerce Order Domain
 
 ```typescript
 import {
-  ValueObject,
-  Entity,
   AggregateRoot,
+  ValueObject,
   DomainEvent,
+  Result,
+  EntityId,
 } from '@vytches-ddd/core';
+import { Email, Money } from '@vytches-ddd/value-objects';
+
+// Domain Events
+class OrderPlaced extends DomainEvent<{
+  orderId: string;
+  customerId: string;
+  totalAmount: number;
+  currency: string;
+}> {}
 
 // Value Objects
-class Email extends ValueObject<string> {
-  constructor(value: string) {
+class OrderStatus extends ValueObject<string> {
+  static readonly PENDING = new OrderStatus('PENDING');
+  static readonly CONFIRMED = new OrderStatus('CONFIRMED');
+  static readonly SHIPPED = new OrderStatus('SHIPPED');
+  static readonly DELIVERED = new OrderStatus('DELIVERED');
+  static readonly CANCELLED = new OrderStatus('CANCELLED');
+
+  private constructor(value: string) {
     super(value);
-    this.validate();
   }
 
-  private validate(): void {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value)) {
-      throw new Error('Invalid email format');
-    }
+  canTransitionTo(newStatus: OrderStatus): boolean {
+    const transitions: Record<string, string[]> = {
+      PENDING: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['SHIPPED', 'CANCELLED'],
+      SHIPPED: ['DELIVERED'],
+      DELIVERED: [],
+      CANCELLED: [],
+    };
+
+    return transitions[this.value].includes(newStatus.value);
   }
 }
 
-// Domain Events
-class UserCreated extends DomainEvent<{
-  userId: string;
-  email: string;
-}> {}
-
-// Aggregates with Event Sourcing
-class User extends AggregateRoot<UserId> {
+// Aggregate Root
+class Order extends AggregateRoot {
   private constructor(
-    id: UserId,
-    private email: Email
+    id: EntityId,
+    private customerId: EntityId,
+    private items: OrderItem[],
+    private status: OrderStatus,
+    private totalAmount: Money
   ) {
     super(id);
   }
 
-  static create(email: Email): User {
-    const user = new User(UserId.create(), email);
+  static create(
+    customerId: EntityId,
+    items: OrderItem[]
+  ): Result<Order, Error> {
+    if (items.length === 0) {
+      return Result.fail(new Error('Order must have at least one item'));
+    }
 
-    user.apply(
-      new UserCreated({
-        userId: user.getId().value,
-        email: email.value,
+    const totalAmount = items.reduce(
+      (sum, item) => sum.add(item.getSubtotal()),
+      Money.zero('USD')
+    );
+
+    const order = new Order(
+      EntityId.create(),
+      customerId,
+      items,
+      OrderStatus.PENDING,
+      totalAmount
+    );
+
+    order.addDomainEvent(
+      new OrderPlaced({
+        orderId: order.id.value,
+        customerId: customerId.value,
+        totalAmount: totalAmount.amount,
+        currency: totalAmount.currency,
       })
     );
 
-    return user;
+    return Result.ok(order);
   }
 
-  changeEmail(newEmail: Email): void {
-    this.email = newEmail;
-    // Events are automatically collected
+  confirm(): Result<void, Error> {
+    if (!this.status.canTransitionTo(OrderStatus.CONFIRMED)) {
+      return Result.fail(new Error('Cannot confirm order in current status'));
+    }
+
+    this.status = OrderStatus.CONFIRMED;
+    this.addDomainEvent(new OrderConfirmed({ orderId: this.id.value }));
+
+    return Result.ok();
   }
 }
 ```
 
-### CQRS with Dependency Injection
+### CQRS Implementation
 
 ```typescript
-import {
-  VytchesDDD,
-  SimpleContainer,
-  CommandHandler,
-  DomainService,
-  ServiceLifetime,
-} from '@vytches-ddd/core';
+import { Command, CommandHandler, CommandBus } from '@vytches-ddd/cqrs';
+import { VytchesDDD, DomainService } from '@vytches-ddd/di';
+import { Logger } from '@vytches-ddd/logging';
 
-// Domain Service with DI
+// Command Definition
+class PlaceOrderCommand extends Command<void> {
+  constructor(
+    public readonly customerId: string,
+    public readonly items: Array<{ productId: string; quantity: number }>
+  ) {
+    super();
+  }
+}
+
+// Domain Service
 @DomainService({
-  serviceId: 'userService',
-  lifetime: ServiceLifetime.Singleton,
+  serviceId: 'orderService',
+  context: 'OrderManagement',
 })
-class UserService {
-  async createUser(email: Email): Promise<User> {
-    return User.create(email);
+class OrderService {
+  private logger = Logger.forContext('OrderService');
+
+  async placeOrder(command: PlaceOrderCommand): Promise<Result<Order, Error>> {
+    this.logger.info('Placing order', { customerId: command.customerId });
+
+    // Business logic here
+    const order = Order.create(
+      EntityId.from(command.customerId),
+      command.items.map(item => OrderItem.create(item))
+    );
+
+    return order;
   }
 }
 
-// Command Handler with auto-discovery
-@CommandHandler(CreateUserCommand)
-class CreateUserHandler {
-  async execute(command: CreateUserCommand): Promise<void> {
-    // Service automatically resolved from DI container
-    const userService = VytchesDDD.resolve<UserService>('userService');
-    const user = await userService.createUser(new Email(command.email));
-    await this.userRepository.save(user);
+// Command Handler with Auto-Discovery
+@CommandHandler(PlaceOrderCommand, {
+  context: 'OrderManagement',
+  timeout: 30000,
+  middleware: ['validation', 'logging', 'transaction'],
+})
+class PlaceOrderHandler {
+  async execute(command: PlaceOrderCommand): Promise<void> {
+    const orderService = VytchesDDD.resolve<OrderService>('orderService');
+    const result = await orderService.placeOrder(command);
+
+    if (result.isFailure()) {
+      throw result.error;
+    }
+
+    // Repository automatically publishes domain events
+    await this.orderRepository.save(result.value);
   }
 }
 
-// Setup DI and CQRS (one-time configuration)
-const container = new SimpleContainer();
-VytchesDDD.configure(container); // Auto-discovers all decorated services
-
-// Usage - zero configuration needed
+// Usage
 const commandBus = new CommandBus();
-await commandBus.execute(new CreateUserCommand('user@example.com', 'John Doe'));
+await commandBus.execute(
+  new PlaceOrderCommand('customer-123', [
+    { productId: 'product-456', quantity: 2 },
+  ])
+);
 ```
 
-### External System Integration with ACL
+### Business Policies
+
+```typescript
+import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import { CreditLimitSpecification, FraudDetectionSpec } from './specifications';
+
+// Define complex business policy
+const orderApprovalPolicy = PolicyBuilder.create<Order>()
+  .withId('order-approval')
+  .withDomain('sales')
+  .withName('Order Approval Policy')
+
+  // Basic validation
+  .must(order => order.getTotalAmount().amount > 0)
+  .withCode('INVALID_AMOUNT')
+  .withMessage('Order amount must be positive')
+
+  // Credit limit check for large orders
+  .when(order => order.getTotalAmount().amount > 10000)
+  .then()
+  .mustAsync(new CreditLimitSpecification())
+  .withCode('CREDIT_LIMIT_EXCEEDED')
+  .withSeverity('ERROR')
+
+  // Fraud detection
+  .mustAsync(new FraudDetectionSpec())
+  .withCode('FRAUD_DETECTED')
+  .withSeverity('ERROR')
+
+  // Business hours restriction
+  .when(ctx => ctx.metadata?.region === 'EU')
+  .then()
+  .must(order => isWithinBusinessHours())
+  .withCode('OUTSIDE_BUSINESS_HOURS')
+  .withSeverity('WARNING')
+
+  .build();
+
+// Execute policy
+const context = PolicyContext.create()
+  .withUserId('user-123')
+  .withMetadata({ region: 'EU', channel: 'web' })
+  .build();
+
+const result = await orderApprovalPolicy.check({
+  entity: order,
+  context,
+});
+
+if (result.isFailure()) {
+  const errors = result.error.violations.filter(v => v.severity === 'ERROR');
+  const warnings = result.error.violations.filter(
+    v => v.severity === 'WARNING'
+  );
+
+  if (errors.length > 0) {
+    throw new OrderValidationError(errors);
+  }
+}
+```
+
+### Saga Pattern for Complex Workflows
+
+```typescript
+import { BaseSaga, SagaOrchestrator, SagaStatus } from '@vytches-ddd/messaging';
+
+// Define Order Processing Saga
+class OrderProcessingSaga extends BaseSaga {
+  constructor() {
+    super('OrderProcessingSaga', 'Order fulfillment workflow');
+  }
+
+  async handleEvent(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
+    switch (event.eventType) {
+      case 'OrderPlaced':
+        return this.handleOrderPlaced(event, context);
+      case 'PaymentProcessed':
+        return this.handlePaymentProcessed(event, context);
+      case 'InventoryReserved':
+        return this.handleInventoryReserved(event, context);
+      case 'PaymentFailed':
+        return this.handlePaymentFailed(event, context);
+    }
+  }
+
+  private async handleOrderPlaced(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ) {
+    this.updateState({
+      currentStep: 'ProcessPayment',
+      stepData: { orderId: event.payload.orderId },
+    });
+
+    return {
+      success: true,
+      commands: [{ type: 'ProcessPayment', payload: event.payload }],
+    };
+  }
+
+  private async handlePaymentFailed(
+    event: IExtendedDomainEvent,
+    context: ISagaExecutionContext
+  ) {
+    // Compensate by cancelling the order
+    return {
+      success: true,
+      commands: [
+        {
+          type: 'CancelOrder',
+          payload: { orderId: this.state.stepData.orderId },
+        },
+      ],
+      events: [
+        {
+          eventType: 'OrderCancelled',
+          payload: { orderId: this.state.stepData.orderId },
+        },
+      ],
+    };
+  }
+
+  async compensate(
+    stepName: string,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
+    switch (stepName) {
+      case 'InventoryReserved':
+        return {
+          success: true,
+          commands: [
+            { type: 'ReleaseInventory', payload: this.state.stepData },
+          ],
+        };
+      case 'PaymentProcessed':
+        return {
+          success: true,
+          commands: [{ type: 'RefundPayment', payload: this.state.stepData }],
+        };
+      default:
+        return { success: true };
+    }
+  }
+}
+
+// Register and use saga
+const orchestrator = new SagaOrchestrator(sagaRepository);
+orchestrator.registerSagaDefinition({
+  sagaType: 'OrderProcessingSaga',
+  startEvents: ['OrderPlaced'],
+  createInstance: async () => new OrderProcessingSaga(),
+  defaultTimeout: 3600000, // 1 hour
+});
+
+// Process events through orchestrator
+await orchestrator.processEvent(orderPlacedEvent, {
+  correlationId: 'order-123',
+});
+```
+
+### Anti-Corruption Layer
 
 ```typescript
 import { BaseACLAdapter, BaseModelTranslator } from '@vytches-ddd/acl';
 
-// Model Translation
-class PaymentModelTranslator extends BaseModelTranslator<
-  PaymentRequest,
-  ExternalPaymentData
+// External payment gateway response
+interface ExternalPaymentResponse {
+  transaction_id: string;
+  status_code: number;
+  amount_cents: number;
+  currency_code: string;
+  processed_at: string;
+}
+
+// Domain model
+class PaymentResult extends ValueObject<{
+  transactionId: string;
+  status: PaymentStatus;
+  amount: Money;
+  processedAt: Date;
+}> {}
+
+// Model translator
+class PaymentTranslator extends BaseModelTranslator<
+  ExternalPaymentResponse,
+  PaymentResult
 > {
-  protected performToExternalTranslation(
-    payment: PaymentRequest
-  ): ExternalPaymentData {
-    return {
-      transaction_id: payment.getTransactionId().value,
-      amount_cents: Math.round(payment.getAmount().value * 100),
-      currency_code: payment.getCurrency().value,
+  protected performToDomainTranslation(
+    external: ExternalPaymentResponse
+  ): PaymentResult {
+    return new PaymentResult({
+      transactionId: external.transaction_id,
+      status: this.mapStatusCode(external.status_code),
+      amount: Money.fromCents(external.amount_cents, external.currency_code),
+      processedAt: new Date(external.processed_at),
+    });
+  }
+
+  private mapStatusCode(code: number): PaymentStatus {
+    const statusMap: Record<number, PaymentStatus> = {
+      200: PaymentStatus.SUCCESS,
+      402: PaymentStatus.INSUFFICIENT_FUNDS,
+      403: PaymentStatus.DECLINED,
+      500: PaymentStatus.ERROR,
     };
+
+    return statusMap[code] ?? PaymentStatus.UNKNOWN;
   }
 }
 
-// ACL Adapter
-class PaymentACLAdapter extends BaseACLAdapter<
+// ACL Adapter with resilience
+class PaymentGatewayAdapter extends BaseACLAdapter<
   PaymentRequest,
-  ExternalPaymentData
+  ExternalPaymentResponse
 > {
-  protected registerSupportedOperations(): void {
-    this.registerOperation('PROCESS_PAYMENT');
-    this.registerOperation('REFUND_PAYMENT');
+  constructor() {
+    super(new PaymentTranslator());
+
+    // Add resilience patterns
+    this.withCircuitBreaker({
+      failureThreshold: 5,
+      resetTimeout: 60000,
+    });
+
+    this.withRetry({
+      maxAttempts: 3,
+      backoff: 'exponential',
+    });
+  }
+
+  protected async executeExternalOperation(
+    operation: string,
+    request: PaymentRequest
+  ): Promise<ExternalPaymentResponse> {
+    const response = await this.httpClient.post('/payments', {
+      // Transform to external format
+    });
+
+    return response.data;
   }
 }
-
-// Usage in Domain Service
-const result = await paymentACL.execute('PROCESS_PAYMENT', paymentRequest);
 ```
 
-### Dependency Injection & Auto-Discovery
+## 🎓 Core Concepts
+
+### 1. Value Objects
+
+Value Objects represent descriptive aspects of the domain with no conceptual
+identity. They are immutable and compared by their values.
 
 ```typescript
-import { VytchesDDD, SimpleContainer, DomainService } from '@vytches-ddd/core';
+import { ValueObject } from '@vytches-ddd/core';
 
-// Simple usage - services auto-discovered
-@DomainService('notificationService')
-class NotificationService {
-  async sendEmail(to: string, subject: string): Promise<void> {
-    // Implementation
+class Address extends ValueObject<{
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}> {
+  constructor(props: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  }) {
+    super(props);
+    this.validate();
+  }
+
+  private validate(): void {
+    if (!this.value.street || !this.value.city) {
+      throw new Error('Street and city are required');
+    }
+
+    if (!this.isValidPostalCode(this.value.postalCode)) {
+      throw new Error('Invalid postal code format');
+    }
+  }
+
+  private isValidPostalCode(code: string): boolean {
+    // Country-specific validation
+    return /^\d{5}(-\d{4})?$/.test(code); // US format
   }
 }
-
-// Context-aware services for DDD bounded contexts
-@DomainService({
-  serviceId: 'orderService',
-  context: 'OrderManagement',
-  lifetime: ServiceLifetime.Singleton,
-  dependencies: ['paymentService', 'inventoryService'],
-})
-class OrderService {
-  processOrder(order: Order): Promise<OrderResult> {
-    // Service automatically registered in OrderManagement context
-    // Can access other services from same context or global container
-  }
-}
-
-// One-time setup with auto-discovery
-const globalContainer = new SimpleContainer();
-VytchesDDD.configure(globalContainer);
-
-// Optional: Context-specific containers for DDD isolation
-const orderContainer = new SimpleContainer();
-VytchesDDD.configureContext('OrderManagement', orderContainer);
-
-// Usage - services resolved automatically
-const notificationService = VytchesDDD.resolve<NotificationService>(
-  'notificationService'
-);
-const orderService = VytchesDDD.resolve<OrderService>(
-  'orderService',
-  'OrderManagement'
-);
 ```
+
+### 2. Entities
+
+Entities have a distinct identity that runs through time and different states.
+
+```typescript
+import { Entity, EntityId } from '@vytches-ddd/core';
+
+class Product extends Entity {
+  private constructor(
+    id: EntityId,
+    private name: string,
+    private sku: string,
+    private price: Money,
+    private stock: number
+  ) {
+    super(id);
+  }
+
+  static create(props: {
+    name: string;
+    sku: string;
+    price: Money;
+    initialStock: number;
+  }): Result<Product, Error> {
+    if (!props.name || props.name.length < 3) {
+      return Result.fail(
+        new Error('Product name must be at least 3 characters')
+      );
+    }
+
+    return Result.ok(
+      new Product(
+        EntityId.create(),
+        props.name,
+        props.sku,
+        props.price,
+        props.initialStock
+      )
+    );
+  }
+
+  adjustStock(quantity: number): Result<void, Error> {
+    const newStock = this.stock + quantity;
+
+    if (newStock < 0) {
+      return Result.fail(new Error('Insufficient stock'));
+    }
+
+    this.stock = newStock;
+    return Result.ok();
+  }
+}
+```
+
+### 3. Aggregates
+
+Aggregates are clusters of domain objects that can be treated as a single unit.
+They maintain consistency boundaries and control access to their internals.
+
+```typescript
+import { AggregateRoot, DomainEvent } from '@vytches-ddd/core';
+
+class ShoppingCart extends AggregateRoot {
+  private items: CartItem[] = [];
+  private customerId: EntityId;
+
+  addItem(product: Product, quantity: number): Result<void, Error> {
+    const existingItem = this.items.find(item =>
+      item.productId.equals(product.id)
+    );
+
+    if (existingItem) {
+      existingItem.increaseQuantity(quantity);
+    } else {
+      this.items.push(CartItem.create(product.id, quantity));
+    }
+
+    this.addDomainEvent(
+      new ItemAddedToCart({
+        cartId: this.id.value,
+        productId: product.id.value,
+        quantity,
+      })
+    );
+
+    return Result.ok();
+  }
+
+  checkout(): Result<Order, Error> {
+    if (this.items.length === 0) {
+      return Result.fail(new Error('Cannot checkout empty cart'));
+    }
+
+    const order = Order.createFromCart(this);
+
+    this.addDomainEvent(
+      new CartCheckedOut({
+        cartId: this.id.value,
+        orderId: order.id.value,
+      })
+    );
+
+    return Result.ok(order);
+  }
+}
+```
+
+### 4. Domain Services
+
+Domain Services encapsulate domain logic that doesn't naturally fit within
+entities or value objects.
+
+```typescript
+import { DomainService } from '@vytches-ddd/di';
+import { Logger } from '@vytches-ddd/logging';
+
+@DomainService({
+  serviceId: 'pricingService',
+  context: 'Sales',
+})
+class PricingService {
+  private logger = Logger.forContext('PricingService');
+
+  calculateDiscount(customer: Customer, order: Order): Result<Money, Error> {
+    this.logger.info('Calculating discount', {
+      customerId: customer.id.value,
+      orderId: order.id.value,
+    });
+
+    // Complex pricing logic involving multiple aggregates
+    const loyaltyDiscount = this.calculateLoyaltyDiscount(customer);
+    const volumeDiscount = this.calculateVolumeDiscount(order);
+    const seasonalDiscount = this.getSeasonalDiscount();
+
+    const totalDiscount = loyaltyDiscount
+      .add(volumeDiscount)
+      .add(seasonalDiscount);
+
+    return Result.ok(totalDiscount);
+  }
+}
+```
+
+### 5. Repositories
+
+Repositories provide an abstraction over data storage, allowing the domain to
+remain persistence-agnostic.
+
+```typescript
+import { IBaseRepository } from '@vytches-ddd/repositories';
+
+interface IOrderRepository extends IBaseRepository<Order> {
+  findByCustomerId(customerId: EntityId): Promise<Order[]>;
+  findByStatus(status: OrderStatus): Promise<Order[]>;
+  findByDateRange(startDate: Date, endDate: Date): Promise<Order[]>;
+}
+
+// Implementation
+class OrderRepository implements IOrderRepository {
+  async save(order: Order): Promise<void> {
+    // Persist aggregate
+    await this.db.orders.upsert({
+      id: order.id.value,
+      data: order.toSnapshot(),
+    });
+
+    // Publish domain events (handled automatically by base repository)
+    await this.eventBus.publishMany(order.getUncommittedEvents());
+    order.markEventsAsCommitted();
+  }
+
+  async findById(id: EntityId): Promise<Order | null> {
+    const data = await this.db.orders.findUnique({
+      where: { id: id.value },
+    });
+
+    return data ? Order.fromSnapshot(data) : null;
+  }
+}
+```
+
+## 🚀 Advanced Patterns
+
+### Event Sourcing
+
+```typescript
+import {
+  EventSourcedAggregate,
+  DomainEvent,
+  IEventStore,
+} from '@vytches-ddd/event-store';
+
+class BankAccount extends EventSourcedAggregate {
+  private balance: Money;
+  private status: AccountStatus;
+
+  static create(customerId: EntityId, initialDeposit: Money): BankAccount {
+    const account = new BankAccount();
+
+    account.apply(
+      new AccountOpened({
+        accountId: EntityId.create().value,
+        customerId: customerId.value,
+        initialDeposit: initialDeposit.toJSON(),
+        openedAt: new Date(),
+      })
+    );
+
+    return account;
+  }
+
+  deposit(amount: Money): Result<void, Error> {
+    if (this.status !== AccountStatus.ACTIVE) {
+      return Result.fail(new Error('Account is not active'));
+    }
+
+    this.apply(
+      new MoneyDeposited({
+        accountId: this.id.value,
+        amount: amount.toJSON(),
+        balance: this.balance.add(amount).toJSON(),
+      })
+    );
+
+    return Result.ok();
+  }
+
+  // Event handlers
+  protected onAccountOpened(event: AccountOpened): void {
+    this.id = EntityId.from(event.payload.accountId);
+    this.balance = Money.fromJSON(event.payload.initialDeposit);
+    this.status = AccountStatus.ACTIVE;
+  }
+
+  protected onMoneyDeposited(event: MoneyDeposited): void {
+    this.balance = Money.fromJSON(event.payload.balance);
+  }
+}
+
+// Usage with Event Store
+const eventStore = new EventStore();
+const account = BankAccount.create(customerId, Money.of(1000, 'USD'));
+
+// Save events
+await eventStore.appendToStream(
+  `account-${account.id.value}`,
+  account.getUncommittedEvents()
+);
+
+// Reconstitute from events
+const events = await eventStore.getEventStream(`account-${accountId}`);
+const reconstituted = BankAccount.fromEventStream(events);
+```
+
+### Projections
+
+```typescript
+import {
+  Projection,
+  ProjectionEngine,
+  ICheckpointCapability,
+} from '@vytches-ddd/projections';
+
+class CustomerOrderSummaryProjection extends Projection {
+  constructor() {
+    super('CustomerOrderSummary');
+
+    // Add capabilities
+    this.addCapability(new CheckpointCapability());
+    this.addCapability(
+      new RetryCapability({
+        maxAttempts: 3,
+        backoff: 'exponential',
+      })
+    );
+  }
+
+  // Define event handlers
+  @HandleEvent(OrderPlaced)
+  async onOrderPlaced(event: OrderPlaced): Promise<void> {
+    await this.db.customerSummaries.upsert({
+      where: { customerId: event.payload.customerId },
+      update: {
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: event.payload.totalAmount },
+        lastOrderDate: event.occurredAt,
+      },
+      create: {
+        customerId: event.payload.customerId,
+        totalOrders: 1,
+        totalSpent: event.payload.totalAmount,
+        lastOrderDate: event.occurredAt,
+      },
+    });
+  }
+
+  @HandleEvent(OrderCancelled)
+  async onOrderCancelled(event: OrderCancelled): Promise<void> {
+    // Update projection
+  }
+}
+
+// Run projection engine
+const engine = new ProjectionEngine();
+engine.register(new CustomerOrderSummaryProjection());
+await engine.start();
+```
+
+### Specifications Pattern
+
+```typescript
+import {
+  Specification,
+  CompositeSpecification,
+  AndSpecification,
+  OrSpecification,
+} from '@vytches-ddd/validation';
+
+// Define specifications
+class MinimumAgeSpecification extends Specification<Customer> {
+  constructor(private minAge: number) {
+    super();
+  }
+
+  isSatisfiedBy(customer: Customer): boolean {
+    return customer.getAge() >= this.minAge;
+  }
+}
+
+class PremiumCustomerSpecification extends Specification<Customer> {
+  isSatisfiedBy(customer: Customer): boolean {
+    return customer.getTier() === CustomerTier.PREMIUM;
+  }
+}
+
+class HighValueOrderSpecification extends Specification<Order> {
+  constructor(private threshold: Money) {
+    super();
+  }
+
+  isSatisfiedBy(order: Order): boolean {
+    return order.getTotalAmount().isGreaterThan(this.threshold);
+  }
+}
+
+// Compose specifications
+const eligibleForDiscount = new AndSpecification(
+  new MinimumAgeSpecification(18),
+  new OrSpecification(
+    new PremiumCustomerSpecification(),
+    new HighValueOrderSpecification(Money.of(1000, 'USD'))
+  )
+);
+
+// Use in domain logic
+if (eligibleForDiscount.isSatisfiedBy(customer)) {
+  order.applyDiscount(discountPercentage);
+}
+```
+
+## 🤖 LLM Integration Guide
+
+This library is designed to be AI-friendly for code generation and assistance.
+Here's how to effectively use it with LLMs:
+
+### Structured Prompts for Code Generation
+
+```markdown
+## Context
+
+- Framework: @vytches-ddd
+- Domain: E-commerce
+- Bounded Context: Order Management
+
+## Requirements
+
+Create an Order aggregate that:
+
+1. Supports multiple order items
+2. Calculates total with tax
+3. Has status workflow (pending -> confirmed -> shipped -> delivered)
+4. Emits domain events for each state change
+5. Validates business rules (min order amount, max items)
+
+## Technical Constraints
+
+- Use Result pattern for error handling
+- Implement event sourcing
+- Add specifications for validation
+- Include unit tests
+
+## Output Format
+
+Provide complete TypeScript implementation with:
+
+- Value objects for OrderStatus, OrderItem
+- Order aggregate with all business logic
+- Domain events for each transition
+- Repository interface
+- Example usage
+```
+
+### Code Analysis Prompt Template
+
+```markdown
+## Task: Analyze Domain Model
+
+Analyze the following code using @vytches-ddd patterns: [paste code here]
+
+Identify:
+
+1. Which DDD patterns are used correctly
+2. Potential improvements
+3. Missing patterns that could benefit the design
+4. Anti-patterns to fix
+
+Provide refactored code following @vytches-ddd best practices.
+```
+
+### Best Practices for AI Assistance
+
+1. **Always specify the package context**:
+
+   ```typescript
+   // Use specific imports for clarity
+   import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+   import { Money } from '@vytches-ddd/value-objects';
+   ```
+
+2. **Include domain context in prompts**:
+
+   - Bounded context name
+   - Business rules and invariants
+   - Integration points
+
+3. **Request specific patterns**:
+
+   - "Implement using Saga pattern from @vytches-ddd/messaging"
+   - "Add resilience using @vytches-ddd/resilience patterns"
+   - "Create ACL adapter using @vytches-ddd/acl"
+
+4. **Use library conventions**:
+   - Result pattern for error handling
+   - Domain events for state changes
+   - Specifications for complex validation
 
 ## 🏗️ Development
 
@@ -245,11 +1101,12 @@ const orderService = VytchesDDD.resolve<OrderService>(
 
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
+- TypeScript >= 5.0.0
 
 ### Setup
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/PawelGozdz/vytches-ddd.git
 cd vytches-ddd
 
@@ -262,80 +1119,152 @@ pnpm build
 # Run tests
 pnpm test
 
-# Lint code
-pnpm lint
+# Start development mode
+pnpm dev
 ```
 
-### Available Scripts
+### Development Commands
 
 ```bash
-# Development
-pnpm dev                 # Start development mode
-pnpm build               # Build all packages
-pnpm test                # Run all tests
-pnpm test:watch          # Run tests in watch mode
-pnpm lint                # Lint all packages
-pnpm format              # Format code with Prettier
+# Core commands
+pnpm dev              # Interactive development mode
+pnpm build            # Build all packages
+pnpm test             # Run all tests
+pnpm lint             # Lint code
+pnpm format           # Format with Prettier
+pnpm type-check       # TypeScript validation
 
-# Affected (only changed packages)
-pnpm build:affected      # Build only affected packages
-pnpm test:affected       # Test only affected packages
-pnpm lint:affected       # Lint only affected packages
+# Advanced workflows
+pnpm playground       # Interactive testing environment
+pnpm test:watch       # Test in watch mode
+pnpm build:affected   # Build only changed packages
+pnpm quality          # Run all quality checks
 
-# Utilities
-pnpm clean               # Clean all build artifacts
-pnpm graph               # View dependency graph
-pnpm affected:graph      # View affected packages graph
-
-# Release
-pnpm release             # Release new versions
+# Release management
+pnpm changeset        # Create changeset
+pnpm release          # Release packages
 ```
 
 ### Project Structure
 
 ```
 vytches-ddd/
-├── packages/
-│   ├── core/            # Core DDD building blocks
-│   ├── di/              # Dependency injection system
-│   ├── utils/           # Common utilities
-│   ├── validation/      # Business rules and specifications
-│   ├── policies/        # Business policies
-│   ├── events/          # Event-driven architecture
-│   ├── cqrs/            # Command Query Responsibility Segregation
-│   ├── acl/             # Anti-Corruption Layer
-│   ├── projections/     # Event projections
-│   ├── messaging/       # Outbox pattern and messaging
-│   ├── resilience/      # Circuit breakers and resilience patterns
-│   ├── testing/         # Test utilities
-│   └── enterprise/      # All-in-one enterprise bundle
-├── examples/
-│   ├── simple/         # Basic usage examples
-│   ├── ecommerce/      # E-commerce domain example
-│   └── banking/        # Banking domain example
-├── tools/              # Build and development tools
-└── docs/               # Documentation
+├── packages/                    # All packages
+│   ├── contracts/              # Shared interfaces
+│   ├── domain-primitives/      # Base DDD classes
+│   ├── value-objects/          # Value object implementations
+│   ├── repositories/           # Repository patterns
+│   ├── aggregates/             # Aggregate root implementations
+│   ├── validation/             # Validation & specifications
+│   ├── policies/               # Business policies
+│   ├── domain-services/        # Domain service patterns
+│   ├── events/                 # Event infrastructure
+│   ├── cqrs/                   # CQRS implementation
+│   ├── projections/            # Event projections
+│   ├── event-store/            # Event persistence
+│   ├── acl/                    # Anti-corruption layer
+│   ├── messaging/              # Messaging patterns
+│   ├── di/                     # Dependency injection
+│   ├── resilience/             # Resilience patterns
+│   ├── logging/                # Structured logging
+│   ├── utils/                  # Common utilities
+│   ├── testing/                # Test utilities
+│   ├── cli/                    # CLI tools
+│   ├── core/                   # Core meta-package
+│   └── enterprise/             # Enterprise bundle
+├── examples/                    # Example applications
+│   ├── basic/                  # Basic usage
+│   ├── ecommerce/              # E-commerce example
+│   ├── banking/                # Banking domain
+│   └── playground/             # Testing playground
+├── docs/                        # Documentation
+│   ├── api/                    # API reference
+│   ├── guides/                 # User guides
+│   ├── patterns/               # Pattern catalog
+│   └── adrs/                   # Architecture decisions
+├── scripts/                     # Build scripts
+└── tools/                       # Development tools
+```
+
+### Testing Strategy
+
+```bash
+# Unit tests
+pnpm test:unit
+
+# Integration tests
+pnpm test:integration
+
+# E2E tests
+pnpm test:e2e
+
+# Coverage report
+pnpm test:coverage
+
+# Test specific package
+pnpm nx test @vytches-ddd/events
 ```
 
 ## 📚 Documentation
 
-- [Getting Started Guide](./docs/guides/getting-started.md)
+### Getting Started
+
+- [Quick Start Guide](./docs/guides/quick-start.md)
 - [Core Concepts](./docs/guides/core-concepts.md)
-- [CQRS Guide](./docs/guides/cqrs.md)
-- [Anti-Corruption Layer](./docs/guides/acl.md)
-- [Event-Driven Architecture](./docs/guides/events.md)
-- [API Reference](./docs/api/index.md)
-- [Examples](./examples/)
+- [Installation](./docs/guides/installation.md)
+
+### Patterns & Practices
+
+- [DDD Patterns](./docs/patterns/ddd-patterns.md)
+- [CQRS Guide](./docs/patterns/cqrs.md)
+- [Event Sourcing](./docs/patterns/event-sourcing.md)
+- [Saga Pattern](./docs/patterns/sagas.md)
+
+### Package Guides
+
+- [Events Package](./docs/packages/events.md)
+- [CQRS Package](./docs/packages/cqrs.md)
+- [ACL Package](./docs/packages/acl.md)
+- [Resilience Package](./docs/packages/resilience.md)
+- [DI Package](./docs/packages/di.md)
+
+### API Reference
+
+- [Core API](./docs/api/core.md)
+- [Full API Reference](./docs/api/index.md)
+
+### Architecture
+
+- [Architecture Overview](./docs/architecture/overview.md)
+- [Decision Records](./docs/adrs/)
+
+### Examples
+
+- [Example Applications](./examples/README.md)
+- [Code Snippets](./docs/examples/snippets.md)
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md)
 for details.
 
-### Code of Conduct
+### Development Workflow
 
-This project adheres to the
-[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Make changes with tests
+4. Run quality checks (`pnpm quality`)
+5. Commit with conventional commits
+6. Push to branch (`git push origin feature/amazing-feature`)
+7. Open Pull Request
+
+### Code Style
+
+- TypeScript strict mode
+- ESLint + Prettier formatting
+- Conventional commits
+- 90%+ test coverage
+- JSDoc for public APIs
 
 ## 📄 License
 
@@ -344,10 +1273,24 @@ for details.
 
 ## 🙏 Acknowledgments
 
-- Inspired by Domain-Driven Design principles by Eric Evans
-- Built on top of proven patterns from the enterprise software community
-- Designed for modern TypeScript development practices
+- Inspired by Eric Evans' Domain-Driven Design
+- Built on enterprise patterns from Martin Fowler
+- Influenced by frameworks like MediatR (.NET) and Axon (Java)
+- Designed for modern TypeScript development
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/PawelGozdz/vytches-ddd)
+- [NPM Organization](https://www.npmjs.com/org/vytches-ddd)
+- [Documentation](https://vytches-ddd.dev)
+- [Discord Community](https://discord.gg/vytches-ddd)
 
 ---
 
+<div align="center">
+
 **Happy Domain Modeling!** 🚀
+
+Made with ❤️ by the VytchesDDD Team
+
+</div>

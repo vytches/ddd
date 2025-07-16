@@ -17,8 +17,30 @@ import {
 } from '../errors';
 
 /**
- * Simple in-memory dependency container implementation
- * Provides basic dependency injection capabilities for testing and simple scenarios
+ * @llm-summary SimpleContainer class for simple container operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * SimpleContainer class implementing infrastructure service for simple container operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SimpleContainer();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SimpleContainer());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SimpleContainer implements IDependencyContainer {
   private readonly services = new Map<string, ServiceDescriptor>();

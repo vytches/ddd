@@ -8,6 +8,32 @@ import { Result } from '@vytches-ddd/utils';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
 
+/**
+ * @llm-summary BusinessRuleValidator class for business rule validator operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BusinessRuleValidator class implementing domain pattern implementation for business rule validator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BusinessRuleValidator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BusinessRuleValidator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class BusinessRuleValidator<T> implements IValidator<T> {
   private rules: ValidationRule<T>[] = [];
   private stopOnFirstFailure = false;

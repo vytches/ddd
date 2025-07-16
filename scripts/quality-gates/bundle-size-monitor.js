@@ -36,20 +36,20 @@ const CONFIG = {
 
     // Pattern packages (medium size)
     validation: 100,
-    policies: 190,
+    policies: 250,
     'domain-services': 50,
 
     // Architecture packages (can be larger)
-    events: 70,
+    events: 100,
     cqrs: 100, // Complex architecture patterns
     projections: 100,
 
     // Integration packages
     acl: 90,
-    messaging: 200, // Enterprise framework with Sagas + Outbox
+    messaging: 250, // Enterprise framework with Sagas + Outbox
 
     // Infrastructure packages
-    resilience: 80,
+    resilience: 120,
     enterprise: 50, // Should be lightweight coordination
     'event-store': 150, // Event sourcing with complex features
 

@@ -1,5 +1,21 @@
 /**
- * Interface for components supporting state capture for audit purposes
+ * @llm-summary Contract for auditable functionality
+ * @llm-domain Architecture
+ * @llm-contract Required
+ *
+ * @description
+ * Auditable interface implementing architectural component for auditable operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAuditable implements IAuditable {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAuditable {
   /**

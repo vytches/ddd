@@ -3,8 +3,30 @@ import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytch
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Type-safe audit capability implementation
- * Tracks all events applied to an aggregate for auditing purposes
+ * @llm-summary AuditCapability class for audit capability operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * AuditCapability class implementing domain pattern implementation for audit capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AuditCapability();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AuditCapability());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
   override readonly type = 'audit' as const;

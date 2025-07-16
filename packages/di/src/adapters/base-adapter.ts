@@ -9,7 +9,30 @@ import type {
 } from '../types';
 
 /**
- * Base adapter class providing common functionality for framework adapters
+ * @llm-summary BaseContainerAdapter class for base container adapter operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseContainerAdapter class implementing infrastructure service for base container adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseContainerAdapter();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseContainerAdapter());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseContainerAdapter implements IDependencyContainer {
   // Simple Phase 1 implementation without logging

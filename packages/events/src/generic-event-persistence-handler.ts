@@ -1,8 +1,30 @@
 import type { IDomainEvent, IEventPersistenceHandler } from '@vytches-ddd/contracts';
 
 /**
- * Generic implementation of event persistence handler
- * Delegates to specific handlers based on event type
+ * @llm-summary GenericEventPersistenceHandler class for generic event persistence handler operations
+ * @llm-domain Architecture
+ * @llm-complexity Simple
+ *
+ * @description
+ * GenericEventPersistenceHandler class implementing architectural component for generic event persistence handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new GenericEventPersistenceHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new GenericEventPersistenceHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 // TODO: dorobić testy
 // TODO: zaktualizować HOW-TO

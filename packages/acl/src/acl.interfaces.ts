@@ -4,7 +4,23 @@ import type { ACLError } from './acl-errors';
 import type { TypedOperation } from './typed-operations';
 
 /**
- * Core ACL Adapter interface for synchronous request/response communication
+ * @llm-summary Contract for a c l adapter functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ACLAdapter interface implementing integration layer component for a c l adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteACLAdapter implements IACLAdapter {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IACLAdapter<TDomainModel, _TExternalModel, TResult = any> {
   execute(
@@ -17,6 +33,25 @@ export interface IACLAdapter<TDomainModel, _TExternalModel, TResult = any> {
   getContextInfo(): ACLContextInfo;
 }
 
+/**
+ * @llm-summary Contract for a c l middleware functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ACLMiddleware interface implementing integration layer component for a c l middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteACLMiddleware implements ACLMiddleware {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface ACLMiddleware {
   execute<T>(
     operation: string,
@@ -26,6 +61,25 @@ export interface ACLMiddleware {
   ): Promise<Result<T, ACLError>>;
 }
 
+/**
+ * @llm-summary Contract for enhanced a c l adapter functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * EnhancedACLAdapter interface implementing integration layer component for enhanced a c l adapter operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEnhancedACLAdapter implements IEnhancedACLAdapter {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface IEnhancedACLAdapter<TDomain, TExternal, TResult = any>
   extends IACLAdapter<TDomain, TExternal, TResult> {
   use(middleware: ACLMiddleware): this;
@@ -37,7 +91,23 @@ export interface IEnhancedACLAdapter<TDomain, TExternal, TResult = any>
 }
 
 /**
- * Model translator for domain <-> external format conversion
+ * @llm-summary Contract for model translator functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ModelTranslator interface implementing integration layer component for model translator operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteModelTranslator implements IModelTranslator {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IModelTranslator<TDomain, TExternal> {
   toExternal(domainModel: TDomain): TExternal;
@@ -47,7 +117,23 @@ export interface IModelTranslator<TDomain, TExternal> {
 }
 
 /**
- * External API interface for synchronous operations
+ * @llm-summary Contract for external a p i functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ExternalAPI interface implementing integration layer component for external a p i operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteExternalAPI implements IExternalAPI {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IExternalAPI<TExternalModel, TResult> {
   execute(operation: string, model: TExternalModel): Promise<TResult>;
@@ -55,6 +141,25 @@ export interface IExternalAPI<TExternalModel, TResult> {
   healthCheck(): Promise<boolean>;
 }
 
+/**
+ * @llm-summary Contract for a c l context info functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ACLContextInfo interface implementing integration layer component for a c l context info operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteACLContextInfo implements ACLContextInfo {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface ACLContextInfo {
   readonly contextName: string;
   readonly externalSystemName: string;
@@ -68,6 +173,25 @@ export interface ACLContextInfo {
   };
 }
 
+/**
+ * @llm-summary Contract for execute options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ExecuteOptions interface implementing integration layer component for execute options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteExecuteOptions implements ExecuteOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface ExecuteOptions {
   version?: string;
   timeout?: number;

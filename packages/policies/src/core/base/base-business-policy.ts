@@ -13,8 +13,30 @@ import type {
 import { PolicyViolation } from '../models/policy-violation';
 
 /**
- * Abstract base class for business policies
- * Provides common functionality and enforces the IBusinessPolicy contract
+ * @llm-summary BaseBusinessPolicy class for base business policy operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseBusinessPolicy class implementing domain pattern implementation for base business policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseBusinessPolicy();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseBusinessPolicy());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
   /**
@@ -113,7 +135,30 @@ export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
 }
 
 /**
- * Policy that wraps a specification for direct use
+ * @llm-summary SpecificationPolicy class for specification policy operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * SpecificationPolicy class implementing domain pattern implementation for specification policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SpecificationPolicy();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SpecificationPolicy());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
@@ -171,7 +216,30 @@ export class SpecificationPolicy<T> extends BaseBusinessPolicy<T> {
 }
 
 /**
- * Policy that wraps an async specification
+ * @llm-summary AsyncSpecificationPolicy class for async specification policy operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * AsyncSpecificationPolicy class implementing domain pattern implementation for async specification policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AsyncSpecificationPolicy();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AsyncSpecificationPolicy());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AsyncSpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
@@ -235,7 +303,30 @@ export class AsyncSpecificationPolicy<T> extends BaseBusinessPolicy<T> {
 }
 
 /**
- * Base class for composite policies that combine multiple policies
+ * @llm-summary BaseCompositePolicy class for base composite policy operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseCompositePolicy class implementing domain pattern implementation for base composite policy operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseCompositePolicy();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseCompositePolicy());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseCompositePolicy<T> extends BaseBusinessPolicy<T> {
   protected readonly policies: IBusinessPolicy<T>[];

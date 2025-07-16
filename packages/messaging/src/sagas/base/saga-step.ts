@@ -8,8 +8,30 @@ import type {
 } from '../interfaces';
 
 /**
- * Base saga step implementation providing common functionality
- * All concrete saga steps should extend this class
+ * @llm-summary SagaStep class for saga step operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaStep class implementing integration layer component for saga step operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaStep();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaStep());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class SagaStep implements ISagaStep {
   protected readonly logger: ReturnType<typeof Logger.forContext>;

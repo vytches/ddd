@@ -52,6 +52,22 @@ export type {
 import { DefaultLogger } from './logger';
 import type { LoggerConfiguration } from './core';
 
+/**
+ * @llm-summary Logger constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * Logger constant implementing infrastructure service for logger operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(Logger);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export const Logger = {
   create: (contextName?: string) => DefaultLogger.create(contextName),
   forContext: (contextName?: string) => DefaultLogger.forContext(contextName),

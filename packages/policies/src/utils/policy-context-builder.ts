@@ -1,8 +1,30 @@
 import type { PolicyContext } from '../core/interfaces/business-policy.interface';
 
 /**
- * Fluent builder for creating PolicyContext instances
- * Provides a convenient way to build context with required and optional fields
+ * @llm-summary PolicyContextBuilder class for policy context builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyContextBuilder class implementing domain pattern implementation for policy context builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyContextBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyContextBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyContextBuilder {
   private userId?: string;
@@ -196,7 +218,30 @@ export class PolicyContextBuilder {
 }
 
 /**
- * Quick factory functions for common scenarios
+ * @llm-summary PolicyContextFactory class for policy context factory operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyContextFactory class implementing domain pattern implementation for policy context factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyContextFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyContextFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyContextFactory {
   /**

@@ -6,7 +6,30 @@
 import { ValidationError } from '../../types';
 
 /**
- * Validation utility functions for CLI inputs
+ * @llm-summary Validation class for validation operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * Validation class implementing infrastructure service for validation operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new Validation();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new Validation());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class Validation {
   /**

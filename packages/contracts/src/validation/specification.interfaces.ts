@@ -1,6 +1,21 @@
 /**
- * Specification pattern interface
- * Defines a business rule that can be evaluated against a candidate
+ * @llm-summary Contract for specification functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * Specification interface implementing core domain functionality for specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSpecification implements ISpecification {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISpecification<T> {
   /**
@@ -40,9 +55,23 @@ export interface ISpecification<T> {
 }
 
 /**
- * Asynchronous specification pattern interface
- * Defines a business rule that can be evaluated against a candidate asynchronously
- * Used for specifications that require external services, database calls, or I/O operations
+ * @llm-summary Contract for async specification functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * AsyncSpecification interface implementing core domain functionality for async specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAsyncSpecification implements IAsyncSpecification {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAsyncSpecification<T> {
   /**

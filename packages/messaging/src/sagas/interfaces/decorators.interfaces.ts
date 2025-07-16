@@ -2,8 +2,23 @@ import type { Constructor } from '@vytches-ddd/di';
 import type { ISagaExecutionContext } from './saga.interfaces';
 
 /**
- * Saga decorator configuration
- * Used to mark classes as saga definitions
+ * @llm-summary Contract for saga decorator options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaDecoratorOptions interface implementing integration layer component for saga decorator options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaDecoratorOptions implements SagaDecoratorOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaDecoratorOptions {
   /** Type identifier for the saga */
@@ -35,8 +50,23 @@ export interface SagaDecoratorOptions {
 }
 
 /**
- * Saga event handler decorator configuration
- * Used to mark methods that handle specific events
+ * @llm-summary Contract for saga event handler options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaEventHandlerOptions interface implementing integration layer component for saga event handler options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaEventHandlerOptions implements SagaEventHandlerOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaEventHandlerOptions {
   /** Event type(s) this handler processes */
@@ -75,8 +105,23 @@ export interface SagaEventHandlerOptions {
 }
 
 /**
- * Compensation handler decorator configuration
- * Used to mark methods that provide compensation logic
+ * @llm-summary Contract for compensation handler options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * CompensationHandlerOptions interface implementing integration layer component for compensation handler options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteCompensationHandlerOptions implements CompensationHandlerOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface CompensationHandlerOptions {
   /** Step name this compensation handler is for */
@@ -96,8 +141,23 @@ export interface CompensationHandlerOptions {
 }
 
 /**
- * Start saga decorator configuration
- * Used to mark event handlers that can initiate new sagas
+ * @llm-summary Contract for start saga options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * StartSagaOptions interface implementing integration layer component for start saga options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteStartSagaOptions implements StartSagaOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface StartSagaOptions {
   /** Properties to use for correlation */
@@ -114,8 +174,23 @@ export interface StartSagaOptions {
 }
 
 /**
- * End saga decorator configuration
- * Used to mark event handlers that complete sagas
+ * @llm-summary Contract for end saga options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * EndSagaOptions interface implementing integration layer component for end saga options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEndSagaOptions implements EndSagaOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface EndSagaOptions {
   /** Whether to execute compensation on saga completion */
@@ -129,8 +204,23 @@ export interface EndSagaOptions {
 }
 
 /**
- * Timeout handler decorator configuration
- * Used to mark methods that handle saga timeouts
+ * @llm-summary Contract for timeout handler options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * TimeoutHandlerOptions interface implementing integration layer component for timeout handler options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTimeoutHandlerOptions implements TimeoutHandlerOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface TimeoutHandlerOptions {
   /** Timeout duration (milliseconds) */
@@ -147,8 +237,23 @@ export interface TimeoutHandlerOptions {
 }
 
 /**
- * Saga step decorator configuration
- * Used to mark methods as saga steps with execution metadata
+ * @llm-summary Contract for saga step options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaStepOptions interface implementing integration layer component for saga step options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaStepOptions implements SagaStepOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaStepOptions {
   /** Unique step name */
@@ -183,8 +288,23 @@ export interface SagaStepOptions {
 }
 
 /**
- * Saga correlation decorator configuration
- * Used to define how sagas correlate with events
+ * @llm-summary Contract for saga correlation options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaCorrelationOptions interface implementing integration layer component for saga correlation options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaCorrelationOptions implements SagaCorrelationOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaCorrelationOptions {
   /** Property paths for correlation matching */
@@ -201,8 +321,23 @@ export interface SagaCorrelationOptions {
 }
 
 /**
- * Saga middleware decorator configuration
- * Used to apply middleware to saga execution
+ * @llm-summary Contract for saga middleware options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaMiddlewareOptions interface implementing integration layer component for saga middleware options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaMiddlewareOptions implements SagaMiddlewareOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaMiddlewareOptions {
   /** Middleware classes to apply */
@@ -219,8 +354,23 @@ export interface SagaMiddlewareOptions {
 }
 
 /**
- * Saga middleware interface
- * Provides cross-cutting concerns for saga execution
+ * @llm-summary Contract for saga middleware functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaMiddleware interface implementing integration layer component for saga middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaMiddleware implements ISagaMiddleware {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaMiddleware {
   /**
@@ -256,7 +406,23 @@ export interface ISagaMiddleware {
 }
 
 /**
- * Saga middleware execution context
+ * @llm-summary Contract for saga middleware context functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaMiddlewareContext interface implementing integration layer component for saga middleware context operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaMiddlewareContext implements ISagaMiddlewareContext {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaMiddlewareContext {
   /** Saga identifier */
@@ -285,8 +451,23 @@ export interface ISagaMiddlewareContext {
 }
 
 /**
- * Saga validation decorator configuration
- * Used to add validation to saga steps
+ * @llm-summary Contract for saga validation options functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaValidationOptions interface implementing integration layer component for saga validation options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaValidationOptions implements SagaValidationOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaValidationOptions {
   /** Validation rules for input */
@@ -315,8 +496,23 @@ export interface SagaValidationOptions {
 }
 
 /**
- * Metadata stored by decorators
- * Used internally for saga configuration and execution
+ * @llm-summary Contract for saga metadata functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaMetadata interface implementing integration layer component for saga metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaMetadata implements SagaMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaMetadata {
   /** Saga configuration */
@@ -351,7 +547,32 @@ export interface SagaMetadata {
 }
 
 /**
- * Type guard for saga metadata
+ * @llm-summary is saga metadata function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * isSagaMetadata function implementing integration layer component for is saga metadata operations.
+ *
+ *
+ * @param {unknown} metadata - metadata parameter
+ * @returns {metadata is SagaMetadata} Returns metadata is SagaMetadata
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = isSagaMetadata(metadata);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => isSagaMetadata(metadata));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function isSagaMetadata(metadata: unknown): metadata is SagaMetadata {
   return (

@@ -1,8 +1,23 @@
 import type { ISaga, ISagaState } from './saga.interfaces';
 
 /**
- * Saga repository interface for persistence operations
- * Provides CRUD operations and querying capabilities for saga state
+ * @llm-summary Contract for saga repository functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaRepository interface implementing integration layer component for saga repository operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaRepository implements ISagaRepository {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaRepository {
   /**
@@ -77,7 +92,23 @@ export interface ISagaRepository {
 }
 
 /**
- * Advanced query interface for saga repository
+ * @llm-summary Contract for saga query functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaQuery interface implementing integration layer component for saga query operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaQuery implements ISagaQuery {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaQuery {
   /** Saga type filter */
@@ -117,7 +148,23 @@ export interface ISagaQuery {
 }
 
 /**
- * Query result interface
+ * @llm-summary Contract for saga query result functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaQueryResult interface implementing integration layer component for saga query result operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaQueryResult implements ISagaQueryResult {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaQueryResult {
   /** Array of matching saga instances */
@@ -138,7 +185,23 @@ export interface ISagaQueryResult {
 }
 
 /**
- * Repository configuration interface
+ * @llm-summary Contract for saga repository config functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaRepositoryConfig interface implementing integration layer component for saga repository config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaRepositoryConfig implements ISagaRepositoryConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaRepositoryConfig {
   /** Connection string or configuration object */
@@ -181,7 +244,30 @@ export interface ISagaRepositoryConfig {
 }
 
 /**
- * Concurrency error for optimistic locking conflicts
+ * @llm-summary SagaConcurrencyError class for saga concurrency error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaConcurrencyError class implementing integration layer component for saga concurrency error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaConcurrencyError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaConcurrencyError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaConcurrencyError extends Error {
   constructor(
@@ -197,7 +283,30 @@ export class SagaConcurrencyError extends Error {
 }
 
 /**
- * Error for saga not found scenarios
+ * @llm-summary SagaNotFoundError class for saga not found error operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaNotFoundError class implementing integration layer component for saga not found error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaNotFoundError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaNotFoundError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaNotFoundError extends Error {
   constructor(public readonly sagaId: string) {
@@ -207,7 +316,23 @@ export class SagaNotFoundError extends Error {
 }
 
 /**
- * Repository factory interface for creating saga repositories
+ * @llm-summary Contract for saga repository factory functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaRepositoryFactory interface implementing integration layer component for saga repository factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaRepositoryFactory implements ISagaRepositoryFactory {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISagaRepositoryFactory {
   /**

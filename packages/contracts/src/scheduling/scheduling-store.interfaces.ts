@@ -6,8 +6,23 @@ import type {
 } from './scheduled-event.interfaces';
 
 /**
- * Storage interface for scheduled events
- * Implementations can use different backends (in-memory, database, etc.)
+ * @llm-summary Contract for scheduled event store functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * ScheduledEventStore interface implementing core domain functionality for scheduled event store operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteScheduledEventStore implements IScheduledEventStore {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IScheduledEventStore {
   /**
@@ -66,7 +81,23 @@ export interface IScheduledEventStore {
 }
 
 /**
- * Transaction support for stores
+ * @llm-summary Contract for transactional scheduled event store functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * TransactionalScheduledEventStore interface implementing core domain functionality for transactional scheduled event store operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTransactionalScheduledEventStore implements ITransactionalScheduledEventStore {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ITransactionalScheduledEventStore extends IScheduledEventStore {
   /**
@@ -91,7 +122,23 @@ export interface ITransactionalScheduledEventStore extends IScheduledEventStore 
 }
 
 /**
- * Metrics interface for monitoring
+ * @llm-summary Contract for scheduler metrics functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * SchedulerMetrics interface implementing core domain functionality for scheduler metrics operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSchedulerMetrics implements ISchedulerMetrics {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ISchedulerMetrics {
   /**

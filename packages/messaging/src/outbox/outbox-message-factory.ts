@@ -5,8 +5,30 @@ import type { IOutboxMessage, OutboxMessageOptions } from './outbox-interfaces';
 import { MessageStatus, MessagePriority } from './outbox-interfaces';
 
 /**
- * Factory for creating outbox messages
- * Provides utility methods for creating different types of messages
+ * @llm-summary OutboxMessageFactory class for outbox message factory operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * OutboxMessageFactory class implementing integration layer component for outbox message factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new OutboxMessageFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new OutboxMessageFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class OutboxMessageFactory {
   /**

@@ -7,8 +7,30 @@ import type {
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
 /**
- * Type-safe versioning capability implementation
- * Handles event versioning and upcasting for evolving domain events
+ * @llm-summary VersioningCapability class for versioning capability operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * VersioningCapability class implementing domain pattern implementation for versioning capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new VersioningCapability();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new VersioningCapability());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class VersioningCapability
   extends Capability<'versioning'>

@@ -2,7 +2,30 @@ import { BaseError } from '@vytches-ddd/domain-primitives';
 import type { ServiceToken } from './types';
 
 /**
- * Base error for dependency injection operations
+ * @llm-summary DIError class for d i error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * DIError class implementing infrastructure service for d i error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DIError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DIError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DIError extends BaseError {
   public readonly cause?: Error | undefined;
@@ -17,7 +40,30 @@ export class DIError extends BaseError {
 }
 
 /**
- * Error thrown when a service cannot be found during resolution
+ * @llm-summary ServiceNotFoundError class for service not found error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * ServiceNotFoundError class implementing infrastructure service for service not found error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ServiceNotFoundError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ServiceNotFoundError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ServiceNotFoundError extends DIError {
   constructor(token: ServiceToken, context?: string) {
@@ -37,7 +83,30 @@ export class ServiceNotFoundError extends DIError {
 }
 
 /**
- * Error thrown when a circular dependency is detected
+ * @llm-summary CircularDependencyError class for circular dependency error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * CircularDependencyError class implementing infrastructure service for circular dependency error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CircularDependencyError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CircularDependencyError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class CircularDependencyError extends DIError {
   constructor(resolutionChain: ServiceToken[]) {
@@ -59,7 +128,30 @@ export class CircularDependencyError extends DIError {
 }
 
 /**
- * Error thrown when a service registration is invalid
+ * @llm-summary InvalidRegistrationError class for invalid registration error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Simple
+ *
+ * @description
+ * InvalidRegistrationError class implementing infrastructure service for invalid registration error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new InvalidRegistrationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new InvalidRegistrationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class InvalidRegistrationError extends DIError {
   constructor(token: ServiceToken, reason: string) {
@@ -78,7 +170,30 @@ export class InvalidRegistrationError extends DIError {
 }
 
 /**
- * Error thrown when a service is already registered
+ * @llm-summary ServiceAlreadyRegisteredError class for service already registered error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Simple
+ *
+ * @description
+ * ServiceAlreadyRegisteredError class implementing infrastructure service for service already registered error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ServiceAlreadyRegisteredError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ServiceAlreadyRegisteredError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ServiceAlreadyRegisteredError extends DIError {
   constructor(token: ServiceToken, context?: string) {
@@ -98,7 +213,30 @@ export class ServiceAlreadyRegisteredError extends DIError {
 }
 
 /**
- * Error thrown when container configuration is invalid
+ * @llm-summary ContainerConfigurationError class for container configuration error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * ContainerConfigurationError class implementing infrastructure service for container configuration error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ContainerConfigurationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ContainerConfigurationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ContainerConfigurationError extends DIError {
   constructor(message: string, cause?: Error) {
@@ -108,7 +246,30 @@ export class ContainerConfigurationError extends DIError {
 }
 
 /**
- * Error thrown when container is disposed and operations are attempted
+ * @llm-summary ContainerDisposedError class for container disposed error operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Simple
+ *
+ * @description
+ * ContainerDisposedError class implementing infrastructure service for container disposed error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ContainerDisposedError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ContainerDisposedError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ContainerDisposedError extends DIError {
   constructor() {

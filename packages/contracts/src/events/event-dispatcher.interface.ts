@@ -2,8 +2,21 @@ import type { IDomainEvent } from './domain-event-interfaces';
 import type { IAggregateWithEvents } from '../aggregates';
 
 /**
- * Event middleware function signature
- * Enables creation of processing pipelines for events
+ * @llm-summary Type definition for event middleware
+ * @llm-domain Core
+ * @llm-usage Frequent
+ *
+ * @description
+ * EventMiddleware type implementing core domain functionality for event middleware operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * const value: EventMiddleware = {} as EventMiddleware;
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export type EventMiddleware = (
   event: IDomainEvent,
@@ -11,8 +24,23 @@ export type EventMiddleware = (
 ) => Promise<void>;
 
 /**
- * Interface for event processors
- * Used to handle specialized event processing logic
+ * @llm-summary Contract for event processor functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EventProcessor interface implementing core domain functionality for event processor operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventProcessor implements IEventProcessor {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventProcessor {
   /**
@@ -27,9 +55,30 @@ export interface IEventProcessor {
 }
 
 /**
- * Abstract class for event dispatchers
- * Responsible for dispatching events to appropriate buses
- * Uses abstract class for DI framework compatibility
+ * @llm-summary EventDispatcher class for event dispatcher operations
+ * @llm-domain Core
+ * @llm-complexity Simple
+ *
+ * @description
+ * EventDispatcher class implementing core domain functionality for event dispatcher operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IEventDispatcher();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IEventDispatcher());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class IEventDispatcher {
   /**
@@ -49,8 +98,30 @@ export abstract class IEventDispatcher {
 }
 
 /**
- * Enhanced event dispatcher with middleware support
- * Uses abstract class for DI framework compatibility
+ * @llm-summary EnhancedEventDispatcher class for enhanced event dispatcher operations
+ * @llm-domain Core
+ * @llm-complexity Simple
+ *
+ * @description
+ * EnhancedEventDispatcher class implementing core domain functionality for enhanced event dispatcher operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IEnhancedEventDispatcher();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IEnhancedEventDispatcher());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class IEnhancedEventDispatcher extends IEventDispatcher {
   /**

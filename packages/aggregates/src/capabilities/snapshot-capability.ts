@@ -4,8 +4,30 @@ import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * Type-safe snapshot capability implementation
- * Handles aggregate state snapshots for audit and performance optimization
+ * @llm-summary SnapshotCapability class for snapshot capability operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * SnapshotCapability class implementing domain pattern implementation for snapshot capability operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SnapshotCapability();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SnapshotCapability());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SnapshotCapability<TState = unknown, TMeta = unknown>
   extends Capability<'snapshot'>

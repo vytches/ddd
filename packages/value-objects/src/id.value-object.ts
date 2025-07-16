@@ -7,8 +7,30 @@ import {
 } from '@vytches-ddd/contracts';
 
 /**
- * Enhanced EntityId implementation with additional validation and utilities
- * Extends the base EntityId from contracts with framework-specific functionality
+ * @llm-summary EntityId class for entity id operations
+ * @llm-domain Core
+ * @llm-complexity Medium
+ *
+ * @description
+ * EntityId class implementing core domain functionality for entity id operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EntityId();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EntityId());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EntityId<T = string> extends BaseEntityId<T> {
   constructor(value: T, type: IdType) {
@@ -81,8 +103,30 @@ export class EntityId<T = string> extends BaseEntityId<T> {
 }
 
 /**
- * Factory class for creating Entity IDs
- * Implements the IEntityIdFactory interface from contracts
+ * @llm-summary EntityIdFactory class for entity id factory operations
+ * @llm-domain Core
+ * @llm-complexity Medium
+ *
+ * @description
+ * EntityIdFactory class implementing core domain functionality for entity id factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EntityIdFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EntityIdFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class EntityIdFactory implements IEntityIdFactory {
   static createWithRandomUUID(): EntityId<string> {

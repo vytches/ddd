@@ -2,10 +2,55 @@ import { IDomainError } from '@vytches-ddd/core';
 import { Result } from '@vytches-ddd/utils';
 import type { BusinessRuleValidator } from '@vytches-ddd/validation';
 
+/**
+ * @llm-summary Contract for application service functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * ApplicationService interface implementing integration layer component for application service operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteApplicationService implements IApplicationService {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface IApplicationService {
   readonly serviceName: string;
 }
 
+/**
+ * @llm-summary BaseApplicationService class for base application service operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * BaseApplicationService class implementing integration layer component for base application service operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseApplicationService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseApplicationService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export abstract class BaseApplicationService implements IApplicationService {
   constructor(public readonly serviceName: string) {}
 
@@ -54,6 +99,32 @@ export abstract class BaseApplicationService implements IApplicationService {
   }
 }
 
+/**
+ * @llm-summary ApplicationError class for application error operations
+ * @llm-domain Integration
+ * @llm-complexity Medium
+ *
+ * @description
+ * ApplicationError class implementing integration layer component for application error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ApplicationError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ApplicationError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class ApplicationError extends IDomainError {
   constructor(
     message: string,

@@ -4,7 +4,30 @@ import type { PolicyBuildStep } from './policy-builder';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 
 /**
- * Policy step builder for configuring individual policy steps
+ * @llm-summary PolicyStepBuilder class for policy step builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyStepBuilder class implementing domain pattern implementation for policy step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyStepBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyStepBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyStepBuilder<T> implements IPolicyStepBuilder<T> {
   constructor(

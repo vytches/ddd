@@ -19,7 +19,30 @@ import { FileSystem } from '../utils/file-system';
 import { Colors } from '../utils/colors';
 
 /**
- * Smart prompt engine with context analysis
+ * @llm-summary ContextAwarePromptEngine class for context aware prompt engine operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * ContextAwarePromptEngine class implementing infrastructure service for context aware prompt engine operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ContextAwarePromptEngine();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ContextAwarePromptEngine());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ContextAwarePromptEngine implements SmartPromptEngine {
   private projectAnalysisCache = new Map<string, ProjectAnalysis>();
@@ -698,7 +721,30 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
 }
 
 /**
- * Factory functions for common prompt types
+ * @llm-summary SmartPrompts class for smart prompts operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * SmartPrompts class implementing infrastructure service for smart prompts operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SmartPrompts();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SmartPrompts());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SmartPrompts {
   /**

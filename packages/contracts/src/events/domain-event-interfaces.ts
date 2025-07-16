@@ -1,6 +1,21 @@
 /**
- * Metadata for domain events
- * Contains additional information about the event context
+ * @llm-summary Contract for event metadata functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * EventMetadata interface implementing core domain functionality for event metadata operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventMetadata implements IEventMetadata {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventMetadata {
   /** Unique identifier for the event */
@@ -41,8 +56,23 @@ export interface IEventMetadata {
 }
 
 /**
- * Base interface for domain events
- * Represents something that happened in the domain
+ * @llm-summary Contract for domain event functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * DomainEvent interface implementing core domain functionality for domain event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainEvent implements IDomainEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDomainEvent<P = unknown> {
   /** Type of the event */
@@ -53,7 +83,23 @@ export interface IDomainEvent<P = unknown> {
 }
 
 /**
- * Extended domain event interface with metadata
+ * @llm-summary Contract for extended domain event functionality
+ * @llm-domain Core
+ * @llm-contract Required
+ *
+ * @description
+ * ExtendedDomainEvent interface implementing core domain functionality for extended domain event operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteExtendedDomainEvent implements IExtendedDomainEvent {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IExtendedDomainEvent<P = unknown> extends IDomainEvent<P> {
   /** Event metadata */

@@ -9,8 +9,30 @@ import { Template, TemplateError } from '../../types';
 import { FileSystem } from '../utils/file-system';
 
 /**
- * Handlebars-based template engine for VytchesDDD CLI
- * Full Handlebars feature support with custom helpers
+ * @llm-summary TemplateEngine class for template engine operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * TemplateEngine class implementing infrastructure service for template engine operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new TemplateEngine();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new TemplateEngine());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class TemplateEngine {
   private templates = new Map<string, HandlebarsTemplateDelegate>();

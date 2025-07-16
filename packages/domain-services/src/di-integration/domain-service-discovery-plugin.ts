@@ -13,8 +13,30 @@ import {
 } from '../domain-service.decorator';
 
 /**
- * Discovery plugin for domain services with DI integration.
- * Scans for @DomainService decorated classes and prepares them for DI registration.
+ * @llm-summary DomainServiceDiscoveryPlugin class for domain service discovery plugin operations
+ * @llm-domain Pattern
+ * @llm-complexity Simple
+ *
+ * @description
+ * DomainServiceDiscoveryPlugin class implementing domain pattern implementation for domain service discovery plugin operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new DomainServiceDiscoveryPlugin();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new DomainServiceDiscoveryPlugin());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   readonly name = 'DomainService';
@@ -150,7 +172,19 @@ export class DomainServiceDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 }
 
 /**
- * Singleton instance of the domain service discovery plugin.
- * Can be imported and registered with the VytchesDDD DI system.
+ * @llm-summary domainServiceDiscoveryPlugin constant
+ * @llm-domain Pattern
+ *
+ * @description
+ * domainServiceDiscoveryPlugin constant implementing domain pattern implementation for domain service discovery plugin operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(domainServiceDiscoveryPlugin);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const domainServiceDiscoveryPlugin = new DomainServiceDiscoveryPlugin();

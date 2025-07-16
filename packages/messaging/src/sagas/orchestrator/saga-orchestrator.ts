@@ -19,8 +19,30 @@ import {
 } from '../errors';
 
 /**
- * Main saga orchestrator implementation
- * Manages saga lifecycle, event processing, and coordination
+ * @llm-summary SagaOrchestrator class for saga orchestrator operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * SagaOrchestrator class implementing integration layer component for saga orchestrator operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SagaOrchestrator();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SagaOrchestrator());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SagaOrchestrator implements ISagaOrchestrator {
   private readonly logger: ReturnType<typeof Logger.forContext>;

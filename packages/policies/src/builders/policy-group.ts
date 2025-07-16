@@ -9,7 +9,30 @@ import {
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 
 /**
- * Policy group for complex AND/OR logic
+ * @llm-summary PolicyGroup class for policy group operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyGroup class implementing domain pattern implementation for policy group operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyGroup();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyGroup());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyGroup<T> implements IPolicyGroup<T> {
   private steps: PolicyGroupStep<T>[] = [];
@@ -153,7 +176,30 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
 }
 
 /**
- * Policy group step builder for configuring group steps
+ * @llm-summary PolicyGroupStepBuilder class for policy group step builder operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyGroupStepBuilder class implementing domain pattern implementation for policy group step builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyGroupStepBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyGroupStepBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyGroupStepBuilder<T> implements IPolicyGroupStepBuilder<T> {
   constructor(
@@ -227,7 +273,23 @@ export class PolicyGroupStepBuilder<T> implements IPolicyGroupStepBuilder<T> {
 }
 
 /**
- * Internal representation of a policy group step
+ * @llm-summary Contract for policy group step functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyGroupStep interface implementing domain pattern implementation for policy group step operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyGroupStep implements PolicyGroupStep {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyGroupStep<T> {
   type: 'specification' | 'async-specification' | 'predicate';

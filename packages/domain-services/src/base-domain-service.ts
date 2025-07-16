@@ -8,14 +8,30 @@ import type { IDomainEvent, IEventBus } from '@vytches-ddd/contracts';
 import type { IUnitOfWork } from '@vytches-ddd/core';
 
 /**
- * Base implementation for domain services.
+ * @llm-summary BaseDomainService class for base domain service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
  *
- * Provides the core functionality required by all domain services.
- * This minimal implementation satisfies the IDomainService interface
- * and can be extended to create specialized domain services.
+ * @description
+ * BaseDomainService class implementing domain pattern implementation for base domain service operations.
  *
- * @class IBaseDomainService
- * @implements {IDomainService}
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IBaseDomainService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IBaseDomainService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class IBaseDomainService implements IDomainService {
   /**
@@ -27,14 +43,30 @@ export abstract class IBaseDomainService implements IDomainService {
 }
 
 /**
- * Base implementation for domain services that publish domain events.
+ * @llm-summary EventAwareDomainService class for event aware domain service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
  *
- * Extends the basic domain service with event publishing capabilities.
- * Services that need to emit domain events should extend this class.
+ * @description
+ * EventAwareDomainService class implementing domain pattern implementation for event aware domain service operations.
  *
- * @class EventAwareDomainService
- * @extends {IBaseDomainService}
- * @implements {IEventBusAware}
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new EventAwareDomainService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new EventAwareDomainService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class EventAwareDomainService extends IBaseDomainService implements IEventBusAware {
   /**
@@ -82,15 +114,30 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
 }
 
 /**
- * Base implementation for domain services that require transactional consistency.
+ * @llm-summary UnitOfWorkAwareDomainService class for unit of work aware domain service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
  *
- * Extends the event-aware domain service with Unit of Work capabilities.
- * Services that need to coordinate operations across multiple aggregates
- * in a transactional manner should extend this class.
+ * @description
+ * UnitOfWorkAwareDomainService class implementing domain pattern implementation for unit of work aware domain service operations.
  *
- * @class UnitOfWorkAwareDomainService
- * @extends {EventAwareDomainService}
- * @implements {IUnitOfWorkAware}
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new UnitOfWorkAwareDomainService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new UnitOfWorkAwareDomainService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class UnitOfWorkAwareDomainService
   extends EventAwareDomainService
@@ -180,14 +227,30 @@ export abstract class UnitOfWorkAwareDomainService
 }
 
 /**
- * Base implementation for domain services with asynchronous lifecycle management.
+ * @llm-summary AsyncDomainService class for async domain service operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
  *
- * Provides initialization and disposal capabilities for services that need
- * to manage resources or perform setup/teardown operations asynchronously.
+ * @description
+ * AsyncDomainService class implementing domain pattern implementation for async domain service operations.
  *
- * @class AsyncDomainService
- * @extends {IBaseDomainService}
- * @implements {IAsyncDomainService}
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AsyncDomainService();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AsyncDomainService());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDomainService {
   /**

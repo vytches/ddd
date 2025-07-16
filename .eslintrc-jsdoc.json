@@ -1,0 +1,74 @@
+{
+  "extends": ["./.eslintrc.json"],
+  "plugins": ["jsdoc"],
+  "rules": {
+    "jsdoc/require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": false,
+          "MethodDefinition": false,
+          "ClassDeclaration": false,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        },
+        "contexts": [
+          "ExportNamedDeclaration[declaration.type='FunctionDeclaration']",
+          "ExportNamedDeclaration[declaration.type='ClassDeclaration']",
+          "ExportNamedDeclaration[declaration.type='InterfaceDeclaration']",
+          "ExportNamedDeclaration[declaration.type='TypeAliasDeclaration']",
+          "ExportNamedDeclaration[declaration.type='EnumDeclaration']"
+        ]
+      }
+    ],
+    "jsdoc/check-tag-names": [
+      "error",
+      {
+        "definedTags": [
+          "llm-summary",
+          "llm-domain",
+          "llm-complexity",
+          "llm-contract",
+          "llm-sideeffects",
+          "llm-pure",
+          "llm-usage",
+          "fileoverview"
+        ]
+      }
+    ],
+    "jsdoc/require-description": "off",
+    "jsdoc/require-param": "off",
+    "jsdoc/require-param-description": "off",
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns": "off",
+    "jsdoc/require-returns-description": "off",
+    "jsdoc/require-returns-type": "off",
+    "jsdoc/require-example": "off",
+    "jsdoc/check-examples": "off",
+    "jsdoc/check-param-names": "error",
+    "jsdoc/check-syntax": "error",
+    "jsdoc/check-types": "error",
+    "jsdoc/valid-types": "off",
+    "jsdoc/match-description": "off",
+    "jsdoc/newline-after-description": "off",
+    "jsdoc/require-hyphen-before-param-description": ["error", "always"],
+    "jsdoc/check-line-alignment": "off",
+    "jsdoc/no-bad-blocks": "error",
+    "jsdoc/no-undefined-types": "off",
+    "jsdoc/require-asterisk-prefix": "off"
+  },
+  "settings": {
+    "jsdoc": {
+      "mode": "typescript",
+      "preferredTypes": {
+        "object": "Object",
+        "array": "Array",
+        "function": "Function"
+      },
+      "tagNamePreference": {
+        "returns": "returns",
+        "yields": "yields"
+      }
+    }
+  }
+}

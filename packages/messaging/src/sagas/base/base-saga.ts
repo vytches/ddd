@@ -12,8 +12,30 @@ import { SagaStatus } from '../interfaces';
 import { SagaMiddlewarePipeline } from '../middleware';
 
 /**
- * Base saga implementation providing common functionality
- * All concrete sagas should extend this class
+ * @llm-summary BaseSaga class for base saga operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * BaseSaga class implementing integration layer component for base saga operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new BaseSaga();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new BaseSaga());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class BaseSaga implements ISaga {
   protected readonly logger: ReturnType<typeof Logger.forContext>;

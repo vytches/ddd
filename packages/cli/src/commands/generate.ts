@@ -75,7 +75,20 @@ interface GenerateOptions {
 }
 
 /**
- * Generate command implementation
+ * @llm-summary generateCommand constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * generateCommand constant implementing infrastructure service for generate command operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(generateCommand);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const generateCommand: Command = {
   name: 'generate',

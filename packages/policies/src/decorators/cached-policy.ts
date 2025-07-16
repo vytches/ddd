@@ -9,8 +9,23 @@ import type {
 import type { PolicyViolation } from '../core/models/policy-violation';
 
 /**
- * Configuration for policy-specific caching
- * Domain-focused - NOT generic abstraction
+ * @llm-summary Contract for policy cache config functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
+ *
+ * @description
+ * PolicyCacheConfig interface implementing domain pattern implementation for policy cache config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcretePolicyCacheConfig implements PolicyCacheConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface PolicyCacheConfig {
   /**
@@ -145,8 +160,30 @@ class PolicyCache {
 }
 
 /**
- * Cached policy behavior - wraps another policy with caching
- * Policy-specific implementation - NOT generic abstraction
+ * @llm-summary PolicyCachingBehavior class for policy caching behavior operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyCachingBehavior class implementing domain pattern implementation for policy caching behavior operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyCachingBehavior();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyCachingBehavior());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   private readonly cache = new PolicyCache();
@@ -336,7 +373,30 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
 }
 
 /**
- * Factory for creating cached policies
+ * @llm-summary PolicyCachingBehaviorFactory class for policy caching behavior factory operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PolicyCachingBehaviorFactory class implementing domain pattern implementation for policy caching behavior factory operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PolicyCachingBehaviorFactory();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PolicyCachingBehaviorFactory());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PolicyCachingBehaviorFactory {
   /**

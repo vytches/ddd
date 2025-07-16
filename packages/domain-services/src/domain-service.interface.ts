@@ -2,11 +2,23 @@ import type { IEventBus } from '@vytches-ddd/contracts';
 import type { IUnitOfWork } from '@vytches-ddd/core';
 
 /**
- * Base interface for domain services in DDD architecture.
- * Domain services encapsulate domain logic that doesn't naturally belong to entities or value objects.
- * They are stateless and operate on multiple aggregates or domain objects.
+ * @llm-summary Contract for domain service functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface IDomainService
+ * @description
+ * DomainService interface implementing domain pattern implementation for domain service operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainService implements IDomainService {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDomainService {
   /**
@@ -20,12 +32,23 @@ export interface IDomainService {
 }
 
 /**
- * Interface for domain services supporting asynchronous lifecycle operations.
- * Extends the base domain service interface with initialization and disposal capabilities.
- * Use this for services that need to acquire and release resources.
+ * @llm-summary Contract for async domain service functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface IAsyncDomainService
- * @extends {IDomainService}
+ * @description
+ * AsyncDomainService interface implementing domain pattern implementation for async domain service operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteAsyncDomainService implements IAsyncDomainService {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IAsyncDomainService extends IDomainService {
   /**
@@ -50,11 +73,23 @@ export interface IAsyncDomainService extends IDomainService {
 }
 
 /**
- * Interface for services that can work with a Unit of Work.
- * This enables domain services to participate in transactions and coordinate changes
- * across multiple aggregates in a consistent manner.
+ * @llm-summary Contract for unit of work aware functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface IUnitOfWorkAware
+ * @description
+ * UnitOfWorkAware interface implementing domain pattern implementation for unit of work aware operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteUnitOfWorkAware implements IUnitOfWorkAware {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IUnitOfWorkAware {
   /**
@@ -77,11 +112,23 @@ export interface IUnitOfWorkAware {
 }
 
 /**
- * Interface for services that can work with a domain event bus.
- * This enables domain services to publish domain events without
- * direct coupling to a specific event bus implementation.
+ * @llm-summary Contract for event bus aware functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface IEventBusAware
+ * @description
+ * EventBusAware interface implementing domain pattern implementation for event bus aware operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteEventBusAware implements IEventBusAware {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IEventBusAware {
   /**
@@ -95,13 +142,22 @@ export interface IEventBusAware {
 }
 
 /**
- * Interface for domain services that require transactional consistency.
- * Combines the domain service interface with the Unit of Work awareness interface.
- * Use this for services that need to coordinate changes across multiple aggregates
- * in a transactional manner.
+ * @llm-summary Contract for transactional domain service functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface ITransactionalDomainService
- * @extends {IDomainService}
- * @extends {IUnitOfWorkAware}
+ * @description
+ * TransactionalDomainService interface implementing domain pattern implementation for transactional domain service operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTransactionalDomainService implements ITransactionalDomainService {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface ITransactionalDomainService extends IDomainService, IUnitOfWorkAware {}

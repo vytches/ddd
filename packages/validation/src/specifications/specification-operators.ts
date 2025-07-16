@@ -9,7 +9,30 @@ import {
 } from './composite-specification';
 
 /**
- * Specyfikacja spełniona zawsze
+ * @llm-summary AlwaysTrueSpecification class for always true specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * AlwaysTrueSpecification class implementing domain pattern implementation for always true specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AlwaysTrueSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AlwaysTrueSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AlwaysTrueSpecification<T> extends CompositeSpecification<T> {
   isSatisfiedBy(_candidate: T): boolean {
@@ -18,7 +41,30 @@ export class AlwaysTrueSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Specyfikacja niespełniona nigdy
+ * @llm-summary AlwaysFalseSpecification class for always false specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * AlwaysFalseSpecification class implementing domain pattern implementation for always false specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AlwaysFalseSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AlwaysFalseSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AlwaysFalseSpecification<T> extends CompositeSpecification<T> {
   isSatisfiedBy(_candidate: T): boolean {
@@ -27,7 +73,30 @@ export class AlwaysFalseSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Specyfikacja oparta o funkcję predykatu
+ * @llm-summary PredicateSpecification class for predicate specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PredicateSpecification class implementing domain pattern implementation for predicate specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PredicateSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PredicateSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PredicateSpecification<T> extends CompositeSpecification<T> {
   constructor(private readonly predicate: (candidate: T) => boolean) {
@@ -40,7 +109,30 @@ export class PredicateSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Specyfikacja sprawdzająca właściwość obiektu pod kątem równości
+ * @llm-summary PropertyEqualsSpecification class for property equals specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PropertyEqualsSpecification class implementing domain pattern implementation for property equals specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PropertyEqualsSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PropertyEqualsSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
   constructor(
@@ -56,7 +148,30 @@ export class PropertyEqualsSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Specyfikacja sprawdzająca czy właściwość obiektu zawiera się w zbiorze wartości
+ * @llm-summary PropertyInSpecification class for property in specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PropertyInSpecification class implementing domain pattern implementation for property in specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PropertyInSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PropertyInSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PropertyInSpecification<T> extends CompositeSpecification<T> {
   constructor(
@@ -72,7 +187,30 @@ export class PropertyInSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Specyfikacja sprawdzająca zakres wartości właściwości obiektu
+ * @llm-summary PropertyBetweenSpecification class for property between specification operations
+ * @llm-domain Pattern
+ * @llm-complexity Medium
+ *
+ * @description
+ * PropertyBetweenSpecification class implementing domain pattern implementation for property between specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new PropertyBetweenSpecification();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new PropertyBetweenSpecification());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class PropertyBetweenSpecification<T> extends CompositeSpecification<T> {
   constructor(
@@ -90,7 +228,20 @@ export class PropertyBetweenSpecification<T> extends CompositeSpecification<T> {
 }
 
 /**
- * Pomocnicze funkcje do tworzenia specyfikacji
+ * @llm-summary Specification constant
+ * @llm-domain Pattern
+ *
+ * @description
+ * Specification constant implementing domain pattern implementation for specification operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(Specification);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const Specification = {
   /**

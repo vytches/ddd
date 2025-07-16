@@ -15,8 +15,30 @@ import type {
 import { createDomainEvent, CapabilityRegistry } from '@vytches-ddd/contracts';
 
 /**
- * Type-safe AggregateRoot implementation with capability management
- * Provides basic aggregate functionality with composition-based extensions
+ * @llm-summary AggregateRoot class for aggregate root operations
+ * @llm-domain Pattern
+ * @llm-complexity Complex
+ *
+ * @description
+ * AggregateRoot class implementing domain pattern implementation for aggregate root operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AggregateRoot();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AggregateRoot());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;

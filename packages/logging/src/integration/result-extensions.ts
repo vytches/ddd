@@ -1,6 +1,25 @@
 import type { Logger } from '../core/index';
 import { DefaultLogger } from '../logger';
 
+/**
+ * @llm-summary Contract for result logging options functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ResultLoggingOptions interface implementing infrastructure service for result logging options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteResultLoggingOptions implements ResultLoggingOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface ResultLoggingOptions {
   logger?: Logger;
   logLevel?: 'debug' | 'info';
@@ -10,14 +29,46 @@ export interface ResultLoggingOptions {
 }
 
 // Generic interface for Result-like objects that support tap methods
+
+/**
+ * @llm-summary Contract for result like functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * ResultLike interface implementing infrastructure service for result like operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteResultLike implements ResultLike {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface ResultLike<TValue, TError> {
   tap(fn: (value: TValue) => void): ResultLike<TValue, TError>;
   tapError(fn: (error: TError) => void): ResultLike<TValue, TError>;
 }
 
 /**
- * Pure function approach to adding logging to Result-like objects
- * No direct dependency on @vytches-ddd/utils package
+ * @llm-summary ResultLoggingExtensions constant
+ * @llm-domain Infrastructure
+ *
+ * @description
+ * ResultLoggingExtensions constant implementing infrastructure service for result logging extensions operations.
+ *
+ * @example
+ * ```typescript
+ * // Usage example
+ * console.log(ResultLoggingExtensions);
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export const ResultLoggingExtensions = {
   /**

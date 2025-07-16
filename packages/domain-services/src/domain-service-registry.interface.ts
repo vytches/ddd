@@ -1,11 +1,23 @@
 import type { IDomainService } from './domain-service.interface';
 
 /**
- * Registry for domain services.
- * Provides a centralized store for registering, retrieving, and managing domain services.
- * Acts as a service locator for domain services throughout the application.
+ * @llm-summary Contract for domain service registry functionality
+ * @llm-domain Pattern
+ * @llm-contract Required
  *
- * @interface IDomainServiceRegistry
+ * @description
+ * DomainServiceRegistry interface implementing domain pattern implementation for domain service registry operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteDomainServiceRegistry implements IDomainServiceRegistry {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface IDomainServiceRegistry {
   /**

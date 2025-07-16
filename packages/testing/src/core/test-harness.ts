@@ -9,6 +9,25 @@
 import { TestClock } from './test-clock';
 import { safeRun, expectError, expectSuccess, type SafeRunResult } from './safe-run';
 
+/**
+ * @llm-summary Contract for test harness options functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * TestHarnessOptions interface implementing infrastructure service for test harness options operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTestHarnessOptions implements TestHarnessOptions {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface TestHarnessOptions {
   /**
    * Automatically clean up resources after each test
@@ -32,6 +51,25 @@ export interface TestHarnessOptions {
   verbose?: boolean;
 }
 
+/**
+ * @llm-summary Contract for test harness state functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * TestHarnessState interface implementing infrastructure service for test harness state operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTestHarnessState implements TestHarnessState {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface TestHarnessState {
   readonly isInitialized: boolean;
   readonly isSetup: boolean;
@@ -41,6 +79,25 @@ export interface TestHarnessState {
   readonly hasErrors: boolean;
 }
 
+/**
+ * @llm-summary Contract for test resource functionality
+ * @llm-domain Infrastructure
+ * @llm-contract Required
+ *
+ * @description
+ * TestResource interface implementing infrastructure service for test resource operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteTestResource implements TestResource {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface TestResource {
   readonly id: string;
   readonly type: string;
@@ -48,6 +105,32 @@ export interface TestResource {
   dispose(): Promise<void> | void;
 }
 
+/**
+ * @llm-summary TestHarness class for test harness operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * TestHarness class implementing infrastructure service for test harness operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new TestHarness();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new TestHarness());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export abstract class TestHarness {
   protected readonly options: Required<TestHarnessOptions>;
   protected _isInitialized = false;
@@ -341,7 +424,30 @@ export abstract class TestHarness {
 }
 
 /**
- * Simple implementation of TestHarness for basic testing scenarios
+ * @llm-summary SimpleTestHarness class for simple test harness operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * SimpleTestHarness class implementing infrastructure service for simple test harness operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new SimpleTestHarness();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new SimpleTestHarness());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class SimpleTestHarness extends TestHarness {
   private _customSetupFn: (() => Promise<void> | void) | undefined;
@@ -385,7 +491,30 @@ export class SimpleTestHarness extends TestHarness {
 }
 
 /**
- * Utility for creating test resource objects
+ * @llm-summary TestResourceBuilder class for test resource builder operations
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ *
+ * @description
+ * TestResourceBuilder class implementing infrastructure service for test resource builder operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new TestResourceBuilder();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new TestResourceBuilder());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class TestResourceBuilder {
   private _id: string;

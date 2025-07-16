@@ -1,8 +1,30 @@
 import type { IDomainEvent } from './domain-event-interfaces';
 
 /**
- * Abstract class for event persistence handlers
- * Uses abstract class for DI framework compatibility
+ * @llm-summary EventPersistenceHandler class for event persistence handler operations
+ * @llm-domain Core
+ * @llm-complexity Simple
+ *
+ * @description
+ * EventPersistenceHandler class implementing core domain functionality for event persistence handler operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new IEventPersistenceHandler();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new IEventPersistenceHandler());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export abstract class IEventPersistenceHandler {
   /**

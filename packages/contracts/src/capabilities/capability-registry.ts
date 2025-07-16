@@ -1,8 +1,30 @@
 import type { Capability, CapabilityConstructor, CapabilityType } from './capability-base';
 
 /**
- * Type-safe capability registry
- * Provides compile-time type safety for capability operations
+ * @llm-summary CapabilityRegistry class for capability registry operations
+ * @llm-domain Core
+ * @llm-complexity Simple
+ *
+ * @description
+ * CapabilityRegistry class implementing core domain functionality for capability registry operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new CapabilityRegistry();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new CapabilityRegistry());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class CapabilityRegistry<
   TCapabilities extends Record<string, Capability> = Record<string, Capability>,
@@ -95,7 +117,30 @@ export class CapabilityRegistry<
 }
 
 /**
- * Create a typed capability registry
+ * @llm-summary create capability registry function
+ * @llm-domain Core
+ * @llm-pure false
+ *
+ * @description
+ * createCapabilityRegistry function implementing core domain functionality for create capability registry operations.
+ *
+ * @returns {CapabilityRegistry<T>} Returns CapabilityRegistry<T>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = createCapabilityRegistry();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => createCapabilityRegistry());
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function createCapabilityRegistry<
   T extends Record<string, Capability>,

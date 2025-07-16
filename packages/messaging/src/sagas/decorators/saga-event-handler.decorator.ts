@@ -4,14 +4,123 @@ import { SAGA_METADATA_KEY } from './saga.decorator';
 import { SagaConfigurationError } from '../errors';
 
 /**
- * Saga event handler decorator - marks a method as an event handler within a saga
- * Provides declarative event handling with automatic correlation and step management
+ * @llm-summary saga event handler function
+ * @llm-domain Integration
+ * @llm-pure false
  *
- * @param options - Event handler configuration
+ * @description
+ * SagaEventHandler function implementing integration layer component for saga event handler operations.
+ *
+ *
+ * @param {SagaEventHandlerOptions} options - options parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = SagaEventHandler(options);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => SagaEventHandler(options));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function SagaEventHandler(options: SagaEventHandlerOptions): MethodDecorator;
+
+/**
+ * @llm-summary saga event handler function
+ * @llm-domain Integration
+ * @llm-pure false
+ *
+ * @description
+ * SagaEventHandler function implementing integration layer component for saga event handler operations.
+ *
+ *
+ * @param {string} eventType - eventType parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = SagaEventHandler(eventType);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => SagaEventHandler(eventType));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function SagaEventHandler(eventType: string): MethodDecorator;
+
+/**
+ * @llm-summary saga event handler function
+ * @llm-domain Integration
+ * @llm-pure false
+ *
+ * @description
+ * SagaEventHandler function implementing integration layer component for saga event handler operations.
+ *
+ *
+ * @param {string[]} eventTypes - eventTypes parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = SagaEventHandler(eventTypes);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => SagaEventHandler(eventTypes));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function SagaEventHandler(eventTypes: string[]): MethodDecorator;
+
+/**
+ * @llm-summary saga event handler function
+ * @llm-domain Integration
+ * @llm-pure false
+ *
+ * @description
+ * SagaEventHandler function implementing integration layer component for saga event handler operations.
+ *
+ *
+ * @param {SagaEventHandlerOptions | string | string[]} optionsOrEventType - optionsOrEventType parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = SagaEventHandler(optionsOrEventType);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => SagaEventHandler(optionsOrEventType));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export function SagaEventHandler(
   optionsOrEventType: SagaEventHandlerOptions | string | string[]
 ): MethodDecorator {
@@ -79,10 +188,32 @@ export function SagaEventHandler(
 }
 
 /**
- * Start saga decorator - marks an event handler as capable of starting new sagas
- * Used in combination with @SagaEventHandler
+ * @llm-summary start saga function
+ * @llm-domain Integration
+ * @llm-pure false
  *
- * @param options - Start saga configuration
+ * @description
+ * StartSaga function implementing integration layer component for start saga operations.
+ *
+ *
+ * @param {Partial<SagaEventHandlerOptions> = {}} options - options parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = StartSaga(options);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => StartSaga(options));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function StartSaga(options: Partial<SagaEventHandlerOptions> = {}): MethodDecorator {
   return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
@@ -115,10 +246,32 @@ export function StartSaga(options: Partial<SagaEventHandlerOptions> = {}): Metho
 }
 
 /**
- * End saga decorator - marks an event handler as capable of completing sagas
- * Used in combination with @SagaEventHandler
+ * @llm-summary end saga function
+ * @llm-domain Integration
+ * @llm-pure false
  *
- * @param options - End saga configuration
+ * @description
+ * EndSaga function implementing integration layer component for end saga operations.
+ *
+ *
+ * @param {Partial<SagaEventHandlerOptions> = {}} options - options parameter
+ * @returns {MethodDecorator} Returns MethodDecorator
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = EndSaga(options);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => EndSaga(options));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function EndSaga(options: Partial<SagaEventHandlerOptions> = {}): MethodDecorator {
   return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
@@ -164,8 +317,32 @@ export function getEventHandlerMetadata(
 }
 
 /**
- * Get all event handler methods from a class
- * @param target - Target class
+ * @llm-summary get event handler methods function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * getEventHandlerMethods function implementing integration layer component for get event handler methods operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @returns {Map<string, SagaEventHandlerOptions>} Returns Map<string, SagaEventHandlerOptions>
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = getEventHandlerMethods(target);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => getEventHandlerMethods(target));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function getEventHandlerMethods(target: any): Map<string, SagaEventHandlerOptions> {
   const metadata: SagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target) || {};
@@ -173,9 +350,33 @@ export function getEventHandlerMethods(target: any): Map<string, SagaEventHandle
 }
 
 /**
- * Check if a method is decorated with @SagaEventHandler
- * @param target - Target class
- * @param methodName - Method name
+ * @llm-summary is event handler method function
+ * @llm-domain Integration
+ * @llm-pure true
+ *
+ * @description
+ * isEventHandlerMethod function implementing integration layer component for is event handler method operations.
+ *
+ *
+ * @param {any} target - target parameter
+ * @param {string} methodName - methodName parameter
+ * @returns {boolean} Returns boolean
+ * @throws {Error} When validation fails
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const result = isEventHandlerMethod(target, methodName);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, result] = safeRun(() => isEventHandlerMethod(target, methodName));
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export function isEventHandlerMethod(target: any, methodName: string): boolean {
   const methodMetadataKey = `saga:eventHandler:${methodName}`;

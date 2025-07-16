@@ -7,7 +7,23 @@ import type {
 } from '../interfaces';
 
 /**
- * Configuration for creating a concrete saga step
+ * @llm-summary Contract for saga step config functionality
+ * @llm-domain Integration
+ * @llm-contract Required
+ *
+ * @description
+ * SagaStepConfig interface implementing integration layer component for saga step config operations.
+ *
+ * @example
+ * ```typescript
+ * // Implementation example
+ * class ConcreteSagaStepConfig implements SagaStepConfig {
+ *   // Implementation
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export interface SagaStepConfig {
   name: string;
@@ -28,8 +44,30 @@ export interface SagaStepConfig {
 }
 
 /**
- * Concrete saga step implementation using configuration
- * This allows for inline step definition as used in tests
+ * @llm-summary ConcreteSagaStep class for concrete saga step operations
+ * @llm-domain Integration
+ * @llm-complexity Expert
+ *
+ * @description
+ * ConcreteSagaStep class implementing integration layer component for concrete saga step operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new ConcreteSagaStep();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new ConcreteSagaStep());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class ConcreteSagaStep implements ISagaStep {
   readonly name: string;

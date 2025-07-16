@@ -2,7 +2,30 @@ import type { DomainErrorOptions } from '@vytches-ddd/domain-primitives';
 import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
 
 /**
- * Unified error class for aggregate-related errors
+ * @llm-summary AggregateError class for aggregate error operations
+ * @llm-domain Pattern
+ * @llm-complexity Complex
+ *
+ * @description
+ * AggregateError class implementing domain pattern implementation for aggregate error operations.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * const instance = new AggregateError();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With error handling
+ * const [error, instance] = safeRun(() => new AggregateError());
+ * if (error) {
+ *   console.error('Creation failed:', error.message);
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ * @public
  */
 export class AggregateError extends IDomainError {
   /**
