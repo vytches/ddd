@@ -20,12 +20,6 @@ export { Colors } from './core/utils/colors';
 export { Validation } from './core/utils/validation';
 export { Performance } from './core/utils/performance';
 
-// Workflows
-export { DomainBuilderWorkflow } from './workflows/domain-builder/domain-builder-workflow';
-export { NaturalLanguageProcessor } from './workflows/domain-builder/natural-language-processor';
-export { BoundedContextMapper } from './workflows/domain-builder/bounded-context-mapper';
-export { PatternOrchestrator } from './workflows/domain-builder/pattern-orchestrator';
-export { DomainAnalyzer } from './workflows/domain-builder/domain-analyzer';
 
 // Types
 export * from './types';

@@ -12,6 +12,9 @@ import { Performance } from '../core/utils/performance';
 import { chatHistory } from '../core/utils/chat-history';
 import { ValidationError } from '../types';
 import { promptForInput, promptForChoice, promptForConfirmation } from '../core/utils/prompts';
+import { UnifiedExampleParser } from '../parsers/unified-parser';
+import { DocumentationGenerator } from '../generators/documentation-generator';
+import { globalDocumentationRegistry } from '../core/documentation-registry';
 
 /**
  * Domain context generation options
@@ -68,9 +71,25 @@ interface GenerateOptions {
   dryRun?: boolean;
   domain?: string;
   fullDomain?: boolean;
+  example?: string;
+  only?: string[];
+  exclude?: string[];
   properties?: PropertyDefinition[];
   methods?: MethodDefinition[];
   events?: EventDefinition[];
+  // Documentation generation options
+  complexity?: string;
+  sections?: string;
+  llmOptimized?: boolean;
+  llm?: boolean;
+  showRelated?: boolean;
+  maxExamples?: number;
+  noRandomize?: boolean;
+  seed?: string;
+  diOnly?: boolean;
+  packages?: string;
+  fix?: boolean;
+  verbose?: boolean;
   [key: string]: unknown;
 }
 
@@ -150,6 +169,36 @@ export const generateCommand: Command = {
       description: 'Generate complete domain context with all components',
       defaultValue: false,
     },
+    {
+      flags: '--example <example>',
+      description: 'Generate from existing example',
+    },
+    {
+      flags: '--only <components>',
+      description: 'Generate only specific components (comma-separated)',
+    },
+    {
+      flags: '--exclude <components>',
+      description: 'Exclude specific components (comma-separated)',
+    },
+    {
+      flags: '--complexity <level>',
+      description: 'Generate documentation with complexity level (basic, intermediate, advanced)',
+    },
+    {
+      flags: '--llm-optimized',
+      description: 'Generate LLM-optimized documentation',
+      defaultValue: false,
+    },
+    {
+      flags: '--max-examples <n>',
+      description: 'Maximum number of examples to include in documentation',
+    },
+    {
+      flags: '--show-related',
+      description: 'Include related examples from other packages',
+      defaultValue: false,
+    },
   ],
   examples: [
     'vytches-ddd generate --type aggregate --name Order',
@@ -160,6 +209,12 @@ export const generateCommand: Command = {
     'vytches-ddd generate --domain ecommerce                 # Bulk component selection',
     'vytches-ddd generate --domain ecommerce --full-domain   # Complete domain context',
     'vytches-ddd generate --type aggregate --name Order --output ./modules/order/src   # Custom output path',
+    'vytches-ddd generate --example order --name CustomerOrder --framework nestjs',
+    'vytches-ddd generate --example order --name CustomerOrder --only service,controller',
+    'vytches-ddd generate --example order --name CustomerOrder --exclude repository',
+    'vytches-ddd generate domain-services --complexity intermediate',
+    'vytches-ddd generate policies --framework nestjs --llm-optimized',
+    'vytches-ddd generate di --max-examples 5 --show-related',
   ],
   action: async (args: string[], options: GenerateOptions) => {
     const startTime = Performance.now();
@@ -169,18 +224,29 @@ export const generateCommand: Command = {
       console.log(Colors.dim('Generating enterprise-grade DDD components'));
       console.log('');
 
-      // Initialize generator
-      const generator = new ComponentGenerator(options);
+      // Check if this is documentation generation (package name as first arg, no type)
+      const firstArg = args[0];
+      const isDocumentationGeneration = firstArg && !options.type && !options.name && !options.example && !options.domain;
 
-      // Check if this is a domain context generation request
-      if (options.domain && options.fullDomain) {
-        await generator.runDomainContextMode();
-      } else if (options.domain && !options.type) {
-        await generator.runDomainSelectionMode();
-      } else if (options.interactive || !options.type || !options.name) {
-        await generator.runInteractiveMode();
+      if (isDocumentationGeneration) {
+        // Documentation generation mode
+        await generateDocumentationForPackage(firstArg, options);
       } else {
-        await generator.runDirectMode();
+        // Component generation mode
+        const generator = new ComponentGenerator(options);
+
+        // Check if this is an example-based generation
+        if (options.example) {
+          await generator.runExampleMode();
+        } else if (options.domain && options.fullDomain) {
+          await generator.runDomainContextMode();
+        } else if (options.domain && !options.type) {
+          await generator.runDomainSelectionMode();
+        } else if (options.interactive || !options.type || !options.name) {
+          await generator.runInteractiveMode();
+        } else {
+          await generator.runDirectMode();
+        }
       }
 
       // Show completion summary
@@ -218,6 +284,164 @@ class ComponentGenerator {
     this.options = options;
     this.templateEngine = TemplateEngine.create();
     this.patternRegistry = PatternRegistry.create();
+  }
+
+  /**
+   * Run example-based generation mode
+   */
+  async runExampleMode(): Promise<void> {
+    console.log(Colors.info('🎯 Example-based Component Generation'));
+    console.log(Colors.dim(`Example: ${this.options.example}`));
+    console.log('');
+
+    // Load all examples
+    await globalDocumentationRegistry.loadAll();
+
+    // Find the example
+    const example = globalDocumentationRegistry.findById(this.options.example!);
+    if (!example) {
+      console.error(Colors.error(`❌ Example '${this.options.example}' not found.`));
+
+      // Suggest similar examples
+      const allExamples = globalDocumentationRegistry.query({});
+      const suggestions = allExamples
+        .filter(ex => ex.id.includes(this.options.example!) || ex.name.toLowerCase().includes(this.options.example!.toLowerCase()))
+        .slice(0, 3);
+
+      if (suggestions.length > 0) {
+        console.log('\n💡 Did you mean:');
+        suggestions.forEach(suggestion => {
+          console.log(`   - ${suggestion.id} (${suggestion.name})`);
+        });
+      }
+
+      return;
+    }
+
+    // Get component name if not provided
+    if (!this.options.name) {
+      this.options.name = await promptForInput('Enter component name:', {
+        validate: (input: string) => {
+          if (!input.trim()) return 'Component name is required';
+          if (!/^[A-Za-z][A-Za-z0-9]*$/.test(input)) return 'Name must be valid identifier';
+          return true;
+        },
+      });
+    }
+
+    // Check framework availability and prompt if needed
+    const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(this.options.example!);
+
+    if (!this.options.framework || this.options.framework === 'standalone') {
+      if (availableFrameworks.length > 0) {
+        this.options.framework = await promptForChoice('Select framework:', [
+          { name: 'Base only (no framework)', value: 'standalone' },
+          ...availableFrameworks.map(fw => ({ name: fw.toUpperCase(), value: fw }))
+        ]);
+      } else {
+        this.options.framework = 'standalone';
+      }
+    }
+
+    // Validate framework availability
+    if (this.options.framework !== 'standalone' && this.options.framework && !availableFrameworks.includes(this.options.framework)) {
+      console.error(Colors.error(`❌ Framework '${this.options.framework}' not available for example '${this.options.example}'.`));
+      if (availableFrameworks.length > 0) {
+        console.log(`💡 Available frameworks: ${availableFrameworks.join(', ')}`);
+      } else {
+        console.log(`💡 This example only has base implementation.`);
+      }
+      return;
+    }
+
+    // Parse component filters
+    if (this.options.only) {
+      if (typeof this.options.only === 'string') {
+        this.options.only = (this.options.only as string).split(',').map((s: string) => s.trim());
+      }
+    }
+
+    if (this.options.exclude) {
+      if (typeof this.options.exclude === 'string') {
+        this.options.exclude = (this.options.exclude as string).split(',').map((s: string) => s.trim());
+      }
+    }
+
+    // Show component filtering options if framework is selected
+    if (this.options.framework !== 'standalone') {
+      const availableComponents = globalDocumentationRegistry.getAvailableComponents(this.options.example!, this.options.framework!);
+
+      if (availableComponents.length > 0 && !this.options.only && !this.options.exclude) {
+        const showComponents = await promptForConfirmation('Show available components for filtering?', false);
+
+        if (showComponents) {
+          console.log(`\n🧩 Available components for ${this.options.framework!.toUpperCase()}:`);
+          availableComponents.forEach(comp => console.log(`   - ${comp}`));
+          console.log('');
+
+          const filterChoice = await promptForChoice('Component filtering:', [
+            { name: 'Generate all components', value: 'all' },
+            { name: 'Select specific components only', value: 'only' },
+            { name: 'Exclude specific components', value: 'exclude' }
+          ]);
+
+          if (filterChoice === 'only') {
+            const selectedComponents = await promptForInput('Enter components to include (comma-separated):', {
+              validate: (input: string) => input.trim() ? true : 'At least one component is required'
+            });
+            this.options.only = selectedComponents.split(',').map(s => s.trim());
+          } else if (filterChoice === 'exclude') {
+            const excludedComponents = await promptForInput('Enter components to exclude (comma-separated):', {
+              required: false
+            });
+            if (excludedComponents) {
+              this.options.exclude = excludedComponents.split(',').map(s => s.trim());
+            }
+          }
+        }
+      }
+    }
+
+    // Ask for output directory
+    if (!this.options.output) {
+      const outputPath = await promptForInput('Enter output directory path (default: ./src):', {
+        required: false,
+        defaultValue: './src',
+      });
+      this.options.output = outputPath || './src';
+    }
+
+    // Show generation summary
+    console.log('');
+    console.log(Colors.bold('📋 Example Generation Summary'));
+    console.log('');
+    console.log(`  ${Colors.cyan('Example:')} ${example.name} (${this.options.example})`);
+    console.log(`  ${Colors.cyan('Component Name:')} ${this.options.name}`);
+    console.log(`  ${Colors.cyan('Framework:')} ${this.options.framework}`);
+    console.log(`  ${Colors.cyan('Output Path:')} ${this.options.output}`);
+
+    if (this.options.only?.length) {
+      console.log(`  ${Colors.cyan('Include Only:')} ${this.options.only.join(', ')}`);
+    }
+
+    if (this.options.exclude?.length) {
+      console.log(`  ${Colors.cyan('Exclude:')} ${this.options.exclude.join(', ')}`);
+    }
+
+    console.log(`  ${Colors.cyan('Description:')} ${example.description}`);
+    console.log(`  ${Colors.cyan('Complexity:')} ${example.complexity}`);
+    console.log(`  ${Colors.cyan('Patterns:')} ${example.patterns?.join(', ') || 'none'}`);
+    console.log('');
+
+    const proceed = await promptForConfirmation('Generate component from example?', true);
+
+    if (!proceed) {
+      console.log(Colors.yellow('Generation cancelled'));
+      return;
+    }
+
+    // Generate from example
+    await this.generateFromExample();
   }
 
   /**
@@ -1726,5 +1950,319 @@ class ComponentGenerator {
 
     console.log('');
     console.log(Colors.info('💡 All components are interconnected and ready for DDD development!'));
+  }
+
+  /**
+   * Generate component from example
+   */
+  private async generateFromExample(): Promise<void> {
+    console.log(Colors.info(`🔨 Generating from example: ${this.options.example}...`));
+
+    try {
+      // Parse the example
+      const parser = new UnifiedExampleParser();
+      const parsedExample = await parser.parseExample({
+        exampleId: this.options.example!,
+        framework: this.options.framework === 'standalone' ? undefined : this.options.framework as any,
+      });
+
+      // Prepare context from parsed example
+      const context = this.prepareExampleContext(parsedExample);
+
+      // Generate files based on example
+      const files = await this.generateFilesFromExample(context, parsedExample);
+
+      if (this.options.dryRun) {
+        console.log(Colors.yellow('🔍 Dry run mode - files that would be generated:'));
+        files.forEach(file => {
+          console.log(`  ${Colors.cyan('•')} ${file.path}`);
+        });
+      } else {
+        // Write files
+        for (const file of files) {
+          await this.writeFile(file);
+        }
+
+        console.log(Colors.success(`✅ Generated ${files.length} files from example`));
+
+        // Show usage instructions
+        console.log('');
+        console.log(Colors.bold('🚀 Generated from Example:'));
+        console.log(`  ${Colors.cyan('Example:')} ${parsedExample.base.metadata.name}`);
+        console.log(`  ${Colors.cyan('Component:')} ${this.options.name}`);
+        console.log(`  ${Colors.cyan('Framework:')} ${this.options.framework}`);
+
+        if (this.options.only?.length) {
+          console.log(`  ${Colors.cyan('Components:')} ${this.options.only.join(', ')}`);
+        }
+
+        if (parsedExample.framework) {
+          console.log(`  ${Colors.cyan('Framework Components:')} ${Array.from(parsedExample.framework.components.keys()).join(', ')}`);
+        }
+
+        this.showNextSteps();
+      }
+    } catch (error) {
+      console.error('');
+      console.error(Colors.error(`❌ Failed to generate from example: ${error instanceof Error ? error.message : error}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Prepare context from parsed example
+   */
+  private prepareExampleContext(parsedExample: any): Record<string, unknown> {
+    const name = this.options.name || 'DefaultName';
+    const example = parsedExample.base.metadata;
+
+    return {
+      name,
+      fileName: this.toKebabCase(name),
+      className: this.toPascalCase(name),
+      camelName: this.toCamelCase(name),
+      description: example.description,
+      domain: example.domain,
+      framework: this.options.framework || 'standalone',
+      timestamp: new Date().toISOString(),
+      author: 'VytchesDDD CLI',
+      version: '1.0.0',
+      // Example-specific context
+      example: {
+        id: example.id,
+        name: example.name,
+        complexity: example.complexity,
+        patterns: example.patterns || [],
+        version: '1.0.0',
+      },
+      // Base example content
+      baseContent: parsedExample.base.content,
+      // Framework content if available
+      frameworkContent: parsedExample.framework,
+      // Available components
+      availableComponents: parsedExample.merged.availableComponents,
+    };
+  }
+
+  /**
+   * Generate files from example
+   */
+  private async generateFilesFromExample(
+    context: Record<string, unknown>,
+    parsedExample: any
+  ): Promise<Array<{ path: string; content: string }>> {
+    const files: Array<{ path: string; content: string }> = [];
+
+    // Generate base component file
+    const baseFile = {
+      path: this.getMainFilePathFromExample(context),
+      content: this.renderBaseExampleContent(context, parsedExample),
+    };
+    files.push(baseFile);
+
+    // Generate framework-specific files if available
+    if (parsedExample.framework && this.options.framework !== 'standalone') {
+      const frameworkFiles = await this.generateFrameworkFilesFromExample(context, parsedExample);
+      files.push(...frameworkFiles);
+    }
+
+    // Generate test file if requested
+    if (this.options.withTests && parsedExample.base.content.testExample) {
+      const testFile = {
+        path: this.getTestFilePathFromExample(context),
+        content: this.renderTestExampleContent(context, parsedExample),
+      };
+      files.push(testFile);
+    }
+
+    return files;
+  }
+
+  /**
+   * Render base example content
+   */
+  private renderBaseExampleContent(context: Record<string, unknown>, parsedExample: any): string {
+    const baseContent = parsedExample.base.content;
+
+    // Replace placeholders in example code
+    let content = baseContent.codeExample;
+
+    // Replace example names with actual component name
+    const exampleName = parsedExample.base.metadata.name;
+    const componentName = context.className as string;
+
+    content = content.replace(new RegExp(exampleName, 'g'), componentName);
+    content = content.replace(new RegExp(this.toKebabCase(exampleName), 'g'), context.fileName as string);
+
+    // Add supporting types
+    if (baseContent.supportingTypes) {
+      content += `\n\n${  baseContent.supportingTypes}`;
+    }
+
+    return content;
+  }
+
+  /**
+   * Generate framework files from example
+   */
+  private async generateFrameworkFilesFromExample(
+    context: Record<string, unknown>,
+    parsedExample: any
+  ): Promise<Array<{ path: string; content: string }>> {
+    const files: Array<{ path: string; content: string }> = [];
+
+    if (!parsedExample.framework) {
+      return files;
+    }
+
+    // Filter components based on only/exclude options
+    const parser = new UnifiedExampleParser();
+    const filteredComponents = parser.filterComponents(
+      parsedExample.framework.components,
+      {
+        only: this.options.only as any,
+        exclude: this.options.exclude as any,
+      }
+    );
+
+    // Generate file for each component
+    for (const [componentType, componentCode] of filteredComponents.entries()) {
+      const file = {
+        path: this.getFrameworkFilePathFromExample(context, componentType),
+        content: this.renderFrameworkComponentContent(context, componentCode, componentType),
+      };
+      files.push(file);
+    }
+
+    return files;
+  }
+
+  /**
+   * Render framework component content
+   */
+  private renderFrameworkComponentContent(
+    context: Record<string, unknown>,
+    componentCode: string,
+    componentType: string
+  ): string {
+    const componentName = context.className as string;
+    const fileName = context.fileName as string;
+
+    // Replace placeholders in component code
+    let content = componentCode;
+
+    // Replace generic names with actual component name
+    content = content.replace(/Order/g, componentName);
+    content = content.replace(/order/g, fileName);
+    content = content.replace(/ORDER/g, componentName.toUpperCase());
+
+    return content;
+  }
+
+  /**
+   * Render test example content
+   */
+  private renderTestExampleContent(context: Record<string, unknown>, parsedExample: any): string {
+    const testContent = parsedExample.base.content.testExample;
+    const componentName = context.className as string;
+    const fileName = context.fileName as string;
+
+    // Replace placeholders in test code
+    let content = testContent;
+
+    // Replace example names with actual component name
+    content = content.replace(/Order/g, componentName);
+    content = content.replace(/order/g, fileName);
+
+    return content;
+  }
+
+  /**
+   * Get main file path from example
+   */
+  private getMainFilePathFromExample(context: Record<string, unknown>): string {
+    const output = this.options.output || './src';
+    const fileName = `${context.fileName}.ts`;
+
+    return FileSystem.joinPath(output, 'domain', fileName);
+  }
+
+  /**
+   * Get framework file path from example
+   */
+  private getFrameworkFilePathFromExample(context: Record<string, unknown>, componentType: string): string {
+    const output = this.options.output || './src';
+    const fileName = `${context.fileName}.${componentType}.ts`;
+
+    const pathMap: Record<string, string> = {
+      module: 'modules',
+      service: 'services',
+      controller: 'controllers',
+      repository: 'repositories',
+      dto: 'dto',
+      config: 'config',
+      middleware: 'middleware',
+      guard: 'guards',
+      interceptor: 'interceptors',
+    };
+
+    const folder = pathMap[componentType] || componentType;
+    return FileSystem.joinPath(output, folder, fileName);
+  }
+
+  /**
+   * Get test file path from example
+   */
+  private getTestFilePathFromExample(context: Record<string, unknown>): string {
+    const output = this.options.output || './src';
+    const fileName = `${context.fileName}.test.ts`;
+
+    return FileSystem.joinPath(output, '../tests', fileName);
+  }
+}
+
+/**
+ * Generate documentation for a package
+ */
+async function generateDocumentationForPackage(packageName: string, options: GenerateOptions): Promise<void> {
+  try {
+    console.log(Colors.cyan(`📚 Generating documentation for package: ${packageName}`));
+    console.log('');
+
+    const generator = new DocumentationGenerator();
+
+    // Parse complexity levels
+    const complexityLevels = options.complexity
+      ? options.complexity.split(',').map(c => c.trim())
+      : undefined;
+
+    // Generate documentation
+    const result = await generator.generate({
+      packageName,
+      ...(complexityLevels && { complexityLevels }),
+      ...(options.framework && { framework: options.framework }),
+      ...(options.llmOptimized && { llmOptimized: options.llmOptimized }),
+      ...(options.llm && { llmOptimized: options.llm }),
+      ...(options.showRelated && { showRelated: options.showRelated }),
+      ...(options.maxExamples && { maxExamples: options.maxExamples }),
+      randomize: !options.noRandomize,
+      ...(options.seed && { seed: options.seed }),
+      ...(options.diOnly && { diOnly: options.diOnly }),
+      ...(options.output && { outputPath: options.output })
+    });
+
+    console.log(Colors.green(`✅ Documentation generated: ${result.outputPath}`));
+
+    if (options.llmOptimized || options.llm) {
+      console.log(Colors.cyan('💡 Tip: Use this file with LLM prompts for code generation'));
+    }
+
+    if (result.randomizedExamples && result.randomizedExamples.length > 0) {
+      console.log(Colors.yellow('🎲 Examples were randomized. Run again to see different examples'));
+    }
+
+  } catch (error) {
+    console.error(Colors.red(`❌ Failed to generate documentation: ${error instanceof Error ? error.message : error}`));
+    process.exit(1);
   }
 }

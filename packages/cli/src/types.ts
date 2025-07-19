@@ -328,7 +328,7 @@ export interface WorkflowStep {
   type: WorkflowStepType;
   prompt?: PromptConfig;
   action?: WorkflowAction;
-  next?: string | ((context: WorkflowContext) => string);
+  next?: string | ((context: any) => string);
 }
 
 /**
@@ -372,7 +372,7 @@ export type WorkflowStepType = 'prompt' | 'action' | 'decision' | 'completion';
 export interface PromptConfig {
   type: 'input' | 'select' | 'multiselect' | 'confirm' | 'password';
   message: string;
-  choices?: string[] | ChoiceOption[] | ((context: WorkflowContext) => string[] | ChoiceOption[]);
+  choices?: string[] | ChoiceOption[] | ((context: any) => string[] | ChoiceOption[]);
   default?: any;
   validate?: (input: any) => boolean | string;
 }
@@ -419,7 +419,7 @@ export interface ChoiceOption {
  * @since 1.0.0
  * @public
  */
-export type WorkflowAction = (context: WorkflowContext) => Promise<void>;
+export type WorkflowAction = (context: any) => Promise<void>;
 
 /**
  * @llm-summary Contract for workflow context functionality
@@ -440,12 +440,7 @@ export type WorkflowAction = (context: WorkflowContext) => Promise<void>;
  * @since 1.0.0
  * @public
  */
-export interface WorkflowContext {
-  [key: string]: any;
-  answers: Record<string, any>;
-  config: CLIConfig;
-  outputPath: string;
-}
+// WorkflowContext moved to workflows/types.ts
 
 // Plugin system
 
@@ -757,9 +752,9 @@ export interface PromptSuggestion {
  * @public
  */
 export interface ContextAwarePrompt extends PromptConfig {
-  analyzer?: (context: WorkflowContext) => Promise<PromptSuggestion[]>;
-  dynamicDefault?: (context: WorkflowContext) => Promise<unknown>;
-  conditionalShow?: (context: WorkflowContext) => boolean;
+  analyzer?: (context: any) => Promise<PromptSuggestion[]>;
+  dynamicDefault?: (context: any) => Promise<unknown>;
+  conditionalShow?: (context: any) => boolean;
 }
 
 /**
@@ -782,12 +777,12 @@ export interface ContextAwarePrompt extends PromptConfig {
  * @public
  */
 export interface SmartPromptEngine {
-  analyzeContext: (context: WorkflowContext) => Promise<ProjectAnalysis>;
+  analyzeContext: (context: any) => Promise<ProjectAnalysis>;
   generateSuggestions: (
     prompt: ContextAwarePrompt,
-    context: WorkflowContext
+    context: any
   ) => Promise<PromptSuggestion[]>;
-  adaptPrompt: (prompt: ContextAwarePrompt, context: WorkflowContext) => Promise<PromptConfig>;
+  adaptPrompt: (prompt: ContextAwarePrompt, context: any) => Promise<PromptConfig>;
   displayAnalysis: (analysis: ProjectAnalysis) => void;
 }
 

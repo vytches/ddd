@@ -133,6 +133,7 @@
                   "scope:acl",
                   "scope:testing",
                   "scope:logging",
+                  "scope:contracts",
                   "scope:validation"
                 ]
               },
@@ -165,6 +166,7 @@
                   "scope:domain-primitives",
                   "scope:utils",
                   "scope:resilience",
+                  "scope:contracts",
                   "scope:logging"
                 ]
               },
@@ -191,6 +193,7 @@
                   "scope:core",
                   "scope:domain-primitives",
                   "scope:utils",
+                  "scope:contracts",
                   "scope:cli",
                   "scope:logging"
                 ]
@@ -228,6 +231,7 @@
                   "scope:core",
                   "scope:domain-primitives",
                   "scope:utils",
+                  "scope:contracts",
                   "scope:di"
                 ]
               },

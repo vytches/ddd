@@ -4,7 +4,6 @@
  */
 
 import type {
-  WorkflowContext,
   PromptConfig,
   ContextAwarePrompt,
   PromptSuggestion,
@@ -15,6 +14,7 @@ import type {
   FrameworkInfo,
   SmartPromptEngine,
 } from '../../types';
+import type { WorkflowContext } from '../../workflows/types';
 import { FileSystem } from '../utils/file-system';
 import { Colors } from '../utils/colors';
 
@@ -58,7 +58,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
    * Analyze project context for intelligent suggestions
    */
   async analyzeContext(context: WorkflowContext): Promise<ProjectAnalysis> {
-    const projectPath = context.config.outputDir || process.cwd();
+    const projectPath = (context.config?.outputDir as string) || process.cwd();
 
     // Check cache first
     if (this.projectAnalysisCache.has(projectPath)) {

@@ -1,0 +1,250 @@
+import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+
+export const domainServicesExampleConfig: PackageExampleConfig = {
+  packageName: 'domain-services',
+  displayName: 'Domain Services',
+  version: '1.0.0',
+  description: 'Domain Services provide orchestration and coordination capabilities for complex business operations that span multiple aggregates or require external integrations.',
+  domain: 'Domain-Driven Design',
+  patterns: ['domain-service', 'orchestration', 'coordination', 'business-logic'],
+  
+  dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+  
+  complexityLevels: {
+    basic: {
+      level: 'basic',
+      diSupport: false,
+      diRequired: false,
+      description: 'Simple domain service patterns for basic orchestration'
+    },
+    intermediate: {
+      level: 'intermediate',
+      diSupport: true,
+      diRequired: false,
+      description: 'Advanced domain service patterns with event handling and policy integration'
+    },
+    advanced: {
+      level: 'advanced',
+      diSupport: true,
+      diRequired: true,
+      description: 'Enterprise domain service patterns with saga orchestration and resilience'
+    }
+  },
+  
+  frameworks: [
+    {
+      name: 'nestjs',
+      displayName: 'NestJS',
+      description: 'NestJS integration with domain services',
+      complexityLevels: ['basic', 'intermediate', 'advanced'],
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+      minimumVersion: '8.0.0'
+    }
+  ],
+  
+  examples: [
+    {
+      id: 'basic-domain-service',
+      name: 'Basic Domain Service',
+      file: 'basic/example-1.md',
+      tags: ['domain-services:core', 'domain-services:basic'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Simple domain service for user management operations',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'domain-service-repository',
+      name: 'Domain Service with Repository',
+      file: 'basic/example-2.md',
+      tags: ['domain-services:core', 'domain-services:repositories'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Domain service coordinating multiple repositories',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/repositories'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'event-driven-domain-service',
+      name: 'Event-Driven Domain Service',
+      file: 'intermediate/example-1.md',
+      tags: ['domain-services:events', 'domain-services:patterns'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Domain service with event publishing capabilities',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/events'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'policy-integrated-domain-service',
+      name: 'Domain Service with Policy Integration',
+      file: 'intermediate/example-2.md',
+      tags: ['domain-services:policies', 'domain-services:validation'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Business policy enforcement within domain services',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/policies'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'cross-aggregate-domain-service',
+      name: 'Cross-Aggregate Domain Service',
+      file: 'intermediate/example-3.md',
+      tags: ['domain-services:orchestration', 'domain-services:aggregates'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Domain service orchestrating multiple aggregates',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/aggregates'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'saga-orchestrated-domain-service',
+      name: 'Saga-Orchestrated Domain Service',
+      file: 'advanced/example-1.md',
+      tags: ['domain-services:saga', 'domain-services:orchestration'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Complex long-running business processes with saga orchestration',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/messaging'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'resilient-domain-service',
+      name: 'Resilient Domain Service',
+      file: 'advanced/example-2.md',
+      tags: ['domain-services:resilience', 'domain-services:patterns'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Domain service with circuit breaker and retry patterns',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/resilience'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'enterprise-domain-service',
+      name: 'Enterprise Domain Service',
+      file: 'advanced/example-3.md',
+      tags: ['domain-services:enterprise', 'domain-services:monitoring'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Production-ready domain service with monitoring and observability',
+      dependencies: ['@vytches-ddd/core', '@vytches-ddd/logging'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'nestjs-manual-setup',
+      name: 'NestJS Manual Setup',
+      file: 'frameworks/nestjs/basic/manual-setup.md',
+      tags: ['domain-services:nestjs', 'domain-services:manual'],
+      complexity: 'basic',
+      framework: 'nestjs',
+      priority: 'high',
+      description: 'Manual setup of domain services in NestJS',
+      dependencies: ['@nestjs/core', '@vytches-ddd/core'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'nestjs-simple-service',
+      name: 'NestJS Simple Service',
+      file: 'frameworks/nestjs/basic/simple-service.md',
+      tags: ['domain-services:nestjs', 'domain-services:integration'],
+      complexity: 'basic',
+      framework: 'nestjs',
+      priority: 'medium',
+      description: 'Simple domain service integration in NestJS',
+      dependencies: ['@nestjs/core', '@vytches-ddd/core'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'nestjs-di-integration',
+      name: 'NestJS DI Integration',
+      file: 'frameworks/nestjs/intermediate/di-integration.md',
+      tags: ['domain-services:nestjs', 'domain-services:di'],
+      complexity: 'intermediate',
+      framework: 'nestjs',
+      priority: 'high',
+      description: 'Advanced DI integration with @vytches-ddd/di',
+      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/di'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'nestjs-event-integration',
+      name: 'NestJS Event Integration',
+      file: 'frameworks/nestjs/intermediate/event-integration.md',
+      tags: ['domain-services:nestjs', 'domain-services:events'],
+      complexity: 'intermediate',
+      framework: 'nestjs',
+      priority: 'medium',
+      description: 'Event-driven domain services in NestJS',
+      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/events'],
+      validation: { fileExists: true }
+    },
+    {
+      id: 'nestjs-enterprise-setup',
+      name: 'NestJS Enterprise Setup',
+      file: 'frameworks/nestjs/advanced/enterprise-setup.md',
+      tags: ['domain-services:nestjs', 'domain-services:enterprise'],
+      complexity: 'advanced',
+      framework: 'nestjs',
+      priority: 'high',
+      description: 'Complete enterprise setup with monitoring and observability',
+      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/logging'],
+      validation: { fileExists: true }
+    }
+  ],
+  
+  tags: {
+    core: ['domain-services:core', 'domain-services:basic', 'domain-services:patterns'],
+    integrations: ['domain-services:repositories', 'domain-services:events', 'domain-services:policies'],
+    frameworks: ['domain-services:nestjs', 'domain-services:manual', 'domain-services:di'],
+    patterns: ['domain-services:orchestration', 'domain-services:saga', 'domain-services:resilience', 'domain-services:enterprise']
+  },
+  
+  contentConfig: {
+    showImportStatements: true,
+    showErrorHandling: true,
+    showTesting: true,
+    showPerformance: true,
+    includeBestPractices: true,
+    includeCommonPitfalls: true,
+    showVersionHistory: false
+  },
+  
+  llmSupport: {
+    enabled: true,
+    includePrompts: true,
+    includeTips: true,
+    includePatterns: true,
+    optimizeForCodeGeneration: true
+  },
+  
+  sections: ['hero', 'description', 'whenToUse', 'whenNotToUse', 'examples', 'useCases', 'frameworkIntegration', 'commonPitfalls', 'troubleshooting', 'performance'],
+  
+  relatedPackages: {
+    'core': {
+      priority: 'high',
+      relationship: 'depends-on',
+      integrationExamples: ['basic-domain-service', 'domain-service-repository']
+    },
+    'events': {
+      priority: 'high',
+      relationship: 'publishes-to',
+      integrationExamples: ['event-driven-domain-service']
+    },
+    'policies': {
+      priority: 'medium',
+      relationship: 'enables',
+      integrationExamples: ['policy-integrated-domain-service']
+    },
+    'messaging': {
+      priority: 'high',
+      relationship: 'enables',
+      integrationExamples: ['saga-orchestrated-domain-service']
+    },
+    'resilience': {
+      priority: 'medium',
+      relationship: 'enables',
+      integrationExamples: ['resilient-domain-service']
+    }
+  }
+};

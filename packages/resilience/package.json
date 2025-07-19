@@ -42,7 +42,8 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*"
+    "@vytches-ddd/core": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
   },
   "devDependencies": {
     "@vytches-ddd/testing": "workspace:*",

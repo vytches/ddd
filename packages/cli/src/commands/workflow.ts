@@ -3,7 +3,8 @@
  * AI-powered interactive workflows for domain modeling and generation
  */
 
-import type { Command, WorkflowContext, CLIConfig } from '../types';
+import type { Command, CLIConfig } from '../types';
+import type { WorkflowContext } from '../workflows/types';
 import { Colors } from '../core/utils/colors';
 import { DomainModelingWorkflow } from '../workflows';
 import { WorkflowEngine } from '../core/engines/workflow-engine';

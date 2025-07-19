@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./examples/metadata": {
+      "types": "./examples/metadata.d.ts",
+      "import": "./examples/metadata.js",
+      "require": "./examples/metadata.cjs"
     }
   },
   "sideEffects": false,

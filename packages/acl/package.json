@@ -43,9 +43,11 @@
   },
   "peerDependencies": {
     "@vytches-ddd/core": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/validation": "workspace:*"
   },
   "devDependencies": {
+    "@vytches-ddd/contracts": "workspace:*",
     "@vytches-ddd/testing": "workspace:*",
     "@vytches-ddd/utils": "workspace:*",
     "@vytches-ddd/validation": "workspace:*",
