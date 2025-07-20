@@ -24,7 +24,7 @@ export class PackageConfigLoader {
         rootDir = parent;
       }
     }
-    
+
     const configPath = path.join(
       rootDir,
       'packages',
@@ -81,7 +81,7 @@ export class PackageConfigLoader {
         rootDir = parent;
       }
     }
-    
+
     const packagesPath = path.join(rootDir, 'packages');
 
     try {
