@@ -5,7 +5,7 @@
  * This is the actual executable file
  */
 
-async function runCLI(): Promise<void> {
+export async function runCLI(): Promise<void> {
   try {
     // Import the CLI main function
     const { main } = await import('./cli.js');
