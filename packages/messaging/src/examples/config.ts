@@ -63,35 +63,168 @@ export const config: PackageExampleConfig = {
     }
   ],
   examples: [
+    // Basic examples
     {
-      id: 'basic-outbox-pattern',
-      name: 'Basic Outbox Pattern',
-      file: 'basic/implementation.md',
-      tags: ['messaging:core', 'messaging:outbox', 'reliable-messaging'],
+      id: 'basic-outbox-implementation',
+      name: 'Basic Outbox Pattern Implementation',
+      file: 'basic/example-1.md',
+      tags: ['messaging:outbox', 'messaging:basic', 'reliable-messaging'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic outbox pattern for reliable message delivery in distributed systems',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/utils']
+      description: 'Basic implementation of outbox pattern for reliable message delivery',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/core']
     },
     {
-      id: 'intermediate-messaging-events',
-      name: 'Messaging with Events & Resilience',
-      file: 'intermediate/implementation.md',
-      tags: ['messaging:advanced', 'messaging:events', 'messaging:resilience'],
+      id: 'basic-retry-dlq',
+      name: 'Message Retry and Dead Letter Queue',
+      file: 'basic/example-2.md',
+      tags: ['messaging:retry', 'messaging:dlq', 'error-handling'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Message processing with retry logic and dead letter queue handling',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/core']
+    },
+    {
+      id: 'basic-use-cases',
+      name: 'Basic Messaging Use Cases',
+      file: 'basic/use-case.md',
+      tags: ['messaging:use-cases', 'messaging:patterns'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Real-world use cases for basic messaging patterns',
+      dependencies: ['@vytches-ddd/messaging']
+    },
+
+    // Intermediate examples
+    {
+      id: 'intermediate-saga-pattern',
+      name: 'Saga Pattern Implementation',
+      file: 'intermediate/example-1.md',
+      tags: ['messaging:saga', 'messaging:orchestration', 'distributed-transactions'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Advanced messaging patterns integrated with events system and resilience',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/resilience', '@vytches-ddd/di']
+      description: 'Implementation of saga pattern for distributed transaction management',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/core']
     },
     {
-      id: 'advanced-saga-orchestration',
-      name: 'Enterprise Saga Orchestration',
-      file: 'advanced/implementation.md',
-      tags: ['messaging:sagas', 'messaging:orchestration', 'messaging:policies', 'messaging:enterprise'],
+      id: 'intermediate-message-routing',
+      name: 'Event-Driven Message Routing',
+      file: 'intermediate/example-2.md',
+      tags: ['messaging:routing', 'messaging:events', 'content-based-routing'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Sophisticated message routing based on content and business rules',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/policies']
+    },
+    {
+      id: 'intermediate-use-cases',
+      name: 'Intermediate Messaging Use Cases',
+      file: 'intermediate/use-case.md',
+      tags: ['messaging:use-cases', 'messaging:saga', 'messaging:routing'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Advanced use cases for saga orchestration and message routing',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events']
+    },
+
+    // Advanced examples
+    {
+      id: 'advanced-event-mesh',
+      name: 'Enterprise Event Mesh Architecture',
+      file: 'advanced/example-1.md',
+      tags: ['messaging:event-mesh', 'messaging:global', 'messaging:enterprise'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise saga orchestration with policies, events, and comprehensive fault tolerance',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/policies', '@vytches-ddd/events', '@vytches-ddd/resilience', '@vytches-ddd/di']
+      description: 'Global event mesh for enterprise-scale distributed systems',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/cqrs', '@vytches-ddd/event-store']
+    },
+    {
+      id: 'advanced-stream-processing',
+      name: 'Real-time Stream Processing with CEP',
+      file: 'advanced/example-2.md',
+      tags: ['messaging:cep', 'messaging:streaming', 'pattern-detection'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Complex event processing and real-time stream processing',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/policies']
+    },
+    {
+      id: 'advanced-use-cases',
+      name: 'Advanced Messaging Use Cases',
+      file: 'advanced/use-case.md',
+      tags: ['messaging:use-cases', 'messaging:enterprise', 'messaging:global'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Enterprise-scale messaging architectures and patterns',
+      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/cqrs']
+    },
+
+    // Framework examples - NestJS
+    {
+      id: 'nestjs-basic-outbox-manual',
+      name: 'NestJS Outbox Pattern - Manual Setup',
+      file: 'frameworks/nestjs/basic/example-1.md',
+      tags: ['messaging:nestjs', 'messaging:outbox', 'framework-integration'],
+      complexity: 'basic',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Manual integration of outbox pattern with NestJS',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging']
+    },
+    {
+      id: 'nestjs-basic-retry-manual',
+      name: 'NestJS Message Processing - Manual Setup',
+      file: 'frameworks/nestjs/basic/example-2.md',
+      tags: ['messaging:nestjs', 'messaging:retry', 'framework-integration'],
+      complexity: 'basic',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Manual integration of message processing with retry logic',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging']
+    },
+    {
+      id: 'nestjs-intermediate-saga-di',
+      name: 'NestJS Saga Orchestration - DI Integration',
+      file: 'frameworks/nestjs/intermediate/example-1.md',
+      tags: ['messaging:nestjs', 'messaging:saga', 'messaging:di'],
+      complexity: 'intermediate',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Advanced saga orchestration with VytchesDDD DI integration',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-advanced-event-mesh',
+      name: 'NestJS Enterprise Event Mesh - Global Coordination',
+      file: 'frameworks/nestjs/advanced/example-1.md',
+      tags: ['messaging:nestjs', 'messaging:event-mesh', 'messaging:enterprise'],
+      complexity: 'advanced',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Enterprise event mesh with global coordination and VytchesDDD DI',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'nestjs-advanced-implementation',
+      name: 'NestJS Advanced Implementation Overview',
+      file: 'frameworks/nestjs/advanced/implementation.md',
+      tags: ['messaging:nestjs', 'messaging:implementation', 'messaging:patterns'],
+      complexity: 'advanced',
+      priority: 'medium',
+      framework: 'nestjs',
+      description: 'Overview of advanced messaging implementation patterns in NestJS',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-advanced-use-cases',
+      name: 'NestJS Advanced Use Cases',
+      file: 'frameworks/nestjs/advanced/use-case.md',
+      tags: ['messaging:nestjs', 'messaging:use-cases', 'messaging:enterprise'],
+      complexity: 'advanced',
+      priority: 'medium',
+      framework: 'nestjs',
+      description: 'Enterprise-scale messaging use cases with NestJS integration',
+      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di']
     }
   ],
   contentConfig: {

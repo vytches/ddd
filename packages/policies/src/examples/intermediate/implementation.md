@@ -1,338 +1,332 @@
-# Intermediate Conditional Policy Implementation
+# Intermediate Policy Implementation Patterns
 
-**Focus**: Advanced policy features with conditional logic and group policies  
-**Domain**: Financial Services  
-**Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/utils
+**Version**: 2.0.0  
+**Package**: @vytches-ddd/policies  
+**Complexity**: intermediate  
+**Domain**: Policy Architecture  
+**Patterns**: policy-behaviors, policy-registry, external-integration
 
-## Business Context
+## Overview
 
-This example demonstrates advanced policy features for a loan approval system:
-- Conditional policies based on loan type and amount
-- Policy groups for complex business logic (excellent credit OR good credit with collateral)
-- Dynamic policy execution based on runtime conditions
-- Rich violation handling with severity levels
+Intermediate policy patterns focus on enterprise-grade policy management including cross-cutting concerns, centralized policy registry, and external service integration. These patterns enable scalable, maintainable, and resilient policy-driven applications.
 
-## Implementation
+## Core Implementation Concepts
+
+This section covers three major intermediate patterns demonstrated in separate examples:
+
+### 1. Policy Behaviors (Example 1)
+Cross-cutting concerns implementation with retry logic, intelligent caching, and temporal constraints. Policy Behaviors wrap business policies with infrastructure concerns like fault tolerance, performance optimization, and time-based execution rules.
+
+**Key Features:**
+- **Retry Behaviors**: Exponential backoff for transient failures
+- **Caching Behaviors**: TTL-based performance optimization  
+- **Temporal Behaviors**: Business hours and working day constraints
+- **Behavior Composition**: Layered behavior stacking for comprehensive enterprise requirements
+
+### 2. Policy Registry (Example 2) 
+Centralized policy management with versioning, dynamic rule deployment, and A/B testing capabilities. The Policy Registry enables business users to update rules without code deployment and provides comprehensive policy lifecycle management.
+
+**Key Features:**
+- **Version Management**: Complete policy versioning with metadata tracking
+- **Dynamic Resolution**: Context-aware policy selection based on user attributes and A/B testing
+- **Gradual Rollouts**: Phased deployment with monitoring and automatic rollback
+- **Analytics**: Comprehensive policy performance and usage metrics
+
+### 3. External Service Integration (Example 3)
+Reliable integration with external APIs and services using circuit breaker patterns, intelligent fallback strategies, and resilience mechanisms. This pattern ensures policy evaluation continues even when external dependencies are unavailable.
+
+**Key Features:**
+- **Circuit Breaker Protection**: Automatic failure detection and service isolation
+- **Intelligent Fallbacks**: Graceful degradation with cached data and default behaviors
+- **Resilience Patterns**: Timeout handling, retry logic, and bulkhead isolation
+- **Service Monitoring**: Health checks, performance tracking, and alerting
+
+These three patterns can be composed together to create comprehensive enterprise policy solutions that are resilient, performant, and maintainable.
 
 ```typescript
-// loan-approval-policy.ts
+// comprehensive-policy-implementation.ts
 import { 
-  PolicyBuilder, 
-  PolicyGroup, 
-  PolicyContext,
-  ISpecification 
+  PolicyRetryBehavior,
+  PolicyCachingBehavior,
+  PolicyTemporalBehavior,
+  PolicyRegistry,
+  BaseBusinessPolicy,
+  PolicyContext
 } from '@vytches-ddd/policies';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
-import { LoanApplication, CreditScore, Collateral } from '../types'; // ALWAYS import from app
+import { CircuitBreaker } from '@vytches-ddd/resilience';
+import { ExternalCreditService, ComplianceService } from '../types';
 
-// Advanced specifications for loan approval
-class CreditScoreSpecification implements ISpecification<LoanApplication> {
-  constructor(private minimumScore: number) {}
-  
-  isSatisfiedBy(application: LoanApplication): boolean {
-    return application.creditScore >= this.minimumScore;
-  }
-}
+/**
+ * @llm-summary Comprehensive intermediate policy implementation
+ * @llm-domain Enterprise Policy Architecture
+ * @llm-complexity Complex
+ *
+ * @description
+ * Demonstrates integration of all three intermediate patterns:
+ * Policy Behaviors, Policy Registry, and External Service Integration
+ * for enterprise-grade policy system implementation.
+ *
+ * @since 2.0.0
+ * @public
+ */
+export class ComprehensivePolicySystem {
+  private registry: PolicyRegistry;
+  private circuitBreaker: CircuitBreaker;
 
-class CollateralSpecification implements ISpecification<LoanApplication> {
-  constructor(private minimumValue: number) {}
-  
-  isSatisfiedBy(application: LoanApplication): boolean {
-    return application.collateral?.value >= this.minimumValue;
-  }
-}
-
-class DebtToIncomeSpecification implements ISpecification<LoanApplication> {
-  constructor(private maximumRatio: number) {}
-  
-  isSatisfiedBy(application: LoanApplication): boolean {
-    return (application.totalDebt / application.annualIncome) <= this.maximumRatio;
-  }
-}
-
-class EmploymentHistorySpecification implements ISpecification<LoanApplication> {
-  constructor(private minimumYears: number) {}
-  
-  isSatisfiedBy(application: LoanApplication): boolean {
-    return application.employmentHistory >= this.minimumYears;
-  }
-}
-
-// ⭐ Advanced Loan Approval Policy with Conditional Logic
-@DomainService('loanApprovalPolicy', {
-  lifetime: ServiceLifetime.Singleton,
-  context: 'LoanProcessing'
-})
-export class LoanApprovalPolicy {
-  private logger = Logger.forContext('LoanApprovalPolicy');
-
-  // Policy group for excellent credit customers
-  private excellentCreditGroup = PolicyGroup.create<LoanApplication>('excellent-credit')
-    .mustSatisfy(
-      app => app.creditScore >= 800,
-      'CREDIT_NOT_EXCELLENT',
-      'Excellent credit score (800+) required'
-    );
-
-  // Policy group for good credit with collateral
-  private goodCreditWithCollateralGroup = PolicyGroup.create<LoanApplication>('good-credit-collateral')
-    .mustSatisfy(
-      app => app.creditScore >= 650,
-      'CREDIT_NOT_GOOD',
-      'Good credit score (650+) required'
-    )
-    .and()
-    .mustSatisfy(
-      app => app.collateral?.value >= 50000,
-      'INSUFFICIENT_COLLATERAL',
-      'Collateral value must be at least $50,000'
-    );
-
-  // Main conditional policy
-  private createConditionalPolicy(loanType: string, amount: number) {
-    return PolicyBuilder.create<LoanApplication>()
-      .withId(`loan-approval-${loanType}`)
-      .withDomain('financial-services')
-      .withName(`${loanType} Loan Approval Policy`)
-      
-      // Basic requirements for all loans
-      .must(new DebtToIncomeSpecification(0.4))
-      .withCode('DEBT_TO_INCOME_HIGH')
-      .withMessage('Debt-to-income ratio must be below 40%')
-      .withSeverity('ERROR')
-      .and()
-      .must(new EmploymentHistorySpecification(2))
-      .withCode('INSUFFICIENT_EMPLOYMENT_HISTORY')
-      .withMessage('Must have at least 2 years employment history')
-      .withSeverity('ERROR')
-      .and()
-      
-      // Conditional logic for high-value loans
-      .when(app => amount > 500000)
-      .then()
-      .must(new CreditScoreSpecification(750))
-      .withCode('HIGH_VALUE_CREDIT_INSUFFICIENT')
-      .withMessage('High-value loans require credit score of 750+')
-      .withSeverity('ERROR')
-      .and()
-      .must(new CollateralSpecification(amount * 0.2))
-      .withCode('HIGH_VALUE_COLLATERAL_INSUFFICIENT')
-      .withMessage('High-value loans require 20% collateral')
-      .withSeverity('ERROR')
-      
-      // Conditional logic for mortgage loans
-      .when(app => loanType === 'mortgage')
-      .then()
-      .shouldSatisfyAny(this.excellentCreditGroup, this.goodCreditWithCollateralGroup)
-      .withCode('MORTGAGE_CREDIT_REQUIREMENTS')
-      .withMessage('Mortgage requires excellent credit OR good credit with collateral')
-      .withSeverity('ERROR')
-      
-      // Conditional logic for business loans
-      .when(app => loanType === 'business')
-      .then()
-      .must(new CreditScoreSpecification(700))
-      .withCode('BUSINESS_CREDIT_INSUFFICIENT')
-      .withMessage('Business loans require credit score of 700+')
-      .withSeverity('ERROR')
-      .and()
-      .mustSatisfy(
-        app => app.businessRevenue >= amount * 0.3,
-        'BUSINESS_REVENUE_INSUFFICIENT',
-        'Business revenue must be at least 30% of loan amount'
-      )
-      .withSeverity('ERROR')
-      
-      // Production environment additional checks
-      .when(ctx => ctx.environment === 'production')
-      .then()
-      .must(new CreditScoreSpecification(600))
-      .withCode('PRODUCTION_MINIMUM_CREDIT')
-      .withMessage('Production environment requires minimum 600 credit score')
-      .withSeverity('ERROR')
-      .otherwise()
-      .should(new CreditScoreSpecification(550))
-      .withCode('STAGING_CREDIT_WARNING')
-      .withMessage('Consider improving credit score for production approval')
-      .withSeverity('WARNING')
-      
-      .build();
+  constructor(
+    private creditService: ExternalCreditService,
+    private complianceService: ComplianceService
+  ) {
+    this.registry = new PolicyRegistry();
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 5,
+      resetTimeout: 60000
+    });
+    
+    this.initializePolicySystem();
   }
 
-  async evaluateLoanApplication(
-    application: LoanApplication, 
-    loanType: string,
-    userId: string
-  ): Promise<Result<LoanApplication, Error>> {
-    try {
-      this.logger.info('Evaluating loan application', {
-        applicationId: application.id,
-        loanType,
-        amount: application.amount,
-        creditScore: application.creditScore
-      });
+  /**
+   * Initialize the comprehensive policy system with all patterns
+   */
+  private async initializePolicySystem(): Promise<void> {
+    console.log('🚀 Initializing Comprehensive Policy System');
 
-      const context = PolicyContext.create()
-        .withUserId(userId)
-        .withRequestId(`loan-${application.id}`)
-        .withCorrelationId(`evaluation-${Date.now()}`)
-        .withContext({ 
-          loanType,
-          environment: process.env.NODE_ENV || 'development',
-          applicationDate: new Date().toISOString()
-        })
-        .build();
+    // 1. Create base policies with external service integration
+    const baseCreditPolicy = this.createExternalServiceIntegratedPolicy();
+    
+    // 2. Enhance with Policy Behaviors (retry, caching, temporal)
+    const enhancedPolicy = this.applyPolicyBehaviors(baseCreditPolicy);
+    
+    // 3. Register in Policy Registry for dynamic management
+    await this.registerPoliciesWithVersioning(enhancedPolicy);
+    
+    console.log('✅ Comprehensive Policy System initialized');
+  }
 
-      const policy = this.createConditionalPolicy(loanType, application.amount);
-      const result = await policy.check({ entity: application, context });
+  /**
+   * Pattern 1: External Service Integration with Circuit Breaker
+   */
+  private createExternalServiceIntegratedPolicy(): BaseBusinessPolicy<any> {
+    return new (class extends BaseBusinessPolicy<any> {
+      constructor(
+        private creditService: ExternalCreditService,
+        private circuitBreaker: CircuitBreaker
+      ) {
+        super();
+      }
 
-      if (result.isFailure()) {
-        const violations = result.error.violations;
+      async check(request: any): Promise<any> {
+        try {
+          // Use circuit breaker for external service calls
+          const creditResult = await this.circuitBreaker.execute(async () => {
+            return await this.creditService.getCreditScore(request.entity.applicantId);
+          });
+
+          if (creditResult.score < 650) {
+            return this.failure({
+              code: 'INSUFFICIENT_CREDIT',
+              message: 'Credit score below threshold',
+              severity: 'ERROR'
+            });
+          }
+
+          return this.success(request.entity);
+
+        } catch (error) {
+          // Fallback to cached data or default behavior
+          if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+            console.warn('🔴 Circuit breaker open - using fallback policy');
+            return this.applyFallbackPolicy(request);
+          }
+          
+          throw error;
+        }
+      }
+
+      private async applyFallbackPolicy(request: any): Promise<any> {
+        // Fallback to cached credit data or conservative approval
+        const cachedScore = await this.getCachedCreditScore(request.entity.applicantId);
         
-        // Separate errors and warnings
-        const errors = violations.filter(v => v.severity === 'ERROR');
-        const warnings = violations.filter(v => v.severity === 'WARNING');
+        if (cachedScore && cachedScore > 700) {
+          return this.success(request.entity);
+        }
         
-        this.logger.warn('Loan application policy violations', {
-          applicationId: application.id,
-          errors: errors.length,
-          warnings: warnings.length,
-          violations: violations.map(v => ({
-            code: v.code,
-            message: v.message,
-            severity: v.severity
-          }))
+        return this.failure({
+          code: 'SERVICE_UNAVAILABLE_FALLBACK',
+          message: 'External service unavailable - manual review required',
+          severity: 'WARNING'
         });
-
-        // If only warnings, approve with conditions
-        if (errors.length === 0 && warnings.length > 0) {
-          return Result.success({
-            ...application,
-            status: 'approved_with_conditions',
-            conditions: warnings.map(w => w.message)
-          });
-        }
-
-        // If errors exist, reject
-        const errorMessages = errors.map(e => `${e.code}: ${e.message}`).join(', ');
-        return Result.failure(new Error(`Loan application rejected: ${errorMessages}`));
       }
 
-      this.logger.info('Loan application approved', {
-        applicationId: application.id,
-        loanType,
-        amount: application.amount
+      private async getCachedCreditScore(applicantId: string): Promise<number | null> {
+        // Simulate cached data retrieval
+        return Math.random() > 0.5 ? 720 : null;
+      }
+    })(this.creditService, this.circuitBreaker);
+  }
+
+  /**
+   * Pattern 2: Policy Behaviors Enhancement
+   */
+  private applyPolicyBehaviors(basePolicy: BaseBusinessPolicy<any>): any {
+    // Layer 1: Retry behavior for resilience
+    const retriedPolicy = PolicyRetryBehavior.create(basePolicy, {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      backoff: 'exponential',
+      shouldRetry: (violation) => 
+        violation.code.includes('TIMEOUT') || violation.code.includes('UNAVAILABLE')
+    });
+
+    // Layer 2: Caching behavior for performance
+    const cachedPolicy = PolicyCachingBehavior.create(retriedPolicy, {
+      ttl: 300000, // 5 minutes
+      maxSize: 1000,
+      keyGenerator: (request) => `credit_${request.entity.applicantId}`,
+      namespace: 'comprehensive-policies'
+    });
+
+    // Layer 3: Temporal behavior for business constraints
+    const temporalPolicy = PolicyTemporalBehavior.create(cachedPolicy, {
+      businessHours: { start: '09:00', end: '17:00' },
+      workingDays: [1, 2, 3, 4, 5],
+      duringBusinessHours: cachedPolicy,
+      duringAfterHours: retriedPolicy, // Less aggressive caching after hours
+      includeTemporalInfo: true
+    });
+
+    return temporalPolicy;
+  }
+
+  /**
+   * Pattern 3: Policy Registry with Versioning
+   */
+  private async registerPoliciesWithVersioning(enhancedPolicy: any): Promise<void> {
+    // Register multiple versions for A/B testing
+    await this.registry.register({
+      id: 'comprehensive-credit-policy-v1',
+      domain: 'financial-services',
+      name: 'Comprehensive Credit Policy v1.0',
+      policy: enhancedPolicy,
+      version: 'v1.0',
+      tags: ['credit', 'comprehensive', 'production'],
+      metadata: {
+        description: 'Production credit policy with all patterns',
+        registeredBy: 'policy-team',
+        environment: 'production'
+      }
+    });
+
+    // Register experimental version
+    const experimentalPolicy = this.createExperimentalPolicy();
+    await this.registry.register({
+      id: 'comprehensive-credit-policy-v1.1-beta',
+      domain: 'financial-services', 
+      name: 'Comprehensive Credit Policy v1.1 Beta',
+      policy: experimentalPolicy,
+      version: 'v1.1-beta',
+      tags: ['credit', 'comprehensive', 'experimental'],
+      metadata: {
+        description: 'Experimental version with AI enhancements',
+        registeredBy: 'ai-team',
+        environment: 'staging',
+        abTestGroup: 'ai-enhancement'
+      }
+    });
+  }
+
+  /**
+   * Comprehensive policy execution with all patterns
+   */
+  async executeComprehensivePolicy(
+    entity: any,
+    context: PolicyContext
+  ): Promise<{
+    result: any;
+    behaviorMetrics: any;
+    registryInfo: any;
+    circuitBreakerStatus: any;
+  }> {
+    const startTime = Date.now();
+
+    try {
+      // Dynamic policy resolution from registry
+      const resolvedPolicy = this.registry.resolve({
+        domain: 'financial-services',
+        tags: ['credit', 'comprehensive'],
+        context: context.metadata
       });
 
-      return Result.success({
-        ...application,
-        status: 'approved'
-      });
+      if (!resolvedPolicy) {
+        throw new Error('No suitable policy found in registry');
+      }
+
+      console.log(`🎯 Executing comprehensive policy: ${resolvedPolicy.name}`);
+
+      // Execute policy with all behavioral enhancements
+      const result = await resolvedPolicy.policy.check({ entity, context });
+
+      const executionTime = Date.now() - startTime;
+
+      return {
+        result,
+        behaviorMetrics: {
+          executionTime,
+          cacheHit: result.metadata?.cacheHit || false,
+          retryAttempts: result.metadata?.retryAttempts || 0,
+          temporalMode: result.metadata?.temporalMode || 'business-hours'
+        },
+        registryInfo: {
+          policyId: resolvedPolicy.id,
+          version: resolvedPolicy.version,
+          dynamicSelection: true
+        },
+        circuitBreakerStatus: {
+          state: this.circuitBreaker.getState(),
+          failureCount: this.circuitBreaker.getFailureCount(),
+          lastFailureTime: this.circuitBreaker.getLastFailureTime()
+        }
+      };
 
     } catch (error) {
-      this.logger.error('Loan evaluation error', {
-        applicationId: application.id,
-        error: error.message
-      });
-
-      return Result.failure(new Error(`Loan evaluation failed: ${error.message}`));
+      console.error(`❌ Comprehensive policy execution failed: ${error.message}`);
+      throw error;
     }
   }
 
-  // Batch evaluation for multiple applications
-  async evaluateMultipleApplications(
-    applications: LoanApplication[],
-    loanType: string,
-    userId: string
-  ): Promise<Result<LoanApplication[], Error>> {
-    try {
-      const results = await Promise.allSettled(
-        applications.map(app => 
-          this.evaluateLoanApplication(app, loanType, userId)
-        )
-      );
-
-      const approvedApplications: LoanApplication[] = [];
-      const rejectedApplications: { application: LoanApplication; reason: string }[] = [];
-
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value.isSuccess()) {
-          approvedApplications.push(result.value.value!);
-        } else {
-          const reason = result.status === 'fulfilled' 
-            ? result.value.error.message 
-            : result.reason;
-          rejectedApplications.push({
-            application: applications[index],
-            reason
-          });
-        }
-      });
-
-      this.logger.info('Batch loan evaluation completed', {
-        total: applications.length,
-        approved: approvedApplications.length,
-        rejected: rejectedApplications.length
-      });
-
-      return Result.success(approvedApplications);
-
-    } catch (error) {
-      return Result.failure(new Error(`Batch evaluation failed: ${error.message}`));
-    }
+  private createExperimentalPolicy(): any {
+    // Simplified experimental policy for demonstration
+    return {
+      check: async () => ({
+        isSuccess: () => true,
+        metadata: { experimental: true }
+      })
+    };
   }
 }
 ```
 
-## Key Features
+## Integration Benefits
 
-- **Conditional Logic**: Dynamic policy execution with `when().then().otherwise()`
-- **Policy Groups**: Complex business logic with OR conditions
-- **Severity Levels**: ERROR, WARNING, INFO violations with different handling
-- **Context-Aware**: Environment-specific policy behavior
-- **Batch Processing**: Efficient evaluation of multiple applications
-- **Rich Logging**: Comprehensive audit trail and debugging information
+### **Comprehensive Resilience**
+- **Circuit Breaker Protection**: Automatic isolation of failing external services
+- **Intelligent Retry Logic**: Exponential backoff with failure classification
+- **Graceful Degradation**: Fallback policies when services are unavailable
 
-## Usage Example
+### **Performance Optimization**
+- **Multi-Layer Caching**: Policy-level and service-level caching strategies
+- **Temporal Optimization**: Different performance profiles for business vs after hours
+- **Resource Management**: Efficient use of external service calls and system resources
 
-```typescript
-// Usage in loan service
-export class LoanService {
-  constructor(private loanPolicy: LoanApprovalPolicy) {}
-
-  async processLoanApplication(
-    application: LoanApplication,
-    loanType: string,
-    userId: string
-  ): Promise<Result<LoanApplication, Error>> {
-    try {
-      const evaluationResult = await this.loanPolicy.evaluateLoanApplication(
-        application,
-        loanType,
-        userId
-      );
-
-      if (evaluationResult.isFailure()) {
-        return Result.failure(evaluationResult.error);
-      }
-
-      const approvedApplication = evaluationResult.value!;
-      
-      // Process approved application
-      return Result.success(approvedApplication);
-    } catch (error) {
-      return Result.failure(new Error(`Loan processing failed: ${error.message}`));
-    }
-  }
-}
-```
+### **Enterprise Management**
+- **Dynamic Policy Updates**: Business rule changes without deployment
+- **A/B Testing**: Parallel policy versions with traffic splitting
+- **Comprehensive Analytics**: Policy performance, behavior effectiveness, and business impact metrics
 
 ## Common Pitfalls
 
-- **Complex Conditions**: Keep conditional logic readable and well-documented
-- **Performance**: Monitor policy evaluation performance for complex conditions
-- **Context Dependency**: Ensure context data is consistently provided
-- **Testing**: Thoroughly test all conditional paths and edge cases
+- **❌ Behavior Conflicts**: Test behavior composition thoroughly for unexpected interactions
+- **❌ Registry Bloat**: Implement proper policy version cleanup and archiving
+- **❌ Circuit Breaker Tuning**: Adjust thresholds based on actual service characteristics
+- **❌ Cache Coherence**: Ensure cached data aligns with business rule change frequency

@@ -4,19 +4,19 @@ export const config: PackageExampleConfig = {
   packageName: 'acl',
   displayName: 'Anti-Corruption Layer',
   version: '1.0.0',
-  description: 'Anti-Corruption Layer provides a translation layer between your domain model and external systems, ensuring your domain remains pure and isolated from external concerns.',
+  description: 'Anti-Corruption Layer provides patterns for integrating with external systems while protecting domain models from external data formats and inconsistencies.',
   domain: 'Integration',
-  patterns: ['anti-corruption-layer', 'adapter-pattern', 'model-translation', 'external-integration'],
+  patterns: ['anti-corruption-layer', 'data-translation', 'external-integration', 'domain-protection', 'system-boundaries'],
   tags: {
-    core: ['acl:core', 'acl:basic', 'acl:integration'],
-    integrations: ['acl:identity', 'acl:e-commerce', 'acl:communication', 'acl:storage', 'acl:finance', 'acl:logistics', 'acl:infrastructure'],
+    core: ['acl:core', 'acl:translation', 'acl:protection', 'acl:integration'],
+    integrations: ['acl:events', 'acl:resilience', 'acl:policies', 'acl:di'],
     frameworks: ['acl:nestjs', 'acl:express', 'acl:fastify'],
-    patterns: ['acl:adapter', 'acl:translator', 'acl:external-api', 'acl:model-mapping']
+    patterns: ['acl:translator', 'acl:aggregator', 'acl:orchestrator', 'acl:composite', 'acl:ai-enhanced']
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/acl', '@vytches-ddd/utils'],
   sections: [
     'hero',
-    'description',
+    'description', 
     'whenToUse',
     'whenNotToUse',
     'examples',
@@ -31,19 +31,19 @@ export const config: PackageExampleConfig = {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic ACL implementation with simple model translation'
+      description: 'Basic data translation and external system integration'
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
-      diRequired: true,
-      description: 'Multi-provider ACL with advanced features'
+      diRequired: false,
+      description: 'Advanced ACL patterns with caching, resilience, and multi-system orchestration'
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise ACL with security, federation, and compliance features'
+      description: 'Enterprise ACL orchestration with AI-powered adaptation and global coordination'
     }
   },
   frameworks: [
@@ -52,46 +52,179 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'Integration with NestJS framework',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/common', '@nestjs/config']
+      dependencies: ['@nestjs/common', '@nestjs/core']
     },
     {
       name: 'express',
       displayName: 'Express',
       description: 'Integration with Express framework',
-      complexityLevels: ['basic', 'intermediate'],
+      complexityLevels: ['basic'],
       dependencies: ['express']
     }
   ],
   examples: [
+    // Basic examples
     {
-      id: 'basic-user-management',
-      name: 'Basic User Management ACL',
-      file: 'basic/implementation.md',
-      tags: ['acl:core', 'acl:basic', 'user-management'],
+      id: 'basic-customer-acl',
+      name: 'Basic Anti-Corruption Layer Implementation',
+      file: 'basic/example-1.md',
+      tags: ['acl:translation', 'acl:basic', 'customer-management'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic user management with external identity provider',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/di', '@vytches-ddd/utils']
+      description: 'Basic ACL implementation for external customer management system integration',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core']
     },
     {
-      id: 'intermediate-multi-provider',
-      name: 'Multi-Provider ACL',
-      file: 'intermediate/implementation.md',
-      tags: ['acl:intermediate', 'multi-provider', 'sync'],
+      id: 'basic-inventory-translation',
+      name: 'Inventory Data Translation with ACL',
+      file: 'basic/example-2.md',
+      tags: ['acl:translation', 'acl:schema-mapping', 'inventory-management'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Data translation for legacy inventory systems with different schemas',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core']
+    },
+    {
+      id: 'basic-use-cases',
+      name: 'Basic ACL Use Cases',
+      file: 'basic/use-case.md',
+      tags: ['acl:use-cases', 'acl:patterns'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Real-world use cases for basic anti-corruption layer patterns',
+      dependencies: ['@vytches-ddd/acl']
+    },
+
+    // Intermediate examples
+    {
+      id: 'intermediate-resilient-acl',
+      name: 'ACL with Caching and Resilience',
+      file: 'intermediate/example-1.md',
+      tags: ['acl:resilience', 'acl:caching', 'acl:performance'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Multi-provider user management with synchronization',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/di', '@vytches-ddd/utils', '@vytches-ddd/logging']
+      description: 'Advanced ACL with caching, circuit breakers, and fault tolerance',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience', '@vytches-ddd/core']
     },
     {
-      id: 'advanced-enterprise',
-      name: 'Enterprise ACL',
-      file: 'advanced/implementation.md',
-      tags: ['acl:advanced', 'enterprise', 'security', 'federation'],
+      id: 'intermediate-composite-acl',
+      name: 'Multi-System Integration with Composite ACL',
+      file: 'intermediate/example-2.md',
+      tags: ['acl:composite', 'acl:orchestration', 'acl:multi-system'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Composite ACL pattern for orchestrating multiple external systems',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/core']
+    },
+    {
+      id: 'intermediate-use-cases',
+      name: 'Intermediate ACL Use Cases',
+      file: 'intermediate/use-case.md',
+      tags: ['acl:use-cases', 'acl:resilience', 'acl:orchestration'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Advanced use cases with resilience patterns and multi-system coordination',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience']
+    },
+
+    // Advanced examples
+    {
+      id: 'advanced-enterprise-orchestration',
+      name: 'Enterprise ACL Orchestration Platform',
+      file: 'advanced/example-1.md',
+      tags: ['acl:enterprise', 'acl:orchestration', 'acl:global'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise-grade ACL with security and federation',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/di', '@vytches-ddd/utils', '@vytches-ddd/logging', '@vytches-ddd/resilience']
+      description: 'Enterprise-scale ACL orchestration with global coordination and event mesh',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/cqrs', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'advanced-ai-powered-acl',
+      name: 'AI-Powered ACL with Intelligent Data Transformation',
+      file: 'advanced/example-2.md',
+      tags: ['acl:ai', 'acl:machine-learning', 'acl:adaptive'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'AI-enhanced ACL with machine learning for adaptive data transformation',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/policies']
+    },
+    {
+      id: 'advanced-use-cases',
+      name: 'Advanced ACL Use Cases',
+      file: 'advanced/use-case.md',
+      tags: ['acl:use-cases', 'acl:enterprise', 'acl:ai'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Enterprise-scale use cases with AI and global orchestration',
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/cqrs']
+    },
+
+    // Framework examples - NestJS
+    {
+      id: 'nestjs-basic-customer-manual',
+      name: 'NestJS ACL Integration - Manual Setup',
+      file: 'frameworks/nestjs/basic/example-1.md',
+      tags: ['acl:nestjs', 'acl:basic', 'framework-integration'],
+      complexity: 'basic',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Manual integration of ACL with NestJS using standard DI patterns',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl']
+    },
+    {
+      id: 'nestjs-basic-order-manual',
+      name: 'NestJS Order Processing ACL - Manual Setup',
+      file: 'frameworks/nestjs/basic/example-2.md',
+      tags: ['acl:nestjs', 'acl:order-processing', 'framework-integration'],
+      complexity: 'basic',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Order processing with external systems using manual NestJS setup',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl']
+    },
+    {
+      id: 'nestjs-intermediate-enterprise-di',
+      name: 'NestJS Advanced ACL with VytchesDDD DI Integration',
+      file: 'frameworks/nestjs/intermediate/example-1.md',
+      tags: ['acl:nestjs', 'acl:enterprise', 'acl:di'],
+      complexity: 'intermediate',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Enterprise ACL patterns with VytchesDDD DI integration and advanced features',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-advanced-orchestration',
+      name: 'NestJS Enterprise ACL Orchestration with Global Coordination',
+      file: 'frameworks/nestjs/advanced/example-1.md',
+      tags: ['acl:nestjs', 'acl:orchestration', 'acl:global'],
+      complexity: 'advanced',
+      priority: 'high',
+      framework: 'nestjs',
+      description: 'Enterprise ACL orchestration with global coordination and AI-enhanced features',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'nestjs-advanced-implementation',
+      name: 'NestJS Advanced ACL Implementation Overview',
+      file: 'frameworks/nestjs/advanced/implementation.md',
+      tags: ['acl:nestjs', 'acl:implementation', 'acl:patterns'],
+      complexity: 'advanced',
+      priority: 'medium',
+      framework: 'nestjs',
+      description: 'Overview of advanced ACL implementation patterns in NestJS',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-advanced-use-cases',
+      name: 'NestJS Advanced ACL Use Cases',
+      file: 'frameworks/nestjs/advanced/use-case.md',
+      tags: ['acl:nestjs', 'acl:use-cases', 'acl:enterprise'],
+      complexity: 'advanced',
+      priority: 'medium',
+      framework: 'nestjs',
+      description: 'Enterprise-scale ACL use cases with NestJS integration',
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
     }
   ],
   contentConfig: {
@@ -111,20 +244,25 @@ export const config: PackageExampleConfig = {
     optimizeForCodeGeneration: true
   },
   relatedPackages: {
-    'domain-services': {
+    'resilience': {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['user-management', 'product-catalog']
+      integrationExamples: ['resilient-acl', 'circuit-breaker-integration']
     },
-    'resilience': {
-      priority: 'medium',
-      relationship: 'enables',
-      integrationExamples: ['enterprise-integration']
+    'events': {
+      priority: 'high',
+      relationship: 'depends-on',
+      integrationExamples: ['event-driven-acl', 'acl-orchestration']
     },
-    'logging': {
+    'policies': {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['audit-logging']
+      integrationExamples: ['policy-driven-translation', 'validation-policies']
+    },
+    'di': {
+      priority: 'high',
+      relationship: 'depends-on',
+      integrationExamples: ['enterprise-di-acl', 'service-discovery']
     }
   }
 };

@@ -63,35 +63,172 @@ export const config: PackageExampleConfig = {
     }
   ],
   examples: [
+    // Basic Examples
     {
-      id: 'basic-business-policy',
-      name: 'Basic Business Policy',
+      id: 'basic-policy-builder',
+      name: 'Policy Builder Fundamentals',
+      file: 'basic/example-1.md',
+      tags: ['policies:core', 'policies:builder', 'business-rules'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Fundamental policy building patterns with fluent API',
+      dependencies: ['@vytches-ddd/policies']
+    },
+    {
+      id: 'basic-specification-pattern',
+      name: 'Specification Pattern Integration',
+      file: 'basic/example-2.md',
+      tags: ['policies:specifications', 'policies:validation', 'business-rules'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Reusable business rules with specification pattern',
+      dependencies: ['@vytches-ddd/policies']
+    },
+    {
+      id: 'basic-implementation',
+      name: 'Basic Policy Implementation',
       file: 'basic/implementation.md',
       tags: ['policies:core', 'policies:validation', 'business-rules'],
       complexity: 'basic',
       priority: 'high',
-      description: 'E-commerce order validation with basic business rules',
+      description: 'Comprehensive basic policy patterns and usage',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+    },
+    
+    // Intermediate Examples
+    {
+      id: 'intermediate-policy-behaviors',
+      name: 'Policy Behaviors and Enhancement',
+      file: 'intermediate/example-1.md',
+      tags: ['policies:behaviors', 'policies:retry', 'policies:caching'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Cross-cutting policy concerns with retry, caching, and temporal behaviors',
       dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
     },
     {
-      id: 'intermediate-conditional-policy',
-      name: 'Conditional Policy with Groups',
+      id: 'intermediate-policy-registry',
+      name: 'Policy Registry and Versioning',
+      file: 'intermediate/example-2.md',
+      tags: ['policies:registry', 'policies:versioning', 'policies:ab-testing'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Centralized policy management with versioning and A/B testing',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+    },
+    {
+      id: 'intermediate-external-integration',
+      name: 'External Service Integration',
+      file: 'intermediate/example-3.md',
+      tags: ['policies:integration', 'policies:resilience', 'policies:external'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Policy integration with external services and resilience patterns',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'intermediate-implementation',
+      name: 'Intermediate Policy Implementation',
       file: 'intermediate/implementation.md',
       tags: ['policies:advanced', 'policies:group', 'conditional-logic'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Advanced policy with conditional logic and group policies',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/utils']
+      description: 'Advanced policy features with conditional logic and behaviors',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+    },
+    
+    // Advanced Examples
+    {
+      id: 'advanced-enterprise-orchestration',
+      name: 'Enterprise Policy Orchestration',
+      file: 'advanced/example-1.md',
+      tags: ['policies:orchestration', 'policies:enterprise', 'policies:governance'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Large-scale policy coordination with comprehensive governance workflows',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/events', '@vytches-ddd/messaging']
     },
     {
-      id: 'advanced-enterprise-policy',
-      name: 'Enterprise Policy System',
+      id: 'advanced-policy-mesh',
+      name: 'Policy Mesh Architecture',
+      file: 'advanced/example-2.md',
+      tags: ['policies:mesh', 'policies:distributed', 'policies:microservices'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Distributed policy enforcement across microservices with service mesh integration',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/messaging', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'advanced-ai-optimization',
+      name: 'AI-Powered Policy Optimization',
+      file: 'advanced/example-3.md',
+      tags: ['policies:ai', 'policies:optimization', 'policies:machine-learning'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Machine learning integration for intelligent policy optimization and adaptive learning',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/analytics', '@vytches-ddd/events']
+    },
+    {
+      id: 'advanced-implementation',
+      name: 'Advanced Policy Implementation',
       file: 'advanced/implementation.md',
       tags: ['policies:enterprise', 'policies:behaviors', 'policies:registry', 'events'],
       complexity: 'advanced',
       priority: 'high',
       description: 'Enterprise policy system with behaviors, registry, and event-driven architecture',
       dependencies: ['@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/utils', '@vytches-ddd/events']
+    },
+    
+    // Framework Integration Examples
+    {
+      id: 'nestjs-basic-integration',
+      name: 'NestJS Basic Policy Integration',
+      file: 'frameworks/nestjs/basic/example-1.md',
+      tags: ['policies:nestjs', 'policies:manual-setup', 'policies:validation'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Basic NestJS integration with manual policy setup',
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies']
+    },
+    {
+      id: 'nestjs-specification-integration',
+      name: 'NestJS Specification Integration',
+      file: 'frameworks/nestjs/basic/example-2.md',
+      tags: ['policies:nestjs', 'policies:specifications', 'policies:composition'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'NestJS integration with specification pattern and rule composition',
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies']
+    },
+    {
+      id: 'nestjs-di-integration',
+      name: 'NestJS Advanced DI Integration',
+      file: 'frameworks/nestjs/intermediate/example-1.md',
+      tags: ['policies:nestjs', 'policies:di', 'policies:behaviors'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Advanced NestJS integration with @vytches-ddd/di and policy behaviors',
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-registry-integration',
+      name: 'NestJS Policy Registry Integration',
+      file: 'frameworks/nestjs/intermediate/example-2.md',
+      tags: ['policies:nestjs', 'policies:registry', 'policies:ab-testing'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'NestJS integration with policy registry, versioning, and A/B testing',
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-enterprise-orchestration',
+      name: 'NestJS Enterprise Orchestration',
+      file: 'frameworks/nestjs/advanced/example-1.md',
+      tags: ['policies:nestjs', 'policies:orchestration', 'policies:enterprise'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Enterprise-scale policy orchestration in NestJS with distributed coordination',
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/events']
     }
   ],
   contentConfig: {

@@ -63,35 +63,78 @@ export const config: PackageExampleConfig = {
     }
   ],
   examples: [
+    // Basic Examples
     {
-      id: 'basic-event-publishing',
-      name: 'Basic Event Publishing',
-      file: 'basic/implementation.md',
-      tags: ['events:core', 'events:repository', 'domain-events'],
+      id: 'basic-repository-pattern',
+      name: 'Repository Pattern with Event Publishing',
+      file: 'basic/example-1.md',
+      tags: ['events:core', 'events:repository', 'domain-events', 'automatic-publishing'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic event publishing through repository pattern with automatic event handling',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/repositories', '@vytches-ddd/utils']
+      description: 'Core repository pattern with automatic event publishing when aggregates are saved',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/repositories', '@vytches-ddd/aggregates']
     },
     {
-      id: 'intermediate-event-handling',
-      name: 'Advanced Event Handling',
-      file: 'intermediate/implementation.md',
-      tags: ['events:advanced', 'events:context', 'events:batch'],
+      id: 'basic-event-handlers',
+      name: 'Event Handlers with Context Filtering',
+      file: 'basic/example-2.md',
+      tags: ['events:handlers', 'events:context', 'events:filtering'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Creating event handlers that automatically respond to published domain events',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/di']
+    },
+    {
+      id: 'basic-context-aware',
+      name: 'Context-Aware Event Processing',
+      file: 'basic/example-3.md',
+      tags: ['events:context', 'events:multi-tenant', 'events:routing'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Multi-tenant event processing with context-based filtering and routing',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils']
+    },
+    {
+      id: 'basic-implementation-overview',
+      name: 'Implementation Overview',
+      file: 'basic/implementation.md',
+      tags: ['events:overview', 'events:getting-started'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'High-level overview of event system implementation patterns',
+      dependencies: ['@vytches-ddd/events']
+    },
+    {
+      id: 'basic-use-cases',
+      name: 'Business Use Cases',
+      file: 'basic/use-case.md',
+      tags: ['events:use-cases', 'events:business-scenarios'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Real-world business scenarios and use cases for event-driven architecture',
+      dependencies: ['@vytches-ddd/events']
+    },
+    // Intermediate Examples
+    {
+      id: 'intermediate-batch-processing',
+      name: 'Batch Event Processing',
+      file: 'intermediate/example-1.md',
+      tags: ['events:batch', 'events:performance', 'events:optimization'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Advanced event handling with context filtering and batch processing',
+      description: 'High-performance batch processing and bulk event publishing for large volumes',
       dependencies: ['@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
     },
+    // Framework Examples
     {
-      id: 'advanced-event-sourcing',
-      name: 'Event Sourcing System',
-      file: 'advanced/implementation.md',
-      tags: ['events:sourcing', 'events:projections', 'events:enterprise'],
-      complexity: 'advanced',
+      id: 'nestjs-manual-setup',
+      name: 'NestJS Manual Setup',
+      file: 'frameworks/nestjs/basic/manual-setup.md',
+      tags: ['events:nestjs', 'events:manual', 'framework:nestjs'],
+      complexity: 'basic',
       priority: 'high',
-      description: 'Enterprise event sourcing with projections and event store integration',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/projections', '@vytches-ddd/di']
+      description: 'Basic NestJS integration with manual event system setup',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events']
     }
   ],
   contentConfig: {

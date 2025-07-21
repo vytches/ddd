@@ -16,7 +16,7 @@ export const config: PackageExampleConfig = {
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/cqrs', '@vytches-ddd/utils'],
   sections: [
     'hero',
-    'description', 
+    'description',
     'whenToUse',
     'whenNotToUse',
     'examples',
@@ -64,34 +64,104 @@ export const config: PackageExampleConfig = {
   ],
   examples: [
     {
-      id: 'basic-cqrs-commands-queries',
-      name: 'Basic CQRS with Commands & Queries',
-      file: 'basic/implementation.md',
-      tags: ['cqrs:core', 'cqrs:commands', 'cqrs:queries', 'cqrs:handlers'],
+      id: 'command-handlers-automatic-registration',
+      name: 'Command Handlers with Automatic Registration',
+      file: 'basic/example-1.md',
+      tags: ['cqrs:commands', 'cqrs:handlers', 'cqrs:validation'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic CQRS implementation with commands, queries, and handlers for application architecture',
+      description: 'Command handlers with automatic registration, validation, and business logic processing',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/di', '@vytches-ddd/utils']
+    },
+    {
+      id: 'query-handlers-caching-optimization',
+      name: 'Query Handlers with Caching and Performance Optimization',
+      file: 'basic/example-2.md',
+      tags: ['cqrs:queries', 'cqrs:handlers', 'cqrs:caching', 'cqrs:performance'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Query handlers with intelligent caching, pagination, and performance optimization strategies',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/di', '@vytches-ddd/utils']
+    },
+    {
+      id: 'middleware-pipeline-cross-cutting-concerns',
+      name: 'Middleware Pipeline for Cross-Cutting Concerns',
+      file: 'basic/example-3.md',
+      tags: ['cqrs:middleware', 'cqrs:validation', 'cqrs:logging', 'cqrs:performance'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Middleware pipeline for validation, logging, performance monitoring, and error handling',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/logging', '@vytches-ddd/validation']
+    },
+    {
+      id: 'event-integration-cqrs-operations',
+      name: 'Event Integration with CQRS Operations',
+      file: 'intermediate/example-1.md',
+      tags: ['cqrs:events', 'cqrs:integration', 'cqrs:projections'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Advanced CQRS integration with event publishing, projections, and cross-context communication',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
+    },
+    {
+      id: 'nestjs-manual-setup',
+      name: 'NestJS Manual Setup',
+      file: 'frameworks/nestjs/basic/manual-setup.md',
+      tags: ['cqrs:nestjs', 'cqrs:manual', 'cqrs:basic'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Basic CQRS integration with NestJS using manual command and query bus setup',
+      dependencies: ['@nestjs/common', '@vytches-ddd/cqrs']
+    },
+    {
+      id: 'nestjs-di-integration',
+      name: 'NestJS DI Integration',
+      file: 'frameworks/nestjs/intermediate/di-integration.md',
+      tags: ['cqrs:nestjs', 'cqrs:di', 'cqrs:enterprise'],
+      complexity: 'intermediate',
+      priority: 'medium',
+      description: 'Advanced NestJS integration with @vytches-ddd/di for automatic handler discovery',
+      dependencies: ['@nestjs/common', '@vytches-ddd/cqrs', '@vytches-ddd/di', '@vytches-ddd/events']
+    },
+    {
+      id: 'cqrs-implementation-overview',
+      name: 'CQRS Implementation Overview',
+      file: 'basic/implementation.md',
+      tags: ['cqrs:core', 'cqrs:overview', 'cqrs:patterns'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Comprehensive overview of CQRS implementation patterns and foundational concepts',
       dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/utils']
     },
     {
-      id: 'intermediate-cqrs-middleware',
-      name: 'Advanced CQRS with Middleware & Integration',
-      file: 'intermediate/implementation.md',
-      tags: ['cqrs:middleware', 'cqrs:validation', 'cqrs:events'],
-      complexity: 'intermediate',
-      priority: 'high',
-      description: 'Advanced CQRS patterns with middleware, validation, and event integration',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/validation', '@vytches-ddd/events', '@vytches-ddd/di']
-    },
-    {
-      id: 'advanced-enterprise-cqrs',
-      name: 'Enterprise CQRS Orchestration',
-      file: 'advanced/implementation.md',
-      tags: ['cqrs:enterprise', 'cqrs:policies', 'cqrs:messaging', 'cqrs:orchestration'],
+      id: 'advanced-distributed-cqrs-patterns',
+      name: 'Advanced Distributed CQRS Patterns',
+      file: 'basic/example-3.md',
+      tags: ['cqrs:advanced', 'cqrs:distributed', 'cqrs:saga', 'cqrs:analytics'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise CQRS with comprehensive middleware, policies, and distributed processing',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/policies', '@vytches-ddd/events', '@vytches-ddd/messaging', '@vytches-ddd/resilience', '@vytches-ddd/di']
+      description: 'Advanced CQRS patterns with distributed processing, saga orchestration, and comprehensive analytics',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/messaging', '@vytches-ddd/resilience', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-enterprise-patterns',
+      name: 'NestJS Enterprise CQRS Patterns',
+      file: 'frameworks/nestjs/advanced/enterprise-patterns.md',
+      tags: ['cqrs:nestjs', 'cqrs:enterprise', 'cqrs:distributed', 'cqrs:saga'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Enterprise-grade NestJS integration with distributed CQRS, saga orchestration, and compensation patterns',
+      dependencies: ['@nestjs/common', '@vytches-ddd/cqrs', '@vytches-ddd/messaging', '@vytches-ddd/di']
+    },
+    {
+      id: 'cqrs-use-cases',
+      name: 'CQRS Use Cases and Applications',
+      file: 'basic/use-case.md',
+      tags: ['cqrs:use-cases', 'cqrs:business', 'cqrs:scenarios'],
+      complexity: 'basic',
+      priority: 'medium',
+      description: 'Real-world use cases and business scenarios where CQRS patterns provide significant value',
+      dependencies: ['@vytches-ddd/cqrs']
     }
   ],
   contentConfig: {

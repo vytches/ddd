@@ -1,387 +1,161 @@
-# Basic Event Publishing Implementation
+# Events - Implementation Overview
 
-**Focus**: Basic event publishing through repository pattern with automatic event handling  
-**Domain**: E-commerce  
-**Complexity**: Basic  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/repositories, @vytches-ddd/utils
+**Version**: 1.0.0  
+**Package**: @vytches-ddd/events  
+**Complexity**: beginner  
+**Domain**: Order Management  
+**Patterns**: repository-pattern, domain-events, automatic-publishing
 
-## Business Context
+## Overview
 
-This example demonstrates the unified event system's core feature - automatic event publishing through repository pattern:
-- Order aggregate raises domain events when business operations occur
-- Repository automatically publishes events when aggregate is saved
-- Event handlers react to domain events for side effects
-- Clean separation between business logic and event handling
+This implementation overview demonstrates the foundational patterns of the Unified Event System. The package provides automatic event publishing through the repository pattern, eliminating manual event management while ensuring consistency.
 
-## Implementation
+## Core Implementation Pattern
+
+The Events package follows the **Repository Pattern with Automatic Event Publishing** where domain events are automatically published when aggregates are saved:
 
 ```typescript
-// order-aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Order, OrderItem, Customer } from '../types'; // ALWAYS import from app
+// 1. Create aggregate with business logic
+const orderAggregate = OrderAggregate.create(orderData);
 
-// Domain events for order lifecycle
-export class OrderCreatedEvent extends DomainEvent {
-  constructor(
-    public readonly orderId: string,
-    public readonly customerId: string,
-    public readonly totalAmount: number,
-    public readonly items: OrderItem[]
-  ) {
-    super('OrderCreated', { orderId, customerId, totalAmount, items });
-  }
-}
+// 2. Save through repository - events published automatically  
+await orderRepository.save(orderAggregate);
+// ↳ Automatically publishes OrderCreated and related events
+```
 
-export class OrderStatusChangedEvent extends DomainEvent {
-  constructor(
-    public readonly orderId: string,
-    public readonly previousStatus: string,
-    public readonly newStatus: string,
-    public readonly reason?: string
-  ) {
-    super('OrderStatusChanged', { orderId, previousStatus, newStatus, reason });
-  }
-}
+## Basic Event Publishing
 
-export class OrderCancelledEvent extends DomainEvent {
-  constructor(
-    public readonly orderId: string,
-    public readonly reason: string,
-    public readonly refundAmount: number
-  ) {
-    super('OrderCancelled', { orderId, reason, refundAmount });
-  }
-}
-
-// ⭐ Order Aggregate with Domain Events
-export class OrderAggregate extends AggregateRoot {
-  private _id: string;
-  private _customerId: string;
-  private _status: string;
-  private _items: OrderItem[];
-  private _totalAmount: number;
-  private _createdAt: Date;
-  private _updatedAt: Date;
-
-  constructor(id: string, customerId: string, items: OrderItem[]) {
-    super();
-    this._id = id;
-    this._customerId = customerId;
-    this._items = items;
-    this._status = 'pending';
-    this._totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    this._createdAt = new Date();
-    this._updatedAt = new Date();
-  }
-
-  // Factory method for creating new orders
-  static create(customerId: string, items: OrderItem[]): OrderAggregate {
-    const orderId = `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const order = new OrderAggregate(orderId, customerId, items);
-    
-    // ⭐ Raise domain event when order is created
-    order.addDomainEvent(new OrderCreatedEvent(
-      orderId,
-      customerId,
-      order._totalAmount,
-      items
-    ));
-    
-    return order;
-  }
-
-  // Business operations that raise events
-  confirm(): void {
-    if (this._status !== 'pending') {
-      throw new Error('Order can only be confirmed when in pending status');
-    }
-    
-    const previousStatus = this._status;
-    this._status = 'confirmed';
-    this._updatedAt = new Date();
-    
-    // ⭐ Raise domain event when status changes
-    this.addDomainEvent(new OrderStatusChangedEvent(
-      this._id,
-      previousStatus,
-      this._status,
-      'Order confirmed by customer'
-    ));
-  }
-
-  ship(): void {
-    if (this._status !== 'confirmed') {
-      throw new Error('Order can only be shipped when confirmed');
-    }
-    
-    const previousStatus = this._status;
-    this._status = 'shipped';
-    this._updatedAt = new Date();
-    
-    this.addDomainEvent(new OrderStatusChangedEvent(
-      this._id,
-      previousStatus,
-      this._status,
-      'Order shipped to customer'
-    ));
-  }
-
-  cancel(reason: string): void {
-    if (this._status === 'shipped' || this._status === 'delivered') {
-      throw new Error('Cannot cancel shipped or delivered orders');
-    }
-    
-    const previousStatus = this._status;
-    this._status = 'cancelled';
-    this._updatedAt = new Date();
-    
-    // ⭐ Raise multiple events for cancellation
-    this.addDomainEvent(new OrderStatusChangedEvent(
-      this._id,
-      previousStatus,
-      this._status,
-      reason
-    ));
-    
-    this.addDomainEvent(new OrderCancelledEvent(
-      this._id,
-      reason,
-      this._totalAmount
-    ));
-  }
-
-  // Getters
-  get id(): string { return this._id; }
-  get customerId(): string { return this._customerId; }
-  get status(): string { return this._status; }
-  get items(): OrderItem[] { return [...this._items]; }
-  get totalAmount(): number { return this._totalAmount; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
-}
-
-// order-repository.ts
-import { IBaseRepository, BaseRepository } from '@vytches-ddd/repositories';
+```typescript
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { OrderAggregate } from './order-aggregate';
+import { AggregateRoot, DomainEvent } from '@vytches-ddd/aggregates';
 
-// ⭐ Order Repository with Automatic Event Publishing
-export class OrderRepository extends BaseRepository<OrderAggregate> {
-  constructor() {
-    // Set up event system for automatic publishing
-    const eventBus = new UnifiedEventBus();
-    const dispatcher = new UniversalEventDispatcher(eventBus);
-    
-    super(dispatcher);
-  }
-
-  async save(order: OrderAggregate): Promise<Result<OrderAggregate, Error>> {
-    try {
-      // ⭐ Repository automatically:
-      // 1. Persists the aggregate
-      // 2. Publishes all domain events
-      // 3. Clears events from aggregate
-      // 4. Handles transaction safety
-      
-      const result = await super.save(order);
-      
-      if (result.isSuccess()) {
-        console.log(`Order ${order.id} saved and events published`);
-      }
-      
-      return result;
-    } catch (error) {
-      return Result.failure(new Error(`Failed to save order: ${error.message}`));
-    }
-  }
-
-  async findById(id: string): Promise<Result<OrderAggregate | null, Error>> {
-    try {
-      // In real implementation, this would query the database
-      // For demo purposes, we'll return null
-      return Result.success(null);
-    } catch (error) {
-      return Result.failure(new Error(`Failed to find order: ${error.message}`));
-    }
-  }
-
-  async findByCustomerId(customerId: string): Promise<Result<OrderAggregate[], Error>> {
-    try {
-      // In real implementation, this would query the database
-      // For demo purposes, we'll return empty array
-      return Result.success([]);
-    } catch (error) {
-      return Result.failure(new Error(`Failed to find orders: ${error.message}`));
-    }
+// Domain Event
+class OrderCreatedEvent extends DomainEvent<{ orderId: string; total: number }> {
+  constructor(data: { orderId: string; total: number }) {
+    super('OrderCreated', data);
   }
 }
 
-// event-handlers.ts
-import { EventHandler } from '@vytches-ddd/events';
-import { 
-  OrderCreatedEvent, 
-  OrderStatusChangedEvent, 
-  OrderCancelledEvent 
-} from './order-aggregate';
+// Aggregate with Events
+class OrderAggregate extends AggregateRoot {
+  private orderId: string;
+  private total: number;
 
-// ⭐ Event handlers for order events
-@EventHandler(OrderCreatedEvent)
-export class OrderCreatedHandler {
-  async handle(event: OrderCreatedEvent): Promise<void> {
-    console.log(`📦 Order Created: ${event.orderId} for customer ${event.customerId}`);
-    
-    // Side effects for order creation:
-    // - Send welcome email to customer
-    // - Update inventory
-    // - Create shipping label
-    // - Notify warehouse
-    
-    try {
-      await this.sendWelcomeEmail(event.customerId, event.orderId);
-      await this.updateInventory(event.items);
-      await this.notifyWarehouse(event.orderId);
-    } catch (error) {
-      console.error('Failed to process order creation:', error);
-      // In real system, you might want to publish a failure event
-    }
+  constructor(orderId: string, total: number) {
+    super(orderId);
+    this.orderId = orderId;
+    this.total = total;
   }
 
-  private async sendWelcomeEmail(customerId: string, orderId: string): Promise<void> {
-    // Email service integration
-    console.log(`📧 Sending welcome email to customer ${customerId} for order ${orderId}`);
-  }
-
-  private async updateInventory(items: OrderItem[]): Promise<void> {
-    // Inventory service integration
-    console.log(`📊 Updating inventory for ${items.length} items`);
-  }
-
-  private async notifyWarehouse(orderId: string): Promise<void> {
-    // Warehouse notification service
-    console.log(`🏭 Notifying warehouse about order ${orderId}`);
+  static create(orderId: string, total: number): OrderAggregate {
+    const aggregate = new OrderAggregate(orderId, total);
+    // Events automatically added to aggregate
+    aggregate.addDomainEvent(new OrderCreatedEvent({ orderId, total }));
+    return aggregate;
   }
 }
 
-@EventHandler(OrderStatusChangedEvent)
-export class OrderStatusChangedHandler {
-  async handle(event: OrderStatusChangedEvent): Promise<void> {
-    console.log(`🔄 Order Status Changed: ${event.orderId} from ${event.previousStatus} to ${event.newStatus}`);
+// Repository with Auto-Publishing
+class OrderRepository {
+  constructor(private eventDispatcher: UniversalEventDispatcher) {}
+
+  async save(aggregate: OrderAggregate): Promise<void> {
+    // 1. Persist aggregate state
+    console.log('Saving aggregate...');
     
-    // Side effects based on status change:
-    if (event.newStatus === 'confirmed') {
-      await this.processPayment(event.orderId);
-    } else if (event.newStatus === 'shipped') {
-      await this.sendShippingNotification(event.orderId);
-    }
-  }
-
-  private async processPayment(orderId: string): Promise<void> {
-    console.log(`💳 Processing payment for order ${orderId}`);
-  }
-
-  private async sendShippingNotification(orderId: string): Promise<void> {
-    console.log(`📦 Sending shipping notification for order ${orderId}`);
+    // 2. Publish events automatically
+    const events = aggregate.getUncommittedEvents();
+    await this.eventDispatcher.publishMany(events);
+    
+    // 3. Mark events as committed
+    aggregate.markEventsAsCommitted();
+    
+    console.log(`${events.length} events published automatically`);
   }
 }
 
-@EventHandler(OrderCancelledEvent)
-export class OrderCancelledHandler {
-  async handle(event: OrderCancelledEvent): Promise<void> {
-    console.log(`❌ Order Cancelled: ${event.orderId} - ${event.reason}`);
-    
-    // Side effects for order cancellation:
-    await this.processRefund(event.orderId, event.refundAmount);
-    await this.restoreInventory(event.orderId);
-    await this.sendCancellationEmail(event.orderId);
-  }
+// Usage
+async function basicExample(): Promise<void> {
+  const eventBus = new UnifiedEventBus();
+  const dispatcher = new UniversalEventDispatcher(eventBus);
+  const repository = new OrderRepository(dispatcher);
 
-  private async processRefund(orderId: string, amount: number): Promise<void> {
-    console.log(`💰 Processing refund of $${amount} for order ${orderId}`);
-  }
-
-  private async restoreInventory(orderId: string): Promise<void> {
-    console.log(`📊 Restoring inventory for cancelled order ${orderId}`);
-  }
-
-  private async sendCancellationEmail(orderId: string): Promise<void> {
-    console.log(`📧 Sending cancellation email for order ${orderId}`);
-  }
+  // Create and save - events published automatically
+  const order = OrderAggregate.create('order-123', 99.99);
+  await repository.save(order); // OrderCreated event published
 }
 ```
 
-## Key Features
-
-- **Automatic Event Publishing**: Repository pattern handles event publishing automatically
-- **Domain Event Pattern**: Aggregates raise events for business operations
-- **Event Handlers**: Decorators for handling domain events with side effects
-- **Transaction Safety**: Events are published only after successful persistence
-- **Clean Architecture**: Clear separation between business logic and event handling
-
-## Usage Example
+## Event Handlers
 
 ```typescript
-// Usage in application service
-export class OrderService {
-  constructor(private orderRepository: OrderRepository) {}
+import { EventHandler } from '@vytches-ddd/events';
 
-  async createOrder(customerId: string, items: OrderItem[]): Promise<Result<OrderAggregate, Error>> {
-    try {
-      // Create order aggregate (raises OrderCreatedEvent)
-      const order = OrderAggregate.create(customerId, items);
-      
-      // Save order (automatically publishes events)
-      const saveResult = await this.orderRepository.save(order);
-      
-      if (saveResult.isFailure()) {
-        return Result.failure(saveResult.error);
-      }
-
-      // Event handlers automatically process the events:
-      // - OrderCreatedHandler sends emails, updates inventory
-      // - All happens automatically after repository.save()
-      
-      return Result.success(saveResult.value);
-    } catch (error) {
-      return Result.failure(new Error(`Failed to create order: ${error.message}`));
-    }
+@EventHandler(OrderCreatedEvent, {
+  autoRegister: true,
+  eventContext: 'order-management'
+})
+class OrderNotificationHandler {
+  async handle(event: OrderCreatedEvent): Promise<void> {
+    const { orderId, total } = event.payload;
+    console.log(`📧 Sending notification for order ${orderId} ($${total})`);
+    
+    // Business logic for notifications
+    await this.sendOrderConfirmation(orderId, total);
   }
-
-  async confirmOrder(orderId: string): Promise<Result<OrderAggregate, Error>> {
-    try {
-      const orderResult = await this.orderRepository.findById(orderId);
-      
-      if (orderResult.isFailure() || !orderResult.value) {
-        return Result.failure(new Error('Order not found'));
-      }
-
-      const order = orderResult.value;
-      
-      // Confirm order (raises OrderStatusChangedEvent)
-      order.confirm();
-      
-      // Save order (automatically publishes events)
-      const saveResult = await this.orderRepository.save(order);
-      
-      if (saveResult.isFailure()) {
-        return Result.failure(saveResult.error);
-      }
-
-      // OrderStatusChangedHandler automatically processes payment
-      
-      return Result.success(saveResult.value);
-    } catch (error) {
-      return Result.failure(new Error(`Failed to confirm order: ${error.message}`));
-    }
+  
+  private async sendOrderConfirmation(orderId: string, total: number): Promise<void> {
+    // Simulate notification sending
+    console.log(`✅ Order confirmation sent for ${orderId}`);
   }
 }
 ```
 
-## Common Pitfalls
+## Complete System Setup
 
-- **Event Ordering**: Be aware that events are processed asynchronously
-- **Error Handling**: Handle failures in event handlers gracefully
-- **Transaction Boundaries**: Events are published after successful persistence
-- **Event Payload**: Keep event payloads focused and immutable
-- **Handler Dependencies**: Avoid circular dependencies between handlers
+```typescript
+import { VytchesDDD } from '@vytches-ddd/di';
+
+// Initialize event system with dependency injection
+async function setupEventSystem(): Promise<void> {
+  const eventBus = new UnifiedEventBus();
+  const dispatcher = new UniversalEventDispatcher(eventBus);
+  
+  // Register with DI container
+  VytchesDDD.registerInstance('eventBus', eventBus);
+  VytchesDDD.registerInstance('eventDispatcher', dispatcher);
+  
+  // Auto-discover event handlers
+  await VytchesDDD.configure();
+  
+  console.log('✅ Event system initialized with automatic handler registration');
+}
+```
+
+## Key Implementation Features
+
+- **🔄 Automatic Publishing**: Events published transparently during repository save operations
+- **📦 Repository Pattern**: Clean separation between business logic and event publishing  
+- **🎯 Domain Events**: Business-focused events representing meaningful domain occurrences
+- **⚡ Transaction Safety**: Events and state changes happen atomically
+- **🏗️ Aggregate-Driven**: Events originate from aggregate business methods
+- **🎨 Handler Auto-Discovery**: Event handlers automatically registered through DI
+
+## Architecture Benefits
+
+1. **Simplified Event Management**: No manual event publishing code required
+2. **Consistency Guarantee**: Events always published when state changes are persisted
+3. **Loose Coupling**: Event handlers can be added without modifying core business logic
+4. **Scalability**: Multiple handlers can process the same event concurrently
+5. **Testability**: Business logic and event publishing can be tested independently
+
+## Implementation Examples
+
+For detailed implementation examples, see:
+
+- **[Example 1: Repository Pattern](./example-1.md)** - Complete repository-based event publishing
+- **[Example 2: Event Handlers](./example-2.md)** - Creating and registering event handlers  
+- **[Example 3: Context Filtering](./example-3.md)** - Multi-tenant and context-aware processing
+- **[Use Cases](./use-case.md)** - Real-world business scenarios and implementations
+
+This foundational pattern forms the basis for all advanced event-driven architecture features in the @vytches-ddd library.
