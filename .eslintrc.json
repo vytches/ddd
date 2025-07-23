@@ -119,6 +119,7 @@
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
+                  "scope:contracts",
                   "scope:di",
                   "scope:cqrs"
                 ]

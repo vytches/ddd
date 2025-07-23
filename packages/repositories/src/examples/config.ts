@@ -1,23 +1,24 @@
 /**
  * @fileoverview Configuration system for @vytches-ddd/repositories examples
- * 
+ *
  * This module provides comprehensive configuration management for all repository
- * examples, including framework integrations, performance settings, and 
+ * examples, including framework integrations, performance settings, and
  * environment-specific configurations.
- * 
+ *
  * @example
  * ```typescript
  * import { exampleConfig, getFrameworkConfig } from './config';
- * 
+ *
  * // Get basic configuration
  * const config = exampleConfig.basic.userRepository;
- * 
+ *
  * // Get NestJS-specific configuration
  * const nestjsConfig = getFrameworkConfig('nestjs', 'intermediate');
  * ```
  */
 
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { EntityId } from '@vytches-ddd/contracts';
+import { randomUUID } from 'crypto';
 
 // ===== TYPES AND INTERFACES =====
 
@@ -372,13 +373,13 @@ export const nestjsConfigurations = {
   intermediate: {
     moduleConfig: {
       imports: [
-        'TypeOrmModule', 
-        'CacheModule', 
+        'TypeOrmModule',
+        'CacheModule',
         'EventEmitterModule',
         'BullModule'
       ],
       providers: [
-        'UserRepository', 
+        'UserRepository',
         'UserService',
         'UnitOfWorkFactory',
         'SpecificationRegistry'
@@ -403,14 +404,14 @@ export const nestjsConfigurations = {
       imports: [
         'TypeOrmModule',
         'CacheModule',
-        'EventEmitterModule', 
+        'EventEmitterModule',
         'BullModule',
         'ElasticsearchModule',
         'PrometheusModule'
       ],
       providers: [
         'UserRepository',
-        'UserService', 
+        'UserService',
         'AIRepositoryOrchestrator',
         'GlobalConsistencyManager',
         'TensorFlowModule'
@@ -450,7 +451,7 @@ export const expressConfigurations = {
     middlewares: ['cors', 'body-parser', 'helmet', 'compression', 'rate-limiter'],
     routeConfig: {
       prefix: '/api',
-      versionPrefix: '/v1', 
+      versionPrefix: '/v1',
       enableOpenAPI: true,
       enableMetrics: true
     }
@@ -458,7 +459,7 @@ export const expressConfigurations = {
   advanced: {
     middlewares: [
       'cors',
-      'body-parser', 
+      'body-parser',
       'helmet',
       'compression',
       'rate-limiter',
@@ -484,8 +485,25 @@ export function getFrameworkConfig(
   framework: 'nestjs' | 'express' | 'fastify',
   complexity: ComplexityLevel
 ): FrameworkConfig {
-  const baseConfig = exampleConfig[complexity].userRepository;
-  
+  const level = complexity
+
+  // Get the appropriate config based on complexity level
+  let baseConfig: ExampleConfig;
+  switch (level) {
+    case 'basic':
+      baseConfig = exampleConfig.basic.userRepository;
+      break;
+    case 'intermediate':
+      baseConfig = exampleConfig.intermediate.financialUnitOfWork;
+      break;
+    case 'advanced':
+      baseConfig = exampleConfig.advanced.globalTradingAccount;
+      break;
+    default:
+      baseConfig = exampleConfig.basic.userRepository;
+      break;
+  }
+
   switch (framework) {
     case 'nestjs':
       return {
@@ -495,14 +513,14 @@ export function getFrameworkConfig(
         decoratorConfig: nestjsConfigurations[complexity].decoratorConfig,
         diConfig: nestjsConfigurations[complexity].diConfig
       };
-    
+
     case 'express':
       return {
         ...baseConfig,
         framework,
         moduleConfig: expressConfigurations[complexity]
       };
-    
+
     case 'fastify':
       return {
         ...baseConfig,
@@ -512,7 +530,7 @@ export function getFrameworkConfig(
           routePrefix: '/api/v1'
         }
       };
-    
+
     default:
       throw new Error(`Unsupported framework: ${framework}`);
   }
@@ -540,14 +558,14 @@ export function getEnvironmentConfig(environment: 'development' | 'staging' | 'p
       performance: { enableMetrics: true, enableQueryOptimization: true }
     }
   };
-  
-  return commonOverrides[environment];
+
+  return commonOverrides[environment] as Partial<ExampleConfig>;
 }
 
 /**
  * Merge configurations with deep merge support
  */
-export function mergeConfigurations(...configs: Partial<ExampleConfig>[]): ExampleConfig {
+export function mergeConfigurations(...configs: Partial<ExampleConfig>[]): Partial<ExampleConfig> {
   return configs.reduce((merged, config) => {
     return deepMerge(merged, config);
   }, basicConfig);
@@ -558,7 +576,7 @@ export function mergeConfigurations(...configs: Partial<ExampleConfig>[]): Examp
  */
 export function validateConfiguration(config: ExampleConfig): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  
+
   // Validate database configuration
   if (!config.database.host) {
     errors.push('Database host is required');
@@ -569,7 +587,7 @@ export function validateConfiguration(config: ExampleConfig): { valid: boolean; 
   if (config.database.port <= 0 || config.database.port > 65535) {
     errors.push('Database port must be between 1 and 65535');
   }
-  
+
   // Validate performance settings
   if (config.performance.batchSize <= 0) {
     errors.push('Batch size must be greater than 0');
@@ -577,22 +595,22 @@ export function validateConfiguration(config: ExampleConfig): { valid: boolean; 
   if (config.performance.maxConcurrentOperations <= 0) {
     errors.push('Max concurrent operations must be greater than 0');
   }
-  
+
   // Validate cache configuration
   if (config.cache.enabled && config.cache.ttl <= 0) {
     errors.push('Cache TTL must be greater than 0 when cache is enabled');
   }
-  
+
   // Validate multi-tenant configuration
   if (config.multiTenant.enabled && !config.multiTenant.tenantIdField) {
     errors.push('Tenant ID field is required when multi-tenancy is enabled');
   }
-  
+
   // Validate distributed configuration
   if (config.distributed.enabled && config.distributed.regions.length === 0) {
     errors.push('At least one region must be specified when distributed mode is enabled');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors
@@ -602,12 +620,12 @@ export function validateConfiguration(config: ExampleConfig): { valid: boolean; 
 /**
  * Generate sample data configuration for testing
  */
-export function generateSampleDataConfig(recordCount: number = 1000): any {
+export function generateSampleDataConfig(recordCount = 1000): any {
   return {
     users: {
       count: recordCount,
       fields: {
-        id: () => EntityId.generate().value,
+        id: () => EntityId.createUuid(randomUUID()).value,
         email: () => `user${Math.floor(Math.random() * 10000)}@example.com`,
         name: () => `User ${Math.floor(Math.random() * 10000)}`,
         createdAt: () => new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
@@ -617,10 +635,9 @@ export function generateSampleDataConfig(recordCount: number = 1000): any {
     products: {
       count: Math.floor(recordCount * 0.1),
       fields: {
-        id: () => EntityId.generate().value,
+        id: () => EntityId.createUuid(randomUUID()).value,
         name: () => `Product ${Math.floor(Math.random() * 1000)}`,
         price: () => Math.floor(Math.random() * 10000) / 100,
-        category: () => ['electronics', 'clothing', 'books', 'home'][Math.floor(Math.random() * 4)],
         inStock: () => Math.random() > 0.2
       }
     }
@@ -634,7 +651,7 @@ export function generateSampleDataConfig(recordCount: number = 1000): any {
  */
 function deepMerge(target: any, source: any): any {
   const result = { ...target };
-  
+
   for (const key in source) {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       result[key] = deepMerge(target[key] || {}, source[key]);
@@ -642,7 +659,7 @@ function deepMerge(target: any, source: any): any {
       result[key] = source[key];
     }
   }
-  
+
   return result;
 }
 
@@ -654,36 +671,103 @@ export const configurationPresets = {
    * E-commerce platform configuration
    */
   ecommerce: mergeConfigurations(intermediateConfig, {
-    multiTenant: { enabled: true, isolationLevel: 'ISOLATED' },
-    cache: { ttl: 300000, maxSize: 100000 },
-    performance: { batchSize: 500, maxConcurrentOperations: 200 }
+    multiTenant: {
+      enabled: true,
+      isolationLevel: 'ISOLATED',
+      tenantIdField: 'tenantId',
+      enableTenantValidation: true,
+      enableCrossTenantQueries: false
+    },
+    cache: {
+      enabled: true,
+      provider: 'redis',
+      ttl: 300000,
+      maxSize: 100000
+    },
+    performance: {
+      batchSize: 500,
+      maxConcurrentOperations: 200,
+      enableOptimisticLocking: true,
+      enableQueryOptimization: true,
+      enableMetrics: true
+    }
   }),
-  
+
   /**
    * Financial services configuration
    */
   financial: mergeConfigurations(advancedConfig, {
-    eventSourcing: { snapshotFrequency: 10, compressionAlgorithm: 'lz4' },
-    distributed: { consistencyLevel: 'linearizable' },
-    logging: { level: 'info' }
+    eventSourcing: {
+      enableEventStore: true,
+      eventStoreType: 'postgresql',
+      snapshotFrequency: 10,
+      enableProjections: true,
+      compressionAlgorithm: 'lz4'
+    },
+    distributed: {
+      enabled: true,
+      regions: ['us-east-1', 'eu-west-1'],
+      replicationStrategy: 'master-slave',
+      consistencyLevel: 'linearizable',
+      enableCrossRegionFailover: true
+    },
+    logging: {
+      level: 'info',
+      enableStructuredLogging: true,
+      enableMetrics: true
+    }
   }),
-  
+
   /**
    * IoT platform configuration
    */
   iot: mergeConfigurations(intermediateConfig, {
-    performance: { batchSize: 10000, maxConcurrentOperations: 1000 },
-    cache: { ttl: 60000, provider: 'redis' },
-    ai: { enabled: true, enableAccessPatternLearning: true }
+    performance: {
+      batchSize: 10000,
+      maxConcurrentOperations: 1000,
+      enableOptimisticLocking: true,
+      enableQueryOptimization: true,
+      enableMetrics: true
+    },
+    cache: {
+      enabled: true,
+      ttl: 60000,
+      provider: 'redis'
+    },
+    ai: {
+      enabled: true,
+      models: ['pattern-recognition', 'predictive-caching'],
+      trainingDataRetention: 90,
+      retrainingThreshold: 0.8,
+      enablePredictiveCaching: true,
+      enableQueryOptimization: true,
+      enableAccessPatternLearning: true
+    }
   }),
-  
+
   /**
    * Gaming platform configuration
    */
   gaming: mergeConfigurations(intermediateConfig, {
-    cache: { ttl: 30000, provider: 'in-memory' },
-    performance: { enableOptimisticLocking: false, batchSize: 1000 },
-    distributed: { enabled: true, consistencyLevel: 'eventual' }
+    cache: {
+      enabled: true,
+      ttl: 30000,
+      provider: 'in-memory'
+    },
+    performance: {
+      enableOptimisticLocking: false,
+      batchSize: 1000,
+      maxConcurrentOperations: 500,
+      enableQueryOptimization: true,
+      enableMetrics: true
+    },
+    distributed: {
+      enabled: true,
+      regions: ['us-west-2'],
+      replicationStrategy: 'multi-master',
+      consistencyLevel: 'eventual',
+      enableCrossRegionFailover: false
+    }
   })
 };
 

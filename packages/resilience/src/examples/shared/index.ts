@@ -133,7 +133,7 @@ export function createExecutionContext(
     startTime: new Date(),
     attempt: 1,
     previousAttempts: [],
-    metadata
+    metadata: metadata || {}
   };
 }
 

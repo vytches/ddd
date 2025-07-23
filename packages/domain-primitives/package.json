@@ -42,10 +42,12 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
   },
   "dependencies": {
-    "@vytches-ddd/utils": "workspace:*"
+    "@vytches-ddd/utils": "workspace:*",
+    "@vytches-ddd/contracts": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

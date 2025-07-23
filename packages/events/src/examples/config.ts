@@ -125,7 +125,78 @@ export const config: PackageExampleConfig = {
       description: 'High-performance batch processing and bulk event publishing for large volumes',
       dependencies: ['@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
     },
-    // Framework Examples
+    {
+      id: 'intermediate-event-deduplication',
+      name: 'Event Deduplication and Idempotency',
+      file: 'intermediate/example-2.md',
+      tags: ['events:deduplication', 'events:idempotency', 'events:reliability'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Advanced event deduplication and idempotency handling for distributed systems',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+    },
+    {
+      id: 'intermediate-event-middleware',
+      name: 'Event Middleware and Pipeline Processing',
+      file: 'intermediate/example-3.md',
+      tags: ['events:middleware', 'events:pipeline', 'events:cross-cutting'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Advanced event middleware system for cross-cutting concerns in event processing',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+    },
+    // Advanced Examples
+    {
+      id: 'advanced-event-sourcing',
+      name: 'Event Sourcing with Snapshots',
+      file: 'advanced/example-1.md',
+      tags: ['events:event-sourcing', 'events:snapshots', 'events:aggregate-reconstruction'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Advanced event sourcing implementation with snapshot optimization for aggregate reconstruction',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/aggregates', '@vytches-ddd/event-store']
+    },
+    {
+      id: 'advanced-stream-processing',
+      name: 'Event Stream Processing with Real-time Analytics',
+      file: 'advanced/example-2.md',
+      tags: ['events:stream-processing', 'events:real-time-analytics', 'events:windowing'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Advanced event stream processing with real-time analytics and complex event processing',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+    },
+    {
+      id: 'advanced-event-mesh',
+      name: 'Enterprise Event Mesh Architecture',
+      file: 'advanced/example-3.md',
+      tags: ['events:event-mesh', 'events:distributed', 'events:microservices'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Enterprise-grade event mesh architecture for distributed microservices communication',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/resilience', '@vytches-ddd/logging', '@vytches-ddd/messaging']
+    },
+    {
+      id: 'advanced-implementation-guide',
+      name: 'Advanced Implementation Guide',
+      file: 'advanced/implementation.md',
+      tags: ['events:implementation', 'events:enterprise-patterns'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Comprehensive implementation patterns for advanced event-driven architectures',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'advanced-use-cases',
+      name: 'Enterprise Use Cases',
+      file: 'advanced/use-case.md',
+      tags: ['events:use-cases', 'events:enterprise-scenarios'],
+      complexity: 'advanced',
+      priority: 'medium',
+      description: 'Enterprise use cases and real-world applications of advanced event systems',
+      dependencies: ['@vytches-ddd/events']
+    },
+    // Framework Examples - NestJS
     {
       id: 'nestjs-manual-setup',
       name: 'NestJS Manual Setup',
@@ -135,6 +206,46 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Basic NestJS integration with manual event system setup',
       dependencies: ['@nestjs/common', '@vytches-ddd/events']
+    },
+    {
+      id: 'nestjs-basic-integration',
+      name: 'NestJS Basic Integration',
+      file: 'frameworks/nestjs/basic/example-1.md',
+      tags: ['events:nestjs', 'events:repository-pattern', 'framework:nestjs'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'Basic NestJS integration with automatic event publishing through repository pattern',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/repositories']
+    },
+    {
+      id: 'nestjs-di-integration',
+      name: 'NestJS DI Integration',
+      file: 'frameworks/nestjs/basic/example-2.md',
+      tags: ['events:nestjs', 'events:di', 'framework:nestjs'],
+      complexity: 'basic',
+      priority: 'high',
+      description: 'NestJS integration using @vytches-ddd/di service locator pattern',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/di']
+    },
+    {
+      id: 'nestjs-intermediate-integration',
+      name: 'NestJS Intermediate Integration',
+      file: 'frameworks/nestjs/intermediate/example-1.md',
+      tags: ['events:nestjs', 'events:batch', 'events:resilience', 'framework:nestjs'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Advanced NestJS integration with batch processing and resilience patterns',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/resilience']
+    },
+    {
+      id: 'nestjs-advanced-integration',
+      name: 'NestJS Advanced Integration',
+      file: 'frameworks/nestjs/advanced/example-1.md',
+      tags: ['events:nestjs', 'events:event-sourcing', 'events:event-mesh', 'framework:nestjs'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Enterprise-grade NestJS integration with event sourcing and complex event processing',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/di', '@vytches-ddd/resilience']
     }
   ],
   contentConfig: {

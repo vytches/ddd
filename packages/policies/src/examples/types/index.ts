@@ -405,7 +405,4 @@ export interface ValidationResult<T = any> {
   metadata?: Record<string, any>;
 }
 
-// Re-export commonly used types from application
-export type { User, Order, Transaction, LoanApplication, Content };
-export type { PolicyViolation, PolicyResult, PolicyContext };
-export type { ValidationError, BusinessRule, PolicyConfiguration };
+// All types are already exported above as interfaces

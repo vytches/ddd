@@ -104,6 +104,26 @@ export const config: PackageExampleConfig = {
       dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
     },
     {
+      id: 'policy-based-authorization-cqrs',
+      name: 'CQRS with Policy-Based Authorization',
+      file: 'intermediate/example-2.md',
+      tags: ['cqrs:policies', 'cqrs:authorization', 'cqrs:security'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Integrating policy-based authorization with CQRS patterns for secure command and query processing',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/utils']
+    },
+    {
+      id: 'distributed-tracing-observability',
+      name: 'CQRS with Distributed Tracing and Observability',
+      file: 'intermediate/example-3.md',
+      tags: ['cqrs:observability', 'cqrs:tracing', 'cqrs:monitoring'],
+      complexity: 'intermediate',
+      priority: 'high',
+      description: 'Implementing comprehensive observability for CQRS operations in distributed systems',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/logging', '@vytches-ddd/resilience', '@vytches-ddd/utils']
+    },
+    {
       id: 'nestjs-manual-setup',
       name: 'NestJS Manual Setup',
       file: 'frameworks/nestjs/basic/manual-setup.md',
@@ -134,14 +154,34 @@ export const config: PackageExampleConfig = {
       dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/utils']
     },
     {
-      id: 'advanced-distributed-cqrs-patterns',
-      name: 'Advanced Distributed CQRS Patterns',
-      file: 'basic/example-3.md',
-      tags: ['cqrs:advanced', 'cqrs:distributed', 'cqrs:saga', 'cqrs:analytics'],
+      id: 'enterprise-saga-orchestration',
+      name: 'Enterprise CQRS with Saga Orchestration',
+      file: 'advanced/example-1.md',
+      tags: ['cqrs:advanced', 'cqrs:saga', 'cqrs:distributed', 'cqrs:compensation'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Advanced CQRS patterns with distributed processing, saga orchestration, and comprehensive analytics',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/messaging', '@vytches-ddd/resilience', '@vytches-ddd/di']
+      description: 'Enterprise-grade CQRS with saga orchestration for managing complex distributed transactions',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/resilience', '@vytches-ddd/di']
+    },
+    {
+      id: 'ai-enhanced-cqrs-predictive',
+      name: 'AI-Enhanced CQRS with Predictive Analytics',
+      file: 'advanced/example-2.md',
+      tags: ['cqrs:ai', 'cqrs:ml', 'cqrs:analytics', 'cqrs:prediction'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Integrating artificial intelligence and machine learning capabilities with CQRS patterns',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/events', '@vytches-ddd/projections', '@vytches-ddd/resilience', '@vytches-ddd/utils']
+    },
+    {
+      id: 'realtime-analytics-stream-processing',
+      name: 'Real-time Analytics CQRS with Stream Processing',
+      file: 'advanced/example-3.md',
+      tags: ['cqrs:analytics', 'cqrs:streaming', 'cqrs:realtime', 'cqrs:cep'],
+      complexity: 'advanced',
+      priority: 'high',
+      description: 'Real-time analytics using CQRS patterns with stream processing and complex event processing',
+      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/events', '@vytches-ddd/projections', '@vytches-ddd/event-store', '@vytches-ddd/utils']
     },
     {
       id: 'nestjs-enterprise-patterns',

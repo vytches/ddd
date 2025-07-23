@@ -1,10 +1,10 @@
 // repositories/src/examples/shared/index.ts
 // Common utilities and helper functions for repository examples
 
-import type { 
-  QueryOptions, 
-  WhereClause, 
-  OrderByClause, 
+import type {
+  QueryOptions,
+  WhereClause,
+  OrderByClause,
   PaginationResult,
   ConnectionConfig,
   CacheKey,
@@ -26,27 +26,27 @@ export function buildQueryOptions(options: Partial<QueryOptions> = {}): QueryOpt
 }
 
 export function addWhereClause(
-  options: QueryOptions, 
-  field: string, 
-  operator: string, 
+  options: QueryOptions,
+  field: string,
+  operator: string,
   value: any
 ): QueryOptions {
   const whereClause: WhereClause = {
     field,
     operator: operator as any,
     value,
-    logical: options.where.length > 0 ? 'AND' : undefined
+    logical: options.where && options.where.length > 0 ? 'AND' : 'AND'
   };
-  
+
   return {
     ...options,
-    where: [...options.where, whereClause]
+    where: [...(options.where || []), whereClause]
   };
 }
 
 export function addOrderBy(
-  options: QueryOptions, 
-  field: string, 
+  options: QueryOptions,
+  field: string,
   direction: 'ASC' | 'DESC' = 'ASC'
 ): QueryOptions {
   const orderByClause: OrderByClause = { field, direction };
@@ -91,13 +91,13 @@ export function createConnectionString(config: ConnectionConfig): string {
 
 export function validateConnectionConfig(config: ConnectionConfig): string[] {
   const errors: string[] = [];
-  
+
   if (!config.host) errors.push('Host is required');
   if (!config.port || config.port <= 0) errors.push('Valid port is required');
   if (!config.database) errors.push('Database name is required');
   if (!config.username) errors.push('Username is required');
   if (!config.password) errors.push('Password is required');
-  
+
   return errors;
 }
 
@@ -117,10 +117,10 @@ export function formatCacheKey(cacheKey: CacheKey): string {
 export function parseCacheKey(keyString: string): CacheKey | null {
   const parts = keyString.split(':');
   if (parts.length < 2) return null;
-  
+
   return {
-    namespace: parts[0],
-    key: parts[1],
+    namespace: parts[0] || 'default',
+    key: parts[1] || keyString,
     version: parts[2] || '1.0'
   };
 }
@@ -129,8 +129,8 @@ export function parseCacheKey(keyString: string): CacheKey | null {
 export function createTransactionContext(options: Partial<TransactionContext> = {}): TransactionContext {
   return {
     transactionId: options.transactionId || generateUniqueId(),
-    userId: options.userId,
-    sessionId: options.sessionId,
+    userId: options.userId || 'anonymous',
+    sessionId: options.sessionId || generateUniqueId(),
     correlationId: options.correlationId || generateUniqueId(),
     metadata: options.metadata || {}
   };
@@ -154,9 +154,9 @@ export function validateRequired(value: any, fieldName: string): string | null {
 }
 
 export function validateLength(
-  value: string, 
-  min: number, 
-  max: number, 
+  value: string,
+  min: number,
+  max: number,
   fieldName: string
 ): string | null {
   if (!value) return `${fieldName} is required`;
@@ -181,15 +181,15 @@ export function isRetryableError(error: Error): boolean {
     'Connection terminated unexpectedly',
     'Connection lost'
   ];
-  
-  return retryableErrors.some(errorType => 
+
+  return retryableErrors.some(errorType =>
     error.message.includes(errorType) || error.name.includes(errorType)
   );
 }
 
 export function getErrorCategory(error: Error): 'CONNECTION' | 'VALIDATION' | 'PERMISSION' | 'NOT_FOUND' | 'UNKNOWN' {
   const message = error.message.toLowerCase();
-  
+
   if (message.includes('connection') || message.includes('network')) {
     return 'CONNECTION';
   }
@@ -202,7 +202,7 @@ export function getErrorCategory(error: Error): 'CONNECTION' | 'VALIDATION' | 'P
   if (message.includes('not found') || message.includes('does not exist')) {
     return 'NOT_FOUND';
   }
-  
+
   return 'UNKNOWN';
 }
 
@@ -233,16 +233,16 @@ export function createEmptyMetrics(): RepositoryMetrics {
 // Data Transformation Utilities
 export function sanitizeForExport(data: any): any {
   if (data === null || data === undefined) return data;
-  
+
   if (Array.isArray(data)) {
     return data.map(sanitizeForExport);
   }
-  
+
   if (typeof data === 'object') {
     const sanitized: any = {};
     for (const [key, value] of Object.entries(data)) {
       // Skip sensitive fields
-      if (!key.toLowerCase().includes('password') && 
+      if (!key.toLowerCase().includes('password') &&
           !key.toLowerCase().includes('secret') &&
           !key.toLowerCase().includes('token')) {
         sanitized[key] = sanitizeForExport(value);
@@ -250,13 +250,13 @@ export function sanitizeForExport(data: any): any {
     }
     return sanitized;
   }
-  
+
   return data;
 }
 
 export function formatExportFilename(
-  entityType: string, 
-  format: string, 
+  entityType: string,
+  format: string,
   timestamp?: Date
 ): string {
   const date = timestamp || new Date();
@@ -313,7 +313,7 @@ export function checkDatabaseHealth(startTime: Date, endTime: Date, error?: Erro
 export function aggregateHealthStatus(checks: boolean[]): 'healthy' | 'degraded' | 'unhealthy' {
   const failedChecks = checks.filter(check => !check).length;
   const totalChecks = checks.length;
-  
+
   if (failedChecks === 0) return 'healthy';
   if (failedChecks <= totalChecks / 2) return 'degraded';
   return 'unhealthy';
@@ -322,7 +322,6 @@ export function aggregateHealthStatus(checks: boolean[]): 'healthy' | 'degraded'
 // Development and Testing Utilities
 export function createMockUser(overrides: any = {}) {
   return {
-    id: generateEntityId(),
     username: 'testuser',
     email: 'test@example.com',
     firstName: 'Test',
@@ -336,7 +335,6 @@ export function createMockUser(overrides: any = {}) {
 
 export function createMockProduct(overrides: any = {}) {
   return {
-    id: generateEntityId(),
     name: 'Test Product',
     description: 'A test product',
     price: 99.99,
@@ -358,7 +356,6 @@ export function createMockProduct(overrides: any = {}) {
 
 export function createMockOrder(overrides: any = {}) {
   return {
-    id: generateEntityId(),
     orderNumber: `ORDER-${Date.now()}`,
     customerId: generateEntityId(),
     status: 'pending',
