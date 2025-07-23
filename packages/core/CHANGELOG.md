@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.3.0 (2025-07-23)
+
+### ✨ Features
+
+- **cli:** generating docs from cli
+  ([bdb20eb](https://github.com/vytches/vytches-ddd/commit/bdb20ebb3d162bd95342491192319f3c2ff6621f))
+- **docs:** all docs added
+  ([20b4c32](https://github.com/vytches/vytches-ddd/commit/20b4c3201f19fdc5734c1171102fd482e82f0038))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.2.0 (2025-07-16)
 
 ### ✨ Features

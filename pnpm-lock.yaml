@@ -189,6 +189,9 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
@@ -287,9 +290,6 @@ importers:
 
   packages/contracts:
     devDependencies:
-      '@vytches-ddd/testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -392,6 +392,9 @@ importers:
 
   packages/domain-primitives:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -670,6 +673,9 @@ importers:
 
   packages/resilience:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core

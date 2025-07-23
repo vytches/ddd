@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/domain-primitives",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Core domain primitives and foundational types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -42,12 +42,12 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*"
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*"
   },
   "dependencies": {
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*"
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/utils": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

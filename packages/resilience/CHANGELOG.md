@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.3.0 (2025-07-23)
+
+### ✨ Features
+
+- **cli:** generating docs from cli
+  ([bdb20eb](https://github.com/vytches/vytches-ddd/commit/bdb20ebb3d162bd95342491192319f3c2ff6621f))
+- **docs:** all docs added
+  ([20b4c32](https://github.com/vytches/vytches-ddd/commit/20b4c3201f19fdc5734c1171102fd482e82f0038))
+- **docs:** generated doc files
+  ([7ce20cc](https://github.com/vytches/vytches-ddd/commit/7ce20cc4f38d07c815858ec2d037dd0aa575f96f))
+- **docs:** linter and formatter run
+  ([8f33d3f](https://github.com/vytches/vytches-ddd/commit/8f33d3f4d92e18b970c1f8e46d9d62064ec3742a))
+
+### 🐛 Bug Fixes
+
+- resolve CI pipeline failures and prevent session file generation
+  ([cb7cb75](https://github.com/vytches/vytches-ddd/commit/cb7cb7549e76595d5a0fad5fd36f973d5ce5c3d9))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.2.0 (2025-07-16)
 
 ### ✨ Features

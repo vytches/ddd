@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/resilience",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Circuit breakers and resilience patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -42,8 +42,8 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*"
+    "@vytches-ddd/contracts": "workspace:*",
+    "@vytches-ddd/core": "workspace:*"
   },
   "devDependencies": {
     "@vytches-ddd/testing": "workspace:*",
