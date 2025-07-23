@@ -105,7 +105,7 @@ export interface ChatHistoryConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: ChatHistoryConfig = {
-  enabled: true,
+  enabled: !process.env.CI, // Disable chat history in CI environments
   maxSessions: 100,
   maxMessagesPerSession: 1000,
   maxHistoryDays: 30,

@@ -27,17 +27,29 @@ vi.mock('../../src/core/utils/colors', () => ({
 }));
 
 // Mock types with proper typing to avoid Jest issues
-const mockDomainModelingWorkflow = DomainModelingWorkflow;
-const mockWorkflowEngine = WorkflowEngine;
-const mockConfigManager = ConfigManager;
-const mockChatHistory = chatHistory;
+const mockDomainModelingWorkflow = DomainModelingWorkflow as unknown as {
+  new (): { start: ReturnType<typeof vi.fn> };
+  mockImplementation: ReturnType<typeof vi.fn>;
+};
+const mockWorkflowEngine = WorkflowEngine as unknown as {
+  createComponentWorkflow: ReturnType<typeof vi.fn>;
+};
+const mockConfigManager = ConfigManager as unknown as {
+  getConfig: ReturnType<typeof vi.fn>;
+};
+const mockChatHistory = chatHistory as unknown as {
+  getSessionHistory: ReturnType<typeof vi.fn>;
+  exportSession: ReturnType<typeof vi.fn>;
+  resumeSession: ReturnType<typeof vi.fn>;
+  getCurrentSession: ReturnType<typeof vi.fn>;
+};
 
 describe('workflowCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Setup default mocks
-    (mockConfigManager as any).getConfig = vi.fn().mockReturnValue({
+    mockConfigManager.getConfig = vi.fn().mockReturnValue({
       debug: false,
       projectPath: '/mock/project',
     });
@@ -59,20 +71,20 @@ describe('workflowCommand', () => {
       }),
     };
 
-    (mockDomainModelingWorkflow as any).mockImplementation(() => mockDomainWorkflowInstance);
+    mockDomainModelingWorkflow.mockImplementation(() => mockDomainWorkflowInstance);
 
-    (mockWorkflowEngine as any).createComponentWorkflow = vi
+    mockWorkflowEngine.createComponentWorkflow = vi
       .fn()
       .mockReturnValue(mockComponentWorkflowInstance);
 
     // Mock chatHistory methods
-    (mockChatHistory as any).getSessionHistory = vi.fn().mockReturnValue([]);
-    (mockChatHistory as any).exportSession = vi.fn().mockResolvedValue({
+    mockChatHistory.getSessionHistory = vi.fn().mockReturnValue([]);
+    mockChatHistory.exportSession = vi.fn().mockResolvedValue({
       json: '/mock/export.json',
       markdown: '/mock/export.md',
     });
-    (mockChatHistory as any).resumeSession = vi.fn().mockResolvedValue(true);
-    (mockChatHistory as any).getCurrentSession = vi.fn().mockReturnValue(null);
+    mockChatHistory.resumeSession = vi.fn().mockResolvedValue(true);
+    mockChatHistory.getCurrentSession = vi.fn().mockReturnValue(null);
 
     // Mock console methods
     vi.spyOn(console, 'log').mockImplementation(() => {
@@ -96,24 +108,26 @@ describe('workflowCommand', () => {
     });
 
     it('should have required options', () => {
-      const options: any[] = workflowCommand.options || [];
+      const options = workflowCommand.options || [];
       expect(options).toBeDefined();
       expect(options.length).toBeGreaterThan(0);
 
       // Check for key options
-      const typeOption = options.find((opt: any) => opt.flags.includes('--type'));
-      const resumeOption = options.find((opt: any) => opt.flags.includes('--resume'));
-      const listOption = options.find((opt: any) => opt.flags.includes('--list-sessions'));
-      const exportOption = options.find((opt: any) => opt.flags.includes('--export'));
+      const typeOption = options.find((opt: { flags: string }) => opt.flags.includes('--type'));
+      const resumeOption = options.find((opt: { flags: string }) => opt.flags.includes('--resume'));
+      const listOption = options.find((opt: { flags: string }) =>
+        opt.flags.includes('--list-sessions')
+      );
+      const exportOption = options.find((opt: { flags: string }) => opt.flags.includes('--export'));
 
       expect(typeOption).toBeDefined();
-      expect(typeOption.choices).toEqual([
+      expect((typeOption as { choices: string[] }).choices).toEqual([
         'domain-modeling',
         'component-generation',
         'enterprise-setup',
         'migration-planning',
       ]);
-      expect(typeOption.defaultValue).toBe('domain-modeling');
+      expect((typeOption as { defaultValue: string }).defaultValue).toBe('domain-modeling');
 
       expect(resumeOption).toBeDefined();
       expect(listOption).toBeDefined();
@@ -122,7 +136,9 @@ describe('workflowCommand', () => {
 
     it('should have examples', () => {
       expect(workflowCommand.examples).toBeDefined();
-      expect(((workflowCommand.examples as any[]) || []).length).toBeGreaterThan(0);
+      expect(
+        Array.isArray(workflowCommand.examples) ? workflowCommand.examples.length : 0
+      ).toBeGreaterThan(0);
     });
   });
 
@@ -137,8 +153,9 @@ describe('workflowCommand', () => {
 
       expect(error).toBeUndefined();
       expect(mockDomainModelingWorkflow).toHaveBeenCalled();
-      const instance = (mockDomainModelingWorkflow as any).mock.results[0].value;
-      expect(instance.start).toHaveBeenCalled();
+      const mockConstructor = mockDomainModelingWorkflow as any;
+      const instance = mockConstructor.mock.results[0]?.value;
+      expect(instance?.start).toHaveBeenCalled();
     });
 
     it('should start domain-modeling workflow when explicitly specified', async () => {
@@ -162,9 +179,10 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect((mockWorkflowEngine as any).createComponentWorkflow).toHaveBeenCalled();
-      const instance = (mockWorkflowEngine as any).createComponentWorkflow.mock.results[0].value;
-      expect(instance.start).toHaveBeenCalledWith('component-type');
+      expect(mockWorkflowEngine.createComponentWorkflow).toHaveBeenCalled();
+      const mockCreateWorkflow = mockWorkflowEngine.createComponentWorkflow as any;
+      const instance = mockCreateWorkflow.mock.results[0]?.value;
+      expect(instance?.start).toHaveBeenCalledWith('component-type');
     });
 
     it('should show warning for enterprise-setup workflow', async () => {

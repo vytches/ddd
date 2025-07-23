@@ -169,18 +169,18 @@ export interface OptimizationHints {
 // ==================
 
 export interface NestJSResultInterceptor {
-  intercept(context: any, next: any): any;
+  intercept(context: unknown, next: unknown): unknown;
 }
 
 export interface NestJSExceptionFilter {
-  catch(exception: unknown, host: any): void;
+  catch(exception: unknown, host: unknown): void;
 }
 
 export interface DIConfiguration {
   providers: Array<{
     provide: string;
-    useClass?: any;
-    useFactory?: () => any;
+    useClass?: unknown;
+    useFactory?: () => unknown;
     inject?: string[];
   }>;
 }
@@ -301,4 +301,4 @@ export type UtilityResult<T> = SuccessResponse<T> | ErrorResponse;
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 export type AsyncOptional<T> = Promise<Optional<T>>;
-export type ResultOf<T> = T extends (...args: any[]) => infer R ? R : never;
+export type ResultOf<T> = T extends (...args: unknown[]) => infer R ? R : never;

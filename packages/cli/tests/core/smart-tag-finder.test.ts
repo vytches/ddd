@@ -9,13 +9,19 @@ import { SeededRandom } from '../../src/utils/seeded-random';
 vi.mock('../../src/core/package-config-loader');
 vi.mock('../../src/utils/seeded-random');
 
-const mockPackageConfigLoader = PackageConfigLoader as any;
+const mockPackageConfigLoader = PackageConfigLoader as unknown as {
+  getConfig: ReturnType<typeof vi.fn>;
+  prototype: {
+    getAvailablePackages: ReturnType<typeof vi.fn>;
+    loadPackageConfig: ReturnType<typeof vi.fn>;
+  };
+};
 const mockSeededRandom = SeededRandom as any;
 
 describe('SmartTagFinder', () => {
   let finder: SmartTagFinder;
   let mockExamples: ExampleDefinition[];
-  let mockPackageConfig: any;
+  let mockPackageConfig: Record<string, unknown>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -92,15 +98,15 @@ describe('SmartTagFinder', () => {
     };
 
     // Setup mocks
-    mockPackageConfigLoader.prototype.getAvailablePackages = vi
+    (mockPackageConfigLoader as any).prototype.getAvailablePackages = vi
       .fn()
       .mockResolvedValue(['core', 'events', 'cqrs']);
-    mockPackageConfigLoader.prototype.loadPackageConfig = vi
+    (mockPackageConfigLoader as any).prototype.loadPackageConfig = vi
       .fn()
       .mockResolvedValue(mockPackageConfig);
 
     // Mock SeededRandom
-    mockSeededRandom.mockImplementation(() => ({
+    (mockSeededRandom as any).mockImplementation(() => ({
       next: vi.fn().mockReturnValue(0.5),
     }));
 
@@ -113,7 +119,10 @@ describe('SmartTagFinder', () => {
   describe('findExamplesByTag', () => {
     it('should find examples by exact tag match', async () => {
       // Mock loadAllExamples to return our test data
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.findExamplesByTag('aggregate');
@@ -129,7 +138,10 @@ describe('SmartTagFinder', () => {
     });
 
     it('should find examples by wildcard pattern', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.findExamplesByTag('domain-*');
@@ -144,7 +156,10 @@ describe('SmartTagFinder', () => {
     });
 
     it('should filter by complexity when specified', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.findExamplesByTag('aggregate', 'basic');
@@ -159,7 +174,10 @@ describe('SmartTagFinder', () => {
     });
 
     it('should filter by framework when specified', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.findExamplesByTag('aggregate', undefined, { framework: 'nestjs' });
@@ -174,7 +192,10 @@ describe('SmartTagFinder', () => {
     });
 
     it('should return empty array when no matches found', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.findExamplesByTag('nonexistent-tag');
@@ -261,13 +282,19 @@ describe('SmartTagFinder', () => {
   describe('suggestSimilarTags', () => {
     beforeEach(() => {
       // Override resolveTagsForExample to return simple tags for testing
-      vi.spyOn(finder as any, 'resolveTagsForExample').mockImplementation((example: any) => {
+      vi.spyOn(
+        finder as unknown as { resolveTagsForExample: (example: ExampleDefinition) => string[] },
+        'resolveTagsForExample'
+      ).mockImplementation((example: ExampleDefinition) => {
         return example.tags;
       });
     });
 
     it('should suggest similar tags based on partial match', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.suggestSimilarTags('domain');
@@ -281,7 +308,10 @@ describe('SmartTagFinder', () => {
     });
 
     it('should suggest tags that contain the pattern', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       const result = await safeRun(async () => {
         return await finder.suggestSimilarTags('command');
@@ -316,11 +346,18 @@ describe('SmartTagFinder', () => {
   describe('clearCache', () => {
     it('should clear the example cache', () => {
       // Set some cache data
-      (finder as any).exampleCache.set('test', []);
-      expect((finder as any).exampleCache.size).toBe(1);
+      (finder as unknown as { exampleCache: Map<string, ExampleDefinition[]> }).exampleCache.set(
+        'test',
+        []
+      );
+      expect(
+        (finder as unknown as { exampleCache: Map<string, ExampleDefinition[]> }).exampleCache.size
+      ).toBe(1);
 
       finder.clearCache();
-      expect((finder as any).exampleCache.size).toBe(0);
+      expect(
+        (finder as unknown as { exampleCache: Map<string, ExampleDefinition[]> }).exampleCache.size
+      ).toBe(0);
     });
   });
 
@@ -328,7 +365,9 @@ describe('SmartTagFinder', () => {
     describe('resolveTagsForExample', () => {
       it('should resolve tags with complexity suffix', () => {
         const example = mockExamples[0];
-        const resolvedTags = (finder as any).resolveTagsForExample(example);
+        const resolvedTags = (
+          finder as unknown as { resolveTagsForExample: (example: ExampleDefinition) => string[] }
+        ).resolveTagsForExample(example!);
 
         expect(resolvedTags).toEqual(['aggregate:basic', 'entity:basic']);
       });
@@ -336,14 +375,34 @@ describe('SmartTagFinder', () => {
 
     describe('separateByPriority', () => {
       it('should separate examples by priority tags', () => {
-        const result = (finder as any).separateByPriority(mockExamples, ['aggregate']);
+        const result = (
+          finder as unknown as {
+            separateByPriority: (
+              examples: ExampleDefinition[],
+              tags: string[]
+            ) => {
+              priority: ExampleDefinition[];
+              regular: ExampleDefinition[];
+            };
+          }
+        ).separateByPriority(mockExamples, ['aggregate']);
 
         expect(result.priority.length).toBe(2); // core and events examples
         expect(result.regular.length).toBe(1); // cqrs example
       });
 
       it('should return all as regular when no priority tags specified', () => {
-        const result = (finder as any).separateByPriority(mockExamples, []);
+        const result = (
+          finder as unknown as {
+            separateByPriority: (
+              examples: ExampleDefinition[],
+              tags: string[]
+            ) => {
+              priority: ExampleDefinition[];
+              regular: ExampleDefinition[];
+            };
+          }
+        ).separateByPriority(mockExamples, []);
 
         expect(result.priority.length).toBe(0);
         expect(result.regular.length).toBe(3);
@@ -387,7 +446,7 @@ describe('SmartTagFinder', () => {
         const configWithIntegrations = {
           ...mockPackageConfig,
           tags: {
-            ...mockPackageConfig.tags,
+            ...((mockPackageConfig.tags as Record<string, unknown>) || {}),
             integrations: ['integration:with:events', 'integration:with:cqrs'],
           },
         };
@@ -444,7 +503,9 @@ describe('SmartTagFinder', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      expect(mockPackageConfigLoader.prototype.getAvailablePackages).not.toHaveBeenCalled();
+      expect(
+        (mockPackageConfigLoader as any).prototype.getAvailablePackages
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle package loading errors gracefully', async () => {
@@ -484,7 +545,10 @@ describe('SmartTagFinder', () => {
 
   describe('integration scenarios', () => {
     it('should handle complete workflow with realistic data', async () => {
-      vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(mockExamples);
+      vi.spyOn(
+        finder as unknown as { loadAllExamples: () => Promise<ExampleDefinition[]> },
+        'loadAllExamples'
+      ).mockResolvedValue(mockExamples);
 
       // Find examples by tag pattern
       const findResult = await safeRun(async () => {

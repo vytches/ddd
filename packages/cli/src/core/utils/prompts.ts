@@ -52,9 +52,9 @@ export interface PromptOptions {
  * @since 1.0.0
  * @public
  */
-export interface SelectOptions {
+export interface SelectOptions<T = unknown> {
   message: string;
-  choices: Array<{ name: string; value: any; description?: string }>;
+  choices: Array<{ name: string; value: T; description?: string }>;
   default?: number;
 }
 
@@ -236,7 +236,7 @@ export class Prompts {
   /**
    * Select from a list of options
    */
-  static async select(options: SelectOptions): Promise<any> {
+  static async select<T = unknown>(options: SelectOptions<T>): Promise<T> {
     console.log(Colors.bold(options.message));
 
     // Display choices
@@ -264,13 +264,17 @@ export class Prompts {
     });
 
     const selectedIndex = parseInt(answer, 10) - 1;
-    return options.choices[selectedIndex]?.value;
+    const selectedChoice = options.choices[selectedIndex];
+    if (!selectedChoice) {
+      throw new CLIError(`Invalid selection: ${selectedIndex + 1}`);
+    }
+    return selectedChoice.value;
   }
 
   /**
    * Multi-select from a list of options
    */
-  static async multiSelect(options: SelectOptions): Promise<any[]> {
+  static async multiSelect<T = unknown>(options: SelectOptions<T>): Promise<T[]> {
     console.log(Colors.bold(options.message));
     console.log(Colors.dim('(Use comma-separated numbers, e.g., 1,3,5)'));
 
@@ -296,7 +300,14 @@ export class Prompts {
     });
 
     const selectedIndices = answer.split(',').map(s => parseInt(s.trim(), 10) - 1);
-    return selectedIndices.map(index => options.choices[index]?.value).filter(Boolean);
+    const results: T[] = [];
+    for (const index of selectedIndices) {
+      const choice = options.choices[index];
+      if (choice) {
+        results.push(choice.value);
+      }
+    }
+    return results;
   }
 
   /**
@@ -458,12 +469,12 @@ export async function promptForInput(
  * @since 1.0.0
  * @public
  */
-export async function promptForChoice(
+export async function promptForChoice<T = unknown>(
   message: string,
-  choices: Array<{ name: string; value: any; description?: string }>,
+  choices: Array<{ name: string; value: T; description?: string }>,
   defaultIndex?: number
-): Promise<any> {
-  const selectOptions: SelectOptions = {
+): Promise<T> {
+  const selectOptions: SelectOptions<T> = {
     message,
     choices,
     ...(defaultIndex !== undefined && { default: defaultIndex }),
@@ -538,10 +549,10 @@ export async function promptForConfirmation(
  * @since 1.0.0
  * @public
  */
-export async function promptForMultiSelect(
+export async function promptForMultiSelect<T = unknown>(
   message: string,
-  choices: Array<{ name: string; value: any; description?: string }>
-): Promise<any[]> {
+  choices: Array<{ name: string; value: T; description?: string }>
+): Promise<T[]> {
   return await Prompts.multiSelect({
     message,
     choices,

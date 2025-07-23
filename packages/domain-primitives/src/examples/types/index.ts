@@ -215,18 +215,18 @@ export interface AIEnhancedPrimitive {
 // ==================
 
 export interface NestJSErrorFilter {
-  catch(exception: unknown, host: any): void;
+  catch(exception: unknown, host: unknown): void;
 }
 
 export interface NestJSActorInterceptor {
-  intercept(context: any, next: any): any;
+  intercept(context: unknown, next: unknown): unknown;
 }
 
 export interface DIConfiguration {
   providers: Array<{
     provide: string;
-    useClass?: any;
-    useFactory?: () => any;
+    useClass?: unknown;
+    useFactory?: () => unknown;
     inject?: string[];
   }>;
 }

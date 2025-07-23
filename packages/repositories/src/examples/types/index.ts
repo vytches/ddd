@@ -65,7 +65,7 @@ export interface Product extends BaseEntity {
   tags: string[];
   isActive: boolean;
   inventory: ProductInventory;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProductInventory {
@@ -116,7 +116,7 @@ export interface Order extends BaseEntity {
   shippingAddress: Address;
   paymentMethod: PaymentMethod;
   notes?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type OrderStatus =
@@ -135,7 +135,7 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 export interface OrderPricing {
@@ -187,7 +187,7 @@ export interface StoredEvent {
   aggregateId: string;
   aggregateType: string;
   eventType: string;
-  eventData: any;
+  eventData: unknown;
   eventMetadata: EventMetadata;
   streamVersion: number;
   globalSequence: number;
@@ -199,7 +199,7 @@ export interface EventMetadata {
   causationId?: string;
   userId?: string;
   source?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface EventStream {
@@ -227,8 +227,8 @@ export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'READ' | 'ARCHIVE';
 
 export interface ChangeRecord {
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   changeType: 'ADD' | 'UPDATE' | 'REMOVE';
 }
 
@@ -237,7 +237,7 @@ export interface AuditMetadata {
   reason?: string;
   sessionId?: string;
   requestId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Transaction Context
@@ -246,7 +246,7 @@ export interface TransactionContext {
   userId?: string;
   sessionId?: string;
   correlationId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Unit of Work Types
@@ -255,8 +255,8 @@ export interface WorkUnit {
   entityType: string;
   entityId: string;
   operation: 'INSERT' | 'UPDATE' | 'DELETE';
-  entity: any;
-  originalEntity?: any;
+  entity: unknown;
+  originalEntity?: unknown;
   timestamp: Date;
 }
 
@@ -286,7 +286,7 @@ export interface OrderByClause {
 export interface WhereClause {
   field: string;
   operator: ComparisonOperator;
-  value: any;
+  value: unknown;
   logical?: LogicalOperator;
 }
 
@@ -396,7 +396,7 @@ export interface RepositoryEvent {
   eventType: 'ENTITY_CREATED' | 'ENTITY_UPDATED' | 'ENTITY_DELETED' | 'BATCH_OPERATION';
   entityType: string;
   entityId: string;
-  payload: any;
+  payload: unknown;
   metadata: EventMetadata;
   timestamp: Date;
 }
@@ -453,5 +453,5 @@ export interface ImportError {
   line: number;
   field?: string;
   error: string;
-  data: any;
+  data: unknown;
 }

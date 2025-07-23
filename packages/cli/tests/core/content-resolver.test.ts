@@ -7,7 +7,11 @@ import { ContentResolver } from '../../src/core/content-resolver';
 vi.mock('fs');
 
 describe('ContentResolver', () => {
-  const mockFs: any = fs;
+  const mockFs = fs as unknown as {
+    existsSync: ReturnType<typeof vi.fn>;
+    readFileSync: ReturnType<typeof vi.fn>;
+    readdirSync: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();

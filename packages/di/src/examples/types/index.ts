@@ -118,7 +118,7 @@ export interface ProcessPaymentData {
   amount: number;
   currency: string;
   method: PaymentMethod;
-  paymentDetails: Record<string, any>;
+  paymentDetails: Record<string, unknown>;
 }
 
 /**
@@ -129,7 +129,7 @@ export interface EmailNotificationData {
   subject: string;
   body: string;
   template?: string;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 }
 
 /**
@@ -189,7 +189,7 @@ export interface AuditLogEntry {
   resource: string;
   resourceId: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -198,7 +198,7 @@ export interface AuditLogEntry {
 export interface ErrorResponse {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: Date;
   correlationId?: string;
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
 import { generateCommand } from '../../src/commands/generate';
+import type { CommandOption } from '../../src/types';
 import { TemplateEngine } from '../../src/core/engines/template-engine';
 import { PatternRegistry } from '../../src/core/engines/pattern-registry';
 import { FileSystem } from '../../src/core/utils/file-system';
@@ -22,12 +23,38 @@ vi.mock('../../src/core/utils/prompts', () => ({
 }));
 
 // Mock dependencies with proper typing
-const mockTemplateEngine = TemplateEngine as any;
-const mockPatternRegistry = PatternRegistry as any;
-const mockFileSystem = FileSystem as any;
-const mockDocumentationRegistry = globalDocumentationRegistry as any;
-const mockUnifiedExampleParser = UnifiedExampleParser as any;
-const mockDocumentationGenerator = DocumentationGenerator as any;
+const mockTemplateEngine = TemplateEngine as unknown as {
+  create: ReturnType<typeof vi.fn>;
+};
+const mockPatternRegistry = PatternRegistry as unknown as {
+  create: ReturnType<typeof vi.fn>;
+};
+const mockFileSystem = FileSystem as unknown as {
+  exists: ReturnType<typeof vi.fn>;
+  isDirectory: ReturnType<typeof vi.fn>;
+  getDirectoryName: ReturnType<typeof vi.fn>;
+  joinPath: ReturnType<typeof vi.fn>;
+  createDirectory: ReturnType<typeof vi.fn>;
+  writeFile: ReturnType<typeof vi.fn>;
+};
+const mockDocumentationRegistry = globalDocumentationRegistry as unknown as {
+  loadAll: ReturnType<typeof vi.fn>;
+  findById: ReturnType<typeof vi.fn>;
+  query: ReturnType<typeof vi.fn>;
+  getAvailableFrameworks: ReturnType<typeof vi.fn>;
+  getAvailableComponents: ReturnType<typeof vi.fn>;
+};
+const mockUnifiedExampleParser = UnifiedExampleParser as unknown as {
+  prototype: {
+    parseExample: ReturnType<typeof vi.fn>;
+    filterComponents: ReturnType<typeof vi.fn>;
+  };
+};
+const mockDocumentationGenerator = DocumentationGenerator as unknown as {
+  prototype: {
+    generate: ReturnType<typeof vi.fn>;
+  };
+};
 
 describe('generateCommand', () => {
   beforeEach(() => {
@@ -89,14 +116,14 @@ describe('generateCommand', () => {
     });
 
     it('should have required options', () => {
-      const options: any[] = generateCommand.options || [];
+      const options: CommandOption[] = generateCommand.options || [];
       expect(options).toBeDefined();
       expect(options.length).toBeGreaterThan(0);
 
       // Check for key options
-      const typeOption = options.find((opt: any) => opt.flags.includes('--type'));
-      const nameOption = options.find((opt: any) => opt.flags.includes('--name'));
-      const outputOption = options.find((opt: any) => opt.flags.includes('--output'));
+      const typeOption = options.find((opt: CommandOption) => opt.flags.includes('--type'));
+      const nameOption = options.find((opt: CommandOption) => opt.flags.includes('--name'));
+      const outputOption = options.find((opt: CommandOption) => opt.flags.includes('--output'));
 
       expect(typeOption).toBeDefined();
       expect(nameOption).toBeDefined();
@@ -105,7 +132,9 @@ describe('generateCommand', () => {
 
     it('should have examples', () => {
       expect(generateCommand.examples).toBeDefined();
-      expect(((generateCommand.examples as any[]) || []).length).toBeGreaterThan(0);
+      expect(
+        Array.isArray(generateCommand.examples) ? generateCommand.examples.length : 0
+      ).toBeGreaterThan(0);
     });
   });
 

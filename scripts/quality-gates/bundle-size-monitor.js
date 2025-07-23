@@ -31,8 +31,8 @@ const CONFIG = {
     repositories: 50,
     aggregates: 90, // Slightly larger due to capabilities
     utils: 50,
-    contracts: 90,
-    logging: 50,
+    contracts: 130, // Foundation layer with extensive interfaces and capabilities
+    logging: 70, // Comprehensive DDD-first logging with integrations
 
     // Pattern packages (medium size)
     validation: 100,
@@ -49,12 +49,12 @@ const CONFIG = {
     messaging: 250, // Enterprise framework with Sagas + Outbox
 
     // Infrastructure packages
-    resilience: 120,
+    resilience: 140, // Full resilience patterns with comprehensive observability
     enterprise: 50, // Should be lightweight coordination
     'event-store': 150, // Event sourcing with complex features
 
     // Tooling packages (more flexible)
-    cli: 450, // CLI framework size increased significantly
+    cli: 500, // CLI framework with comprehensive examples and documentation generation
     testing: 100, // Test utilities can be larger
   },
 

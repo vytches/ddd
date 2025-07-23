@@ -13,6 +13,8 @@ import type {
   DependencyInfo,
   FrameworkInfo,
   SmartPromptEngine,
+  NamingConvention,
+  ProjectSuggestion,
 } from '../../types';
 import type { WorkflowContext } from '../../workflows/types';
 import { FileSystem } from '../utils/file-system';
@@ -399,8 +401,8 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
   /**
    * Analyze naming conventions
    */
-  private async analyzeNamingConventions(projectPath: string): Promise<any[]> {
-    const conventions: any[] = [];
+  private async analyzeNamingConventions(projectPath: string): Promise<NamingConvention[]> {
+    const conventions: NamingConvention[] = [];
 
     try {
       const files = await this.scanAllFiles(projectPath);
@@ -513,8 +515,8 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
   /**
    * Generate project-level suggestions
    */
-  private generateProjectSuggestions(analysis: ProjectAnalysis): any[] {
-    const suggestions: any[] = [];
+  private generateProjectSuggestions(analysis: ProjectAnalysis): ProjectSuggestion[] {
+    const suggestions: ProjectSuggestion[] = [];
 
     // Structure suggestions
     if (!analysis.structure.hasTestsDir) {

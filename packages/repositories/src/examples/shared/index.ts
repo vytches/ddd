@@ -29,11 +29,11 @@ export function addWhereClause(
   options: QueryOptions,
   field: string,
   operator: string,
-  value: any
+  value: unknown
 ): QueryOptions {
   const whereClause: WhereClause = {
     field,
-    operator: operator as any,
+    operator: operator as WhereClause['operator'],
     value,
     logical: options.where && options.where.length > 0 ? 'AND' : 'AND',
   };
@@ -151,7 +151,7 @@ export function validateEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function validateRequired(value: any, fieldName: string): string | null {
+export function validateRequired(value: unknown, fieldName: string): string | null {
   if (value === null || value === undefined || value === '') {
     return `${fieldName} is required`;
   }
@@ -238,7 +238,7 @@ export function createEmptyMetrics(): RepositoryMetrics {
 }
 
 // Data Transformation Utilities
-export function sanitizeForExport(data: any): any {
+export function sanitizeForExport(data: unknown): unknown {
   if (data === null || data === undefined) return data;
 
   if (Array.isArray(data)) {
@@ -246,7 +246,7 @@ export function sanitizeForExport(data: any): any {
   }
 
   if (typeof data === 'object') {
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       // Skip sensitive fields
       if (
@@ -302,11 +302,13 @@ export function createBaseEntity(id?: string): {
   };
 }
 
-export function updateEntityVersion(entity: any): any {
+export function updateEntityVersion<T extends Record<string, unknown>>(
+  entity: T
+): T & { updatedAt: Date; version: number } {
   return {
     ...entity,
     updatedAt: new Date(),
-    version: (entity.version || 1) + 1,
+    version: ((entity.version as number) || 1) + 1,
   };
 }
 
@@ -330,7 +332,7 @@ export function aggregateHealthStatus(checks: boolean[]): 'healthy' | 'degraded'
 }
 
 // Development and Testing Utilities
-export function createMockUser(overrides: any = {}) {
+export function createMockUser(overrides: Record<string, unknown> = {}) {
   return {
     username: 'testuser',
     email: 'test@example.com',
@@ -343,7 +345,7 @@ export function createMockUser(overrides: any = {}) {
   };
 }
 
-export function createMockProduct(overrides: any = {}) {
+export function createMockProduct(overrides: Record<string, unknown> = {}) {
   return {
     name: 'Test Product',
     description: 'A test product',
@@ -364,7 +366,7 @@ export function createMockProduct(overrides: any = {}) {
   };
 }
 
-export function createMockOrder(overrides: any = {}) {
+export function createMockOrder(overrides: Record<string, unknown> = {}) {
   return {
     orderNumber: `ORDER-${Date.now()}`,
     customerId: generateEntityId(),

@@ -102,9 +102,9 @@ export interface ExampleConfig {
 
 export interface FrameworkConfig extends ExampleConfig {
   framework: 'nestjs' | 'express' | 'fastify' | 'manual';
-  moduleConfig?: any;
-  decoratorConfig?: any;
-  diConfig?: any;
+  moduleConfig?: Record<string, unknown>;
+  decoratorConfig?: Record<string, unknown>;
+  diConfig?: Record<string, unknown>;
 }
 
 export type ComplexityLevel = 'basic' | 'intermediate' | 'advanced';
@@ -610,9 +610,34 @@ export function validateConfiguration(config: ExampleConfig): { valid: boolean; 
 }
 
 /**
+ * Sample data configuration interface
+ */
+interface SampleDataConfig {
+  users: {
+    count: number;
+    fields: {
+      id: () => string;
+      email: () => string;
+      name: () => string;
+      createdAt: () => Date;
+      isActive: () => boolean;
+    };
+  };
+  products: {
+    count: number;
+    fields: {
+      id: () => string;
+      name: () => string;
+      price: () => number;
+      inStock: () => boolean;
+    };
+  };
+}
+
+/**
  * Generate sample data configuration for testing
  */
-export function generateSampleDataConfig(recordCount = 1000): any {
+export function generateSampleDataConfig(recordCount = 1000): SampleDataConfig {
   return {
     users: {
       count: recordCount,
@@ -641,14 +666,18 @@ export function generateSampleDataConfig(recordCount = 1000): any {
 /**
  * Deep merge utility function
  */
-function deepMerge(target: any, source: any): any {
-  const result = { ...target };
+function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
+  const result = { ...target } as T;
 
   for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(target[key] || {}, source[key]);
+    const sourceValue = source[key];
+    if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
+      result[key] = deepMerge(
+        (target[key] as Record<string, unknown>) || {},
+        sourceValue as Record<string, unknown>
+      ) as T[Extract<keyof T, string>];
     } else {
-      result[key] = source[key];
+      result[key] = sourceValue as T[Extract<keyof T, string>];
     }
   }
 

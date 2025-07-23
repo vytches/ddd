@@ -12,7 +12,7 @@ export interface PaymentRequest {
   merchantId: string;
   customerId: string;
   paymentMethod: PaymentMethod;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentResponse {
@@ -87,14 +87,14 @@ export interface NotificationRequest {
   content: string;
   priority: NotificationPriority;
   scheduledAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ExternalApiRequest {
   endpoint: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retryConfig?: RetryConfig;
 }
@@ -102,7 +102,7 @@ export interface ExternalApiRequest {
 export interface ExternalApiResponse {
   status: number;
   statusText: string;
-  data: any;
+  data: unknown;
   headers: Record<string, string>;
   responseTime: number;
   requestId: string;
@@ -190,7 +190,7 @@ export interface ResilienceContext {
   startTime: Date;
   attempt: number;
   previousAttempts: AttemptHistory[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AttemptHistory {
@@ -222,7 +222,7 @@ export interface HealthCheckResult {
   serviceName: string;
   status: HealthStatus;
   responseTime: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: Date;
   uptime: number;
   dependencies: DependencyHealth[];
@@ -312,7 +312,7 @@ export interface ChaosExperiment {
   name: string;
   type: 'latency' | 'error' | 'timeout' | 'resource_exhaustion' | 'network_partition';
   target: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   duration: number;
   probability: number;
   conditions: string[];
@@ -464,14 +464,14 @@ export interface ServiceResult<T> {
 export interface ServiceError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   retryable: boolean;
   timestamp: Date;
 }
 
 export interface BatchProcessingRequest {
   batchId: string;
-  items: any[];
+  items: unknown[];
   batchSize: number;
   parallelism: number;
   timeout: number;

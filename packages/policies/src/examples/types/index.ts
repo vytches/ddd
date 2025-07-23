@@ -242,8 +242,8 @@ export interface PolicyViolation {
   message: string;
   severity: 'ERROR' | 'WARNING' | 'INFO';
   field?: string;
-  value?: any;
-  details?: Record<string, any>;
+  value?: unknown;
+  details?: Record<string, unknown>;
   timestamp: Date;
 }
 
@@ -251,11 +251,11 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
-  details?: Record<string, any>;
+  value?: unknown;
+  details?: Record<string, unknown>;
 }
 
-export interface PolicyResult<T = any> {
+export interface PolicyResult<T = unknown> {
   success: boolean;
   data?: T;
   violations?: PolicyViolation[];
@@ -282,7 +282,7 @@ export interface PolicyContext {
   environment?: 'development' | 'staging' | 'production';
   tenant?: string;
   features?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -292,12 +292,12 @@ export interface PolicyConfiguration {
   enabled: boolean;
   priority: number;
   tags: string[];
-  conditions?: Record<string, any>;
-  metadata?: Record<string, any>;
+  conditions?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PolicyExecutionContext {
-  entity: any;
+  entity: unknown;
   context: PolicyContext;
   configuration?: PolicyConfiguration;
   cache?: PolicyCache;
@@ -323,7 +323,7 @@ export interface BusinessRule {
   errorCode: string;
   severity: 'ERROR' | 'WARNING' | 'INFO';
   enabled: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ComplianceRule extends BusinessRule {
@@ -347,7 +347,7 @@ export interface PolicyAuditLog {
   context: PolicyContext;
   executionTime: number;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -356,7 +356,7 @@ export interface PolicyAuditLog {
 export interface ExternalValidationRequest {
   entityType: string;
   entityId: string;
-  data: any;
+  data: unknown;
   validationType: string;
   context: PolicyContext;
 }
@@ -364,7 +364,7 @@ export interface ExternalValidationRequest {
 export interface ExternalValidationResponse {
   valid: boolean;
   violations: PolicyViolation[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   externalId?: string;
 }
 
@@ -391,19 +391,19 @@ export interface TenantConfiguration {
 /**
  * Integration with other packages
  */
-export interface SpecificationResult<T = any> {
+export interface SpecificationResult<T = unknown> {
   isSatisfied: boolean;
   entity: T;
   reasons?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
   isValid: boolean;
   data: T;
   errors: ValidationError[];
   warnings?: ValidationError[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // All types are already exported above as interfaces

@@ -132,7 +132,8 @@ export function deepEquals(a: unknown, b: unknown): boolean {
 
     for (const prop of aProps) {
       if (!bProps.includes(prop)) return false;
-      if (!deepEquals((a as any)[prop], (b as any)[prop])) return false;
+      if (!deepEquals((a as Record<string, unknown>)[prop], (b as Record<string, unknown>)[prop]))
+        return false;
     }
 
     return true;
@@ -419,8 +420,8 @@ export function isValidationResult(obj: unknown): obj is ValueObjectValidationRe
     obj !== null &&
     'isValid' in obj &&
     'errors' in obj &&
-    typeof (obj as any).isValid === 'boolean' &&
-    Array.isArray((obj as any).errors)
+    typeof (obj as { isValid?: boolean; errors?: unknown[] }).isValid === 'boolean' &&
+    Array.isArray((obj as { isValid?: boolean; errors?: unknown[] }).errors)
   );
 }
 
@@ -433,8 +434,8 @@ export function isValueObjectError(obj: unknown): obj is ValueObjectError {
     obj !== null &&
     'code' in obj &&
     'message' in obj &&
-    typeof (obj as any).code === 'string' &&
-    typeof (obj as any).message === 'string'
+    typeof (obj as { code?: string; message?: string }).code === 'string' &&
+    typeof (obj as { code?: string; message?: string }).message === 'string'
   );
 }
 

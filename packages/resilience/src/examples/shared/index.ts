@@ -100,7 +100,7 @@ export interface ResilienceExecutionContext {
     duration: number;
     timestamp: Date;
   }>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

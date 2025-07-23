@@ -115,7 +115,7 @@ export interface ProductData {
   inventory: number;
   isAvailable: boolean;
   images: string[];
-  specifications: Record<string, any>;
+  specifications: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -129,7 +129,7 @@ export interface CreateProductData {
   currency: string;
   inventory: number;
   images?: string[];
-  specifications?: Record<string, any>;
+  specifications?: Record<string, unknown>;
 }
 
 // ============================================
@@ -163,7 +163,7 @@ export interface Transaction {
   description: string;
   timestamp: Date;
   balance: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type TransactionType = 'deposit' | 'withdrawal' | 'transfer' | 'fee' | 'interest';
@@ -290,7 +290,7 @@ export interface AuditEntry {
   userId: string;
   action: string;
   timestamp: Date;
-  changes?: Record<string, any>;
+  changes?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -298,7 +298,7 @@ export interface AuditEntry {
 export interface Snapshot {
   aggregateId: string;
   version: number;
-  state: any;
+  state: unknown;
   timestamp: Date;
 }
 
@@ -323,7 +323,7 @@ export interface ProcessInstance {
   processDefinitionId: string;
   state: ProcessState;
   currentStep: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   history: ProcessHistoryEntry[];
   startedAt: Date;
   completedAt?: Date;
@@ -342,7 +342,7 @@ export interface ProcessHistoryEntry {
   status: 'started' | 'completed' | 'failed';
   timestamp: Date;
   actor?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface ProcessError {
@@ -363,16 +363,16 @@ export interface ServiceContext {
   correlationId: string;
   requestId: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
-export interface CommandResult<T = any> {
+export interface CommandResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: Error;
   aggregateId?: string;
   version?: number;
-  events?: any[];
+  events?: unknown[];
 }
 
 export interface QueryResult<T = any> {
@@ -424,12 +424,12 @@ export interface TestScenario {
   given: any; // Initial state
   when: any; // Command/operation
   then: any; // Expected outcome
-  events?: any[]; // Expected events
+  events?: unknown[]; // Expected events
 }
 
 export interface AggregateTestContext {
   aggregateId: string;
   userId: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

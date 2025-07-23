@@ -268,7 +268,7 @@ describe('ChatHistory', () => {
       });
 
       it('should trim messages when exceeding limit', async () => {
-        const limitedHistory = new ChatHistory({ maxMessagesPerSession: 2 });
+        const limitedHistory = new ChatHistory({ maxMessagesPerSession: 2, enabled: true });
         await limitedHistory.startSession('Test');
 
         await limitedHistory.addMessage('user', 'Message 1');

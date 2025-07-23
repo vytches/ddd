@@ -37,30 +37,51 @@ export class HybridTemplateEngine {
     );
 
     // Helper for conditional sections
-    this.hbs.registerHelper('ifSection', function (this: any, sectionName: string, options: any) {
-      const sections = this.sections || [];
-      if (sections.includes(sectionName)) {
-        return options.fn(this);
+    this.hbs.registerHelper(
+      'ifSection',
+      function (
+        this: { sections?: string[] },
+        sectionName: string,
+        options: Handlebars.HelperOptions
+      ) {
+        const sections = this.sections || [];
+        if (sections.includes(sectionName)) {
+          return options.fn(this);
+        }
+        return options.inverse(this);
       }
-      return options.inverse(this);
-    });
+    );
 
     // Helper for complexity filtering
-    this.hbs.registerHelper('ifComplexity', function (this: any, complexity: string, options: any) {
-      const complexityLevels = this.complexityLevels || [];
-      if (complexityLevels.includes(complexity)) {
-        return options.fn(this);
+    this.hbs.registerHelper(
+      'ifComplexity',
+      function (
+        this: { complexityLevels?: string[] },
+        complexity: string,
+        options: Handlebars.HelperOptions
+      ) {
+        const complexityLevels = this.complexityLevels || [];
+        if (complexityLevels.includes(complexity)) {
+          return options.fn(this);
+        }
+        return options.inverse(this);
       }
-      return options.inverse(this);
-    });
+    );
 
     // Helper for framework filtering
-    this.hbs.registerHelper('ifFramework', function (this: any, framework: string, options: any) {
-      if (this.framework === framework) {
-        return options.fn(this);
+    this.hbs.registerHelper(
+      'ifFramework',
+      function (
+        this: { framework?: string },
+        framework: string,
+        options: Handlebars.HelperOptions
+      ) {
+        if (this.framework === framework) {
+          return options.fn(this);
+        }
+        return options.inverse(this);
       }
-      return options.inverse(this);
-    });
+    );
 
     // Helper to capitalize strings
     this.hbs.registerHelper('capitalize', (str: string) => {
@@ -68,14 +89,14 @@ export class HybridTemplateEngine {
     });
 
     // Helper to concatenate strings
-    this.hbs.registerHelper('concat', (...args: any[]) => {
+    this.hbs.registerHelper('concat', (...args: unknown[]) => {
       // Remove the last argument which is the Handlebars options object
       const strings = args.slice(0, -1);
       return strings.join('');
     });
 
     // Helper to check if array includes value
-    this.hbs.registerHelper('includes', (array: any[], value: any) => {
+    this.hbs.registerHelper('includes', (array: unknown[], value: unknown) => {
       return array && array.includes(value);
     });
 
@@ -107,7 +128,7 @@ export class HybridTemplateEngine {
     );
   }
 
-  async render(layout: string, data: any): Promise<string> {
+  async render(layout: string, data: Record<string, unknown>): Promise<string> {
     const template = await this.loadTemplate(`layouts/${layout}.hbs`);
     return template(data);
   }

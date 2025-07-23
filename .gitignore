@@ -119,3 +119,8 @@ packages/*/examples/metadata.d.ts
 packages/*/examples/metadata.cjs
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# CLI chat history sessions (generated during development/testing)
+.vytches-ddd/
+**/.vytches-ddd/
+**/session-*.json

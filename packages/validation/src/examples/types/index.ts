@@ -137,7 +137,7 @@ export interface ValidationContext {
   tenantId?: string;
   operationType: 'create' | 'update' | 'delete' | 'bulk_import';
   environment: 'development' | 'staging' | 'production';
-  businessRules?: Record<string, any>;
+  businessRules?: Record<string, unknown>;
   validationLevel: 'basic' | 'standard' | 'strict' | 'enterprise';
   locale?: string;
   timezone?: string;
@@ -146,7 +146,7 @@ export interface ValidationContext {
 export interface ValidationRequest<T> {
   entity: T;
   context: ValidationContext;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
   skipRules?: string[];
   includeWarnings?: boolean;
 }
@@ -163,7 +163,7 @@ export interface ValidationError {
   code: string;
   message: string;
   severity: 'error' | 'critical';
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   context?: string;
 }
 
@@ -209,7 +209,7 @@ export interface RuleCondition {
     | 'regex'
     | 'in'
     | 'not_in';
-  value: any;
+  value: unknown;
   logicalOperator?: 'and' | 'or';
 }
 
@@ -355,7 +355,7 @@ export interface PolicyRule {
 export interface PolicyCondition {
   field: string;
   operator: string;
-  value: any;
+  value: unknown;
   context?: string;
 }
 

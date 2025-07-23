@@ -108,7 +108,7 @@ describe('bin.ts', () => {
       const fs = await import('fs/promises');
       const path = await import('path');
 
-      const binPath = path.resolve('packages/cli/src/bin.ts');
+      const binPath = path.resolve(__dirname, '../src/bin.ts');
       const result = await safeRun(async () => {
         const content = await fs.readFile(binPath, 'utf-8');
         return content;

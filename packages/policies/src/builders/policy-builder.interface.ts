@@ -66,7 +66,7 @@ export interface IPolicyBuilder<T> {
    * Add a custom predicate that must be satisfied
    */
   mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: unknown) => boolean,
     errorCode: string,
     errorMessage: string
   ): IPolicyStepBuilder<T>;
@@ -75,7 +75,7 @@ export interface IPolicyBuilder<T> {
    * Add a custom async predicate that must be satisfied
    */
   mustSatisfyAsync(
-    predicate: (entity: T, context?: any) => Promise<boolean>,
+    predicate: (entity: T, context?: unknown) => Promise<boolean>,
     errorCode: string,
     errorMessage: string
   ): IPolicyStepBuilder<T>;
@@ -97,7 +97,7 @@ export interface IPolicyBuilder<T> {
   /**
    * Add conditional logic to the policy
    */
-  when(condition: (entity: T, context?: any) => boolean): IConditionalPolicyBuilder<T>;
+  when(condition: (entity: T, context?: unknown) => boolean): IConditionalPolicyBuilder<T>;
 
   /**
    * Build the final policy
@@ -200,7 +200,7 @@ export interface IPolicyGroup<T> {
    * Add a custom predicate that must be satisfied in this group
    */
   mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: unknown) => boolean,
     errorCode: string,
     errorMessage: string
   ): IPolicyGroupStepBuilder<T>;
