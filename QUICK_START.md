@@ -1,6 +1,6 @@
-# VytchesDDD - Quick Start Setup Guide
+# VytchesDDD - Quick Start Guide
 
-This guide will help you set up the complete VytchesDDD monorepo from scratch.
+This guide will help you get started with VytchesDDD library quickly.
 
 ## 🚀 Prerequisites
 
@@ -10,280 +10,172 @@ Before starting, ensure you have:
 - **pnpm** >= 8.0.0 (Install: `npm install -g pnpm`)
 - **Git** installed and configured
 
-## 📋 Step-by-Step Setup
+## 📋 Getting Started
 
-### Step 1: Create New Directory
+### Option 1: Clone and Use (Recommended)
 
 ```bash
-mkdir vytches-ddd
+# Clone the repository
+git clone https://github.com/vytches/vytches-ddd.git
 cd vytches-ddd
-```
 
-### Step 2: Copy Configuration Files
-
-Copy all the provided configuration files to your project root:
-
-```
-vytches-ddd/
-├── package.json                 # Root package configuration
-├── nx.json                      # Nx workspace configuration
-├── lerna.json                   # Lerna release configuration
-├── tsconfig.base.json           # TypeScript base configuration
-├── .eslintrc.json              # ESLint configuration
-├── prettier.config.js          # Prettier configuration
-├── vitest.config.ts            # Vitest test configuration
-├── commitlint.config.js        # Commit message linting
-├── .gitignore                  # Git ignore rules
-├── README.md                   # Project documentation
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # CI pipeline
-│       └── release.yml         # Release pipeline
-├── .husky/
-│   ├── pre-commit             # Pre-commit hooks
-│   └── commit-msg             # Commit message hooks
-└── .vscode/
-    ├── settings.json          # VS Code settings
-    └── extensions.json        # Recommended extensions
-```
-
-### Step 3: Run Setup Automation
-
-Make the setup script executable and run it:
-
-```bash
-chmod +x setup-automation.sh
-./setup-automation.sh
-```
-
-This will create the complete directory structure and all package
-configurations.
-
-### Step 4: Install Dependencies
-
-```bash
+# Install dependencies
 pnpm install
-```
 
-### Step 5: Setup Git Hooks
-
-```bash
+# Setup git hooks
 pnpm prepare
+
+# Verify installation
+pnpm build
+pnpm test
 ```
 
-### Step 6: Verify Setup
+### Option 2: Install Individual Packages
 
 ```bash
-# Build all packages
-pnpm build
+# Install specific packages you need
+npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/cqrs
 
-# Run tests
-pnpm test
-
-# Check linting
-pnpm lint
-
-# View dependency graph
-pnpm graph
+# Or install the complete suite
+npm install @vytches-ddd/core
 ```
 
-## 📦 Package Structure
+## 🔧 Verify Installation
 
-After setup, you'll have this structure:
+```bash
+# Development commands (if you cloned the repo)
+pnpm build    # Build all packages
+pnpm test     # Run tests  
+pnpm lint     # Check linting
+pnpm dev      # Development mode
 
-```
-vytches-ddd/
-├── packages/
-│   ├── core/                   # @vytches-ddd/core
-│   ├── events/                 # @vytches-ddd/events
-│   ├── cqrs/                   # @vytches-ddd/cqrs
-│   ├── acl/                    # @vytches-ddd/acl
-│   ├── projections/            # @vytches-ddd/projections
-│   ├── resilience/             # @vytches-ddd/resilience
-│   ├── enterprise/             # @vytches-ddd/enterprise
-│   └── cli/                    # @vytches-ddd/cli
-├── examples/
-│   ├── simple/                 # Basic usage examples
-│   ├── ecommerce/              # E-commerce domain
-│   └── banking/                # Banking domain
-├── tools/                      # Build and development tools
-└── docs/                       # Documentation
+# Individual package usage
+npm test      # Test your application using VytchesDDD
 ```
 
-## 🔧 Migration from Existing Code
-
-### Step 7: Copy Your Existing Library Code
-
-1. **Core package** (`packages/core/src/`):
-
-   - Copy your Value Objects, Entities, Aggregates
-   - Copy Repository interfaces and base classes
-   - Copy Domain Services and Business Rules
-
-2. **Events package** (`packages/events/src/`):
-
-   - Copy Domain Events and Integration Events
-   - Copy Event Bus implementations
-   - Copy Event Handlers
-
-3. **CQRS package** (`packages/cqrs/src/`):
-
-   - Copy Command and Query classes
-   - Copy Handlers and Buses
-   - Copy CQRS Module
-
-4. **ACL package** (`packages/acl/src/`):
-   - Copy ACL Adapters and Translators
-   - Copy External API interfaces
-   - Copy Middleware and Registry
-
-### Step 8: Update Imports
-
-Update your import statements to use the new package structure:
+## 🏗️ Basic Usage Example
 
 ```typescript
-// Old imports
-import { ValueObject } from './core/value-object';
-import { DomainEvent } from './events/domain-event';
+// app.ts
+import { AggregateRoot, EntityId, DomainEvent } from '@vytches-ddd/core';
+import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+import { EventBus } from '@vytches-ddd/events';
 
-// New imports
-import { ValueObject } from '@vytches-ddd/core';
-import { DomainEvent } from '@vytches-ddd/events';
-```
+// Create a simple aggregate
+class User extends AggregateRoot {
+  constructor(
+    id: EntityId<string>,
+    private email: string,
+    private name: string
+  ) {
+    super(id);
+  }
 
-### Step 9: Update Package Dependencies
-
-Each package's `package.json` should specify its dependencies:
-
-```json
-{
-  "dependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/events": "workspace:*"
+  static create(email: string, name: string): User {
+    const id = EntityId.createWithRandomUUID();
+    const user = new User(id, email, name);
+    
+    // Add domain event
+    user.addDomainEvent(new UserCreatedEvent(id.getValue(), email, name));
+    
+    return user;
   }
 }
+
+// Usage in your application
+const user = User.create('john@example.com', 'John Doe');
+console.log('User created:', user.getId().getValue());
 ```
 
-## 🎯 Development Workflow
+## 📦 Available Packages
 
-### Daily Development
+| Package | Description | Installation |
+|---------|-------------|---------------|
+| `@vytches-ddd/core` | Meta-package with all essentials | `npm install @vytches-ddd/core` |
+| `@vytches-ddd/events` | Event-driven architecture | `npm install @vytches-ddd/events` |
+| `@vytches-ddd/cqrs` | Command Query Responsibility Segregation | `npm install @vytches-ddd/cqrs` |
+| `@vytches-ddd/aggregates` | Aggregate root patterns | `npm install @vytches-ddd/aggregates` |
+| `@vytches-ddd/repositories` | Repository patterns | `npm install @vytches-ddd/repositories` |
+| `@vytches-ddd/value-objects` | Value object implementations | `npm install @vytches-ddd/value-objects` |
+| `@vytches-ddd/policies` | Business policy patterns | `npm install @vytches-ddd/policies` |
+| `@vytches-ddd/resilience` | Resilience patterns | `npm install @vytches-ddd/resilience` |
 
-```bash
-# Start development mode (watches for changes)
-pnpm dev
+## 📋 Project Structure (if cloned)
 
-# Run tests in watch mode
-pnpm test:watch
-
-# Build only changed packages
-pnpm build:affected
-
-# Test only changed packages
-pnpm test:affected
+```
+vytches-ddd/
+├── packages/                   # All DDD packages
+│   ├── core/                  # Meta-package
+│   ├── aggregates/            # Aggregate patterns
+│   ├── events/                # Event system
+│   ├── cqrs/                  # CQRS implementation
+│   └── ...                    # 21 total packages
+├── examples/                  # Usage examples
+│   ├── simple/               # Basic examples
+│   └── playground/           # Interactive examples
+├── docs/                     # Documentation
+└── scripts/                  # Build tools
 ```
 
-### Before Committing
+## 🎯 Next Steps
 
-```bash
-# Format code
-pnpm format
+### For Library Users
+1. **Explore Examples**: Check individual package READMEs for usage examples
+2. **Read Documentation**: Visit package documentation for detailed API reference
+3. **Join Community**: Get help and share experiences with other users
 
-# Lint and fix issues
-pnpm lint:fix
+### For Contributors (if you cloned the repo)
+1. **Development Mode**: Use `pnpm dev` for active development
+2. **Testing**: Run `pnpm test` before committing changes
+3. **Documentation**: Update docs when adding new features
 
-# Run affected tests
-pnpm test:affected
+## 📚 Learn More
 
-# Commit (will trigger hooks)
-git add .
-git commit -m "feat(core): add new feature"
-```
-
-### Release Process
-
-```bash
-# Create a release (will bump versions and create tags)
-pnpm release
-
-# Or manually
-pnpm build
-pnpm test
-pnpm release:version
-pnpm release:publish
-```
-
-## 🔧 Customization
-
-### Update Package Information
-
-1. **Root package.json**: Update author, repository URL, homepage
-2. **Individual packages**: Update descriptions, keywords
-3. **README.md**: Update badges and links
-4. **GitHub workflows**: Update repository references
-
-### Configure NPM Publishing
-
-1. Create NPM account and get access token
-2. Add `NPM_TOKEN` secret to GitHub repository
-3. Update registry URLs in package.json files
-
-### Setup Nx Cloud (Optional)
-
-For faster builds with distributed caching:
-
-1. Sign up at [nx.app](https://nx.app)
-2. Get access token
-3. Add to `nx.json` configuration
+- **📖 Documentation**: Comprehensive guides in each package README
+- **💡 Examples**: 365+ practical examples across all packages
+- **🏗️ Architecture**: See `docs/` folder for design decisions
+- **🤝 Contributing**: Read `CONTRIBUTING.md` for contribution guidelines
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
 
-1. **pnpm install fails**:
+**Installation Problems:**
+```bash
+# Clear npm/pnpm cache
+npm cache clean --force
+# or
+pnpm store prune
+```
 
-   - Check Node.js version: `node --version`
-   - Clear cache: `pnpm store prune`
+**Build Issues:**
+```bash
+# Clean and rebuild
+pnpm clean && pnpm build
+# or for individual packages
+npm run build
+```
 
-2. **Build fails**:
-
-   - Check TypeScript errors: `pnpm type-check`
-   - Clean and rebuild: `pnpm clean && pnpm build`
-
-3. **Tests fail**:
-
-   - Run specific package: `pnpm nx test core`
-   - Check coverage: `pnpm test:coverage`
-
-4. **Linting errors**:
-   - Auto-fix: `pnpm lint:fix`
-   - Check ESLint config: `.eslintrc.json`
+**TypeScript Errors:**
+- Check your TypeScript version (should be >= 5.0)
+- Ensure proper imports from `@vytches-ddd/*` packages
 
 ### Getting Help
 
-- Check [Nx documentation](https://nx.dev)
-- Check [Lerna documentation](https://lerna.js.org)
-- Open issue in GitHub repository
+- 📖 Check package READMEs for detailed documentation
+- 🐛 Open issues on GitHub for bugs
+- 💬 Join discussions for questions and feature requests
 
-## ✅ Verification Checklist
+## ✅ Quick Verification
 
-Before proceeding with development, verify:
+After setup, test basic functionality:
 
-- [ ] All packages build successfully (`pnpm build`)
-- [ ] All tests pass (`pnpm test`)
-- [ ] Linting passes (`pnpm lint`)
-- [ ] Git hooks work (make a test commit)
-- [ ] Dependency graph is correct (`pnpm graph`)
-- [ ] VS Code extensions are installed
-- [ ] Documentation is accessible
+```typescript
+// test.ts
+import { EntityId } from '@vytches-ddd/core';
 
-## 🎉 Next Steps
+const id = EntityId.createWithRandomUUID();
+console.log('VytchesDDD is working!', id.getValue());
+```
 
-1. **Copy your existing code** into the appropriate packages
-2. **Update examples** with real usage scenarios
-3. **Write comprehensive tests** for all components
-4. **Update documentation** with your specific patterns
-5. **Setup CI/CD** with your GitHub repository
-6. **Configure NPM publishing** for releases
-
-**You're ready to build enterprise-grade Domain-Driven Design applications with
-VytchesDDD!** 🚀
+**You're ready to build enterprise-grade Domain-Driven Design applications with VytchesDDD!** 🚀
