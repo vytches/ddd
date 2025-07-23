@@ -1,0 +1,125 @@
+# {{packageConfig.displayName}} - {{#if framework}}{{framework}} Implementation Guide{{else}}Usage Guide{{/if}}
+
+## 🤖 CONTEXT FOR CODE GENERATION
+
+This document provides complete implementation guidance for @vytches-ddd/{{packageConfig.packageName}}{{#if framework}} in {{framework}} applications{{/if}}.  
+**Use this as a reference for generating production-ready code.**
+
+## 📦 REQUIRED DEPENDENCIES
+
+```json
+{
+  "dependencies": {
+    "@vytches-ddd/{{packageConfig.packageName}}": "^{{packageConfig.version}}"{{#if packageConfig.dependencies}}{{#each packageConfig.dependencies}},
+    "{{this}}": "^{{../packageConfig.version}}"{{/each}}{{/if}}
+  }
+}
+```
+
+## 📋 WHAT THIS FEATURE DOES
+
+{{loadMarkdown packageConfig.packageName "shared/description.md"}}
+
+## 🔧 COMPLETE IMPLEMENTATION PATTERN
+
+{{#each complexityLevels}}
+### {{capitalize this}} Level Implementation (Copy-Paste Ready)
+
+```typescript
+{{loadMarkdown ../packageConfig.packageName (concat this "/implementation.md")}}
+```
+
+{{#if ../framework}}
+### {{capitalize this}} Level {{../framework}} Integration (Copy-Paste Ready)
+
+```typescript
+{{loadFrameworkExample ../packageConfig.packageName ../framework this}}
+```
+{{/if}}
+
+{{/each}}
+
+{{#if packageConfig.tags.integrations}}
+## 🔗 INTEGRATION PATTERNS
+
+{{#each packageConfig.tags.integrations}}
+### Integration with {{this}}
+
+```typescript
+{{loadCrossPackageExample ../packageConfig.packageName this "intermediate" "integration-example"}}
+```
+
+{{/each}}
+{{/if}}
+
+{{#if packageConfig.llmSupport.enabled}}
+{{#if packageConfig.llmSupport.includePrompts}}
+## 🤖 LLM CODE GENERATION PROMPTS
+
+### Prompt 1: Basic Implementation
+"Generate a {{#if framework}}{{framework}} service{{else}}class{{/if}} that implements {{packageConfig.displayName}} using the above pattern. Include proper error handling and return structured results."
+
+### Prompt 2: Advanced Implementation
+"Generate a complete {{#if framework}}{{framework}} module{{else}}implementation{{/if}} with {{packageConfig.displayName}}{{#if framework}}, including service implementation{{/if}}. Use the pattern shown above and add comprehensive error handling."
+
+{{#if packageConfig.tags.integrations}}
+### Prompt 3: Integration Examples
+{{#each packageConfig.tags.integrations}}
+"Integrate {{../packageConfig.displayName}} with {{this}} using the integration pattern above{{#if ../framework}} in {{../framework}}{{/if}}."
+{{/each}}
+{{/if}}
+
+### Prompt 4: Custom Business Rules
+"Modify the above {{packageConfig.displayName}} implementation to include custom business rules for: [YOUR_SPECIFIC_REQUIREMENTS]. Generate the complete {{#if framework}}{{framework}} {{/if}}implementation."
+{{/if}}
+
+{{#if packageConfig.llmSupport.includeTips}}
+## 🎯 GENERATION TIPS FOR LLM
+
+1. **Use the exact import statements shown above**
+2. **Follow the {{#if framework}}{{framework}} {{/if}}patterns for integration**
+3. **Include proper TypeScript types from the examples**
+4. **Add error handling using standard try/catch blocks**
+5. **Generate tests following the testing patterns**
+{{#if packageConfig.tags.integrations}}
+6. **For integrations, use the cross-package patterns shown**
+{{/if}}
+{{/if}}
+{{/if}}
+
+## 🔄 COMMON PATTERNS FOR LLM GENERATION
+
+### Error Handling Pattern
+
+```typescript
+{{loadMarkdown packageConfig.packageName "patterns/error-handling.md"}}
+```
+
+### Testing Pattern
+
+```typescript
+{{loadMarkdown packageConfig.packageName "patterns/testing.md"}}
+```
+
+{{#if packageConfig.contentConfig.showImportStatements}}
+### Import Pattern
+
+```typescript
+{{loadMarkdown packageConfig.packageName "patterns/imports.md"}}
+```
+{{/if}}
+
+## 📝 USAGE EXAMPLES
+
+{{#each complexityLevels}}
+### {{capitalize this}} Level Usage
+
+{{loadMarkdown ../packageConfig.packageName (concat this "/use-case.md")}}
+
+{{/each}}
+
+---
+
+**Generated for LLM Code Generation** | {{timestamp}} | @vytches-ddd/{{packageConfig.packageName}} v{{packageConfig.version}}
+
+> **Tip**: Copy relevant sections to your LLM prompt along with your specific requirements for best results.

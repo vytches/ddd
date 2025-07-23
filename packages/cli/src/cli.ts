@@ -11,6 +11,7 @@ import { Colors } from './core/utils/colors';
 import { Performance } from './core/utils/performance';
 import { generateCommand } from './commands/generate';
 import { domainBuilderCommand } from './commands/domain-builder';
+import { examplesCommand } from './commands/examples';
 
 /**
  * Main CLI entry point
@@ -30,7 +31,7 @@ async function main(): Promise<void> {
 
     // Show version if requested
     if (parsed.options.version || parsed.options.v) {
-      console.log('🎯 VytchesDDD CLI v1.0.0');
+      console.log('🎯 VytchesDDD CLI v0.3.0');
       return;
     }
 
@@ -52,6 +53,10 @@ async function main(): Promise<void> {
         await domainBuilderCommand.action(parsed.args, parsed.options);
         break;
 
+      case 'examples':
+        await examplesCommand.action(parsed.args, parsed.options);
+        break;
+
       default:
         if (!parsed.command) {
           console.log(Colors.yellow('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'));
@@ -59,6 +64,7 @@ async function main(): Promise<void> {
           console.log('Available commands:');
           console.log('  generate, g      Generate DDD components');
           console.log('  domain           Build complete domains');
+          console.log('  examples         Manage and work with examples');
           console.log('');
           console.log('Use --help with any command for more information');
         } else {
@@ -81,3 +87,8 @@ async function main(): Promise<void> {
 
 // Export main function
 export { main };
+
+// Run CLI if this is the main module
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(console.error);
+}

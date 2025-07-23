@@ -119,7 +119,7 @@ export const domainBuilderCommand: Command = {
 
       // Create and configure domain builder workflow
       const workflow = new DomainBuilderWorkflow({
-        domainName: domainName || undefined,
+        ...(domainName && { domainName }),
         structure: options.structure as string,
         framework: options.framework as string,
         guided: !options.quick,

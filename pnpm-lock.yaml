@@ -6,6 +6,9 @@ settings:
 
 overrides:
   esbuild: '>=0.25.0'
+  axios: '>=1.11.0'
+  form-data: '>=4.0.4'
+  on-headers: '>=1.1.0'
 
 importers:
   .:
@@ -158,6 +161,9 @@ importers:
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
       typescript:
         specifier: ~5.8.2
         version: 5.8.3
@@ -166,13 +172,13 @@ importers:
         version: 6.1.5(typanion@3.14.0)
       vite:
         specifier: ^7.0.4
-        version: 7.0.4(@types/node@20.19.1)
+        version: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.5.4
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@7.0.4)
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
+        version: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3)
       vitest-sonar-reporter:
         specifier: ^2.0.1
         version: 2.0.1(vitest@3.2.4)
@@ -186,6 +192,9 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
@@ -200,7 +209,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -228,7 +237,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -241,6 +250,9 @@ importers:
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
+      '@vytches-ddd/logging':
+        specifier: workspace:*
+        version: link:../logging
       chalk:
         specifier: ^5.3.0
         version: 5.4.1
@@ -254,18 +266,24 @@ importers:
       '@types/handlebars':
         specifier: ^4.1.0
         version: 4.1.0
+      '@types/yargs':
+        specifier: ^17.0.33
+        version: 17.0.33
       '@vytches-ddd/testing':
         specifier: workspace:*
         version: link:../testing
       eslint-plugin-jsdoc:
         specifier: ^51.3.4
         version: 51.3.4(eslint@8.57.1)
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -275,15 +293,12 @@ importers:
 
   packages/contracts:
     devDependencies:
-      '@vytches-ddd/testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -320,7 +335,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -345,7 +360,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -370,7 +385,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -380,6 +395,9 @@ importers:
 
   packages/domain-primitives:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/utils':
         specifier: workspace:*
         version: link:../utils
@@ -389,7 +407,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -420,7 +438,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -442,7 +460,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -467,7 +485,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -492,7 +510,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -523,7 +541,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -545,7 +563,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -570,7 +588,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -598,7 +616,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -623,7 +641,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -648,7 +666,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -658,6 +676,9 @@ importers:
 
   packages/resilience:
     dependencies:
+      '@vytches-ddd/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches-ddd/core':
         specifier: workspace:*
         version: link:../core
@@ -670,7 +691,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -689,7 +710,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -704,7 +725,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -726,7 +747,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -751,7 +772,7 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
       vite-plugin-dts:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@20.19.1)(typescript@5.8.3)(vite@6.3.5)
@@ -2695,7 +2716,7 @@ packages:
       combined-stream: 1.0.8
       extend: 3.0.2
       forever-agent: 0.6.1
-      form-data: 4.0.3
+      form-data: 4.0.4
       http-signature: 1.4.0
       is-typedarray: 1.0.0
       isstream: 0.1.2
@@ -4707,8 +4728,8 @@ packages:
       picomatch: 4.0.2
       semver: 7.7.2
       tsconfig-paths: 4.2.0
-      vite: 7.0.4(@types/node@20.19.1)
-      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
+      vite: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
+      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -6827,7 +6848,7 @@ packages:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
+      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6894,7 +6915,7 @@ packages:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.17
-      vite: 7.0.4(@types/node@20.19.1)
+      vite: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
     dev: true
 
   /@vitest/pretty-format@2.1.9:
@@ -6991,7 +7012,7 @@ packages:
       sirv: 3.0.1
       tinyglobby: 0.2.14
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
+      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3)
     dev: true
 
   /@vitest/utils@2.1.9:
@@ -7775,14 +7796,14 @@ packages:
     engines: { node: '>=4' }
     dev: true
 
-  /axios@1.10.0:
+  /axios@1.11.0:
     resolution:
       {
-        integrity: sha512-/1xYAC4MP/HEG+3duIhFr4ZQXR4sQXOIe+o6sdqzeykGLx6Upp/1p8MHqhINOvGeP7xyNHe7tsiJByc4SSVUxw==,
+        integrity: sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==,
       }
     dependencies:
       follow-redirects: 1.15.9
-      form-data: 4.0.3
+      form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -8810,7 +8831,7 @@ packages:
       compressible: 2.0.18
       debug: 2.6.9
       negotiator: 0.6.4
-      on-headers: 1.0.2
+      on-headers: 1.1.0
       safe-buffer: 5.2.1
       vary: 1.1.2
     transitivePeerDependencies:
@@ -11350,10 +11371,10 @@ packages:
       }
     dev: true
 
-  /form-data@4.0.3:
+  /form-data@4.0.4:
     resolution:
       {
-        integrity: sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==,
+        integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==,
       }
     engines: { node: '>= 6' }
     dependencies:
@@ -11650,6 +11671,15 @@ packages:
       {
         integrity: sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==,
       }
+    dev: true
+
+  /get-tsconfig@4.10.1:
+    resolution:
+      {
+        integrity: sha512-auHyJ4AgMz7vgS8Hp3N6HXSmlMdUyhSUrfBF16w153rxtLIEOE+HGqaBppczZvnHLqQJfiHotCYpNhl0lUROFQ==,
+      }
+    dependencies:
+      resolve-pkg-maps: 1.0.0
     dev: true
 
   /getpass@0.1.7:
@@ -15821,7 +15851,7 @@ packages:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.10.0
+      axios: 1.11.0
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -15888,7 +15918,7 @@ packages:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.2
       '@zkochan/js-yaml': 0.0.7
-      axios: 1.10.0
+      axios: 1.11.0
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -16029,10 +16059,10 @@ packages:
       ee-first: 1.1.1
     dev: true
 
-  /on-headers@1.0.2:
+  /on-headers@1.1.0:
     resolution:
       {
-        integrity: sha512-pZAE+FJLoyITytdqK0U5s+FIpjN0JP3OzFi/u8Rx+EV5/W+JTWGXG8xFzevE7AjBfDqHv/8vL8qQsIhHnqRkrA==,
+        integrity: sha512-737ZY3yNnXy37FHkQxPzt4UZ2UWPWiCZWLvFZ4fu5cueciegX0zGPnrlY6bwRg4FdQOe9YU8MkmJwGhoMybl8A==,
       }
     engines: { node: '>= 0.8' }
     dev: true
@@ -17587,6 +17617,13 @@ packages:
     engines: { node: '>=8' }
     dependencies:
       global-dirs: 0.1.1
+    dev: true
+
+  /resolve-pkg-maps@1.0.0:
+    resolution:
+      {
+        integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==,
+      }
     dev: true
 
   /resolve.exports@2.0.3:
@@ -19441,6 +19478,20 @@ packages:
       }
     dev: true
 
+  /tsx@4.20.3:
+    resolution:
+      {
+        integrity: sha512-qjbnuR9Tr+FJOMBqJCW5ehvIo/buZq7vH7qD7JziU98h6l3qGy0a/yPFjwO+y0/T7GFpNgNAvEcPPVfyT8rrPQ==,
+      }
+    engines: { node: '>=18.0.0' }
+    hasBin: true
+    dependencies:
+      esbuild: 0.25.6
+      get-tsconfig: 4.10.1
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
   /tuf-js@2.2.1:
     resolution:
       {
@@ -20081,7 +20132,7 @@ packages:
       - terser
     dev: true
 
-  /vite-node@3.2.4(@types/node@20.19.1):
+  /vite-node@3.2.4(@types/node@20.19.1)(tsx@4.20.3):
     resolution:
       {
         integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==,
@@ -20093,7 +20144,7 @@ packages:
       debug: 4.4.1
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.0.4(@types/node@20.19.1)
+      vite: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -20131,7 +20182,7 @@ packages:
       local-pkg: 1.1.1
       magic-string: 0.30.17
       typescript: 5.8.3
-      vite: 6.3.5(@types/node@20.19.1)
+      vite: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
@@ -20160,7 +20211,7 @@ packages:
       local-pkg: 1.1.1
       magic-string: 0.30.17
       typescript: 5.8.3
-      vite: 7.0.4(@types/node@20.19.1)
+      vite: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
@@ -20209,7 +20260,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vite@6.3.5(@types/node@20.19.1):
+  /vite@6.3.5(@types/node@20.19.1)(tsx@4.20.3):
     resolution:
       {
         integrity: sha512-cZn6NDFE7wdTpINgs++ZJ4N49W2vRp8LCKrn3Ob1kYNtOo21vfDoaV5GzBfLU4MovSAB8uNRm4jgzVQZ+mBzPQ==,
@@ -20259,11 +20310,12 @@ packages:
       postcss: 8.5.6
       rollup: 4.44.0
       tinyglobby: 0.2.14
+      tsx: 4.20.3
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
 
-  /vite@7.0.4(@types/node@20.19.1):
+  /vite@7.0.4(@types/node@20.19.1)(tsx@4.20.3):
     resolution:
       {
         integrity: sha512-SkaSguuS7nnmV7mfJ8l81JGBFV7Gvzp8IzgE8A8t23+AxuNX61Q5H1Tpz5efduSN7NHC8nQXD3sKQKZAu5mNEA==,
@@ -20313,6 +20365,7 @@ packages:
       postcss: 8.5.6
       rollup: 4.44.2
       tinyglobby: 0.2.14
+      tsx: 4.20.3
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
@@ -20326,7 +20379,7 @@ packages:
     peerDependencies:
       vitest: '>=1'
     dependencies:
-      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)
+      vitest: 3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3)
     dev: true
 
   /vitest@2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4):
@@ -20391,7 +20444,7 @@ packages:
       - terser
     dev: true
 
-  /vitest@3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4):
+  /vitest@3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(tsx@4.20.3):
     resolution:
       {
         integrity: sha512-LUCP5ev3GURDysTWiP47wRRUpLKMOfPh+yKTx3kVIEiu5KOMeqzpnYNsKyOoVrULivR8tLcks4+lga33Whn90A==,
@@ -20444,8 +20497,8 @@ packages:
       tinyglobby: 0.2.14
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.0.4(@types/node@20.19.1)
-      vite-node: 3.2.4(@types/node@20.19.1)
+      vite: 7.0.4(@types/node@20.19.1)(tsx@4.20.3)
+      vite-node: 3.2.4(@types/node@20.19.1)(tsx@4.20.3)
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - jiti

@@ -4,7 +4,6 @@
  */
 
 import type {
-  WorkflowContext,
   PromptConfig,
   ContextAwarePrompt,
   PromptSuggestion,
@@ -14,7 +13,10 @@ import type {
   DependencyInfo,
   FrameworkInfo,
   SmartPromptEngine,
+  NamingConvention,
+  ProjectSuggestion,
 } from '../../types';
+import type { WorkflowContext } from '../../workflows/types';
 import { FileSystem } from '../utils/file-system';
 import { Colors } from '../utils/colors';
 
@@ -58,7 +60,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
    * Analyze project context for intelligent suggestions
    */
   async analyzeContext(context: WorkflowContext): Promise<ProjectAnalysis> {
-    const projectPath = context.config.outputDir || process.cwd();
+    const projectPath = (context.config?.outputDir as string) || process.cwd();
 
     // Check cache first
     if (this.projectAnalysisCache.has(projectPath)) {
@@ -399,8 +401,8 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
   /**
    * Analyze naming conventions
    */
-  private async analyzeNamingConventions(projectPath: string): Promise<any[]> {
-    const conventions: any[] = [];
+  private async analyzeNamingConventions(projectPath: string): Promise<NamingConvention[]> {
+    const conventions: NamingConvention[] = [];
 
     try {
       const files = await this.scanAllFiles(projectPath);
@@ -513,8 +515,8 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
   /**
    * Generate project-level suggestions
    */
-  private generateProjectSuggestions(analysis: ProjectAnalysis): any[] {
-    const suggestions: any[] = [];
+  private generateProjectSuggestions(analysis: ProjectAnalysis): ProjectSuggestion[] {
+    const suggestions: ProjectSuggestion[] = [];
 
     // Structure suggestions
     if (!analysis.structure.hasTestsDir) {

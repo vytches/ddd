@@ -123,6 +123,15 @@ async function showProjectAnalysis(path: string): Promise<void> {
 
   try {
     const analysis = await promptEngine.analyzeContext({
+      workflowType: 'analysis',
+      step: 1,
+      totalSteps: 1,
+      data: {},
+      metadata: {
+        startedAt: new Date(),
+        lastModified: new Date(),
+        sessionId: `analysis-${Date.now()}`,
+      },
       config: {
         outputDir: path,
         debug: false,

@@ -120,7 +120,9 @@ export default defineConfig({
         // Externalize Node.js built-ins
         const nodeBuiltins = [
           'fs',
+          'fs/promises',
           'path',
+          'url',
           'readline',
           'child_process',
           'os',

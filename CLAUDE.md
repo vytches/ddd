@@ -94,6 +94,40 @@ pnpm jsdoc:serve      # Generate and serve locally
 pnpm jsdoc:watch      # Watch for changes and regenerate
 ```
 
+### CLI Documentation Generation
+
+**IMPORTANT**: Use `pnpm cli examples` for all documentation generation tasks.
+
+```bash
+# Generate Package Documentation
+pnpm cli examples generate <package> --complexity <level>
+pnpm cli examples generate domain-services --complexity intermediate
+pnpm cli examples generate policies --framework nestjs --llm-optimized
+
+# Generate Multi-Package Bundles
+pnpm cli examples bundle --packages <packages> --framework <framework>
+pnpm cli examples bundle --packages policies,domain-services --framework nestjs
+
+# Find Examples by Tag
+pnpm cli examples find-by-tag <tag> --complexity <level>
+pnpm cli examples find-by-tag "policies:core" --max-examples 3
+
+# Validate Examples
+pnpm cli examples validate --package <package> --fix
+pnpm cli examples validate --package policies --fix
+
+# Available CLI Options
+--complexity <level>     # basic, intermediate, advanced
+--framework <name>       # nestjs, express, fastify
+--llm-optimized         # Optimize for LLM consumption
+--max-examples <num>    # Limit number of examples
+--randomize            # Randomize example selection
+--seed <string>        # Seed for reproducible randomization
+--output <path>        # Output file path
+--di-only              # Show only @vytches-ddd/di examples
+--fix                  # Auto-fix validation issues
+```
+
 ### Architecture Decision Records
 
 ```bash
@@ -847,6 +881,102 @@ VytchesDDD.configure(container); // Auto-discovers all decorated services
 // Services are automatically registered and available
 const service = VytchesDDD.resolve<UserService>('userService');
 ```
+
+### Framework Integration with Bridge Pattern
+
+**CRITICAL**: Use Bridge Pattern to avoid Double Instance Risk when integrating
+with frameworks like NestJS.
+
+#### NestJS Integration (Recommended Pattern)
+
+```typescript
+// 1. Domain service with VytchesDDD
+@DomainService('userService', {
+  lifetime: ServiceLifetime.Singleton,
+  context: 'UserManagement',
+})
+class UserService {
+  // Business logic with @Resilience, timeouts, etc.
+  async createUser(data: CreateUserData): Promise<Result<User, Error>> {
+    // Business implementation
+  }
+}
+
+// 2. Framework bridge service
+@Injectable()
+export class UserController {
+  private readonly userService: UserService;
+
+  constructor() {
+    // ⭐ Bridge Pattern: Get existing instance from VytchesDDD
+    this.userService = VytchesDDD.resolve<UserService>('userService');
+  }
+
+  @Post('users')
+  async createUser(@Body() userData: CreateUserData) {
+    // Delegate to VytchesDDD instance
+    const result = await this.userService.createUser(userData);
+    // Handle result...
+  }
+}
+
+// 3. Module configuration
+@Module({
+  controllers: [UserController],
+})
+export class UserModule implements OnModuleInit {
+  async onModuleInit() {
+    // ⭐ CRITICAL: Initialize VytchesDDD BEFORE framework DI
+    await VytchesDDD.configure();
+  }
+}
+```
+
+#### Bridge Utility for Complex Scenarios
+
+```typescript
+export class VytchesDDDBridge {
+  static createNestJSProvider<T>(serviceId: string) {
+    return {
+      provide: serviceId,
+      useFactory: () => {
+        const instance = VytchesDDD.resolve<T>(serviceId);
+        if (!instance) {
+          throw new Error(
+            `Service ${serviceId} not found in VytchesDDD container`
+          );
+        }
+        return instance;
+      },
+    };
+  }
+}
+
+@Module({
+  providers: [
+    VytchesDDDBridge.createNestJSProvider<UserService>('userService'),
+    VytchesDDDBridge.createNestJSProvider<OrderService>('orderService'),
+  ],
+})
+export class DomainModule implements OnModuleInit {
+  async onModuleInit() {
+    await VytchesDDD.configure();
+  }
+}
+```
+
+### Key Principles for Framework Integration
+
+1. **VytchesDDD First**: Always initialize VytchesDDD container before framework
+   DI
+2. **Single Instance**: Use factory pattern to get existing instances, never
+   create new ones
+3. **No Dual Decorators**: Either `@DomainService` OR `@Injectable`, never both
+   on same class
+4. **Business Logic in Domain**: Keep business functionality in `@DomainService`
+   classes
+5. **Framework as Bridge**: Framework services are thin wrappers that delegate
+   to VytchesDDD instances
 
 ### Domain Service with DI
 
@@ -1610,7 +1740,317 @@ const policy2 = RetryPolicy.create(basePolicy, config); // Same as above
 const policy3 = PolicyRetryDecorator.create(basePolicy, config); // Same as above
 ```
 
-## Examples and Showcases
+## Examples Infrastructure - Library-First Philosophy
+
+### **CRITICAL: Library-First Framework Integration**
+
+**When creating framework examples, show ONLY the integration points that
+actually use library features.**
+
+- ✅ **INCLUDE**: Direct library usage (ACL setup, event publishing, CQRS
+  handlers)
+- ✅ **INCLUDE**: Framework-specific integration patterns (DI configuration,
+  decorators)
+- ✅ **INCLUDE**: Essential configuration that enables library features
+- ❌ **EXCLUDE**: Complete application implementations (controllers, guards,
+  interceptors)
+- ❌ **EXCLUDE**: Business logic not related to library features
+- ❌ **EXCLUDE**: Framework ceremony (DTOs, validation, authentication)
+- ❌ **EXCLUDE**: Repository patterns unless they're part of the library feature
+
+**Core Principle**: "We don't want to show the framework, but our library"
+
+### **MANDATORY: Example Generation Pattern**
+
+**When generating ANY example, follow this strict pattern:**
+
+#### **1. Domain/Basic Examples (\*.md files in basic/)**
+
+````markdown
+# [ComponentName] - [ComplexityLevel] Example
+
+**Version**: [current-version] **Package**: @vytches-ddd/[package-name]
+**Complexity**: [beginner|intermediate|advanced] **Domain**: [domain-name]
+**Patterns**: [pattern1, pattern2, pattern3] **Dependencies**:
+[list-of-dependencies]
+
+## Description
+
+[What this example demonstrates - library usage focus]
+
+## Business Context
+
+[Why this pattern is useful - business scenario]
+
+## Code Example
+
+```typescript
+// [filename].ts
+import { [LibraryClasses] } from '@vytches-ddd/[package]';
+import { [ExistingTypes] } from './types'; // ALWAYS import existing types
+
+// ✅ FOCUS: Library implementation only
+export class [ComponentName] extends [LibraryBaseClass] {
+  // Implementation using library features
+}
+```
+````
+
+## Key Features
+
+- [Library-specific features demonstrated]
+
+## Common Pitfalls
+
+- [Mistakes to avoid when using library]
+
+## Related Examples
+
+- [Links to related examples]
+
+````
+
+#### **2. Framework Examples (*.md files in frameworks/)**
+
+**HYBRID APPROACH**: Create separate files for manual and DI approaches
+
+**A. Manual Setup (Beginner) - manual.md**
+```markdown
+# [ComponentName] - [Framework] Manual Setup
+
+**Focus**: Basic [LibraryClass] usage in [Framework] with manual instantiation
+**Base Example**: [link-to-basic-example]
+**Dependencies**: [framework-deps], @vytches-ddd/[package]
+
+## Service Implementation
+```typescript
+// [component].service.ts
+import { Injectable } from '@nestjs/common';
+import { [LibraryClass] } from '@vytches-ddd/[package]';
+import { [ExistingTypes] } from './types'; // ALWAYS import from app
+
+@Injectable()
+export class [ComponentName]Service {
+  private readonly [libraryInstance]: [LibraryClass];
+
+  constructor() {
+    // ⭐ FOCUS: Manual library setup (beginner-friendly)
+    this.[libraryInstance] = new [LibraryClass]([config]);
+  }
+
+  // ✅ FOCUS: Thin wrapper around library
+  async [method](): Promise<Result<[Type], Error>> {
+    return await this.[libraryInstance].[method]();
+  }
+}
+````
+
+**Key Points:**
+
+- Simple manual instantiation for beginners
+- Focus on library usage, not DI complexity
+- Standard NestJS patterns for framework integration
+
+````
+
+**B. DI Integration (Intermediate+) - di.md**
+```markdown
+# [ComponentName] - [Framework] DI Integration
+
+**Focus**: Advanced [LibraryClass] usage with @vytches-ddd/di integration
+**Base Example**: [link-to-basic-example]
+**Dependencies**: [framework-deps], @vytches-ddd/[package], @vytches-ddd/di
+
+## Service Implementation
+```typescript
+// [component].service.ts
+import { Injectable } from '@nestjs/common';
+import { VytchesDDD } from '@vytches-ddd/di';
+import { [ExistingTypes] } from './types'; // ALWAYS import from app
+
+@Injectable()
+export class [ComponentName]Service {
+  private readonly [libraryInstance]: [LibraryClass];
+
+  constructor() {
+    // ⭐ FOCUS: @vytches-ddd/di integration
+    this.[libraryInstance] = VytchesDDD.resolve<[LibraryClass]>('[serviceId]');
+  }
+
+  // ✅ FOCUS: Thin wrapper around library
+  async [method](): Promise<Result<[Type], Error>> {
+    return await this.[libraryInstance].[method]();
+  }
+}
+````
+
+**Key Points:**
+
+- Advanced DI integration with @vytches-ddd/di
+- Service locator pattern usage
+- Enterprise-grade dependency management
+
+````
+
+#### **3. STRICT VALIDATION CHECKLIST**
+**Before creating ANY example, verify:**
+
+- [ ] **NO generated interfaces/DTOs**: All types imported from `./types` or similar
+- [ ] **NO business logic in framework services**: Keep as thin wrappers
+- [ ] **SEPARATE FILES**: manual.md for beginners, di.md for intermediate+
+- [ ] **APPROPRIATE APPROACH**: Manual setup for beginner, @vytches-ddd/di for advanced
+- [ ] **NO unnecessary files**: interfaces.md, config.md unless library-specific
+- [ ] **LIBRARY FOCUS**: Every code block shows actual library usage
+- [ ] **PROPER IMPORTS**: All external types imported with comments
+- [ ] **MARKDOWN LINTING**: Proper trailing newlines and formatting
+- [ ] **DOCUMENTATION**: Clear focus on library integration points
+
+#### **4. FORBIDDEN PATTERNS**
+```typescript
+// ❌ NEVER DO THIS - Creating interfaces
+export interface User {
+  id: string;
+  email: string;
+}
+
+// ❌ NEVER DO THIS - Business logic in service
+async createUser(userData: CreateUserData): Promise<User> {
+  const user: User = {
+    id: generateId(),
+    email: userData.email,
+    // ... more business logic
+  };
+  return await this.acl.createUser(user);
+}
+
+// ❌ NEVER DO THIS - Manual instantiation in constructor
+constructor(api: ExternalAPI) {
+  this.acl = new UserManagementACL(api, translator);
+}
+````
+
+#### **5. REQUIRED PATTERNS**
+
+```typescript
+// ✅ ALWAYS DO THIS - Import existing types
+import { User, CreateUserData } from './types'; // From your app
+
+// ✅ ALWAYS DO THIS - Thin wrapper service
+async createUser(userData: CreateUserData): Promise<Result<User, Error>> {
+  return await this.acl.createUser(userData);
+}
+
+// ✅ ALWAYS DO THIS - DI injection
+constructor(
+  private readonly acl: UserManagementACL // Pre-configured instance
+) {}
+```
+
+### **VALIDATION COMMAND**
+
+Run this mental checklist before submitting ANY example:
+
+1. Does it show library usage prominently?
+2. Are all types imported from application?
+3. Is framework service a thin wrapper?
+4. Does it avoid generating supporting code?
+5. Does it follow established patterns?
+
+**Framework-Specific Guidelines**:
+
+**NestJS Examples**:
+
+- ✅ **USE STANDARD NestJS DI**: Standard @Injectable(), useFactory patterns for
+  framework integration
+- ✅ **LIBRARY DI HYBRID APPROACH**: Separate files for manual setup vs
+  @vytches-ddd/di integration
+- ✅ **BEGINNER = MANUAL SETUP**: Basic examples use manual library
+  instantiation (simple, clear)
+- ✅ **INTERMEDIATE+ = LIBRARY DI**: Advanced examples show @vytches-ddd/di
+  integration (@DomainService, VytchesDDD.resolve())
+- ✅ **SEPARATE FILES**: manual.md and di.md files that can be merged in output
+- ✅ **KEEP SIMPLE**: 1-3 methods max, focus on core library operations
+- ✅ **IMPORT EXISTING**: Import ALL DTOs, interfaces from application (don't
+  create ANY)
+- ✅ **ASSUME EXISTS**: Assume User, CreateUserData, UpdateUserData exist in
+  application
+- ❌ **AVOID**: Creating interfaces, DTOs, types, or any supporting code
+- ❌ **AVOID**: Business logic in framework services (keep as thin wrapper)
+- ❌ **AVOID**: Mixing manual and DI approaches in same example file
+
+**Error Handling**:
+
+- ✅ **USE standard try/catch**: Simple, clear error handling in implementation
+  code
+- ✅ **USE safeRun in tests**: Always use safeRun from @vytches-ddd/utils in
+  test files
+- ❌ **AVOID safeRun in implementation**: Don't use safeRun in usage examples or
+  service code
+- ❌ **AVOID logging**: Skip unnecessary logging in examples
+
+**Code Style**:
+
+- ✅ **KEEP SIMPLE**: Focus on library integration, not complex patterns
+- ✅ **USE framework conventions**: Follow each framework's standard patterns
+- ✅ **ASSUME EXTERNAL CODE**: Import and use existing DTOs, services,
+  interfaces
+- ❌ **AVOID over-engineering**: Don't add complexity that doesn't show library
+  usage
+- ❌ **AVOID creating supporting code**: Don't generate DTOs, validation, etc.
+
+### Philosophy: "Show Library, Not Framework"
+
+```typescript
+// ✅ CORRECT: Service that actually uses library features with DI
+@Injectable()
+export class PaymentService {
+  constructor(private readonly paymentACL: PaymentACLService) {}
+
+  async processPayment(payment: Payment): Promise<Payment> {
+    // ⭐ Main focus: Use our ACL from @vytches-ddd/acl
+    try {
+      return await this.paymentACL.execute('process', payment);
+    } catch (error) {
+      throw new Error(`Payment failed: ${error.message}`);
+    }
+  }
+}
+
+// ❌ WRONG: Complex business logic that doesn't show library
+@Injectable()
+export class OrderService {
+  async validateOrder(order: Order): Promise<void> {
+    // Complex validation logic
+    // Repository operations
+    // Business rules
+    // NO LIBRARY USAGE - this shouldn't be in library examples
+  }
+}
+```
+
+### Framework Examples Structure
+
+**Only include files that demonstrate meaningful library integration:**
+
+```
+packages/[package]/examples/
+├── basic/                             # Domain-focused examples
+│   ├── business-policy/
+│   │   ├── domain.md                 # Core library implementation
+│   │   ├── interfaces.md             # Supporting contracts
+│   │   └── usage.md                  # Usage patterns
+├── frameworks/                       # Framework integrations
+│   └── nestjs/
+│       └── business-policy/
+│           └── service.md            # ONLY file - shows library usage
+```
+
+**Files to EXCLUDE from framework examples:**
+
+- `module.md` - Just DI configuration, no library features
+- `controller.md` - HTTP handling, no library interaction
+- `dto.md` - Framework validation, not library feature
+- `repository.md` - External concern unless using library repository patterns
 
 ### Available Examples
 

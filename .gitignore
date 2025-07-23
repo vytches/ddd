@@ -112,5 +112,15 @@ packages/*/src/**/*.d.ts
 examples/*/src/**/*.js
 examples/*/src/**/*.js.map
 examples/*/src/**/*.d.ts
+
+# Generated metadata files (should be built, not committed)
+packages/*/examples/metadata.js
+packages/*/examples/metadata.d.ts
+packages/*/examples/metadata.cjs
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# CLI chat history sessions (generated during development/testing)
+.vytches-ddd/
+**/.vytches-ddd/
+**/session-*.json

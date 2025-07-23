@@ -4,7 +4,8 @@
  * AI-assisted workflow management for complex CLI operations
  */
 
-import type { WorkflowStep, WorkflowContext } from '../../types';
+import type { WorkflowStep } from '../../types';
+import type { WorkflowContext } from '../../workflows/types';
 import { CLIError } from '../../types';
 import { Prompts } from '../utils/prompts';
 import { Colors } from '../utils/colors';
@@ -44,6 +45,15 @@ export class WorkflowEngine {
 
   constructor(initialContext: Partial<WorkflowContext> = {}) {
     this.context = {
+      workflowType: 'default',
+      step: 0,
+      totalSteps: 0,
+      data: {},
+      metadata: {
+        startedAt: new Date(),
+        lastModified: new Date(),
+        sessionId: `workflow-${Date.now()}`,
+      },
       answers: {},
       config: {} as any, // Will be injected
       outputPath: './src',
@@ -154,7 +164,7 @@ export class WorkflowEngine {
       this.currentStep = this.getNextStep(step);
 
       // Show progress
-      if (this.context.config.debug) {
+      if (this.context.config?.debug) {
         const duration = Performance.since(startTime);
         console.log(Colors.dim(`Step completed in ${duration.toFixed(1)}ms`));
       }
@@ -247,7 +257,9 @@ export class WorkflowEngine {
     }
 
     // Store answer in context
-    this.context.answers[step.id] = answer;
+    if (this.context.answers) {
+      this.context.answers[step.id] = answer;
+    }
   }
 
   /**

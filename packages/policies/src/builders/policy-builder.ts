@@ -15,7 +15,9 @@ import type {
 import { PolicyStepBuilder } from './policy-step-builder';
 import { PolicyGroup } from './policy-group';
 import { ConditionalPolicyBuilder } from './conditional-policy-builder';
-import type { PolicyViolationSeverity } from '../core/models/policy-violation';
+import type { PolicyViolationSeverity, PolicyViolation } from '../core/models/policy-violation';
+import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { Result } from '@vytches-ddd/utils';
 
 /**
  * @llm-summary PolicyBuilder class for policy builder operations
@@ -159,7 +161,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
    * Add a custom predicate that must be satisfied
    */
   public mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: unknown) => boolean,
     errorCode: string,
     errorMessage: string
   ): IPolicyStepBuilder<T> {
@@ -180,7 +182,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
    * Add a custom async predicate that must be satisfied
    */
   public mustSatisfyAsync(
-    predicate: (entity: T, context?: any) => Promise<boolean>,
+    predicate: (entity: T, context?: unknown) => Promise<boolean>,
     errorCode: string,
     errorMessage: string
   ): IPolicyStepBuilder<T> {
@@ -238,7 +240,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   /**
    * Add conditional logic to the policy
    */
-  public when(condition: (entity: T, context?: any) => boolean): IConditionalPolicyBuilder<T> {
+  public when(condition: (entity: T, context?: unknown) => boolean): IConditionalPolicyBuilder<T> {
     return new ConditionalPolicyBuilder(this, condition);
   }
 
@@ -369,7 +371,9 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
         );
 
       default:
-        throw new Error(`Unsupported step type for single policy: ${(step as any).type}`);
+        throw new Error(
+          `Unsupported step type for single policy: ${(step as { type: string }).type}`
+        );
     }
   }
 
@@ -414,8 +418,8 @@ export interface PolicyBuildStep<T> {
     | 'conditional';
   specification?: ISpecification<T>;
   asyncSpecification?: IAsyncSpecification<T>;
-  predicate?: (entity: T, context?: any) => boolean;
-  asyncPredicate?: (entity: T, context?: any) => Promise<boolean>;
+  predicate?: (entity: T, context?: unknown) => boolean;
+  asyncPredicate?: (entity: T, context?: unknown) => Promise<boolean>;
   rulesBuilder?: (entity: T) => boolean;
   groups?: IPolicyGroup<T>[];
   isRequired: boolean;
@@ -434,7 +438,7 @@ class PredicatePolicy<T> extends BaseBusinessPolicy<T> {
     id: string,
     domain: string,
     name: string,
-    private readonly predicate: (entity: T, context?: any) => boolean,
+    private readonly predicate: (entity: T, context?: unknown) => boolean,
     private readonly errorCode: string,
     private readonly errorMessage: string,
     private readonly severity: PolicyViolationSeverity
@@ -442,7 +446,7 @@ class PredicatePolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     try {
       const satisfied = this.predicate(request.entity, request.context);
 
@@ -473,7 +477,7 @@ class AsyncPredicatePolicy<T> extends BaseBusinessPolicy<T> {
     id: string,
     domain: string,
     name: string,
-    private readonly predicate: (entity: T, context?: any) => Promise<boolean>,
+    private readonly predicate: (entity: T, context?: unknown) => Promise<boolean>,
     private readonly errorCode: string,
     private readonly errorMessage: string,
     private readonly severity: PolicyViolationSeverity
@@ -481,7 +485,7 @@ class AsyncPredicatePolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     try {
       const satisfied = await this.predicate(request.entity, request.context);
 
@@ -520,7 +524,7 @@ class RulesPolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     try {
       const satisfied = this.rulesBuilder(request.entity);
 
@@ -557,7 +561,7 @@ class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     // For now, implement simple AND logic for all steps
     // TODO: Implement proper logic operators based on step configuration
 
@@ -600,7 +604,9 @@ class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
 
       // TODO: Implement other step types
       default:
-        throw new Error(`Unsupported step type in composite policy: ${(step as any).type}`);
+        throw new Error(
+          `Unsupported step type in composite policy: ${(step as { type: string }).type}`
+        );
     }
   }
 }

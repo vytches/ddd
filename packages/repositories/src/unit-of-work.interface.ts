@@ -64,7 +64,7 @@ export interface IUnitOfWork {
    * @throws {Error} If the repository with the specified name is not registered
    * @memberof IUnitOfWork
    */
-  getRepository<T extends IRepository<any>>(name: string): T;
+  getRepository<T extends IRepository<{ getId(): unknown }>>(name: string): T;
 
   /**
    * Registers a repository with this Unit of Work.
@@ -75,7 +75,10 @@ export interface IUnitOfWork {
    * @param {T} repository The repository instance to register
    * @memberof IUnitOfWork
    */
-  registerRepository<T extends IRepository<any>>(name: string, repository: T): void;
+  registerRepository<T extends IRepository<{ getId(): unknown }>>(
+    name: string,
+    repository: T
+  ): void;
 
   /**
    * Gets the domain event bus associated with this Unit of Work.

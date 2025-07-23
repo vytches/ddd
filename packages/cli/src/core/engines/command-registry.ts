@@ -108,7 +108,7 @@ export class CommandRegistry {
         const description = option.description;
         const defaultValue = option.defaultValue;
 
-        const opt = cmd.option(flags, description, defaultValue);
+        cmd.option(flags, description, defaultValue);
         if (option.choices) {
           // Commander.js doesn't have runtime choices validation by default
           // We'll handle this in the action function if needed

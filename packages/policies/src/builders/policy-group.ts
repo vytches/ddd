@@ -6,7 +6,9 @@ import {
   SpecificationPolicy,
   AsyncSpecificationPolicy,
 } from '../core/base/base-business-policy';
-import type { PolicyViolationSeverity } from '../core/models/policy-violation';
+import type { PolicyViolationSeverity, PolicyViolation } from '../core/models/policy-violation';
+import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { Result } from '@vytches-ddd/utils';
 
 /**
  * @llm-summary PolicyGroup class for policy group operations
@@ -82,7 +84,7 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
    * Add a custom predicate that must be satisfied in this group
    */
   public mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: unknown) => boolean,
     errorCode: string,
     errorMessage: string
   ): IPolicyGroupStepBuilder<T> {
@@ -257,7 +259,7 @@ export class PolicyGroupStepBuilder<T> implements IPolicyGroupStepBuilder<T> {
    * Add a custom predicate that must be satisfied in this group
    */
   public mustSatisfy(
-    predicate: (entity: T, context?: any) => boolean,
+    predicate: (entity: T, context?: unknown) => boolean,
     errorCode: string,
     errorMessage: string
   ): IPolicyGroupStepBuilder<T> {
@@ -295,7 +297,7 @@ export interface PolicyGroupStep<T> {
   type: 'specification' | 'async-specification' | 'predicate';
   specification?: ISpecification<T>;
   asyncSpecification?: IAsyncSpecification<T>;
-  predicate?: (entity: T, context?: any) => boolean;
+  predicate?: (entity: T, context?: unknown) => boolean;
   isRequired: boolean;
   errorCode: string;
   errorMessage: string;
@@ -320,7 +322,7 @@ class GroupPredicatePolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     try {
       const satisfied = this.predicate(request.entity, request.context);
 
@@ -356,7 +358,7 @@ class GroupCompositePolicy<T> extends BaseBusinessPolicy<T> {
     super(id, domain, name);
   }
 
-  public async check(request: any): Promise<any> {
+  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
     // Implement AND logic for all steps in the group
     for (const step of this.steps) {
       const stepPolicy = this.createPolicyFromStep(step);

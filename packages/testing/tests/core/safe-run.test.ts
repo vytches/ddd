@@ -7,15 +7,22 @@ import {
   safeRunWithTimeout,
   type SafeRunResult,
 } from '../../src';
-import {
-  IDomainError,
-  type DomainErrorOptions,
-  DomainErrorCode,
-} from '@vytches-ddd/domain-primitives';
+// Local test implementation to avoid circular dependency
+interface TestDomainErrorOptions {
+  code: string;
+  data?: Record<string, unknown>;
+}
 
-class TestDomainError extends IDomainError {
-  constructor(message: string) {
-    super(message, { code: DomainErrorCode.Default } as DomainErrorOptions);
+class TestDomainError extends Error {
+  public readonly code: string;
+  public data?: Record<string, unknown>;
+
+  constructor(message: string, options: TestDomainErrorOptions = { code: 'DEFAULT' }) {
+    super(message);
+    this.name = 'TestDomainError';
+    this.code = options.code;
+    // @ts-expect-error expecting data to be optional
+    this.data = options.data;
   }
 }
 
@@ -125,7 +132,7 @@ describe('safeRunTest', () => {
   it('should add test context to BaseError instances', () => {
     const testContext = 'UserService.createUser test';
     const result = safeRunTest(() => {
-      throw new TestDomainError('domain validation failed');
+      throw new TestDomainError('domain validation failed', { code: 'DOMAIN_ERROR' });
     }, testContext) as SafeRunResult<never, TestDomainError>;
 
     const [error, value] = result;
@@ -140,7 +147,7 @@ describe('safeRunTest', () => {
   it('should add test context to BaseError instances in async operations', async () => {
     const testContext = 'OrderService.processOrder test';
     const result = (await safeRunTest(async () => {
-      throw new TestDomainError('async domain error');
+      throw new TestDomainError('async domain error', { code: 'ASYNC_ERROR' });
     }, testContext)) as SafeRunResult<never, TestDomainError>;
 
     const [error, value] = result;
@@ -210,15 +217,15 @@ describe('expectError', () => {
 
   it('should work with BaseError hierarchy', () => {
     const result: SafeRunResult<string, TestDomainError> = safeRun(() => {
-      throw new TestDomainError('domain error');
+      throw new TestDomainError('domain error', { code: 'DOMAIN_ERROR' });
     });
 
     const errorExtractor = expectError(TestDomainError);
     const error = errorExtractor(result);
 
     expect(error).toBeInstanceOf(TestDomainError);
-    expect(error).toBeInstanceOf(IDomainError);
-    expect(error.code).toBe(DomainErrorCode.Default);
+    expect(error).toBeInstanceOf(Error);
+    expect(error.code).toBe('DOMAIN_ERROR');
   });
 });
 
@@ -298,7 +305,7 @@ describe('safeRunWithTimeout', () => {
   });
 
   it('should return original error when operation fails before timeout', async () => {
-    const originalError = new TestDomainError('operation failed');
+    const originalError = new TestDomainError('operation failed', { code: 'OPERATION_FAILED' });
     const result = await safeRunWithTimeout(async () => {
       throw originalError;
     }, 1000);
@@ -312,7 +319,7 @@ describe('safeRunWithTimeout', () => {
     const testContext = 'AggregateService.test';
     const result = await safeRunWithTimeout(
       async () => {
-        throw new TestDomainError('async domain error');
+        throw new TestDomainError('async domain error', { code: 'ASYNC_DOMAIN_ERROR' });
       },
       1000,
       testContext
@@ -359,7 +366,7 @@ describe('integration with existing testing patterns', () => {
       // Business logic that might throw domain errors
       const isValid = false;
       if (!isValid) {
-        throw new TestDomainError('Invalid aggregate state');
+        throw new TestDomainError('Invalid aggregate state', { code: 'INVALID_STATE' });
       }
       return { id: 1, state: 'valid' };
     };
@@ -370,7 +377,7 @@ describe('integration with existing testing patterns', () => {
     ) as SafeRunResult<{ id: number; state: string }, TestDomainError>;
     const error = expectError(TestDomainError)(result);
 
-    expect(error.code).toBe(DomainErrorCode.Default);
+    expect(error.code).toBe('INVALID_STATE');
     expect((error.data as { testContext?: string })?.testContext).toBe(
       'AggregateRoot.businessOperation'
     );

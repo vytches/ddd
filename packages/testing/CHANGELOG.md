@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.3.0 (2025-07-23)
+
+### ✨ Features
+
+- **docs:** linter and formatter run
+  ([8f33d3f](https://github.com/vytches/vytches-ddd/commit/8f33d3f4d92e18b970c1f8e46d9d62064ec3742a))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.2.0 (2025-07-16)
 
 ### ✨ Features
