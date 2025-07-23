@@ -1,19 +1,22 @@
 # NestJS Service Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging + NestJS
-**Complexity**: basic
-**Framework**: NestJS
-**Integration**: Complete service integration with logging middleware
-**Dependencies**: @nestjs/common, @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging + NestJS **Complexity**:
+basic **Framework**: NestJS **Integration**: Complete service integration with
+logging middleware **Dependencies**: @nestjs/common, @vytches-ddd/logging
 
 ## Description
 
-Complete NestJS service integration with logging middleware, request/response tracking, and comprehensive error handling. This example demonstrates production-ready logging patterns for NestJS applications with middleware integration and service-wide logging strategies.
+Complete NestJS service integration with logging middleware, request/response
+tracking, and comprehensive error handling. This example demonstrates
+production-ready logging patterns for NestJS applications with middleware
+integration and service-wide logging strategies.
 
 ## Business Context
 
-Production NestJS applications require comprehensive logging that captures HTTP requests, service operations, and system events while maintaining performance. This integration provides complete observability for debugging issues, monitoring performance, and understanding user behavior patterns.
+Production NestJS applications require comprehensive logging that captures HTTP
+requests, service operations, and system events while maintaining performance.
+This integration provides complete observability for debugging issues,
+monitoring performance, and understanding user behavior patterns.
 
 ## Code Example
 
@@ -56,21 +59,30 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     // ⭐ FOCUS: Production-ready logger configuration
     const config: LoggerConfiguration = {
-      level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+      level:
+        process.env.LOG_LEVEL ||
+        (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
       enableConsoleOutput: true,
       enableFileOutput: process.env.NODE_ENV === 'production',
-      
+
       contextDetection: {
         enabled: true,
         stackTraceAnalysis: true,
-        boundedContextDetection: true
+        boundedContextDetection: true,
       },
-      
+
       masking: {
         enabled: true,
         sensitiveKeys: [
-          'password', 'secret', 'token', 'apiKey', 'cardNumber',
-          'ssn', 'phoneNumber', 'authorization', 'cookie'
+          'password',
+          'secret',
+          'token',
+          'apiKey',
+          'cardNumber',
+          'ssn',
+          'phoneNumber',
+          'authorization',
+          'cookie',
         ],
         replacement: '[MASKED]',
         customMaskers: {
@@ -78,24 +90,24 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
             const [local, domain] = email.split('@');
             return `${local[0]}***@${domain}`;
           },
-          phone: (phone: string) => phone.replace(/\d(?=\d{4})/g, '*')
-        }
+          phone: (phone: string) => phone.replace(/\d(?=\d{4})/g, '*'),
+        },
       },
-      
+
       formatting: {
         colorize: process.env.NODE_ENV === 'development',
         timestamp: true,
-        prettyPrint: process.env.NODE_ENV === 'development'
-      }
+        prettyPrint: process.env.NODE_ENV === 'development',
+      },
     };
 
     Logger.configure(config);
     this.logger = Logger.forContext('LoggingService');
-    
+
     this.logger.info('Logging system initialized', {
       environment: process.env.NODE_ENV,
       logLevel: config.level,
-      version: process.env.npm_package_version || '1.0.0'
+      version: process.env.npm_package_version || '1.0.0',
     });
   }
 
@@ -113,10 +125,13 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ⭐ FOCUS: Create contextual loggers
-  createLogger(context: string, additionalContext?: Record<string, any>): Logger {
+  createLogger(
+    context: string,
+    additionalContext?: Record<string, any>
+  ): Logger {
     return Logger.forContext(context).withContext({
       requestId: this.requestId,
-      ...additionalContext
+      ...additionalContext,
     });
   }
 
@@ -126,7 +141,7 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
       ...startupInfo,
       timestamp: new Date(),
       processId: process.pid,
-      nodeVersion: process.version
+      nodeVersion: process.version,
     });
   }
 
@@ -134,39 +149,48 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
     this.logger.info('Application shutdown initiated', {
       uptime: process.uptime(),
       timestamp: new Date(),
-      processId: process.pid
+      processId: process.pid,
     });
   }
 
   // ⭐ FOCUS: Business event logging
-  logBusinessEvent(event: string, data: Record<string, any>, level: 'info' | 'warn' | 'error' = 'info'): void {
+  logBusinessEvent(
+    event: string,
+    data: Record<string, any>,
+    level: 'info' | 'warn' | 'error' = 'info'
+  ): void {
     this.logger[level](`Business event: ${event}`, {
       event,
       data,
       requestId: this.requestId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   // ⭐ FOCUS: Performance metric logging
-  logPerformanceMetric(operation: string, duration: number, additionalMetrics?: Record<string, any>): void {
+  logPerformanceMetric(
+    operation: string,
+    duration: number,
+    additionalMetrics?: Record<string, any>
+  ): void {
     const performanceCategory = this.categorizePerformance(duration);
-    
+
     this.logger.info('Performance metric', {
       operation,
       duration,
       performanceCategory,
       requestId: this.requestId,
       ...additionalMetrics,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
-    if (duration > 5000) { // Log slow operations
+    if (duration > 5000) {
+      // Log slow operations
       this.logger.warn('Slow operation detected', {
         operation,
         duration,
         threshold: 5000,
-        requestId: this.requestId
+        requestId: this.requestId,
       });
     }
   }
@@ -181,7 +205,12 @@ export class LoggingService implements OnModuleInit, OnModuleDestroy {
 }
 
 // request-logging.interceptor.ts - HTTP request/response logging
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/core';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request, Response } from 'express';
@@ -193,9 +222,11 @@ export class RequestLoggingInterceptor implements NestInterceptor {
   constructor(private readonly loggingService: LoggingService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest<Request & { requestId?: string }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { requestId?: string }>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     // Generate unique request ID
     const requestId = uuidv4();
     request.requestId = requestId;
@@ -214,11 +245,11 @@ export class RequestLoggingInterceptor implements NestInterceptor {
       headers: this.sanitizeHeaders(request.headers),
       query: request.query,
       contentLength: request.get('content-length') || 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return next.handle().pipe(
-      tap((data) => {
+      tap(data => {
         const duration = Date.now() - startTime;
         const responseSize = JSON.stringify(data || {}).length;
 
@@ -230,17 +261,17 @@ export class RequestLoggingInterceptor implements NestInterceptor {
           statusCode: response.statusCode,
           duration,
           responseSize,
-          performanceCategory: this.categorizePerformance(duration)
+          performanceCategory: this.categorizePerformance(duration),
         });
 
         // Log performance metrics
         this.loggingService.logPerformanceMetric('http_request', duration, {
           endpoint: `${request.method} ${request.route?.path || request.url}`,
           statusCode: response.statusCode,
-          responseSize
+          responseSize,
         });
       }),
-      catchError((error) => {
+      catchError(error => {
         const duration = Date.now() - startTime;
 
         // ⭐ FOCUS: Log request error
@@ -251,7 +282,7 @@ export class RequestLoggingInterceptor implements NestInterceptor {
           duration,
           error: error,
           errorMessage: error?.message,
-          statusCode: error?.status || 500
+          statusCode: error?.status || 500,
         });
 
         throw error;
@@ -261,13 +292,13 @@ export class RequestLoggingInterceptor implements NestInterceptor {
 
   private sanitizeHeaders(headers: Record<string, any>): Record<string, any> {
     const sanitized = { ...headers };
-    
+
     // Remove sensitive headers
     delete sanitized.authorization;
     delete sanitized.cookie;
     delete sanitized['x-api-key'];
     delete sanitized['x-auth-token'];
-    
+
     return sanitized;
   }
 
@@ -281,7 +312,12 @@ export class RequestLoggingInterceptor implements NestInterceptor {
 }
 
 // performance.interceptor.ts - Performance monitoring
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/core';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { LoggingService } from './logging.service';
@@ -303,17 +339,27 @@ export class PerformanceInterceptor implements NestInterceptor {
         const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
 
         // ⭐ FOCUS: Log method performance
-        this.loggingService.logPerformanceMetric(`${className}.${methodName}`, duration, {
-          memoryDelta: `${(memoryDelta / 1024 / 1024).toFixed(2)} MB`,
-          heapUsed: `${(endMemory.heapUsed / 1024 / 1024).toFixed(2)} MB`
-        });
+        this.loggingService.logPerformanceMetric(
+          `${className}.${methodName}`,
+          duration,
+          {
+            memoryDelta: `${(memoryDelta / 1024 / 1024).toFixed(2)} MB`,
+            heapUsed: `${(endMemory.heapUsed / 1024 / 1024).toFixed(2)} MB`,
+          }
+        );
       })
     );
   }
 }
 
 // error-logging.filter.ts - Global error handling with logging
-import { Catch, ExceptionFilter, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Catch,
+  ExceptionFilter,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggingService } from './logging.service';
 
@@ -327,10 +373,10 @@ export class ErrorLoggingFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     const logger = this.loggingService.createLogger('ErrorHandler');
-    
+
     const isHttpException = exception instanceof HttpException;
-    const status = isHttpException 
-      ? exception.getStatus() 
+    const status = isHttpException
+      ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const errorResponse = isHttpException
@@ -345,29 +391,37 @@ export class ErrorLoggingFilter implements ExceptionFilter {
       url: request.url,
       statusCode: status,
       error: exception,
-      errorMessage: exception instanceof Error ? exception.message : 'Unknown error',
+      errorMessage:
+        exception instanceof Error ? exception.message : 'Unknown error',
       errorType: exception?.constructor?.name || 'Unknown',
       userAgent: request.get('user-agent'),
       ipAddress: request.ip,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Log business event for significant errors
     if (status >= 500) {
-      this.loggingService.logBusinessEvent('ServerError', {
-        statusCode: status,
-        endpoint: `${request.method} ${request.url}`,
-        errorType: exception?.constructor?.name
-      }, 'error');
+      this.loggingService.logBusinessEvent(
+        'ServerError',
+        {
+          statusCode: status,
+          endpoint: `${request.method} ${request.url}`,
+          errorType: exception?.constructor?.name,
+        },
+        'error'
+      );
     }
 
     response.status(status).json({
       success: false,
       statusCode: status,
-      message: typeof errorResponse === 'string' ? errorResponse : (errorResponse as any)?.message,
+      message:
+        typeof errorResponse === 'string'
+          ? errorResponse
+          : (errorResponse as any)?.message,
       timestamp: new Date().toISOString(),
       path: request.url,
-      requestId: request.requestId
+      requestId: request.requestId,
     });
   }
 }
@@ -390,7 +444,7 @@ export class UserService implements OnModuleInit {
   async createUser(createUserDto: CreateUserRequest): Promise<UserData> {
     const operationLogger = this.loggingService.createLogger('UserService', {
       operation: 'createUser',
-      email: createUserDto.email // Will be masked
+      email: createUserDto.email, // Will be masked
     });
 
     const startTime = Date.now();
@@ -399,22 +453,25 @@ export class UserService implements OnModuleInit {
     operationLogger.info('User creation started', {
       email: createUserDto.email, // Masked
       role: createUserDto.role,
-      hasInitialData: !!createUserDto.initialData
+      hasInitialData: !!createUserDto.initialData,
     });
 
     try {
       // Step 1: Validate input
       await this.validateUserInput(createUserDto, operationLogger);
-      
+
       // Step 2: Check for existing user
       await this.checkUserExists(createUserDto.email, operationLogger);
-      
+
       // Step 3: Create user record
-      const user = await this.saveUserToDatabase(createUserDto, operationLogger);
-      
+      const user = await this.saveUserToDatabase(
+        createUserDto,
+        operationLogger
+      );
+
       // Step 4: Send welcome email
       await this.sendWelcomeEmail(user, operationLogger);
-      
+
       const duration = Date.now() - startTime;
 
       // ⭐ FOCUS: Log successful completion
@@ -423,24 +480,23 @@ export class UserService implements OnModuleInit {
         email: user.email, // Masked
         role: user.role,
         duration,
-        performanceCategory: this.categorizePerformance(duration)
+        performanceCategory: this.categorizePerformance(duration),
       });
 
       // Log business event
       this.loggingService.logBusinessEvent('UserCreated', {
         userId: user.id,
         role: user.role,
-        hasWelcomeEmail: true
+        hasWelcomeEmail: true,
       });
 
       // Log performance metric
       this.loggingService.logPerformanceMetric('createUser', duration, {
         email: createUserDto.email, // Masked
-        role: createUserDto.role
+        role: createUserDto.role,
       });
 
       return user;
-
     } catch (error) {
       const duration = Date.now() - startTime;
       const stage = this.determineFailureStage(error as Error);
@@ -451,30 +507,37 @@ export class UserService implements OnModuleInit {
         error: error,
         stage,
         duration,
-        attemptCount: 1
+        attemptCount: 1,
       });
 
       // Log business event for failures
-      this.loggingService.logBusinessEvent('UserCreationFailed', {
-        email: createUserDto.email, // Masked
-        failureStage: stage,
-        errorMessage: (error as Error).message
-      }, 'error');
+      this.loggingService.logBusinessEvent(
+        'UserCreationFailed',
+        {
+          email: createUserDto.email, // Masked
+          failureStage: stage,
+          errorMessage: (error as Error).message,
+        },
+        'error'
+      );
 
       throw error;
     }
   }
 
-  async updateUser(id: string, updateData: UpdateUserRequest): Promise<UserData> {
+  async updateUser(
+    id: string,
+    updateData: UpdateUserRequest
+  ): Promise<UserData> {
     const operationLogger = this.loggingService.createLogger('UserService', {
       operation: 'updateUser',
-      userId: id
+      userId: id,
     });
 
     operationLogger.info('User update started', {
       userId: id,
       fieldsToUpdate: Object.keys(updateData),
-      updateCount: Object.keys(updateData).length
+      updateCount: Object.keys(updateData).length,
     });
 
     const startTime = Date.now();
@@ -490,18 +553,22 @@ export class UserService implements OnModuleInit {
       const changes = this.detectChanges(existingUser, updateData);
       operationLogger.debug('User changes detected', {
         changes: changes,
-        changeCount: changes.length
+        changeCount: changes.length,
       });
 
       // Update user
-      const updatedUser = await this.updateUserInDatabase(id, updateData, operationLogger);
+      const updatedUser = await this.updateUserInDatabase(
+        id,
+        updateData,
+        operationLogger
+      );
       const duration = Date.now() - startTime;
 
       // ⭐ FOCUS: Log successful update
       operationLogger.info('User update completed', {
         userId: updatedUser.id,
         changedFields: changes,
-        duration
+        duration,
       });
 
       // Log significant changes as business events
@@ -510,20 +577,19 @@ export class UserService implements OnModuleInit {
           userId: id,
           changedFields: changes,
           newRole: updateData.role,
-          newStatus: updateData.isActive
+          newStatus: updateData.isActive,
         });
       }
 
       return updatedUser;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       operationLogger.error('User update failed', {
         userId: id,
         updateData: updateData,
         error: error,
-        duration
+        duration,
       });
 
       throw error;
@@ -533,12 +599,12 @@ export class UserService implements OnModuleInit {
   async deleteUser(id: string): Promise<void> {
     const operationLogger = this.loggingService.createLogger('UserService', {
       operation: 'deleteUser',
-      userId: id
+      userId: id,
     });
 
     operationLogger.warn('User deletion initiated', {
       userId: id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     try {
@@ -556,20 +622,23 @@ export class UserService implements OnModuleInit {
         userId: id,
         userEmail: user.email, // Masked
         userRole: user.role,
-        deletionType: 'soft_delete'
+        deletionType: 'soft_delete',
       });
 
       // Log critical business event
-      this.loggingService.logBusinessEvent('UserDeleted', {
-        userId: id,
-        email: user.email, // Masked
-        role: user.role
-      }, 'warn');
-
+      this.loggingService.logBusinessEvent(
+        'UserDeleted',
+        {
+          userId: id,
+          email: user.email, // Masked
+          role: user.role,
+        },
+        'warn'
+      );
     } catch (error) {
       operationLogger.error('User deletion failed', {
         userId: id,
-        error: error
+        error: error,
       });
 
       throw error;
@@ -577,7 +646,10 @@ export class UserService implements OnModuleInit {
   }
 
   // Helper methods with logging
-  private async validateUserInput(input: CreateUserRequest, logger: Logger): Promise<void> {
+  private async validateUserInput(
+    input: CreateUserRequest,
+    logger: Logger
+  ): Promise<void> {
     logger.debug('Validating user input');
 
     const validationErrors: string[] = [];
@@ -593,7 +665,7 @@ export class UserService implements OnModuleInit {
     if (validationErrors.length > 0) {
       logger.warn('User input validation failed', {
         validationErrors,
-        errorCount: validationErrors.length
+        errorCount: validationErrors.length,
       });
       throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
     }
@@ -606,7 +678,7 @@ export class UserService implements OnModuleInit {
 
     // Simulate database check
     const exists = Math.random() > 0.95; // 5% chance user exists
-    
+
     if (exists) {
       logger.warn('User already exists', { email }); // Masked
       throw new Error('User with this email already exists');
@@ -615,7 +687,10 @@ export class UserService implements OnModuleInit {
     logger.debug('User availability confirmed');
   }
 
-  private async saveUserToDatabase(input: CreateUserRequest, logger: Logger): Promise<UserData> {
+  private async saveUserToDatabase(
+    input: CreateUserRequest,
+    logger: Logger
+  ): Promise<UserData> {
     logger.debug('Saving user to database');
 
     // Simulate database save
@@ -625,60 +700,68 @@ export class UserService implements OnModuleInit {
       email: input.email,
       role: input.role,
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     };
 
     logger.debug('User saved to database', {
       userId: user.id,
-      email: user.email // Masked
+      email: user.email, // Masked
     });
 
     return user;
   }
 
-  private async sendWelcomeEmail(user: UserData, logger: Logger): Promise<void> {
+  private async sendWelcomeEmail(
+    user: UserData,
+    logger: Logger
+  ): Promise<void> {
     logger.debug('Sending welcome email', {
       userId: user.id,
-      email: user.email // Masked
+      email: user.email, // Masked
     });
 
     // Simulate email sending
-    if (Math.random() > 0.9) { // 10% failure rate
+    if (Math.random() > 0.9) {
+      // 10% failure rate
       logger.error('Welcome email failed', {
         userId: user.id,
-        email: user.email // Masked
+        email: user.email, // Masked
       });
       throw new Error('Failed to send welcome email');
     }
 
     logger.info('Welcome email sent', {
       userId: user.id,
-      email: user.email // Masked
+      email: user.email, // Masked
     });
   }
 
   // Additional helper methods...
   private async findUserById(id: string): Promise<UserData | null> {
     if (id === 'user-not-found') return null;
-    
+
     return {
       id,
       name: 'John Doe',
       email: 'john@example.com',
       role: 'user',
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     };
   }
 
-  private async updateUserInDatabase(id: string, updateData: UpdateUserRequest, logger: Logger): Promise<UserData> {
+  private async updateUserInDatabase(
+    id: string,
+    updateData: UpdateUserRequest,
+    logger: Logger
+  ): Promise<UserData> {
     logger.debug('Updating user in database', { userId: id });
-    
+
     const existing = await this.findUserById(id);
     return {
       ...existing!,
       ...updateData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -687,11 +770,17 @@ export class UserService implements OnModuleInit {
     // Simulate soft delete operation
   }
 
-  private detectChanges(existing: UserData, updates: UpdateUserRequest): string[] {
+  private detectChanges(
+    existing: UserData,
+    updates: UpdateUserRequest
+  ): string[] {
     const changes: string[] = [];
-    
+
     Object.keys(updates).forEach(key => {
-      if (existing[key as keyof UserData] !== updates[key as keyof UpdateUserRequest]) {
+      if (
+        existing[key as keyof UserData] !==
+        updates[key as keyof UpdateUserRequest]
+      ) {
         changes.push(key);
       }
     });
@@ -702,8 +791,10 @@ export class UserService implements OnModuleInit {
   private determineFailureStage(error: Error): string {
     const message = error.message.toLowerCase();
     if (message.includes('validation')) return 'validation';
-    if (message.includes('exists') || message.includes('duplicate')) return 'duplicate_check';
-    if (message.includes('database') || message.includes('save')) return 'database_save';
+    if (message.includes('exists') || message.includes('duplicate'))
+      return 'duplicate_check';
+    if (message.includes('database') || message.includes('save'))
+      return 'database_save';
     if (message.includes('email')) return 'welcome_email';
     return 'unknown';
   }
@@ -725,18 +816,18 @@ import { LoggingService } from './logging/logging.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Get logging service
   const loggingService = app.get(LoggingService);
-  
+
   // Set up global error filter
   app.useGlobalFilters(new ErrorLoggingFilter(loggingService));
-  
+
   // Log application startup
   loggingService.logApplicationStartup({
     port: process.env.PORT || 3000,
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 
   await app.listen(process.env.PORT || 3000);
@@ -748,7 +839,7 @@ async function bootstrap() {
   });
 }
 
-bootstrap().catch((error) => {
+bootstrap().catch(error => {
   console.error('Application bootstrap failed:', error);
   process.exit(1);
 });
@@ -757,7 +848,7 @@ bootstrap().catch((error) => {
 ## Key Features
 
 - **Complete Request Logging**: Automatic HTTP request/response tracking
-- **Performance Monitoring**: Method execution time and memory usage tracking  
+- **Performance Monitoring**: Method execution time and memory usage tracking
 - **Global Error Handling**: Comprehensive error logging with context
 - **Business Event Logging**: Track important business operations
 - **Service Integration**: Easy integration with existing NestJS services
@@ -775,7 +866,7 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    LoggingModule,  // Import logging module first
+    LoggingModule, // Import logging module first
     UserModule,
     // Other modules
   ],
@@ -792,19 +883,29 @@ const getConfig = (): LoggerConfiguration => ({
   enableConsoleOutput: true,
   enableFileOutput: process.env.NODE_ENV === 'production',
   enableRemoteLogging: process.env.ENABLE_REMOTE_LOGGING === 'true',
-  
+
   masking: {
     enabled: true,
-    sensitiveKeys: process.env.NODE_ENV === 'production'
-      ? ['password', 'secret', 'token', 'apiKey', 'cardNumber', 'ssn', 'email', 'phoneNumber']
-      : ['password', 'secret', 'token', 'apiKey'],
+    sensitiveKeys:
+      process.env.NODE_ENV === 'production'
+        ? [
+            'password',
+            'secret',
+            'token',
+            'apiKey',
+            'cardNumber',
+            'ssn',
+            'email',
+            'phoneNumber',
+          ]
+        : ['password', 'secret', 'token', 'apiKey'],
   },
-  
+
   formatting: {
     colorize: process.env.NODE_ENV === 'development',
     prettyPrint: process.env.NODE_ENV === 'development',
-    timestamp: true
-  }
+    timestamp: true,
+  },
 });
 ```
 
@@ -820,11 +921,14 @@ const getConfig = (): LoggerConfiguration => ({
 
 ## Common Pitfalls
 
-- **Missing Request Context**: Ensure request IDs are propagated throughout request lifecycle
-- **Over-logging in Production**: Use appropriate log levels to avoid performance impact
+- **Missing Request Context**: Ensure request IDs are propagated throughout
+  request lifecycle
+- **Over-logging in Production**: Use appropriate log levels to avoid
+  performance impact
 - **Sensitive Data Exposure**: Ensure comprehensive masking configuration
 - **Memory Leaks**: Properly clean up logging context in long-running operations
-- **Performance Impact**: Monitor logging overhead in high-throughput applications
+- **Performance Impact**: Monitor logging overhead in high-throughput
+  applications
 
 ## Related Examples
 

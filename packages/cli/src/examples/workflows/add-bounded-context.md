@@ -1,12 +1,13 @@
 # Add Bounded Context Workflow
 
-**Focus**: Adding a new bounded context to existing DDD project
-**Time**: 10-20 minutes
-**Result**: New domain integrated with existing contexts
+**Focus**: Adding a new bounded context to existing DDD project **Time**: 10-20
+minutes **Result**: New domain integrated with existing contexts
 
 ## Overview
 
-This workflow shows how to add a new bounded context to an existing VytchesDDD project, ensuring proper integration with current domains and maintaining clean architecture boundaries.
+This workflow shows how to add a new bounded context to an existing VytchesDDD
+project, ensuring proper integration with current domains and maintaining clean
+architecture boundaries.
 
 ## Prerequisites
 
@@ -25,16 +26,17 @@ ls src/domain/
 ```
 
 **Context Map Output:**
+
 ```
 📊 Current Architecture Analysis
 
 Existing Domains:
-├── UserManagement (Customer-Supplier) 
+├── UserManagement (Customer-Supplier)
 │   ├── User aggregate
 │   ├── Authentication services
 │   └── Profile management
 └── OrderManagement (Downstream)
-    ├── Order aggregate  
+    ├── Order aggregate
     ├── Payment processing
     └── Fulfillment tracking
 
@@ -52,10 +54,11 @@ vytches-ddd domain ProductCatalog --guided
 ```
 
 **Guided Analysis:**
+
 ```
 🧠 Domain Analysis Assistant
 
-? What business problem does this domain solve?  
+? What business problem does this domain solve?
 > "Manage product information, pricing, categories, and inventory for e-commerce"
 
 ? How does this relate to existing domains?
@@ -71,7 +74,7 @@ vytches-ddd domain ProductCatalog --guided
   ✓ Category management for navigation
 
 💡 AI Analysis: Product Catalog is a Upstream/Customer domain
-   - Provides product data to OrderManagement  
+   - Provides product data to OrderManagement
    - Receives inventory updates from external systems
    - Publishes pricing and availability events
 
@@ -86,11 +89,12 @@ vytches-ddd domain ProductCatalog --template ecommerce --with-integration
 ```
 
 **Generated Structure:**
+
 ```
 src/domain/product-catalog/
 ├── aggregates/
 │   ├── product.aggregate.ts          # Main product entity
-│   ├── category.aggregate.ts         # Product categorization  
+│   ├── category.aggregate.ts         # Product categorization
 │   └── inventory.aggregate.ts        # Stock management
 ├── entities/
 │   ├── brand.entity.ts
@@ -132,6 +136,7 @@ vytches-ddd generate contract ProductData --for-domains OrderManagement,ProductC
 ```
 
 **Generated Contract:**
+
 ```typescript
 // src/shared/contracts/product-data.contract.ts
 export interface ProductDataContract {
@@ -170,6 +175,7 @@ vytches-ddd domain OrderManagement --add-integration ProductCatalog
 ```
 
 **Updated Order Aggregate:**
+
 ```typescript
 // src/domain/order-management/aggregates/order.aggregate.ts
 import { ProductDataContract } from '@shared/contracts/product-data.contract';
@@ -201,9 +207,11 @@ export class OrderAggregate extends AggregateRoot {
         item.productId,
         item.quantity
       );
-      
+
       if (!isAvailable) {
-        throw new DomainError(`Insufficient stock for product ${item.productId}`);
+        throw new DomainError(
+          `Insufficient stock for product ${item.productId}`
+        );
       }
     }
 
@@ -217,15 +225,17 @@ export class OrderAggregate extends AggregateRoot {
       OrderStatus.CREATED
     );
 
-    order.addDomainEvent(new OrderCreatedEvent(
-      order.id,
-      order.customerId,
-      order.items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.unitPrice
-      }))
-    ));
+    order.addDomainEvent(
+      new OrderCreatedEvent(
+        order.id,
+        order.customerId,
+        order.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.unitPrice,
+        }))
+      )
+    );
 
     return order;
   }
@@ -241,13 +251,16 @@ vytches-ddd generate event-handler InventoryUpdated --domain OrderManagement
 ```
 
 **Generated Event Handler:**
+
 ```typescript
 // src/application/order-management/handlers/product-price-changed.handler.ts
 import { EventHandler, IEventHandler } from '@vytches-ddd/events';
 import { ProductPriceChangedIntegrationEvent } from '@shared/contracts/product-data.contract';
 
 @EventHandler(ProductPriceChangedIntegrationEvent)
-export class ProductPriceChangedHandler implements IEventHandler<ProductPriceChangedIntegrationEvent> {
+export class ProductPriceChangedHandler
+  implements IEventHandler<ProductPriceChangedIntegrationEvent>
+{
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly notificationService: INotificationService
@@ -255,17 +268,17 @@ export class ProductPriceChangedHandler implements IEventHandler<ProductPriceCha
 
   async handle(event: ProductPriceChangedIntegrationEvent): Promise<void> {
     // Find pending orders with this product
-    const pendingOrders = await this.orderRepository.findPendingOrdersWithProduct(
-      event.productId
-    );
+    const pendingOrders =
+      await this.orderRepository.findPendingOrdersWithProduct(event.productId);
 
     for (const order of pendingOrders) {
       // Recalculate order totals if price increased significantly
       const priceIncrease = (event.newPrice - event.oldPrice) / event.oldPrice;
-      
-      if (priceIncrease > 0.1) { // 10% increase threshold
+
+      if (priceIncrease > 0.1) {
+        // 10% increase threshold
         order.recalculateWithNewPrice(event.productId, event.newPrice);
-        
+
         // Notify customer about price change
         await this.notificationService.notifyPriceChange(
           order.customerId,
@@ -275,7 +288,7 @@ export class ProductPriceChangedHandler implements IEventHandler<ProductPriceCha
           event.newPrice
         );
       }
-      
+
       await this.orderRepository.save(order);
     }
   }
@@ -290,6 +303,7 @@ vytches-ddd generate acl ExternalInventory --domain ProductCatalog
 ```
 
 **Generated ACL:**
+
 ```typescript
 // src/domain/product-catalog/acl/external-inventory.acl.ts
 export class ExternalInventoryACL {
@@ -302,55 +316,58 @@ export class ExternalInventoryACL {
     try {
       // External API call
       const externalData = await this.externalInventoryApi.getStock(productId);
-      
+
       // Transform external format to domain format
       return StockLevel.create({
         productId,
         quantity: externalData.available_quantity,
         reservedQuantity: externalData.reserved_qty,
         lastUpdated: new Date(externalData.last_sync_timestamp),
-        source: 'EXTERNAL_SYSTEM'
+        source: 'EXTERNAL_SYSTEM',
       });
-      
     } catch (error) {
       this.logger.error('Failed to sync inventory', { productId, error });
-      
+
       // Return safe default or cached value
       return StockLevel.unavailable(productId);
     }
   }
 
-  async bulkSyncInventory(productIds: string[]): Promise<Map<string, StockLevel>> {
+  async bulkSyncInventory(
+    productIds: string[]
+  ): Promise<Map<string, StockLevel>> {
     const results = new Map<string, StockLevel>();
-    
+
     // Batch API calls for efficiency
     const batchSize = 50;
     for (let i = 0; i < productIds.length; i += batchSize) {
       const batch = productIds.slice(i, i + batchSize);
-      
+
       try {
         const batchData = await this.externalInventoryApi.getBulkStock(batch);
-        
+
         for (const [productId, data] of Object.entries(batchData)) {
-          results.set(productId, StockLevel.create({
+          results.set(
             productId,
-            quantity: data.available_quantity,
-            reservedQuantity: data.reserved_qty,
-            lastUpdated: new Date(data.last_sync_timestamp),
-            source: 'EXTERNAL_SYSTEM'
-          }));
+            StockLevel.create({
+              productId,
+              quantity: data.available_quantity,
+              reservedQuantity: data.reserved_qty,
+              lastUpdated: new Date(data.last_sync_timestamp),
+              source: 'EXTERNAL_SYSTEM',
+            })
+          );
         }
-        
       } catch (error) {
         this.logger.error('Batch inventory sync failed', { batch, error });
-        
+
         // Add fallback values for failed batch
         for (const productId of batch) {
           results.set(productId, StockLevel.unavailable(productId));
         }
       }
     }
-    
+
     return results;
   }
 }
@@ -363,6 +380,7 @@ export class ExternalInventoryACL {
 ```
 
 **Updated src/index.ts:**
+
 ```typescript
 // Add new imports
 import { ProductQueryService } from './application/product-catalog/services/product-query.service';
@@ -375,8 +393,8 @@ async function bootstrap() {
 
   // Add new repositories
   const productRepository = new InMemoryProductRepository();
-  
-  // Add new services  
+
+  // Add new services
   const productQueryService = new ProductQueryService(productRepository);
 
   // Register new handlers
@@ -386,40 +404,45 @@ async function bootstrap() {
   // Update existing handlers with new dependencies
   const createOrderHandler = new CreateOrderHandler(
     orderRepository,
-    productQueryService  // Now injected
+    productQueryService // Now injected
   );
   commandBus.register(CreateOrderCommand, createOrderHandler);
 
   console.log('🚀 Application updated with ProductCatalog domain!');
-  
+
   await demonstrateIntegration(commandBus, queryBus);
 }
 
-async function demonstrateIntegration(commandBus: CommandBus, queryBus: QueryBus) {
+async function demonstrateIntegration(
+  commandBus: CommandBus,
+  queryBus: QueryBus
+) {
   // 1. Create a product
-  await commandBus.execute(new CreateProductCommand({
-    name: 'Wireless Headphones',
-    price: 99.99,
-    currency: 'USD',
-    categoryId: 'electronics',
-    initialStock: 50
-  }));
+  await commandBus.execute(
+    new CreateProductCommand({
+      name: 'Wireless Headphones',
+      price: 99.99,
+      currency: 'USD',
+      categoryId: 'electronics',
+      initialStock: 50,
+    })
+  );
   console.log('✅ Product created');
 
   // 2. Create order with product validation
-  await commandBus.execute(new CreateOrderCommand(
-    'user-123',
-    [{ productId: 'product-1', quantity: 2 }],
-    { street: '123 Main St', city: 'NYC', zipCode: '10001' }
-  ));
+  await commandBus.execute(
+    new CreateOrderCommand(
+      'user-123',
+      [{ productId: 'product-1', quantity: 2 }],
+      { street: '123 Main St', city: 'NYC', zipCode: '10001' }
+    )
+  );
   console.log('✅ Order created with product validation');
 
   // 3. Update product price (triggers event)
-  await commandBus.execute(new UpdateProductPriceCommand(
-    'product-1',
-    119.99,
-    new Date()
-  ));
+  await commandBus.execute(
+    new UpdateProductPriceCommand('product-1', 119.99, new Date())
+  );
   console.log('✅ Product price updated, orders notified');
 }
 ```
@@ -432,6 +455,7 @@ vytches-ddd generate integration-test ProductCatalogOrderManagement --domains Pr
 ```
 
 **Generated Integration Test:**
+
 ```typescript
 // tests/integration/product-catalog-order-management.test.ts
 import { ProductQueryService } from '@application/product-catalog/services/product-query.service';
@@ -448,7 +472,7 @@ describe('ProductCatalog <-> OrderManagement Integration', () => {
   it('should validate product availability when creating order', async () => {
     // Arrange
     const productId = 'test-product-1';
-    await seedProduct(productId, { stock: 10, price: 50.00 });
+    await seedProduct(productId, { stock: 10, price: 50.0 });
 
     const createOrderCommand = new CreateOrderCommand(
       'customer-1',
@@ -462,13 +486,13 @@ describe('ProductCatalog <-> OrderManagement Integration', () => {
     // Assert
     expect(result.isSuccess).toBe(true);
     expect(result.value.items).toHaveLength(1);
-    expect(result.value.items[0].unitPrice).toBe(50.00);
+    expect(result.value.items[0].unitPrice).toBe(50.0);
   });
 
   it('should reject order when product out of stock', async () => {
     // Arrange
     const productId = 'test-product-2';
-    await seedProduct(productId, { stock: 2, price: 30.00 });
+    await seedProduct(productId, { stock: 2, price: 30.0 });
 
     const createOrderCommand = new CreateOrderCommand(
       'customer-1',
@@ -477,8 +501,9 @@ describe('ProductCatalog <-> OrderManagement Integration', () => {
     );
 
     // Act & Assert
-    await expect(createOrderHandler.execute(createOrderCommand))
-      .rejects.toThrow('Insufficient stock');
+    await expect(
+      createOrderHandler.execute(createOrderCommand)
+    ).rejects.toThrow('Insufficient stock');
   });
 
   it('should handle price changes for pending orders', async () => {
@@ -498,6 +523,7 @@ vytches-ddd domain --context-map --validate-integration
 ```
 
 **Validation Results:**
+
 ```
 🔍 Domain Integration Validation
 
@@ -506,7 +532,7 @@ vytches-ddd domain --context-map --validate-integration
    - Proper event publishing
    - ACL for external systems
 
-✅ OrderManagement Domain  
+✅ OrderManagement Domain
    - Updated with product integration
    - Event handlers registered
    - Error handling for unavailable products
@@ -537,6 +563,7 @@ Score: 95/100 (Excellent integration)
 ## Common Integration Patterns
 
 ### 1. Customer-Supplier Pattern
+
 ```typescript
 // Downstream domain depends on upstream
 // OrderManagement (Customer) ← ProductCatalog (Supplier)
@@ -548,6 +575,7 @@ export interface IProductQueryService {
 ```
 
 ### 2. Event-Driven Integration
+
 ```typescript
 // Upstream publishes events, downstream subscribes
 @EventHandler(ProductPriceChangedIntegrationEvent)
@@ -559,6 +587,7 @@ export class PriceChangeHandler {
 ```
 
 ### 3. Anti-Corruption Layer
+
 ```typescript
 // Protect domain from external system complexity
 export class ExternalInventoryACL {
@@ -569,9 +598,10 @@ export class ExternalInventoryACL {
 ```
 
 ### 4. Shared Kernel
+
 ```typescript
 // Shared value objects across domains
-export class Money extends ValueObject<{amount: number, currency: string}> {
+export class Money extends ValueObject<{ amount: number; currency: string }> {
   // Used by both OrderManagement and ProductCatalog
 }
 ```
@@ -579,16 +609,19 @@ export class Money extends ValueObject<{amount: number, currency: string}> {
 ## Tips for Success
 
 ### Planning
+
 - **Map relationships first**: Use `--context-map` before adding domains
 - **Define contracts early**: Create shared interfaces before implementation
 - **Start with queries**: Read-side integration is usually simpler than commands
 
 ### Implementation
+
 - **Use events for loose coupling**: Avoid direct domain-to-domain calls
 - **Implement ACL for external systems**: Protect your domain model
 - **Test integration patterns**: Write integration tests, not just unit tests
 
 ### Maintenance
+
 - **Validate regularly**: Run `--validate-all` after changes
 - **Monitor integration points**: Log and track cross-domain calls
 - **Version contracts**: Use semantic versioning for shared interfaces
@@ -596,16 +629,19 @@ export class Money extends ValueObject<{amount: number, currency: string}> {
 ## Troubleshooting
 
 **Circular dependencies?**
+
 ```bash
 vytches-ddd domain --context-map --check-cycles
 ```
 
 **Integration events not firing?**
+
 ```bash
 vytches-ddd validate --check-event-handlers --domain OrderManagement
 ```
 
 **ACL translation errors?**
+
 ```bash
 vytches-ddd generate test ExternalInventoryACL --integration
 ```
@@ -613,6 +649,7 @@ vytches-ddd generate test ExternalInventoryACL --integration
 ## Next Steps
 
 1. **Add more integrations**: Payment gateway, shipping service
-2. **Implement sagas**: For complex cross-domain transactions  
+2. **Implement sagas**: For complex cross-domain transactions
 3. **Add monitoring**: Track integration health and performance
-4. **Consider splitting**: When domains become too coupled, consider microservices
+4. **Consider splitting**: When domains become too coupled, consider
+   microservices

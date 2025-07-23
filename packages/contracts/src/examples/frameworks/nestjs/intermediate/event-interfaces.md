@@ -1,12 +1,14 @@
 # Event Interfaces with NestJS
 
-**Focus**: Advanced event interface patterns with NestJS integration
-**Base Example**: [Event Interface Architecture](../../basic/event-interfaces.md)
+**Focus**: Advanced event interface patterns with NestJS integration **Base
+Example**: [Event Interface Architecture](../../basic/event-interfaces.md)
 **Dependencies**: @nestjs/common, @nestjs/cqrs, @vytches-ddd/contracts
 
 ## Description
 
-This example demonstrates advanced integration of VytchesDDD event interfaces with NestJS, showing domain event handling, event bus integration, and sophisticated event-driven patterns using NestJS CQRS module.
+This example demonstrates advanced integration of VytchesDDD event interfaces
+with NestJS, showing domain event handling, event bus integration, and
+sophisticated event-driven patterns using NestJS CQRS module.
 
 ## Event Handler Implementation
 
@@ -14,18 +16,23 @@ This example demonstrates advanced integration of VytchesDDD event interfaces wi
 // user-events.handler.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { IDomainEvent, IEventHandler as VytchesEventHandler } from '@vytches-ddd/contracts';
-import { 
-  UserRegisteredEvent, 
+import {
+  IDomainEvent,
+  IEventHandler as VytchesEventHandler,
+} from '@vytches-ddd/contracts';
+import {
+  UserRegisteredEvent,
   UserProfileUpdatedEvent,
   EmailService,
-  NotificationService 
+  NotificationService,
 } from './types'; // From your app
 
 // ✅ FOCUS: NestJS event handler with VytchesDDD contracts
 @EventsHandler(UserRegisteredEvent)
 @Injectable()
-export class UserRegisteredHandler implements IEventHandler<UserRegisteredEvent> {
+export class UserRegisteredHandler
+  implements IEventHandler<UserRegisteredEvent>
+{
   private readonly logger = new Logger(UserRegisteredHandler.name);
 
   constructor(
@@ -39,7 +46,7 @@ export class UserRegisteredHandler implements IEventHandler<UserRegisteredEvent>
         userId: event.aggregateId,
         email: event.payload.email,
         correlationId: event.metadata.correlationId,
-        eventType: event.eventType
+        eventType: event.eventType,
       });
 
       // Send welcome email
@@ -47,14 +54,14 @@ export class UserRegisteredHandler implements IEventHandler<UserRegisteredEvent>
         to: event.payload.email,
         userId: event.payload.userId,
         userName: event.payload.name,
-        registrationDate: event.payload.registrationDate
+        registrationDate: event.payload.registrationDate,
       });
 
       // Create user profile notifications
       await this.notificationService.createWelcomeNotifications({
         userId: event.payload.userId,
         email: event.payload.email,
-        preferences: event.payload.preferences
+        preferences: event.payload.preferences,
       });
 
       // Update analytics
@@ -62,27 +69,28 @@ export class UserRegisteredHandler implements IEventHandler<UserRegisteredEvent>
 
       this.logger.log('User registration event processed successfully', {
         userId: event.aggregateId,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
-
     } catch (error) {
       this.logger.error('Failed to process user registration event', {
         userId: event.aggregateId,
         error: error.message,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
       throw error;
     }
   }
 
-  private async trackUserRegistration(event: UserRegisteredEvent): Promise<void> {
+  private async trackUserRegistration(
+    event: UserRegisteredEvent
+  ): Promise<void> {
     // Analytics tracking logic
     const analyticsData = {
       eventType: event.eventType,
       userId: event.aggregateId,
       timestamp: event.occurredAt,
       source: event.metadata.source,
-      userType: event.payload.userType
+      userType: event.payload.userType,
     };
 
     // In real implementation, send to analytics service
@@ -92,7 +100,9 @@ export class UserRegisteredHandler implements IEventHandler<UserRegisteredEvent>
 
 // ✅ FOCUS: Multi-event handler pattern
 @Injectable()
-export class UserProfileEventHandler implements VytchesEventHandler<UserProfileUpdatedEvent> {
+export class UserProfileEventHandler
+  implements VytchesEventHandler<UserProfileUpdatedEvent>
+{
   private readonly logger = new Logger(UserProfileEventHandler.name);
 
   constructor(
@@ -105,14 +115,14 @@ export class UserProfileEventHandler implements VytchesEventHandler<UserProfileU
       this.logger.log('Processing profile update event', {
         userId: event.aggregateId,
         changes: Object.keys(event.payload.changes),
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
 
       // Sync profile across services
       await this.profileSyncService.syncProfile({
         userId: event.aggregateId,
         changes: event.payload.changes,
-        timestamp: event.occurredAt
+        timestamp: event.occurredAt,
       });
 
       // Create audit entry
@@ -121,7 +131,7 @@ export class UserProfileEventHandler implements VytchesEventHandler<UserProfileU
         changes: event.payload.changes,
         previousValues: event.payload.previousValues,
         actor: event.metadata.actor,
-        timestamp: event.occurredAt
+        timestamp: event.occurredAt,
       });
 
       // Trigger downstream events if needed
@@ -132,31 +142,34 @@ export class UserProfileEventHandler implements VytchesEventHandler<UserProfileU
       if (event.payload.changes.preferences) {
         await this.handlePreferencesChange(event);
       }
-
     } catch (error) {
       this.logger.error('Failed to process profile update event', {
         userId: event.aggregateId,
         error: error.message,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
       throw error;
     }
   }
 
-  private async handleEmailChange(event: UserProfileUpdatedEvent): Promise<void> {
+  private async handleEmailChange(
+    event: UserProfileUpdatedEvent
+  ): Promise<void> {
     // Handle email change specific logic
     this.logger.log('Processing email change', {
       userId: event.aggregateId,
       oldEmail: event.payload.previousValues.email,
-      newEmail: event.payload.changes.email
+      newEmail: event.payload.changes.email,
     });
   }
 
-  private async handlePreferencesChange(event: UserProfileUpdatedEvent): Promise<void> {
+  private async handlePreferencesChange(
+    event: UserProfileUpdatedEvent
+  ): Promise<void> {
     // Handle preferences change specific logic
     this.logger.log('Processing preferences change', {
       userId: event.aggregateId,
-      preferences: event.payload.changes.preferences
+      preferences: event.payload.changes.preferences,
     });
   }
 }
@@ -183,7 +196,7 @@ export class DomainEventService implements IEventBus {
       this.logger.debug('Publishing domain event', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
 
       // Publish to NestJS event bus
@@ -191,9 +204,9 @@ export class DomainEventService implements IEventBus {
 
       // Also handle through VytchesDDD handlers if registered
       const eventHandlers = this.handlers.get(event.eventType) || [];
-      
+
       if (eventHandlers.length > 0) {
-        const handlerPromises = eventHandlers.map(async (handler) => {
+        const handlerPromises = eventHandlers.map(async handler => {
           try {
             await handler.handle(event);
           } catch (error) {
@@ -201,7 +214,7 @@ export class DomainEventService implements IEventBus {
               eventType: event.eventType,
               handlerName: handler.constructor.name,
               error: error.message,
-              correlationId: event.metadata.correlationId
+              correlationId: event.metadata.correlationId,
             });
             throw error;
           }
@@ -213,14 +226,13 @@ export class DomainEventService implements IEventBus {
       this.logger.debug('Domain event published successfully', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
-        handlerCount: eventHandlers.length
+        handlerCount: eventHandlers.length,
       });
-
     } catch (error) {
       this.logger.error('Failed to publish domain event', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -232,24 +244,24 @@ export class DomainEventService implements IEventBus {
   }
 
   subscribe<T extends IDomainEvent>(
-    eventType: string, 
+    eventType: string,
     handler: IEventHandler<T>
   ): void {
     if (!this.handlers.has(eventType)) {
       this.handlers.set(eventType, []);
     }
-    
+
     this.handlers.get(eventType)!.push(handler);
-    
+
     this.logger.log('Event handler subscribed', {
       eventType,
       handlerName: handler.constructor.name,
-      totalHandlers: this.handlers.get(eventType)!.length
+      totalHandlers: this.handlers.get(eventType)!.length,
     });
   }
 
   unsubscribe<T extends IDomainEvent>(
-    eventType: string, 
+    eventType: string,
     handler: IEventHandler<T>
   ): void {
     const eventHandlers = this.handlers.get(eventType);
@@ -260,7 +272,7 @@ export class DomainEventService implements IEventBus {
       eventHandlers.splice(index, 1);
       this.logger.log('Event handler unsubscribed', {
         eventType,
-        handlerName: handler.constructor.name
+        handlerName: handler.constructor.name,
       });
     }
   }
@@ -283,10 +295,10 @@ export class DomainEventService implements IEventBus {
 import { Injectable, Logger } from '@nestjs/common';
 import { DomainEventService } from './domain-event.service';
 import { IDomainEvent, EntityId, IActor } from '@vytches-ddd/contracts';
-import { 
-  UserRegisteredEvent, 
+import {
+  UserRegisteredEvent,
   UserProfileUpdatedEvent,
-  OrderCreatedEvent 
+  OrderCreatedEvent,
 } from './types'; // From your app
 
 @Injectable()
@@ -315,15 +327,15 @@ export class EventPublisherService {
         userType: userData.userType,
         preferences: {
           newsletter: true,
-          notifications: true
-        }
+          notifications: true,
+        },
       },
       {
         correlationId: this.generateCorrelationId(),
         causationId: undefined,
         actor: actor.id,
         timestamp: new Date(),
-        source: 'UserService'
+        source: 'UserService',
       }
     );
 
@@ -343,14 +355,14 @@ export class EventPublisherService {
         changes,
         previousValues,
         updatedAt: new Date(),
-        reason: 'user_update'
+        reason: 'user_update',
       },
       {
         correlationId: this.generateCorrelationId(),
         causationId: undefined,
         actor: actor.id,
         timestamp: new Date(),
-        source: 'UserService'
+        source: 'UserService',
       }
     );
 
@@ -358,12 +370,14 @@ export class EventPublisherService {
   }
 
   // ✅ FOCUS: Batch event publishing
-  async publishUserEvents(events: {
-    userId: EntityId<string>;
-    eventType: 'registered' | 'updated' | 'deleted';
-    data: any;
-    actor: IActor;
-  }[]): Promise<void> {
+  async publishUserEvents(
+    events: {
+      userId: EntityId<string>;
+      eventType: 'registered' | 'updated' | 'deleted';
+      data: any;
+      actor: IActor;
+    }[]
+  ): Promise<void> {
     const domainEvents: IDomainEvent[] = [];
 
     for (const eventData of events) {
@@ -372,15 +386,15 @@ export class EventPublisherService {
       switch (eventData.eventType) {
         case 'registered':
           domainEvent = this.createUserRegisteredEvent(
-            eventData.userId, 
-            eventData.data, 
+            eventData.userId,
+            eventData.data,
             eventData.actor
           );
           break;
         case 'updated':
           domainEvent = this.createUserUpdatedEvent(
-            eventData.userId, 
-            eventData.data, 
+            eventData.userId,
+            eventData.data,
             eventData.actor
           );
           break;
@@ -401,16 +415,12 @@ export class EventPublisherService {
     data: any,
     actor: IActor
   ): UserRegisteredEvent {
-    return new UserRegisteredEvent(
-      userId.getValue(),
-      data,
-      {
-        correlationId: this.generateCorrelationId(),
-        actor: actor.id,
-        timestamp: new Date(),
-        source: 'UserService'
-      }
-    );
+    return new UserRegisteredEvent(userId.getValue(), data, {
+      correlationId: this.generateCorrelationId(),
+      actor: actor.id,
+      timestamp: new Date(),
+      source: 'UserService',
+    });
   }
 
   private createUserUpdatedEvent(
@@ -418,16 +428,12 @@ export class EventPublisherService {
     data: any,
     actor: IActor
   ): UserProfileUpdatedEvent {
-    return new UserProfileUpdatedEvent(
-      userId.getValue(),
-      data,
-      {
-        correlationId: this.generateCorrelationId(),
-        actor: actor.id,
-        timestamp: new Date(),
-        source: 'UserService'
-      }
-    );
+    return new UserProfileUpdatedEvent(userId.getValue(), data, {
+      correlationId: this.generateCorrelationId(),
+      actor: actor.id,
+      timestamp: new Date(),
+      source: 'UserService',
+    });
   }
 
   private generateCorrelationId(): string {
@@ -443,12 +449,7 @@ export class EventPublisherService {
 import { Injectable, Logger } from '@nestjs/common';
 import { EntityId, IActor } from '@vytches-ddd/contracts';
 import { EventPublisherService } from './event-publisher.service';
-import { 
-  User, 
-  CreateUserData, 
-  UpdateUserData,
-  UserRepository 
-} from './types'; // From your app
+import { User, CreateUserData, UpdateUserData, UserRepository } from './types'; // From your app
 
 @Injectable()
 export class UserApplicationService {
@@ -469,7 +470,7 @@ export class UserApplicationService {
         email: userData.email,
         name: userData.name,
         createdAt: new Date(),
-        createdBy: actor.id
+        createdBy: actor.id,
       };
 
       // Save to repository
@@ -481,7 +482,7 @@ export class UserApplicationService {
         {
           email: userData.email,
           name: userData.name,
-          userType: userData.userType || 'standard'
+          userType: userData.userType || 'standard',
         },
         actor
       );
@@ -489,29 +490,28 @@ export class UserApplicationService {
       this.logger.log('User created successfully', {
         userId: userId.getValue(),
         email: userData.email,
-        actorId: actor.id
+        actorId: actor.id,
       });
 
       return user;
-
     } catch (error) {
       this.logger.error('Failed to create user', {
         email: userData.email,
         error: error.message,
-        actorId: actor.id
+        actorId: actor.id,
       });
       throw error;
     }
   }
 
   async updateUser(
-    userId: string, 
-    updates: UpdateUserData, 
+    userId: string,
+    updates: UpdateUserData,
     actor: IActor
   ): Promise<User> {
     try {
       const entityId = EntityId.createText(userId);
-      
+
       // Get current user
       const currentUser = await this.userRepository.findById(entityId);
       if (!currentUser) {
@@ -521,14 +521,14 @@ export class UserApplicationService {
       // Store previous values for event
       const previousValues = {
         email: currentUser.email,
-        name: currentUser.name
+        name: currentUser.name,
       };
 
       // Update user
       const updatedUser: User = {
         ...currentUser,
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       await this.userRepository.save(updatedUser);
@@ -544,16 +544,15 @@ export class UserApplicationService {
       this.logger.log('User updated successfully', {
         userId: entityId.getValue(),
         changes: Object.keys(updates),
-        actorId: actor.id
+        actorId: actor.id,
       });
 
       return updatedUser;
-
     } catch (error) {
       this.logger.error('Failed to update user', {
         userId,
         error: error.message,
-        actorId: actor.id
+        actorId: actor.id,
       });
       throw error;
     }
@@ -570,9 +569,9 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { DomainEventService } from './domain-event.service';
 import { EventPublisherService } from './event-publisher.service';
 import { UserApplicationService } from './user-application.service';
-import { 
-  UserRegisteredHandler, 
-  UserProfileEventHandler 
+import {
+  UserRegisteredHandler,
+  UserProfileEventHandler,
 } from './user-events.handler';
 
 @Module({
@@ -582,13 +581,9 @@ import {
     EventPublisherService,
     UserApplicationService,
     UserRegisteredHandler,
-    UserProfileEventHandler
+    UserProfileEventHandler,
   ],
-  exports: [
-    DomainEventService,
-    EventPublisherService,
-    UserApplicationService
-  ]
+  exports: [DomainEventService, EventPublisherService, UserApplicationService],
 })
 export class UserEventsModule {
   constructor(
@@ -606,25 +601,32 @@ export class UserEventsModule {
 
 ## Key Points
 
-- **Dual Event Handling**: Supports both NestJS CQRS and VytchesDDD event patterns
+- **Dual Event Handling**: Supports both NestJS CQRS and VytchesDDD event
+  patterns
 - **Event Bridge**: Seamless integration between frameworks
-- **Domain Event Publishing**: Clean separation of business logic and event publishing
+- **Domain Event Publishing**: Clean separation of business logic and event
+  publishing
 - **Advanced Patterns**: Batch publishing, correlation tracking, error handling
-- **NestJS Integration**: Uses familiar NestJS decorators and dependency injection
+- **NestJS Integration**: Uses familiar NestJS decorators and dependency
+  injection
 - **Actor Context**: Proper actor propagation through event metadata
 
 ## Common Pitfalls
 
-- **Event Handler Registration**: Don't forget to register VytchesDDD handlers manually
-- **Correlation IDs**: Always include correlation IDs for event traceability  
+- **Event Handler Registration**: Don't forget to register VytchesDDD handlers
+  manually
+- **Correlation IDs**: Always include correlation IDs for event traceability
 - **Error Handling**: Implement proper error handling in event handlers
 - **Event Ordering**: Be aware of event processing order in complex scenarios
 
 ## Related Examples
 
-- [Event Interface Architecture](../../basic/event-interfaces.md) - Core event patterns
-- [Advanced Event Architecture](../../intermediate/event-architecture.md) - Persistence and replay
-- [Contracts Integration](../basic/contracts-integration.md) - Basic NestJS patterns
+- [Event Interface Architecture](../../basic/event-interfaces.md) - Core event
+  patterns
+- [Advanced Event Architecture](../../intermediate/event-architecture.md) -
+  Persistence and replay
+- [Contracts Integration](../basic/contracts-integration.md) - Basic NestJS
+  patterns
 
 ## Best Practices
 

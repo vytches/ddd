@@ -1,7 +1,8 @@
 # Blockchain Transaction Orchestrator - NestJS Integration
 
-**Focus**: Enterprise blockchain operations with NestJS integration
-**Base Example**: [Enterprise Blockchain Transaction Orchestrator](../../advanced/example-3.md)
+**Focus**: Enterprise blockchain operations with NestJS integration **Base
+Example**:
+[Enterprise Blockchain Transaction Orchestrator](../../advanced/example-3.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
 
 ## Advanced Service Implementation
@@ -11,14 +12,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   BlockchainNetwork,
   SmartContractAddress,
   TransactionResult,
   CrossChainTransaction,
   ComplianceValidation,
   NetworkHealth,
-  GasOptimization
+  GasOptimization,
 } from './types'; // From your application
 
 @Injectable()
@@ -35,8 +36,10 @@ export class BlockchainOrchestratorService {
     complianceData: any
   ): Promise<string> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+
       // Create orchestrator with blockchain capabilities
       const orchestrator = BlockchainAggregateClass.create(
         [sourceChain, targetChain],
@@ -44,10 +47,10 @@ export class BlockchainOrchestratorService {
         {
           multiSigThreshold: 3,
           securityLevel: 'enterprise',
-          encryptionAlgorithm: 'ECDSA-secp256k1'
+          encryptionAlgorithm: 'ECDSA-secp256k1',
         }
       );
-      
+
       // Use library cross-chain method
       const transactionId = await orchestrator.initiateCrossChainTransaction(
         sourceChain,
@@ -57,11 +60,13 @@ export class BlockchainOrchestratorService {
         recipient,
         complianceData
       );
-      
+
       this.logger.log(`Cross-chain transaction initiated: ${transactionId}`);
       return transactionId;
     } catch (error) {
-      this.logger.error(`Failed to initiate cross-chain transaction: ${error.message}`);
+      this.logger.error(
+        `Failed to initiate cross-chain transaction: ${error.message}`
+      );
       throw error;
     }
   }
@@ -74,9 +79,14 @@ export class BlockchainOrchestratorService {
     constructorArgs: any[]
   ): Promise<SmartContractAddress> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library smart contract deployment
       const contractAddress = await orchestrator.deploySmartContract(
         network,
@@ -85,8 +95,10 @@ export class BlockchainOrchestratorService {
         constructorArgs,
         true // Enable security validation
       );
-      
-      this.logger.log(`Smart contract deployed: ${contractAddress.address} on ${network.name}`);
+
+      this.logger.log(
+        `Smart contract deployed: ${contractAddress.address} on ${network.name}`
+      );
       return contractAddress;
     } catch (error) {
       this.logger.error(`Failed to deploy smart contract: ${error.message}`);
@@ -100,19 +112,26 @@ export class BlockchainOrchestratorService {
     consensusMechanism: string = 'proof-of-authority'
   ): Promise<string> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library atomic batch execution
       const batchId = await orchestrator.executeAtomicTransactionBatch(
         transactions,
         consensusMechanism as any
       );
-      
+
       this.logger.log(`Atomic transaction batch executed: ${batchId}`);
       return batchId;
     } catch (error) {
-      this.logger.error(`Failed to execute transaction batch: ${error.message}`);
+      this.logger.error(
+        `Failed to execute transaction batch: ${error.message}`
+      );
       throw error;
     }
   }
@@ -123,20 +142,27 @@ export class BlockchainOrchestratorService {
     strategy: string = 'dynamic'
   ): Promise<GasOptimization> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library gas optimization
       await orchestrator.optimizeNetworkGasUsage(networks, strategy as any);
-      
+
       const optimization = {
         networks: networks.map(n => n.name),
         strategy,
         estimatedSavings: 25, // Mock percentage
-        optimizedAt: new Date()
+        optimizedAt: new Date(),
       };
-      
-      this.logger.log(`Gas optimization completed for ${networks.length} networks`);
+
+      this.logger.log(
+        `Gas optimization completed for ${networks.length} networks`
+      );
       return optimization;
     } catch (error) {
       this.logger.error(`Failed to optimize gas usage: ${error.message}`);
@@ -150,20 +176,25 @@ export class BlockchainOrchestratorService {
     jurisdictions: string[]
   ): Promise<ComplianceValidation> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library compliance validation
       await orchestrator.validateGlobalCompliance(transactionId, jurisdictions);
-      
+
       const validation = {
         transactionId,
         jurisdictions,
         complianceStatus: 'compliant',
         validatedAt: new Date(),
-        riskLevel: 'low'
+        riskLevel: 'low',
       };
-      
+
       this.logger.log(`Compliance validated for transaction ${transactionId}`);
       return validation;
     } catch (error) {
@@ -175,13 +206,21 @@ export class BlockchainOrchestratorService {
   // ✅ FOCUS: Network health monitoring
   async monitorNetworkHealth(): Promise<Map<string, NetworkHealth>> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library network monitoring
-      const healthMetrics = await orchestrator.monitorAndOptimizeNetworkHealth();
-      
-      this.logger.log(`Network health monitored for ${healthMetrics.size} networks`);
+      const healthMetrics =
+        await orchestrator.monitorAndOptimizeNetworkHealth();
+
+      this.logger.log(
+        `Network health monitored for ${healthMetrics.size} networks`
+      );
       return healthMetrics;
     } catch (error) {
       this.logger.error(`Failed to monitor network health: ${error.message}`);
@@ -196,17 +235,24 @@ export class BlockchainOrchestratorService {
     signerIdentity: string
   ): Promise<boolean> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library multi-signature processing
       const thresholdMet = await orchestrator.processMultiSignatureTransaction(
         transactionId,
         signature,
         signerIdentity
       );
-      
-      this.logger.log(`Multi-signature processed for ${transactionId}: threshold met = ${thresholdMet}`);
+
+      this.logger.log(
+        `Multi-signature processed for ${transactionId}: threshold met = ${thresholdMet}`
+      );
       return thresholdMet;
     } catch (error) {
       this.logger.error(`Failed to process multi-signature: ${error.message}`);
@@ -217,12 +263,17 @@ export class BlockchainOrchestratorService {
   // ✅ FOCUS: Transaction and orchestrator metrics
   async getOrchestratorMetrics(): Promise<any> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library metrics method
       const metrics = orchestrator.getOrchestratorMetrics();
-      
+
       return metrics;
     } catch (error) {
       this.logger.error(`Failed to get orchestrator metrics: ${error.message}`);
@@ -232,12 +283,17 @@ export class BlockchainOrchestratorService {
 
   async getActiveTransactionsSummary(): Promise<any[]> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library active transactions method
       const summary = orchestrator.getActiveTransactionsSummary();
-      
+
       return summary;
     } catch (error) {
       this.logger.error(`Failed to get active transactions: ${error.message}`);
@@ -247,21 +303,31 @@ export class BlockchainOrchestratorService {
 
   async getNetworkHealthSummary(): Promise<any> {
     try {
-      const BlockchainAggregateClass = VytchesDDD.resolve<any>('EnterpriseBlockchainTransactionOrchestratorAggregate');
-      const orchestrator = await this.loadBlockchainOrchestrator('default', BlockchainAggregateClass);
-      
+      const BlockchainAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseBlockchainTransactionOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadBlockchainOrchestrator(
+        'default',
+        BlockchainAggregateClass
+      );
+
       // Use library network health method
       const healthSummary = orchestrator.getNetworkHealthSummary();
-      
+
       return healthSummary;
     } catch (error) {
-      this.logger.error(`Failed to get network health summary: ${error.message}`);
+      this.logger.error(
+        `Failed to get network health summary: ${error.message}`
+      );
       return {};
     }
   }
 
   // Private helper methods
-  private async loadBlockchainOrchestrator(orchestratorId: string, BlockchainAggregateClass: any): Promise<any> {
+  private async loadBlockchainOrchestrator(
+    orchestratorId: string,
+    BlockchainAggregateClass: any
+  ): Promise<any> {
     // Mock implementation
     return BlockchainAggregateClass.fromSnapshot({
       id: orchestratorId,
@@ -272,7 +338,7 @@ export class BlockchainOrchestratorService {
       securityLevel: 'enterprise',
       operationalMode: 'production',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }
@@ -296,6 +362,7 @@ export class BlockchainOrchestratorModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Enterprise blockchain transaction orchestration with NestJS
 - Cross-chain operations with compliance validation
 - Smart contract deployment and management
@@ -303,20 +370,26 @@ export class BlockchainOrchestratorModule implements OnModuleInit {
 - Gas optimization and network health monitoring
 
 **Usage Example:**
+
 ```typescript
 @Controller('blockchain')
 export class BlockchainController {
-  constructor(private readonly blockchainService: BlockchainOrchestratorService) {}
+  constructor(
+    private readonly blockchainService: BlockchainOrchestratorService
+  ) {}
 
   @Post('cross-chain-transactions')
-  async initiateCrossChain(@Body() data: {
-    sourceChain: BlockchainNetwork;
-    targetChain: BlockchainNetwork;
-    amount: string;
-    asset: string;
-    recipient: string;
-    compliance: any;
-  }) {
+  async initiateCrossChain(
+    @Body()
+    data: {
+      sourceChain: BlockchainNetwork;
+      targetChain: BlockchainNetwork;
+      amount: string;
+      asset: string;
+      recipient: string;
+      compliance: any;
+    }
+  ) {
     return await this.blockchainService.initiateCrossChainTransaction(
       data.sourceChain,
       data.targetChain,
@@ -328,12 +401,15 @@ export class BlockchainController {
   }
 
   @Post('smart-contracts')
-  async deployContract(@Body() data: {
-    network: BlockchainNetwork;
-    type: string;
-    bytecode: string;
-    args: any[];
-  }) {
+  async deployContract(
+    @Body()
+    data: {
+      network: BlockchainNetwork;
+      type: string;
+      bytecode: string;
+      args: any[];
+    }
+  ) {
     return await this.blockchainService.deploySmartContract(
       data.network,
       data.type,
@@ -343,7 +419,9 @@ export class BlockchainController {
   }
 
   @Post('transaction-batches')
-  async executeBatch(@Body() data: { transactions: any[]; consensus?: string }) {
+  async executeBatch(
+    @Body() data: { transactions: any[]; consensus?: string }
+  ) {
     return await this.blockchainService.executeAtomicTransactionBatch(
       data.transactions,
       data.consensus

@@ -1,15 +1,20 @@
 # Basic Outbox Pattern Implementation
 
-**Focus**: Basic outbox pattern for reliable message delivery in distributed systems  
+**Focus**: Basic outbox pattern for reliable message delivery in distributed
+systems  
 **Domain**: E-commerce Order Processing  
 **Complexity**: Basic  
 **Dependencies**: @vytches-ddd/messaging, @vytches-ddd/utils
 
 ## Business Context
 
-This example demonstrates the outbox pattern for reliable message delivery in an e-commerce system:
-- Ensures messages are delivered even if the message broker is temporarily unavailable
-- Provides transactional consistency between database operations and message publishing
+This example demonstrates the outbox pattern for reliable message delivery in an
+e-commerce system:
+
+- Ensures messages are delivered even if the message broker is temporarily
+  unavailable
+- Provides transactional consistency between database operations and message
+  publishing
 - Handles message deduplication and retry logic
 - Supports message prioritization and delayed processing
 
@@ -72,12 +77,12 @@ export interface OrderShippedMessage extends OutboxMessage {
 }
 
 // outbox-service.ts
-import { 
-  OutboxService, 
-  OutboxMessage, 
+import {
+  OutboxService,
+  OutboxMessage,
   MessagePriority,
   OutboxRepository,
-  MessageProcessor
+  MessageProcessor,
 } from '@vytches-ddd/messaging';
 import { Result } from '@vytches-ddd/utils';
 
@@ -100,14 +105,16 @@ export class OrderOutboxService {
   async addMessage(message: OutboxMessage): Promise<Result<void, Error>> {
     try {
       const result = await this.outboxService.addMessage(message);
-      
+
       if (result.isSuccess()) {
         console.log(`Message added to outbox: ${message.type} - ${message.id}`);
       }
-      
+
       return result;
     } catch (error) {
-      return Result.failure(new Error(`Failed to add message to outbox: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to add message to outbox: ${error.message}`)
+      );
     }
   }
 
@@ -115,14 +122,16 @@ export class OrderOutboxService {
   async addMessages(messages: OutboxMessage[]): Promise<Result<void, Error>> {
     try {
       const result = await this.outboxService.addMessages(messages);
-      
+
       if (result.isSuccess()) {
         console.log(`${messages.length} messages added to outbox`);
       }
-      
+
       return result;
     } catch (error) {
-      return Result.failure(new Error(`Failed to add messages to outbox: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to add messages to outbox: ${error.message}`)
+      );
     }
   }
 
@@ -130,7 +139,7 @@ export class OrderOutboxService {
   async processMessages(): Promise<Result<number, Error>> {
     try {
       const pendingMessages = await this.outboxService.getPendingMessages();
-      
+
       if (pendingMessages.isFailure()) {
         return Result.failure(pendingMessages.error);
       }
@@ -147,11 +156,15 @@ export class OrderOutboxService {
 
       return Result.success(processedCount);
     } catch (error) {
-      return Result.failure(new Error(`Failed to process messages: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to process messages: ${error.message}`)
+      );
     }
   }
 
-  private async processMessage(message: OutboxMessage): Promise<Result<void, Error>> {
+  private async processMessage(
+    message: OutboxMessage
+  ): Promise<Result<void, Error>> {
     try {
       // Mark message as processing
       await this.outboxService.markMessageAsProcessing(message.id);
@@ -162,7 +175,9 @@ export class OrderOutboxService {
       if (result.isSuccess()) {
         // Mark message as processed
         await this.outboxService.markMessageAsProcessed(message.id);
-        console.log(`Message processed successfully: ${message.type} - ${message.id}`);
+        console.log(
+          `Message processed successfully: ${message.type} - ${message.id}`
+        );
       } else {
         // Handle processing failure
         await this.handleProcessingFailure(message, result.error);
@@ -175,20 +190,27 @@ export class OrderOutboxService {
     }
   }
 
-  private async handleProcessingFailure(message: OutboxMessage, error: Error): Promise<void> {
+  private async handleProcessingFailure(
+    message: OutboxMessage,
+    error: Error
+  ): Promise<void> {
     const retryCount = (message.retryCount || 0) + 1;
     const maxRetries = 3;
 
     if (retryCount <= maxRetries) {
       // Schedule retry
-      const nextRetry = new Date(Date.now() + (retryCount * 30000)); // 30s, 60s, 90s
+      const nextRetry = new Date(Date.now() + retryCount * 30000); // 30s, 60s, 90s
       await this.outboxService.scheduleRetry(message.id, nextRetry, retryCount);
-      
-      console.log(`Message scheduled for retry ${retryCount}/${maxRetries}: ${message.id}`);
+
+      console.log(
+        `Message scheduled for retry ${retryCount}/${maxRetries}: ${message.id}`
+      );
     } else {
       // Mark as failed after max retries
       await this.outboxService.markMessageAsFailed(message.id, error.message);
-      console.error(`Message failed after ${maxRetries} retries: ${message.id} - ${error.message}`);
+      console.error(
+        `Message failed after ${maxRetries} retries: ${message.id} - ${error.message}`
+      );
     }
   }
 
@@ -204,7 +226,7 @@ export class OrderOutboxService {
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
     }
-    
+
     // Process any remaining messages
     await this.processMessages();
   }
@@ -221,7 +243,7 @@ export class OrderOutboxService {
       pending: stats.pendingCount,
       processed: stats.processedCount,
       failed: stats.failedCount,
-      processing: stats.processingCount
+      processing: stats.processingCount,
     };
   }
 
@@ -229,7 +251,7 @@ export class OrderOutboxService {
   async retryFailedMessages(): Promise<Result<number, Error>> {
     try {
       const failedMessages = await this.outboxService.getFailedMessages();
-      
+
       if (failedMessages.isFailure()) {
         return Result.failure(failedMessages.error);
       }
@@ -245,7 +267,9 @@ export class OrderOutboxService {
 
       return Result.success(retriedCount);
     } catch (error) {
-      return Result.failure(new Error(`Failed to retry messages: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to retry messages: ${error.message}`)
+      );
     }
   }
 }
@@ -266,7 +290,7 @@ export class OrderServiceWithOutbox extends OrderService {
     try {
       // Create order in database transaction
       const orderResult = await this.orderRepository.create(orderData);
-      
+
       if (orderResult.isFailure()) {
         return Result.failure(orderResult.error);
       }
@@ -282,34 +306,43 @@ export class OrderServiceWithOutbox extends OrderService {
           customerId: order.customerId,
           items: order.items,
           totalAmount: order.totalAmount,
-          shippingAddress: order.shippingAddress
+          shippingAddress: order.shippingAddress,
         },
         priority: MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(), // Send immediately
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add message to outbox in same transaction
-      const outboxResult = await this.outboxService.addMessage(orderCreatedMessage);
-      
+      const outboxResult =
+        await this.outboxService.addMessage(orderCreatedMessage);
+
       if (outboxResult.isFailure()) {
         // Rollback order creation if outbox fails
         await this.orderRepository.delete(order.id);
-        return Result.failure(new Error(`Failed to create order: ${outboxResult.error.message}`));
+        return Result.failure(
+          new Error(`Failed to create order: ${outboxResult.error.message}`)
+        );
       }
 
       return Result.success(order);
     } catch (error) {
-      return Result.failure(new Error(`Order creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order creation failed: ${error.message}`)
+      );
     }
   }
 
-  async processPayment(orderId: string, paymentData: PaymentData): Promise<Result<Payment, Error>> {
+  async processPayment(
+    orderId: string,
+    paymentData: PaymentData
+  ): Promise<Result<Payment, Error>> {
     try {
       // Process payment
-      const paymentResult = await this.paymentService.processPayment(paymentData);
-      
+      const paymentResult =
+        await this.paymentService.processPayment(paymentData);
+
       if (paymentResult.isFailure()) {
         return Result.failure(paymentResult.error);
       }
@@ -325,33 +358,40 @@ export class OrderServiceWithOutbox extends OrderService {
           paymentId: payment.id,
           amount: payment.amount,
           paymentMethod: payment.method,
-          processedAt: payment.processedAt
+          processedAt: payment.processedAt,
         },
         priority: MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
       const outboxResult = await this.outboxService.addMessage(paymentMessage);
-      
+
       if (outboxResult.isFailure()) {
-        console.error(`Failed to add payment message to outbox: ${outboxResult.error.message}`);
+        console.error(
+          `Failed to add payment message to outbox: ${outboxResult.error.message}`
+        );
         // Don't fail the payment, just log the error
       }
 
       return Result.success(payment);
     } catch (error) {
-      return Result.failure(new Error(`Payment processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment processing failed: ${error.message}`)
+      );
     }
   }
 
-  async reserveInventory(orderId: string, items: OrderItem[]): Promise<Result<InventoryReservation, Error>> {
+  async reserveInventory(
+    orderId: string,
+    items: OrderItem[]
+  ): Promise<Result<InventoryReservation, Error>> {
     try {
       // Reserve inventory
       const reservationResult = await this.inventoryService.reserveItems(items);
-      
+
       if (reservationResult.isFailure()) {
         return Result.failure(reservationResult.error);
       }
@@ -368,13 +408,13 @@ export class OrderServiceWithOutbox extends OrderService {
           items: items.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            reservedAt: new Date()
-          }))
+            reservedAt: new Date(),
+          })),
         },
         priority: MessagePriority.NORMAL,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
@@ -382,15 +422,21 @@ export class OrderServiceWithOutbox extends OrderService {
 
       return Result.success(reservation);
     } catch (error) {
-      return Result.failure(new Error(`Inventory reservation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Inventory reservation failed: ${error.message}`)
+      );
     }
   }
 
-  async shipOrder(orderId: string, shippingData: ShippingData): Promise<Result<Shipment, Error>> {
+  async shipOrder(
+    orderId: string,
+    shippingData: ShippingData
+  ): Promise<Result<Shipment, Error>> {
     try {
       // Create shipment
-      const shipmentResult = await this.shippingService.createShipment(shippingData);
-      
+      const shipmentResult =
+        await this.shippingService.createShipment(shippingData);
+
       if (shipmentResult.isFailure()) {
         return Result.failure(shipmentResult.error);
       }
@@ -406,12 +452,12 @@ export class OrderServiceWithOutbox extends OrderService {
           trackingNumber: shipment.trackingNumber,
           carrier: shipment.carrier,
           shippedAt: shipment.shippedAt,
-          estimatedDelivery: shipment.estimatedDelivery
+          estimatedDelivery: shipment.estimatedDelivery,
         },
         priority: MessagePriority.NORMAL,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
@@ -419,12 +465,16 @@ export class OrderServiceWithOutbox extends OrderService {
 
       return Result.success(shipment);
     } catch (error) {
-      return Result.failure(new Error(`Order shipping failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order shipping failed: ${error.message}`)
+      );
     }
   }
 
   // Batch operations for better performance
-  async createMultipleOrders(ordersData: CreateOrderData[]): Promise<Result<Order[], Error>> {
+  async createMultipleOrders(
+    ordersData: CreateOrderData[]
+  ): Promise<Result<Order[], Error>> {
     try {
       const orders: Order[] = [];
       const outboxMessages: OutboxMessage[] = [];
@@ -432,7 +482,7 @@ export class OrderServiceWithOutbox extends OrderService {
       // Create all orders
       for (const orderData of ordersData) {
         const orderResult = await this.orderRepository.create(orderData);
-        
+
         if (orderResult.isFailure()) {
           return Result.failure(orderResult.error);
         }
@@ -449,12 +499,12 @@ export class OrderServiceWithOutbox extends OrderService {
             customerId: order.customerId,
             items: order.items,
             totalAmount: order.totalAmount,
-            shippingAddress: order.shippingAddress
+            shippingAddress: order.shippingAddress,
           },
           priority: MessagePriority.HIGH,
           createdAt: new Date(),
           scheduledFor: new Date(),
-          retryCount: 0
+          retryCount: 0,
         };
 
         outboxMessages.push(message);
@@ -462,14 +512,16 @@ export class OrderServiceWithOutbox extends OrderService {
 
       // Add all messages to outbox in batch
       const outboxResult = await this.outboxService.addMessages(outboxMessages);
-      
+
       if (outboxResult.isFailure()) {
         return Result.failure(outboxResult.error);
       }
 
       return Result.success(orders);
     } catch (error) {
-      return Result.failure(new Error(`Batch order creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Batch order creation failed: ${error.message}`)
+      );
     }
   }
 }
@@ -486,18 +538,20 @@ export class SimpleMessagePublisher implements MessagePublisher {
       // Simulate message publishing (replace with actual message broker)
       console.log(`Publishing message: ${message.type} - ${message.id}`);
       console.log(`Payload:`, JSON.stringify(message.payload, null, 2));
-      
+
       // Simulate network delay
       await this.delay(100);
-      
+
       // Simulate occasional failures (5% failure rate)
       if (Math.random() < 0.05) {
         throw new Error('Message broker temporarily unavailable');
       }
-      
+
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Message publishing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Message publishing failed: ${error.message}`)
+      );
     }
   }
 
@@ -518,7 +572,9 @@ export class InMemoryOutboxRepository implements OutboxRepository {
       this.messages.set(message.id, { ...message });
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Failed to save message: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to save message: ${error.message}`)
+      );
     }
   }
 
@@ -529,22 +585,26 @@ export class InMemoryOutboxRepository implements OutboxRepository {
       }
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Failed to save messages: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to save messages: ${error.message}`)
+      );
     }
   }
 
-  async findPendingMessages(limit: number = 100): Promise<Result<OutboxMessage[], Error>> {
+  async findPendingMessages(
+    limit: number = 100
+  ): Promise<Result<OutboxMessage[], Error>> {
     try {
       const now = new Date();
       const pending = Array.from(this.messages.values())
-        .filter(msg => 
-          msg.status === 'pending' && 
-          msg.scheduledFor <= now
-        )
+        .filter(msg => msg.status === 'pending' && msg.scheduledFor <= now)
         .sort((a, b) => {
           // Sort by priority then by creation date
           if (a.priority !== b.priority) {
-            return this.getPriorityValue(b.priority) - this.getPriorityValue(a.priority);
+            return (
+              this.getPriorityValue(b.priority) -
+              this.getPriorityValue(a.priority)
+            );
           }
           return a.createdAt.getTime() - b.createdAt.getTime();
         })
@@ -552,11 +612,16 @@ export class InMemoryOutboxRepository implements OutboxRepository {
 
       return Result.success(pending);
     } catch (error) {
-      return Result.failure(new Error(`Failed to find pending messages: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to find pending messages: ${error.message}`)
+      );
     }
   }
 
-  async updateStatus(messageId: string, status: string): Promise<Result<void, Error>> {
+  async updateStatus(
+    messageId: string,
+    status: string
+  ): Promise<Result<void, Error>> {
     try {
       const message = this.messages.get(messageId);
       if (!message) {
@@ -565,14 +630,20 @@ export class InMemoryOutboxRepository implements OutboxRepository {
 
       message.status = status;
       message.updatedAt = new Date();
-      
+
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Failed to update message status: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to update message status: ${error.message}`)
+      );
     }
   }
 
-  async updateRetryCount(messageId: string, retryCount: number, nextRetry: Date): Promise<Result<void, Error>> {
+  async updateRetryCount(
+    messageId: string,
+    retryCount: number,
+    nextRetry: Date
+  ): Promise<Result<void, Error>> {
     try {
       const message = this.messages.get(messageId);
       if (!message) {
@@ -583,20 +654,27 @@ export class InMemoryOutboxRepository implements OutboxRepository {
       message.scheduledFor = nextRetry;
       message.status = 'pending';
       message.updatedAt = new Date();
-      
+
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Failed to update retry count: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to update retry count: ${error.message}`)
+      );
     }
   }
 
   private getPriorityValue(priority: MessagePriority): number {
     switch (priority) {
-      case MessagePriority.CRITICAL: return 4;
-      case MessagePriority.HIGH: return 3;
-      case MessagePriority.NORMAL: return 2;
-      case MessagePriority.LOW: return 1;
-      default: return 2;
+      case MessagePriority.CRITICAL:
+        return 4;
+      case MessagePriority.HIGH:
+        return 3;
+      case MessagePriority.NORMAL:
+        return 2;
+      case MessagePriority.LOW:
+        return 1;
+      default:
+        return 2;
     }
   }
 }
@@ -604,7 +682,8 @@ export class InMemoryOutboxRepository implements OutboxRepository {
 
 ## Key Features
 
-- **Transactional Outbox**: Messages are stored in the same transaction as business data
+- **Transactional Outbox**: Messages are stored in the same transaction as
+  business data
 - **Automatic Processing**: Background processing of pending messages
 - **Retry Logic**: Exponential backoff with configurable retry limits
 - **Message Prioritization**: Critical messages processed first
@@ -625,17 +704,19 @@ export class OrderController {
     try {
       // Create order with outbox pattern
       const result = await this.orderService.createOrder(orderData);
-      
+
       if (result.isFailure()) {
         return Result.failure(result.error);
       }
 
       // Order created and message added to outbox
       // Background processor will handle message delivery
-      
+
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure(new Error(`Order creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order creation failed: ${error.message}`)
+      );
     }
   }
 
@@ -656,7 +737,8 @@ export class OrderController {
 
 ## Common Pitfalls
 
-- **Transaction Boundaries**: Ensure outbox messages are saved in the same transaction as business data
+- **Transaction Boundaries**: Ensure outbox messages are saved in the same
+  transaction as business data
 - **Message Ordering**: Consider message ordering requirements for your use case
 - **Duplicate Processing**: Implement idempotent message handlers
 - **Message Size**: Keep message payloads reasonable to avoid performance issues

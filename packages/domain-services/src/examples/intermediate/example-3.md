@@ -1,49 +1,51 @@
 # Cross-Aggregate Domain Service - Intermediate Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: intermediate
-**Domain**: order-management
-**Patterns**: domain-service, cross-aggregate, transaction-coordination
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/aggregates
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+intermediate **Domain**: order-management **Patterns**: domain-service,
+cross-aggregate, transaction-coordination **Dependencies**: @vytches-ddd/core,
+@vytches-ddd/aggregates
 
 ## Description
 
-This example demonstrates a domain service that coordinates operations across multiple aggregates. It shows proper transaction coordination, consistency management, and aggregate interaction patterns.
+This example demonstrates a domain service that coordinates operations across
+multiple aggregates. It shows proper transaction coordination, consistency
+management, and aggregate interaction patterns.
 
 ## Business Context
 
-Some business operations span multiple aggregates (Order, Customer, Inventory, Payment). Domain services provide a way to coordinate these operations while maintaining aggregate boundaries and ensuring consistency.
+Some business operations span multiple aggregates (Order, Customer, Inventory,
+Payment). Domain services provide a way to coordinate these operations while
+maintaining aggregate boundaries and ensuring consistency.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-coordination.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
 import { AggregateRoot, UnitOfWork } from '@vytches-ddd/aggregates';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  Customer, 
-  Product, 
+import {
+  Order,
+  Customer,
+  Product,
   Payment,
-  CreateOrderCommand, 
+  CreateOrderCommand,
   OrderProcessingResult,
   IOrderRepository,
   ICustomerRepository,
   IProductRepository,
-  IPaymentRepository
+  IPaymentRepository,
 } from '../types';
 
 /**
  * @llm-summary Domain service coordinating operations across multiple aggregates
  * @llm-domain order-management
  * @llm-complexity Medium
- * 
+ *
  * @description
  * Coordinates order processing across Order, Customer, Product, and Payment aggregates.
  * Ensures consistency and proper transaction boundaries.
- * 
+ *
  * @example
  * ```typescript
  * const service = new OrderCoordinationService(repositories, unitOfWork);
@@ -63,11 +65,13 @@ export class OrderCoordinationService extends BaseDomainService {
 
   /**
    * Processes complete order across multiple aggregates
-   * 
+   *
    * @param command - Order creation command
    * @returns Result containing processing result or error
    */
-  async processCompleteOrder(command: CreateOrderCommand): Promise<Result<OrderProcessingResult, Error>> {
+  async processCompleteOrder(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       // Start unit of work for transaction coordination
       await this.unitOfWork.begin();
@@ -81,7 +85,9 @@ export class OrderCoordinationService extends BaseDomainService {
       const customer = customerResult.value;
 
       // Step 2: Validate and reserve inventory
-      const inventoryResult = await this.validateAndReserveInventory(command.items);
+      const inventoryResult = await this.validateAndReserveInventory(
+        command.items
+      );
       if (inventoryResult.isFailure()) {
         await this.unitOfWork.rollback();
         return Result.failure(inventoryResult.error);
@@ -89,7 +95,11 @@ export class OrderCoordinationService extends BaseDomainService {
       const reservedProducts = inventoryResult.value;
 
       // Step 3: Create order aggregate
-      const orderResult = await this.createOrder(command, customer, reservedProducts);
+      const orderResult = await this.createOrder(
+        command,
+        customer,
+        reservedProducts
+      );
       if (orderResult.isFailure()) {
         await this.unitOfWork.rollback();
         return Result.failure(orderResult.error);
@@ -117,32 +127,37 @@ export class OrderCoordinationService extends BaseDomainService {
         inventoryUpdates: reservedProducts.map(p => ({
           productId: p.id,
           quantityReserved: this.getReservedQuantity(p.id, command.items),
-          success: true
+          success: true,
         })),
-        notifications: []
+        notifications: [],
       };
 
       return Result.success(result);
-
     } catch (error) {
       await this.unitOfWork.rollback();
-      return Result.failure(new Error(`Order coordination failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order coordination failed: ${error.message}`)
+      );
     }
   }
 
   /**
    * Validates customer aggregate
    */
-  private async validateCustomer(userId: string): Promise<Result<Customer, Error>> {
+  private async validateCustomer(
+    userId: string
+  ): Promise<Result<Customer, Error>> {
     const customer = await this.customerRepository.findById(userId);
-    
+
     if (!customer) {
       return Result.failure(new Error(`Customer not found: ${userId}`));
     }
 
     // Business rule: Customer must be active
     if (customer.status === 'inactive' || customer.status === 'suspended') {
-      return Result.failure(new Error(`Customer account is ${customer.status}`));
+      return Result.failure(
+        new Error(`Customer account is ${customer.status}`)
+      );
     }
 
     return Result.success(customer);
@@ -158,25 +173,31 @@ export class OrderCoordinationService extends BaseDomainService {
 
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
-      
+
       if (!product) {
-        return Result.failure(new Error(`Product not found: ${item.productId}`));
+        return Result.failure(
+          new Error(`Product not found: ${item.productId}`)
+        );
       }
 
       if (product.status !== 'active') {
-        return Result.failure(new Error(`Product not available: ${product.name}`));
+        return Result.failure(
+          new Error(`Product not available: ${product.name}`)
+        );
       }
 
       if (product.inventory < item.quantity) {
-        return Result.failure(new Error(`Insufficient inventory for ${product.name}`));
+        return Result.failure(
+          new Error(`Insufficient inventory for ${product.name}`)
+        );
       }
 
       // Reserve inventory
       product.inventory -= item.quantity;
-      
+
       // Register for unit of work
       this.unitOfWork.registerDirty(product);
-      
+
       reservedProducts.push(product);
     }
 
@@ -187,11 +208,10 @@ export class OrderCoordinationService extends BaseDomainService {
    * Creates order aggregate
    */
   private async createOrder(
-    command: CreateOrderCommand, 
-    customer: Customer, 
+    command: CreateOrderCommand,
+    customer: Customer,
     products: Product[]
   ): Promise<Result<Order, Error>> {
-    
     // Calculate total amount
     let totalAmount = 0;
     const orderItems = [];
@@ -201,12 +221,12 @@ export class OrderCoordinationService extends BaseDomainService {
       if (product) {
         const itemTotal = product.price * item.quantity;
         totalAmount += itemTotal;
-        
+
         orderItems.push({
           productId: product.id,
           quantity: item.quantity,
           price: product.price,
-          name: product.name
+          name: product.name,
         });
       }
     }
@@ -218,26 +238,29 @@ export class OrderCoordinationService extends BaseDomainService {
       status: 'pending',
       totalAmount,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Register for unit of work
     this.unitOfWork.registerNew(order);
-    
+
     return Result.success(order);
   }
 
   /**
    * Processes payment through payment aggregate
    */
-  private async processPayment(order: Order, customer: Customer): Promise<Result<Payment, Error>> {
+  private async processPayment(
+    order: Order,
+    customer: Customer
+  ): Promise<Result<Payment, Error>> {
     const payment: Payment = {
       id: this.generatePaymentId(),
       orderId: order.id,
       amount: order.totalAmount,
       status: 'pending',
       method: 'credit_card', // Simplified
-      processedAt: new Date()
+      processedAt: new Date(),
     };
 
     // Business rule: Check customer payment limit
@@ -251,23 +274,32 @@ export class OrderCoordinationService extends BaseDomainService {
 
     // Register for unit of work
     this.unitOfWork.registerNew(payment);
-    
+
     return Result.success(payment);
   }
 
   /**
    * Updates customer aggregate with order information
    */
-  private async updateCustomerOrder(customer: Customer, order: Order): Promise<void> {
+  private async updateCustomerOrder(
+    customer: Customer,
+    order: Order
+  ): Promise<void> {
     // Update customer statistics
     customer.totalSpent += order.totalAmount;
-    
+
     // Update loyalty level based on spending
     if (customer.totalSpent >= 50000 && customer.loyaltyLevel !== 'platinum') {
       customer.loyaltyLevel = 'platinum';
-    } else if (customer.totalSpent >= 25000 && customer.loyaltyLevel === 'bronze') {
+    } else if (
+      customer.totalSpent >= 25000 &&
+      customer.loyaltyLevel === 'bronze'
+    ) {
       customer.loyaltyLevel = 'gold';
-    } else if (customer.totalSpent >= 10000 && customer.loyaltyLevel === 'bronze') {
+    } else if (
+      customer.totalSpent >= 10000 &&
+      customer.loyaltyLevel === 'bronze'
+    ) {
       customer.loyaltyLevel = 'silver';
     }
 
@@ -278,7 +310,10 @@ export class OrderCoordinationService extends BaseDomainService {
   /**
    * Handles order cancellation across aggregates
    */
-  async cancelOrder(orderId: string, reason: string): Promise<Result<void, Error>> {
+  async cancelOrder(
+    orderId: string,
+    reason: string
+  ): Promise<Result<void, Error>> {
     try {
       await this.unitOfWork.begin();
 
@@ -291,7 +326,9 @@ export class OrderCoordinationService extends BaseDomainService {
 
       if (order.status === 'cancelled' || order.status === 'delivered') {
         await this.unitOfWork.rollback();
-        return Result.failure(new Error(`Cannot cancel order with status: ${order.status}`));
+        return Result.failure(
+          new Error(`Cannot cancel order with status: ${order.status}`)
+        );
       }
 
       // Step 2: Update order status
@@ -320,10 +357,11 @@ export class OrderCoordinationService extends BaseDomainService {
 
       await this.unitOfWork.commit();
       return Result.success();
-
     } catch (error) {
       await this.unitOfWork.rollback();
-      return Result.failure(new Error(`Order cancellation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order cancellation failed: ${error.message}`)
+      );
     }
   }
 
@@ -343,7 +381,10 @@ export class OrderCoordinationService extends BaseDomainService {
   /**
    * Gets reserved quantity for product
    */
-  private getReservedQuantity(productId: string, items: CreateOrderItemCommand[]): number {
+  private getReservedQuantity(
+    productId: string,
+    items: CreateOrderItemCommand[]
+  ): number {
     const item = items.find(i => i.productId === productId);
     return item ? item.quantity : 0;
   }
@@ -362,11 +403,12 @@ export class OrderCoordinationService extends BaseDomainService {
     return `payment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
-```
+````
 
 ## Key Features
 
-- **Cross-Aggregate Coordination**: Coordinates operations across multiple aggregates
+- **Cross-Aggregate Coordination**: Coordinates operations across multiple
+  aggregates
 - **Transaction Management**: Uses UnitOfWork pattern for consistency
 - **Aggregate Boundaries**: Respects aggregate boundaries and consistency rules
 - **Rollback Handling**: Proper rollback on failures
@@ -377,12 +419,15 @@ export class OrderCoordinationService extends BaseDomainService {
 
 - **Long Transactions**: Keep transactions short to avoid deadlocks
 - **Aggregate Leakage**: Don't expose aggregate internals across boundaries
-- **Consistency**: Ensure eventual consistency when immediate consistency isn't possible
+- **Consistency**: Ensure eventual consistency when immediate consistency isn't
+  possible
 - **Error Handling**: Handle partial failures gracefully
-- **Performance**: Consider performance implications of cross-aggregate operations
+- **Performance**: Consider performance implications of cross-aggregate
+  operations
 
 ## Related Examples
 
 - [Event-Driven Domain Service](./example-1.md) - Event-driven coordination
 - [Domain Service with Policy Integration](./example-2.md) - Policy enforcement
-- [Saga-Orchestrated Domain Service](../advanced/example-1.md) - Long-running processes
+- [Saga-Orchestrated Domain Service](../advanced/example-1.md) - Long-running
+  processes

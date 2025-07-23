@@ -1,8 +1,9 @@
 # Intermediate Repository - NestJS DI Integration
 
-**Focus**: Advanced repository patterns with @vytches-ddd/di integration
-**Base Example**: [Unit of Work Pattern](../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories, @vytches-ddd/di
+**Focus**: Advanced repository patterns with @vytches-ddd/di integration **Base
+Example**: [Unit of Work Pattern](../../intermediate/example-1.md)
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories,
+@vytches-ddd/di
 
 ## Service Implementation
 
@@ -10,17 +11,17 @@
 // financial.service.ts
 import { Injectable } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   UnitOfWork,
   BaseRepository,
-  SpecificationRegistry 
+  SpecificationRegistry,
 } from '@vytches-ddd/repositories';
-import { 
-  Account, 
-  Transaction, 
-  AuditLog, 
+import {
+  Account,
+  Transaction,
+  AuditLog,
   TransferRequest,
-  AccountSpecification 
+  AccountSpecification,
 } from './types'; // From your app
 
 @Injectable()
@@ -33,31 +34,44 @@ export class FinancialService {
 
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration for advanced scenarios
-    this.accountRepository = VytchesDDD.resolve<BaseRepository<Account>>('accountRepository');
-    this.transactionRepository = VytchesDDD.resolve<BaseRepository<Transaction>>('transactionRepository');
-    this.auditRepository = VytchesDDD.resolve<BaseRepository<AuditLog>>('auditRepository');
-    this.specificationRegistry = VytchesDDD.resolve<SpecificationRegistry<Account>>('accountSpecificationRegistry');
-    this.unitOfWorkFactory = VytchesDDD.resolve<UnitOfWorkFactory>('unitOfWorkFactory');
+    this.accountRepository =
+      VytchesDDD.resolve<BaseRepository<Account>>('accountRepository');
+    this.transactionRepository = VytchesDDD.resolve<
+      BaseRepository<Transaction>
+    >('transactionRepository');
+    this.auditRepository =
+      VytchesDDD.resolve<BaseRepository<AuditLog>>('auditRepository');
+    this.specificationRegistry = VytchesDDD.resolve<
+      SpecificationRegistry<Account>
+    >('accountSpecificationRegistry');
+    this.unitOfWorkFactory =
+      VytchesDDD.resolve<UnitOfWorkFactory>('unitOfWorkFactory');
   }
 
   // ✅ FOCUS: Complex financial transaction with DI-managed UoW
   async processTransfer(request: TransferRequest): Promise<TransferResult> {
     const uow = this.unitOfWorkFactory.createFinancialUoW();
-    
+
     try {
       await uow.begin();
 
       // All repositories are pre-configured through DI
-      const fromAccount = await this.accountRepository.findById(request.fromAccountId);
-      const toAccount = await this.accountRepository.findById(request.toAccountId);
+      const fromAccount = await this.accountRepository.findById(
+        request.fromAccountId
+      );
+      const toAccount = await this.accountRepository.findById(
+        request.toAccountId
+      );
 
       if (!fromAccount || !toAccount) {
         throw new Error('Account not found');
       }
 
       // Use DI-managed specifications
-      const transferValidation = this.specificationRegistry
-        .compose(['sufficient-balance', 'account-active'], 'AND');
+      const transferValidation = this.specificationRegistry.compose(
+        ['sufficient-balance', 'account-active'],
+        'AND'
+      );
 
       if (!transferValidation.isSatisfiedBy(fromAccount)) {
         throw new Error('Transfer validation failed');
@@ -79,7 +93,7 @@ export class FinancialService {
         amount: request.amount,
         type: 'TRANSFER',
         status: 'COMPLETED',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       await uow.registerNew(this.transactionRepository, transaction);
@@ -89,12 +103,12 @@ export class FinancialService {
         id: generateId(),
         action: 'TRANSFER_PROCESSED',
         userId: request.userId,
-        details: { 
-          fromAccount: fromAccount.id, 
-          toAccount: toAccount.id, 
-          amount: request.amount 
+        details: {
+          fromAccount: fromAccount.id,
+          toAccount: toAccount.id,
+          amount: request.amount,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       await uow.commit();
@@ -103,9 +117,8 @@ export class FinancialService {
         success: true,
         transactionId: transaction.id,
         fromBalance: fromAccount.balance,
-        toBalance: toAccount.balance
+        toBalance: toAccount.balance,
       };
-
     } catch (error) {
       await uow.rollback();
       throw error;
@@ -122,18 +135,18 @@ export class FinancialService {
     if (criteria.minBalance !== undefined) {
       specificationNames.push('minimum-balance');
     }
-    
+
     if (criteria.accountType) {
       specificationNames.push('account-type');
     }
-    
+
     if (criteria.hasRecentActivity) {
       specificationNames.push('recent-activity');
     }
 
     // Compose specifications through DI-managed registry
     const compositeSpec = this.specificationRegistry.compose(
-      specificationNames, 
+      specificationNames,
       criteria.operator || 'AND'
     );
 
@@ -150,7 +163,7 @@ export class FinancialService {
       enableMetrics: true,
       enableAuditing: true,
       maxBatchSize: 1000,
-      enableParallelProcessing: true
+      enableParallelProcessing: true,
     });
 
     try {
@@ -165,14 +178,13 @@ export class FinancialService {
         uow: enterpriseUoW,
         enableValidation: true,
         enableFraudDetection: true,
-        parallelism: 10
+        parallelism: 10,
       });
 
       // Enterprise UoW automatically handles metrics and auditing
       await enterpriseUoW.commit();
 
       return result;
-
     } catch (error) {
       await enterpriseUoW.rollback();
       throw error;
@@ -183,8 +195,10 @@ export class FinancialService {
   async generateIntelligentAccountInsights(
     accountId: string
   ): Promise<AccountInsights> {
-    const aiAnalyzer = VytchesDDD.resolve<AIFinancialAnalyzer>('aiFinancialAnalyzer');
-    
+    const aiAnalyzer = VytchesDDD.resolve<AIFinancialAnalyzer>(
+      'aiFinancialAnalyzer'
+    );
+
     // Get account data
     const account = await this.accountRepository.findById(accountId);
     if (!account) {
@@ -195,10 +209,10 @@ export class FinancialService {
     const transactions = await this.transactionRepository.find({
       where: [
         { field: 'fromAccountId', operator: 'eq', value: accountId },
-        { field: 'toAccountId', operator: 'eq', value: accountId }
+        { field: 'toAccountId', operator: 'eq', value: accountId },
       ],
       orderBy: [{ field: 'timestamp', direction: 'DESC' }],
-      limit: 1000
+      limit: 1000,
     });
 
     // AI analysis through DI
@@ -207,10 +221,10 @@ export class FinancialService {
       transactions,
       analysisTypes: [
         'spending_patterns',
-        'risk_assessment', 
+        'risk_assessment',
         'fraud_detection',
-        'cash_flow_prediction'
-      ]
+        'cash_flow_prediction',
+      ],
     });
 
     return insights;
@@ -226,17 +240,21 @@ export class FinancialService {
       request.tenantContext
     );
 
-    const tenantUoW = this.unitOfWorkFactory.createTenantUoW(request.tenantContext);
+    const tenantUoW = this.unitOfWorkFactory.createTenantUoW(
+      request.tenantContext
+    );
 
     try {
       await tenantUoW.begin();
 
       // All operations automatically scoped to tenant
-      const results = await this.processTenantSpecificLogic(request, tenantRepo);
+      const results = await this.processTenantSpecificLogic(
+        request,
+        tenantRepo
+      );
 
       await tenantUoW.commit();
       return results;
-
     } catch (error) {
       await tenantUoW.rollback();
       throw error;
@@ -251,7 +269,7 @@ export class FinancialService {
     return {
       success: true,
       tenantId: request.tenantContext,
-      processedCount: 1
+      processedCount: 1,
     };
   }
 }
@@ -262,10 +280,10 @@ export class FinancialService {
 ```typescript
 // financial-di.setup.ts
 import { VytchesDDD, DomainService } from '@vytches-ddd/di';
-import { 
+import {
   BaseRepository,
   SpecificationRegistry,
-  UnitOfWorkFactory 
+  UnitOfWorkFactory,
 } from '@vytches-ddd/repositories';
 
 // Repository configurations with DI
@@ -277,7 +295,7 @@ export class AccountRepositoryConfig {
       enableCaching: true,
       cacheTTL: 300000,
       enableAuditing: true,
-      enableMetrics: true
+      enableMetrics: true,
     });
   }
 }
@@ -289,7 +307,7 @@ export class TransactionRepositoryConfig {
       enableEventSourcing: true,
       enableBatching: true,
       batchSize: 1000,
-      enableCompression: true
+      enableCompression: true,
     });
   }
 }
@@ -300,7 +318,7 @@ export class AuditRepositoryConfig {
     return new BaseRepository<AuditLog>('audit_logs', {
       enableCompression: true,
       enableArchiving: true,
-      retentionPeriod: 2555 // 7 years in days
+      retentionPeriod: 2555, // 7 years in days
     });
   }
 }
@@ -310,14 +328,26 @@ export class AuditRepositoryConfig {
 export class AccountSpecificationRegistryConfig {
   static create(): SpecificationRegistry<Account> {
     const registry = new SpecificationRegistry<Account>();
-    
+
     // Pre-register all specifications
-    registry.register('sufficient-balance', new AccountSpecification.SufficientBalance());
-    registry.register('account-active', new AccountSpecification.AccountActive());
-    registry.register('minimum-balance', new AccountSpecification.MinimumBalance());
+    registry.register(
+      'sufficient-balance',
+      new AccountSpecification.SufficientBalance()
+    );
+    registry.register(
+      'account-active',
+      new AccountSpecification.AccountActive()
+    );
+    registry.register(
+      'minimum-balance',
+      new AccountSpecification.MinimumBalance()
+    );
     registry.register('account-type', new AccountSpecification.AccountType());
-    registry.register('recent-activity', new AccountSpecification.RecentActivity());
-    
+    registry.register(
+      'recent-activity',
+      new AccountSpecification.RecentActivity()
+    );
+
     return registry;
   }
 }
@@ -330,7 +360,7 @@ export class UnitOfWorkFactoryConfig {
       enableMetrics: true,
       enableAuditing: true,
       defaultTimeout: 30000,
-      enableDistributedTransactions: true
+      enableDistributedTransactions: true,
     });
   }
 }
@@ -342,7 +372,7 @@ export class AIFinancialAnalyzerConfig {
     return new AIFinancialAnalyzer({
       modelEndpoint: process.env.AI_MODEL_ENDPOINT,
       enableCaching: true,
-      confidenceThreshold: 0.8
+      confidenceThreshold: 0.8,
     });
   }
 }
@@ -355,7 +385,7 @@ export class BatchTransactionProcessorConfig {
       maxBatchSize: 1000,
       enableParallelProcessing: true,
       enableValidation: true,
-      enableFraudDetection: true
+      enableFraudDetection: true,
     });
   }
 }
@@ -373,7 +403,7 @@ import { FinancialController } from './financial.controller';
 @Module({
   providers: [FinancialService],
   controllers: [FinancialController],
-  exports: [FinancialService]
+  exports: [FinancialService],
 })
 export class FinancialModule implements OnModuleInit {
   async onModuleInit() {

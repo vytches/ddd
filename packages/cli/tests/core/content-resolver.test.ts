@@ -21,7 +21,14 @@ describe('ContentResolver', () => {
       const packageName = 'test-package';
       const requestedPath = 'basic/example.md';
       const expectedContent = '# Example Content';
-      const fullPath = path.join(process.cwd(), 'packages', packageName, 'src', 'examples', requestedPath);
+      const fullPath = path.join(
+        process.cwd(),
+        'packages',
+        packageName,
+        'src',
+        'examples',
+        requestedPath
+      );
 
       mockFs.existsSync.mockImplementation((path: string) => path === fullPath);
       mockFs.readFileSync.mockReturnValue(expectedContent);
@@ -68,7 +75,14 @@ describe('ContentResolver', () => {
       const requestedPath = 'basic/implementation.md';
       const mappedPath = 'basic/basic-example.md';
       const expectedContent = '# Basic Example';
-      const fullPath = path.join(process.cwd(), 'packages', packageName, 'src', 'examples', mappedPath);
+      const fullPath = path.join(
+        process.cwd(),
+        'packages',
+        packageName,
+        'src',
+        'examples',
+        mappedPath
+      );
 
       mockFs.existsSync.mockImplementation((path: string) => path === fullPath);
       mockFs.readFileSync.mockReturnValue(expectedContent);
@@ -83,7 +97,14 @@ describe('ContentResolver', () => {
       const requestedPath = 'intermediate/use-case.md';
       const mappedPath = 'intermediate/usage.md';
       const expectedContent = '# Usage Example';
-      const fullPath = path.join(process.cwd(), 'packages', packageName, 'src', 'examples', mappedPath);
+      const fullPath = path.join(
+        process.cwd(),
+        'packages',
+        packageName,
+        'src',
+        'examples',
+        mappedPath
+      );
 
       mockFs.existsSync.mockImplementation((path: string) => path === fullPath);
       mockFs.readFileSync.mockReturnValue(expectedContent);
@@ -135,11 +156,16 @@ describe('ContentResolver', () => {
       const requestedPath = 'intermediate/nonexistent.md';
       const existingFile = 'example.md';
       const expectedContent = '# Intermediate Example';
-      const dirPath = path.join(process.cwd(), 'packages', packageName, 'src', 'examples', 'intermediate');
-
-      mockFs.existsSync.mockImplementation((path: string) =>
-        path === dirPath
+      const dirPath = path.join(
+        process.cwd(),
+        'packages',
+        packageName,
+        'src',
+        'examples',
+        'intermediate'
       );
+
+      mockFs.existsSync.mockImplementation((path: string) => path === dirPath);
       // Ensure readdirSync returns an array with the existing file
       mockFs.readdirSync.mockReturnValue([existingFile, 'other-file.txt']); // Test .md filtering
       mockFs.readFileSync.mockReturnValue(expectedContent);
@@ -264,17 +290,17 @@ describe('ContentResolver', () => {
     it('should return correct main export for known packages', () => {
       const packages = {
         'domain-services': 'BaseDomainService',
-        'acl': 'BaseACL',
-        'policies': 'PolicyBuilder',
-        'resilience': 'ResiliencePolicy',
-        'messaging': 'MessageBus',
-        'events': 'UnifiedEventBus',
-        'cqrs': 'CommandBus',
-        'projections': 'ProjectionEngine',
-        'validation': 'ValidationFacade',
-        'aggregates': 'AggregateRoot',
-        'repositories': 'BaseRepository',
-        'di': 'VytchesDDD'
+        acl: 'BaseACL',
+        policies: 'PolicyBuilder',
+        resilience: 'ResiliencePolicy',
+        messaging: 'MessageBus',
+        events: 'UnifiedEventBus',
+        cqrs: 'CommandBus',
+        projections: 'ProjectionEngine',
+        validation: 'ValidationFacade',
+        aggregates: 'AggregateRoot',
+        repositories: 'BaseRepository',
+        di: 'VytchesDDD',
       };
 
       // Note: getMainExport is private, so we test it indirectly through generated content
@@ -360,9 +386,11 @@ describe('ContentResolver', () => {
       // Should try exact paths first
       expect(callPaths.some(p => p.includes('src/examples/basic/implementation.md'))).toBe(true);
       expect(callPaths.some(p => p.includes('examples/basic/implementation.md'))).toBe(true);
-      
+
       // Should also try mapped paths (basic-example.md, example-1.md)
-      const hasMappedPaths = callPaths.some(p => p.includes('basic-example.md') || p.includes('example-1.md'));
+      const hasMappedPaths = callPaths.some(
+        p => p.includes('basic-example.md') || p.includes('example-1.md')
+      );
       expect(hasMappedPaths).toBe(true);
     });
   });

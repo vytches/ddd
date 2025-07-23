@@ -69,14 +69,14 @@ describe('DocumentationGenerator', () => {
         level: 'basic',
         diSupport: false,
         diRequired: false,
-        description: 'Basic implementation'
+        description: 'Basic implementation',
       },
       advanced: {
         level: 'advanced',
         diSupport: true,
         diRequired: false,
-        description: 'Advanced implementation'
-      }
+        description: 'Advanced implementation',
+      },
     },
     frameworks: [],
     sections: ['core', 'integration', 'patterns'],
@@ -85,7 +85,7 @@ describe('DocumentationGenerator', () => {
       core: ['domain-services:core'],
       integrations: ['domain-services:integration'],
       frameworks: ['domain-services:nestjs'],
-      patterns: ['domain-services:patterns']
+      patterns: ['domain-services:patterns'],
     },
     contentConfig: {
       showImportStatements: true,
@@ -94,14 +94,14 @@ describe('DocumentationGenerator', () => {
       showPerformance: false,
       includeBestPractices: true,
       includeCommonPitfalls: false,
-      showVersionHistory: false
+      showVersionHistory: false,
     },
     llmSupport: {
       enabled: true,
       includePrompts: false,
       includeTips: true,
       includePatterns: true,
-      optimizeForCodeGeneration: false
+      optimizeForCodeGeneration: false,
     },
     relatedPackages: {},
     tagFinder: {
@@ -140,15 +140,17 @@ describe('DocumentationGenerator', () => {
     // Setup default mock returns
     mockConfigLoader.loadPackageConfig.mockResolvedValue(mockPackageConfig);
     // Mock findExamplesByTag to return examples based on complexity
-    mockTagFinder.findExamplesByTag.mockImplementation((tagPattern: string, complexity?: string) => {
-      if (complexity === 'basic') {
-        return Promise.resolve([mockExampleDefinition]);
-      } else if (complexity === 'advanced') {
-        return Promise.resolve([mockAdvancedExample]);
-      } else {
-        return Promise.resolve([]); // No intermediate examples in our mock
+    mockTagFinder.findExamplesByTag.mockImplementation(
+      (tagPattern: string, complexity?: string) => {
+        if (complexity === 'basic') {
+          return Promise.resolve([mockExampleDefinition]);
+        } else if (complexity === 'advanced') {
+          return Promise.resolve([mockAdvancedExample]);
+        } else {
+          return Promise.resolve([]); // No intermediate examples in our mock
+        }
       }
-    });
+    );
     mockTagFinder.selectExamples.mockResolvedValue([mockExampleDefinition]);
     mockTemplateEngine.render.mockResolvedValue('# Generated Documentation\n\nContent here...');
 
@@ -223,7 +225,7 @@ describe('DocumentationGenerator', () => {
 
       mockTagFinder.findExamplesByTag.mockResolvedValue([
         mockExampleDefinition, // diSupport: false
-        mockAdvancedExample,   // diSupport: true
+        mockAdvancedExample, // diSupport: true
       ]);
 
       await generator.generate(options);
@@ -268,19 +270,13 @@ describe('DocumentationGenerator', () => {
 
       await generator.generate(options);
 
-      expect(mockTemplateEngine.render).toHaveBeenCalledWith(
-        'llm-optimized',
-        expect.any(Object)
-      );
+      expect(mockTemplateEngine.render).toHaveBeenCalledWith('llm-optimized', expect.any(Object));
     });
 
     it('should use standard template by default', async () => {
       await generator.generate(basicOptions);
 
-      expect(mockTemplateEngine.render).toHaveBeenCalledWith(
-        'feature-doc',
-        expect.any(Object)
-      );
+      expect(mockTemplateEngine.render).toHaveBeenCalledWith('feature-doc', expect.any(Object));
     });
 
     it('should apply smart selection and randomization', async () => {
@@ -292,15 +288,17 @@ describe('DocumentationGenerator', () => {
       };
 
       // Override the mock to return multiple examples
-      mockTagFinder.findExamplesByTag.mockImplementation((tagPattern: string, complexity?: string) => {
-        if (complexity === 'basic') {
-          return Promise.resolve([mockExampleDefinition]);
-        } else if (complexity === 'advanced') {
-          return Promise.resolve([mockAdvancedExample]);
-        } else {
-          return Promise.resolve([]);
+      mockTagFinder.findExamplesByTag.mockImplementation(
+        (tagPattern: string, complexity?: string) => {
+          if (complexity === 'basic') {
+            return Promise.resolve([mockExampleDefinition]);
+          } else if (complexity === 'advanced') {
+            return Promise.resolve([mockAdvancedExample]);
+          } else {
+            return Promise.resolve([]);
+          }
         }
-      });
+      );
       mockTagFinder.selectExamples.mockResolvedValue([mockExampleDefinition]);
 
       const result = await generator.generate(options);
@@ -410,17 +408,19 @@ describe('DocumentationGenerator', () => {
       const renderCall = mockTemplateEngine.render.mock.calls[0];
       const templateData = renderCall[1];
 
-      expect(templateData).toEqual(expect.objectContaining({
-        packageConfig: mockPackageConfig,
-        complexityLevels: ['basic', 'intermediate', 'advanced'],
-        framework: 'nestjs',
-        sections: ['core', 'integration', 'patterns'],
-        examples: [mockExampleDefinition, mockAdvancedExample],
-        relatedExamples: [],
-        llmOptimized: true,
-        timestamp: expect.any(String),
-        seed: 'test-seed',
-      }));
+      expect(templateData).toEqual(
+        expect.objectContaining({
+          packageConfig: mockPackageConfig,
+          complexityLevels: ['basic', 'intermediate', 'advanced'],
+          framework: 'nestjs',
+          sections: ['core', 'integration', 'patterns'],
+          examples: [mockExampleDefinition, mockAdvancedExample],
+          relatedExamples: [],
+          llmOptimized: true,
+          timestamp: expect.any(String),
+          seed: 'test-seed',
+        })
+      );
     });
 
     it('should use package seed when no custom seed provided', async () => {
@@ -437,8 +437,8 @@ describe('DocumentationGenerator', () => {
     it('should handle package config loading errors', async () => {
       mockConfigLoader.loadPackageConfig.mockRejectedValue(new Error('Package not found'));
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({ packageName: 'invalid-package' })
+      const [error] = await safeRun(
+        async () => await generator.generate({ packageName: 'invalid-package' })
       );
 
       expect(error).toBeInstanceOf(Error);
@@ -448,8 +448,8 @@ describe('DocumentationGenerator', () => {
     it('should handle tag finder errors', async () => {
       mockTagFinder.findExamplesByTag.mockRejectedValue(new Error('Tag finder failed'));
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({ packageName: 'domain-services' })
+      const [error] = await safeRun(
+        async () => await generator.generate({ packageName: 'domain-services' })
       );
 
       expect(error).toBeInstanceOf(Error);
@@ -458,8 +458,8 @@ describe('DocumentationGenerator', () => {
     it('should handle template rendering errors', async () => {
       mockTemplateEngine.render.mockRejectedValue(new Error('Template render failed'));
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({ packageName: 'domain-services' })
+      const [error] = await safeRun(
+        async () => await generator.generate({ packageName: 'domain-services' })
       );
 
       expect(error).toBeInstanceOf(Error);
@@ -468,8 +468,8 @@ describe('DocumentationGenerator', () => {
     it('should handle file writing errors', async () => {
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write failed'));
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({ packageName: 'domain-services' })
+      const [error] = await safeRun(
+        async () => await generator.generate({ packageName: 'domain-services' })
       );
 
       expect(error).toBeInstanceOf(Error);
@@ -478,8 +478,8 @@ describe('DocumentationGenerator', () => {
     it('should handle missing package config', async () => {
       mockConfigLoader.loadPackageConfig.mockResolvedValue(null);
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({ packageName: 'domain-services' })
+      const [error] = await safeRun(
+        async () => await generator.generate({ packageName: 'domain-services' })
       );
 
       expect(error).toBeDefined();
@@ -493,11 +493,12 @@ describe('DocumentationGenerator', () => {
 
       mockConfigLoader.loadPackageConfig.mockResolvedValue(configWithoutTagFinder);
 
-      const [error] = await safeRun(async () =>
-        await generator.generate({
-          packageName: 'domain-services',
-          randomize: true,
-        })
+      const [error] = await safeRun(
+        async () =>
+          await generator.generate({
+            packageName: 'domain-services',
+            randomize: true,
+          })
       );
 
       expect(error).toBeUndefined(); // Should handle gracefully
@@ -557,12 +558,14 @@ describe('DocumentationGenerator', () => {
       };
 
       // Mock to return both examples for basic complexity
-      mockTagFinder.findExamplesByTag.mockImplementation((tagPattern: string, complexity?: string) => {
-        if (complexity === 'basic') {
-          return Promise.resolve([mockExampleDefinition, basicExampleWithDI]);
+      mockTagFinder.findExamplesByTag.mockImplementation(
+        (tagPattern: string, complexity?: string) => {
+          if (complexity === 'basic') {
+            return Promise.resolve([mockExampleDefinition, basicExampleWithDI]);
+          }
+          return Promise.resolve([]);
         }
-        return Promise.resolve([]);
-      });
+      );
 
       const result = await generator.generate({
         packageName: 'domain-services',
@@ -577,14 +580,16 @@ describe('DocumentationGenerator', () => {
 
     it('should include advanced examples in DI-only mode', async () => {
       // Mock to return examples per complexity level
-      mockTagFinder.findExamplesByTag.mockImplementation((tagPattern: string, complexity?: string) => {
-        if (complexity === 'basic') {
-          return Promise.resolve([mockExampleDefinition]); // basic, no DI
-        } else if (complexity === 'advanced') {
-          return Promise.resolve([mockAdvancedExample]); // advanced, with DI
+      mockTagFinder.findExamplesByTag.mockImplementation(
+        (tagPattern: string, complexity?: string) => {
+          if (complexity === 'basic') {
+            return Promise.resolve([mockExampleDefinition]); // basic, no DI
+          } else if (complexity === 'advanced') {
+            return Promise.resolve([mockAdvancedExample]); // advanced, with DI
+          }
+          return Promise.resolve([]);
         }
-        return Promise.resolve([]);
-      });
+      );
 
       const result = await generator.generate({
         packageName: 'domain-services',
@@ -623,12 +628,12 @@ describe('DocumentationGenerator', () => {
       };
 
       mockTagFinder.findExamplesByTag
-        .mockResolvedValueOnce([mockExampleDefinition])  // basic core
-        .mockResolvedValueOnce([])                       // intermediate core
-        .mockResolvedValueOnce([mockAdvancedExample])    // advanced core
-        .mockResolvedValueOnce([relatedBasic])           // basic integration
-        .mockResolvedValueOnce([])                       // intermediate integration
-        .mockResolvedValueOnce([relatedAdvanced]);       // advanced integration
+        .mockResolvedValueOnce([mockExampleDefinition]) // basic core
+        .mockResolvedValueOnce([]) // intermediate core
+        .mockResolvedValueOnce([mockAdvancedExample]) // advanced core
+        .mockResolvedValueOnce([relatedBasic]) // basic integration
+        .mockResolvedValueOnce([]) // intermediate integration
+        .mockResolvedValueOnce([relatedAdvanced]); // advanced integration
 
       const result = await generator.generate({
         packageName: 'domain-services',

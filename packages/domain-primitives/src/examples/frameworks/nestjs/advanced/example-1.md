@@ -1,15 +1,20 @@
 # Enterprise Domain Foundation Platform - NestJS Advanced Integration
 
-**Version**: 2.1.0
-**Package**: @vytches-ddd/domain-primitives
-**Complexity**: Advanced
-**Framework**: NestJS
-**Base Example**: [Enterprise Error Recovery Orchestration](../../advanced/example-3.md)
-**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches-ddd/domain-primitives, @vytches-ddd/di, @vytches-ddd/logging, @vytches-ddd/resilience
+**Version**: 2.1.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+Advanced **Framework**: NestJS **Base Example**:
+[Enterprise Error Recovery Orchestration](../../advanced/example-3.md)
+**Dependencies**: @nestjs/common, @nestjs/schedule,
+@vytches-ddd/domain-primitives, @vytches-ddd/di, @vytches-ddd/logging,
+@vytches-ddd/resilience
 
 ## Business Context
 
-This example demonstrates a complete enterprise-grade domain foundation platform integrated with NestJS. It showcases comprehensive error recovery orchestration, multi-tenant security management, cross-domain coordination, and real-time health monitoring. This pattern is essential for mission-critical financial services platforms requiring 99.99% uptime, regulatory compliance, and sophisticated disaster recovery capabilities.
+This example demonstrates a complete enterprise-grade domain foundation platform
+integrated with NestJS. It showcases comprehensive error recovery orchestration,
+multi-tenant security management, cross-domain coordination, and real-time
+health monitoring. This pattern is essential for mission-critical financial
+services platforms requiring 99.99% uptime, regulatory compliance, and
+sophisticated disaster recovery capabilities.
 
 ## Service Implementation
 
@@ -26,13 +31,13 @@ import type {
   SecurityThreatAssessment,
   DisasterRecoveryPlan,
   SystemHealthMetrics,
-  ComplianceDashboard
+  ComplianceDashboard,
 } from '../types'; // From your application
 import {
   BaseError,
   ErrorRecoveryOrchestrationError,
   MultiTenantSecurityError,
-  DomainOrchestrationError
+  DomainOrchestrationError,
 } from '@vytches-ddd/domain-primitives';
 
 @DomainService('enterpriseDomainPlatform', {
@@ -40,42 +45,44 @@ import {
   context: 'EnterpriseDomainFoundation',
   dependencies: [
     'errorRecoveryOrchestrator',
-    'multiTenantSecurityManager', 
+    'multiTenantSecurityManager',
     'domainOrchestrator',
     'complianceManager',
     'observabilityService',
-    'disasterRecoveryManager'
-  ]
+    'disasterRecoveryManager',
+  ],
 })
 @Injectable()
-export class EnterpriseDomainPlatformService 
-  implements OnModuleInit, OnModuleDestroy, IEnterpriseDomainPlatform {
-  
+export class EnterpriseDomainPlatformService
+  implements OnModuleInit, OnModuleDestroy, IEnterpriseDomainPlatform
+{
   private readonly logger = Logger.forContext('EnterpriseDomainPlatform')
     .withUserId('system')
     .withContext({ service: 'EnterpriseDomainPlatform' });
-  
+
   private readonly errorRecoveryOrchestrator: IErrorRecoveryOrchestrator;
   private readonly multiTenantSecurityManager: IMultiTenantSecurityManager;
   private readonly domainOrchestrator: IDomainOrchestrator;
   private readonly complianceManager: IComplianceManager;
   private readonly observabilityService: IObservabilityService;
   private readonly disasterRecoveryManager: IDisasterRecoveryManager;
-  
+
   private platformHealthy = true;
   private activeTenants = new Set<string>();
   private emergencyMode = false;
 
   constructor() {
     // ⭐ FOCUS: Advanced VytchesDDD DI with comprehensive service resolution
-    this.errorRecoveryOrchestrator = VytchesDDD.resolve<IErrorRecoveryOrchestrator>(
-      'errorRecoveryOrchestrator',
-      'EnterpriseDomainFoundation'
-    );
-    this.multiTenantSecurityManager = VytchesDDD.resolve<IMultiTenantSecurityManager>(
-      'multiTenantSecurityManager',
-      'EnterpriseDomainFoundation'
-    );
+    this.errorRecoveryOrchestrator =
+      VytchesDDD.resolve<IErrorRecoveryOrchestrator>(
+        'errorRecoveryOrchestrator',
+        'EnterpriseDomainFoundation'
+      );
+    this.multiTenantSecurityManager =
+      VytchesDDD.resolve<IMultiTenantSecurityManager>(
+        'multiTenantSecurityManager',
+        'EnterpriseDomainFoundation'
+      );
     this.domainOrchestrator = VytchesDDD.resolve<IDomainOrchestrator>(
       'domainOrchestrator',
       'EnterpriseDomainFoundation'
@@ -97,14 +104,14 @@ export class EnterpriseDomainPlatformService
   async onModuleInit(): Promise<void> {
     this.logger.info('Initializing Enterprise Domain Platform', {
       version: '2.1.0',
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
     });
-    
+
     // Initialize platform subsystems
     await this.initializePlatformSubsystems();
     await this.validateSystemIntegrity();
     await this.activateMonitoring();
-    
+
     this.logger.info('Enterprise Domain Platform initialized successfully');
   }
 
@@ -125,25 +132,24 @@ export class EnterpriseDomainPlatformService
       systemId: error.systemId,
       recoveryPhase: error.recoveryPhase,
       businessImpact: error.businessImpact,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     try {
       // ⭐ Advanced error recovery through VytchesDDD orchestration
-      const recoveryPlan = await this.errorRecoveryOrchestrator.createRecoveryPlan(
-        error,
-        context
-      );
+      const recoveryPlan =
+        await this.errorRecoveryOrchestrator.createRecoveryPlan(error, context);
 
       if (error.requiresEmergencyResponse()) {
         await this.initiateEmergencyProtocol(error, recoveryPlan);
       }
 
       // Execute recovery strategy
-      const recoveryResult = await this.errorRecoveryOrchestrator.executeRecovery(
-        recoveryPlan,
-        context
-      );
+      const recoveryResult =
+        await this.errorRecoveryOrchestrator.executeRecovery(
+          recoveryPlan,
+          context
+        );
 
       if (recoveryResult.requiresDisasterRecovery) {
         await this.disasterRecoveryManager.activateDisasterRecovery(
@@ -154,15 +160,17 @@ export class EnterpriseDomainPlatformService
       this.logger.info('System recovery completed successfully', {
         recoveryId: recoveryResult.recoveryId,
         duration: recoveryResult.recoveryDuration,
-        systemsRestored: recoveryResult.systemsRestored
+        systemsRestored: recoveryResult.systemsRestored,
       });
-
     } catch (recoveryError) {
-      this.logger.error('System recovery failed - escalating to emergency protocols', {
-        originalError: error.message,
-        recoveryError: (recoveryError as Error).message
-      });
-      
+      this.logger.error(
+        'System recovery failed - escalating to emergency protocols',
+        {
+          originalError: error.message,
+          recoveryError: (recoveryError as Error).message,
+        }
+      );
+
       await this.escalateToEmergencyProtocols(error, recoveryError as Error);
       throw recoveryError;
     }
@@ -175,35 +183,38 @@ export class EnterpriseDomainPlatformService
   ): Promise<SecurityThreatAssessment> {
     this.logger.debug('Assessing security threats for tenant', {
       tenantId,
-      threatContext: threatContext.type
+      threatContext: threatContext.type,
     });
 
     try {
       // Use VytchesDDD security manager for threat analysis
-      const threatAssessment = await this.multiTenantSecurityManager.assessThreats(
-        tenantId,
-        threatContext
-      );
+      const threatAssessment =
+        await this.multiTenantSecurityManager.assessThreats(
+          tenantId,
+          threatContext
+        );
 
       if (threatAssessment.threatLevel === 'CRITICAL') {
         await this.initiateSecurityLockdown(tenantId, threatAssessment);
       }
 
       // Update compliance posture
-      await this.complianceManager.updateSecurityPosture(tenantId, threatAssessment);
+      await this.complianceManager.updateSecurityPosture(
+        tenantId,
+        threatAssessment
+      );
 
       return threatAssessment;
-
     } catch (error) {
       this.logger.error('Security threat assessment failed', {
         tenantId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
-      
+
       if (error instanceof MultiTenantSecurityError) {
         await this.handleSecurityIncident(error, tenantId);
       }
-      
+
       throw error;
     }
   }
@@ -214,19 +225,20 @@ export class EnterpriseDomainPlatformService
     participants: DomainParticipant[]
   ): Promise<DomainOperationResult> {
     const correlationId = operation.correlationId;
-    
+
     this.logger.info('Coordinating cross-domain operation', {
       operationType: operation.type,
       participantCount: participants.length,
-      correlationId
+      correlationId,
     });
 
     try {
       // Advanced domain orchestration through VytchesDDD
-      const orchestrationResult = await this.domainOrchestrator.coordinateOperation(
-        operation,
-        participants
-      );
+      const orchestrationResult =
+        await this.domainOrchestrator.coordinateOperation(
+          operation,
+          participants
+        );
 
       // Monitor operation compliance
       await this.complianceManager.validateCrossDomainOperation(
@@ -235,12 +247,11 @@ export class EnterpriseDomainPlatformService
       );
 
       return orchestrationResult;
-
     } catch (error) {
       this.logger.error('Cross-domain coordination failed', {
         operationType: operation.type,
         error: (error as Error).message,
-        correlationId
+        correlationId,
       });
 
       if (error instanceof DomainOrchestrationError) {
@@ -257,22 +268,21 @@ export class EnterpriseDomainPlatformService
   async monitorPlatformHealth(): Promise<void> {
     try {
       const healthMetrics = await this.collectSystemHealthMetrics();
-      
+
       if (!healthMetrics.allSystemsHealthy) {
         this.logger.warn('Platform health degradation detected', {
           unhealthySystems: healthMetrics.unhealthySystems,
-          criticalAlerts: healthMetrics.criticalAlerts
+          criticalAlerts: healthMetrics.criticalAlerts,
         });
-        
+
         await this.handleHealthDegradation(healthMetrics);
       }
 
       // Update observability metrics
       await this.observabilityService.recordPlatformHealth(healthMetrics);
-      
     } catch (error) {
       this.logger.error('Health monitoring failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
     }
   }
@@ -281,21 +291,25 @@ export class EnterpriseDomainPlatformService
   @Cron(CronExpression.EVERY_HOUR)
   async generateComplianceReport(): Promise<void> {
     try {
-      const complianceDashboard = await this.complianceManager.generateDashboard();
-      
+      const complianceDashboard =
+        await this.complianceManager.generateDashboard();
+
       if (complianceDashboard.hasViolations) {
         this.logger.warn('Compliance violations detected', {
           violationCount: complianceDashboard.violations.length,
-          criticalViolations: complianceDashboard.violations.filter(v => v.severity === 'CRITICAL').length
+          criticalViolations: complianceDashboard.violations.filter(
+            v => v.severity === 'CRITICAL'
+          ).length,
         });
       }
 
       // Archive compliance data
-      await this.observabilityService.archiveComplianceData(complianceDashboard);
-      
+      await this.observabilityService.archiveComplianceData(
+        complianceDashboard
+      );
     } catch (error) {
       this.logger.error('Compliance reporting failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
     }
   }
@@ -304,22 +318,23 @@ export class EnterpriseDomainPlatformService
   private async initializePlatformSubsystems(): Promise<void> {
     // Initialize error recovery subsystem
     await this.errorRecoveryOrchestrator.initialize();
-    
+
     // Initialize security subsystem
     await this.multiTenantSecurityManager.initialize();
-    
+
     // Initialize domain orchestration
     await this.domainOrchestrator.initialize();
-    
+
     // Initialize disaster recovery
     await this.disasterRecoveryManager.initialize();
-    
+
     this.logger.info('All platform subsystems initialized');
   }
 
   private async validateSystemIntegrity(): Promise<void> {
-    const integrityCheck = await this.observabilityService.performIntegrityCheck();
-    
+    const integrityCheck =
+      await this.observabilityService.performIntegrityCheck();
+
     if (!integrityCheck.passed) {
       throw new DomainOrchestrationError(
         'System integrity validation failed',
@@ -347,12 +362,12 @@ export class EnterpriseDomainPlatformService
     recoveryError: Error
   ): Promise<void> {
     this.emergencyMode = true;
-    
+
     await this.disasterRecoveryManager.activateEmergencyProtocols({
       originalError: originalError.message,
       recoveryError: recoveryError.message,
       timestamp: new Date(),
-      platformState: 'EMERGENCY'
+      platformState: 'EMERGENCY',
     });
   }
 
@@ -360,12 +375,14 @@ export class EnterpriseDomainPlatformService
     return {
       allSystemsHealthy: this.platformHealthy && !this.emergencyMode,
       activeTenantCount: this.activeTenants.size,
-      errorRecoveryHealth: await this.errorRecoveryOrchestrator.getHealthStatus(),
+      errorRecoveryHealth:
+        await this.errorRecoveryOrchestrator.getHealthStatus(),
       securityHealth: await this.multiTenantSecurityManager.getHealthStatus(),
-      domainOrchestrationHealth: await this.domainOrchestrator.getHealthStatus(),
+      domainOrchestrationHealth:
+        await this.domainOrchestrator.getHealthStatus(),
       timestamp: new Date(),
       unhealthySystems: [],
-      criticalAlerts: []
+      criticalAlerts: [],
     };
   }
 }
@@ -389,7 +406,7 @@ export class EnterpriseDomainPlatformModule implements OnModuleInit {
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD with all enterprise services
     await VytchesDDD.configure();
-    
+
     console.log('Enterprise Domain Platform Module initialized');
   }
 }
@@ -397,27 +414,37 @@ export class EnterpriseDomainPlatformModule implements OnModuleInit {
 
 ## Key Features
 
-- **Comprehensive Error Recovery**: Enterprise-grade error orchestration with disaster recovery
+- **Comprehensive Error Recovery**: Enterprise-grade error orchestration with
+  disaster recovery
 - **Multi-Tenant Security**: Advanced threat assessment and tenant isolation
-- **Cross-Domain Coordination**: SAGA patterns for complex business workflows  
+- **Cross-Domain Coordination**: SAGA patterns for complex business workflows
 - **Real-Time Monitoring**: Continuous health monitoring with automated alerting
 - **Compliance Management**: Automated regulatory compliance reporting
 - **Emergency Protocols**: Automatic escalation for critical system failures
 - **Observability**: Complete system observability with metrics and logging
-- **Resilience Patterns**: Circuit breakers and retry policies for fault tolerance
+- **Resilience Patterns**: Circuit breakers and retry policies for fault
+  tolerance
 
 ## Common Pitfalls
 
-- **Service Dependencies**: Ensure all enterprise services are properly configured in VytchesDDD
-- **Emergency Mode**: Test emergency protocols thoroughly - they bypass normal constraints
+- **Service Dependencies**: Ensure all enterprise services are properly
+  configured in VytchesDDD
+- **Emergency Mode**: Test emergency protocols thoroughly - they bypass normal
+  constraints
 - **Tenant Isolation**: Never share security contexts between tenants
 - **Disaster Recovery**: Regularly test disaster recovery procedures
-- **Compliance Auditing**: Ensure all business operations are logged for compliance
-- **Resource Management**: Monitor memory usage with large-scale tenant operations
+- **Compliance Auditing**: Ensure all business operations are logged for
+  compliance
+- **Resource Management**: Monitor memory usage with large-scale tenant
+  operations
 
 ## Related Examples
 
-- [Enterprise Error Recovery Orchestration](../../advanced/example-3.md) - Base error recovery patterns
-- [Multi-Tenant Domain Security](../../advanced/example-2.md) - Security management patterns
-- [Enterprise Domain Orchestration](../../advanced/example-1.md) - Cross-domain coordination
-- [Intermediate NestJS Integration](../intermediate/example-1.md) - Standard VytchesDDD integration
+- [Enterprise Error Recovery Orchestration](../../advanced/example-3.md) - Base
+  error recovery patterns
+- [Multi-Tenant Domain Security](../../advanced/example-2.md) - Security
+  management patterns
+- [Enterprise Domain Orchestration](../../advanced/example-1.md) - Cross-domain
+  coordination
+- [Intermediate NestJS Integration](../intermediate/example-1.md) - Standard
+  VytchesDDD integration

@@ -1,24 +1,26 @@
 # Intermediate Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate
-**Framework**: NestJS
-**Focus**: Manual setup for complex composite value objects
-**Base Example**: [User Profile Composite](../../../intermediate/example-2.md)
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Intermediate **Framework**: NestJS **Focus**: Manual setup for
+complex composite value objects **Base Example**:
+[User Profile Composite](../../../intermediate/example-2.md)
 
 ## Service Implementation
 
 ```typescript
 // user-profile.service.ts
 import { Injectable } from '@nestjs/common';
-import { UserProfile, PersonName, PhoneNumber } from '@vytches-ddd/value-objects';
+import {
+  UserProfile,
+  PersonName,
+  PhoneNumber,
+} from '@vytches-ddd/value-objects';
 import { Email } from '@vytches-ddd/value-objects';
 import { Address } from '@vytches-ddd/value-objects';
-import { 
-  CreateUserProfileDto, 
+import {
+  CreateUserProfileDto,
   UpdateProfileDto,
-  UserProfileResponse 
+  UserProfileResponse,
 } from './types'; // From your application
 
 @Injectable()
@@ -37,19 +39,21 @@ export class UserProfileService {
       );
 
       const email = Email.create(dto.email, dto.emailConfig);
-      
-      const phoneNumber = dto.phoneNumber 
+
+      const phoneNumber = dto.phoneNumber
         ? PhoneNumber.create(dto.phoneNumber, dto.countryCode, dto.extension)
         : undefined;
 
-      const address = dto.address ? Address.create(
-        dto.address.street,
-        dto.address.city,
-        dto.address.state,
-        dto.address.postalCode,
-        dto.address.country,
-        dto.address.coordinates
-      ) : undefined;
+      const address = dto.address
+        ? Address.create(
+            dto.address.street,
+            dto.address.city,
+            dto.address.state,
+            dto.address.postalCode,
+            dto.address.country,
+            dto.address.coordinates
+          )
+        : undefined;
 
       const userProfile = UserProfile.create(
         personalInfo,
@@ -66,42 +70,52 @@ export class UserProfileService {
             displayName: userProfile.getDisplayName(),
             firstName: personalInfo.firstName,
             lastName: personalInfo.lastName,
-            preferredName: personalInfo.preferredName
+            preferredName: personalInfo.preferredName,
           },
           email: {
             address: email.address,
             isVerified: email.isVerified,
-            domain: email.domain
+            domain: email.domain,
           },
-          phoneNumber: phoneNumber ? {
-            formatted: phoneNumber.getFormattedNumber(),
-            countryCode: phoneNumber.countryCode,
-            type: phoneNumber.type
-          } : undefined,
-          address: address ? {
-            formatted: address.getFormattedAddress(),
-            city: address.city,
-            state: address.state,
-            country: address.country
-          } : undefined,
+          phoneNumber: phoneNumber
+            ? {
+                formatted: phoneNumber.getFormattedNumber(),
+                countryCode: phoneNumber.countryCode,
+                type: phoneNumber.type,
+              }
+            : undefined,
+          address: address
+            ? {
+                formatted: address.getFormattedAddress(),
+                city: address.city,
+                state: address.state,
+                country: address.country,
+              }
+            : undefined,
           completionScore: userProfile.getCompletionScore(),
-          contactSummary: userProfile.getContactSummary()
-        }
+          contactSummary: userProfile.getContactSummary(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create user profile'
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create user profile',
       };
     }
   }
 
   // ✅ FOCUS: Update profile with validation
-  updateUserProfile(profileId: string, dto: UpdateProfileDto): UserProfileResponse {
+  updateUserProfile(
+    profileId: string,
+    dto: UpdateProfileDto
+  ): UserProfileResponse {
     try {
       // In real implementation, would fetch existing profile
       const existingProfile = this.getExistingProfile(profileId);
-      
+
       let updatedProfile = existingProfile;
 
       // Update personal information if provided
@@ -109,7 +123,8 @@ export class UserProfileService {
         const newPersonalInfo = PersonName.create(
           dto.personalInfo.firstName || existingProfile.personalInfo.firstName,
           dto.personalInfo.lastName || existingProfile.personalInfo.lastName,
-          dto.personalInfo.middleName || existingProfile.personalInfo.middleName,
+          dto.personalInfo.middleName ||
+            existingProfile.personalInfo.middleName,
           dto.personalInfo.title,
           dto.personalInfo.suffix,
           dto.personalInfo.preferredName
@@ -130,12 +145,15 @@ export class UserProfileService {
 
       return {
         success: true,
-        data: this.mapProfileToResponse(updatedProfile)
+        data: this.mapProfileToResponse(updatedProfile),
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update user profile'
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update user profile',
       };
     }
   }
@@ -148,22 +166,22 @@ export class UserProfileService {
     recommendations: string[];
   } {
     const profile = this.getExistingProfile(profileId);
-    
+
     const completion = profile.getCompletionScore();
     const privacy = profile.getPrivacyRiskAssessment();
     const communication = profile.getCommunicationProfile();
 
     const recommendations: string[] = [];
-    
+
     // Generate recommendations based on analysis
     if (completion.score < 70) {
       recommendations.push(...completion.recommendations);
     }
-    
+
     if (privacy.riskLevel === 'high') {
       recommendations.push(...privacy.recommendations);
     }
-    
+
     if (communication.channels.length < 2) {
       recommendations.push('Consider adding additional communication methods');
     }
@@ -172,7 +190,7 @@ export class UserProfileService {
       completionAnalysis: completion,
       privacyRisk: privacy,
       communicationProfile: communication,
-      recommendations
+      recommendations,
     };
   }
 
@@ -188,18 +206,22 @@ export class UserProfileService {
     };
   } {
     const successful: UserProfileResponse[] = [];
-    const failed: Array<{ index: number; error: string; dto: CreateUserProfileDto }> = [];
+    const failed: Array<{
+      index: number;
+      error: string;
+      dto: CreateUserProfileDto;
+    }> = [];
 
     profiles.forEach((dto, index) => {
       const result = this.createUserProfile(dto);
-      
+
       if (result.success) {
         successful.push(result);
       } else {
         failed.push({
           index,
           error: result.error || 'Unknown error',
-          dto
+          dto,
         });
       }
     });
@@ -211,8 +233,8 @@ export class UserProfileService {
         total: profiles.length,
         successful: successful.length,
         failed: failed.length,
-        successRate: successful.length / profiles.length
-      }
+        successRate: successful.length / profiles.length,
+      },
     };
   }
 
@@ -220,24 +242,29 @@ export class UserProfileService {
   searchProfiles(criteria: ProfileSearchCriteria): UserProfileResponse[] {
     // In real implementation, would query database
     const allProfiles = this.getAllProfiles();
-    
+
     return allProfiles.filter(profile => {
-      if (criteria.completionScoreMin && profile.data?.completionScore.score < criteria.completionScoreMin) {
+      if (
+        criteria.completionScoreMin &&
+        profile.data?.completionScore.score < criteria.completionScoreMin
+      ) {
         return false;
       }
-      
+
       if (criteria.hasPhoneNumber !== undefined) {
         const hasPhone = !!profile.data?.phoneNumber;
         if (criteria.hasPhoneNumber !== hasPhone) {
           return false;
         }
       }
-      
-      if (criteria.preferredLanguage && 
-          profile.data?.preferences?.language !== criteria.preferredLanguage) {
+
+      if (
+        criteria.preferredLanguage &&
+        profile.data?.preferences?.language !== criteria.preferredLanguage
+      ) {
         return false;
       }
-      
+
       if (criteria.emailDomain) {
         const emailDomain = profile.data?.email.domain;
         if (!emailDomain?.includes(criteria.emailDomain)) {
@@ -276,9 +303,10 @@ export class UserProfileService {
       try {
         Email.create(dto.email);
       } catch (error) {
-        errors.push({ 
-          field: 'email', 
-          message: error instanceof Error ? error.message : 'Invalid email format'
+        errors.push({
+          field: 'email',
+          message:
+            error instanceof Error ? error.message : 'Invalid email format',
         });
       }
     }
@@ -288,9 +316,12 @@ export class UserProfileService {
       try {
         PhoneNumber.create(dto.phoneNumber, dto.countryCode);
       } catch (error) {
-        errors.push({ 
-          field: 'phoneNumber', 
-          message: error instanceof Error ? error.message : 'Invalid phone number format'
+        errors.push({
+          field: 'phoneNumber',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Invalid phone number format',
         });
       }
     }
@@ -299,21 +330,24 @@ export class UserProfileService {
     if (dto.preferences?.notifications?.sms && !dto.phoneNumber) {
       warnings.push({
         field: 'preferences.notifications.sms',
-        message: 'SMS notifications enabled but no phone number provided'
+        message: 'SMS notifications enabled but no phone number provided',
       });
     }
 
-    if (dto.preferences?.privacy?.profileVisibility === 'public' && dto.emailConfig?.requireVerification === false) {
+    if (
+      dto.preferences?.privacy?.profileVisibility === 'public' &&
+      dto.emailConfig?.requireVerification === false
+    ) {
       warnings.push({
         field: 'preferences.privacy.profileVisibility',
-        message: 'Public profile recommended with verified email'
+        message: 'Public profile recommended with verified email',
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -332,14 +366,14 @@ export class UserProfileService {
       personalInfo: {
         displayName: profile.getDisplayName(),
         firstName: profile.personalInfo.firstName,
-        lastName: profile.personalInfo.lastName
+        lastName: profile.personalInfo.lastName,
       },
       email: {
         address: profile.email.address,
-        isVerified: profile.email.isVerified
+        isVerified: profile.email.isVerified,
       },
       completionScore: profile.getCompletionScore(),
-      contactSummary: profile.getContactSummary()
+      contactSummary: profile.getContactSummary(),
     };
   }
 }
@@ -351,10 +385,10 @@ export class UserProfileService {
 // date-range.service.ts
 import { Injectable } from '@nestjs/common';
 import { DateRange } from '@vytches-ddd/value-objects';
-import { 
-  CreateDateRangeDto, 
+import {
+  CreateDateRangeDto,
   DateRangeResponse,
-  BusinessDayCalculationDto 
+  BusinessDayCalculationDto,
 } from './types'; // From your application
 
 @Injectable()
@@ -378,13 +412,16 @@ export class DateRangeService {
           timezone: dateRange.timezone,
           humanReadable: dateRange.toHumanReadable(),
           isoCurrent: dateRange.isCurrent(),
-          businessDays: dateRange.getBusinessDaysCount()
-        }
+          businessDays: dateRange.getBusinessDaysCount(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create date range'
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create date range',
       };
     }
   }
@@ -416,23 +453,31 @@ export class DateRangeService {
       breakdown: {
         totalDays: calculation.durationDays,
         workingDays: calculation.businessDays,
-        nonWorkingDays: calculation.durationDays - calculation.businessDays
-      }
+        nonWorkingDays: calculation.durationDays - calculation.businessDays,
+      },
     };
   }
 
   // ✅ FOCUS: Range operations
-  analyzeRangeOverlap(range1Dto: CreateDateRangeDto, range2Dto: CreateDateRangeDto): {
+  analyzeRangeOverlap(
+    range1Dto: CreateDateRangeDto,
+    range2Dto: CreateDateRangeDto
+  ): {
     hasOverlap: boolean;
     overlapRange?: DateRangeResponse['data'];
     gap?: DateRangeResponse['data'];
-    relationship: 'overlaps' | 'adjacent' | 'separate' | 'contains' | 'contained';
+    relationship:
+      | 'overlaps'
+      | 'adjacent'
+      | 'separate'
+      | 'contains'
+      | 'contained';
   } {
     const range1 = DateRange.create(
       new Date(range1Dto.startDate),
       new Date(range1Dto.endDate)
     );
-    
+
     const range2 = DateRange.create(
       new Date(range2Dto.startDate),
       new Date(range2Dto.endDate)
@@ -443,12 +488,23 @@ export class DateRangeService {
     const gap = range1.gap(range2);
 
     // Determine relationship
-    let relationship: 'overlaps' | 'adjacent' | 'separate' | 'contains' | 'contained' = 'separate';
-    
+    let relationship:
+      | 'overlaps'
+      | 'adjacent'
+      | 'separate'
+      | 'contains'
+      | 'contained' = 'separate';
+
     if (hasOverlap) {
-      if (range1.startDate <= range2.startDate && range1.endDate >= range2.endDate) {
+      if (
+        range1.startDate <= range2.startDate &&
+        range1.endDate >= range2.endDate
+      ) {
         relationship = 'contains';
-      } else if (range2.startDate <= range1.startDate && range2.endDate >= range1.endDate) {
+      } else if (
+        range2.startDate <= range1.startDate &&
+        range2.endDate >= range1.endDate
+      ) {
         relationship = 'contained';
       } else {
         relationship = 'overlaps';
@@ -459,24 +515,32 @@ export class DateRangeService {
 
     return {
       hasOverlap,
-      overlapRange: overlap ? {
-        startDate: overlap.startDate,
-        endDate: overlap.endDate,
-        duration: overlap.durationInDays,
-        humanReadable: overlap.toHumanReadable()
-      } : undefined,
-      gap: gap ? {
-        startDate: gap.startDate,
-        endDate: gap.endDate,
-        duration: gap.durationInDays,
-        humanReadable: gap.toHumanReadable()
-      } : undefined,
-      relationship
+      overlapRange: overlap
+        ? {
+            startDate: overlap.startDate,
+            endDate: overlap.endDate,
+            duration: overlap.durationInDays,
+            humanReadable: overlap.toHumanReadable(),
+          }
+        : undefined,
+      gap: gap
+        ? {
+            startDate: gap.startDate,
+            endDate: gap.endDate,
+            duration: gap.durationInDays,
+            humanReadable: gap.toHumanReadable(),
+          }
+        : undefined,
+      relationship,
     };
   }
 
   // ✅ FOCUS: Range chunking and iteration
-  chunkDateRange(dto: CreateDateRangeDto, chunkType: 'days' | 'weeks' | 'months', chunkSize?: number): {
+  chunkDateRange(
+    dto: CreateDateRangeDto,
+    chunkType: 'days' | 'weeks' | 'months',
+    chunkSize?: number
+  ): {
     chunks: Array<{
       startDate: Date;
       endDate: Date;
@@ -496,7 +560,7 @@ export class DateRangeService {
     );
 
     let chunks: DateRange[];
-    
+
     switch (chunkType) {
       case 'days':
         chunks = dateRange.chunkByDays(chunkSize || 1);
@@ -513,11 +577,14 @@ export class DateRangeService {
       startDate: chunk.startDate,
       endDate: chunk.endDate,
       duration: chunk.durationInDays,
-      chunkIndex: index
+      chunkIndex: index,
     }));
 
     const totalDays = dateRange.durationInDays;
-    const chunkedDays = chunks.reduce((sum, chunk) => sum + chunk.durationInDays, 0);
+    const chunkedDays = chunks.reduce(
+      (sum, chunk) => sum + chunk.durationInDays,
+      0
+    );
 
     return {
       chunks: chunkData,
@@ -525,8 +592,8 @@ export class DateRangeService {
       coverage: {
         totalDays,
         chunkedDays,
-        coveragePercentage: (chunkedDays / totalDays) * 100
-      }
+        coveragePercentage: (chunkedDays / totalDays) * 100,
+      },
     };
   }
 
@@ -547,22 +614,35 @@ export class DateRangeService {
       new Date(availableRange.endDate)
     );
 
-    const excluded = excludeRanges?.map(range => 
-      DateRange.create(new Date(range.startDate), new Date(range.endDate))
-    ) || [];
+    const excluded =
+      excludeRanges?.map(range =>
+        DateRange.create(new Date(range.startDate), new Date(range.endDate))
+      ) || [];
 
     const preferred = preferredStartDates.map(date => new Date(date));
-    const slots: Array<{ startDate: Date; endDate: Date; score: number; reason: string }> = [];
+    const slots: Array<{
+      startDate: Date;
+      endDate: Date;
+      score: number;
+      reason: string;
+    }> = [];
 
     // Simple slot finding algorithm
     const currentDate = new Date(available.startDate);
-    
-    while (currentDate <= new Date(available.endDate.getTime() - (requiredDuration * 24 * 60 * 60 * 1000))) {
-      const slotEnd = new Date(currentDate.getTime() + (requiredDuration * 24 * 60 * 60 * 1000));
+
+    while (
+      currentDate <=
+      new Date(
+        available.endDate.getTime() - requiredDuration * 24 * 60 * 60 * 1000
+      )
+    ) {
+      const slotEnd = new Date(
+        currentDate.getTime() + requiredDuration * 24 * 60 * 60 * 1000
+      );
       const candidateSlot = DateRange.create(currentDate, slotEnd);
 
       // Check for conflicts with excluded ranges
-      const hasConflict = excluded.some(excludedRange => 
+      const hasConflict = excluded.some(excludedRange =>
         candidateSlot.overlaps(excludedRange)
       );
 
@@ -572,8 +652,10 @@ export class DateRangeService {
         let reason = 'Available slot';
 
         // Boost score if near preferred dates
-        const nearPreferred = preferred.some(prefDate => 
-          Math.abs(currentDate.getTime() - prefDate.getTime()) < (7 * 24 * 60 * 60 * 1000)
+        const nearPreferred = preferred.some(
+          prefDate =>
+            Math.abs(currentDate.getTime() - prefDate.getTime()) <
+            7 * 24 * 60 * 60 * 1000
         );
 
         if (nearPreferred) {
@@ -591,7 +673,7 @@ export class DateRangeService {
           startDate: new Date(currentDate),
           endDate: slotEnd,
           score,
-          reason
+          reason,
         });
       }
 
@@ -600,9 +682,7 @@ export class DateRangeService {
     }
 
     // Sort by score and return top options
-    return slots
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10); // Top 10 options
+    return slots.sort((a, b) => b.score - a.score).slice(0, 10); // Top 10 options
   }
 }
 ```
@@ -614,11 +694,11 @@ export class DateRangeService {
 import { Controller, Post, Body, Get, Param, Put, Query } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { DateRangeService } from './date-range.service';
-import { 
-  CreateUserProfileDto, 
-  UpdateProfileDto, 
+import {
+  CreateUserProfileDto,
+  UpdateProfileDto,
   ProfileSearchCriteria,
-  CreateDateRangeDto 
+  CreateDateRangeDto,
 } from './types'; // From your application
 
 @Controller('profiles')

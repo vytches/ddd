@@ -7,18 +7,20 @@
 
 ## Overview
 
-This example demonstrates basic integration of @vytches-ddd/validation with NestJS using manual setup and standard dependency injection patterns. Perfect for beginners wanting to understand the fundamentals of validation integration.
+This example demonstrates basic integration of @vytches-ddd/validation with
+NestJS using manual setup and standard dependency injection patterns. Perfect
+for beginners wanting to understand the fundamentals of validation integration.
 
 ## Implementation
 
 ```typescript
 // user-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
+import {
   BaseSpecification,
   IValidator,
   ValidationResult,
-  FieldValidator 
+  FieldValidator,
 } from '@vytches-ddd/validation';
 import { User, ValidationContext } from './types'; // From your application
 
@@ -27,11 +29,11 @@ class EmailSpecification extends BaseSpecification<User> {
   isSatisfiedBy(user: User): SpecificationResult {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(user.email);
-    
+
     return {
       isSatisfied: isValid,
       reason: isValid ? undefined : 'Invalid email format',
-      metadata: { field: 'email', rule: 'email-format' }
+      metadata: { field: 'email', rule: 'email-format' },
     };
   }
 }
@@ -44,11 +46,13 @@ class AgeSpecification extends BaseSpecification<User> {
 
   isSatisfiedBy(user: User): SpecificationResult {
     const isValid = user.age >= this.minimumAge;
-    
+
     return {
       isSatisfied: isValid,
-      reason: isValid ? undefined : `Must be at least ${this.minimumAge} years old`,
-      metadata: { field: 'age', minimumRequired: this.minimumAge }
+      reason: isValid
+        ? undefined
+        : `Must be at least ${this.minimumAge} years old`,
+      metadata: { field: 'age', minimumRequired: this.minimumAge },
     };
   }
 }
@@ -66,7 +70,10 @@ export class UserValidationService implements IValidator<User> {
     this.initializeFieldValidator();
   }
 
-  async validate(user: User, context?: ValidationContext): Promise<ValidationResult> {
+  async validate(
+    user: User,
+    context?: ValidationContext
+  ): Promise<ValidationResult> {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
@@ -77,7 +84,7 @@ export class UserValidationService implements IValidator<User> {
         field: 'email',
         code: 'INVALID_EMAIL',
         message: emailResult.reason!,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -88,7 +95,7 @@ export class UserValidationService implements IValidator<User> {
         field: 'age',
         code: 'AGE_TOO_LOW',
         message: ageResult.reason!,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -96,7 +103,7 @@ export class UserValidationService implements IValidator<User> {
     const fieldResults = await Promise.all([
       this.fieldValidator.validateField(user, 'firstName', user.firstName),
       this.fieldValidator.validateField(user, 'lastName', user.lastName),
-      this.fieldValidator.validateField(user, 'phoneNumber', user.phoneNumber)
+      this.fieldValidator.validateField(user, 'phoneNumber', user.phoneNumber),
     ]);
 
     // Aggregate field validation results
@@ -118,9 +125,9 @@ export class UserValidationService implements IValidator<User> {
         context: context || {
           operationType: 'create',
           environment: 'production',
-          validationLevel: 'standard'
-        }
-      }
+          validationLevel: 'standard',
+        },
+      },
     };
   }
 
@@ -133,10 +140,8 @@ export class UserValidationService implements IValidator<User> {
         category: 'user',
         priority: 1,
         isActive: true,
-        conditions: [
-          { field: 'firstName', operator: 'not_equals', value: '' }
-        ],
-        actions: [{ type: 'validate', parameters: {} }]
+        conditions: [{ field: 'firstName', operator: 'not_equals', value: '' }],
+        actions: [{ type: 'validate', parameters: {} }],
       },
       {
         id: 'last-name-required',
@@ -145,10 +150,8 @@ export class UserValidationService implements IValidator<User> {
         category: 'user',
         priority: 1,
         isActive: true,
-        conditions: [
-          { field: 'lastName', operator: 'not_equals', value: '' }
-        ],
-        actions: [{ type: 'validate', parameters: {} }]
+        conditions: [{ field: 'lastName', operator: 'not_equals', value: '' }],
+        actions: [{ type: 'validate', parameters: {} }],
       },
       {
         id: 'phone-format',
@@ -158,10 +161,14 @@ export class UserValidationService implements IValidator<User> {
         priority: 2,
         isActive: true,
         conditions: [
-          { field: 'phoneNumber', operator: 'regex', value: '^\\+?[\\d\\s\\-\\(\\)]+$' }
+          {
+            field: 'phoneNumber',
+            operator: 'regex',
+            value: '^\\+?[\\d\\s\\-\\(\\)]+$',
+          },
         ],
-        actions: [{ type: 'validate', parameters: {} }]
-      }
+        actions: [{ type: 'validate', parameters: {} }],
+      },
     ];
 
     this.fieldValidator = new FieldValidator(fieldRules);
@@ -169,22 +176,20 @@ export class UserValidationService implements IValidator<User> {
 }
 
 // user.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Body, 
+import {
+  Controller,
+  Post,
+  Body,
   BadRequestException,
   HttpStatus,
-  HttpCode 
+  HttpCode,
 } from '@nestjs/common';
 import { UserValidationService } from './user-validation.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userValidationService: UserValidationService
-  ) {}
+  constructor(private readonly userValidationService: UserValidationService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -196,7 +201,7 @@ export class UserController {
         {
           operationType: 'create',
           environment: 'production',
-          validationLevel: 'standard'
+          validationLevel: 'standard',
         }
       );
 
@@ -204,7 +209,7 @@ export class UserController {
         throw new BadRequestException({
           message: 'Validation failed',
           errors: validationResult.errors,
-          warnings: validationResult.warnings
+          warnings: validationResult.warnings,
         });
       }
 
@@ -212,13 +217,12 @@ export class UserController {
       return {
         success: true,
         message: 'User validation passed',
-        validationMetadata: validationResult.metadata
+        validationMetadata: validationResult.metadata,
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'User validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -227,12 +231,12 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async validateUserBatch(@Body() users: CreateUserDto[]) {
     try {
-      const validationPromises = users.map(user => 
+      const validationPromises = users.map(user =>
         this.userValidationService.validate(user as User)
       );
 
       const results = await Promise.all(validationPromises);
-      
+
       const validUsers = results.filter(r => r.isValid).length;
       const invalidUsers = results.filter(r => !r.isValid).length;
 
@@ -242,20 +246,19 @@ export class UserController {
           total: users.length,
           valid: validUsers,
           invalid: invalidUsers,
-          successRate: validUsers / users.length
+          successRate: validUsers / users.length,
         },
         results: results.map((result, index) => ({
           index,
           isValid: result.isValid,
           errors: result.errors,
-          warnings: result.warnings
-        }))
+          warnings: result.warnings,
+        })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Batch validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -269,7 +272,7 @@ import { UserValidationService } from './user-validation.service';
 @Module({
   controllers: [UserController],
   providers: [UserValidationService],
-  exports: [UserValidationService]
+  exports: [UserValidationService],
 })
 export class UserModule {}
 
@@ -285,9 +288,12 @@ export class AppModule {}
 
 ## Key Points
 
-- **Simple Manual Instantiation**: Direct creation of validation specifications and services
-- **Standard NestJS Patterns**: Uses familiar Injectable decorators and dependency injection
-- **Library Integration**: Shows core @vytches-ddd/validation usage in NestJS context
+- **Simple Manual Instantiation**: Direct creation of validation specifications
+  and services
+- **Standard NestJS Patterns**: Uses familiar Injectable decorators and
+  dependency injection
+- **Library Integration**: Shows core @vytches-ddd/validation usage in NestJS
+  context
 - **Error Handling**: Proper HTTP error responses with validation details
 - **Batch Support**: Demonstrates handling multiple validation requests
 
@@ -319,7 +325,7 @@ curl -X POST http://localhost:3000/users/batch \
     {
       "email": "invalid-email",
       "firstName": "",
-      "lastName": "Two", 
+      "lastName": "Two",
       "age": 15,
       "phoneNumber": "invalid"
     }

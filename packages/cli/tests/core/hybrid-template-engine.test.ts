@@ -14,10 +14,10 @@ vi.mock('handlebars', () => ({
     create: vi.fn(() => ({
       registerHelper: vi.fn(),
       compile: vi.fn(),
-      SafeString: vi.fn((content) => ({ toString: () => content }))
+      SafeString: vi.fn(content => ({ toString: () => content })),
     })),
-    SafeString: vi.fn((content) => ({ toString: () => content }))
-  }
+    SafeString: vi.fn(content => ({ toString: () => content })),
+  },
 }));
 
 const mockFs = vi.mocked(fs);
@@ -37,7 +37,7 @@ describe('HybridTemplateEngine', () => {
     mockHandlebars = {
       registerHelper: vi.fn(),
       compile: vi.fn().mockReturnValue(mockCompiledTemplate),
-      SafeString: vi.fn((content) => ({ toString: () => content }))
+      SafeString: vi.fn(content => ({ toString: () => content })),
     };
 
     // Mock Handlebars.create to return our mock
@@ -73,7 +73,7 @@ describe('HybridTemplateEngine', () => {
     it('should render template with provided data successfully', async () => {
       const templateData = {
         title: 'Test Title',
-        content: 'Test Content'
+        content: 'Test Content',
       };
 
       const result = await safeRun(async () => {
@@ -181,7 +181,7 @@ describe('HybridTemplateEngine', () => {
         const context = { sections: ['introduction', 'examples'] };
         const options = {
           fn: vi.fn().mockReturnValue('Section content'),
-          inverse: vi.fn().mockReturnValue('No section')
+          inverse: vi.fn().mockReturnValue('No section'),
         };
 
         const result = helper!.call(context, 'examples', options);
@@ -197,7 +197,7 @@ describe('HybridTemplateEngine', () => {
         const context = { sections: ['introduction'] };
         const options = {
           fn: vi.fn().mockReturnValue('Section content'),
-          inverse: vi.fn().mockReturnValue('No section')
+          inverse: vi.fn().mockReturnValue('No section'),
         };
 
         const result = helper!.call(context, 'advanced', options);
@@ -215,7 +215,7 @@ describe('HybridTemplateEngine', () => {
         const context = { complexityLevels: ['basic', 'intermediate'] };
         const options = {
           fn: vi.fn().mockReturnValue('Complexity content'),
-          inverse: vi.fn().mockReturnValue('No complexity')
+          inverse: vi.fn().mockReturnValue('No complexity'),
         };
 
         const result = helper!.call(context, 'basic', options);
@@ -230,7 +230,7 @@ describe('HybridTemplateEngine', () => {
         const context = { complexityLevels: ['basic'] };
         const options = {
           fn: vi.fn().mockReturnValue('Complexity content'),
-          inverse: vi.fn().mockReturnValue('No complexity')
+          inverse: vi.fn().mockReturnValue('No complexity'),
         };
 
         const result = helper!.call(context, 'advanced', options);
@@ -247,7 +247,7 @@ describe('HybridTemplateEngine', () => {
         const context = { framework: 'nestjs' };
         const options = {
           fn: vi.fn().mockReturnValue('Framework content'),
-          inverse: vi.fn().mockReturnValue('No framework')
+          inverse: vi.fn().mockReturnValue('No framework'),
         };
 
         const result = helper!.call(context, 'nestjs', options);
@@ -262,7 +262,7 @@ describe('HybridTemplateEngine', () => {
         const context = { framework: 'nestjs' };
         const options = {
           fn: vi.fn().mockReturnValue('Framework content'),
-          inverse: vi.fn().mockReturnValue('No framework')
+          inverse: vi.fn().mockReturnValue('No framework'),
         };
 
         const result = helper!.call(context, 'express', options);
@@ -285,7 +285,9 @@ describe('HybridTemplateEngine', () => {
         const helper = registeredHelpers.get('concat');
 
         // Simulate Handlebars passing options object as last argument
-        const result = helper!('hello', ' ', 'world', { /* handlebars options */ });
+        const result = helper!('hello', ' ', 'world', {
+          /* handlebars options */
+        });
 
         expect(result).toBe('hello world');
       });
@@ -404,7 +406,10 @@ describe('HybridTemplateEngine', () => {
 
     describe('loadFrameworkContent', () => {
       it('should load framework content using ContentResolver', () => {
-        const result = (engine as any).loadFrameworkContent('test-package', 'frameworks/nestjs/basic');
+        const result = (engine as any).loadFrameworkContent(
+          'test-package',
+          'frameworks/nestjs/basic'
+        );
 
         expect(result).toBe('Mock resolved content');
         expect(ContentResolver.resolveContent).toHaveBeenCalledWith(
@@ -430,7 +435,7 @@ describe('HybridTemplateEngine', () => {
         sections: ['introduction', 'examples', 'api'],
         complexityLevels: ['basic', 'intermediate'],
         framework: 'nestjs',
-        tags: ['aggregate', 'entity', 'repository']
+        tags: ['aggregate', 'entity', 'repository'],
       };
 
       const result = await safeRun(async () => {

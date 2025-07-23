@@ -30,9 +30,9 @@
 /**
  * Framework component types for documentation generation
  */
-export type FrameworkComponentType = 
+export type FrameworkComponentType =
   | 'module'
-  | 'service' 
+  | 'service'
   | 'controller'
   | 'repository'
   | 'dto'

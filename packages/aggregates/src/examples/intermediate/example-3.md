@@ -1,19 +1,25 @@
 # Multi-Tenant Loan Application - Complex Workflow Aggregate
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Intermediate
-**Domain**: Financial Services & Multi-Tenancy
-**Patterns**: Workflow Management, Multi-Tenant Architecture, Approval Chain, Document Management
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+Intermediate **Domain**: Financial Services & Multi-Tenancy **Patterns**:
+Workflow Management, Multi-Tenant Architecture, Approval Chain, Document
+Management **Dependencies**: @vytches-ddd/aggregates,
+@vytches-ddd/domain-primitives, @vytches-ddd/contracts
 
 ## Description
 
-This example demonstrates a sophisticated loan application aggregate that manages complex approval workflows across multiple tenants. It handles document collection, multi-step approval processes, risk assessment integration, and maintains detailed audit trails for regulatory compliance.
+This example demonstrates a sophisticated loan application aggregate that
+manages complex approval workflows across multiple tenants. It handles document
+collection, multi-step approval processes, risk assessment integration, and
+maintains detailed audit trails for regulatory compliance.
 
 ## Business Context
 
-A multi-tenant lending platform serves multiple financial institutions, each with their own approval processes, risk criteria, and compliance requirements. The system must handle various loan types, coordinate approval workflows, manage document requirements, and provide complete audit trails for regulatory compliance.
+A multi-tenant lending platform serves multiple financial institutions, each
+with their own approval processes, risk criteria, and compliance requirements.
+The system must handle various loan types, coordinate approval workflows, manage
+document requirements, and provide complete audit trails for regulatory
+compliance.
 
 ## Code Example
 
@@ -22,14 +28,14 @@ A multi-tenant lending platform serves multiple financial institutions, each wit
 import { AggregateRoot } from '@vytches-ddd/aggregates';
 import { DomainEvent } from '@vytches-ddd/contracts';
 import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
-import { 
-  LoanApplicationData, 
-  LoanType, 
+import {
+  LoanApplicationData,
+  LoanType,
   LoanStatus,
   ApprovalStep,
   DocumentRequirement,
   RiskAssessment,
-  TenantConfig 
+  TenantConfig,
 } from './types'; // From your application
 
 // Domain Events
@@ -174,58 +180,58 @@ interface IWorkflowEngine {
 
 export class LoanWorkflowEngine implements IWorkflowEngine {
   private tenantConfig: TenantConfig;
-  
+
   constructor(tenantConfig: TenantConfig) {
     this.tenantConfig = tenantConfig;
   }
 
   getNextStep(currentStep: string, decision: string): string | null {
     const workflows = {
-      'submitted': {
+      submitted: {
         'auto-approved': 'document-collection',
-        'requires-review': 'initial-review'
+        'requires-review': 'initial-review',
       },
       'initial-review': {
-        'approved': 'document-collection',
-        'rejected': 'rejected',
-        'escalated': 'senior-review'
+        approved: 'document-collection',
+        rejected: 'rejected',
+        escalated: 'senior-review',
       },
       'senior-review': {
-        'approved': 'document-collection',
-        'rejected': 'rejected',
-        'conditional': 'conditional-approval'
+        approved: 'document-collection',
+        rejected: 'rejected',
+        conditional: 'conditional-approval',
       },
       'document-collection': {
-        'complete': 'credit-check',
-        'incomplete': 'document-collection'
+        complete: 'credit-check',
+        incomplete: 'document-collection',
       },
       'credit-check': {
-        'passed': 'risk-assessment',
-        'failed': 'rejected'
+        passed: 'risk-assessment',
+        failed: 'rejected',
       },
       'risk-assessment': {
         'low-risk': 'final-approval',
         'medium-risk': 'manager-approval',
-        'high-risk': 'committee-review'
+        'high-risk': 'committee-review',
       },
       'manager-approval': {
-        'approved': 'final-approval',
-        'rejected': 'rejected',
-        'escalated': 'committee-review'
+        approved: 'final-approval',
+        rejected: 'rejected',
+        escalated: 'committee-review',
       },
       'committee-review': {
-        'approved': 'final-approval',
-        'rejected': 'rejected',
-        'conditional': 'conditional-approval'
+        approved: 'final-approval',
+        rejected: 'rejected',
+        conditional: 'conditional-approval',
       },
       'conditional-approval': {
         'conditions-met': 'final-approval',
-        'conditions-failed': 'rejected'
+        'conditions-failed': 'rejected',
       },
       'final-approval': {
-        'approved': 'approved',
-        'rejected': 'rejected'
-      }
+        approved: 'approved',
+        rejected: 'rejected',
+      },
     };
 
     return workflows[currentStep]?.[decision] || null;
@@ -233,16 +239,28 @@ export class LoanWorkflowEngine implements IWorkflowEngine {
 
   validateTransition(from: string, to: string): boolean {
     const validTransitions = {
-      'submitted': ['initial-review', 'document-collection'],
+      submitted: ['initial-review', 'document-collection'],
       'initial-review': ['document-collection', 'senior-review', 'rejected'],
-      'senior-review': ['document-collection', 'conditional-approval', 'rejected'],
+      'senior-review': [
+        'document-collection',
+        'conditional-approval',
+        'rejected',
+      ],
       'document-collection': ['credit-check'],
       'credit-check': ['risk-assessment', 'rejected'],
-      'risk-assessment': ['final-approval', 'manager-approval', 'committee-review'],
+      'risk-assessment': [
+        'final-approval',
+        'manager-approval',
+        'committee-review',
+      ],
       'manager-approval': ['final-approval', 'committee-review', 'rejected'],
-      'committee-review': ['final-approval', 'conditional-approval', 'rejected'],
+      'committee-review': [
+        'final-approval',
+        'conditional-approval',
+        'rejected',
+      ],
       'conditional-approval': ['final-approval', 'rejected'],
-      'final-approval': ['approved', 'rejected']
+      'final-approval': ['approved', 'rejected'],
     };
 
     return validTransitions[from]?.includes(to) || false;
@@ -254,10 +272,10 @@ export class LoanWorkflowEngine implements IWorkflowEngine {
         'identity-verification',
         'income-verification',
         'employment-verification',
-        'bank-statements'
+        'bank-statements',
       ],
       'credit-check': ['credit-authorization'],
-      'risk-assessment': ['financial-statements', 'collateral-valuation']
+      'risk-assessment': ['financial-statements', 'collateral-valuation'],
     };
 
     return documentRequirements[step] || [];
@@ -265,10 +283,12 @@ export class LoanWorkflowEngine implements IWorkflowEngine {
 
   getApprovalAuthority(step: string): number {
     const authorityLimits = {
-      'initial-review': this.tenantConfig.approvalLimits?.initialReview || 50000,
+      'initial-review':
+        this.tenantConfig.approvalLimits?.initialReview || 50000,
       'manager-approval': this.tenantConfig.approvalLimits?.manager || 250000,
       'senior-review': this.tenantConfig.approvalLimits?.senior || 500000,
-      'committee-review': this.tenantConfig.approvalLimits?.committee || 1000000
+      'committee-review':
+        this.tenantConfig.approvalLimits?.committee || 1000000,
     };
 
     return authorityLimits[step] || 0;
@@ -296,7 +316,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
   private submittedAt: Date;
   private updatedAt: Date;
   private expiresAt?: Date;
-  
+
   // Multi-tenant configuration
   private workflowEngine: IWorkflowEngine;
   private tenantConfig: TenantConfig;
@@ -311,7 +331,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     this.conditions = [];
     this.rejectionReasons = [];
     this.currency = 'USD';
-    
+
     this.tenantConfig = tenantConfig;
     this.workflowEngine = new LoanWorkflowEngine(tenantConfig);
   }
@@ -328,58 +348,74 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     },
     tenantConfig: TenantConfig
   ): MultiTenantLoanApplicationAggregate {
-    const application = new MultiTenantLoanApplicationAggregate(EntityId.generate(), tenantConfig);
-    
+    const application = new MultiTenantLoanApplicationAggregate(
+      EntityId.generate(),
+      tenantConfig
+    );
+
     // Validate tenant limits
     if (loanData.requestedAmount > tenantConfig.maxLoanAmount) {
-      throw new LoanAmountExceedsLimitError(loanData.requestedAmount, tenantConfig.maxLoanAmount);
+      throw new LoanAmountExceedsLimitError(
+        loanData.requestedAmount,
+        tenantConfig.maxLoanAmount
+      );
     }
-    
+
     application.tenantId = tenantId;
     application.applicantId = applicantId;
-    application.applicationNumber = application.generateApplicationNumber(tenantId);
+    application.applicationNumber =
+      application.generateApplicationNumber(tenantId);
     application.loanType = loanData.loanType;
     application.requestedAmount = loanData.requestedAmount;
     application.currency = loanData.currency || 'USD';
     application.term = loanData.term;
     application.submittedAt = new Date();
     application.updatedAt = new Date();
-    
-    application.addDomainEvent(new LoanApplicationSubmittedEvent(
-      application.id.value,
-      applicantId,
-      tenantId,
-      loanData.loanType,
-      loanData.requestedAmount,
-      application.submittedAt
-    ));
-    
+
+    application.addDomainEvent(
+      new LoanApplicationSubmittedEvent(
+        application.id.value,
+        applicantId,
+        tenantId,
+        loanData.loanType,
+        loanData.requestedAmount,
+        application.submittedAt
+      )
+    );
+
     return application;
   }
 
   // ⭐ Document management
-  uploadDocument(documentType: string, documentId: string, uploadedBy: string, metadata?: any): void {
+  uploadDocument(
+    documentType: string,
+    documentId: string,
+    uploadedBy: string,
+    metadata?: any
+  ): void {
     this.ensureApplicationActive();
-    
+
     // Store document reference
     this.uploadedDocuments.set(documentType, {
       documentId,
       documentType,
       uploadedBy,
       uploadedAt: new Date(),
-      metadata: metadata || {}
+      metadata: metadata || {},
     });
-    
+
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new DocumentUploadedEvent(
-      this.id.value,
-      documentType,
-      documentId,
-      uploadedBy,
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new DocumentUploadedEvent(
+        this.id.value,
+        documentType,
+        documentId,
+        uploadedBy,
+        new Date()
+      )
+    );
+
     // Check if this completes document collection step
     if (this.currentWorkflowStep === 'document-collection') {
       this.checkDocumentCompleteness();
@@ -395,17 +431,21 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     conditions?: string[]
   ): void {
     this.ensureApplicationActive();
-    
+
     if (stepName !== this.currentWorkflowStep) {
-      throw new BaseError('INVALID_APPROVAL_STEP', `Expected ${this.currentWorkflowStep}, got ${stepName}`);
+      throw new BaseError(
+        'INVALID_APPROVAL_STEP',
+        `Expected ${this.currentWorkflowStep}, got ${stepName}`
+      );
     }
-    
+
     // Check approver authority
-    const requiredAuthority = this.workflowEngine.getApprovalAuthority(stepName);
+    const requiredAuthority =
+      this.workflowEngine.getApprovalAuthority(stepName);
     if (this.requestedAmount > requiredAuthority && decision === 'approved') {
       throw new InsufficientApprovalAuthorityError(approver, requiredAuthority);
     }
-    
+
     // Record approval step
     const approvalStep: ApprovalStep = {
       step: stepName,
@@ -413,27 +453,29 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
       reviewer: approver,
       comments,
       timestamp: new Date(),
-      conditions: conditions || []
+      conditions: conditions || [],
     };
-    
+
     this.approvalHistory.push(approvalStep);
-    
+
     // Handle conditions for conditional approval
     if (decision === 'conditional' && conditions && conditions.length > 0) {
       this.conditions.push(...conditions);
     }
-    
+
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new ApprovalStepCompletedEvent(
-      this.id.value,
-      stepName,
-      approver,
-      decision,
-      comments,
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new ApprovalStepCompletedEvent(
+        this.id.value,
+        stepName,
+        approver,
+        decision,
+        comments,
+        new Date()
+      )
+    );
+
     // Progress workflow
     this.progressWorkflow(decision);
   }
@@ -446,29 +488,31 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     assessedBy: string
   ): void {
     this.ensureApplicationActive();
-    
+
     const previousScore = this.getCurrentRiskScore();
-    
+
     const riskAssessment: RiskAssessment = {
       type: assessmentType,
       score,
       factors,
       assessedBy,
       assessedAt: new Date(),
-      recommendation: this.determineRiskRecommendation(score)
+      recommendation: this.determineRiskRecommendation(score),
     };
-    
+
     this.riskAssessments.push(riskAssessment);
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new RiskAssessmentUpdatedEvent(
-      this.id.value,
-      previousScore,
-      score,
-      assessmentType,
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new RiskAssessmentUpdatedEvent(
+        this.id.value,
+        previousScore,
+        score,
+        assessmentType,
+        new Date()
+      )
+    );
+
     // Auto-progress workflow based on risk score
     if (this.currentWorkflowStep === 'risk-assessment') {
       this.autoProgressBasedOnRisk(score);
@@ -483,40 +527,42 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     finalConditions: string[] = []
   ): void {
     this.ensureApplicationActive();
-    
+
     if (this.currentWorkflowStep !== 'final-approval') {
-      throw new BaseError('INVALID_WORKFLOW_STATE', 'Application not ready for final approval');
+      throw new BaseError(
+        'INVALID_WORKFLOW_STATE',
+        'Application not ready for final approval'
+      );
     }
-    
+
     this.status = 'approved';
     this.approvedAmount = approvedAmount;
     this.interestRate = interestRate;
     this.conditions = finalConditions;
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new LoanApprovedEvent(
-      this.id.value,
-      approvedAmount,
-      interestRate,
-      this.term,
-      finalConditions,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new LoanApprovedEvent(
+        this.id.value,
+        approvedAmount,
+        interestRate,
+        this.term,
+        finalConditions,
+        new Date()
+      )
+    );
   }
 
   reject(rejectedBy: string, reasons: string[]): void {
     this.ensureApplicationActive();
-    
+
     this.status = 'rejected';
     this.rejectionReasons = reasons;
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new LoanRejectedEvent(
-      this.id.value,
-      reasons,
-      rejectedBy,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new LoanRejectedEvent(this.id.value, reasons, rejectedBy, new Date())
+    );
   }
 
   // ⭐ Conditional approval handling
@@ -526,72 +572,98 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     issuedBy: string
   ): void {
     this.ensureApplicationActive();
-    
+
     this.status = 'conditional';
     this.conditions = conditions;
-    this.expiresAt = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000);
+    this.expiresAt = new Date(
+      Date.now() + expirationDays * 24 * 60 * 60 * 1000
+    );
     this.currentWorkflowStep = 'conditional-approval';
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new ConditionalApprovalIssuedEvent(
-      this.id.value,
-      conditions,
-      this.expiresAt,
-      issuedBy
-    ));
+
+    this.addDomainEvent(
+      new ConditionalApprovalIssuedEvent(
+        this.id.value,
+        conditions,
+        this.expiresAt,
+        issuedBy
+      )
+    );
   }
 
   meetConditions(conditionsMet: string[], verifiedBy: string): void {
     if (this.status !== 'conditional') {
-      throw new BaseError('NOT_CONDITIONAL', 'Application is not in conditional status');
+      throw new BaseError(
+        'NOT_CONDITIONAL',
+        'Application is not in conditional status'
+      );
     }
-    
+
     // Check if all conditions are met
-    const remainingConditions = this.conditions.filter(c => !conditionsMet.includes(c));
-    
+    const remainingConditions = this.conditions.filter(
+      c => !conditionsMet.includes(c)
+    );
+
     if (remainingConditions.length === 0) {
       // All conditions met, progress to final approval
       this.currentWorkflowStep = 'final-approval';
       this.status = 'under_review';
       this.progressWorkflow('conditions-met');
     }
-    
+
     this.updatedAt = new Date();
   }
 
   // ⭐ Private workflow methods
   private progressWorkflow(decision: string): void {
-    const nextStep = this.workflowEngine.getNextStep(this.currentWorkflowStep, decision);
-    
+    const nextStep = this.workflowEngine.getNextStep(
+      this.currentWorkflowStep,
+      decision
+    );
+
     if (!nextStep) {
       return; // No transition available
     }
-    
-    if (!this.workflowEngine.validateTransition(this.currentWorkflowStep, nextStep)) {
-      throw new InvalidWorkflowTransitionError(this.currentWorkflowStep, nextStep);
+
+    if (
+      !this.workflowEngine.validateTransition(
+        this.currentWorkflowStep,
+        nextStep
+      )
+    ) {
+      throw new InvalidWorkflowTransitionError(
+        this.currentWorkflowStep,
+        nextStep
+      );
     }
-    
+
     const previousStep = this.currentWorkflowStep;
     this.currentWorkflowStep = nextStep;
-    
+
     // Update status based on workflow step
     this.updateStatusFromWorkflowStep(nextStep);
-    
-    this.addDomainEvent(new WorkflowProgressedEvent(
-      this.id.value,
-      previousStep,
-      nextStep,
-      'system',
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new WorkflowProgressedEvent(
+        this.id.value,
+        previousStep,
+        nextStep,
+        'system',
+        new Date()
+      )
+    );
   }
 
   private checkDocumentCompleteness(): void {
-    const requiredDocs = this.workflowEngine.getRequiredDocuments('document-collection');
+    const requiredDocs = this.workflowEngine.getRequiredDocuments(
+      'document-collection'
+    );
     const uploadedTypes = Array.from(this.uploadedDocuments.keys());
-    
-    const missingDocs = requiredDocs.filter(doc => !uploadedTypes.includes(doc));
-    
+
+    const missingDocs = requiredDocs.filter(
+      doc => !uploadedTypes.includes(doc)
+    );
+
     if (missingDocs.length === 0) {
       // All documents uploaded, progress to next step
       this.progressWorkflow('complete');
@@ -600,7 +672,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
 
   private autoProgressBasedOnRisk(riskScore: number): void {
     let decision: string;
-    
+
     if (riskScore <= 30) {
       decision = 'low-risk';
     } else if (riskScore <= 70) {
@@ -608,7 +680,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
     } else {
       decision = 'high-risk';
     }
-    
+
     this.progressWorkflow(decision);
   }
 
@@ -621,12 +693,12 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
 
   private updateStatusFromWorkflowStep(step: string): void {
     const statusMap = {
-      'rejected': 'rejected',
-      'approved': 'approved',
+      rejected: 'rejected',
+      approved: 'approved',
       'conditional-approval': 'conditional',
-      'final-approval': 'under_review'
+      'final-approval': 'under_review',
     };
-    
+
     if (statusMap[step]) {
       this.status = statusMap[step];
     } else {
@@ -636,28 +708,39 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
 
   private ensureApplicationActive(): void {
     if (this.status === 'approved') {
-      throw new BaseError('APPLICATION_APPROVED', 'Cannot modify approved application');
+      throw new BaseError(
+        'APPLICATION_APPROVED',
+        'Cannot modify approved application'
+      );
     }
-    
+
     if (this.status === 'rejected') {
-      throw new BaseError('APPLICATION_REJECTED', 'Cannot modify rejected application');
+      throw new BaseError(
+        'APPLICATION_REJECTED',
+        'Cannot modify rejected application'
+      );
     }
-    
+
     if (this.expiresAt && new Date() > this.expiresAt) {
-      throw new BaseError('APPLICATION_EXPIRED', 'Conditional approval has expired');
+      throw new BaseError(
+        'APPLICATION_EXPIRED',
+        'Conditional approval has expired'
+      );
     }
   }
 
   private generateApplicationNumber(tenantId: string): string {
     const prefix = this.tenantConfig.applicationPrefix || 'APP';
     const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `${prefix}-${tenantId.slice(-3).toUpperCase()}-${timestamp}-${random}`;
   }
 
   private getCurrentRiskScore(): number {
-    return this.riskAssessments.length > 0 
-      ? this.riskAssessments[this.riskAssessments.length - 1].score 
+    return this.riskAssessments.length > 0
+      ? this.riskAssessments[this.riskAssessments.length - 1].score
       : 0;
   }
 
@@ -681,15 +764,19 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
       conditions: this.conditions,
       submittedAt: this.submittedAt,
       updatedAt: this.updatedAt,
-      expiresAt: this.expiresAt
+      expiresAt: this.expiresAt,
     };
   }
 
   getWorkflowStatus(): any {
-    const requiredDocs = this.workflowEngine.getRequiredDocuments(this.currentWorkflowStep);
+    const requiredDocs = this.workflowEngine.getRequiredDocuments(
+      this.currentWorkflowStep
+    );
     const uploadedTypes = Array.from(this.uploadedDocuments.keys());
-    const missingDocs = requiredDocs.filter(doc => !uploadedTypes.includes(doc));
-    
+    const missingDocs = requiredDocs.filter(
+      doc => !uploadedTypes.includes(doc)
+    );
+
     return {
       currentStep: this.currentWorkflowStep,
       status: this.status,
@@ -697,7 +784,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
       uploadedDocuments: uploadedTypes,
       missingDocuments: missingDocs,
       completedApprovals: this.approvalHistory.length,
-      nextPossibleActions: this.getNextPossibleActions()
+      nextPossibleActions: this.getNextPossibleActions(),
     };
   }
 
@@ -710,33 +797,46 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
       currentScore: this.getCurrentRiskScore(),
       assessmentHistory: this.riskAssessments,
       riskFactors: this.riskAssessments.flatMap(r => r.factors),
-      recommendation: this.riskAssessments.length > 0 
-        ? this.riskAssessments[this.riskAssessments.length - 1].recommendation 
-        : 'pending'
+      recommendation:
+        this.riskAssessments.length > 0
+          ? this.riskAssessments[this.riskAssessments.length - 1].recommendation
+          : 'pending',
     };
   }
 
   private getNextPossibleActions(): string[] {
     const actions = [];
-    
+
     if (this.currentWorkflowStep === 'document-collection') {
-      const requiredDocs = this.workflowEngine.getRequiredDocuments(this.currentWorkflowStep);
-      const missingDocs = requiredDocs.filter(doc => !this.uploadedDocuments.has(doc));
+      const requiredDocs = this.workflowEngine.getRequiredDocuments(
+        this.currentWorkflowStep
+      );
+      const missingDocs = requiredDocs.filter(
+        doc => !this.uploadedDocuments.has(doc)
+      );
       if (missingDocs.length > 0) {
         actions.push('upload-documents');
       } else {
         actions.push('progress-to-credit-check');
       }
     }
-    
-    if (['initial-review', 'senior-review', 'manager-approval', 'committee-review', 'final-approval'].includes(this.currentWorkflowStep)) {
+
+    if (
+      [
+        'initial-review',
+        'senior-review',
+        'manager-approval',
+        'committee-review',
+        'final-approval',
+      ].includes(this.currentWorkflowStep)
+    ) {
       actions.push('approve', 'reject', 'request-more-info');
     }
-    
+
     if (this.status === 'conditional') {
       actions.push('meet-conditions', 'extend-deadline');
     }
-    
+
     return actions;
   }
 
@@ -762,7 +862,7 @@ export class MultiTenantLoanApplicationAggregate extends AggregateRoot {
       rejectionReasons: this.rejectionReasons,
       submittedAt: this.submittedAt,
       updatedAt: this.updatedAt,
-      expiresAt: this.expiresAt
+      expiresAt: this.expiresAt,
     };
   }
 }
@@ -778,10 +878,16 @@ export function multiTenantLoanExample(): void {
       initialReview: 50000,
       manager: 200000,
       senior: 500000,
-      committee: 1000000
+      committee: 1000000,
     },
     requiredDocuments: ['identity', 'income', 'employment'],
-    workflowSteps: ['submitted', 'initial-review', 'document-collection', 'risk-assessment', 'final-approval']
+    workflowSteps: [
+      'submitted',
+      'initial-review',
+      'document-collection',
+      'risk-assessment',
+      'final-approval',
+    ],
   };
 
   // Create loan application
@@ -792,7 +898,7 @@ export function multiTenantLoanExample(): void {
       loanType: 'personal',
       requestedAmount: 75000,
       currency: 'USD',
-      term: 60
+      term: 60,
     },
     tenantConfig
   );
@@ -800,9 +906,21 @@ export function multiTenantLoanExample(): void {
   console.log('Application created:', application.getApplicationSummary());
 
   // Upload required documents
-  application.uploadDocument('identity-verification', 'DOC-001', 'CUSTOMER-123', { verified: true });
-  application.uploadDocument('income-verification', 'DOC-002', 'CUSTOMER-123', { annualIncome: 85000 });
-  application.uploadDocument('employment-verification', 'DOC-003', 'CUSTOMER-123', { employer: 'Tech Corp' });
+  application.uploadDocument(
+    'identity-verification',
+    'DOC-001',
+    'CUSTOMER-123',
+    { verified: true }
+  );
+  application.uploadDocument('income-verification', 'DOC-002', 'CUSTOMER-123', {
+    annualIncome: 85000,
+  });
+  application.uploadDocument(
+    'employment-verification',
+    'DOC-003',
+    'CUSTOMER-123',
+    { employer: 'Tech Corp' }
+  );
 
   console.log('Workflow status:', application.getWorkflowStatus());
 
@@ -836,17 +954,21 @@ export function multiTenantLoanExample(): void {
 
 - **Multi-Tenant Architecture**: Configurable workflows per tenant
 - **Complex Workflow Management**: Multi-step approval processes with validation
-- **Document Management**: Required document tracking and completion verification
-- **Risk Assessment Integration**: Automated risk scoring with workflow progression
+- **Document Management**: Required document tracking and completion
+  verification
+- **Risk Assessment Integration**: Automated risk scoring with workflow
+  progression
 - **Approval Authority Validation**: Hierarchical approval limits enforcement
-- **Conditional Approvals**: Time-limited conditional approval with condition tracking
+- **Conditional Approvals**: Time-limited conditional approval with condition
+  tracking
 - **Comprehensive Audit Trail**: Complete history of all application changes
 
 ## Workflow Engine Benefits
 
 1. **Flexibility**: Each tenant can configure their own approval process
 2. **Compliance**: Enforces required steps and documentation
-3. **Automation**: Automatic progression based on risk scores and document completion
+3. **Automation**: Automatic progression based on risk scores and document
+   completion
 4. **Validation**: Prevents invalid workflow transitions
 
 ## Multi-Tenant Features
@@ -858,8 +980,10 @@ export function multiTenantLoanExample(): void {
 
 ## Risk Assessment Integration
 
-- **Multiple Assessment Types**: Credit score, income verification, collateral valuation
-- **Automatic Workflow Progression**: Low-risk applications fast-track to approval
+- **Multiple Assessment Types**: Credit score, income verification, collateral
+  valuation
+- **Automatic Workflow Progression**: Low-risk applications fast-track to
+  approval
 - **Historical Tracking**: Complete risk assessment history maintained
 
 ## Common Pitfalls

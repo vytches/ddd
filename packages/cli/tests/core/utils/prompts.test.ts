@@ -1,15 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import type {
-  PromptOptions,
-  SelectOptions} from '../../../src/core/utils/prompts';
+import type { PromptOptions, SelectOptions } from '../../../src/core/utils/prompts';
 import {
   Prompts,
   promptForInput,
   promptForChoice,
   promptForConfirmation,
   promptForMultiSelect,
-  ConfirmOptions
+  ConfirmOptions,
 } from '../../../src/core/utils/prompts';
 import { CLIError } from '../../../src/types';
 import * as readline from 'readline';
@@ -143,21 +141,19 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const options: PromptOptions = {
         message: 'Enter valid input',
-        validate: (input) => input === 'valid' || 'Input must be "valid"',
+        validate: input => input === 'valid' || 'Input must be "valid"',
       };
 
       const answer = await Prompts.ask(options);
 
       expect(answer).toBe('valid');
       expect(mockReadlineInterface.question).toHaveBeenCalledTimes(2);
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Input must be "valid"')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Input must be "valid"'));
     });
 
     it('should validate with boolean return value', async () => {
@@ -172,20 +168,18 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const options: PromptOptions = {
         message: 'Enter valid input',
-        validate: (input) => input === 'valid',
+        validate: input => input === 'valid',
       };
 
       const answer = await Prompts.ask(options);
 
       expect(answer).toBe('valid');
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid input')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid input'));
     });
 
     it('should format prompt with default value', async () => {
@@ -322,7 +316,7 @@ describe('Prompts', () => {
 
       const result = await Prompts.confirm({
         message: 'Continue?',
-        default: true
+        default: true,
       });
 
       expect(result).toBe(true);
@@ -367,7 +361,7 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.confirm({ message: 'Continue?' });
@@ -398,46 +392,36 @@ describe('Prompts', () => {
 
     it('should display choices and return selected value', async () => {
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.select(selectOptions);
 
       expect(result).toBe('opt1');
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Choose an option')
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('1. Option 1')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Choose an option'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('1. Option 1'));
     });
 
     it('should highlight default option', async () => {
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const optionsWithDefault = { ...selectOptions, default: 1 };
       await Prompts.select(optionsWithDefault);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❯ 2. Option 2')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('❯ 2. Option 2'));
     });
 
     it('should show descriptions when provided', async () => {
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       await Prompts.select(selectOptions);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('First option')
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Third option')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('First option'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Third option'));
     });
 
     it('should validate selection and re-ask on invalid', async () => {
@@ -452,7 +436,7 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.select(selectOptions);
@@ -494,7 +478,7 @@ describe('Prompts', () => {
 
     it('should return array of selected values', async () => {
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.multiSelect(multiSelectOptions);
@@ -517,7 +501,7 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.multiSelect(multiSelectOptions);
@@ -540,15 +524,13 @@ describe('Prompts', () => {
       });
 
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
 
       const result = await Prompts.multiSelect(multiSelectOptions);
 
       expect(result).toEqual(['opt1', 'opt2']);
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid selection: 5')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid selection: 5'));
     });
 
     it('should handle whitespace in selections', async () => {
@@ -602,12 +584,8 @@ describe('Prompts', () => {
       it('should display progress bar', () => {
         Prompts.progressBar(50, 100, 'Processing files');
 
-        expect(mockStdout.write).toHaveBeenCalledWith(
-          expect.stringContaining('50%')
-        );
-        expect(mockStdout.write).toHaveBeenCalledWith(
-          expect.stringContaining('Processing files')
-        );
+        expect(mockStdout.write).toHaveBeenCalledWith(expect.stringContaining('50%'));
+        expect(mockStdout.write).toHaveBeenCalledWith(expect.stringContaining('Processing files'));
       });
 
       it('should add newline when complete', () => {
@@ -675,8 +653,8 @@ describe('Prompts', () => {
           callback(''); // Empty input
         });
 
-        const [error] = await safeRun(async () =>
-          await promptForInput('Enter name', { required: true })
+        const [error] = await safeRun(
+          async () => await promptForInput('Enter name', { required: true })
         );
 
         expect(error).toBeInstanceOf(CLIError);
@@ -695,11 +673,11 @@ describe('Prompts', () => {
         });
 
         const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-          return
+          return;
         });
 
         const result = await promptForInput('Enter value', {
-          validate: (input) => input === 'valid' || 'Must be valid'
+          validate: input => input === 'valid' || 'Must be valid',
         });
 
         expect(result).toBe('valid');

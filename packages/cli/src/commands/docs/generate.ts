@@ -16,68 +16,68 @@ export interface GenerateArgs {
   output?: string;
 }
 
-export const generateCommand: CommandModule<Record<string,unknown>, GenerateArgs> = {
+export const generateCommand: CommandModule<Record<string, unknown>, GenerateArgs> = {
   command: 'generate <package>',
   describe: 'Generate documentation for a specific package',
   builder: {
     package: {
       type: 'string',
       describe: 'Package name (e.g., policies, domain-services, acl)',
-      demandOption: true
+      demandOption: true,
     },
     complexity: {
       type: 'string',
       describe: 'Complexity level: basic, intermediate, advanced, or comma-separated list',
-      alias: 'c'
+      alias: 'c',
     },
     framework: {
       type: 'string',
       choices: ['nestjs', 'express', 'fastify'],
       describe: 'Framework integration',
-      alias: 'f'
+      alias: 'f',
     },
     sections: {
       type: 'string',
       describe: 'Comma-separated list of sections to include',
-      alias: 's'
+      alias: 's',
     },
     llmOptimized: {
       type: 'boolean',
       describe: 'Generate LLM-optimized documentation',
       alias: 'llm',
-      default: false
+      default: false,
     },
     showRelated: {
       type: 'boolean',
       describe: 'Include related examples from other packages',
-      default: false
+      default: false,
     },
     maxExamples: {
       type: 'number',
       describe: 'Maximum number of examples to include',
-      alias: 'm'
+      alias: 'm',
     },
     noRandomize: {
       type: 'boolean',
       describe: 'Disable randomization of examples',
-      default: false
+      default: false,
     },
     seed: {
       type: 'string',
-      describe: 'Custom seed for randomization'
+      describe: 'Custom seed for randomization',
     },
     diOnly: {
       type: 'boolean',
       describe: 'Show only examples that support DI',
-      default: false
+      default: false,
     },
     output: {
       type: 'string',
       describe: 'Output file path',
-      alias: 'o'
-    }
+      alias: 'o',
+    },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       const generator = new DocumentationGenerator();
 
@@ -87,9 +87,7 @@ export const generateCommand: CommandModule<Record<string,unknown>, GenerateArgs
         : undefined;
 
       // Parse sections
-      const sections = argv.sections
-        ? argv.sections.split(',').map(s => s.trim())
-        : undefined;
+      const sections = argv.sections ? argv.sections.split(',').map(s => s.trim()) : undefined;
 
       // Generate documentation
       const result = await generator.generate({
@@ -103,7 +101,7 @@ export const generateCommand: CommandModule<Record<string,unknown>, GenerateArgs
         randomize: !argv.noRandomize,
         ...(argv.seed && { seed: argv.seed }),
         ...(argv.diOnly && { diOnly: argv.diOnly }),
-        ...(argv.output && { outputPath: argv.output })
+        ...(argv.output && { outputPath: argv.output }),
       });
 
       logger.success(`✅ Documentation generated: ${result.outputPath}`);
@@ -115,10 +113,11 @@ export const generateCommand: CommandModule<Record<string,unknown>, GenerateArgs
       if (result.randomizedExamples && result.randomizedExamples.length > 0) {
         logger.info('🎲 Examples were randomized. Run again to see different examples');
       }
-
     } catch (error) {
-      logger.error(`❌ Failed to generate documentation: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `❌ Failed to generate documentation: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
-  }
+  },
 };

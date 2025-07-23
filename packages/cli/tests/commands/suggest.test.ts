@@ -9,14 +9,14 @@ vi.mock('../../src/core/suggestions/command-suggester');
 vi.mock('../../src/core/prompts/context-aware-prompts');
 vi.mock('../../src/core/utils/colors', () => ({
   Colors: {
-    bold: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    error: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    yellow: vi.fn((text) => text),
-    red: vi.fn((text) => text),
-    dim: vi.fn((text) => text),
-    warning: vi.fn((text) => text),
+    bold: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    error: vi.fn(text => text),
+    green: vi.fn(text => text),
+    yellow: vi.fn(text => text),
+    red: vi.fn(text => text),
+    dim: vi.fn(text => text),
+    warning: vi.fn(text => text),
   },
 }));
 
@@ -88,8 +88,12 @@ describe('suggestCommand', () => {
     mockContextAwarePromptEngine.create = vi.fn().mockReturnValue(mockPromptEngineInstance);
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit and process.cwd
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -99,7 +103,9 @@ describe('suggestCommand', () => {
   describe('command configuration', () => {
     it('should have correct name and description', () => {
       expect(suggestCommand.name).toBe('suggest');
-      expect(suggestCommand.description).toBe('Get intelligent command suggestions based on your project state');
+      expect(suggestCommand.description).toBe(
+        'Get intelligent command suggestions based on your project state'
+      );
       expect(suggestCommand.aliases).toEqual(['s', 'hint', 'next']);
     });
 
@@ -123,7 +129,7 @@ describe('suggestCommand', () => {
 
     it('should have examples', () => {
       expect(suggestCommand.examples).toBeDefined();
-      expect((suggestCommand.examples as any[] || []).length).toBeGreaterThan(0);
+      expect(((suggestCommand.examples as any[]) || []).length).toBeGreaterThan(0);
     });
   });
 
@@ -143,9 +149,7 @@ describe('suggestCommand', () => {
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('Getting Started with VytchesDDD')
       );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('vytches-ddd init')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('vytches-ddd init'));
     });
 
     it('should use custom path when provided', async () => {
@@ -212,9 +216,7 @@ describe('suggestCommand', () => {
 
       expect(error).toBeUndefined();
       expect(mockSuggesterInstance.getQuickSuggestion).toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Quick Suggestion')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Quick Suggestion'));
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('vytches-ddd generate aggregate Order')
       );
@@ -254,9 +256,7 @@ describe('suggestCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Confidence: 70%')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Confidence: 70%'));
     });
 
     it('should not show confidence when above threshold', async () => {
@@ -378,15 +378,11 @@ describe('suggestCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Tips:')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Tips:'));
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('vytches-ddd suggest --quick')
       );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('vytches-ddd workflow')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('vytches-ddd workflow'));
     });
   });
 
@@ -549,7 +545,7 @@ describe('suggestCommand', () => {
       const options = {
         analysis: true,
         category: 'improvement',
-        path: '/custom/analysis/path'
+        path: '/custom/analysis/path',
       };
 
       const [error] = await safeRun(async () => {

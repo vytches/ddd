@@ -1,19 +1,21 @@
 # Intermediate Aggregate Implementation Patterns
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Intermediate
-**Domain**: Advanced Domain-Driven Design Patterns
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+Intermediate **Domain**: Advanced Domain-Driven Design Patterns
 
 ## Overview
 
-This document covers intermediate-level aggregate implementation patterns that extend beyond basic CRUD operations. These patterns address complex business scenarios including event sourcing, capability separation, workflow management, and multi-tenant architectures.
+This document covers intermediate-level aggregate implementation patterns that
+extend beyond basic CRUD operations. These patterns address complex business
+scenarios including event sourcing, capability separation, workflow management,
+and multi-tenant architectures.
 
 ## Advanced Implementation Patterns
 
 ### 1. Event Sourcing Pattern
 
-**Purpose**: Rebuild aggregate state from a sequence of domain events for complete audit trails and temporal queries
+**Purpose**: Rebuild aggregate state from a sequence of domain events for
+complete audit trails and temporal queries
 
 ```typescript
 // ✅ CORRECT: Event sourcing with state reconstruction
@@ -21,12 +23,15 @@ export class EventSourcedAggregate extends AggregateRoot {
   private eventVersion: number = 0;
 
   // Reconstitute from event stream
-  static fromEvents(id: EntityId, events: DomainEvent[]): EventSourcedAggregate {
+  static fromEvents(
+    id: EntityId,
+    events: DomainEvent[]
+  ): EventSourcedAggregate {
     const aggregate = new EventSourcedAggregate(id);
-    
+
     // Apply all historical events to rebuild state
     events.forEach(event => aggregate.applyEvent(event));
-    
+
     aggregate.markAsHydrated(); // Prevent event emission during reconstitution
     return aggregate;
   }
@@ -68,18 +73,18 @@ export class BadAggregate extends AggregateRoot {
 // ✅ CORRECT: Snapshot with incremental events
 export class SnapshotOptimizedAggregate extends AggregateRoot {
   static fromSnapshot(
-    id: EntityId, 
-    snapshotData: SnapshotData, 
+    id: EntityId,
+    snapshotData: SnapshotData,
     eventsAfterSnapshot: DomainEvent[]
   ): SnapshotOptimizedAggregate {
     const aggregate = new SnapshotOptimizedAggregate(id);
-    
+
     // Restore from snapshot (fast)
     aggregate.restoreFromSnapshot(snapshotData);
-    
+
     // Apply only events after snapshot (minimal processing)
     eventsAfterSnapshot.forEach(event => aggregate.applyEvent(event));
-    
+
     aggregate.markAsHydrated();
     return aggregate;
   }
@@ -176,8 +181,11 @@ export class WorkflowAggregate extends AggregateRoot {
   }
 
   progressWorkflow(decision: string, actor: string): void {
-    const nextStep = this.workflowEngine.getNextStep(this.currentStep, decision);
-    
+    const nextStep = this.workflowEngine.getNextStep(
+      this.currentStep,
+      decision
+    );
+
     if (!nextStep) {
       throw new InvalidWorkflowTransitionError(this.currentStep, decision);
     }
@@ -189,13 +197,15 @@ export class WorkflowAggregate extends AggregateRoot {
     const previousStep = this.currentStep;
     this.currentStep = nextStep;
 
-    this.addDomainEvent(new WorkflowProgressedEvent(
-      this.id.value,
-      previousStep,
-      nextStep,
-      actor,
-      new Date()
-    ));
+    this.addDomainEvent(
+      new WorkflowProgressedEvent(
+        this.id.value,
+        previousStep,
+        nextStep,
+        actor,
+        new Date()
+      )
+    );
   }
 }
 
@@ -211,7 +221,8 @@ export class BadWorkflowAggregate extends AggregateRoot {
 
 ### 5. Multi-Tenant Pattern
 
-**Purpose**: Support multiple tenants with different configurations and business rules
+**Purpose**: Support multiple tenants with different configurations and business
+rules
 
 ```typescript
 // ✅ CORRECT: Tenant-aware aggregate with configuration
@@ -248,7 +259,7 @@ export class MultiTenantAggregate extends AggregateRoot {
   processRequest(request: Request): void {
     // Use tenant-specific business rules
     this.validateWithTenantRules(request);
-    
+
     // Apply tenant-specific workflow
     const workflow = this.tenantConfig.getWorkflow(request.type);
     this.executeWithWorkflow(request, workflow);
@@ -264,7 +275,8 @@ export class MultiTenantAggregate extends AggregateRoot {
 // ❌ WRONG: Hard-coded single tenant logic
 export class BadMultiTenantAggregate extends AggregateRoot {
   processRequest(request: Request): void {
-    if (request.amount > 10000) { // Hard-coded limit for all tenants
+    if (request.amount > 10000) {
+      // Hard-coded limit for all tenants
       throw new Error('Amount too high');
     }
   }
@@ -283,8 +295,8 @@ export class VersionedAggregate extends AggregateRoot {
   performOperation(expectedVersion: number): void {
     if (this.version !== expectedVersion) {
       throw new OptimisticLockingError(
-        this.version, 
-        expectedVersion, 
+        this.version,
+        expectedVersion,
         'Aggregate was modified by another process'
       );
     }
@@ -309,7 +321,7 @@ export class MemoryEfficientAggregate extends AggregateRoot {
 
   addTransaction(transaction: Transaction): void {
     this.transactions.push(transaction);
-    
+
     // Keep only recent transactions to prevent memory issues
     if (this.transactions.length > this.MAX_TRANSACTIONS) {
       this.transactions = this.transactions.slice(-this.MAX_TRANSACTIONS);
@@ -339,18 +351,20 @@ export class EfficientEventAggregate extends AggregateRoot {
   addMultipleItems(items: Item[]): void {
     items.forEach(item => {
       this.addItemWithoutRecalculation(item);
-      
+
       // Emit individual item events
       this.addDomainEvent(new ItemAddedEvent(this.id.value, item));
     });
 
     // Single recalculation and summary event
     this.recalculateTotal();
-    this.addDomainEvent(new CartTotalRecalculatedEvent(
-      this.id.value,
-      this.totalAmount,
-      items.length
-    ));
+    this.addDomainEvent(
+      new CartTotalRecalculatedEvent(
+        this.id.value,
+        this.totalAmount,
+        items.length
+      )
+    );
   }
 }
 ```
@@ -391,7 +405,7 @@ export class EventUpcastingService {
         'unknown' // Default value for missing field
       );
     }
-    
+
     return event;
   }
 }
@@ -409,7 +423,7 @@ describe('EventSourcedAggregate', () => {
     const events = [
       new CartCreatedEvent('cart-1', 'customer-1'),
       new ItemAddedEvent('cart-1', { id: 'item-1', price: 10 }),
-      new ItemAddedEvent('cart-1', { id: 'item-2', price: 20 })
+      new ItemAddedEvent('cart-1', { id: 'item-2', price: 20 }),
     ];
 
     // When - reconstruct from events
@@ -426,10 +440,16 @@ describe('EventSourcedAggregate', () => {
 
   it('should maintain idempotency during event replay', () => {
     const events = [new ItemAddedEvent('cart-1', { id: 'item-1', price: 10 })];
-    
+
     // Apply events multiple times
-    const cart1 = EventSourcedCart.fromEvents(EntityId.fromString('cart-1'), events);
-    const cart2 = EventSourcedCart.fromEvents(EntityId.fromString('cart-1'), events);
+    const cart1 = EventSourcedCart.fromEvents(
+      EntityId.fromString('cart-1'),
+      events
+    );
+    const cart2 = EventSourcedCart.fromEvents(
+      EntityId.fromString('cart-1'),
+      events
+    );
 
     expect(cart1.totalAmount).toBe(cart2.totalAmount);
   });
@@ -451,9 +471,9 @@ describe('RiskAssessmentCapability', () => {
 
   it('should calculate risk score based on transaction amount', () => {
     const transaction = createTestTransaction({ amount: 10000 });
-    
+
     const assessment = riskCapability.assessRisk(transaction);
-    
+
     expect(assessment.score).toBeGreaterThan(0);
     expect(assessment.factors).toContain('large-amount');
   });
@@ -462,11 +482,11 @@ describe('RiskAssessmentCapability', () => {
     const suspiciousTransactions = [
       createTestTransaction({ amount: 100, timestamp: new Date() }),
       createTestTransaction({ amount: 100, timestamp: new Date() }),
-      createTestTransaction({ amount: 100, timestamp: new Date() })
+      createTestTransaction({ amount: 100, timestamp: new Date() }),
     ];
 
     const hasFraud = riskCapability.checkFraudPatterns(suspiciousTransactions);
-    
+
     expect(hasFraud).toBe(true);
   });
 });
@@ -485,16 +505,23 @@ describe('LoanWorkflowEngine', () => {
 
   it('should progress through valid transitions', () => {
     const nextStep = workflowEngine.getNextStep('submitted', 'auto-approved');
-    
+
     expect(nextStep).toBe('document-collection');
-    expect(workflowEngine.validateTransition('submitted', 'document-collection')).toBe(true);
+    expect(
+      workflowEngine.validateTransition('submitted', 'document-collection')
+    ).toBe(true);
   });
 
   it('should reject invalid transitions', () => {
-    const nextStep = workflowEngine.getNextStep('submitted', 'invalid-decision');
-    
+    const nextStep = workflowEngine.getNextStep(
+      'submitted',
+      'invalid-decision'
+    );
+
     expect(nextStep).toBeNull();
-    expect(workflowEngine.validateTransition('submitted', 'final-approval')).toBe(false);
+    expect(
+      workflowEngine.validateTransition('submitted', 'final-approval')
+    ).toBe(false);
   });
 });
 ```
@@ -551,19 +578,35 @@ export class LazyCalculationAggregate extends AggregateRoot {
 // ❌ WRONG: Aggregate handling too many responsibilities
 export class GodAggregate extends AggregateRoot {
   // Hundreds of methods handling different business concerns
-  processPayment() { /* ... */ }
-  calculateTaxes() { /* ... */ }
-  validateCompliance() { /* ... */ }
-  generateReports() { /* ... */ }
-  sendNotifications() { /* ... */ }
+  processPayment() {
+    /* ... */
+  }
+  calculateTaxes() {
+    /* ... */
+  }
+  validateCompliance() {
+    /* ... */
+  }
+  generateReports() {
+    /* ... */
+  }
+  sendNotifications() {
+    /* ... */
+  }
   // ... many more unrelated methods
 }
 
 // ✅ CORRECT: Focused aggregate with clear boundaries
 export class PaymentAggregate extends AggregateRoot {
-  processPayment() { /* ... */ }
-  validatePaymentMethod() { /* ... */ }
-  calculateFees() { /* ... */ }
+  processPayment() {
+    /* ... */
+  }
+  validatePaymentMethod() {
+    /* ... */
+  }
+  calculateFees() {
+    /* ... */
+  }
   // Only payment-related responsibilities
 }
 ```
@@ -574,10 +617,10 @@ export class PaymentAggregate extends AggregateRoot {
 // ❌ WRONG: Always replaying all events
 static fromEvents(id: EntityId, events: DomainEvent[]): SlowAggregate {
   const aggregate = new SlowAggregate(id);
-  
+
   // Inefficient for aggregates with thousands of events
   events.forEach(event => aggregate.applyEvent(event));
-  
+
   return aggregate;
 }
 
@@ -588,10 +631,10 @@ static fromSnapshotAndEvents(
   eventsAfterSnapshot: DomainEvent[]
 ): FastAggregate {
   const aggregate = new FastAggregate(id);
-  
+
   aggregate.restoreFromSnapshot(snapshot); // Fast restoration
   eventsAfterSnapshot.forEach(event => aggregate.applyEvent(event)); // Minimal replay
-  
+
   return aggregate;
 }
 ```
@@ -600,13 +643,18 @@ static fromSnapshotAndEvents(
 
 1. **Event Sourcing**: Use for complete audit trails and temporal queries
 2. **Snapshots**: Optimize performance for long-lived aggregates
-3. **Capabilities**: Separate complex business logic into focused, testable components
+3. **Capabilities**: Separate complex business logic into focused, testable
+   components
 4. **Workflows**: Use workflow engines for complex multi-step processes
 5. **Multi-Tenancy**: Design for configuration-driven behavior differences
 6. **Versioning**: Plan for event schema evolution from the start
 7. **Memory Management**: Keep collections bounded to prevent memory leaks
-8. **Testing**: Test capabilities, workflows, and event sourcing scenarios separately
+8. **Testing**: Test capabilities, workflows, and event sourcing scenarios
+   separately
 9. **Performance**: Use lazy loading and smart snapshot strategies
-10. **Boundaries**: Keep aggregates focused on their core business responsibility
+10. **Boundaries**: Keep aggregates focused on their core business
+    responsibility
 
-These intermediate patterns enable you to handle complex business scenarios while maintaining the integrity and testability that make aggregates valuable in domain-driven design.
+These intermediate patterns enable you to handle complex business scenarios
+while maintaining the integrity and testability that make aggregates valuable in
+domain-driven design.

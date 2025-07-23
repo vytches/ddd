@@ -1,38 +1,40 @@
 # Intermediate Implementation Guide
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: Advanced implementation strategies, architectural patterns, system integration
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Domain**: Infrastructure **Patterns**: Advanced implementation strategies,
+architectural patterns, system integration **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-Advanced implementation strategies for integrating utilities into complex application architectures. This guide covers sophisticated patterns for Result handling, error aggregation, asynchronous operations, and system-wide utility integration.
+Advanced implementation strategies for integrating utilities into complex
+application architectures. This guide covers sophisticated patterns for Result
+handling, error aggregation, asynchronous operations, and system-wide utility
+integration.
 
 ## Business Context
 
 As applications grow in complexity, utility integration needs to address:
+
 - Multi-layered architectures with service boundaries
 - Asynchronous workflows with complex error handling
 - Bulk operations with partial failure handling
 - Cross-cutting concerns like logging, monitoring, and recovery
 - Integration with external systems and APIs
 
-This guide provides architectural patterns for implementing utilities at enterprise scale.
+This guide provides architectural patterns for implementing utilities at
+enterprise scale.
 
 ## Code Example
 
 ```typescript
 // intermediate-implementation.ts
 import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
-import { 
-  UserData, 
-  ValidationError, 
+import {
+  UserData,
+  ValidationError,
   ServiceResponse,
   AggregatedError,
-  AsyncResult 
+  AsyncResult
 } from '../types';
 
 // ✅ FOCUS: Advanced implementation patterns
@@ -56,7 +58,7 @@ export class IntermediateImplementation {
         const validationResult = this.validateUserInput(userData);
         if (validationResult.isFailure) {
           await this.logOperation(operationId, 'VALIDATION_FAILED', { errors: validationResult.error });
-          
+
           return {
             success: false,
             error: {
@@ -82,7 +84,7 @@ export class IntermediateImplementation {
         const businessRulesResult = await this.applyBusinessRules(validUser);
         if (businessRulesResult.isFailure) {
           await this.logOperation(operationId, 'BUSINESS_RULES_FAILED', { error: businessRulesResult.error });
-          
+
           return {
             success: false,
             error: {
@@ -102,7 +104,7 @@ export class IntermediateImplementation {
         const persistenceResult = await this.persistUser(businessRulesResult.value);
         if (persistenceResult.isFailure) {
           await this.logOperation(operationId, 'PERSISTENCE_FAILED', { error: persistenceResult.error });
-          
+
           return {
             success: false,
             error: {
@@ -138,7 +140,7 @@ export class IntermediateImplementation {
 
       } catch (error) {
         await this.logOperation(operationId, 'UNEXPECTED_ERROR', { error: (error as Error).message });
-        
+
         return {
           success: false,
           error: {
@@ -205,7 +207,7 @@ export class IntermediateImplementation {
     private async findUserByEmail(email: string): Promise<UserData | null> {
       // Simulate database lookup
       await LibUtils.sleep(50);
-      
+
       // For demo: certain emails "exist"
       const existingEmails = ['admin@company.com', 'test@example.com'];
       if (existingEmails.includes(email)) {
@@ -217,7 +219,7 @@ export class IntermediateImplementation {
           createdAt: new Date(),
         };
       }
-      
+
       return null;
     }
 
@@ -225,7 +227,7 @@ export class IntermediateImplementation {
       return await Result.tryAsync(async () => {
         // Simulate database operation
         await LibUtils.sleep(100);
-        
+
         if (userData.email === 'fail@example.com') {
           throw new Error('Database connection failed');
         }
@@ -254,7 +256,7 @@ export class IntermediateImplementation {
 
       // Log any failures for monitoring
       results.forEach((result, index) => {
-        if (result.status === 'rejected' || 
+        if (result.status === 'rejected' ||
             (result.status === 'fulfilled' && result.value[0])) {
           const error = result.status === 'rejected' ? result.reason : result.value[0];
           this.logOperation(operationId, `POST_ACTIVITY_${index}_FAILED`, { error: error.message });
@@ -332,7 +334,7 @@ export class IntermediateImplementation {
     ): Promise<ServiceResponse<any>> {
       const startTime = Date.now();
       const operationId = LibUtils.getUUID();
-      
+
       const results = {
         successful: [] as UserData[],
         failed: [] as { index: number; data: Partial<UserData>; errors: ValidationError[] }[],
@@ -369,8 +371,8 @@ export class IntermediateImplementation {
               ...results.summary,
               completionPercentage: (results.summary.processed / results.summary.total) * 100,
               estimatedTimeRemaining: this.estimateTimeRemaining(
-                startTime, 
-                results.summary.processed, 
+                startTime,
+                results.summary.processed,
                 results.summary.total
               ),
             });
@@ -423,7 +425,7 @@ export class IntermediateImplementation {
     }
 
     private async processBatch(
-      batch: Partial<UserData>[], 
+      batch: Partial<UserData>[],
       startIndex: number,
       options: any
     ): Promise<any> {
@@ -436,10 +438,10 @@ export class IntermediateImplementation {
       // Process items concurrently within batch
       const batchPromises = batch.map(async (userData, batchIndex) => {
         const globalIndex = startIndex + batchIndex;
-        
+
         // Primary processing attempt
         const primaryResult = await this.processUserWithRecovery(userData, globalIndex);
-        
+
         if (primaryResult.isSuccess) {
           return { type: 'success', data: primaryResult.value, index: globalIndex };
         }
@@ -452,11 +454,11 @@ export class IntermediateImplementation {
           }
         }
 
-        return { 
-          type: 'failed', 
-          data: userData, 
-          errors: primaryResult.error, 
-          index: globalIndex 
+        return {
+          type: 'failed',
+          data: userData,
+          errors: primaryResult.error,
+          index: globalIndex
         };
       });
 
@@ -541,7 +543,7 @@ export class IntermediateImplementation {
 
     private async processConcurrently<T>(promises: Promise<T>[], concurrency: number): Promise<T[]> {
       const results: T[] = [];
-      
+
       for (let i = 0; i < promises.length; i += concurrency) {
         const batch = promises.slice(i, i + concurrency);
         const batchResults = await Promise.all(batch);
@@ -553,11 +555,11 @@ export class IntermediateImplementation {
 
     private estimateTimeRemaining(startTime: number, processed: number, total: number): number {
       if (processed === 0) return 0;
-      
+
       const elapsedTime = Date.now() - startTime;
       const averageTimePerItem = elapsedTime / processed;
       const remainingItems = total - processed;
-      
+
       return Math.round(remainingItems * averageTimePerItem);
     }
   }
@@ -627,24 +629,28 @@ export class IntermediateImplementation {
 ## Implementation Strategies
 
 ### 1. Layered Error Handling
+
 - Service layer handles business logic errors
 - Repository layer handles data persistence errors
 - Integration layer handles external system errors
 - Each layer provides appropriate context and recovery options
 
 ### 2. Asynchronous Operation Management
+
 - Use Result patterns for async operations
 - Implement proper timeout and retry mechanisms
 - Handle concurrent operations with controlled parallelism
 - Provide progress tracking for long-running operations
 
 ### 3. Batch Processing Architecture
+
 - Process data in manageable batches
 - Implement recovery mechanisms for partial failures
 - Provide comprehensive progress reporting
 - Use controlled concurrency to avoid system overload
 
 ### 4. System Integration Patterns
+
 - Use interceptor patterns for cross-cutting concerns
 - Implement service registration and discovery
 - Provide consistent error handling across integrations
@@ -653,14 +659,16 @@ export class IntermediateImplementation {
 ## Key Benefits
 
 - **Scalable Architecture**: Handles enterprise-scale operations efficiently
-- **Robust Error Handling**: Comprehensive error management with recovery options
+- **Robust Error Handling**: Comprehensive error management with recovery
+  options
 - **Monitoring Integration**: Built-in logging and progress tracking
 - **System Resilience**: Graceful degradation and recovery mechanisms
 - **Performance Optimization**: Batched and concurrent processing capabilities
 
 ## Best Practices
 
-- **Separate Concerns**: Keep validation, business logic, and persistence separate
+- **Separate Concerns**: Keep validation, business logic, and persistence
+  separate
 - **Implement Circuit Breakers**: Protect against cascading failures
 - **Use Bulk Operations**: Process multiple items efficiently
 - **Provide Progress Feedback**: Keep users informed during long operations

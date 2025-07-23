@@ -1,7 +1,9 @@
 # CQRS - NestJS Manual Setup
 
-**Focus**: Basic CQRS command and query handling in NestJS with manual instantiation  
-**Base Example**: [Command Handlers](../../../basic/example-1.md), [Query Handlers](../../../basic/example-2.md)  
+**Focus**: Basic CQRS command and query handling in NestJS with manual
+instantiation  
+**Base Example**: [Command Handlers](../../../basic/example-1.md),
+[Query Handlers](../../../basic/example-2.md)  
 **Dependencies**: @nestjs/common, @vytches-ddd/cqrs
 
 ## Service Implementation
@@ -10,15 +12,15 @@
 // user.service.ts
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { 
-  CreateUserCommand, 
+import {
+  CreateUserCommand,
   UpdateUserCommand,
   GetUserByIdQuery,
   SearchUsersQuery,
   User,
   UserListResult,
   CreateUserData,
-  UpdateUserData 
+  UpdateUserData,
 } from './types'; // From your application
 
 /**
@@ -36,9 +38,9 @@ export class UserService {
     this.queryBus = new QueryBus({
       enableCaching: true,
       enableMetrics: true,
-      defaultTimeout: 10000
+      defaultTimeout: 10000,
     });
-    
+
     this.initializeHandlers();
   }
 
@@ -59,7 +61,7 @@ export class UserService {
       );
 
       const result = await this.commandBus.execute(command);
-      
+
       if (!result.success) {
         throw new Error(`User creation failed: ${result.error}`);
       }
@@ -87,7 +89,7 @@ export class UserService {
       );
 
       const result = await this.commandBus.execute(command);
-      
+
       if (!result.success) {
         throw new Error(`User update failed: ${result.error}`);
       }
@@ -101,7 +103,10 @@ export class UserService {
   /**
    * Retrieves a user by ID through CQRS query handling
    */
-  async getUserById(userId: string, includeProfile: boolean = true): Promise<User | null> {
+  async getUserById(
+    userId: string,
+    includeProfile: boolean = true
+  ): Promise<User | null> {
     try {
       // ✅ FOCUS: Query execution with caching support
       const query = new GetUserByIdQuery(
@@ -111,7 +116,7 @@ export class UserService {
       );
 
       const result = await this.queryBus.execute(query);
-      
+
       if (!result.success) {
         if (result.error?.includes('not found')) {
           return null;
@@ -146,7 +151,7 @@ export class UserService {
       );
 
       const result = await this.queryBus.execute(query);
-      
+
       if (!result.success) {
         throw new Error(`User search failed: ${result.error}`);
       }
@@ -163,20 +168,32 @@ export class UserService {
   private async initializeHandlers(): Promise<void> {
     // Register command handlers manually
     // In production, use automatic discovery through @vytches-ddd/di
-    
+
     // Note: Handler registration would typically be done through
     // dependency injection and automatic discovery. This manual
     // approach is for demonstration of basic CQRS concepts.
-    
+
     console.log('🔧 CQRS handlers initialized manually');
-    console.log('💡 For production, consider using @vytches-ddd/di for automatic discovery');
+    console.log(
+      '💡 For production, consider using @vytches-ddd/di for automatic discovery'
+    );
   }
 }
 ```
 
 ```typescript
 // user.controller.ts
-import { Controller, Post, Put, Get, Body, Param, Query, HttpStatus, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Put,
+  Get,
+  Body,
+  Param,
+  Query,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, SearchUsersDto } from './dto'; // From your app
 
@@ -199,24 +216,21 @@ export class UserController {
           lastName: createUserDto.lastName,
           bio: createUserDto.bio,
           location: createUserDto.location,
-          phoneNumber: createUserDto.phoneNumber
+          phoneNumber: createUserDto.phoneNumber,
         },
-        initialPreferences: createUserDto.preferences
+        initialPreferences: createUserDto.preferences,
       };
 
       // ✅ FOCUS: Delegate to CQRS-based service
       const user = await this.userService.createUser(userData);
-      
+
       return {
         success: true,
         data: user,
-        message: 'User created successfully'
+        message: 'User created successfully',
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -232,22 +246,19 @@ export class UserController {
         role: updateUserDto.role,
         profile: updateUserDto.profile,
         preferences: updateUserDto.preferences,
-        version: updateUserDto.version
+        version: updateUserDto.version,
       };
 
       // ✅ FOCUS: Command execution through service
       const user = await this.userService.updateUser(userId, userData);
-      
+
       return {
         success: true,
         data: user,
-        message: 'User updated successfully'
+        message: 'User updated successfully',
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -259,29 +270,23 @@ export class UserController {
     try {
       // ✅ FOCUS: Query execution through service
       const user = await this.userService.getUserById(
-        userId, 
+        userId,
         includeProfile !== false
       );
-      
+
       if (!user) {
-        throw new HttpException(
-          'User not found',
-          HttpStatus.NOT_FOUND
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      
+
       return {
         success: true,
-        data: user
+        data: user,
       };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException(
-        error.message,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -295,7 +300,7 @@ export class UserController {
         searchDto.page || 1,
         searchDto.pageSize || 20
       );
-      
+
       return {
         success: true,
         data: result.users,
@@ -305,14 +310,11 @@ export class UserController {
           totalPages: result.pageInfo.totalPages,
           totalCount: result.totalCount,
           hasNextPage: result.pageInfo.hasNextPage,
-          hasPreviousPage: result.pageInfo.hasPreviousPage
-        }
+          hasPreviousPage: result.pageInfo.hasPreviousPage,
+        },
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
@@ -327,17 +329,20 @@ import { UserController } from './user.controller';
 @Module({
   controllers: [UserController],
   providers: [UserService],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
 ```
 
 ## Key Points
 
-- **Manual Setup**: Simple manual instantiation of CommandBus and QueryBus for basic scenarios
+- **Manual Setup**: Simple manual instantiation of CommandBus and QueryBus for
+  basic scenarios
 - **Service Layer**: NestJS service acts as thin wrapper around CQRS operations
-- **Error Handling**: Standard try/catch blocks with appropriate HTTP status codes
-- **Framework Integration**: Standard NestJS patterns (Injectable, Controller, Module)
+- **Error Handling**: Standard try/catch blocks with appropriate HTTP status
+  codes
+- **Framework Integration**: Standard NestJS patterns (Injectable, Controller,
+  Module)
 - **Type Safety**: Full TypeScript support with proper error handling
 
 ## Benefits
@@ -351,7 +356,8 @@ export class UserModule {}
 
 - **Manual Registration**: Handlers must be registered manually (not scalable)
 - **No Auto-Discovery**: Missing automatic handler discovery benefits
-- **Limited Middleware**: Basic setup lacks advanced middleware pipeline features
+- **Limited Middleware**: Basic setup lacks advanced middleware pipeline
+  features
 - **Service Coupling**: Service layer directly manages CQRS infrastructure
 
 ## When to Use
@@ -359,11 +365,14 @@ export class UserModule {}
 - **Learning CQRS**: Great for understanding basic CQRS concepts
 - **Simple Applications**: Suitable for applications with limited complexity
 - **Proof of Concepts**: Perfect for demonstrating CQRS patterns
-- **Migration Path**: Good starting point before moving to advanced DI integration
+- **Migration Path**: Good starting point before moving to advanced DI
+  integration
 
 ## Migration to Advanced Setup
 
-For production applications, consider upgrading to the [DI Integration](../intermediate/di-integration.md) approach which provides:
+For production applications, consider upgrading to the
+[DI Integration](../intermediate/di-integration.md) approach which provides:
+
 - Automatic handler discovery through @vytches-ddd/di
 - Advanced middleware pipeline support
 - Better separation of concerns

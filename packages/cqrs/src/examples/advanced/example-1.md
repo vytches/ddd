@@ -1,31 +1,45 @@
 # Enterprise CQRS with Saga Orchestration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/cqrs
-**Complexity**: Advanced
-**Domain**: Architecture
-**Patterns**: CQRS, Saga orchestration, Distributed transactions, Compensation
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/di
+**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Domain**: Architecture **Patterns**: CQRS, Saga orchestration, Distributed
+transactions, Compensation **Dependencies**: @vytches-ddd/cqrs,
+@vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/resilience,
+@vytches-ddd/di
 
 ## Description
 
-This example demonstrates implementing enterprise-grade CQRS with saga orchestration for managing complex distributed transactions. It shows how to coordinate multiple bounded contexts, handle partial failures, implement compensation logic, and ensure eventual consistency across microservices.
+This example demonstrates implementing enterprise-grade CQRS with saga
+orchestration for managing complex distributed transactions. It shows how to
+coordinate multiple bounded contexts, handle partial failures, implement
+compensation logic, and ensure eventual consistency across microservices.
 
 ## Business Context
 
 Enterprise systems often require complex workflows that span multiple services:
-- E-commerce order fulfillment involving inventory, payment, shipping, and notifications
-- Financial transactions requiring regulatory compliance, fraud detection, and multi-step approvals
-- Healthcare patient admission involving insurance verification, bed allocation, and staff assignment
-- Supply chain orchestration with multiple vendors, warehouses, and logistics providers
 
-These scenarios require sophisticated coordination with proper failure handling and compensation.
+- E-commerce order fulfillment involving inventory, payment, shipping, and
+  notifications
+- Financial transactions requiring regulatory compliance, fraud detection, and
+  multi-step approvals
+- Healthcare patient admission involving insurance verification, bed allocation,
+  and staff assignment
+- Supply chain orchestration with multiple vendors, warehouses, and logistics
+  providers
+
+These scenarios require sophisticated coordination with proper failure handling
+and compensation.
 
 ## Code Example
 
 ```typescript
 // enterprise-saga-cqrs.ts
-import { Command, CommandHandler, CommandBus, Query, QueryHandler } from '@vytches-ddd/cqrs';
+import {
+  Command,
+  CommandHandler,
+  CommandBus,
+  Query,
+  QueryHandler,
+} from '@vytches-ddd/cqrs';
 import { BaseSaga, SagaStep, SagaContext } from '@vytches-ddd/messaging';
 import { DomainEvent, EventBus } from '@vytches-ddd/events';
 import { CircuitBreaker, Retry, Timeout } from '@vytches-ddd/resilience';
@@ -36,14 +50,14 @@ import type {
   PaymentData,
   ShippingData,
   SagaState,
-  CompensationContext
+  CompensationContext,
 } from '../types'; // From your application
 
 // ✅ FOCUS: Complex saga orchestration command
 export class ProcessOrderSagaCommand extends Command {
   public readonly sagaId: string;
   public readonly correlationId: string;
-  
+
   constructor(
     public readonly orderData: OrderData,
     public readonly metadata: SagaMetadata
@@ -74,7 +88,7 @@ export interface OrderFulfillmentSagaState extends SagaState {
 // ✅ FOCUS: Enterprise saga implementation
 @DomainService('orderFulfillmentSaga', {
   lifetime: 'scoped',
-  context: 'OrderManagement'
+  context: 'OrderManagement',
 })
 export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
   private readonly steps: SagaStep[] = [
@@ -82,34 +96,34 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
       name: 'VALIDATE_ORDER',
       handler: this.validateOrder.bind(this),
       compensator: null, // No compensation needed
-      retryPolicy: { maxAttempts: 3, baseDelay: 1000 }
+      retryPolicy: { maxAttempts: 3, baseDelay: 1000 },
     },
     {
       name: 'RESERVE_INVENTORY',
       handler: this.reserveInventory.bind(this),
       compensator: this.releaseInventory.bind(this),
       retryPolicy: { maxAttempts: 3, baseDelay: 2000 },
-      timeout: 30000
+      timeout: 30000,
     },
     {
       name: 'PROCESS_PAYMENT',
       handler: this.processPayment.bind(this),
       compensator: this.refundPayment.bind(this),
       retryPolicy: { maxAttempts: 2, baseDelay: 5000 },
-      timeout: 60000
+      timeout: 60000,
     },
     {
       name: 'ARRANGE_SHIPPING',
       handler: this.arrangeShipping.bind(this),
       compensator: this.cancelShipping.bind(this),
-      retryPolicy: { maxAttempts: 3, baseDelay: 3000 }
+      retryPolicy: { maxAttempts: 3, baseDelay: 3000 },
     },
     {
       name: 'SEND_NOTIFICATIONS',
       handler: this.sendNotifications.bind(this),
       compensator: null, // Best effort, no compensation
-      retryPolicy: { maxAttempts: 5, baseDelay: 1000 }
-    }
+      retryPolicy: { maxAttempts: 5, baseDelay: 1000 },
+    },
   ];
 
   constructor(
@@ -122,9 +136,11 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
   }
 
   // ✅ FOCUS: Saga execution with distributed coordination
-  async execute(command: ProcessOrderSagaCommand): Promise<Result<OrderFulfillmentResult, SagaError>> {
+  async execute(
+    command: ProcessOrderSagaCommand
+  ): Promise<Result<OrderFulfillmentResult, SagaError>> {
     const sagaContext = this.createSagaContext(command);
-    
+
     try {
       // Initialize saga state
       const initialState: OrderFulfillmentSagaState = {
@@ -137,49 +153,50 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
         compensatedSteps: [],
         notificationIds: [],
         startedAt: new Date(),
-        status: 'STARTED'
+        status: 'STARTED',
       };
 
       await this.sagaRepository.save(initialState);
 
       // Publish saga started event
-      await this.eventBus.publish(new SagaStartedEvent(
-        command.sagaId,
-        'OrderFulfillmentSaga',
-        command.orderData
-      ));
+      await this.eventBus.publish(
+        new SagaStartedEvent(
+          command.sagaId,
+          'OrderFulfillmentSaga',
+          command.orderData
+        )
+      );
 
       // Execute saga steps
       for (const step of this.steps) {
         const stepResult = await this.executeStep(step, sagaContext);
-        
+
         if (stepResult.isFailure()) {
           // Step failed, initiate compensation
           await this.compensate(sagaContext, step.name);
-          
+
           return Result.fail({
             type: 'SAGA_EXECUTION_FAILED',
             sagaId: command.sagaId,
             failedStep: step.name,
             reason: stepResult.error.message,
-            compensationCompleted: true
+            compensationCompleted: true,
           });
         }
 
         // Update saga state
         await this.updateSagaState(sagaContext.sagaId, {
           currentStep: step.name,
-          completedSteps: [...sagaContext.state.completedSteps, step.name]
+          completedSteps: [...sagaContext.state.completedSteps, step.name],
         });
       }
 
       // Saga completed successfully
       const completedState = await this.completeSaga(sagaContext);
-      
-      await this.eventBus.publish(new SagaCompletedEvent(
-        command.sagaId,
-        completedState
-      ));
+
+      await this.eventBus.publish(
+        new SagaCompletedEvent(command.sagaId, completedState)
+      );
 
       return Result.ok({
         sagaId: command.sagaId,
@@ -187,17 +204,16 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
         status: 'COMPLETED',
         completedSteps: completedState.completedSteps,
         trackingNumber: completedState.shippingTrackingId!,
-        estimatedDelivery: this.calculateDeliveryDate()
+        estimatedDelivery: this.calculateDeliveryDate(),
       });
-
     } catch (error) {
       // Catastrophic failure - attempt compensation
       await this.handleCatastrophicFailure(sagaContext, error as Error);
-      
+
       return Result.fail({
         type: 'SAGA_CATASTROPHIC_FAILURE',
         sagaId: command.sagaId,
-        message: (error as Error).message
+        message: (error as Error).message,
       });
     }
   }
@@ -205,46 +221,54 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
   // ✅ FOCUS: Individual saga steps with business logic
   @CircuitBreaker({ failureThreshold: 5, resetTimeout: 60000 })
   @Retry({ maxAttempts: 3, baseDelay: 2000 })
-  private async validateOrder(context: SagaContext): Promise<Result<void, Error>> {
+  private async validateOrder(
+    context: SagaContext
+  ): Promise<Result<void, Error>> {
     const validationCommand = new ValidateOrderCommand(
       context.state.orderId,
       context.correlationId
     );
 
     const result = await this.commandBus.execute(validationCommand);
-    
+
     if (result.isFailure()) {
-      return Result.fail(new Error(`Order validation failed: ${result.error.message}`));
+      return Result.fail(
+        new Error(`Order validation failed: ${result.error.message}`)
+      );
     }
 
     return Result.ok(undefined);
   }
 
   @Timeout(30000)
-  private async reserveInventory(context: SagaContext): Promise<Result<void, Error>> {
+  private async reserveInventory(
+    context: SagaContext
+  ): Promise<Result<void, Error>> {
     const reservationCommand = new ReserveInventoryCommand(
       context.state.orderId,
       context.orderData.items,
       {
         sagaId: context.sagaId,
         correlationId: context.correlationId,
-        priority: context.orderData.priority
+        priority: context.orderData.priority,
       }
     );
 
     const result = await this.commandBus.execute(reservationCommand);
-    
+
     if (result.isSuccess) {
       // Store reservation ID for potential compensation
       await this.updateSagaState(context.sagaId, {
-        inventoryReservationId: result.value.reservationId
+        inventoryReservationId: result.value.reservationId,
       });
     }
 
     return result;
   }
 
-  private async processPayment(context: SagaContext): Promise<Result<void, Error>> {
+  private async processPayment(
+    context: SagaContext
+  ): Promise<Result<void, Error>> {
     // Check if customer has sufficient credit
     const creditQuery = new CheckCustomerCreditQuery(
       context.state.customerId,
@@ -252,7 +276,7 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
     );
 
     const creditResult = await this.queryBus.execute(creditQuery);
-    
+
     if (creditResult.isFailure() || !creditResult.value.hasCredit) {
       return Result.fail(new Error('Insufficient credit'));
     }
@@ -265,15 +289,15 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
       paymentMethod: context.orderData.paymentMethod,
       sagaContext: {
         sagaId: context.sagaId,
-        correlationId: context.correlationId
-      }
+        correlationId: context.correlationId,
+      },
     });
 
     const paymentResult = await this.commandBus.execute(paymentCommand);
-    
+
     if (paymentResult.isSuccess) {
       await this.updateSagaState(context.sagaId, {
-        paymentTransactionId: paymentResult.value.transactionId
+        paymentTransactionId: paymentResult.value.transactionId,
       });
     }
 
@@ -281,7 +305,9 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
   }
 
   // ✅ FOCUS: Compensation logic for rollback
-  private async releaseInventory(context: CompensationContext): Promise<Result<void, Error>> {
+  private async releaseInventory(
+    context: CompensationContext
+  ): Promise<Result<void, Error>> {
     if (!context.state.inventoryReservationId) {
       return Result.ok(undefined); // Nothing to compensate
     }
@@ -291,15 +317,18 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
       {
         reason: 'SAGA_COMPENSATION',
         sagaId: context.sagaId,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       }
     );
 
     try {
       await this.commandBus.execute(releaseCommand);
-      
+
       await this.updateSagaState(context.sagaId, {
-        compensatedSteps: [...context.state.compensatedSteps, 'RESERVE_INVENTORY']
+        compensatedSteps: [
+          ...context.state.compensatedSteps,
+          'RESERVE_INVENTORY',
+        ],
       });
 
       return Result.ok(undefined);
@@ -310,7 +339,9 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
     }
   }
 
-  private async refundPayment(context: CompensationContext): Promise<Result<void, Error>> {
+  private async refundPayment(
+    context: CompensationContext
+  ): Promise<Result<void, Error>> {
     if (!context.state.paymentTransactionId) {
       return Result.ok(undefined);
     }
@@ -320,30 +351,38 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
       {
         reason: 'ORDER_FULFILLMENT_FAILED',
         sagaId: context.sagaId,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       }
     );
 
     const refundResult = await this.commandBus.execute(refundCommand);
-    
+
     if (refundResult.isSuccess) {
       await this.updateSagaState(context.sagaId, {
-        compensatedSteps: [...context.state.compensatedSteps, 'PROCESS_PAYMENT']
+        compensatedSteps: [
+          ...context.state.compensatedSteps,
+          'PROCESS_PAYMENT',
+        ],
       });
 
       // Notify customer about refund
-      await this.eventBus.publish(new PaymentRefundedEvent(
-        context.state.orderId,
-        context.state.paymentTransactionId,
-        refundResult.value.refundId
-      ));
+      await this.eventBus.publish(
+        new PaymentRefundedEvent(
+          context.state.orderId,
+          context.state.paymentTransactionId,
+          refundResult.value.refundId
+        )
+      );
     }
 
     return refundResult;
   }
 
   // ✅ FOCUS: Compensation orchestration
-  private async compensate(context: SagaContext, failedStep: string): Promise<void> {
+  private async compensate(
+    context: SagaContext,
+    failedStep: string
+  ): Promise<void> {
     const stepsToCompensate = this.getCompensationSteps(
       context.state.completedSteps,
       failedStep
@@ -354,7 +393,7 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
         try {
           await step.compensator({
             ...context,
-            compensationReason: failedStep
+            compensationReason: failedStep,
           });
         } catch (error) {
           // Log but continue compensation
@@ -365,11 +404,14 @@ export class OrderFulfillmentSaga extends BaseSaga<OrderFulfillmentSagaState> {
 
     await this.updateSagaState(context.sagaId, {
       status: 'COMPENSATED',
-      completedAt: new Date()
+      completedAt: new Date(),
     });
   }
 
-  private getCompensationSteps(completedSteps: string[], failedStep: string): SagaStep[] {
+  private getCompensationSteps(
+    completedSteps: string[],
+    failedStep: string
+  ): SagaStep[] {
     // Return steps in reverse order for compensation
     return this.steps
       .filter(step => completedSteps.includes(step.name))
@@ -386,7 +428,9 @@ export class ProcessOrderSagaHandler {
     private readonly orderFulfillmentSaga: OrderFulfillmentSaga
   ) {}
 
-  async execute(command: ProcessOrderSagaCommand): Promise<Result<OrderFulfillmentResult, SagaError>> {
+  async execute(
+    command: ProcessOrderSagaCommand
+  ): Promise<Result<OrderFulfillmentResult, SagaError>> {
     // Register saga with orchestrator
     await this.sagaOrchestrator.register(
       command.sagaId,
@@ -394,7 +438,7 @@ export class ProcessOrderSagaHandler {
       {
         timeout: 300000, // 5 minutes
         maxRetries: 1,
-        isolationLevel: 'SERIALIZABLE'
+        isolationLevel: 'SERIALIZABLE',
       }
     );
 
@@ -420,9 +464,11 @@ export class GetSagaStatusHandler {
     private readonly eventStore: IEventStore
   ) {}
 
-  async execute(query: GetSagaStatusQuery): Promise<Result<SagaStatusResult, Error>> {
+  async execute(
+    query: GetSagaStatusQuery
+  ): Promise<Result<SagaStatusResult, Error>> {
     const saga = await this.sagaRepository.findById(query.sagaId);
-    
+
     if (!saga) {
       return Result.fail(new Error(`Saga ${query.sagaId} not found`));
     }
@@ -437,18 +483,20 @@ export class GetSagaStatusHandler {
       compensatedSteps: saga.compensatedSteps,
       startedAt: saga.startedAt,
       completedAt: saga.completedAt,
-      duration: saga.completedAt 
-        ? saga.completedAt.getTime() - saga.startedAt.getTime() 
-        : Date.now() - saga.startedAt.getTime()
+      duration: saga.completedAt
+        ? saga.completedAt.getTime() - saga.startedAt.getTime()
+        : Date.now() - saga.startedAt.getTime(),
     };
 
     if (query.includeHistory) {
       // Fetch saga events from event store
-      const events = await this.eventStore.getEventsByCorrelationId(saga.sagaId);
+      const events = await this.eventStore.getEventsByCorrelationId(
+        saga.sagaId
+      );
       result.history = events.map(e => ({
         timestamp: e.occurredAt,
         eventType: e.eventType,
-        data: e.payload
+        data: e.payload,
       }));
     }
 
@@ -471,7 +519,7 @@ export class SagaMonitoringService {
 
       if (result.isSuccess) {
         const status = result.value;
-        
+
         // Record metrics
         await this.metricsCollector.recordMetrics({
           operation: 'SagaExecution',
@@ -480,8 +528,8 @@ export class SagaMonitoringService {
           duration: status.duration,
           completedSteps: status.completedSteps.length,
           tags: {
-            sagaId: status.sagaId
-          }
+            sagaId: status.sagaId,
+          },
         });
 
         // Check for alerts
@@ -490,7 +538,7 @@ export class SagaMonitoringService {
             severity: 'WARNING',
             title: 'Long-running saga detected',
             message: `Saga ${sagaId} has been running for ${status.duration}ms`,
-            sagaId
+            sagaId,
           });
         }
 
@@ -506,7 +554,8 @@ export class SagaMonitoringService {
 
 ## Key Features
 
-- **Saga Orchestration**: Complete distributed transaction management with compensation
+- **Saga Orchestration**: Complete distributed transaction management with
+  compensation
 - **Step Coordination**: Sequential execution with proper state management
 - **Compensation Logic**: Automatic rollback of completed steps on failure
 - **Resilience Patterns**: Circuit breakers, retries, and timeouts for each step
@@ -519,11 +568,7 @@ export class SagaMonitoringService {
 
 ```typescript
 // Initialize saga infrastructure
-const sagaOrchestrator = new SagaOrchestrator(
-  sagaRepository,
-  eventBus,
-  logger
-);
+const sagaOrchestrator = new SagaOrchestrator(sagaRepository, eventBus, logger);
 
 const commandBus = new CommandBus();
 commandBus.registerHandler(ProcessOrderSagaCommand, ProcessOrderSagaHandler);
@@ -533,31 +578,34 @@ const orderData: OrderData = {
   orderId: 'order-123',
   customerId: 'customer-456',
   items: [
-    { productId: 'prod-1', quantity: 2, price: 50.00 },
-    { productId: 'prod-2', quantity: 1, price: 100.00 }
+    { productId: 'prod-1', quantity: 2, price: 50.0 },
+    { productId: 'prod-2', quantity: 1, price: 100.0 },
   ],
-  totalAmount: 200.00,
+  totalAmount: 200.0,
   paymentMethod: 'CREDIT_CARD',
-  shippingAddress: { /* ... */ },
-  priority: 'STANDARD'
+  shippingAddress: {
+    /* ... */
+  },
+  priority: 'STANDARD',
 };
 
-const sagaCommand = new ProcessOrderSagaCommand(
-  orderData,
-  {
-    correlationId: 'correlation-123',
-    initiatedBy: 'user-789',
-    source: 'WEB_PORTAL'
-  }
-);
+const sagaCommand = new ProcessOrderSagaCommand(orderData, {
+  correlationId: 'correlation-123',
+  initiatedBy: 'user-789',
+  source: 'WEB_PORTAL',
+});
 
 const result = await commandBus.execute(sagaCommand);
 
 if (result.isSuccess) {
   console.log('Order fulfilled:', result.value);
-  
+
   // Start monitoring
-  const monitoringService = new SagaMonitoringService(queryBus, metrics, alerting);
+  const monitoringService = new SagaMonitoringService(
+    queryBus,
+    metrics,
+    alerting
+  );
   await monitoringService.monitorSaga(result.value.sagaId);
 } else {
   console.error('Order fulfillment failed:', result.error);

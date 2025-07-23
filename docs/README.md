@@ -54,7 +54,8 @@ Our JSDoc includes special tags optimized for AI/LLM consumption:
 Each package includes:
 
 - ✅ **Comprehensive README** with usage examples and API reference
-- ✅ **JSDoc documentation** with LLM-optimized tags (@llm-summary, @llm-domain, @llm-complexity)
+- ✅ **JSDoc documentation** with LLM-optimized tags (@llm-summary, @llm-domain,
+  @llm-complexity)
 - ✅ **Multiple examples** per public API (basic, intermediate, advanced)
 - ✅ **Framework integration** examples (NestJS, Express, etc.)
 - ✅ **Parameter documentation** with types and constraints
@@ -109,18 +110,25 @@ Each package includes:
 
 ### Documentation Generation Process
 
-1. **CLI-Based Generation**: Use `pnpm cli examples generate <package>` for automated documentation
-2. **Complexity Levels**: Generate basic, intermediate, and advanced examples automatically  
-3. **Framework Integration**: Generate framework-specific examples (NestJS, Express, etc.)
-4. **Validation**: Automated compliance checking with `pnpm cli examples validate`
+1. **CLI-Based Generation**: Use `pnpm cli examples generate <package>` for
+   automated documentation
+2. **Complexity Levels**: Generate basic, intermediate, and advanced examples
+   automatically
+3. **Framework Integration**: Generate framework-specific examples (NestJS,
+   Express, etc.)
+4. **Validation**: Automated compliance checking with
+   `pnpm cli examples validate`
 5. **Publication**: Generate HTML documentation with `pnpm jsdoc:publish`
 
 ### Available Tools and Scripts
 
-- **CLI Documentation**: `pnpm cli examples` - Modern documentation generation system
-- **JSDoc Tools**: `jsdoc-generator.js`, `jsdoc-validator.js`, `jsdoc-publisher.js`
+- **CLI Documentation**: `pnpm cli examples` - Modern documentation generation
+  system
+- **JSDoc Tools**: `jsdoc-generator.js`, `jsdoc-validator.js`,
+  `jsdoc-publisher.js`
 - **Quality Gates**: Automated validation in CI/CD pipeline
-- **Bundle Generation**: `pnpm cli examples bundle` for multi-package documentation
+- **Bundle Generation**: `pnpm cli examples bundle` for multi-package
+  documentation
 
 ### Quality Assurance
 
@@ -135,16 +143,21 @@ See `docs/adr/` for architectural decisions affecting the library design.
 
 ## Contributing to Documentation
 
-1. **Use CLI tools**: `pnpm cli examples generate <package>` for automated documentation generation
-2. **Follow complexity levels**: Create basic, intermediate, and advanced examples  
-3. **Add framework examples**: Include NestJS, Express, or other framework integrations
+1. **Use CLI tools**: `pnpm cli examples generate <package>` for automated
+   documentation generation
+2. **Follow complexity levels**: Create basic, intermediate, and advanced
+   examples
+3. **Add framework examples**: Include NestJS, Express, or other framework
+   integrations
 4. **Include LLM tags**: Use @llm-summary, @llm-domain, @llm-complexity tags
-5. **Validate before commit**: Run `pnpm cli examples validate --fix` to ensure compliance
-6. **Update package READMEs**: Keep package documentation current with API changes
+5. **Validate before commit**: Run `pnpm cli examples validate --fix` to ensure
+   compliance
+6. **Update package READMEs**: Keep package documentation current with API
+   changes
 
 ## Documentation Status
 
-- **Total Packages**: 23 packages  
+- **Total Packages**: 23 packages
 - **TypeScript Files**: 905 files
 - **Package READMEs**: 23/23 (100% coverage)
 - **API Documentation**: JSDoc with LLM-optimized tags
@@ -156,7 +169,7 @@ See `docs/adr/` for architectural decisions affecting the library design.
 - [ ] Interactive API explorer with live code examples
 - [ ] Code playground integration for testing examples
 - [ ] Advanced CLI features for documentation automation
-- [ ] Performance benchmarks and optimization guides  
+- [ ] Performance benchmarks and optimization guides
 - [ ] Enterprise deployment and scaling guides
 - [ ] Migration guides for major version updates
 

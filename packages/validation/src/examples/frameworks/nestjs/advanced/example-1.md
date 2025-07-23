@@ -3,28 +3,28 @@
 **Package**: @vytches-ddd/validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
-**Focus**: Enterprise-scale validation orchestration with global coordination and AI enhancement
+**Focus**: Enterprise-scale validation orchestration with global coordination
+and AI enhancement
 
 ## Overview
 
-This example demonstrates advanced enterprise validation orchestration in NestJS using VytchesDDD DI for global coordination, AI-powered validation enhancement, and sophisticated enterprise-grade validation patterns with automatic scaling and fault tolerance.
+This example demonstrates advanced enterprise validation orchestration in NestJS
+using VytchesDDD DI for global coordination, AI-powered validation enhancement,
+and sophisticated enterprise-grade validation patterns with automatic scaling
+and fault tolerance.
 
 ## Implementation
 
 ```typescript
 // enterprise-validation-orchestrator.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  DomainService, 
-  ServiceLifetime, 
-  VytchesDDD 
-} from '@vytches-ddd/di';
-import { 
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import {
   EnterpriseValidationOrchestrator,
   AIEnhancedValidationSpecification,
   GlobalDataQualityMonitor,
   ValidationMetrics,
-  GlobalValidationResult 
+  GlobalValidationResult,
 } from '@vytches-ddd/validation';
 import { User, ValidationContext, EnterpriseValidationRequest } from './types'; // From your application
 
@@ -34,15 +34,15 @@ import { User, ValidationContext, EnterpriseValidationRequest } from './types'; 
   lifetime: ServiceLifetime.Singleton,
   context: 'EnterpriseValidation',
   dependencies: [
-    'globalEventBus', 
-    'policyRegistry', 
+    'globalEventBus',
+    'policyRegistry',
     'aiValidationEngine',
     'globalStateManager',
-    'qualityMonitor'
+    'qualityMonitor',
   ],
   timeout: 60000,
   middleware: ['logging', 'resilience', 'metrics'],
-  autoRegister: true
+  autoRegister: true,
 })
 export class EnterpriseValidationOrchestratorService {
   private orchestrator: EnterpriseValidationOrchestrator;
@@ -58,7 +58,11 @@ export class EnterpriseValidationOrchestratorService {
   async orchestrateGlobalValidation<T>(
     entities: T[],
     validationDomain: string,
-    coordinationStrategy: 'adaptive' | 'consensus' | 'majority' | 'strict_all' = 'adaptive'
+    coordinationStrategy:
+      | 'adaptive'
+      | 'consensus'
+      | 'majority'
+      | 'strict_all' = 'adaptive'
   ): Promise<GlobalValidationResult> {
     return await this.orchestrator.orchestrateGlobalValidation(
       entities,
@@ -71,14 +75,19 @@ export class EnterpriseValidationOrchestratorService {
     entity: T,
     enhancementLevel: 'basic' | 'advanced' | 'enterprise' = 'enterprise'
   ): Promise<ValidationResult> {
-    return await this.aiValidator.validateWithEnhancement(entity, enhancementLevel);
+    return await this.aiValidator.validateWithEnhancement(
+      entity,
+      enhancementLevel
+    );
   }
 
   async monitorGlobalQuality(): Promise<GlobalQualityMetrics> {
     return await this.qualityMonitor.getGlobalQualitySnapshot();
   }
 
-  async getValidationMetrics(timeRange?: TimeRange): Promise<EnterpriseValidationMetrics> {
+  async getValidationMetrics(
+    timeRange?: TimeRange
+  ): Promise<EnterpriseValidationMetrics> {
     return await this.metrics.getEnterpriseMetrics(timeRange);
   }
 
@@ -118,9 +127,10 @@ export class EnterpriseValidationBridgeService {
 
   constructor() {
     // ⭐ FOCUS: Bridge pattern with enterprise VytchesDDD DI
-    this.orchestratorService = VytchesDDD.resolve<EnterpriseValidationOrchestratorService>(
-      'enterpriseValidationOrchestrator'
-    );
+    this.orchestratorService =
+      VytchesDDD.resolve<EnterpriseValidationOrchestratorService>(
+        'enterpriseValidationOrchestrator'
+      );
   }
 
   async processEnterpriseValidation(
@@ -128,24 +138,31 @@ export class EnterpriseValidationBridgeService {
   ): Promise<EnterpriseValidationResponse> {
     try {
       // Global orchestrated validation
-      const orchestrationResult = await this.orchestratorService.orchestrateGlobalValidation(
-        request.entities,
-        request.domain,
-        request.coordinationStrategy || 'adaptive'
-      );
+      const orchestrationResult =
+        await this.orchestratorService.orchestrateGlobalValidation(
+          request.entities,
+          request.domain,
+          request.coordinationStrategy || 'adaptive'
+        );
 
       // AI-enhanced validation for critical entities
       const aiEnhancedResults = await Promise.all(
-        request.criticalEntities.map(entity => 
-          this.orchestratorService.validateWithAIEnhancement(entity, 'enterprise')
+        request.criticalEntities.map(entity =>
+          this.orchestratorService.validateWithAIEnhancement(
+            entity,
+            'enterprise'
+          )
         )
       );
 
       // Global quality monitoring
-      const qualitySnapshot = await this.orchestratorService.monitorGlobalQuality();
+      const qualitySnapshot =
+        await this.orchestratorService.monitorGlobalQuality();
 
       // Validation metrics
-      const metrics = await this.orchestratorService.getValidationMetrics(request.timeRange);
+      const metrics = await this.orchestratorService.getValidationMetrics(
+        request.timeRange
+      );
 
       return {
         success: orchestrationResult.isValid,
@@ -159,11 +176,15 @@ export class EnterpriseValidationBridgeService {
           aiEnhancedResults,
           qualitySnapshot
         ),
-        nextActions: await this.determineNextActions(orchestrationResult, request)
+        nextActions: await this.determineNextActions(
+          orchestrationResult,
+          request
+        ),
       };
-
     } catch (error) {
-      throw new Error(`Enterprise validation orchestration failed: ${error.message}`);
+      throw new Error(
+        `Enterprise validation orchestration failed: ${error.message}`
+      );
     }
   }
 
@@ -182,19 +203,24 @@ export class EnterpriseValidationBridgeService {
       overallQuality: aggregatedQuality,
       entityResults: qualityResults,
       globalTrends,
-      qualityRecommendations: await this.generateQualityRecommendations(aggregatedQuality),
-      riskAssessment: await this.assessQualityRisks(aggregatedQuality, globalTrends)
+      qualityRecommendations:
+        await this.generateQualityRecommendations(aggregatedQuality),
+      riskAssessment: await this.assessQualityRisks(
+        aggregatedQuality,
+        globalTrends
+      ),
     };
   }
 
   private async assessEntityQuality(
-    entity: any, 
+    entity: any,
     assessmentLevel: string
   ): Promise<EntityQualityResult> {
-    const aiValidation = await this.orchestratorService.validateWithAIEnhancement(
-      entity, 
-      assessmentLevel as any
-    );
+    const aiValidation =
+      await this.orchestratorService.validateWithAIEnhancement(
+        entity,
+        assessmentLevel as any
+      );
 
     return {
       entityId: entity.id || 'unknown',
@@ -202,34 +228,44 @@ export class EnterpriseValidationBridgeService {
       aiConfidence: aiValidation.metadata?.prediction?.confidence || 0,
       validationResult: aiValidation,
       riskFactors: aiValidation.metadata?.riskFactors || [],
-      recommendations: aiValidation.metadata?.recommendations || []
+      recommendations: aiValidation.metadata?.recommendations || [],
     };
   }
 
-  private aggregateQualityResults(results: EntityQualityResult[]): AggregatedQualityMetrics {
+  private aggregateQualityResults(
+    results: EntityQualityResult[]
+  ): AggregatedQualityMetrics {
     const totalEntities = results.length;
-    const averageQuality = results.reduce((sum, r) => sum + r.qualityScore, 0) / totalEntities;
-    const averageConfidence = results.reduce((sum, r) => sum + r.aiConfidence, 0) / totalEntities;
-    
+    const averageQuality =
+      results.reduce((sum, r) => sum + r.qualityScore, 0) / totalEntities;
+    const averageConfidence =
+      results.reduce((sum, r) => sum + r.aiConfidence, 0) / totalEntities;
+
     return {
       totalEntities,
       averageQualityScore: averageQuality,
       averageAiConfidence: averageConfidence,
       highQualityEntities: results.filter(r => r.qualityScore >= 0.9).length,
       lowQualityEntities: results.filter(r => r.qualityScore < 0.7).length,
-      overallGrade: this.calculateOverallGrade(averageQuality, averageConfidence)
+      overallGrade: this.calculateOverallGrade(
+        averageQuality,
+        averageConfidence
+      ),
     };
   }
 
-  private calculateOverallGrade(qualityScore: number, confidence: number): string {
-    const combinedScore = (qualityScore * 0.7) + (confidence * 0.3);
-    
+  private calculateOverallGrade(
+    qualityScore: number,
+    confidence: number
+  ): string {
+    const combinedScore = qualityScore * 0.7 + confidence * 0.3;
+
     if (combinedScore >= 0.95) return 'A+';
-    if (combinedScore >= 0.90) return 'A';
+    if (combinedScore >= 0.9) return 'A';
     if (combinedScore >= 0.85) return 'B+';
-    if (combinedScore >= 0.80) return 'B';
+    if (combinedScore >= 0.8) return 'B';
     if (combinedScore >= 0.75) return 'C+';
-    if (combinedScore >= 0.70) return 'C';
+    if (combinedScore >= 0.7) return 'C';
     return 'D';
   }
 
@@ -241,19 +277,23 @@ export class EnterpriseValidationBridgeService {
     const recommendations: string[] = [];
 
     if (orchestration.consensusResult.globalConsensus < 0.9) {
-      recommendations.push('Consider increasing validation consensus threshold');
+      recommendations.push(
+        'Consider increasing validation consensus threshold'
+      );
     }
 
     if (quality.overallQuality < 0.95) {
       recommendations.push('Implement additional data quality measures');
     }
 
-    const lowConfidenceAI = aiResults.filter(r => 
-      (r.metadata?.prediction?.confidence || 0) < 0.8
+    const lowConfidenceAI = aiResults.filter(
+      r => (r.metadata?.prediction?.confidence || 0) < 0.8
     ).length;
 
     if (lowConfidenceAI > aiResults.length * 0.2) {
-      recommendations.push('Review AI model training data for better predictions');
+      recommendations.push(
+        'Review AI model training data for better predictions'
+      );
     }
 
     return recommendations;
@@ -287,11 +327,16 @@ export class EnterpriseValidationBridgeService {
     return {
       riskLevel: quality.averageQualityScore < 0.8 ? 'high' : 'low',
       riskFactors: [
-        ...(quality.lowQualityEntities > 0 ? ['Low quality entities detected'] : []),
-        ...(trends.degradationTrend > 0.05 ? ['Quality degradation trend'] : [])
+        ...(quality.lowQualityEntities > 0
+          ? ['Low quality entities detected']
+          : []),
+        ...(trends.degradationTrend > 0.05
+          ? ['Quality degradation trend']
+          : []),
       ],
       mitigation: 'Implement automated quality improvement workflows',
-      timeToAction: quality.averageQualityScore < 0.7 ? 'immediate' : 'within 24 hours'
+      timeToAction:
+        quality.averageQualityScore < 0.7 ? 'immediate' : 'within 24 hours',
     };
   }
 
@@ -318,14 +363,14 @@ export class EnterpriseValidationBridgeService {
 }
 
 // enterprise-validation.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Body, 
+import {
+  Controller,
+  Post,
+  Body,
   BadRequestException,
   HttpStatus,
   HttpCode,
-  Query 
+  Query,
 } from '@nestjs/common';
 import { EnterpriseValidationBridgeService } from './enterprise-validation-bridge.service';
 
@@ -340,14 +385,17 @@ export class EnterpriseValidationController {
   async orchestrateValidation(@Body() request: EnterpriseValidationRequest) {
     try {
       // ✅ FOCUS: Enterprise orchestration with global coordination
-      const result = await this.enterpriseValidationService.processEnterpriseValidation(request);
+      const result =
+        await this.enterpriseValidationService.processEnterpriseValidation(
+          request
+        );
 
       if (!result.success) {
         throw new BadRequestException({
           message: 'Enterprise validation orchestration failed',
           orchestrationResult: result.orchestrationResult,
           aiEnhancedResults: result.aiEnhancedResults,
-          globalConsensus: result.globalConsensus
+          globalConsensus: result.globalConsensus,
         });
       }
 
@@ -358,21 +406,21 @@ export class EnterpriseValidationController {
           globalConsensus: result.globalConsensus.globalConsensus,
           regionalResults: result.orchestrationResult.regionalResults.length,
           aiEnhancementApplied: result.aiEnhancedResults.length,
-          qualityScore: result.qualitySnapshot.overallQuality
+          qualityScore: result.qualitySnapshot.overallQuality,
         },
         recommendations: result.recommendations,
         nextActions: result.nextActions,
         metrics: {
           totalValidated: request.entities.length,
           processingTime: result.metrics.averageProcessingTime,
-          globalValidationScore: result.orchestrationResult.consensusResult.confidenceScore
-        }
+          globalValidationScore:
+            result.orchestrationResult.consensusResult.confidenceScore,
+        },
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Enterprise validation orchestration failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -381,13 +429,15 @@ export class EnterpriseValidationController {
   @HttpCode(HttpStatus.OK)
   async assessGlobalQuality(
     @Body() entities: any[],
-    @Query('level') assessmentLevel: 'standard' | 'comprehensive' | 'enterprise' = 'enterprise'
+    @Query('level')
+    assessmentLevel: 'standard' | 'comprehensive' | 'enterprise' = 'enterprise'
   ) {
     try {
-      const result = await this.enterpriseValidationService.processGlobalQualityAssessment(
-        entities,
-        assessmentLevel
-      );
+      const result =
+        await this.enterpriseValidationService.processGlobalQualityAssessment(
+          entities,
+          assessmentLevel
+        );
 
       return {
         success: true,
@@ -397,12 +447,12 @@ export class EnterpriseValidationController {
           averageQuality: result.overallQuality.averageQualityScore,
           highQualityCount: result.overallQuality.highQualityEntities,
           lowQualityCount: result.overallQuality.lowQualityEntities,
-          totalAssessed: result.overallQuality.totalEntities
+          totalAssessed: result.overallQuality.totalEntities,
         },
         globalTrends: {
           currentQuality: result.globalTrends.overallQuality,
           qualityTrend: result.globalTrends.trend,
-          riskLevel: result.riskAssessment.riskLevel
+          riskLevel: result.riskAssessment.riskLevel,
         },
         recommendations: result.qualityRecommendations,
         riskAssessment: result.riskAssessment,
@@ -411,25 +461,24 @@ export class EnterpriseValidationController {
           qualityScore: r.qualityScore,
           grade: this.calculateEntityGrade(r.qualityScore),
           mainIssues: r.riskFactors.slice(0, 3),
-          topRecommendations: r.recommendations.slice(0, 2)
-        }))
+          topRecommendations: r.recommendations.slice(0, 2),
+        })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Global quality assessment failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   private calculateEntityGrade(score: number): string {
     if (score >= 0.95) return 'A+';
-    if (score >= 0.90) return 'A';
+    if (score >= 0.9) return 'A';
     if (score >= 0.85) return 'B+';
-    if (score >= 0.80) return 'B';
+    if (score >= 0.8) return 'B';
     if (score >= 0.75) return 'C+';
-    if (score >= 0.70) return 'C';
+    if (score >= 0.7) return 'C';
     return 'D';
   }
 }
@@ -443,7 +492,7 @@ import { VytchesDDD } from '@vytches-ddd/di';
 @Module({
   controllers: [EnterpriseValidationController],
   providers: [EnterpriseValidationBridgeService],
-  exports: [EnterpriseValidationBridgeService]
+  exports: [EnterpriseValidationBridgeService],
 })
 export class EnterpriseValidationModule implements OnModuleInit {
   async onModuleInit() {
@@ -457,13 +506,13 @@ export class EnterpriseValidationModule implements OnModuleInit {
         qualityMonitoring: true,
         advancedMetrics: true,
         globalCoordination: true,
-        enterpriseResilience: true
+        enterpriseResilience: true,
       },
       scaling: {
         autoScaling: true,
         maxConcurrentValidations: 10000,
-        distributedProcessing: true
-      }
+        distributedProcessing: true,
+      },
     });
   }
 }
@@ -471,12 +520,17 @@ export class EnterpriseValidationModule implements OnModuleInit {
 
 ## Key Points
 
-- **Enterprise Orchestration**: Global validation coordination across multiple regions and systems
-- **VytchesDDD DI Integration**: Advanced dependency injection with enterprise service management
-- **AI-Enhanced Validation**: Machine learning-powered validation with adaptive thresholds
+- **Enterprise Orchestration**: Global validation coordination across multiple
+  regions and systems
+- **VytchesDDD DI Integration**: Advanced dependency injection with enterprise
+  service management
+- **AI-Enhanced Validation**: Machine learning-powered validation with adaptive
+  thresholds
 - **Global Quality Monitoring**: Real-time quality assessment and trend analysis
-- **Advanced Metrics**: Comprehensive validation metrics and performance monitoring
-- **Bridge Pattern**: Clean separation between NestJS and enterprise business logic
+- **Advanced Metrics**: Comprehensive validation metrics and performance
+  monitoring
+- **Bridge Pattern**: Clean separation between NestJS and enterprise business
+  logic
 
 ## Usage Examples
 
@@ -518,7 +572,7 @@ curl -X POST http://localhost:3000/enterprise/validation/quality-assessment?leve
       "data": { "completeness": 0.95, "accuracy": 0.98 }
     },
     {
-      "id": "entity-002", 
+      "id": "entity-002",
       "type": "transaction",
       "data": { "completeness": 0.92, "accuracy": 0.96 }
     }
@@ -527,11 +581,15 @@ curl -X POST http://localhost:3000/enterprise/validation/quality-assessment?leve
 
 ## Best Practices
 
-1. **Initialize VytchesDDD First**: Always configure enterprise features before NestJS startup
+1. **Initialize VytchesDDD First**: Always configure enterprise features before
+   NestJS startup
 2. **Use Bridge Pattern**: Keep NestJS controllers as thin orchestration layers
-3. **Leverage Enterprise Features**: Utilize global coordination, AI enhancement, and quality monitoring
-4. **Monitor Performance**: Track validation metrics and optimize for enterprise scale
-5. **Handle Failures Gracefully**: Implement comprehensive error handling for enterprise scenarios
+3. **Leverage Enterprise Features**: Utilize global coordination, AI
+   enhancement, and quality monitoring
+4. **Monitor Performance**: Track validation metrics and optimize for enterprise
+   scale
+5. **Handle Failures Gracefully**: Implement comprehensive error handling for
+   enterprise scenarios
 
 ## Next Steps
 

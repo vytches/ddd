@@ -1,13 +1,14 @@
 # Basic Value Objects - Implementation Overview
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Focus**: Implementation patterns and best practices
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Focus**: Implementation patterns and best practices
 
 ## Overview
 
-This document provides comprehensive guidance for implementing basic value objects using the @vytches-ddd/value-objects package. It covers fundamental patterns, common implementations, and best practices for creating robust value objects.
+This document provides comprehensive guidance for implementing basic value
+objects using the @vytches-ddd/value-objects package. It covers fundamental
+patterns, common implementations, and best practices for creating robust value
+objects.
 
 ## Core Implementation Pattern
 
@@ -96,7 +97,7 @@ export class Temperature extends ValueObject<TemperatureData> {
   // ✅ Generic factory with validation
   private static create(value: number, unit: TemperatureUnit): Temperature {
     const data: TemperatureData = { value, unit };
-    
+
     if (!Temperature.isValidTemperature(data)) {
       throw new Error(`Invalid temperature: ${value}°${unit}`);
     }
@@ -109,9 +110,9 @@ export class Temperature extends ValueObject<TemperatureData> {
     const absoluteZero = {
       celsius: -273.15,
       fahrenheit: -459.67,
-      kelvin: 0
+      kelvin: 0,
     };
-    
+
     return data.value >= absoluteZero[data.unit];
   }
 }
@@ -131,7 +132,7 @@ export class Percentage extends ValueObject<PercentageData> {
     if (value < 0 || value > 100) {
       throw new Error('Percentage must be between 0 and 100');
     }
-    
+
     return new Percentage({ value });
   }
 
@@ -172,11 +173,11 @@ export class Percentage extends ValueObject<PercentageData> {
 Implement thorough validation with clear error messages:
 
 ```typescript
-import { 
-  validateRequired, 
-  validateStringLength, 
+import {
+  validateRequired,
+  validateStringLength,
   validateNumericRange,
-  combineValidationResults 
+  combineValidationResults,
 } from '../shared';
 
 export class ProductCode extends ValueObject<ProductCodeData> {
@@ -201,15 +202,15 @@ export class ProductCode extends ValueObject<ProductCodeData> {
     const validations = [
       // Required field validation
       validateRequired(data.code, 'product code'),
-      
+
       // Length validation
       validateStringLength(data.code, 3, 20, 'product code'),
-      
+
       // Format validation
       ProductCode.validateFormat(data.code),
-      
+
       // Business rule validation
-      ProductCode.validateBusinessRules(data.code)
+      ProductCode.validateBusinessRules(data.code),
     ];
 
     return combineValidationResults(...validations);
@@ -218,18 +219,22 @@ export class ProductCode extends ValueObject<ProductCodeData> {
   private static validateFormat(code: string): ValueObjectValidationResult {
     // Must contain only alphanumeric characters and hyphens
     const formatRegex = /^[A-Z0-9-]+$/;
-    
+
     if (!formatRegex.test(code)) {
       return {
         isValid: false,
-        errors: ['Product code must contain only letters, numbers, and hyphens']
+        errors: [
+          'Product code must contain only letters, numbers, and hyphens',
+        ],
       };
     }
 
     return { isValid: true, errors: [] };
   }
 
-  private static validateBusinessRules(code: string): ValueObjectValidationResult {
+  private static validateBusinessRules(
+    code: string
+  ): ValueObjectValidationResult {
     const errors: string[] = [];
 
     // Cannot start or end with hyphen
@@ -247,7 +252,7 @@ export class ProductCode extends ValueObject<ProductCodeData> {
       errors.push('Product code must contain at least one letter');
     }
 
-    return errors.length > 0 
+    return errors.length > 0
       ? { isValid: false, errors }
       : { isValid: true, errors: [] };
   }
@@ -285,7 +290,9 @@ Use TypeScript effectively for type safety:
 
 ```typescript
 // ✅ Generic identifier value object
-export class Identifier<T extends string = string> extends ValueObject<{ value: T }> {
+export class Identifier<T extends string = string> extends ValueObject<{
+  value: T;
+}> {
   private constructor(data: { value: T }) {
     super(data);
   }
@@ -324,11 +331,11 @@ export const UserId = {
     }
     return Identifier.create(value as `user-${string}`);
   },
-  
+
   generate: (): UserId => {
     const id = `user-${Math.random().toString(36).substring(2, 15)}`;
     return Identifier.create(id as `user-${string}`);
-  }
+  },
 };
 ```
 
@@ -361,31 +368,31 @@ export class Duration extends ValueObject<DurationData> {
 
   toHumanReadable(): string {
     const totalMinutes = this.data.totalMinutes;
-    
+
     if (totalMinutes < 60) {
       return `${totalMinutes} minute${totalMinutes !== 1 ? 's' : ''}`;
     }
-    
+
     if (totalMinutes < 24 * 60) {
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
-      
+
       let result = `${hours} hour${hours !== 1 ? 's' : ''}`;
       if (minutes > 0) {
         result += ` ${minutes} minute${minutes !== 1 ? 's' : ''}`;
       }
-      
+
       return result;
     }
-    
+
     const days = Math.floor(totalMinutes / (24 * 60));
     const remainingHours = Math.floor((totalMinutes % (24 * 60)) / 60);
-    
+
     let result = `${days} day${days !== 1 ? 's' : ''}`;
     if (remainingHours > 0) {
       result += ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
     }
-    
+
     return result;
   }
 
@@ -393,20 +400,20 @@ export class Duration extends ValueObject<DurationData> {
     const totalMinutes = this.data.totalMinutes;
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    
+
     return `PT${hours}H${minutes}M`;
   }
 
   toCompactString(): string {
     const totalMinutes = this.data.totalMinutes;
-    
+
     if (totalMinutes < 60) {
       return `${totalMinutes}m`;
     }
-    
+
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    
+
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
 
@@ -432,12 +439,15 @@ export class Duration extends ValueObject<DurationData> {
 ```typescript
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 
-export class TaskPriority extends ValueObject<{ level: Priority; numericValue: number }> {
+export class TaskPriority extends ValueObject<{
+  level: Priority;
+  numericValue: number;
+}> {
   private static readonly PRIORITY_VALUES: Record<Priority, number> = {
     low: 1,
-    medium: 2, 
+    medium: 2,
     high: 3,
-    critical: 4
+    critical: 4,
   };
 
   private constructor(data: { level: Priority; numericValue: number }) {
@@ -462,16 +472,20 @@ export class TaskPriority extends ValueObject<{ level: Priority; numericValue: n
 
   static fromString(priority: string): TaskPriority {
     const normalizedPriority = priority.toLowerCase() as Priority;
-    
+
     if (!TaskPriority.PRIORITY_VALUES[normalizedPriority]) {
       throw new Error(`Invalid priority: ${priority}`);
     }
 
     switch (normalizedPriority) {
-      case 'low': return TaskPriority.low();
-      case 'medium': return TaskPriority.medium();
-      case 'high': return TaskPriority.high();
-      case 'critical': return TaskPriority.critical();
+      case 'low':
+        return TaskPriority.low();
+      case 'medium':
+        return TaskPriority.medium();
+      case 'high':
+        return TaskPriority.high();
+      case 'critical':
+        return TaskPriority.critical();
     }
   }
 
@@ -509,7 +523,7 @@ export class FullName extends ValueObject<PersonNameData> {
       lastName: lastName.trim(),
       middleName: middleName?.trim(),
       title: title?.trim(),
-      suffix: suffix?.trim()
+      suffix: suffix?.trim(),
     };
 
     if (!data.firstName || !data.lastName) {
@@ -520,7 +534,9 @@ export class FullName extends ValueObject<PersonNameData> {
   }
 
   // ✅ Multiple formatting options
-  getDisplayName(format: 'formal' | 'casual' | 'last-first' = 'casual'): string {
+  getDisplayName(
+    format: 'formal' | 'casual' | 'last-first' = 'casual'
+  ): string {
     switch (format) {
       case 'formal':
         return this.getFormalName();
@@ -534,13 +550,13 @@ export class FullName extends ValueObject<PersonNameData> {
 
   private getFormalName(): string {
     const parts = [];
-    
+
     if (this.data.title) parts.push(this.data.title);
     parts.push(this.data.firstName);
     if (this.data.middleName) parts.push(this.data.middleName);
     parts.push(this.data.lastName);
     if (this.data.suffix) parts.push(this.data.suffix);
-    
+
     return parts.join(' ');
   }
 
@@ -548,35 +564,45 @@ export class FullName extends ValueObject<PersonNameData> {
     const parts = [this.data.firstName];
     if (this.data.middleName) parts.push(this.data.middleName);
     parts.push(this.data.lastName);
-    
+
     return parts.join(' ');
   }
 
   private getLastFirstName(): string {
     const parts = [this.data.lastName + ',', this.data.firstName];
     if (this.data.middleName) parts.push(this.data.middleName);
-    
+
     return parts.join(' ');
   }
 
   getInitials(): string {
     let initials = this.data.firstName.charAt(0);
-    
+
     if (this.data.middleName) {
       initials += this.data.middleName.charAt(0);
     }
-    
+
     initials += this.data.lastName.charAt(0);
-    
+
     return initials.toUpperCase();
   }
 
   // ✅ Getters
-  get firstName(): string { return this.data.firstName; }
-  get lastName(): string { return this.data.lastName; }
-  get middleName(): string | undefined { return this.data.middleName; }
-  get title(): string | undefined { return this.data.title; }
-  get suffix(): string | undefined { return this.data.suffix; }
+  get firstName(): string {
+    return this.data.firstName;
+  }
+  get lastName(): string {
+    return this.data.lastName;
+  }
+  get middleName(): string | undefined {
+    return this.data.middleName;
+  }
+  get title(): string | undefined {
+    return this.data.title;
+  }
+  get suffix(): string | undefined {
+    return this.data.suffix;
+  }
 
   toString(): string {
     return this.getDisplayName();
@@ -589,14 +615,17 @@ export class FullName extends ValueObject<PersonNameData> {
 ### **1. Descriptive Error Messages**
 
 ```typescript
-export class CreditCardNumber extends ValueObject<{ number: string; brand: CardBrand }> {
+export class CreditCardNumber extends ValueObject<{
+  number: string;
+  brand: CardBrand;
+}> {
   private constructor(data: { number: string; brand: CardBrand }) {
     super(data);
   }
 
   static create(number: string): CreditCardNumber {
     const cleanNumber = number.replace(/[\s-]/g, '');
-    
+
     // ✅ Specific validation errors
     if (cleanNumber.length === 0) {
       throw new Error('Credit card number cannot be empty');
@@ -611,7 +640,9 @@ export class CreditCardNumber extends ValueObject<{ number: string; brand: CardB
     }
 
     if (!CreditCardNumber.passesLuhnCheck(cleanNumber)) {
-      throw new Error('Credit card number is not valid (fails Luhn algorithm check)');
+      throw new Error(
+        'Credit card number is not valid (fails Luhn algorithm check)'
+      );
     }
 
     const brand = CreditCardNumber.detectBrand(cleanNumber);
@@ -648,7 +679,7 @@ export class CreditCardNumber extends ValueObject<{ number: string; brand: CardB
     if (number.startsWith('5') || number.startsWith('2')) return 'mastercard';
     if (number.startsWith('34') || number.startsWith('37')) return 'amex';
     if (number.startsWith('6011')) return 'discover';
-    
+
     return null;
   }
 }
@@ -667,7 +698,7 @@ describe('Money Value Object', () => {
   describe('creation', () => {
     it('should create valid money instance', () => {
       const [error, money] = safeRun(() => Money.create(29.99, 'USD'));
-      
+
       expect(error).toBeNull();
       expect(money?.amount).toBe(29.99);
       expect(money?.currency).toBe('USD');
@@ -675,7 +706,7 @@ describe('Money Value Object', () => {
 
     it('should throw error for invalid currency', () => {
       const [error] = safeRun(() => Money.create(10, 'INVALID'));
-      
+
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toContain('Unsupported currency');
     });
@@ -683,21 +714,21 @@ describe('Money Value Object', () => {
 
   describe('operations', () => {
     it('should add money correctly', () => {
-      const money1 = Money.create(10.00, 'USD');
-      const money2 = Money.create(5.00, 'USD');
-      
+      const money1 = Money.create(10.0, 'USD');
+      const money2 = Money.create(5.0, 'USD');
+
       const result = money1.add(money2);
-      
-      expect(result.amount).toBe(15.00);
+
+      expect(result.amount).toBe(15.0);
       expect(result.currency).toBe('USD');
     });
 
     it('should prevent operations on different currencies', () => {
       const usd = Money.create(10, 'USD');
       const eur = Money.create(10, 'EUR');
-      
+
       const [error] = safeRun(() => usd.add(eur));
-      
+
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toContain('different currencies');
     });
@@ -705,16 +736,16 @@ describe('Money Value Object', () => {
 
   describe('equality', () => {
     it('should be equal for same amount and currency', () => {
-      const money1 = Money.create(10.50, 'USD');
-      const money2 = Money.create(10.50, 'USD');
-      
+      const money1 = Money.create(10.5, 'USD');
+      const money2 = Money.create(10.5, 'USD');
+
       expect(money1.equals(money2)).toBe(true);
     });
 
     it('should not be equal for different currencies', () => {
       const money1 = Money.create(10, 'USD');
       const money2 = Money.create(10, 'EUR');
-      
+
       expect(money1.equals(money2)).toBe(false);
     });
   });
@@ -734,4 +765,5 @@ Basic value object implementations should focus on:
 7. **Error Handling**: Descriptive error messages for validation failures
 8. **Testing**: Comprehensive test coverage including error cases
 
-These patterns provide a solid foundation for implementing robust value objects that serve as building blocks for more complex domain logic.
+These patterns provide a solid foundation for implementing robust value objects
+that serve as building blocks for more complex domain logic.

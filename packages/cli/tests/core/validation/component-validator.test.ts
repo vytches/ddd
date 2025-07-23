@@ -36,11 +36,11 @@ describe('ComponentValidator', () => {
     vi.mocked(FileSystem.readFile).mockResolvedValue('{}');
     vi.mocked(FileSystem.listDirectory).mockResolvedValue([]);
     vi.mocked(FileSystem.isDirectory).mockReturnValue(false);
-    vi.mocked(FileSystem.getBaseName).mockImplementation((path) =>
-      path.split('/').pop()?.split('.')[0] || ''
+    vi.mocked(FileSystem.getBaseName).mockImplementation(
+      path => path.split('/').pop()?.split('.')[0] || ''
     );
-    vi.mocked(FileSystem.getExtension).mockImplementation((path) =>
-      path.includes('.') ? `.${  path.split('.').pop()}` : ''
+    vi.mocked(FileSystem.getExtension).mockImplementation(path =>
+      path.includes('.') ? `.${path.split('.').pop()}` : ''
     );
   });
 
@@ -61,7 +61,11 @@ describe('ComponentValidator', () => {
   describe('validateComponent method', () => {
     describe('basic validation', () => {
       it('should validate valid aggregate component', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -95,7 +99,11 @@ describe('ComponentValidator', () => {
       });
 
       it('should validate valid command component', async () => {
-        const result = await validator.validateComponent('command', 'CreateOrderCommand', mockContext);
+        const result = await validator.validateComponent(
+          'command',
+          'CreateOrderCommand',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -134,10 +142,16 @@ describe('ComponentValidator', () => {
       });
 
       it('should warn about non-PascalCase names', async () => {
-        const result = await validator.validateComponent('aggregate', 'orderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'orderAggregate',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
-        expect(result.warnings).toContain('Component name should be in PascalCase (e.g., OrderAggregate)');
+        expect(result.warnings).toContain(
+          'Component name should be in PascalCase (e.g., OrderAggregate)'
+        );
       });
 
       it('should warn about very long component names', async () => {
@@ -152,7 +166,9 @@ describe('ComponentValidator', () => {
         const result = await validator.validateComponent('aggregate', 'Class', mockContext);
 
         expect(result.isValid).toBe(false);
-        expect(result.errors).toContain('"Class" is a reserved word and cannot be used as component name');
+        expect(result.errors).toContain(
+          '"Class" is a reserved word and cannot be used as component name'
+        );
       });
     });
 
@@ -165,7 +181,11 @@ describe('ComponentValidator', () => {
       });
 
       it('should validate aggregate with Aggregate suffix', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
         expect(result.suggestions).not.toContain('Consider adding "Aggregate" suffix for clarity');
@@ -189,7 +209,9 @@ describe('ComponentValidator', () => {
         const result = await validator.validateComponent('event', 'OrderCreateEvent', mockContext);
 
         expect(result.isValid).toBe(true);
-        expect(result.suggestions).toContain('Use past tense for event names (e.g., OrderCreated, PaymentProcessed)');
+        expect(result.suggestions).toContain(
+          'Use past tense for event names (e.g., OrderCreated, PaymentProcessed)'
+        );
       });
 
       it('should suggest command naming conventions', async () => {
@@ -207,32 +229,50 @@ describe('ComponentValidator', () => {
       });
 
       it('should discourage ValueObject suffix', async () => {
-        const result = await validator.validateComponent('value-object', 'EmailValueObject', mockContext);
+        const result = await validator.validateComponent(
+          'value-object',
+          'EmailValueObject',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
-        expect(result.suggestions).toContain('ValueObject suffix is redundant, use descriptive name instead');
+        expect(result.suggestions).toContain(
+          'ValueObject suffix is redundant, use descriptive name instead'
+        );
       });
     });
 
     describe('project context analysis', () => {
       it('should detect NestJS framework', async () => {
         vi.mocked(FileSystem.exists).mockReturnValue(true);
-        vi.mocked(FileSystem.readFile).mockResolvedValue(JSON.stringify({
-          dependencies: { '@nestjs/core': '^10.0.0' }
-        }));
+        vi.mocked(FileSystem.readFile).mockResolvedValue(
+          JSON.stringify({
+            dependencies: { '@nestjs/core': '^10.0.0' },
+          })
+        );
 
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.metadata?.projectContext?.frameworks).toContain('nestjs');
       });
 
       it('should detect TypeORM', async () => {
         vi.mocked(FileSystem.exists).mockReturnValue(true);
-        vi.mocked(FileSystem.readFile).mockResolvedValue(JSON.stringify({
-          dependencies: { typeorm: '^0.3.0' }
-        }));
+        vi.mocked(FileSystem.readFile).mockResolvedValue(
+          JSON.stringify({
+            dependencies: { typeorm: '^0.3.0' },
+          })
+        );
 
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.metadata?.projectContext?.hasTypeORM).toBe(true);
       });
@@ -252,8 +292,8 @@ describe('ComponentValidator', () => {
         vi.mocked(FileSystem.exists).mockReturnValue(true);
         vi.mocked(FileSystem.readFile).mockRejectedValue(new Error('Permission denied'));
 
-        const [error] = await safeRun(async () =>
-          await validator.validateComponent('aggregate', 'OrderAggregate', mockContext)
+        const [error] = await safeRun(
+          async () => await validator.validateComponent('aggregate', 'OrderAggregate', mockContext)
         );
 
         expect(error).toBeUndefined();
@@ -268,7 +308,11 @@ describe('ComponentValidator', () => {
         vi.mocked(FileSystem.getBaseName).mockReturnValue('order-aggregate');
         vi.mocked(FileSystem.getExtension).mockReturnValue('.ts');
 
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.isValid).toBe(false);
         expect(result.errors.some(e => e.includes('already exists'))).toBe(true);
@@ -291,7 +335,11 @@ describe('ComponentValidator', () => {
       it('should handle conflict detection errors gracefully', async () => {
         vi.mocked(FileSystem.exists).mockReturnValue(false); // src directory doesn't exist
 
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.isValid).toBe(true);
         // Should not warn when src directory doesn't exist - this is expected behavior
@@ -301,25 +349,41 @@ describe('ComponentValidator', () => {
 
     describe('dependency analysis', () => {
       it('should suggest repository for aggregate', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.suggestions.some(s => s.includes('IOrderAggregateRepository'))).toBe(true);
       });
 
       it('should suggest events for aggregate', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.suggestions.some(s => s.includes('OrderAggregateCreated'))).toBe(true);
       });
 
       it('should suggest commands for aggregate', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.suggestions.some(s => s.includes('CreateOrderAggregateCommand'))).toBe(true);
       });
 
       it('should suggest handler for command', async () => {
-        const result = await validator.validateComponent('command', 'CreateOrderCommand', mockContext);
+        const result = await validator.validateComponent(
+          'command',
+          'CreateOrderCommand',
+          mockContext
+        );
 
         expect(result.suggestions.some(s => s.includes('CreateOrderCommandHandler'))).toBe(true);
       });
@@ -345,7 +409,11 @@ describe('ComponentValidator', () => {
 
     describe('confidence calculation', () => {
       it('should have high confidence for valid components', async () => {
-        const result = await validator.validateComponent('aggregate', 'OrderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'OrderAggregate',
+          mockContext
+        );
 
         expect(result.metadata?.confidence).toBeGreaterThan(0.5);
       });
@@ -357,7 +425,11 @@ describe('ComponentValidator', () => {
       });
 
       it('should have moderate confidence with warnings', async () => {
-        const result = await validator.validateComponent('aggregate', 'orderAggregate', mockContext);
+        const result = await validator.validateComponent(
+          'aggregate',
+          'orderAggregate',
+          mockContext
+        );
 
         expect(result.metadata?.confidence).toBeGreaterThan(0.3);
         expect(result.metadata?.confidence).toBeLessThan(0.9);
@@ -370,7 +442,7 @@ describe('ComponentValidator', () => {
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
     });
 
@@ -380,7 +452,7 @@ describe('ComponentValidator', () => {
         errors: [],
         warnings: [],
         suggestions: [],
-        metadata: { confidence: 0.9 }
+        metadata: { confidence: 0.9 },
       };
 
       validator.displayValidationResults(result);
@@ -395,7 +467,7 @@ describe('ComponentValidator', () => {
         errors: ['Component name cannot be empty'],
         warnings: ['Some warning'],
         suggestions: ['Some suggestion'],
-        metadata: { confidence: 0.3 }
+        metadata: { confidence: 0.3 },
       };
 
       validator.displayValidationResults(result);
@@ -412,7 +484,7 @@ describe('ComponentValidator', () => {
         isValid: true,
         errors: [],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       };
 
       const [error] = safeRun(() => validator.displayValidationResults(result));
@@ -423,7 +495,11 @@ describe('ComponentValidator', () => {
 
   describe('edge cases and error handling', () => {
     it('should handle unknown component types gracefully', async () => {
-      const result = await validator.validateComponent('unknown' as ComponentType, 'TestComponent', mockContext);
+      const result = await validator.validateComponent(
+        'unknown' as ComponentType,
+        'TestComponent',
+        mockContext
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.metadata?.componentType).toBe('unknown');
@@ -443,8 +519,8 @@ describe('ComponentValidator', () => {
       vi.mocked(FileSystem.exists).mockReturnValue(true);
       vi.mocked(FileSystem.readFile).mockResolvedValue('invalid json');
 
-      const [error] = await safeRun(async () =>
-        await validator.validateComponent('aggregate', 'OrderAggregate', mockContext)
+      const [error] = await safeRun(
+        async () => await validator.validateComponent('aggregate', 'OrderAggregate', mockContext)
       );
 
       expect(error).toBeUndefined();

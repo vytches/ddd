@@ -9,15 +9,20 @@
 
 ## Description
 
-Demonstrates context-aware event processing where events are filtered and routed based on tenant, user, bounded context, or other contextual information. This enables multi-tenant applications and sophisticated event routing scenarios.
+Demonstrates context-aware event processing where events are filtered and routed
+based on tenant, user, bounded context, or other contextual information. This
+enables multi-tenant applications and sophisticated event routing scenarios.
 
 ## Business Context
 
-In a multi-tenant e-commerce platform, different tenants may have different business rules, integrations, and notification preferences. Context-aware event processing allows the same event to be handled differently for different tenants while maintaining code reuse.
+In a multi-tenant e-commerce platform, different tenants may have different
+business rules, integrations, and notification preferences. Context-aware event
+processing allows the same event to be handled differently for different tenants
+while maintaining code reuse.
 
 ## Code Example
 
-```typescript
+````typescript
 // context-aware-events.ts
 import { DomainEvent, EventContext } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
@@ -27,11 +32,11 @@ import { OrderCreatedEventData, UserRegisteredEventData } from '../types';
  * @llm-summary Context-enhanced domain event with tenant and user information
  * @llm-domain Multi-Tenant Architecture
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Domain event that includes rich context information for multi-tenant
  * scenarios, enabling context-based filtering and routing.
- * 
+ *
  * @example
  * ```typescript
  * const event = new OrderCreatedEventWithContext(data, {
@@ -40,7 +45,7 @@ import { OrderCreatedEventData, UserRegisteredEventData } from '../types';
  *   boundedContext: 'order-management'
  * });
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
@@ -109,12 +114,15 @@ export class UserRegisteredEventWithContext extends DomainEvent<UserRegisteredEv
     this.context = context;
   }
 }
-```
+````
 
-```typescript
+````typescript
 // tenant-specific-handlers.ts
 import { EventHandler } from '@vytches-ddd/events';
-import { OrderCreatedEventWithContext, UserRegisteredEventWithContext } from '../types';
+import {
+  OrderCreatedEventWithContext,
+  UserRegisteredEventWithContext,
+} from '../types';
 
 /**
  * @llm-summary Enterprise tenant-specific order processing handler
@@ -130,7 +138,7 @@ import { OrderCreatedEventWithContext, UserRegisteredEventWithContext } from '..
  */
 @EventHandler(OrderCreatedEventWithContext, {
   eventContext: 'order-management',
-  contextFilter: (event) => event.getTenantId()?.startsWith('tenant-enterprise')
+  contextFilter: event => event.getTenantId()?.startsWith('tenant-enterprise'),
 })
 export class EnterpriseOrderHandler {
   /**
@@ -160,39 +168,58 @@ export class EnterpriseOrderHandler {
   async handle(event: OrderCreatedEventWithContext): Promise<void> {
     const { orderId, total, userId } = event.payload;
     const tenantId = event.getTenantId();
-    
-    console.log(`🏢 Processing enterprise order ${orderId} for tenant ${tenantId}`);
-    
+
+    console.log(
+      `🏢 Processing enterprise order ${orderId} for tenant ${tenantId}`
+    );
+
     try {
       // Enterprise-specific processing
       if (total > 10000) {
         await this.requireManagerApproval(orderId, total, tenantId!);
       }
-      
+
       await this.integrateWithErpSystem(orderId, tenantId!);
       await this.sendEnterpriseNotifications(orderId, userId, tenantId!);
-      
+
       console.log(`✅ Enterprise processing completed for order ${orderId}`);
-      
     } catch (error) {
-      console.error(`❌ Enterprise processing failed for order ${orderId}:`, error);
+      console.error(
+        `❌ Enterprise processing failed for order ${orderId}:`,
+        error
+      );
       throw error;
     }
   }
 
-  private async requireManagerApproval(orderId: string, total: number, tenantId: string): Promise<void> {
-    console.log(`  📋 Requiring manager approval for high-value order ${orderId} ($${total})`);
+  private async requireManagerApproval(
+    orderId: string,
+    total: number,
+    tenantId: string
+  ): Promise<void> {
+    console.log(
+      `  📋 Requiring manager approval for high-value order ${orderId} ($${total})`
+    );
     // Simulate approval workflow
     await new Promise(resolve => setTimeout(resolve, 200));
   }
 
-  private async integrateWithErpSystem(orderId: string, tenantId: string): Promise<void> {
-    console.log(`  🔗 Integrating order ${orderId} with ERP system for ${tenantId}`);
+  private async integrateWithErpSystem(
+    orderId: string,
+    tenantId: string
+  ): Promise<void> {
+    console.log(
+      `  🔗 Integrating order ${orderId} with ERP system for ${tenantId}`
+    );
     // Simulate ERP integration
     await new Promise(resolve => setTimeout(resolve, 300));
   }
 
-  private async sendEnterpriseNotifications(orderId: string, userId: string, tenantId: string): Promise<void> {
+  private async sendEnterpriseNotifications(
+    orderId: string,
+    userId: string,
+    tenantId: string
+  ): Promise<void> {
     console.log(`  📧 Sending enterprise notifications for order ${orderId}`);
     // Simulate enhanced notifications
     await new Promise(resolve => setTimeout(resolve, 150));
@@ -213,10 +240,13 @@ export class EnterpriseOrderHandler {
  */
 @EventHandler(OrderCreatedEventWithContext, {
   eventContext: 'order-management',
-  contextFilter: (event) => {
+  contextFilter: event => {
     const tenantId = event.getTenantId();
-    return tenantId?.startsWith('tenant-standard') || tenantId?.startsWith('tenant-basic');
-  }
+    return (
+      tenantId?.startsWith('tenant-standard') ||
+      tenantId?.startsWith('tenant-basic')
+    );
+  },
 })
 export class StandardOrderHandler {
   /**
@@ -237,28 +267,38 @@ export class StandardOrderHandler {
   async handle(event: OrderCreatedEventWithContext): Promise<void> {
     const { orderId, total, userId } = event.payload;
     const tenantId = event.getTenantId();
-    
-    console.log(`🏪 Processing standard order ${orderId} for tenant ${tenantId}`);
-    
+
+    console.log(
+      `🏪 Processing standard order ${orderId} for tenant ${tenantId}`
+    );
+
     try {
       await this.processStandardOrder(orderId, total);
       await this.sendStandardNotifications(orderId, userId);
-      
+
       console.log(`✅ Standard processing completed for order ${orderId}`);
-      
     } catch (error) {
-      console.error(`❌ Standard processing failed for order ${orderId}:`, error);
+      console.error(
+        `❌ Standard processing failed for order ${orderId}:`,
+        error
+      );
       throw error;
     }
   }
 
-  private async processStandardOrder(orderId: string, total: number): Promise<void> {
+  private async processStandardOrder(
+    orderId: string,
+    total: number
+  ): Promise<void> {
     console.log(`  📦 Processing standard order ${orderId} ($${total})`);
     // Simulate standard processing
     await new Promise(resolve => setTimeout(resolve, 100));
   }
 
-  private async sendStandardNotifications(orderId: string, userId: string): Promise<void> {
+  private async sendStandardNotifications(
+    orderId: string,
+    userId: string
+  ): Promise<void> {
     console.log(`  📧 Sending standard notifications for order ${orderId}`);
     // Simulate standard notifications
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -279,7 +319,7 @@ export class StandardOrderHandler {
  */
 @EventHandler(UserRegisteredEventWithContext, {
   eventContext: 'user-management',
-  contextFilter: (event) => event.context.region === 'EU'
+  contextFilter: event => event.context.region === 'EU',
 })
 export class EuropeanUserOnboardingHandler {
   /**
@@ -300,43 +340,53 @@ export class EuropeanUserOnboardingHandler {
   async handle(event: UserRegisteredEventWithContext): Promise<void> {
     const { userId, email, name } = event.payload;
     const region = event.context.region;
-    
-    console.log(`🇪🇺 Processing EU user registration for ${userId} in region ${region}`);
-    
+
+    console.log(
+      `🇪🇺 Processing EU user registration for ${userId} in region ${region}`
+    );
+
     try {
       await this.ensureGdprCompliance(userId, email);
       await this.sendEuropeanWelcomeFlow(userId, name);
       await this.setupRegionalPreferences(userId, region!);
-      
+
       console.log(`✅ EU onboarding completed for user ${userId}`);
-      
     } catch (error) {
       console.error(`❌ EU onboarding failed for user ${userId}:`, error);
       throw error;
     }
   }
 
-  private async ensureGdprCompliance(userId: string, email: string): Promise<void> {
+  private async ensureGdprCompliance(
+    userId: string,
+    email: string
+  ): Promise<void> {
     console.log(`  🔒 Ensuring GDPR compliance for user ${userId}`);
     // Simulate GDPR compliance setup
     await new Promise(resolve => setTimeout(resolve, 200));
   }
 
-  private async sendEuropeanWelcomeFlow(userId: string, name: string): Promise<void> {
+  private async sendEuropeanWelcomeFlow(
+    userId: string,
+    name: string
+  ): Promise<void> {
     console.log(`  📧 Sending European welcome flow to ${name}`);
     // Simulate regional welcome flow
     await new Promise(resolve => setTimeout(resolve, 150));
   }
 
-  private async setupRegionalPreferences(userId: string, region: string): Promise<void> {
+  private async setupRegionalPreferences(
+    userId: string,
+    region: string
+  ): Promise<void> {
     console.log(`  ⚙️ Setting up regional preferences for ${region}`);
     // Simulate preference setup
     await new Promise(resolve => setTimeout(resolve, 100));
   }
 }
-```
+````
 
-```typescript
+````typescript
 // context-builder.ts
 import { EventContext } from '@vytches-ddd/events';
 
@@ -527,7 +577,7 @@ export class ContextBuilder {
       boundedContext: this.context.boundedContext,
       region: this.context.region,
       timestamp: new Date(),
-      metadata: this.context.metadata || {}
+      metadata: this.context.metadata || {},
     };
   }
 }
@@ -550,9 +600,16 @@ async function demonstrateContextAwareEvents(): Promise<void> {
         orderId: 'order-enterprise-001',
         userId: 'user-123',
         total: 15000,
-        items: [{ productId: 'server-rack', name: 'Server Rack', quantity: 2, total: 15000 }],
-        createdAt: new Date()
-      }
+        items: [
+          {
+            productId: 'server-rack',
+            name: 'Server Rack',
+            quantity: 2,
+            total: 15000,
+          },
+        ],
+        createdAt: new Date(),
+      },
     },
     {
       name: 'Standard Tenant - Regular Order',
@@ -566,9 +623,11 @@ async function demonstrateContextAwareEvents(): Promise<void> {
         orderId: 'order-standard-001',
         userId: 'user-456',
         total: 299,
-        items: [{ productId: 'laptop', name: 'Laptop', quantity: 1, total: 299 }],
-        createdAt: new Date()
-      }
+        items: [
+          { productId: 'laptop', name: 'Laptop', quantity: 1, total: 299 },
+        ],
+        createdAt: new Date(),
+      },
     },
     {
       name: 'EU User Registration',
@@ -584,52 +643,66 @@ async function demonstrateContextAwareEvents(): Promise<void> {
         email: 'user@example.eu',
         name: 'Jean Dupont',
         registrationSource: 'web' as const,
-        registeredAt: new Date()
-      }
-    }
+        registeredAt: new Date(),
+      },
+    },
   ];
 
   for (const scenario of scenarios) {
     console.log(`📋 Processing: ${scenario.name}`);
     console.log(`   Context: ${JSON.stringify(scenario.context, null, 2)}`);
-    
+
     try {
       if ('orderData' in scenario) {
-        const event = new OrderCreatedEventWithContext(scenario.orderData, scenario.context);
+        const event = new OrderCreatedEventWithContext(
+          scenario.orderData,
+          scenario.context
+        );
         // Event would be automatically routed to appropriate handlers
         console.log(`   ✅ Order event created with context filtering`);
       } else if ('userData' in scenario) {
-        const event = new UserRegisteredEventWithContext(scenario.userData, scenario.context);
+        const event = new UserRegisteredEventWithContext(
+          scenario.userData,
+          scenario.context
+        );
         // Event would be automatically routed to regional handlers
-        console.log(`   ✅ User registration event created with regional context`);
+        console.log(
+          `   ✅ User registration event created with regional context`
+        );
       }
-      
     } catch (error) {
       console.error(`   ❌ Failed to process ${scenario.name}:`, error);
     }
-    
+
     console.log(); // Empty line for readability
   }
 }
-```
+````
 
 ## Key Features
 
-- **🎯 Context Filtering**: Events automatically routed based on context criteria
+- **🎯 Context Filtering**: Events automatically routed based on context
+  criteria
 - **🏢 Multi-Tenancy**: Tenant-specific event processing with shared code base
-- **🌍 Regional Handling**: Location-based event processing for compliance and localization
-- **🔍 Flexible Filtering**: Custom filter functions for complex routing scenarios
-- **📊 Rich Context**: Comprehensive context information including correlation, metadata
+- **🌍 Regional Handling**: Location-based event processing for compliance and
+  localization
+- **🔍 Flexible Filtering**: Custom filter functions for complex routing
+  scenarios
+- **📊 Rich Context**: Comprehensive context information including correlation,
+  metadata
 
 ## Common Pitfalls
 
 - **❌ Context Bloat**: Don't add unnecessary information to event context
 - **❌ Filter Complexity**: Keep context filters simple and efficient
-- **❌ Missing Fallbacks**: Consider what happens when context doesn't match any filter
+- **❌ Missing Fallbacks**: Consider what happens when context doesn't match any
+  filter
 - **❌ Context Mutation**: Don't modify context information after event creation
 
 ## Related Examples
 
 - [Example 1: Basic Publishing](./example-1.md) - Foundation repository pattern
-- [Example 2: Event Handlers](./example-2.md) - Basic event handler implementation
-- [Intermediate: Batch Processing](../intermediate/example-1.md) - Processing multiple contextualized events
+- [Example 2: Event Handlers](./example-2.md) - Basic event handler
+  implementation
+- [Intermediate: Batch Processing](../intermediate/example-1.md) - Processing
+  multiple contextualized events

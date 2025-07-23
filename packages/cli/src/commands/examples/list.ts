@@ -55,7 +55,10 @@ export const builder = (yargs: any) =>
     .example('$0 examples list', 'List all examples')
     .example('$0 examples list --package aggregates', 'List examples from aggregates package')
     .example('$0 examples list --framework nestjs', 'List examples with NestJS integration')
-    .example('$0 examples list --complexity basic --domain e-commerce', 'List basic e-commerce examples')
+    .example(
+      '$0 examples list --complexity basic --domain e-commerce',
+      'List basic e-commerce examples'
+    )
     .example('$0 examples list --frameworks', 'Show available frameworks for each example');
 
 export const handler = async (argv: Arguments<ListOptions>): Promise<void> => {
@@ -86,7 +89,7 @@ export const handler = async (argv: Arguments<ListOptions>): Promise<void> => {
       // Show with framework information
       console.log('\n📚 Available Examples with Framework Support:\n');
 
-      examples.forEach((example) => {
+      examples.forEach(example => {
         const frameworks = globalDocumentationRegistry.getAvailableFrameworks(example.id);
 
         console.log(`🔹 ${example.name}`);
@@ -113,8 +116,10 @@ export const handler = async (argv: Arguments<ListOptions>): Promise<void> => {
         Package: example.package,
         Complexity: example.complexity,
         Domain: example.domain || 'none',
-        Patterns: example.patterns?.slice(0, 2).join(', ') + (example.patterns && example.patterns.length > 2 ? '...' : '') || 'none',
-        Frameworks: globalDocumentationRegistry.getAvailableFrameworks(example.id).length || 'base'
+        Patterns:
+          example.patterns?.slice(0, 2).join(', ') +
+            (example.patterns && example.patterns.length > 2 ? '...' : '') || 'none',
+        Frameworks: globalDocumentationRegistry.getAvailableFrameworks(example.id).length || 'base',
       }));
 
       console.table(tableData);
@@ -139,7 +144,6 @@ export const handler = async (argv: Arguments<ListOptions>): Promise<void> => {
       }
       console.log(`   Use --help to see all filter options`);
     }
-
   } catch (error) {
     console.error('Error listing examples:', error);
     process.exit(1);

@@ -22,9 +22,15 @@ describe('bundle command', () => {
     vi.mocked(DocumentationBundler).mockImplementation(() => mockBundler);
 
     // Mock logger
-    vi.mocked(logger.success).mockImplementation(() => { return });
-    vi.mocked(logger.info).mockImplementation(() => { return });
-    vi.mocked(logger.error).mockImplementation(() => { return });
+    vi.mocked(logger.success).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.info).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.error).mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -217,7 +223,9 @@ describe('bundle command', () => {
 
       expect(logger.success).toHaveBeenCalledWith('✅ Bundle generated: /custom/path/bundle.md');
       expect(logger.info).toHaveBeenCalledWith('📦 Includes 4 packages with 25 examples');
-      expect(logger.info).toHaveBeenCalledWith('💡 Tip: Use this bundle with LLM prompts for complete library understanding');
+      expect(logger.info).toHaveBeenCalledWith(
+        '💡 Tip: Use this bundle with LLM prompts for complete library understanding'
+      );
     });
 
     it('should display LLM tip when llmOptimized is true', async () => {
@@ -236,7 +244,9 @@ describe('bundle command', () => {
 
       await bundleCommand.handler!(argv);
 
-      expect(logger.info).toHaveBeenCalledWith('💡 Tip: Use this bundle with LLM prompts for complete library understanding');
+      expect(logger.info).toHaveBeenCalledWith(
+        '💡 Tip: Use this bundle with LLM prompts for complete library understanding'
+      );
     });
 
     it('should not display LLM tip when llmOptimized is false', async () => {
@@ -254,7 +264,9 @@ describe('bundle command', () => {
 
       await bundleCommand.handler!(argv);
 
-      expect(logger.info).not.toHaveBeenCalledWith('💡 Tip: Use this bundle with LLM prompts for complete library understanding');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '💡 Tip: Use this bundle with LLM prompts for complete library understanding'
+      );
     });
   });
 
@@ -275,7 +287,9 @@ describe('bundle command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate bundle: Bundle generation failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate bundle: Bundle generation failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
@@ -291,7 +305,9 @@ describe('bundle command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate bundle: String error message');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate bundle: String error message'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
@@ -308,7 +324,9 @@ describe('bundle command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate bundle: Bundler initialization failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate bundle: Bundler initialization failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
   });

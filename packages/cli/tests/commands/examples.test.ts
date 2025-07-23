@@ -64,8 +64,12 @@ describe('examples command', () => {
     vi.mocked(fs.writeFile).mockResolvedValue(undefined);
 
     // Mock console methods
-    mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => { return });
-    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => { return });
+    mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -94,10 +98,18 @@ describe('examples command', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith('📚 Examples Management');
       expect(mockConsoleLog).toHaveBeenCalledWith('Usage: examples <command> [options]');
       expect(mockConsoleLog).toHaveBeenCalledWith('Commands:');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  generate <package>     Generate documentation for a package');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  bundle                 Generate bundled documentation');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  find-by-tag <tag>      Find examples by tag pattern');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  validate               Validate example configurations');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  generate <package>     Generate documentation for a package'
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  bundle                 Generate bundled documentation'
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  find-by-tag <tag>      Find examples by tag pattern'
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  validate               Validate example configurations'
+      );
     });
 
     it('should display help when help option is true', async () => {
@@ -105,8 +117,12 @@ describe('examples command', () => {
 
       expect(mockConsoleLog).toHaveBeenCalledWith('📚 Examples Management');
       expect(mockConsoleLog).toHaveBeenCalledWith('Examples:');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  examples generate policies --complexity intermediate');
-      expect(mockConsoleLog).toHaveBeenCalledWith('  examples generate policies --framework nestjs --llm-optimized');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  examples generate policies --complexity intermediate'
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '  examples generate policies --framework nestjs --llm-optimized'
+      );
     });
   });
 
@@ -132,8 +148,12 @@ describe('examples command', () => {
         randomize: true,
       });
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('✅ Documentation generated: /test/policies-docs.md');
-      expect(mockConsoleLog).toHaveBeenCalledWith('💡 Tip: Use this file with LLM prompts for code generation');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '✅ Documentation generated: /test/policies-docs.md'
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '💡 Tip: Use this file with LLM prompts for code generation'
+      );
     });
 
     it('should handle llm alias option', async () => {
@@ -153,7 +173,9 @@ describe('examples command', () => {
         randomize: true,
       });
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('💡 Tip: Use this file with LLM prompts for code generation');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '💡 Tip: Use this file with LLM prompts for code generation'
+      );
     });
 
     it('should display randomization message when examples were randomized', async () => {
@@ -165,7 +187,9 @@ describe('examples command', () => {
 
       await examplesCommand.action(['generate', 'policies'], {});
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('🎲 Examples were randomized. Run again to see different examples');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '🎲 Examples were randomized. Run again to see different examples'
+      );
     });
 
     it('should require package name for generate command', async () => {
@@ -184,7 +208,9 @@ describe('examples command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(mockConsoleError).toHaveBeenCalledWith('❌ Failed to generate documentation: Generation failed');
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        '❌ Failed to generate documentation: Generation failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
   });
@@ -218,7 +244,9 @@ describe('examples command', () => {
       expect(fs.writeFile).toHaveBeenCalledWith('/test/bundle.md', '# Bundle Content', 'utf8');
       expect(mockConsoleLog).toHaveBeenCalledWith('✅ Bundle generated: /test/bundle.md');
       expect(mockConsoleLog).toHaveBeenCalledWith('📦 Includes 2 packages with 10 examples');
-      expect(mockConsoleLog).toHaveBeenCalledWith('💡 Tip: Use this bundle with LLM prompts for complete library understanding');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '💡 Tip: Use this bundle with LLM prompts for complete library understanding'
+      );
     });
 
     it('should handle bundle with llm alias', async () => {
@@ -274,7 +302,9 @@ describe('examples command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(mockConsoleError).toHaveBeenCalledWith('❌ Failed to generate bundle: File write failed');
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        '❌ Failed to generate bundle: File write failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
   });
@@ -329,7 +359,9 @@ describe('examples command', () => {
 
       await examplesCommand.action(['find-by-tag', 'invalid:tag'], {});
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('⚠️  No examples found for tag pattern: invalid:tag');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '⚠️  No examples found for tag pattern: invalid:tag'
+      );
       expect(mockConsoleLog).toHaveBeenCalledWith('💡 Did you mean:');
       expect(mockConsoleLog).toHaveBeenCalledWith('   - policies:core');
       expect(mockConsoleLog).toHaveBeenCalledWith('   - policies:advanced');
@@ -341,7 +373,9 @@ describe('examples command', () => {
 
       await examplesCommand.action(['find-by-tag', 'invalid:tag'], {});
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('⚠️  No examples found for tag pattern: invalid:tag');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '⚠️  No examples found for tag pattern: invalid:tag'
+      );
       expect(mockConsoleLog).not.toHaveBeenCalledWith('💡 Did you mean:');
     });
 
@@ -357,7 +391,9 @@ describe('examples command', () => {
 
       await examplesCommand.action(['find-by-tag', 'policies:*'], {});
 
-      expect(mockConsoleLog).toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should not display randomization message when noRandomize is true', async () => {
@@ -365,7 +401,9 @@ describe('examples command', () => {
 
       await examplesCommand.action(['find-by-tag', 'policies:*'], { noRandomize: true });
 
-      expect(mockConsoleLog).not.toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(mockConsoleLog).not.toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should handle find-by-tag errors', async () => {
@@ -416,15 +454,9 @@ describe('examples command', () => {
 
     it('should handle validation results with errors and warnings', async () => {
       const mockResults = {
-        errors: [
-          { package: 'policies', example: 'basic-example', message: 'Missing file' },
-        ],
-        warnings: [
-          { package: 'events', example: 'event-example', message: 'Missing description' },
-        ],
-        fixed: [
-          { package: 'core', example: 'fixed-example', description: 'Added imports' },
-        ],
+        errors: [{ package: 'policies', example: 'basic-example', message: 'Missing file' }],
+        warnings: [{ package: 'events', example: 'event-example', message: 'Missing description' }],
+        fixed: [{ package: 'core', example: 'fixed-example', description: 'Added imports' }],
         packagesValidated: 2,
         examplesValidated: 10,
       };
@@ -469,7 +501,7 @@ describe('examples command', () => {
   });
 
   describe('complexity icon helper', () => {
-        const mockExamples = [
+    const mockExamples = [
       {
         id: 'example-1',
         name: 'Basic Policy',
@@ -492,8 +524,22 @@ describe('examples command', () => {
       const mockExamplesWithComplexity = [
         { ...mockExamples[0], complexity: 'basic' },
         { ...mockExamples[1], complexity: 'intermediate' },
-        { id: 'example-3', name: 'Expert', package: 'test', complexity: 'advanced', tags: [], diSupport: true },
-        { id: 'example-4', name: 'Unknown', package: 'test', complexity: 'unknown', tags: [], diSupport: true },
+        {
+          id: 'example-3',
+          name: 'Expert',
+          package: 'test',
+          complexity: 'advanced',
+          tags: [],
+          diSupport: true,
+        },
+        {
+          id: 'example-4',
+          name: 'Unknown',
+          package: 'test',
+          complexity: 'unknown',
+          tags: [],
+          diSupport: true,
+        },
       ];
       mockTagFinder.findExamplesByTag.mockResolvedValue(mockExamplesWithComplexity);
 

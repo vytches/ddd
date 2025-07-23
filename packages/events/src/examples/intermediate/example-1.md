@@ -9,44 +9,56 @@
 
 ## Description
 
-Demonstrates advanced event processing patterns including batch publishing, bulk operations, and performance optimizations for high-throughput scenarios. Shows how to efficiently handle large volumes of events while maintaining consistency and reliability.
+Demonstrates advanced event processing patterns including batch publishing, bulk
+operations, and performance optimizations for high-throughput scenarios. Shows
+how to efficiently handle large volumes of events while maintaining consistency
+and reliability.
 
 ## Business Context
 
-In high-volume e-commerce scenarios, inventory updates, bulk order processing, and batch imports can generate thousands of events. Processing these events individually would create performance bottlenecks and resource contention. Batch processing enables efficient handling of large event volumes while maintaining system responsiveness.
+In high-volume e-commerce scenarios, inventory updates, bulk order processing,
+and batch imports can generate thousands of events. Processing these events
+individually would create performance bottlenecks and resource contention. Batch
+processing enables efficient handling of large event volumes while maintaining
+system responsiveness.
 
 ## Code Example
 
-```typescript
+````typescript
 // batch-inventory-processor.ts
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
 import { DomainEvent } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
-import { Product, InventoryUpdateCommand, InventoryUpdatedEventData } from '../types';
+import {
+  Product,
+  InventoryUpdateCommand,
+  InventoryUpdatedEventData,
+} from '../types';
 
 /**
  * @llm-summary High-performance batch inventory processor with event optimization
  * @llm-domain Inventory Management
  * @llm-complexity Intermediate
- * 
+ *
  * @description
  * Processes inventory updates in batches to optimize performance and reduce
  * resource contention. Demonstrates bulk event publishing and transaction batching.
- * 
+ *
  * @example
  * ```typescript
  * const processor = new BatchInventoryProcessor(eventBus, { batchSize: 100 });
  * await processor.processBulkUpdates(inventoryUpdates);
  * // ↳ Processes updates in batches and publishes events efficiently
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
 export class BatchInventoryProcessor {
   private readonly eventDispatcher: UniversalEventDispatcher;
   private readonly config: BatchProcessingConfig;
-  private readonly pendingUpdates: Map<string, InventoryUpdateCommand> = new Map();
+  private readonly pendingUpdates: Map<string, InventoryUpdateCommand> =
+    new Map();
 
   constructor(
     eventBus: UnifiedEventBus,
@@ -59,7 +71,7 @@ export class BatchInventoryProcessor {
       maxRetries: 3,
       concurrentBatches: 5,
       enableMetrics: true,
-      ...config
+      ...config,
     };
   }
 
@@ -82,7 +94,7 @@ export class BatchInventoryProcessor {
    *   { productId: 'prod-2', quantityChange: 10, reason: 'restock' },
    *   // ... 1000+ more updates
    * ];
-   * 
+   *
    * const result = await processor.processBulkUpdates(updates);
    * console.log(`Processed ${result.totalProcessed} updates in ${result.duration}ms`);
    * ```
@@ -90,24 +102,40 @@ export class BatchInventoryProcessor {
    * @since 1.0.0
    * @public
    */
-  async processBulkUpdates(updates: InventoryUpdateCommand[]): Promise<BatchProcessingResult> {
+  async processBulkUpdates(
+    updates: InventoryUpdateCommand[]
+  ): Promise<BatchProcessingResult> {
     const startTime = Date.now();
     const metrics = new ProcessingMetrics();
 
     try {
-      console.log(`📦 Starting batch processing of ${updates.length} inventory updates`);
-      
+      console.log(
+        `📦 Starting batch processing of ${updates.length} inventory updates`
+      );
+
       // Split updates into optimized batches
       const batches = this.createOptimizedBatches(updates);
       console.log(`  ✅ Created ${batches.length} optimized batches`);
 
       // Process batches concurrently with limit
-      const batchResults = await this.processBatchesConcurrently(batches, metrics);
-      
+      const batchResults = await this.processBatchesConcurrently(
+        batches,
+        metrics
+      );
+
       // Aggregate results
-      const totalProcessed = batchResults.reduce((sum, result) => sum + result.processed, 0);
-      const totalFailed = batchResults.reduce((sum, result) => sum + result.failed, 0);
-      const totalEvents = batchResults.reduce((sum, result) => sum + result.eventsPublished, 0);
+      const totalProcessed = batchResults.reduce(
+        (sum, result) => sum + result.processed,
+        0
+      );
+      const totalFailed = batchResults.reduce(
+        (sum, result) => sum + result.failed,
+        0
+      );
+      const totalEvents = batchResults.reduce(
+        (sum, result) => sum + result.eventsPublished,
+        0
+      );
 
       const duration = Date.now() - startTime;
 
@@ -116,7 +144,9 @@ export class BatchInventoryProcessor {
       console.log(`   ❌ Failed: ${totalFailed} updates`);
       console.log(`   📡 Events Published: ${totalEvents} events`);
       console.log(`   ⏱️ Duration: ${duration}ms`);
-      console.log(`   🚀 Throughput: ${Math.round(totalProcessed / (duration / 1000))} updates/sec`);
+      console.log(
+        `   🚀 Throughput: ${Math.round(totalProcessed / (duration / 1000))} updates/sec`
+      );
 
       return {
         totalProcessed,
@@ -125,9 +155,8 @@ export class BatchInventoryProcessor {
         duration,
         throughput: Math.round(totalProcessed / (duration / 1000)),
         batchCount: batches.length,
-        metrics: metrics.getMetrics()
+        metrics: metrics.getMetrics(),
       };
-
     } catch (error) {
       console.error('❌ Batch processing failed:', error);
       throw error;
@@ -149,12 +178,14 @@ export class BatchInventoryProcessor {
    * @since 1.0.0
    * @private
    */
-  private createOptimizedBatches(updates: InventoryUpdateCommand[]): InventoryUpdateCommand[][] {
+  private createOptimizedBatches(
+    updates: InventoryUpdateCommand[]
+  ): InventoryUpdateCommand[][] {
     const batches: InventoryUpdateCommand[][] = [];
-    
+
     // Group updates by product category for better cache locality
     const categoryGroups = this.groupByCategory(updates);
-    
+
     for (const [category, categoryUpdates] of categoryGroups) {
       // Further split category groups into processing batches
       for (let i = 0; i < categoryUpdates.length; i += this.config.batchSize) {
@@ -187,11 +218,11 @@ export class BatchInventoryProcessor {
     metrics: ProcessingMetrics
   ): Promise<BatchResult[]> {
     const results: BatchResult[] = [];
-    
+
     // Process batches in controlled concurrent groups
     for (let i = 0; i < batches.length; i += this.config.concurrentBatches) {
       const currentGroup = batches.slice(i, i + this.config.concurrentBatches);
-      
+
       const groupPromises = currentGroup.map(async (batch, index) => {
         const batchId = `batch-${i + index}`;
         return await this.processSingleBatch(batch, batchId, metrics);
@@ -227,10 +258,10 @@ export class BatchInventoryProcessor {
     metrics: ProcessingMetrics
   ): Promise<BatchResult> {
     const batchStartTime = Date.now();
-    
+
     try {
       console.log(`  🔄 Processing ${batchId} with ${batch.length} updates`);
-      
+
       // Process updates and collect events
       const events: InventoryUpdatedEvent[] = [];
       let processed = 0;
@@ -244,7 +275,10 @@ export class BatchInventoryProcessor {
             processed++;
           }
         } catch (error) {
-          console.error(`    ❌ Failed to process update for ${update.productId}:`, error);
+          console.error(
+            `    ❌ Failed to process update for ${update.productId}:`,
+            error
+          );
           failed++;
           metrics.recordFailure(error);
         }
@@ -259,28 +293,29 @@ export class BatchInventoryProcessor {
       const batchDuration = Date.now() - batchStartTime;
       metrics.recordBatch(batchId, processed, failed, batchDuration);
 
-      console.log(`  ✅ ${batchId} completed: ${processed} processed, ${failed} failed (${batchDuration}ms)`);
+      console.log(
+        `  ✅ ${batchId} completed: ${processed} processed, ${failed} failed (${batchDuration}ms)`
+      );
 
       return {
         batchId,
         processed,
         failed,
         eventsPublished: events.length,
-        duration: batchDuration
+        duration: batchDuration,
       };
-
     } catch (error) {
       const batchDuration = Date.now() - batchStartTime;
       console.error(`  ❌ ${batchId} failed completely:`, error);
-      
+
       metrics.recordBatch(batchId, 0, batch.length, batchDuration);
-      
+
       return {
         batchId,
         processed: 0,
         failed: batch.length,
         eventsPublished: 0,
-        duration: batchDuration
+        duration: batchDuration,
       };
     }
   }
@@ -300,18 +335,24 @@ export class BatchInventoryProcessor {
    * @since 1.0.0
    * @private
    */
-  private async processInventoryUpdate(update: InventoryUpdateCommand): Promise<InventoryUpdatedEvent | null> {
+  private async processInventoryUpdate(
+    update: InventoryUpdateCommand
+  ): Promise<InventoryUpdatedEvent | null> {
     // Simulate business logic and validation
     const currentStock = await this.getCurrentStock(update.productId);
     const newStock = currentStock + update.quantityChange;
 
     // Validate business rules
     if (newStock < 0 && update.reason === 'sale') {
-      throw new Error(`Insufficient inventory for product ${update.productId}: ${currentStock} available, ${Math.abs(update.quantityChange)} requested`);
+      throw new Error(
+        `Insufficient inventory for product ${update.productId}: ${currentStock} available, ${Math.abs(update.quantityChange)} requested`
+      );
     }
 
     if (Math.abs(update.quantityChange) > 10000) {
-      throw new Error(`Inventory change too large: ${update.quantityChange} for product ${update.productId}`);
+      throw new Error(
+        `Inventory change too large: ${update.quantityChange} for product ${update.productId}`
+      );
     }
 
     // Simulate database update
@@ -323,25 +364,27 @@ export class BatchInventoryProcessor {
       previousStock: currentStock,
       newStock,
       reason: update.reason,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return new InventoryUpdatedEvent(eventData);
   }
 
-  private groupByCategory(updates: InventoryUpdateCommand[]): Map<string, InventoryUpdateCommand[]> {
+  private groupByCategory(
+    updates: InventoryUpdateCommand[]
+  ): Map<string, InventoryUpdateCommand[]> {
     const groups = new Map<string, InventoryUpdateCommand[]>();
-    
+
     for (const update of updates) {
       // Simulate category extraction from product ID
       const category = update.productId.split('-')[0] || 'general';
-      
+
       if (!groups.has(category)) {
         groups.set(category, []);
       }
       groups.get(category)!.push(update);
     }
-    
+
     return groups;
   }
 
@@ -351,9 +394,9 @@ export class BatchInventoryProcessor {
       'electronics-laptop': 100,
       'electronics-phone': 250,
       'clothing-shirt': 500,
-      'books-novel': 75
+      'books-novel': 75,
     };
-    
+
     return stockLevels[productId] || Math.floor(Math.random() * 100) + 10;
   }
 }
@@ -388,11 +431,11 @@ export class InventoryUpdatedEvent extends DomainEvent<InventoryUpdatedEventData
  * @public
  */
 export interface BatchProcessingConfig {
-  batchSize: number;           // Number of items per batch
-  flushInterval: number;       // Auto-flush interval in milliseconds
-  maxRetries: number;          // Maximum retry attempts for failed items
-  concurrentBatches: number;   // Number of batches to process concurrently
-  enableMetrics: boolean;      // Whether to collect performance metrics
+  batchSize: number; // Number of items per batch
+  flushInterval: number; // Auto-flush interval in milliseconds
+  maxRetries: number; // Maximum retry attempts for failed items
+  concurrentBatches: number; // Number of batches to process concurrently
+  enableMetrics: boolean; // Whether to collect performance metrics
 }
 
 /**
@@ -442,13 +485,18 @@ export class ProcessingMetrics {
   private failures: Error[] = [];
   private startTime: number = Date.now();
 
-  recordBatch(batchId: string, processed: number, failed: number, duration: number): void {
+  recordBatch(
+    batchId: string,
+    processed: number,
+    failed: number,
+    duration: number
+  ): void {
     this.batchMetrics.set(batchId, {
       batchId,
       processed,
       failed,
       eventsPublished: processed, // Simplified - in real scenario this might differ
-      duration
+      duration,
     });
   }
 
@@ -459,15 +507,18 @@ export class ProcessingMetrics {
   getMetrics(): Record<string, unknown> {
     const batches = Array.from(this.batchMetrics.values());
     const totalDuration = Date.now() - this.startTime;
-    
+
     return {
       totalBatches: batches.length,
-      averageBatchDuration: batches.reduce((sum, b) => sum + b.duration, 0) / batches.length,
+      averageBatchDuration:
+        batches.reduce((sum, b) => sum + b.duration, 0) / batches.length,
       minBatchDuration: Math.min(...batches.map(b => b.duration)),
       maxBatchDuration: Math.max(...batches.map(b => b.duration)),
       totalFailures: this.failures.length,
-      failureRate: this.failures.length / (batches.reduce((sum, b) => sum + b.processed + b.failed, 0)),
-      processingDuration: totalDuration
+      failureRate:
+        this.failures.length /
+        batches.reduce((sum, b) => sum + b.processed + b.failed, 0),
+      processingDuration: totalDuration,
     };
   }
 }
@@ -480,70 +531,99 @@ async function demonstrateBatchProcessing(): Promise<void> {
   const processor = new BatchInventoryProcessor(eventBus, {
     batchSize: 25,
     concurrentBatches: 3,
-    enableMetrics: true
+    enableMetrics: true,
   });
 
   // Generate large volume of inventory updates
   const updates: InventoryUpdateCommand[] = [];
   const productTypes = ['electronics', 'clothing', 'books', 'home'];
-  const reasons: Array<InventoryUpdatedEventData['reason']> = ['sale', 'restock', 'adjustment', 'damage'];
+  const reasons: Array<InventoryUpdatedEventData['reason']> = [
+    'sale',
+    'restock',
+    'adjustment',
+    'damage',
+  ];
 
   for (let i = 0; i < 500; i++) {
-    const productType = productTypes[Math.floor(Math.random() * productTypes.length)];
+    const productType =
+      productTypes[Math.floor(Math.random() * productTypes.length)];
     const productId = `${productType}-${Math.floor(Math.random() * 100)}`;
     const reason = reasons[Math.floor(Math.random() * reasons.length)];
-    const quantityChange = reason === 'sale' ? 
-      -Math.floor(Math.random() * 10) - 1 : 
-      Math.floor(Math.random() * 50) + 1;
+    const quantityChange =
+      reason === 'sale'
+        ? -Math.floor(Math.random() * 10) - 1
+        : Math.floor(Math.random() * 50) + 1;
 
     updates.push({
       productId,
       quantityChange,
-      reason
+      reason,
     });
   }
 
   try {
     const result = await processor.processBulkUpdates(updates);
-    
+
     console.log('\n📊 Final Processing Summary:');
-    console.log(`✅ Success Rate: ${((result.totalProcessed / (result.totalProcessed + result.totalFailed)) * 100).toFixed(1)}%`);
+    console.log(
+      `✅ Success Rate: ${((result.totalProcessed / (result.totalProcessed + result.totalFailed)) * 100).toFixed(1)}%`
+    );
     console.log(`🚀 Throughput: ${result.throughput} updates/second`);
-    console.log(`📦 Batch Efficiency: ${(result.totalProcessed / result.batchCount).toFixed(1)} updates/batch`);
-    console.log(`📡 Event Publishing: ${result.eventsPublished} events published`);
-    
+    console.log(
+      `📦 Batch Efficiency: ${(result.totalProcessed / result.batchCount).toFixed(1)} updates/batch`
+    );
+    console.log(
+      `📡 Event Publishing: ${result.eventsPublished} events published`
+    );
   } catch (error) {
     console.error('❌ Demonstration failed:', error);
   }
 }
-```
+````
 
 ## Key Features
 
-- **📦 Intelligent Batching**: Groups updates by category and characteristics for optimal processing
-- **⚡ Concurrent Processing**: Controlled parallelism prevents resource exhaustion while maximizing throughput
-- **📊 Performance Metrics**: Comprehensive metrics collection for monitoring and optimization
-- **🔄 Bulk Event Publishing**: Efficient batch event publishing reduces overhead and improves performance
-- **🛡️ Error Isolation**: Individual update failures don't affect the entire batch
-- **🎯 Resource Management**: Configurable batch sizes and concurrency limits for different environments
+- **📦 Intelligent Batching**: Groups updates by category and characteristics
+  for optimal processing
+- **⚡ Concurrent Processing**: Controlled parallelism prevents resource
+  exhaustion while maximizing throughput
+- **📊 Performance Metrics**: Comprehensive metrics collection for monitoring
+  and optimization
+- **🔄 Bulk Event Publishing**: Efficient batch event publishing reduces
+  overhead and improves performance
+- **🛡️ Error Isolation**: Individual update failures don't affect the entire
+  batch
+- **🎯 Resource Management**: Configurable batch sizes and concurrency limits
+  for different environments
 
 ## Performance Benefits
 
-1. **Reduced Event Publishing Overhead**: Bulk publishing eliminates per-event processing costs
-2. **Improved Database Efficiency**: Batch operations reduce connection overhead and improve cache locality
-3. **Controlled Resource Usage**: Concurrency limits prevent system overload during peak processing
+1. **Reduced Event Publishing Overhead**: Bulk publishing eliminates per-event
+   processing costs
+2. **Improved Database Efficiency**: Batch operations reduce connection overhead
+   and improve cache locality
+3. **Controlled Resource Usage**: Concurrency limits prevent system overload
+   during peak processing
 4. **Better Error Recovery**: Isolated failures enable partial success scenarios
-5. **Optimized Memory Usage**: Streaming processing prevents memory exhaustion with large datasets
+5. **Optimized Memory Usage**: Streaming processing prevents memory exhaustion
+   with large datasets
 
 ## Common Pitfalls
 
-- **❌ Oversized Batches**: Too large batches can cause memory issues and transaction timeouts
-- **❌ Undersized Batches**: Too small batches reduce efficiency gains from batching
-- **❌ Uncontrolled Concurrency**: Too many concurrent batches can overwhelm system resources
-- **❌ Poor Error Handling**: Not isolating failures can cause entire batch operations to fail
+- **❌ Oversized Batches**: Too large batches can cause memory issues and
+  transaction timeouts
+- **❌ Undersized Batches**: Too small batches reduce efficiency gains from
+  batching
+- **❌ Uncontrolled Concurrency**: Too many concurrent batches can overwhelm
+  system resources
+- **❌ Poor Error Handling**: Not isolating failures can cause entire batch
+  operations to fail
 
 ## Related Examples
 
-- [Example 2: Event Sourcing](./example-2.md) - Event sourcing with batch replay capabilities
-- [Example 3: Multi-Context Processing](./example-3.md) - Context-aware batch processing for multi-tenant scenarios
-- [Advanced: Performance Monitoring](../advanced/example-1.md) - Advanced monitoring and optimization techniques
+- [Example 2: Event Sourcing](./example-2.md) - Event sourcing with batch replay
+  capabilities
+- [Example 3: Multi-Context Processing](./example-3.md) - Context-aware batch
+  processing for multi-tenant scenarios
+- [Advanced: Performance Monitoring](../advanced/example-1.md) - Advanced
+  monitoring and optimization techniques

@@ -9,23 +9,33 @@
 
 ## Description
 
-This example demonstrates an advanced Anti-Corruption Layer that includes caching for performance optimization and resilience patterns for handling external system failures.
+This example demonstrates an advanced Anti-Corruption Layer that includes
+caching for performance optimization and resilience patterns for handling
+external system failures.
 
 ## Business Context
 
-An order management system integrates with multiple external services (inventory, payment, shipping) that may be slow or unreliable. The ACL provides caching and fault tolerance to ensure system reliability.
+An order management system integrates with multiple external services
+(inventory, payment, shipping) that may be slow or unreliable. The ACL provides
+caching and fault tolerance to ensure system reliability.
 
 ## Code Example
 
 ```typescript
 // resilient-order.acl.ts
-import { AntiCorruptionLayer, IDataTranslator, CachingACLDecorator } from '@vytches-ddd/acl';
+import {
+  AntiCorruptionLayer,
+  IDataTranslator,
+  CachingACLDecorator,
+} from '@vytches-ddd/acl';
 import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
 import { Result } from '@vytches-ddd/utils';
 import { Order, ThirdPartyOrderData, OrderSubmissionRequest } from '../types'; // From your application
 
 // Enhanced translator with validation
-export class OrderDataTranslator implements IDataTranslator<ThirdPartyOrderData, Order> {
+export class OrderDataTranslator
+  implements IDataTranslator<ThirdPartyOrderData, Order>
+{
   translate(external: ThirdPartyOrderData): Result<Order, Error> {
     try {
       // Comprehensive validation
@@ -41,7 +51,7 @@ export class OrderDataTranslator implements IDataTranslator<ThirdPartyOrderData,
           productId: item.product_sku,
           quantity: item.qty,
           unitPrice: item.price_per_unit,
-          totalPrice: item.line_total
+          totalPrice: item.line_total,
         })),
         totalAmount: external.grand_total,
         currency: external.currency,
@@ -51,13 +61,15 @@ export class OrderDataTranslator implements IDataTranslator<ThirdPartyOrderData,
           street: external.delivery_address.address_line_1,
           city: external.delivery_address.city,
           postalCode: external.delivery_address.zip_code,
-          country: external.delivery_address.country_code
-        }
+          country: external.delivery_address.country_code,
+        },
       };
 
       return Result.success(order);
     } catch (error) {
-      return Result.failure(new Error(`Order translation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order translation failed: ${error.message}`)
+      );
     }
   }
 
@@ -83,12 +95,12 @@ export class OrderDataTranslator implements IDataTranslator<ThirdPartyOrderData,
 
   private mapOrderStatus(externalStatus: string): Order['status'] {
     const statusMap: Record<string, Order['status']> = {
-      'new': 'pending',
-      'processing': 'confirmed',
-      'shipped': 'shipped',
-      'delivered': 'delivered',
-      'cancelled': 'cancelled',
-      'rejected': 'cancelled'
+      new: 'pending',
+      processing: 'confirmed',
+      shipped: 'shipped',
+      delivered: 'delivered',
+      cancelled: 'cancelled',
+      rejected: 'cancelled',
     };
 
     return statusMap[externalStatus.toLowerCase()] || 'pending';
@@ -96,18 +108,21 @@ export class OrderDataTranslator implements IDataTranslator<ThirdPartyOrderData,
 }
 
 // Resilient ACL with caching and circuit breaker
-export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, Order> {
+export class ResilientOrderACL extends AntiCorruptionLayer<
+  ThirdPartyOrderData,
+  Order
+> {
   private circuitBreaker: CircuitBreaker;
   private retryPolicy: RetryPolicy;
 
   constructor(private externalOrderAPI: ExternalOrderAPI) {
     super(new OrderDataTranslator());
-    
+
     // Configure circuit breaker
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
       resetTimeout: 60000, // 1 minute
-      monitoringPeriod: 30000 // 30 seconds
+      monitoringPeriod: 30000, // 30 seconds
     });
 
     // Configure retry policy
@@ -115,7 +130,7 @@ export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, 
       maxAttempts: 3,
       baseDelay: 1000,
       backoffStrategy: 'exponential',
-      maxDelay: 10000
+      maxDelay: 10000,
     });
   }
 
@@ -126,40 +141,50 @@ export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, 
           const externalData = await this.externalOrderAPI.getOrder(orderId);
           return this.translateData(externalData);
         } catch (error) {
-          return Result.failure(new Error(`Failed to get order: ${error.message}`));
+          return Result.failure(
+            new Error(`Failed to get order: ${error.message}`)
+          );
         }
       });
     });
   }
 
-  async submitOrder(request: OrderSubmissionRequest): Promise<Result<Order, Error>> {
+  async submitOrder(
+    request: OrderSubmissionRequest
+  ): Promise<Result<Order, Error>> {
     return this.circuitBreaker.execute(async () => {
       return this.retryPolicy.execute(async () => {
         try {
           // Convert domain order to external format
           const externalData = this.convertToExternalFormat(request.order);
-          
+
           // Submit to external system
           const submittedData = await this.externalOrderAPI.submitOrder({
             order: externalData,
             validate_inventory: request.validateInventory,
-            send_notification: request.notifyCustomer
+            send_notification: request.notifyCustomer,
           });
 
           return this.translateData(submittedData);
         } catch (error) {
-          return Result.failure(new Error(`Order submission failed: ${error.message}`));
+          return Result.failure(
+            new Error(`Order submission failed: ${error.message}`)
+          );
         }
       });
     });
   }
 
-  async getOrdersByCustomer(customerId: string, limit: number = 10): Promise<Result<Order[], Error>> {
+  async getOrdersByCustomer(
+    customerId: string,
+    limit: number = 10
+  ): Promise<Result<Order[], Error>> {
     return this.circuitBreaker.execute(async () => {
       return this.retryPolicy.execute(async () => {
         try {
-          const externalOrders = await this.externalOrderAPI.getOrdersByCustomer(customerId, limit);
-          
+          const externalOrders =
+            await this.externalOrderAPI.getOrdersByCustomer(customerId, limit);
+
           const orders: Order[] = [];
           const errors: string[] = [];
 
@@ -168,17 +193,23 @@ export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, 
             if (result.isSuccess()) {
               orders.push(result.value);
             } else {
-              errors.push(`Order ${externalOrder.order_reference}: ${result.error.message}`);
+              errors.push(
+                `Order ${externalOrder.order_reference}: ${result.error.message}`
+              );
             }
           }
 
           if (orders.length === 0 && errors.length > 0) {
-            return Result.failure(new Error(`All orders failed: ${errors.join(', ')}`));
+            return Result.failure(
+              new Error(`All orders failed: ${errors.join(', ')}`)
+            );
           }
 
           return Result.success(orders);
         } catch (error) {
-          return Result.failure(new Error(`Failed to get customer orders: ${error.message}`));
+          return Result.failure(
+            new Error(`Failed to get customer orders: ${error.message}`)
+          );
         }
       });
     });
@@ -192,7 +223,7 @@ export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, 
         product_sku: item.productId,
         qty: item.quantity,
         price_per_unit: item.unitPrice,
-        line_total: item.totalPrice
+        line_total: item.totalPrice,
       })),
       grand_total: order.totalAmount,
       currency: order.currency,
@@ -202,18 +233,18 @@ export class ResilientOrderACL extends AntiCorruptionLayer<ThirdPartyOrderData, 
         address_line_1: order.shippingAddress.street,
         city: order.shippingAddress.city,
         zip_code: order.shippingAddress.postalCode,
-        country_code: order.shippingAddress.country
-      }
+        country_code: order.shippingAddress.country,
+      },
     };
   }
 
   private convertOrderStatus(status: Order['status']): string {
     const statusMap: Record<Order['status'], string> = {
-      'pending': 'new',
-      'confirmed': 'processing',
-      'shipped': 'shipped',
-      'delivered': 'delivered',
-      'cancelled': 'cancelled'
+      pending: 'new',
+      confirmed: 'processing',
+      shipped: 'shipped',
+      delivered: 'delivered',
+      cancelled: 'cancelled',
     };
 
     return statusMap[status] || 'new';
@@ -228,7 +259,7 @@ export class CachedOrderACL {
     this.cachedACL = new CachingACLDecorator(baseACL, {
       ttl: 300000, // 5 minutes
       maxSize: 1000,
-      keyGenerator: (method, args) => `${method}_${args.join('_')}`
+      keyGenerator: (method, args) => `${method}_${args.join('_')}`,
     });
   }
 
@@ -236,15 +267,25 @@ export class CachedOrderACL {
     return this.cachedACL.execute('getOrder', [orderId]);
   }
 
-  async getOrdersByCustomer(customerId: string, limit?: number): Promise<Result<Order[], Error>> {
-    return this.cachedACL.execute('getOrdersByCustomer', [customerId, limit || 10]);
+  async getOrdersByCustomer(
+    customerId: string,
+    limit?: number
+  ): Promise<Result<Order[], Error>> {
+    return this.cachedACL.execute('getOrdersByCustomer', [
+      customerId,
+      limit || 10,
+    ]);
   }
 
   // No caching for mutations
-  async submitOrder(request: OrderSubmissionRequest): Promise<Result<Order, Error>> {
+  async submitOrder(
+    request: OrderSubmissionRequest
+  ): Promise<Result<Order, Error>> {
     // Clear related cache entries
-    this.cachedACL.invalidatePattern(`getOrdersByCustomer_${request.order.customerId}`);
-    
+    this.cachedACL.invalidatePattern(
+      `getOrdersByCustomer_${request.order.customerId}`
+    );
+
     // Execute without caching
     return (this.cachedACL as any).baseACL.submitOrder(request);
   }
@@ -254,19 +295,23 @@ export class CachedOrderACL {
 export class OrderManagementService {
   constructor(private orderACL: CachedOrderACL) {}
 
-  async processCustomerOrder(request: OrderSubmissionRequest): Promise<Result<Order, Error>> {
+  async processCustomerOrder(
+    request: OrderSubmissionRequest
+  ): Promise<Result<Order, Error>> {
     // Submit order through resilient ACL
     const result = await this.orderACL.submitOrder(request);
-    
+
     if (result.isSuccess()) {
       // Additional domain logic can be added here
       console.log(`Order ${result.value.id} processed successfully`);
     }
-    
+
     return result;
   }
 
-  async getCustomerOrderHistory(customerId: string): Promise<Result<Order[], Error>> {
+  async getCustomerOrderHistory(
+    customerId: string
+  ): Promise<Result<Order[], Error>> {
     // Benefit from caching for repeated requests
     return await this.orderACL.getOrdersByCustomer(customerId);
   }
@@ -276,7 +321,10 @@ export class OrderManagementService {
 interface ExternalOrderAPI {
   getOrder(id: string): Promise<ThirdPartyOrderData>;
   submitOrder(request: ExternalOrderSubmission): Promise<ThirdPartyOrderData>;
-  getOrdersByCustomer(customerId: string, limit: number): Promise<ThirdPartyOrderData[]>;
+  getOrdersByCustomer(
+    customerId: string,
+    limit: number
+  ): Promise<ThirdPartyOrderData[]>;
 }
 
 interface ExternalOrderSubmission {
@@ -289,16 +337,19 @@ interface ExternalOrderSubmission {
 ## Key Features
 
 - **Circuit Breaker**: Prevents cascading failures when external system is down
-- **Retry Logic**: Automatic retry with exponential backoff for transient failures
+- **Retry Logic**: Automatic retry with exponential backoff for transient
+  failures
 - **Caching**: Performance optimization for frequently accessed data
-- **Data Validation**: Comprehensive validation of external data before translation
+- **Data Validation**: Comprehensive validation of external data before
+  translation
 - **Cache Invalidation**: Smart cache invalidation for data consistency
 
 ## Common Pitfalls
 
 - **Cache Inconsistency**: Implement proper cache invalidation strategies
 - **Retry Storms**: Use jitter in retry delays to prevent synchronized retries
-- **Circuit Breaker Tuning**: Monitor and adjust thresholds based on actual usage
+- **Circuit Breaker Tuning**: Monitor and adjust thresholds based on actual
+  usage
 
 ## Related Examples
 

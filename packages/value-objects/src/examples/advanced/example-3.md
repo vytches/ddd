@@ -1,36 +1,40 @@
 # Coordinates Value Object - Advanced Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced
-**Domain**: Geospatial & Location Services
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Advanced **Domain**: Geospatial & Location Services
 **Patterns**: Geometric Calculations, Distance Functions, Spatial Operations
 **Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **Coordinates** value object for advanced geospatial applications including distance calculations, area computations, and spatial relationships. Shows advanced patterns for geographic value objects with mathematical operations.
+This example demonstrates creating a **Coordinates** value object for advanced
+geospatial applications including distance calculations, area computations, and
+spatial relationships. Shows advanced patterns for geographic value objects with
+mathematical operations.
 
 ## Business Context
 
-Coordinates are essential for mapping services, logistics, location-based services, and geographic analysis. They provide distance calculations, boundary checks, and spatial operations. Critical for delivery routing, geofencing, and location analytics.
+Coordinates are essential for mapping services, logistics, location-based
+services, and geographic analysis. They provide distance calculations, boundary
+checks, and spatial operations. Critical for delivery routing, geofencing, and
+location analytics.
 
 ## Code Example
 
 ```typescript
 // coordinates.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  CoordinatesData, 
+import {
+  CoordinatesData,
   BoundingBox,
   DistanceUnit,
-  ValueObjectValidationResult 
+  ValueObjectValidationResult,
 } from './types';
-import { 
-  validateRequired, 
+import {
+  validateRequired,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class Coordinates extends ValueObject<CoordinatesData> {
@@ -53,7 +57,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
       latitude: parseFloat(latitude.toFixed(8)), // Precision to ~1cm
       longitude: parseFloat(longitude.toFixed(8)),
       altitude: altitude ? parseFloat(altitude.toFixed(2)) : undefined,
-      accuracy: accuracy ? parseFloat(accuracy.toFixed(2)) : undefined
+      accuracy: accuracy ? parseFloat(accuracy.toFixed(2)) : undefined,
     };
 
     const validation = Coordinates.validate(data);
@@ -78,7 +82,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
       parts[0], // latitude
       parts[1], // longitude
       parts[2], // altitude (optional)
-      parts[3]  // accuracy (optional)
+      parts[3] // accuracy (optional)
     );
   }
 
@@ -93,8 +97,18 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     lngSeconds: number,
     lngDirection: 'E' | 'W'
   ): Coordinates {
-    const lat = Coordinates.dmsToDecimal(latDegrees, latMinutes, latSeconds, latDirection);
-    const lng = Coordinates.dmsToDecimal(lngDegrees, lngMinutes, lngSeconds, lngDirection);
+    const lat = Coordinates.dmsToDecimal(
+      latDegrees,
+      latMinutes,
+      latSeconds,
+      latDirection
+    );
+    const lng = Coordinates.dmsToDecimal(
+      lngDegrees,
+      lngMinutes,
+      lngSeconds,
+      lngDirection
+    );
 
     return Coordinates.create(lat, lng);
   }
@@ -114,7 +128,10 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     }
 
     // Altitude validation (reasonable limits)
-    if (data.altitude !== undefined && (data.altitude < -11000 || data.altitude > 9000)) {
+    if (
+      data.altitude !== undefined &&
+      (data.altitude < -11000 || data.altitude > 9000)
+    ) {
       errors.push('Altitude must be between -11,000m and +9,000m');
     }
 
@@ -123,7 +140,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
       errors.push('Accuracy must be a positive number');
     }
 
-    return errors.length > 0 
+    return errors.length > 0
       ? { isValid: false, errors }
       : { isValid: true, errors: [] };
   }
@@ -132,16 +149,26 @@ export class Coordinates extends ValueObject<CoordinatesData> {
   distanceTo(other: Coordinates, unit: DistanceUnit = 'km'): number {
     const lat1Rad = this.toRadians(this.data.latitude);
     const lat2Rad = this.toRadians(other.data.latitude);
-    const deltaLatRad = this.toRadians(other.data.latitude - this.data.latitude);
-    const deltaLngRad = this.toRadians(other.data.longitude - this.data.longitude);
+    const deltaLatRad = this.toRadians(
+      other.data.latitude - this.data.latitude
+    );
+    const deltaLngRad = this.toRadians(
+      other.data.longitude - this.data.longitude
+    );
 
-    const a = Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
-              Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-              Math.sin(deltaLngRad / 2) * Math.sin(deltaLngRad / 2);
+    const a =
+      Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
+      Math.cos(lat1Rad) *
+        Math.cos(lat2Rad) *
+        Math.sin(deltaLngRad / 2) *
+        Math.sin(deltaLngRad / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    const radius = unit === 'miles' ? Coordinates.EARTH_RADIUS_MILES : Coordinates.EARTH_RADIUS_KM;
+    const radius =
+      unit === 'miles'
+        ? Coordinates.EARTH_RADIUS_MILES
+        : Coordinates.EARTH_RADIUS_KM;
     const distance = radius * c;
 
     return parseFloat(distance.toFixed(6));
@@ -151,11 +178,14 @@ export class Coordinates extends ValueObject<CoordinatesData> {
   bearingTo(other: Coordinates): number {
     const lat1Rad = this.toRadians(this.data.latitude);
     const lat2Rad = this.toRadians(other.data.latitude);
-    const deltaLngRad = this.toRadians(other.data.longitude - this.data.longitude);
+    const deltaLngRad = this.toRadians(
+      other.data.longitude - this.data.longitude
+    );
 
     const x = Math.sin(deltaLngRad) * Math.cos(lat2Rad);
-    const y = Math.cos(lat1Rad) * Math.sin(lat2Rad) - 
-              Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(deltaLngRad);
+    const y =
+      Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+      Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(deltaLngRad);
 
     const bearingRad = Math.atan2(x, y);
     const bearingDeg = this.toDegrees(bearingRad);
@@ -164,8 +194,15 @@ export class Coordinates extends ValueObject<CoordinatesData> {
   }
 
   // ✅ FOCUS: Destination point calculation
-  destinationPoint(distance: number, bearing: number, unit: DistanceUnit = 'km'): Coordinates {
-    const radius = unit === 'miles' ? Coordinates.EARTH_RADIUS_MILES : Coordinates.EARTH_RADIUS_KM;
+  destinationPoint(
+    distance: number,
+    bearing: number,
+    unit: DistanceUnit = 'km'
+  ): Coordinates {
+    const radius =
+      unit === 'miles'
+        ? Coordinates.EARTH_RADIUS_MILES
+        : Coordinates.EARTH_RADIUS_KM;
     const angularDistance = distance / radius;
 
     const lat1Rad = this.toRadians(this.data.latitude);
@@ -174,24 +211,28 @@ export class Coordinates extends ValueObject<CoordinatesData> {
 
     const lat2Rad = Math.asin(
       Math.sin(lat1Rad) * Math.cos(angularDistance) +
-      Math.cos(lat1Rad) * Math.sin(angularDistance) * Math.cos(bearingRad)
+        Math.cos(lat1Rad) * Math.sin(angularDistance) * Math.cos(bearingRad)
     );
 
-    const lng2Rad = lng1Rad + Math.atan2(
-      Math.sin(bearingRad) * Math.sin(angularDistance) * Math.cos(lat1Rad),
-      Math.cos(angularDistance) - Math.sin(lat1Rad) * Math.sin(lat2Rad)
-    );
+    const lng2Rad =
+      lng1Rad +
+      Math.atan2(
+        Math.sin(bearingRad) * Math.sin(angularDistance) * Math.cos(lat1Rad),
+        Math.cos(angularDistance) - Math.sin(lat1Rad) * Math.sin(lat2Rad)
+      );
 
     const lat2 = this.toDegrees(lat2Rad);
     const lng2 = this.toDegrees(lng2Rad);
 
-    return Coordinates.create(lat2, (lng2 + 540) % 360 - 180); // Normalize longitude
+    return Coordinates.create(lat2, ((lng2 + 540) % 360) - 180); // Normalize longitude
   }
 
   // ✅ FOCUS: Bounding box operations
   static getBoundingBox(coordinates: Coordinates[]): BoundingBox {
     if (coordinates.length === 0) {
-      throw new Error('Cannot create bounding box from empty coordinates array');
+      throw new Error(
+        'Cannot create bounding box from empty coordinates array'
+      );
     }
 
     let minLat = coordinates[0].data.latitude;
@@ -208,19 +249,25 @@ export class Coordinates extends ValueObject<CoordinatesData> {
 
     return {
       southWest: Coordinates.create(minLat, minLng),
-      northEast: Coordinates.create(maxLat, maxLng)
+      northEast: Coordinates.create(maxLat, maxLng),
     };
   }
 
   isWithinBoundingBox(boundingBox: BoundingBox): boolean {
-    return this.data.latitude >= boundingBox.southWest.data.latitude &&
-           this.data.latitude <= boundingBox.northEast.data.latitude &&
-           this.data.longitude >= boundingBox.southWest.data.longitude &&
-           this.data.longitude <= boundingBox.northEast.data.longitude;
+    return (
+      this.data.latitude >= boundingBox.southWest.data.latitude &&
+      this.data.latitude <= boundingBox.northEast.data.latitude &&
+      this.data.longitude >= boundingBox.southWest.data.longitude &&
+      this.data.longitude <= boundingBox.northEast.data.longitude
+    );
   }
 
   // ✅ FOCUS: Circle/radius operations
-  isWithinRadius(center: Coordinates, radius: number, unit: DistanceUnit = 'km'): boolean {
+  isWithinRadius(
+    center: Coordinates,
+    radius: number,
+    unit: DistanceUnit = 'km'
+  ): boolean {
     const distance = this.distanceTo(center, unit);
     return distance <= radius;
   }
@@ -233,7 +280,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     return points
       .map(point => ({
         coordinates: point,
-        distance: this.distanceTo(point, unit)
+        distance: this.distanceTo(point, unit),
       }))
       .filter(item => item.distance <= radius)
       .sort((a, b) => a.distance - b.distance);
@@ -250,14 +297,17 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     const x = this.data.longitude;
     const y = this.data.latitude;
 
-    for (let i = 0, j = polygonVertices.length - 1; i < polygonVertices.length; j = i++) {
+    for (
+      let i = 0, j = polygonVertices.length - 1;
+      i < polygonVertices.length;
+      j = i++
+    ) {
       const xi = polygonVertices[i].data.longitude;
       const yi = polygonVertices[i].data.latitude;
       const xj = polygonVertices[j].data.longitude;
       const yj = polygonVertices[j].data.latitude;
 
-      if (((yi > y) !== (yj > y)) &&
-          (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
         inside = !inside;
       }
     }
@@ -271,7 +321,9 @@ export class Coordinates extends ValueObject<CoordinatesData> {
       throw new Error('Cannot calculate center from empty coordinates array');
     }
 
-    let x = 0, y = 0, z = 0;
+    let x = 0,
+      y = 0,
+      z = 0;
 
     for (const coord of coordinates) {
       const latRad = coord.toRadians(coord.data.latitude);
@@ -302,21 +354,23 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     const BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
     let lat = this.data.latitude;
     let lng = this.data.longitude;
-    let latMin = -90, latMax = 90;
-    let lngMin = -180, lngMax = 180;
+    let latMin = -90,
+      latMax = 90;
+    let lngMin = -180,
+      lngMax = 180;
     let geohash = '';
     let bits = 0;
     let even = true;
 
     while (geohash.length < precision) {
       let ch = 0;
-      
+
       for (let i = 0; i < 5; i++) {
         if (even) {
           // Longitude
           const mid = (lngMin + lngMax) / 2;
           if (lng >= mid) {
-            ch |= (1 << (4 - i));
+            ch |= 1 << (4 - i);
             lngMin = mid;
           } else {
             lngMax = mid;
@@ -325,7 +379,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
           // Latitude
           const mid = (latMin + latMax) / 2;
           if (lat >= mid) {
-            ch |= (1 << (4 - i));
+            ch |= 1 << (4 - i);
             latMin = mid;
           } else {
             latMax = mid;
@@ -333,7 +387,7 @@ export class Coordinates extends ValueObject<CoordinatesData> {
         }
         even = !even;
       }
-      
+
       geohash += BASE32[ch];
     }
 
@@ -342,13 +396,15 @@ export class Coordinates extends ValueObject<CoordinatesData> {
 
   // ✅ FOCUS: Coordinate system conversions
   toMercator(): { x: number; y: number } {
-    const x = this.data.longitude * 20037508.34 / 180;
-    let y = Math.log(Math.tan((90 + this.data.latitude) * Math.PI / 360)) / (Math.PI / 180);
-    y = y * 20037508.34 / 180;
+    const x = (this.data.longitude * 20037508.34) / 180;
+    let y =
+      Math.log(Math.tan(((90 + this.data.latitude) * Math.PI) / 360)) /
+      (Math.PI / 180);
+    y = (y * 20037508.34) / 180;
 
     return {
       x: parseFloat(x.toFixed(2)),
-      y: parseFloat(y.toFixed(2))
+      y: parseFloat(y.toFixed(2)),
     };
   }
 
@@ -361,17 +417,21 @@ export class Coordinates extends ValueObject<CoordinatesData> {
       const degrees = Math.floor(abs);
       const minutes = Math.floor((abs - degrees) * 60);
       const seconds = ((abs - degrees) * 60 - minutes) * 60;
-      
-      const direction = isLatitude 
-        ? (decimal >= 0 ? 'N' : 'S')
-        : (decimal >= 0 ? 'E' : 'W');
+
+      const direction = isLatitude
+        ? decimal >= 0
+          ? 'N'
+          : 'S'
+        : decimal >= 0
+          ? 'E'
+          : 'W';
 
       return `${degrees}°${minutes}'${seconds.toFixed(2)}"${direction}`;
     };
 
     return {
       latitude: formatDMS(this.data.latitude, true),
-      longitude: formatDMS(this.data.longitude, false)
+      longitude: formatDMS(this.data.longitude, false),
     };
   }
 
@@ -394,11 +454,11 @@ export class Coordinates extends ValueObject<CoordinatesData> {
   // ✅ FOCUS: Display methods
   toString(): string {
     let result = `${this.data.latitude.toFixed(6)}, ${this.data.longitude.toFixed(6)}`;
-    
+
     if (this.data.altitude !== undefined) {
       result += `, ${this.data.altitude}m`;
     }
-    
+
     return result;
   }
 
@@ -433,26 +493,36 @@ export class Coordinates extends ValueObject<CoordinatesData> {
     direction: 'N' | 'S' | 'E' | 'W'
   ): number {
     let decimal = degrees + minutes / 60 + seconds / 3600;
-    
+
     if (direction === 'S' || direction === 'W') {
       decimal = -decimal;
     }
-    
+
     return decimal;
   }
 
   // ✅ FOCUS: Getters
-  get latitude(): number { return this.data.latitude; }
-  get longitude(): number { return this.data.longitude; }
-  get altitude(): number | undefined { return this.data.altitude; }
-  get accuracy(): number | undefined { return this.data.accuracy; }
+  get latitude(): number {
+    return this.data.latitude;
+  }
+  get longitude(): number {
+    return this.data.longitude;
+  }
+  get altitude(): number | undefined {
+    return this.data.altitude;
+  }
+  get accuracy(): number | undefined {
+    return this.data.accuracy;
+  }
 
   // ✅ FOCUS: Value object equality
   protected isEqualTo(other: Coordinates): boolean {
-    return this.data.latitude === other.data.latitude &&
-           this.data.longitude === other.data.longitude &&
-           this.data.altitude === other.data.altitude &&
-           this.data.accuracy === other.data.accuracy;
+    return (
+      this.data.latitude === other.data.latitude &&
+      this.data.longitude === other.data.longitude &&
+      this.data.altitude === other.data.altitude &&
+      this.data.accuracy === other.data.accuracy
+    );
   }
 }
 ```
@@ -464,12 +534,12 @@ export class Coordinates extends ValueObject<CoordinatesData> {
 import { Coordinates } from './coordinates';
 
 // ✅ Creating coordinates
-const newYork = Coordinates.create(40.7128, -74.0060);
+const newYork = Coordinates.create(40.7128, -74.006);
 const london = Coordinates.fromString('51.5074, -0.1278');
 const paris = Coordinates.fromDMS(48, 51, 29, 'N', 2, 17, 40, 'E');
 
 console.log(newYork.toString()); // "40.712800, -74.006000"
-console.log(london.toDMS()); 
+console.log(london.toDMS());
 // { latitude: "51°30'26.64\"N", longitude: "0°7'40.08\"W" }
 
 // ✅ Distance calculations
@@ -492,7 +562,9 @@ const center = Coordinates.getCenter(coordinates);
 console.log(`Geographic center: ${center.toString()}`);
 
 const boundingBox = Coordinates.getBoundingBox(coordinates);
-console.log(`Bounding box: ${boundingBox.southWest} to ${boundingBox.northEast}`);
+console.log(
+  `Bounding box: ${boundingBox.southWest} to ${boundingBox.northEast}`
+);
 
 // ✅ Geohashing
 const geohash = newYork.getGeohash(8);
@@ -535,7 +607,7 @@ class GeospatialService {
       })
       .map(location => ({
         ...location,
-        distance: center.distanceTo(location.coordinates)
+        distance: center.distanceTo(location.coordinates),
       }))
       .sort((a, b) => a.distance - b.distance);
 
@@ -547,7 +619,10 @@ class GeospatialService {
   }
 
   // ✅ Find locations within polygon
-  findWithinArea(polygonVertices: Coordinates[], category?: string): Location[] {
+  findWithinArea(
+    polygonVertices: Coordinates[],
+    category?: string
+  ): Location[] {
     return this.locations.filter(location => {
       if (category && location.category !== category) {
         return false;
@@ -557,7 +632,10 @@ class GeospatialService {
   }
 
   // ✅ Route optimization (simple nearest neighbor)
-  optimizeRoute(start: Coordinates, waypoints: Location[]): {
+  optimizeRoute(
+    start: Coordinates,
+    waypoints: Location[]
+  ): {
     route: Location[];
     totalDistance: number;
   } {
@@ -595,7 +673,7 @@ class GeospatialService {
 
     return {
       route,
-      totalDistance: parseFloat(totalDistance.toFixed(2))
+      totalDistance: parseFloat(totalDistance.toFixed(2)),
     };
   }
 
@@ -626,8 +704,8 @@ class GeospatialService {
           id: l.id,
           name: l.name,
           coordinates: l.coordinates,
-          category: l.category
-        }))
+          category: l.category,
+        })),
       };
     });
   }
@@ -643,7 +721,7 @@ class GeospatialService {
       locations: Location[];
       radius: number;
     }> = [];
-    
+
     const processed = new Set<string>();
 
     for (const location of this.locations) {
@@ -666,7 +744,7 @@ class GeospatialService {
       if (cluster.length > 0) {
         const clusterCoords = cluster.map(l => l.coordinates);
         const center = Coordinates.getCenter(clusterCoords);
-        
+
         // Calculate cluster radius
         const distances = clusterCoords.map(c => center.distanceTo(c));
         const radius = Math.max(...distances);
@@ -687,25 +765,25 @@ geoService.addLocation({
   id: '1',
   name: 'Central Park',
   coordinates: Coordinates.create(40.7829, -73.9654),
-  category: 'park'
+  category: 'park',
 });
 
 geoService.addLocation({
   id: '2',
   name: 'Times Square',
-  coordinates: Coordinates.create(40.7580, -73.9855),
-  category: 'attraction'
+  coordinates: Coordinates.create(40.758, -73.9855),
+  category: 'attraction',
 });
 
 geoService.addLocation({
   id: '3',
   name: 'Brooklyn Bridge',
   coordinates: Coordinates.create(40.7061, -73.9969),
-  category: 'landmark'
+  category: 'landmark',
 });
 
 // Find locations near Times Square
-const userLocation = Coordinates.create(40.7580, -73.9855);
+const userLocation = Coordinates.create(40.758, -73.9855);
 const nearby = geoService.findNearby(userLocation, 5, undefined, 10);
 
 console.log(`Found ${nearby.length} locations within 5km:`);
@@ -714,7 +792,7 @@ nearby.forEach(location => {
 });
 
 // Optimize delivery route
-const deliveryStart = Coordinates.create(40.7500, -74.0000);
+const deliveryStart = Coordinates.create(40.75, -74.0);
 const deliveryPoints = geoService.findNearby(deliveryStart, 10);
 const optimizedRoute = geoService.optimizeRoute(deliveryStart, deliveryPoints);
 
@@ -727,7 +805,8 @@ optimizedRoute.route.forEach((stop, i) => {
 ## Key Features
 
 - **Distance Calculations**: Haversine formula for accurate earth distances
-- **Bearing & Navigation**: Cardinal directions and destination point calculations
+- **Bearing & Navigation**: Cardinal directions and destination point
+  calculations
 - **Geospatial Operations**: Bounding boxes, polygon containment, radius queries
 - **Coordinate Conversions**: DMS, Mercator projection, geohashing support
 - **Advanced Analytics**: Center calculation, clustering, route optimization
@@ -735,11 +814,13 @@ optimizedRoute.route.forEach((stop, i) => {
 
 ## Common Pitfalls
 
-- **Earth Curvature**: Haversine formula assumes spherical earth (not perfectly accurate)
+- **Earth Curvature**: Haversine formula assumes spherical earth (not perfectly
+  accurate)
 - **Datum Differences**: GPS coordinates may use different reference systems
 - **Precision Limits**: Floating-point precision affects very small distances
 - **Performance**: Complex polygon operations can be computationally expensive
-- **Edge Cases**: Poles, dateline crossing, and extreme coordinates need special handling
+- **Edge Cases**: Poles, dateline crossing, and extreme coordinates need special
+  handling
 
 ## Related Examples
 

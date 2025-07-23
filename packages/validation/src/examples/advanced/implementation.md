@@ -1,13 +1,17 @@
 # Enterprise Validation Orchestration Implementation
 
-**Focus**: Enterprise validation orchestration with messaging, policies, and comprehensive validation workflows  
+**Focus**: Enterprise validation orchestration with messaging, policies, and
+comprehensive validation workflows  
 **Domain**: Global Banking Compliance Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies, @vytches-ddd/events, @vytches-ddd/messaging, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies,
+@vytches-ddd/events, @vytches-ddd/messaging, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates an enterprise-grade validation orchestration system for a global banking compliance platform that requires:
+This example demonstrates an enterprise-grade validation orchestration system
+for a global banking compliance platform that requires:
+
 - Policy-driven validation configuration based on regulatory requirements
 - Comprehensive messaging integration for distributed validation workflows
 - Event-driven validation orchestration with real-time monitoring
@@ -18,10 +22,10 @@ This example demonstrates an enterprise-grade validation orchestration system fo
 
 ```typescript
 // validation-policies.ts
-import { 
-  PolicyBuilder, 
-  PolicyContext, 
-  ISpecification as IPolicySpecification 
+import {
+  PolicyBuilder,
+  PolicyContext,
+  ISpecification as IPolicySpecification,
 } from '@vytches-ddd/policies';
 import { ValidationConfiguration, RegulatoryFramework } from '../types'; // ALWAYS import from app
 
@@ -96,7 +100,9 @@ export class ValidationPolicyEngine {
     )
     .build();
 
-  async getValidationConfiguration(context: any): Promise<ValidationConfiguration> {
+  async getValidationConfiguration(
+    context: any
+  ): Promise<ValidationConfiguration> {
     const policyContext = PolicyContext.create()
       .withUserId(context.userId)
       .withRequestId(context.requestId)
@@ -104,19 +110,34 @@ export class ValidationPolicyEngine {
       .build();
 
     // Evaluate validation policies
-    const needsEnhanced = await this.evaluatePolicy(this.enhancedValidationPolicy, context, policyContext);
-    const needsCorporate = await this.evaluatePolicy(this.corporateValidationPolicy, context, policyContext);
-    
+    const needsEnhanced = await this.evaluatePolicy(
+      this.enhancedValidationPolicy,
+      context,
+      policyContext
+    );
+    const needsCorporate = await this.evaluatePolicy(
+      this.corporateValidationPolicy,
+      context,
+      policyContext
+    );
+
     return this.buildValidationConfiguration({
       needsEnhanced,
       needsCorporate,
-      context
+      context,
     });
   }
 
-  private async evaluatePolicy(policy: any, context: any, policyContext: PolicyContext): Promise<boolean> {
+  private async evaluatePolicy(
+    policy: any,
+    context: any,
+    policyContext: PolicyContext
+  ): Promise<boolean> {
     try {
-      const result = await policy.check({ entity: context, context: policyContext });
+      const result = await policy.check({
+        entity: context,
+        context: policyContext,
+      });
       return result.isSuccess();
     } catch (error) {
       return false;
@@ -138,7 +159,7 @@ export class ValidationPolicyEngine {
       enabledChecks: ['identity', 'address', 'sanctions'],
       requiredDocuments: ['id-document', 'proof-of-address'],
       regulatoryFramework: context.regulatoryFramework || 'FATF',
-      jurisdiction: context.jurisdiction
+      jurisdiction: context.jurisdiction,
     };
 
     if (needsEnhanced) {
@@ -146,7 +167,11 @@ export class ValidationPolicyEngine {
       config.requiresManualReview = true;
       config.timeoutMs = 60000;
       config.maxRetries = 5;
-      config.enabledChecks.push('pep-check', 'adverse-media', 'source-of-funds');
+      config.enabledChecks.push(
+        'pep-check',
+        'adverse-media',
+        'source-of-funds'
+      );
       config.requiredDocuments.push('source-of-funds-document');
     }
 
@@ -154,8 +179,15 @@ export class ValidationPolicyEngine {
       config.level = 'corporate';
       config.requiresManualReview = true;
       config.timeoutMs = 120000;
-      config.enabledChecks.push('beneficial-ownership', 'board-verification', 'corporate-structure');
-      config.requiredDocuments.push('corporate-documents', 'beneficial-ownership-declaration');
+      config.enabledChecks.push(
+        'beneficial-ownership',
+        'board-verification',
+        'corporate-structure'
+      );
+      config.requiredDocuments.push(
+        'corporate-documents',
+        'beneficial-ownership-declaration'
+      );
     }
 
     return config;
@@ -180,7 +212,7 @@ export class ValidationWorkflowStartedEvent extends DomainEvent {
       customerId,
       validationType,
       configuration,
-      startedAt
+      startedAt,
     });
   }
 }
@@ -198,7 +230,7 @@ export class ValidationStepCompletedEvent extends DomainEvent {
       customerId,
       stepName,
       stepResult,
-      completedAt
+      completedAt,
     });
   }
 }
@@ -216,7 +248,7 @@ export class ValidationWorkflowCompletedEvent extends DomainEvent {
       customerId,
       isValid,
       validationResults,
-      completedAt
+      completedAt,
     });
   }
 }
@@ -269,10 +301,10 @@ export interface RegulatoryReportMessage extends OutboxMessage {
 }
 
 // enterprise-validation-orchestrator.ts
-import { 
+import {
   CompositeSpecification,
   BusinessRuleValidator,
-  ValidationFacade 
+  ValidationFacade,
 } from '@vytches-ddd/validation';
 import { UnifiedEventBus } from '@vytches-ddd/events';
 import { OutboxService } from '@vytches-ddd/messaging';
@@ -283,13 +315,14 @@ import { Result } from '@vytches-ddd/utils';
 // ⭐ Enterprise Validation Orchestrator
 @DomainService('enterpriseValidationOrchestrator', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'ValidationOrchestration'
+  context: 'ValidationOrchestration',
 })
 export class EnterpriseValidationOrchestrator {
   private logger = Logger.forContext('EnterpriseValidationOrchestrator');
   private validationPolicyEngine: ValidationPolicyEngine;
   private activeWorkflows: Map<string, ValidationWorkflow> = new Map();
-  private validationStepHandlers: Map<string, ValidationStepHandler> = new Map();
+  private validationStepHandlers: Map<string, ValidationStepHandler> =
+    new Map();
 
   constructor(
     private eventBus: UnifiedEventBus,
@@ -305,30 +338,63 @@ export class EnterpriseValidationOrchestrator {
   }
 
   private initializeValidationStepHandlers(): void {
-    this.validationStepHandlers.set('identity-verification', new IdentityVerificationHandler());
-    this.validationStepHandlers.set('address-verification', new AddressVerificationHandler());
-    this.validationStepHandlers.set('sanctions-screening', new SanctionsScreeningHandler(this.sanctionsService));
-    this.validationStepHandlers.set('pep-screening', new PEPScreeningHandler(this.pepService));
-    this.validationStepHandlers.set('document-verification', new DocumentVerificationHandler(this.documentVerificationService));
-    this.validationStepHandlers.set('beneficial-ownership', new BeneficialOwnershipHandler());
-    this.validationStepHandlers.set('corporate-structure', new CorporateStructureHandler());
-    this.validationStepHandlers.set('source-of-funds', new SourceOfFundsHandler());
+    this.validationStepHandlers.set(
+      'identity-verification',
+      new IdentityVerificationHandler()
+    );
+    this.validationStepHandlers.set(
+      'address-verification',
+      new AddressVerificationHandler()
+    );
+    this.validationStepHandlers.set(
+      'sanctions-screening',
+      new SanctionsScreeningHandler(this.sanctionsService)
+    );
+    this.validationStepHandlers.set(
+      'pep-screening',
+      new PEPScreeningHandler(this.pepService)
+    );
+    this.validationStepHandlers.set(
+      'document-verification',
+      new DocumentVerificationHandler(this.documentVerificationService)
+    );
+    this.validationStepHandlers.set(
+      'beneficial-ownership',
+      new BeneficialOwnershipHandler()
+    );
+    this.validationStepHandlers.set(
+      'corporate-structure',
+      new CorporateStructureHandler()
+    );
+    this.validationStepHandlers.set(
+      'source-of-funds',
+      new SourceOfFundsHandler()
+    );
     this.validationStepHandlers.set('adverse-media', new AdverseMediaHandler());
   }
 
   private subscribeToEvents(): void {
     // Subscribe to validation workflow events
-    this.eventBus.subscribe('ValidationWorkflowStarted', async (event: ValidationWorkflowStartedEvent) => {
-      await this.handleWorkflowStarted(event);
-    });
+    this.eventBus.subscribe(
+      'ValidationWorkflowStarted',
+      async (event: ValidationWorkflowStartedEvent) => {
+        await this.handleWorkflowStarted(event);
+      }
+    );
 
-    this.eventBus.subscribe('ValidationStepCompleted', async (event: ValidationStepCompletedEvent) => {
-      await this.handleStepCompleted(event);
-    });
+    this.eventBus.subscribe(
+      'ValidationStepCompleted',
+      async (event: ValidationStepCompletedEvent) => {
+        await this.handleStepCompleted(event);
+      }
+    );
 
-    this.eventBus.subscribe('ValidationWorkflowCompleted', async (event: ValidationWorkflowCompletedEvent) => {
-      await this.handleWorkflowCompleted(event);
-    });
+    this.eventBus.subscribe(
+      'ValidationWorkflowCompleted',
+      async (event: ValidationWorkflowCompletedEvent) => {
+        await this.handleWorkflowCompleted(event);
+      }
+    );
   }
 
   // Start comprehensive validation workflow
@@ -340,24 +406,25 @@ export class EnterpriseValidationOrchestrator {
   ): Promise<Result<string, ValidationError[]>> {
     try {
       const workflowId = this.generateWorkflowId();
-      
+
       this.logger.info('Starting validation workflow', {
         workflowId,
         customerId,
         customerType: customerData.customerType,
-        jurisdiction: context.jurisdiction
+        jurisdiction: context.jurisdiction,
       });
 
       // Get validation configuration from policy engine
-      const configuration = await this.validationPolicyEngine.getValidationConfiguration({
-        customerId,
-        customerType: customerData.customerType,
-        jurisdiction: context.jurisdiction,
-        regulatoryFramework: context.regulatoryFramework,
-        transactionAmount: context.transactionAmount,
-        entityType: context.entityType,
-        ...context
-      });
+      const configuration =
+        await this.validationPolicyEngine.getValidationConfiguration({
+          customerId,
+          customerType: customerData.customerType,
+          jurisdiction: context.jurisdiction,
+          regulatoryFramework: context.regulatoryFramework,
+          transactionAmount: context.transactionAmount,
+          entityType: context.entityType,
+          ...context,
+        });
 
       // Create validation workflow
       const workflow = new ValidationWorkflow({
@@ -366,19 +433,21 @@ export class EnterpriseValidationOrchestrator {
         customerData,
         documents,
         configuration,
-        context
+        context,
       });
 
       this.activeWorkflows.set(workflowId, workflow);
 
       // Publish workflow started event
-      await this.eventBus.publish(new ValidationWorkflowStartedEvent(
-        workflowId,
-        customerId,
-        configuration.level,
-        configuration,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new ValidationWorkflowStartedEvent(
+          workflowId,
+          customerId,
+          configuration.level,
+          configuration,
+          new Date()
+        )
+      );
 
       // Send validation request message
       const validationRequestMessage: ValidationRequestMessage = {
@@ -390,12 +459,15 @@ export class EnterpriseValidationOrchestrator {
           validationType: configuration.level,
           configuration,
           customerData,
-          documents
+          documents,
         },
-        priority: configuration.level === 'enhanced' ? MessagePriority.HIGH : MessagePriority.NORMAL,
+        priority:
+          configuration.level === 'enhanced'
+            ? MessagePriority.HIGH
+            : MessagePriority.NORMAL,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       await this.outboxService.addMessage(validationRequestMessage);
@@ -407,26 +479,28 @@ export class EnterpriseValidationOrchestrator {
     } catch (error) {
       this.logger.error('Failed to start validation workflow', {
         customerId,
-        error: error.message
+        error: error.message,
       });
 
-      return Result.failure([{
-        field: 'workflow',
-        message: `Failed to start validation workflow: ${error.message}`,
-        code: 'WORKFLOW_START_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'workflow',
+          message: `Failed to start validation workflow: ${error.message}`,
+          code: 'WORKFLOW_START_ERROR',
+        },
+      ]);
     }
   }
 
   private async executeWorkflow(workflow: ValidationWorkflow): Promise<void> {
     try {
       const steps = this.getValidationSteps(workflow.configuration);
-      
+
       for (const stepName of steps) {
         this.logger.info('Executing validation step', {
           workflowId: workflow.workflowId,
           customerId: workflow.customerId,
-          stepName
+          stepName,
         });
 
         const stepHandler = this.validationStepHandlers.get(stepName);
@@ -441,20 +515,22 @@ export class EnterpriseValidationOrchestrator {
           customerData: workflow.customerData,
           documents: workflow.documents,
           configuration: workflow.configuration,
-          context: workflow.context
+          context: workflow.context,
         });
 
         // Update workflow state
         workflow.addStepResult(stepName, stepResult);
 
         // Publish step completed event
-        await this.eventBus.publish(new ValidationStepCompletedEvent(
-          workflow.workflowId,
-          workflow.customerId,
-          stepName,
-          stepResult,
-          new Date()
-        ));
+        await this.eventBus.publish(
+          new ValidationStepCompletedEvent(
+            workflow.workflowId,
+            workflow.customerId,
+            stepName,
+            stepResult,
+            new Date()
+          )
+        );
 
         // Send validation step message
         const stepMessage: ValidationStepMessage = {
@@ -465,25 +541,28 @@ export class EnterpriseValidationOrchestrator {
             customerId: workflow.customerId,
             stepName,
             stepData: stepResult,
-            configuration: workflow.configuration
+            configuration: workflow.configuration,
           },
           priority: MessagePriority.NORMAL,
           createdAt: new Date(),
           scheduledFor: new Date(),
-          retryCount: 0
+          retryCount: 0,
         };
 
         await this.outboxService.addMessage(stepMessage);
 
         // Check if step failed and workflow should stop
-        if (stepResult.isFailure() && stepResult.error.some((e: any) => e.severity === 'critical')) {
+        if (
+          stepResult.isFailure() &&
+          stepResult.error.some((e: any) => e.severity === 'critical')
+        ) {
           this.logger.error('Critical validation step failed', {
             workflowId: workflow.workflowId,
             customerId: workflow.customerId,
             stepName,
-            errors: stepResult.error
+            errors: stepResult.error,
           });
-          
+
           workflow.markAsFailed(stepResult.error);
           break;
         }
@@ -495,14 +574,16 @@ export class EnterpriseValidationOrchestrator {
       this.logger.error('Workflow execution failed', {
         workflowId: workflow.workflowId,
         customerId: workflow.customerId,
-        error: error.message
+        error: error.message,
       });
 
-      workflow.markAsFailed([{
-        field: 'workflow',
-        message: `Workflow execution failed: ${error.message}`,
-        code: 'WORKFLOW_EXECUTION_ERROR'
-      }]);
+      workflow.markAsFailed([
+        {
+          field: 'workflow',
+          message: `Workflow execution failed: ${error.message}`,
+          code: 'WORKFLOW_EXECUTION_ERROR',
+        },
+      ]);
 
       await this.completeWorkflow(workflow);
     }
@@ -517,20 +598,22 @@ export class EnterpriseValidationOrchestrator {
         workflowId: workflow.workflowId,
         customerId: workflow.customerId,
         isValid,
-        totalSteps: validationResults.length
+        totalSteps: validationResults.length,
       });
 
       // Update workflow status
       workflow.markAsCompleted();
 
       // Publish workflow completed event
-      await this.eventBus.publish(new ValidationWorkflowCompletedEvent(
-        workflow.workflowId,
-        workflow.customerId,
-        isValid,
-        validationResults,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new ValidationWorkflowCompletedEvent(
+          workflow.workflowId,
+          workflow.customerId,
+          isValid,
+          validationResults,
+          new Date()
+        )
+      );
 
       // Send validation completed message
       const completedMessage: ValidationCompletedMessage = {
@@ -541,12 +624,12 @@ export class EnterpriseValidationOrchestrator {
           customerId: workflow.customerId,
           isValid,
           validationResults,
-          completedAt: new Date()
+          completedAt: new Date(),
         },
         priority: isValid ? MessagePriority.NORMAL : MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       await this.outboxService.addMessage(completedMessage);
@@ -562,12 +645,14 @@ export class EnterpriseValidationOrchestrator {
       this.logger.error('Failed to complete workflow', {
         workflowId: workflow.workflowId,
         customerId: workflow.customerId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
-  private async generateRegulatoryReport(workflow: ValidationWorkflow): Promise<void> {
+  private async generateRegulatoryReport(
+    workflow: ValidationWorkflow
+  ): Promise<void> {
     try {
       const reportData = await this.complianceReportingService.generateReport({
         workflowId: workflow.workflowId,
@@ -575,7 +660,7 @@ export class EnterpriseValidationOrchestrator {
         customerData: workflow.customerData,
         validationResults: workflow.getAllResults(),
         regulatoryFramework: workflow.configuration.regulatoryFramework,
-        jurisdiction: workflow.configuration.jurisdiction
+        jurisdiction: workflow.configuration.jurisdiction,
       });
 
       // Send regulatory report message
@@ -588,12 +673,12 @@ export class EnterpriseValidationOrchestrator {
           regulatoryFramework: workflow.configuration.regulatoryFramework,
           jurisdiction: workflow.configuration.jurisdiction,
           reportData,
-          reportedAt: new Date()
+          reportedAt: new Date(),
         },
         priority: MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       await this.outboxService.addMessage(reportMessage);
@@ -601,42 +686,42 @@ export class EnterpriseValidationOrchestrator {
       this.logger.error('Failed to generate regulatory report', {
         workflowId: workflow.workflowId,
         customerId: workflow.customerId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   private getValidationSteps(configuration: ValidationConfiguration): string[] {
     const steps = ['identity-verification', 'address-verification'];
-    
+
     if (configuration.enabledChecks.includes('sanctions')) {
       steps.push('sanctions-screening');
     }
-    
+
     if (configuration.enabledChecks.includes('pep-check')) {
       steps.push('pep-screening');
     }
-    
+
     if (configuration.enabledChecks.includes('document-verification')) {
       steps.push('document-verification');
     }
-    
+
     if (configuration.enabledChecks.includes('beneficial-ownership')) {
       steps.push('beneficial-ownership');
     }
-    
+
     if (configuration.enabledChecks.includes('corporate-structure')) {
       steps.push('corporate-structure');
     }
-    
+
     if (configuration.enabledChecks.includes('source-of-funds')) {
       steps.push('source-of-funds');
     }
-    
+
     if (configuration.enabledChecks.includes('adverse-media')) {
       steps.push('adverse-media');
     }
-    
+
     return steps;
   }
 
@@ -645,27 +730,33 @@ export class EnterpriseValidationOrchestrator {
   }
 
   // Event handlers
-  private async handleWorkflowStarted(event: ValidationWorkflowStartedEvent): Promise<void> {
+  private async handleWorkflowStarted(
+    event: ValidationWorkflowStartedEvent
+  ): Promise<void> {
     this.logger.info('Validation workflow started', {
       workflowId: event.workflowId,
       customerId: event.customerId,
-      validationType: event.validationType
+      validationType: event.validationType,
     });
   }
 
-  private async handleStepCompleted(event: ValidationStepCompletedEvent): Promise<void> {
+  private async handleStepCompleted(
+    event: ValidationStepCompletedEvent
+  ): Promise<void> {
     this.logger.info('Validation step completed', {
       workflowId: event.workflowId,
       customerId: event.customerId,
-      stepName: event.stepName
+      stepName: event.stepName,
     });
   }
 
-  private async handleWorkflowCompleted(event: ValidationWorkflowCompletedEvent): Promise<void> {
+  private async handleWorkflowCompleted(
+    event: ValidationWorkflowCompletedEvent
+  ): Promise<void> {
     this.logger.info('Validation workflow completed', {
       workflowId: event.workflowId,
       customerId: event.customerId,
-      isValid: event.isValid
+      isValid: event.isValid,
     });
   }
 
@@ -678,7 +769,7 @@ export class EnterpriseValidationOrchestrator {
     errors: any[];
   }> {
     const workflow = this.activeWorkflows.get(workflowId);
-    
+
     if (!workflow) {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
@@ -688,20 +779,20 @@ export class EnterpriseValidationOrchestrator {
       status: workflow.getStatus(),
       completedSteps: workflow.getCompletedSteps(),
       isValid: workflow.isValid(),
-      errors: workflow.getAllErrors()
+      errors: workflow.getAllErrors(),
     };
   }
 
   async getAllActiveWorkflows(): Promise<{ [workflowId: string]: any }> {
     const workflows: { [workflowId: string]: any } = {};
-    
+
     for (const [workflowId, workflow] of this.activeWorkflows.entries()) {
       workflows[workflowId] = {
         workflowId: workflow.workflowId,
         customerId: workflow.customerId,
         status: workflow.getStatus(),
         completedSteps: workflow.getCompletedSteps(),
-        isValid: workflow.isValid()
+        isValid: workflow.isValid(),
       };
     }
 
@@ -710,7 +801,7 @@ export class EnterpriseValidationOrchestrator {
 
   async forceCompleteWorkflow(workflowId: string): Promise<void> {
     const workflow = this.activeWorkflows.get(workflowId);
-    
+
     if (!workflow) {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
@@ -728,7 +819,7 @@ export class ValidationWorkflow {
   public readonly documents: any[];
   public readonly configuration: ValidationConfiguration;
   public readonly context: any;
-  
+
   private stepResults: Map<string, any> = new Map();
   private status: 'pending' | 'running' | 'completed' | 'failed' = 'pending';
   private completedSteps: string[] = [];
@@ -828,33 +919,41 @@ export class SanctionsScreeningHandler extends ValidationStepHandler {
 
   async execute(params: any): Promise<Result<any, ValidationError[]>> {
     try {
-      const result = await this.sanctionsService.checkSanctions(params.customerData);
-      
+      const result = await this.sanctionsService.checkSanctions(
+        params.customerData
+      );
+
       if (result.isMatch) {
-        return Result.failure([{
-          field: 'sanctions',
-          message: 'Customer matches sanctions list',
-          code: 'SANCTIONS_MATCH'
-        }]);
+        return Result.failure([
+          {
+            field: 'sanctions',
+            message: 'Customer matches sanctions list',
+            code: 'SANCTIONS_MATCH',
+          },
+        ]);
       }
-      
+
       return Result.success({ screened: true, match: false });
     } catch (error) {
-      return Result.failure([{
-        field: 'sanctions',
-        message: `Sanctions screening failed: ${error.message}`,
-        code: 'SANCTIONS_SCREENING_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'sanctions',
+          message: `Sanctions screening failed: ${error.message}`,
+          code: 'SANCTIONS_SCREENING_ERROR',
+        },
+      ]);
     }
   }
 }
 
 // Mock compliance reporting service
-export class MockComplianceReportingService implements ComplianceReportingService {
+export class MockComplianceReportingService
+  implements ComplianceReportingService
+{
   async generateReport(params: any): Promise<any> {
     // Simulate report generation
     await this.delay(2000);
-    
+
     return {
       reportId: `report-${Date.now()}`,
       customerId: params.customerId,
@@ -862,10 +961,12 @@ export class MockComplianceReportingService implements ComplianceReportingServic
       jurisdiction: params.jurisdiction,
       summary: {
         totalSteps: params.validationResults.length,
-        passedSteps: params.validationResults.filter((r: any) => r.isSuccess()).length,
-        failedSteps: params.validationResults.filter((r: any) => r.isFailure()).length
+        passedSteps: params.validationResults.filter((r: any) => r.isSuccess())
+          .length,
+        failedSteps: params.validationResults.filter((r: any) => r.isFailure())
+          .length,
       },
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -877,12 +978,17 @@ export class MockComplianceReportingService implements ComplianceReportingServic
 
 ## Key Features
 
-- **Policy-Driven Configuration**: Validation behavior determined by business policies
-- **Comprehensive Workflow Orchestration**: Complex validation workflows with multiple steps
-- **Messaging Integration**: Distributed validation processing through reliable messaging
-- **Multi-Jurisdiction Support**: Different validation requirements based on jurisdiction
+- **Policy-Driven Configuration**: Validation behavior determined by business
+  policies
+- **Comprehensive Workflow Orchestration**: Complex validation workflows with
+  multiple steps
+- **Messaging Integration**: Distributed validation processing through reliable
+  messaging
+- **Multi-Jurisdiction Support**: Different validation requirements based on
+  jurisdiction
 - **Regulatory Compliance**: Automated regulatory reporting and audit trails
-- **Real-time Monitoring**: Event-driven architecture with comprehensive observability
+- **Real-time Monitoring**: Event-driven architecture with comprehensive
+  observability
 - **Flexible Step Handlers**: Pluggable validation step implementations
 - **Enterprise Scalability**: Support for high-volume validation processing
 
@@ -914,7 +1020,7 @@ export class ComplianceController {
           transactionAmount: context.expectedTransactionVolume,
           entityType: customerData.entityType,
           userId: context.userId,
-          requestId: context.requestId
+          requestId: context.requestId,
         }
       );
 
@@ -928,11 +1034,13 @@ export class ComplianceController {
 
       return Result.success(workflowId);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Customer onboarding failed: ${error.message}`,
-        code: 'ONBOARDING_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Customer onboarding failed: ${error.message}`,
+          code: 'ONBOARDING_ERROR',
+        },
+      ]);
     }
   }
 
@@ -944,14 +1052,15 @@ export class ComplianceController {
     isValid: boolean;
     errors: any[];
   }> {
-    const status = await this.validationOrchestrator.getWorkflowStatus(workflowId);
-    
+    const status =
+      await this.validationOrchestrator.getWorkflowStatus(workflowId);
+
     const totalSteps = 8; // Based on configuration
     const progress = (status.completedSteps.length / totalSteps) * 100;
-    
+
     return {
       ...status,
-      progress
+      progress,
     };
   }
 
@@ -967,10 +1076,17 @@ export class ComplianceController {
 
 ## Common Pitfalls
 
-- **Workflow Complexity**: Keep validation workflows as simple as possible while meeting requirements
-- **Policy Conflicts**: Ensure validation policies don't conflict with each other
-- **Message Ordering**: Consider message ordering for complex validation workflows
-- **Resource Management**: Monitor resource usage for high-volume validation processing
-- **Error Propagation**: Properly handle errors throughout the validation workflow
-- **Regulatory Compliance**: Ensure all validation steps meet regulatory requirements
-- **Performance**: Monitor and optimize validation performance for large-scale processing
+- **Workflow Complexity**: Keep validation workflows as simple as possible while
+  meeting requirements
+- **Policy Conflicts**: Ensure validation policies don't conflict with each
+  other
+- **Message Ordering**: Consider message ordering for complex validation
+  workflows
+- **Resource Management**: Monitor resource usage for high-volume validation
+  processing
+- **Error Propagation**: Properly handle errors throughout the validation
+  workflow
+- **Regulatory Compliance**: Ensure all validation steps meet regulatory
+  requirements
+- **Performance**: Monitor and optimize validation performance for large-scale
+  processing

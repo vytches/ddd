@@ -1,8 +1,8 @@
 # Order Aggregate - NestJS Integration with State Machine
 
-**Focus**: Order state machine aggregate integration with NestJS
-**Base Example**: [Basic Order Aggregate](../../basic/example-2.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Focus**: Order state machine aggregate integration with NestJS **Base
+Example**: [Basic Order Aggregate](../../basic/example-2.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
 
 ## Service Implementation
 
@@ -11,13 +11,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   Order,
   CreateOrderData,
   OrderItem,
   ShippingAddress,
   OrderStatus,
-  PaymentInfo
+  PaymentInfo,
 } from './types'; // From your application
 
 @Injectable()
@@ -28,17 +28,19 @@ export class OrderAggregateService {
   async createOrder(orderData: CreateOrderData): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      
+
       // Use library factory with business validation
       const orderAggregate = OrderAggregateClass.create(
         orderData.customerId,
         orderData.items,
         orderData.shippingAddress
       );
-      
+
       const order = orderAggregate.toSnapshot();
-      
-      this.logger.log(`Order created: ${order.id} for customer ${orderData.customerId}`);
+
+      this.logger.log(
+        `Order created: ${order.id} for customer ${orderData.customerId}`
+      );
       return order;
     } catch (error) {
       this.logger.error(`Failed to create order: ${error.message}`);
@@ -47,16 +49,22 @@ export class OrderAggregateService {
   }
 
   // ✅ FOCUS: State machine operations
-  async confirmOrder(orderId: string, paymentInfo: PaymentInfo): Promise<Order> {
+  async confirmOrder(
+    orderId: string,
+    paymentInfo: PaymentInfo
+  ): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library state transition method
       orderAggregate.confirm(paymentInfo);
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Order confirmed: ${orderId}`);
       return updatedOrder;
     } catch (error) {
@@ -68,13 +76,16 @@ export class OrderAggregateService {
   async startProcessing(orderId: string): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library method with state validation
       orderAggregate.startProcessing();
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Order processing started: ${orderId}`);
       return updatedOrder;
     } catch (error) {
@@ -86,13 +97,16 @@ export class OrderAggregateService {
   async shipOrder(orderId: string, trackingNumber: string): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library shipping method
       orderAggregate.ship(trackingNumber, new Date());
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Order shipped: ${orderId}, tracking: ${trackingNumber}`);
       return updatedOrder;
     } catch (error) {
@@ -104,13 +118,16 @@ export class OrderAggregateService {
   async completeOrder(orderId: string): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library completion method
       orderAggregate.complete();
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Order completed: ${orderId}`);
       return updatedOrder;
     } catch (error) {
@@ -122,13 +139,16 @@ export class OrderAggregateService {
   async cancelOrder(orderId: string, reason: string): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library cancellation with business rules
       orderAggregate.cancel(reason);
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Order cancelled: ${orderId}, reason: ${reason}`);
       return updatedOrder;
     } catch (error) {
@@ -141,14 +161,19 @@ export class OrderAggregateService {
   async addItemToOrder(orderId: string, item: OrderItem): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library method with business validation
       orderAggregate.addItem(item);
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
-      this.logger.log(`Item added to order: ${orderId}, item: ${item.productId}`);
+
+      this.logger.log(
+        `Item added to order: ${orderId}, item: ${item.productId}`
+      );
       return updatedOrder;
     } catch (error) {
       this.logger.error(`Failed to add item to order: ${error.message}`);
@@ -156,17 +181,25 @@ export class OrderAggregateService {
     }
   }
 
-  async removeItemFromOrder(orderId: string, productId: string): Promise<Order> {
+  async removeItemFromOrder(
+    orderId: string,
+    productId: string
+  ): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library method
       orderAggregate.removeItem(productId);
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
-      this.logger.log(`Item removed from order: ${orderId}, product: ${productId}`);
+
+      this.logger.log(
+        `Item removed from order: ${orderId}, product: ${productId}`
+      );
       return updatedOrder;
     } catch (error) {
       this.logger.error(`Failed to remove item from order: ${error.message}`);
@@ -174,16 +207,22 @@ export class OrderAggregateService {
     }
   }
 
-  async updateShippingAddress(orderId: string, address: ShippingAddress): Promise<Order> {
+  async updateShippingAddress(
+    orderId: string,
+    address: ShippingAddress
+  ): Promise<Order> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library method with validation
       orderAggregate.updateShippingAddress(address);
-      
+
       const updatedOrder = orderAggregate.toSnapshot();
-      
+
       this.logger.log(`Shipping address updated: ${orderId}`);
       return updatedOrder;
     } catch (error) {
@@ -196,8 +235,11 @@ export class OrderAggregateService {
   async getOrderById(orderId: string): Promise<Order | null> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       return orderAggregate.toSnapshot();
     } catch (error) {
       this.logger.warn(`Order not found: ${orderId}`);
@@ -226,8 +268,11 @@ export class OrderAggregateService {
   async getValidTransitions(orderId: string): Promise<OrderStatus[]> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library method to get valid state transitions
       return orderAggregate.getValidTransitions();
     } catch (error) {
@@ -236,11 +281,17 @@ export class OrderAggregateService {
     }
   }
 
-  async canTransitionTo(orderId: string, targetStatus: OrderStatus): Promise<boolean> {
+  async canTransitionTo(
+    orderId: string,
+    targetStatus: OrderStatus
+  ): Promise<boolean> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       // Use library validation method
       return orderAggregate.canTransitionTo(targetStatus);
     } catch (error) {
@@ -253,8 +304,11 @@ export class OrderAggregateService {
   async getOrderDomainEvents(orderId: string): Promise<any[]> {
     try {
       const OrderAggregateClass = VytchesDDD.resolve<any>('OrderAggregate');
-      const orderAggregate = await this.loadOrderAggregate(orderId, OrderAggregateClass);
-      
+      const orderAggregate = await this.loadOrderAggregate(
+        orderId,
+        OrderAggregateClass
+      );
+
       return orderAggregate.getUncommittedEvents();
     } catch (error) {
       this.logger.error(`Failed to get domain events: ${error.message}`);
@@ -263,7 +317,10 @@ export class OrderAggregateService {
   }
 
   // Helper method for aggregate loading
-  private async loadOrderAggregate(orderId: string, OrderAggregateClass: any): Promise<any> {
+  private async loadOrderAggregate(
+    orderId: string,
+    OrderAggregateClass: any
+  ): Promise<any> {
     // Mock implementation - in reality would load from event store or repository
     return OrderAggregateClass.fromSnapshot({
       id: orderId,
@@ -272,7 +329,7 @@ export class OrderAggregateService {
       totalAmount: 0,
       status: 'draft',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }
@@ -296,6 +353,7 @@ export class OrderModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Integrates order state machine logic with NestJS
 - Provides state transition validation through library methods
 - Handles order lifecycle management with proper error handling
@@ -303,6 +361,7 @@ export class OrderModule implements OnModuleInit {
 - Exposes domain events for integration with other bounded contexts
 
 **Integration Benefits:**
+
 1. **State Management**: Proper state machine implementation through library
 2. **Business Rules**: Order business logic encapsulated in aggregate
 3. **Event Sourcing**: Access to domain events for integration patterns
@@ -310,6 +369,7 @@ export class OrderModule implements OnModuleInit {
 5. **Error Handling**: Comprehensive error handling for all operations
 
 **Usage Example:**
+
 ```typescript
 // order.controller.ts
 @Controller('orders')

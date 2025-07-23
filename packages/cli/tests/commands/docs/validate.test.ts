@@ -23,10 +23,18 @@ describe('validate command', () => {
     vi.mocked(ExampleValidator).mockImplementation(() => mockValidator);
 
     // Mock logger
-    vi.mocked(logger.success).mockImplementation(() => { return });
-    vi.mocked(logger.info).mockImplementation(() => { return });
-    vi.mocked(logger.warn).mockImplementation(() => { return });
-    vi.mocked(logger.error).mockImplementation(() => { return });
+    vi.mocked(logger.success).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.info).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.warn).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.error).mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -142,7 +150,9 @@ describe('validate command', () => {
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
       expect(logger.error).toHaveBeenCalledWith('❌ Found 2 errors:');
-      expect(logger.error).toHaveBeenCalledWith('   - policies/basic-example: Missing configuration file');
+      expect(logger.error).toHaveBeenCalledWith(
+        '   - policies/basic-example: Missing configuration file'
+      );
       expect(logger.error).toHaveBeenCalledWith('   - core/advanced-example: Invalid syntax');
       expect(logger.info).toHaveBeenCalledWith('   - Errors: 2');
       expect(mockProcessExit).toHaveBeenCalledWith(1);
@@ -166,7 +176,9 @@ describe('validate command', () => {
       await validateCommand.handler(argv);
 
       expect(logger.warn).toHaveBeenCalledWith('⚠️  Found 2 warnings:');
-      expect(logger.warn).toHaveBeenCalledWith('   - events/intermediate-example: Missing description');
+      expect(logger.warn).toHaveBeenCalledWith(
+        '   - events/intermediate-example: Missing description'
+      );
       expect(logger.warn).toHaveBeenCalledWith('   - cqrs/query-example: Outdated pattern');
       expect(logger.info).toHaveBeenCalledWith('   - Warnings: 2');
       expect(mockProcessExit).not.toHaveBeenCalled();
@@ -174,9 +186,7 @@ describe('validate command', () => {
 
     it('should handle validation results with errors, warnings, and fixes', async () => {
       const mockResults = {
-        errors: [
-          { package: 'policies', example: 'basic-example', message: 'Critical error' },
-        ],
+        errors: [{ package: 'policies', example: 'basic-example', message: 'Critical error' }],
         warnings: [
           { package: 'events', example: 'intermediate-example', message: 'Warning message' },
         ],
@@ -251,7 +261,9 @@ describe('validate command', () => {
       await validateCommand.handler(argv);
 
       expect(logger.info).not.toHaveBeenCalledWith('🔧 Applied 1 fixes:');
-      expect(logger.info).not.toHaveBeenCalledWith('   - core/fixed-example: Added missing imports');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '   - core/fixed-example: Added missing imports'
+      );
       expect(logger.info).not.toHaveBeenCalledWith('   - Fixes applied: 1');
     });
 
@@ -322,7 +334,9 @@ describe('validate command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Validation failed: Validator initialization failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Validation failed: Validator initialization failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
   });
@@ -330,9 +344,7 @@ describe('validate command', () => {
   describe('exit behavior', () => {
     it('should exit with code 1 when there are errors', async () => {
       const mockResults = {
-        errors: [
-          { package: 'policies', example: 'basic-example', message: 'Error message' },
-        ],
+        errors: [{ package: 'policies', example: 'basic-example', message: 'Error message' }],
         warnings: [],
         fixed: [],
         packagesValidated: 1,

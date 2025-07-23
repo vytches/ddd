@@ -7,6 +7,7 @@
 ## Context
 
 Our documentation generation system needs to support:
+
 - Granular example selection with individual tagging
 - Random selection with limits (e.g., "show 5 random examples")
 - Complexity levels for progressive learning
@@ -14,13 +15,16 @@ Our documentation generation system needs to support:
 - Standalone examples without cross-dependencies
 - Library-first philosophy (no framework ceremony)
 
-The previous approach used single files per complexity level, which limited flexibility in tagging and selection.
+The previous approach used single files per complexity level, which limited
+flexibility in tagging and selection.
 
 ## Decision
 
-We will implement an **Individual Example System** with the following characteristics:
+We will implement an **Individual Example System** with the following
+characteristics:
 
 ### 1. File Structure
+
 ```
 packages/[package]/examples/
 ├── basic/
@@ -39,6 +43,7 @@ packages/[package]/examples/
 ```
 
 ### 2. Configuration Structure
+
 ```typescript
 export const packageExampleConfig: PackageExampleConfig = {
   examples: [
@@ -49,15 +54,16 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['domain-services:basic', 'business-logic:pricing'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic pricing calculation with business rules'
-    }
-  ]
+      description: 'Basic pricing calculation with business rules',
+    },
+  ],
 };
 ```
 
 ### 3. Type System Architecture
 
 #### Shared Types in Contracts
+
 ```typescript
 // @vytches-ddd/contracts/src/examples/types.ts
 export interface PackageExampleConfig {
@@ -66,8 +72,10 @@ export interface PackageExampleConfig {
 ```
 
 #### Package-Specific Types as Markdown
-```markdown
+
+````markdown
 <!-- packages/domain-services/examples/types/user.md -->
+
 # User Types
 
 ```typescript
@@ -82,7 +90,9 @@ export interface CreateUserData {
   name: string;
 }
 ```
-```
+````
+
+````
 
 ### 4. CLI Integration Strategy
 
@@ -97,7 +107,7 @@ vytches-ddd examples generate policies --complexity intermediate
 vytches-ddd examples bundle --packages policies,domain-services
 vytches-ddd examples find-by-tag "policies:core"
 vytches-ddd examples validate --package policies --fix
-```
+````
 
 ### 5. Smart Selection Features
 
@@ -117,7 +127,8 @@ vytches-ddd examples validate --package policies --fix
 4. **Progressive Learning**: Clear complexity levels for different audiences
 5. **Library Focus**: Examples show library usage, not framework ceremony
 6. **Markdown Types**: Types as documentation, not real imports
-7. **Unified CLI**: Documentation generation integrated into main generate command
+7. **Unified CLI**: Documentation generation integrated into main generate
+   command
 
 ### Negative
 
@@ -137,8 +148,9 @@ vytches-ddd examples validate --package policies --fix
 
 Types are now markdown files that can be included in documentation:
 
-```markdown
+````markdown
 <!-- types/user.md -->
+
 # User Types
 
 ```typescript
@@ -152,20 +164,25 @@ export interface User {
   name: string;
 }
 ```
-```
+````
+
+````
 
 Examples then reference these types:
 
 ```typescript
 // In example-1.md
 import { User, CreateUserData } from './types/user';
-```
+````
 
 ### CLI Command Structure
 
-1. **Primary Command**: `vytches-ddd generate <package>` for single package documentation
-2. **Secondary Command**: `vytches-ddd examples <subcommand>` for advanced example management
-3. **Unified Interface**: Both commands use the same underlying generation system
+1. **Primary Command**: `vytches-ddd generate <package>` for single package
+   documentation
+2. **Secondary Command**: `vytches-ddd examples <subcommand>` for advanced
+   example management
+3. **Unified Interface**: Both commands use the same underlying generation
+   system
 
 ### Framework Complexity Levels
 
@@ -176,12 +193,15 @@ import { User, CreateUserData } from './types/user';
 ## Alternatives Considered
 
 1. **Single File Per Category**: All examples in one file
+
    - Rejected: Limited tagging and selection flexibility
 
 2. **Real TypeScript Types**: Import actual .ts files
+
    - Rejected: Creates circular dependencies
 
 3. **Complex Naming**: `di-manual-nestjs-1.md`
+
    - Rejected: Folder structure provides context
 
 4. **Separate Documentation CLI**: Keep `docs` command separate

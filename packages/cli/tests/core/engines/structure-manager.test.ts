@@ -57,9 +57,7 @@ describe('StructureManager', () => {
 
   describe('structure retrieval', () => {
     it('should get structure by type', () => {
-      const [error, structure] = safeRun(() =>
-        manager.getStructure('clean-architecture')
-      );
+      const [error, structure] = safeRun(() => manager.getStructure('clean-architecture'));
 
       expect(error).toBeUndefined();
       expect(structure).toBeDefined();
@@ -68,9 +66,7 @@ describe('StructureManager', () => {
     });
 
     it('should throw error for non-existent structure', () => {
-      const [structureError] = safeRun(() =>
-        manager.getStructure('non-existent' as any)
-      );
+      const [structureError] = safeRun(() => manager.getStructure('non-existent' as any));
 
       expect(structureError).toBeInstanceOf(CLIError);
       expect(structureError?.message).toContain('Unknown project structure: non-existent');
@@ -120,11 +116,13 @@ describe('StructureManager', () => {
   describe('structure detection', () => {
     it('should detect clean architecture', async () => {
       vi.mocked(FileSystem.exists).mockImplementation((path: string) => {
-        return path.includes('domain') || path.includes('application') || path.includes('infrastructure');
+        return (
+          path.includes('domain') || path.includes('application') || path.includes('infrastructure')
+        );
       });
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -136,8 +134,8 @@ describe('StructureManager', () => {
         return path.includes('core') || path.includes('adapters');
       });
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -149,8 +147,8 @@ describe('StructureManager', () => {
         return path.includes('core/domain') || path.includes('core/application');
       });
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -162,8 +160,8 @@ describe('StructureManager', () => {
         return path.includes('modules');
       });
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -175,8 +173,8 @@ describe('StructureManager', () => {
         return path.includes('services');
       });
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -186,8 +184,8 @@ describe('StructureManager', () => {
     it('should return null when no structure is detected', async () => {
       vi.mocked(FileSystem.exists).mockResolvedValue(false);
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -197,8 +195,8 @@ describe('StructureManager', () => {
     it('should handle detection errors gracefully', async () => {
       vi.mocked(FileSystem.exists).mockRejectedValue(new Error('File system error'));
 
-      const [error, detectedStructure] = await safeRun(async () =>
-        await manager.detectStructure('/project')
+      const [error, detectedStructure] = await safeRun(
+        async () => await manager.detectStructure('/project')
       );
 
       expect(error).toBeUndefined();
@@ -208,8 +206,8 @@ describe('StructureManager', () => {
 
   describe('structure creation', () => {
     it('should create clean architecture structure', async () => {
-      const [error] = await safeRun(async () =>
-        await manager.createStructure('clean-architecture', '/project')
+      const [error] = await safeRun(
+        async () => await manager.createStructure('clean-architecture', '/project')
       );
 
       expect(error).toBeUndefined();
@@ -218,8 +216,8 @@ describe('StructureManager', () => {
     });
 
     it('should create hexagonal architecture structure', async () => {
-      const [error] = await safeRun(async () =>
-        await manager.createStructure('hexagonal', '/project')
+      const [error] = await safeRun(
+        async () => await manager.createStructure('hexagonal', '/project')
       );
 
       expect(error).toBeUndefined();
@@ -228,10 +226,12 @@ describe('StructureManager', () => {
     });
 
     it('should handle structure creation errors', async () => {
-      vi.mocked(FileSystem.createDirectory).mockRejectedValue(new Error('Directory creation failed'));
+      vi.mocked(FileSystem.createDirectory).mockRejectedValue(
+        new Error('Directory creation failed')
+      );
 
-      const [createError] = await safeRun(async () =>
-        await manager.createStructure('clean-architecture', '/project')
+      const [createError] = await safeRun(
+        async () => await manager.createStructure('clean-architecture', '/project')
       );
 
       expect(createError).toBeInstanceOf(CLIError);
@@ -241,31 +241,19 @@ describe('StructureManager', () => {
 
   describe('component path generation', () => {
     it('should generate path for domain aggregate', () => {
-      const path = manager.getComponentPath(
-        'clean-architecture',
-        'domain',
-        'OrderAggregate'
-      );
+      const path = manager.getComponentPath('clean-architecture', 'domain', 'OrderAggregate');
 
       expect(path).toBe('src/domain/aggregates');
     });
 
     it('should generate path for domain entity', () => {
-      const path = manager.getComponentPath(
-        'clean-architecture',
-        'domain',
-        'OrderEntity'
-      );
+      const path = manager.getComponentPath('clean-architecture', 'domain', 'OrderEntity');
 
       expect(path).toBe('src/domain/entities');
     });
 
     it('should generate path for value object', () => {
-      const path = manager.getComponentPath(
-        'clean-architecture',
-        'domain',
-        'MoneyValueObject'
-      );
+      const path = manager.getComponentPath('clean-architecture', 'domain', 'MoneyValueObject');
 
       expect(path).toBe('src/domain/value-objects');
     });
@@ -281,11 +269,7 @@ describe('StructureManager', () => {
     });
 
     it('should generate path for application query', () => {
-      const path = manager.getComponentPath(
-        'clean-architecture',
-        'application',
-        'GetOrderQuery'
-      );
+      const path = manager.getComponentPath('clean-architecture', 'application', 'GetOrderQuery');
 
       expect(path).toBe('src/application/queries');
     });
@@ -312,23 +296,14 @@ describe('StructureManager', () => {
     });
 
     it('should handle microservices with service name', () => {
-      const path = manager.getComponentPath(
-        'microservices',
-        'domain',
-        'OrderAggregate',
-        'order'
-      );
+      const path = manager.getComponentPath('microservices', 'domain', 'OrderAggregate', 'order');
 
       expect(path).toBe('services/order-service/src/domain/aggregates');
     });
 
     it('should throw error for unsupported component type', () => {
       const [pathError] = safeRun(() =>
-        manager.getComponentPath(
-          'hexagonal',
-          'presentation' as any,
-          'OrderController'
-        )
+        manager.getComponentPath('hexagonal', 'presentation' as any, 'OrderController')
       );
 
       expect(pathError).toBeInstanceOf(CLIError);
@@ -412,7 +387,13 @@ describe('StructureManager', () => {
     });
 
     it('should generate documentation for all structure types', () => {
-      const structures = ['clean-architecture', 'hexagonal', 'onion', 'modular-monolith', 'microservices'];
+      const structures = [
+        'clean-architecture',
+        'hexagonal',
+        'onion',
+        'modular-monolith',
+        'microservices',
+      ];
 
       structures.forEach(structure => {
         const documentation = manager.generateDocumentation(structure as any);

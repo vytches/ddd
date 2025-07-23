@@ -1,25 +1,34 @@
 # Event Stream Processing with Real-time Analytics
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/events
-**Complexity**: advanced
-**Domain**: Architecture
-**Patterns**: event-stream-processing, real-time-analytics, event-aggregation, windowing
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Domain**: Architecture **Patterns**: event-stream-processing,
+real-time-analytics, event-aggregation, windowing **Dependencies**:
+@vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
 
 ## Description
 
-Advanced event stream processing system with real-time analytics, windowing, and complex event processing capabilities. This example demonstrates enterprise-grade stream processing patterns for high-throughput event analysis, anomaly detection, and real-time business intelligence.
+Advanced event stream processing system with real-time analytics, windowing, and
+complex event processing capabilities. This example demonstrates
+enterprise-grade stream processing patterns for high-throughput event analysis,
+anomaly detection, and real-time business intelligence.
 
 ## Business Context
 
-Modern applications generate massive event streams that require real-time analysis for business intelligence, fraud detection, and operational monitoring. Stream processing enables immediate insights from event data through windowing, aggregation, and pattern matching while maintaining high throughput and low latency.
+Modern applications generate massive event streams that require real-time
+analysis for business intelligence, fraud detection, and operational monitoring.
+Stream processing enables immediate insights from event data through windowing,
+aggregation, and pattern matching while maintaining high throughput and low
+latency.
 
 ## Code Example
 
 ```typescript
 // advanced-stream-processor.ts
-import { DomainEvent, UnifiedEventBus, IEventHandler } from '@vytches-ddd/events';
+import {
+  DomainEvent,
+  UnifiedEventBus,
+  IEventHandler,
+} from '@vytches-ddd/events';
 import { EntityId } from '@vytches-ddd/value-objects';
 import { Result, AsyncResult } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
@@ -37,12 +46,12 @@ export class TransactionProcessedEvent extends DomainEvent {
     correlationId?: string
   ) {
     super('TransactionProcessed', transactionId.value, correlationId);
-    this.metadata = { 
-      amount, 
-      currency, 
+    this.metadata = {
+      amount,
+      currency,
       merchantId: merchantId.value,
       location,
-      userId: userId.value
+      userId: userId.value,
     };
   }
 }
@@ -58,11 +67,11 @@ export class UserLoginEvent extends DomainEvent {
     correlationId?: string
   ) {
     super('UserLogin', userId.value, correlationId);
-    this.metadata = { 
+    this.metadata = {
       sessionId: sessionId.value,
       ipAddress,
       location,
-      userAgent
+      userAgent,
     };
   }
 }
@@ -78,11 +87,11 @@ export class ProductViewedEvent extends DomainEvent {
     correlationId?: string
   ) {
     super('ProductViewed', productId.value, correlationId);
-    this.metadata = { 
+    this.metadata = {
       userId: userId.value,
       category,
       price,
-      sessionId: sessionId.value
+      sessionId: sessionId.value,
     };
   }
 }
@@ -104,14 +113,16 @@ export interface StreamingMetric {
 
 export interface StreamProcessor<TEvent extends DomainEvent> {
   process(event: TEvent): Promise<Result<StreamingMetric[], Error>>;
-  getWindowedMetrics(windowSize: number): Promise<Result<StreamingMetric[], Error>>;
+  getWindowedMetrics(
+    windowSize: number
+  ): Promise<Result<StreamingMetric[], Error>>;
 }
 
 // ⭐ FOCUS: Windowing strategy implementation
 export class SlidingWindow {
   private events: Array<{ event: DomainEvent; timestamp: Date }> = [];
   private readonly maxAge: number;
-  
+
   constructor(windowSizeMs: number) {
     this.maxAge = windowSizeMs;
   }
@@ -124,9 +135,7 @@ export class SlidingWindow {
 
   getEvents(since?: Date): DomainEvent[] {
     const cutoff = since || new Date(Date.now() - this.maxAge);
-    return this.events
-      .filter(e => e.timestamp >= cutoff)
-      .map(e => e.event);
+    return this.events.filter(e => e.timestamp >= cutoff).map(e => e.event);
   }
 
   private cleanup(now: Date): void {
@@ -139,21 +148,25 @@ export class SlidingWindow {
     return {
       start,
       end: endTime,
-      duration: this.maxAge
+      duration: this.maxAge,
     };
   }
 }
 
 // ⭐ FOCUS: Transaction analytics processor
-export class TransactionAnalyticsProcessor implements StreamProcessor<TransactionProcessedEvent> {
+export class TransactionAnalyticsProcessor
+  implements StreamProcessor<TransactionProcessedEvent>
+{
   private readonly logger = Logger.forContext('TransactionAnalyticsProcessor');
   private readonly slidingWindow = new SlidingWindow(5 * 60 * 1000); // 5 minutes
   private readonly suspiciousPatterns = new Map<string, any>();
 
-  async process(event: TransactionProcessedEvent): Promise<Result<StreamingMetric[], Error>> {
+  async process(
+    event: TransactionProcessedEvent
+  ): Promise<Result<StreamingMetric[], Error>> {
     try {
       this.slidingWindow.addEvent(event);
-      
+
       const metrics: StreamingMetric[] = [];
       const now = new Date();
       const window = this.slidingWindow.getWindow(now);
@@ -182,23 +195,28 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
         window: {
           start: window.start,
           end: window.end,
-          duration: window.duration
-        }
+          duration: window.duration,
+        },
       });
 
       return Result.ok(metrics);
-
     } catch (error) {
       this.logger.error('Failed to process transaction event', {
         error: error,
-        transactionId: event.transactionId.value
+        transactionId: event.transactionId.value,
       });
-      return Result.fail(new Error(`Transaction processing failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Transaction processing failed: ${error.message}`)
+      );
     }
   }
 
-  private async calculateTransactionVolume(window: TimeWindow): Promise<StreamingMetric> {
-    const events = this.slidingWindow.getEvents(window.start) as TransactionProcessedEvent[];
+  private async calculateTransactionVolume(
+    window: TimeWindow
+  ): Promise<StreamingMetric> {
+    const events = this.slidingWindow.getEvents(
+      window.start
+    ) as TransactionProcessedEvent[];
     const totalAmount = events.reduce((sum, e) => sum + e.amount, 0);
     const transactionCount = events.length;
 
@@ -210,23 +228,26 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
       dimensions: {
         count: transactionCount,
         avgAmount: transactionCount > 0 ? totalAmount / transactionCount : 0,
-        currency: events[0]?.currency || 'USD'
-      }
+        currency: events[0]?.currency || 'USD',
+      },
     };
   }
 
   private async detectFraudPatterns(
-    currentEvent: TransactionProcessedEvent, 
+    currentEvent: TransactionProcessedEvent,
     window: TimeWindow
   ): Promise<StreamingMetric[]> {
-    const events = this.slidingWindow.getEvents(window.start) as TransactionProcessedEvent[];
+    const events = this.slidingWindow.getEvents(
+      window.start
+    ) as TransactionProcessedEvent[];
     const userEvents = events.filter(e => e.userId.equals(currentEvent.userId));
-    
+
     const metrics: StreamingMetric[] = [];
 
     // ⭐ FOCUS: Rapid transaction pattern (velocity fraud)
     const rapidTransactions = userEvents.length;
-    if (rapidTransactions > 10) { // More than 10 transactions in 5 minutes
+    if (rapidTransactions > 10) {
+      // More than 10 transactions in 5 minutes
       metrics.push({
         metricName: 'fraud_velocity_alert',
         value: rapidTransactions,
@@ -236,16 +257,17 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
           userId: currentEvent.userId.value,
           alertType: 'high_velocity',
           threshold: 10,
-          severity: 'high'
-        }
+          severity: 'high',
+        },
       });
     }
 
     // ⭐ FOCUS: Geographic dispersion pattern
     const locations = userEvents.map(e => e.location);
     const uniqueCountries = new Set(locations.map(l => l.country)).size;
-    
-    if (uniqueCountries > 2) { // Transactions from more than 2 countries
+
+    if (uniqueCountries > 2) {
+      // Transactions from more than 2 countries
       metrics.push({
         metricName: 'fraud_geographic_alert',
         value: uniqueCountries,
@@ -255,15 +277,18 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
           userId: currentEvent.userId.value,
           alertType: 'geographic_dispersion',
           countries: Array.from(new Set(locations.map(l => l.country))),
-          severity: 'medium'
-        }
+          severity: 'medium',
+        },
       });
     }
 
     // ⭐ FOCUS: Large amount pattern
-    if (currentEvent.amount > 10000) { // Large transaction
-      const recentLargeTransactions = userEvents.filter(e => e.amount > 5000).length;
-      
+    if (currentEvent.amount > 10000) {
+      // Large transaction
+      const recentLargeTransactions = userEvents.filter(
+        e => e.amount > 5000
+      ).length;
+
       metrics.push({
         metricName: 'fraud_amount_alert',
         value: currentEvent.amount,
@@ -273,8 +298,8 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
           userId: currentEvent.userId.value,
           alertType: 'large_amount',
           recentLargeCount: recentLargeTransactions,
-          severity: currentEvent.amount > 50000 ? 'critical' : 'high'
-        }
+          severity: currentEvent.amount > 50000 ? 'critical' : 'high',
+        },
       });
     }
 
@@ -285,15 +310,23 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
     currentEvent: TransactionProcessedEvent,
     window: TimeWindow
   ): Promise<StreamingMetric[]> {
-    const events = this.slidingWindow.getEvents(window.start) as TransactionProcessedEvent[];
-    const countryStats = new Map<string, { count: number; totalAmount: number }>();
+    const events = this.slidingWindow.getEvents(
+      window.start
+    ) as TransactionProcessedEvent[];
+    const countryStats = new Map<
+      string,
+      { count: number; totalAmount: number }
+    >();
 
     events.forEach(event => {
       const country = event.location.country;
-      const existing = countryStats.get(country) || { count: 0, totalAmount: 0 };
+      const existing = countryStats.get(country) || {
+        count: 0,
+        totalAmount: 0,
+      };
       countryStats.set(country, {
         count: existing.count + 1,
-        totalAmount: existing.totalAmount + event.amount
+        totalAmount: existing.totalAmount + event.amount,
       });
     });
 
@@ -308,8 +341,8 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
         dimensions: {
           country,
           transactionCount: stats.count,
-          avgAmount: stats.totalAmount / stats.count
-        }
+          avgAmount: stats.totalAmount / stats.count,
+        },
       });
     });
 
@@ -320,7 +353,9 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
     currentEvent: TransactionProcessedEvent,
     window: TimeWindow
   ): Promise<StreamingMetric[]> {
-    const events = this.slidingWindow.getEvents(window.start) as TransactionProcessedEvent[];
+    const events = this.slidingWindow.getEvents(
+      window.start
+    ) as TransactionProcessedEvent[];
     const amounts = events.map(e => e.amount).sort((a, b) => a - b);
 
     if (amounts.length === 0) return [];
@@ -329,32 +364,38 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
     const p90 = amounts[Math.floor(amounts.length * 0.9)];
     const p99 = amounts[Math.floor(amounts.length * 0.99)];
 
-    return [{
-      metricName: 'transaction_amount_distribution',
-      value: median,
-      timestamp: new Date(),
-      window,
-      dimensions: {
-        median,
-        p90,
-        p99,
-        min: amounts[0],
-        max: amounts[amounts.length - 1],
-        count: amounts.length
-      }
-    }];
+    return [
+      {
+        metricName: 'transaction_amount_distribution',
+        value: median,
+        timestamp: new Date(),
+        window,
+        dimensions: {
+          median,
+          p90,
+          p99,
+          min: amounts[0],
+          max: amounts[amounts.length - 1],
+          count: amounts.length,
+        },
+      },
+    ];
   }
 
-  async getWindowedMetrics(windowSize: number): Promise<Result<StreamingMetric[], Error>> {
+  async getWindowedMetrics(
+    windowSize: number
+  ): Promise<Result<StreamingMetric[], Error>> {
     try {
       const now = new Date();
       const window = {
         start: new Date(now.getTime() - windowSize),
         end: now,
-        duration: windowSize
+        duration: windowSize,
       };
 
-      const events = this.slidingWindow.getEvents(window.start) as TransactionProcessedEvent[];
+      const events = this.slidingWindow.getEvents(
+        window.start
+      ) as TransactionProcessedEvent[];
       const metrics: StreamingMetric[] = [];
 
       // Aggregate metrics for the window
@@ -371,14 +412,16 @@ export class TransactionAnalyticsProcessor implements StreamProcessor<Transactio
           transactionCount: events.length,
           uniqueUsers,
           uniqueMerchants,
-          avgTransactionAmount: events.length > 0 ? totalAmount / events.length : 0
-        }
+          avgTransactionAmount:
+            events.length > 0 ? totalAmount / events.length : 0,
+        },
       });
 
       return Result.ok(metrics);
-
     } catch (error) {
-      return Result.fail(new Error(`Failed to get windowed metrics: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to get windowed metrics: ${error.message}`)
+      );
     }
   }
 }
@@ -389,12 +432,15 @@ export class UserBehaviorAnalyticsProcessor {
   private readonly sessionWindow = new SlidingWindow(30 * 60 * 1000); // 30 minutes
   private readonly userSessions = new Map<string, Array<DomainEvent>>();
 
-  async processUserEvent(event: UserLoginEvent | ProductViewedEvent): Promise<Result<StreamingMetric[], Error>> {
+  async processUserEvent(
+    event: UserLoginEvent | ProductViewedEvent
+  ): Promise<Result<StreamingMetric[], Error>> {
     try {
       this.sessionWindow.addEvent(event);
-      
+
       const userId = 'userId' in event ? event.userId.value : event.aggregateId;
-      const sessionId = 'sessionId' in event ? event.sessionId.value : 'unknown';
+      const sessionId =
+        'sessionId' in event ? event.sessionId.value : 'unknown';
 
       // Track user session
       const sessionKey = `${userId}:${sessionId}`;
@@ -410,58 +456,84 @@ export class UserBehaviorAnalyticsProcessor {
       // ⭐ FOCUS: Session analytics
       if (event.eventType === 'ProductViewed') {
         const productEvent = event as ProductViewedEvent;
-        const sessionMetrics = await this.analyzeUserSession(userId, sessionId, window);
+        const sessionMetrics = await this.analyzeUserSession(
+          userId,
+          sessionId,
+          window
+        );
         metrics.push(...sessionMetrics);
 
-        const behaviorMetrics = await this.analyzePurchaseBehavior(productEvent, window);
+        const behaviorMetrics = await this.analyzePurchaseBehavior(
+          productEvent,
+          window
+        );
         metrics.push(...behaviorMetrics);
       }
 
       // ⭐ FOCUS: Login pattern analysis
       if (event.eventType === 'UserLogin') {
         const loginEvent = event as UserLoginEvent;
-        const loginMetrics = await this.analyzeLoginPatterns(loginEvent, window);
+        const loginMetrics = await this.analyzeLoginPatterns(
+          loginEvent,
+          window
+        );
         metrics.push(...loginMetrics);
       }
 
       return Result.ok(metrics);
-
     } catch (error) {
       this.logger.error('Failed to process user behavior event', {
         error: error,
-        eventType: event.eventType
+        eventType: event.eventType,
       });
-      return Result.fail(new Error(`User behavior processing failed: ${error.message}`));
+      return Result.fail(
+        new Error(`User behavior processing failed: ${error.message}`)
+      );
     }
   }
 
-  private async analyzeUserSession(userId: string, sessionId: string, window: TimeWindow): Promise<StreamingMetric[]> {
+  private async analyzeUserSession(
+    userId: string,
+    sessionId: string,
+    window: TimeWindow
+  ): Promise<StreamingMetric[]> {
     const sessionKey = `${userId}:${sessionId}`;
     const sessionEvents = this.userSessions.get(sessionKey) || [];
-    
-    const productViews = sessionEvents.filter(e => e.eventType === 'ProductViewed') as ProductViewedEvent[];
+
+    const productViews = sessionEvents.filter(
+      e => e.eventType === 'ProductViewed'
+    ) as ProductViewedEvent[];
     const categories = new Set(productViews.map(e => e.category));
     const totalValue = productViews.reduce((sum, e) => sum + e.price, 0);
 
-    return [{
-      metricName: 'user_session_activity',
-      value: productViews.length,
-      timestamp: new Date(),
-      window,
-      dimensions: {
-        userId,
-        sessionId,
-        categoriesViewed: Array.from(categories),
-        totalViewedValue: totalValue,
-        sessionDuration: sessionEvents.length > 1 
-          ? sessionEvents[sessionEvents.length - 1].timestamp.getTime() - sessionEvents[0].timestamp.getTime()
-          : 0
-      }
-    }];
+    return [
+      {
+        metricName: 'user_session_activity',
+        value: productViews.length,
+        timestamp: new Date(),
+        window,
+        dimensions: {
+          userId,
+          sessionId,
+          categoriesViewed: Array.from(categories),
+          totalViewedValue: totalValue,
+          sessionDuration:
+            sessionEvents.length > 1
+              ? sessionEvents[sessionEvents.length - 1].timestamp.getTime() -
+                sessionEvents[0].timestamp.getTime()
+              : 0,
+        },
+      },
+    ];
   }
 
-  private async analyzePurchaseBehavior(event: ProductViewedEvent, window: TimeWindow): Promise<StreamingMetric[]> {
-    const allEvents = this.sessionWindow.getEvents(window.start) as ProductViewedEvent[];
+  private async analyzePurchaseBehavior(
+    event: ProductViewedEvent,
+    window: TimeWindow
+  ): Promise<StreamingMetric[]> {
+    const allEvents = this.sessionWindow.getEvents(
+      window.start
+    ) as ProductViewedEvent[];
     const userEvents = allEvents.filter(e => e.userId.equals(event.userId));
 
     // Category affinity analysis
@@ -474,43 +546,59 @@ export class UserBehaviorAnalyticsProcessor {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
 
-    return [{
-      metricName: 'purchase_intent_signal',
-      value: userEvents.length,
-      timestamp: new Date(),
-      window,
-      dimensions: {
-        userId: event.userId.value,
-        currentCategory: event.category,
-        currentPrice: event.price,
-        topCategories: topCategories.map(([cat, count]) => ({ category: cat, views: count })),
-        browsingSimilarItems: userEvents.filter(e => e.category === event.category).length,
-        priceRange: this.categorizePrice(event.price)
-      }
-    }];
+    return [
+      {
+        metricName: 'purchase_intent_signal',
+        value: userEvents.length,
+        timestamp: new Date(),
+        window,
+        dimensions: {
+          userId: event.userId.value,
+          currentCategory: event.category,
+          currentPrice: event.price,
+          topCategories: topCategories.map(([cat, count]) => ({
+            category: cat,
+            views: count,
+          })),
+          browsingSimilarItems: userEvents.filter(
+            e => e.category === event.category
+          ).length,
+          priceRange: this.categorizePrice(event.price),
+        },
+      },
+    ];
   }
 
-  private async analyzeLoginPatterns(event: UserLoginEvent, window: TimeWindow): Promise<StreamingMetric[]> {
-    const allLoginEvents = this.sessionWindow.getEvents(window.start) as UserLoginEvent[];
-    const userLogins = allLoginEvents.filter(e => e.userId.equals(event.userId));
+  private async analyzeLoginPatterns(
+    event: UserLoginEvent,
+    window: TimeWindow
+  ): Promise<StreamingMetric[]> {
+    const allLoginEvents = this.sessionWindow.getEvents(
+      window.start
+    ) as UserLoginEvent[];
+    const userLogins = allLoginEvents.filter(e =>
+      e.userId.equals(event.userId)
+    );
 
     const uniqueIPs = new Set(userLogins.map(e => e.ipAddress));
     const uniqueCountries = new Set(userLogins.map(e => e.location.country));
 
-    return [{
-      metricName: 'user_login_pattern',
-      value: userLogins.length,
-      timestamp: new Date(),
-      window,
-      dimensions: {
-        userId: event.userId.value,
-        loginCount: userLogins.length,
-        uniqueIPs: uniqueIPs.size,
-        uniqueCountries: uniqueCountries.size,
-        currentCountry: event.location.country,
-        suspiciousActivity: uniqueIPs.size > 3 || uniqueCountries.size > 2
-      }
-    }];
+    return [
+      {
+        metricName: 'user_login_pattern',
+        value: userLogins.length,
+        timestamp: new Date(),
+        window,
+        dimensions: {
+          userId: event.userId.value,
+          loginCount: userLogins.length,
+          uniqueIPs: uniqueIPs.size,
+          uniqueCountries: uniqueCountries.size,
+          currentCountry: event.location.country,
+          suspiciousActivity: uniqueIPs.size > 3 || uniqueCountries.size > 2,
+        },
+      },
+    ];
   }
 
   private categorizePrice(price: number): string {
@@ -534,29 +622,40 @@ export class RealTimeAnalyticsDashboard {
 
   private setupEventHandlers(): void {
     // ⭐ FOCUS: Subscribe to real-time event streams
-    this.eventBus.subscribe('TransactionProcessed', async (event: TransactionProcessedEvent) => {
-      const metricsResult = await this.transactionProcessor.process(event);
-      if (metricsResult.isSuccess()) {
-        this.updateDashboard('transactions', metricsResult.value);
+    this.eventBus.subscribe(
+      'TransactionProcessed',
+      async (event: TransactionProcessedEvent) => {
+        const metricsResult = await this.transactionProcessor.process(event);
+        if (metricsResult.isSuccess()) {
+          this.updateDashboard('transactions', metricsResult.value);
+        }
       }
-    });
+    );
 
     this.eventBus.subscribe('UserLogin', async (event: UserLoginEvent) => {
-      const metricsResult = await this.userBehaviorProcessor.processUserEvent(event);
+      const metricsResult =
+        await this.userBehaviorProcessor.processUserEvent(event);
       if (metricsResult.isSuccess()) {
         this.updateDashboard('user_behavior', metricsResult.value);
       }
     });
 
-    this.eventBus.subscribe('ProductViewed', async (event: ProductViewedEvent) => {
-      const metricsResult = await this.userBehaviorProcessor.processUserEvent(event);
-      if (metricsResult.isSuccess()) {
-        this.updateDashboard('user_behavior', metricsResult.value);
+    this.eventBus.subscribe(
+      'ProductViewed',
+      async (event: ProductViewedEvent) => {
+        const metricsResult =
+          await this.userBehaviorProcessor.processUserEvent(event);
+        if (metricsResult.isSuccess()) {
+          this.updateDashboard('user_behavior', metricsResult.value);
+        }
       }
-    });
+    );
   }
 
-  private updateDashboard(category: string, newMetrics: StreamingMetric[]): void {
+  private updateDashboard(
+    category: string,
+    newMetrics: StreamingMetric[]
+  ): void {
     const existing = this.metrics.get(category) || [];
     existing.push(...newMetrics);
 
@@ -575,12 +674,15 @@ export class RealTimeAnalyticsDashboard {
       latestMetrics: newMetrics.map(m => ({
         name: m.metricName,
         value: m.value,
-        timestamp: m.timestamp
-      }))
+        timestamp: m.timestamp,
+      })),
     });
   }
 
-  async getDashboardData(timeRange?: { start: Date; end: Date }): Promise<Record<string, any>> {
+  async getDashboardData(timeRange?: {
+    start: Date;
+    end: Date;
+  }): Promise<Record<string, any>> {
     const now = new Date();
     const defaultStart = new Date(now.getTime() - 60 * 60 * 1000); // Last hour
 
@@ -590,15 +692,16 @@ export class RealTimeAnalyticsDashboard {
     const dashboardData: Record<string, any> = {};
 
     for (const [category, metrics] of this.metrics.entries()) {
-      const filteredMetrics = metrics.filter(m => 
-        m.timestamp >= start && m.timestamp <= end
+      const filteredMetrics = metrics.filter(
+        m => m.timestamp >= start && m.timestamp <= end
       );
 
       dashboardData[category] = {
         totalMetrics: filteredMetrics.length,
         metricsByType: this.groupMetricsByType(filteredMetrics),
         timeRange: { start, end },
-        lastUpdated: metrics.length > 0 ? metrics[metrics.length - 1].timestamp : null
+        lastUpdated:
+          metrics.length > 0 ? metrics[metrics.length - 1].timestamp : null,
       };
     }
 
@@ -607,7 +710,7 @@ export class RealTimeAnalyticsDashboard {
 
   private groupMetricsByType(metrics: StreamingMetric[]): Record<string, any> {
     const grouped = new Map<string, StreamingMetric[]>();
-    
+
     metrics.forEach(metric => {
       if (!grouped.has(metric.metricName)) {
         grouped.set(metric.metricName, []);
@@ -616,12 +719,15 @@ export class RealTimeAnalyticsDashboard {
     });
 
     const result: Record<string, any> = {};
-    
+
     grouped.forEach((metricList, metricName) => {
       result[metricName] = {
         count: metricList.length,
         latest: metricList[metricList.length - 1],
-        values: metricList.map(m => ({ value: m.value, timestamp: m.timestamp }))
+        values: metricList.map(m => ({
+          value: m.value,
+          timestamp: m.timestamp,
+        })),
       };
     });
 
@@ -629,18 +735,26 @@ export class RealTimeAnalyticsDashboard {
   }
 
   // ⭐ FOCUS: Alert system for anomalies
-  async checkForAnomalies(): Promise<Array<{ type: string; severity: string; message: string; data: any }>> {
-    const alerts: Array<{ type: string; severity: string; message: string; data: any }> = [];
-    
+  async checkForAnomalies(): Promise<
+    Array<{ type: string; severity: string; message: string; data: any }>
+  > {
+    const alerts: Array<{
+      type: string;
+      severity: string;
+      message: string;
+      data: any;
+    }> = [];
+
     // Check transaction metrics for anomalies
     const transactionMetrics = this.metrics.get('transactions') || [];
-    const recentTransactions = transactionMetrics.filter(m => 
-      Date.now() - m.timestamp.getTime() < 5 * 60 * 1000 // Last 5 minutes
+    const recentTransactions = transactionMetrics.filter(
+      m => Date.now() - m.timestamp.getTime() < 5 * 60 * 1000 // Last 5 minutes
     );
 
     // High fraud alerts
-    const fraudAlerts = recentTransactions.filter(m => 
-      m.metricName.includes('fraud') && m.dimensions?.severity === 'critical'
+    const fraudAlerts = recentTransactions.filter(
+      m =>
+        m.metricName.includes('fraud') && m.dimensions?.severity === 'critical'
     );
 
     fraudAlerts.forEach(alert => {
@@ -648,20 +762,25 @@ export class RealTimeAnalyticsDashboard {
         type: 'fraud_detection',
         severity: 'critical',
         message: `Critical fraud pattern detected: ${alert.dimensions?.alertType}`,
-        data: alert.dimensions
+        data: alert.dimensions,
       });
     });
 
     // High volume alerts
-    const volumeMetrics = recentTransactions.filter(m => m.metricName === 'transaction_volume');
+    const volumeMetrics = recentTransactions.filter(
+      m => m.metricName === 'transaction_volume'
+    );
     if (volumeMetrics.length > 0) {
-      const avgVolume = volumeMetrics.reduce((sum, m) => sum + m.value, 0) / volumeMetrics.length;
-      if (avgVolume > 1000000) { // $1M+ in 5 minutes
+      const avgVolume =
+        volumeMetrics.reduce((sum, m) => sum + m.value, 0) /
+        volumeMetrics.length;
+      if (avgVolume > 1000000) {
+        // $1M+ in 5 minutes
         alerts.push({
           type: 'high_volume',
           severity: 'warning',
           message: `High transaction volume detected: $${avgVolume.toLocaleString()}`,
-          data: { avgVolume, timeWindow: '5_minutes' }
+          data: { avgVolume, timeWindow: '5_minutes' },
         });
       }
     }
@@ -692,7 +811,7 @@ async function setupRealTimeAnalytics() {
       Math.random() * 1000 + 10,
       'USD',
       merchantId,
-      { lat: 40.7128, lng: -74.0060, country: 'US' },
+      { lat: 40.7128, lng: -74.006, country: 'US' },
       new Date()
     );
 
@@ -729,7 +848,8 @@ setupRealTimeAnalytics();
 
 ## Key Features
 
-- **Real-time Stream Processing**: Process events as they arrive with low latency
+- **Real-time Stream Processing**: Process events as they arrive with low
+  latency
 - **Windowing Operations**: Time-based and count-based windowing for analytics
 - **Fraud Detection**: Real-time pattern matching for suspicious activities
 - **User Behavior Analytics**: Session tracking and purchase intent analysis
@@ -750,7 +870,8 @@ setupRealTimeAnalytics();
 - **Window Overflow**: Monitor memory usage with high-frequency events
 - **Clock Skew**: Handle out-of-order events properly
 - **State Management**: Ensure proper cleanup of windowed state
-- **Backpressure**: Handle situations where processing can't keep up with event rate
+- **Backpressure**: Handle situations where processing can't keep up with event
+  rate
 
 ## Related Examples
 

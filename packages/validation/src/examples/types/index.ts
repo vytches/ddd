@@ -107,7 +107,14 @@ export interface OrderItem {
   specifications?: Record<string, string>;
 }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned';
 
 export interface PaymentMethod {
   type: 'credit_card' | 'debit_card' | 'bank_transfer' | 'digital_wallet' | 'cash_on_delivery';
@@ -193,7 +200,15 @@ export interface BusinessRule {
 
 export interface RuleCondition {
   field: string;
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'regex' | 'in' | 'not_in';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'greater_than'
+    | 'less_than'
+    | 'contains'
+    | 'regex'
+    | 'in'
+    | 'not_in';
   value: any;
   logicalOperator?: 'and' | 'or';
 }
@@ -346,7 +361,12 @@ export interface PolicyCondition {
 
 // Event types for validation
 export interface ValidationEvent {
-  eventType: 'validation_started' | 'validation_completed' | 'validation_failed' | 'rule_applied' | 'policy_evaluated';
+  eventType:
+    | 'validation_started'
+    | 'validation_completed'
+    | 'validation_failed'
+    | 'rule_applied'
+    | 'policy_evaluated';
   entityType: string;
   entityId: string;
   validationId: string;

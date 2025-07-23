@@ -1,19 +1,22 @@
 # Event Interface Architecture
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Basic
-**Domain**: Foundation
-**Patterns**: event-interfaces, domain-events, event-architecture
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Domain**: Foundation **Patterns**: event-interfaces, domain-events,
+event-architecture **Dependencies**: @vytches-ddd/contracts
 
 ## Description
 
-The event interface architecture provides the foundation for event-driven design in VytchesDDD. This example demonstrates core event interfaces, domain event patterns, event bus architecture, and handler registration patterns essential for building event-driven applications.
+The event interface architecture provides the foundation for event-driven design
+in VytchesDDD. This example demonstrates core event interfaces, domain event
+patterns, event bus architecture, and handler registration patterns essential
+for building event-driven applications.
 
 ## Business Context
 
-Event-driven architecture enables loose coupling between domain components, supports audit trails, enables real-time processing, and facilitates integration between bounded contexts. These interfaces provide the contracts that make this architecture possible.
+Event-driven architecture enables loose coupling between domain components,
+supports audit trails, enables real-time processing, and facilitates integration
+between bounded contexts. These interfaces provide the contracts that make this
+architecture possible.
 
 ## Core Event Interfaces
 
@@ -21,11 +24,11 @@ Event-driven architecture enables loose coupling between domain components, supp
 
 ```typescript
 // src/domain/events/domain-event-foundation.ts
-import { 
-  IDomainEvent, 
-  DomainEventMetadata, 
+import {
+  IDomainEvent,
+  DomainEventMetadata,
   IEventBus,
-  IEventHandler 
+  IEventHandler,
 } from '@vytches-ddd/contracts';
 
 // Basic domain event implementation
@@ -33,7 +36,7 @@ export class UserRegisteredEvent implements IDomainEvent {
   public readonly eventType = 'UserRegistered';
   public readonly eventVersion = '1.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -45,14 +48,14 @@ export class UserRegisteredEvent implements IDomainEvent {
     public readonly metadata: DomainEventMetadata = {}
   ) {
     this.occurredAt = new Date();
-    
+
     // Add default metadata
     this.metadata = {
       correlationId: metadata.correlationId || this.generateCorrelationId(),
       causationId: metadata.causationId,
       userId: metadata.userId,
       timestamp: this.occurredAt,
-      ...metadata
+      ...metadata,
     };
   }
 
@@ -66,7 +69,7 @@ export class OrderProcessedEvent implements IDomainEvent {
   public readonly eventType = 'OrderProcessed';
   public readonly eventVersion = '2.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -89,7 +92,7 @@ export class OrderProcessedEvent implements IDomainEvent {
       correlationId: metadata.correlationId || `order-${aggregateId}`,
       timestamp: this.occurredAt,
       version: this.eventVersion,
-      ...metadata
+      ...metadata,
     };
   }
 }
@@ -102,7 +105,9 @@ export class OrderProcessedEvent implements IDomainEvent {
 import { IEventHandler } from '@vytches-ddd/contracts';
 
 // Simple event handler
-export class UserRegistrationEmailHandler implements IEventHandler<UserRegisteredEvent> {
+export class UserRegistrationEmailHandler
+  implements IEventHandler<UserRegisteredEvent>
+{
   constructor(
     private readonly emailService: EmailService,
     private readonly logger: Logger
@@ -113,24 +118,24 @@ export class UserRegistrationEmailHandler implements IEventHandler<UserRegistere
       this.logger.info('Processing user registration event', {
         userId: event.payload.userId,
         email: event.payload.email,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
 
       await this.emailService.sendWelcomeEmail({
         to: event.payload.email,
         userId: event.payload.userId,
-        userType: event.payload.userType
+        userType: event.payload.userType,
       });
 
       this.logger.info('Welcome email sent successfully', {
         userId: event.payload.userId,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
     } catch (error) {
       this.logger.error('Failed to send welcome email', {
         userId: event.payload.userId,
         error: error.message,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
       throw error;
     }
@@ -147,7 +152,9 @@ export class UserRegistrationEmailHandler implements IEventHandler<UserRegistere
 }
 
 // Multi-event handler
-export class OrderAnalyticsHandler implements IEventHandler<OrderProcessedEvent> {
+export class OrderAnalyticsHandler
+  implements IEventHandler<OrderProcessedEvent>
+{
   constructor(
     private readonly analyticsService: AnalyticsService,
     private readonly metricsCollector: MetricsCollector
@@ -155,7 +162,7 @@ export class OrderAnalyticsHandler implements IEventHandler<OrderProcessedEvent>
 
   async handle(event: OrderProcessedEvent): Promise<void> {
     const { payload, metadata } = event;
-    
+
     // Update analytics
     await this.analyticsService.trackOrderProcessed({
       orderId: payload.orderId,
@@ -163,17 +170,17 @@ export class OrderAnalyticsHandler implements IEventHandler<OrderProcessedEvent>
       totalAmount: payload.totalAmount,
       currency: payload.currency,
       itemCount: payload.items.length,
-      timestamp: event.occurredAt
+      timestamp: event.occurredAt,
     });
 
     // Update metrics
     this.metricsCollector.increment('orders.processed', 1, {
       currency: payload.currency,
-      status: payload.processingStatus
+      status: payload.processingStatus,
     });
 
     this.metricsCollector.histogram('orders.amount', payload.totalAmount, {
-      currency: payload.currency
+      currency: payload.currency,
     });
   }
 
@@ -211,24 +218,24 @@ export class InMemoryEventBus implements IEventBus {
       eventType,
       aggregateId: event.aggregateId,
       handlerCount: eventHandlers.length,
-      correlationId: event.metadata.correlationId
+      correlationId: event.metadata.correlationId,
     });
 
     // Execute handlers concurrently
-    const handlerPromises = eventHandlers.map(async (handler) => {
+    const handlerPromises = eventHandlers.map(async handler => {
       try {
         await handler.handle(event);
         this.logger.debug('Event handler completed successfully', {
           eventType,
           handlerName: this.getHandlerName(handler),
-          correlationId: event.metadata.correlationId
+          correlationId: event.metadata.correlationId,
         });
       } catch (error) {
         this.logger.error('Event handler failed', {
           eventType,
           handlerName: this.getHandlerName(handler),
           error: error.message,
-          correlationId: event.metadata.correlationId
+          correlationId: event.metadata.correlationId,
         });
         throw error;
       }
@@ -245,26 +252,26 @@ export class InMemoryEventBus implements IEventBus {
 
   // Subscribe handler to event type
   subscribe<T extends IDomainEvent>(
-    eventType: string, 
+    eventType: string,
     handler: IEventHandler<T>
   ): void {
     if (!this.handlers.has(eventType)) {
       this.handlers.set(eventType, []);
     }
-    
+
     const eventHandlers = this.handlers.get(eventType)!;
     eventHandlers.push(handler);
 
     this.logger.info('Event handler subscribed', {
       eventType,
       handlerName: this.getHandlerName(handler),
-      totalHandlers: eventHandlers.length
+      totalHandlers: eventHandlers.length,
     });
   }
 
   // Unsubscribe handler
   unsubscribe<T extends IDomainEvent>(
-    eventType: string, 
+    eventType: string,
     handler: IEventHandler<T>
   ): void {
     const eventHandlers = this.handlers.get(eventType);
@@ -275,7 +282,7 @@ export class InMemoryEventBus implements IEventBus {
       eventHandlers.splice(index, 1);
       this.logger.info('Event handler unsubscribed', {
         eventType,
-        handlerName: this.getHandlerName(handler)
+        handlerName: this.getHandlerName(handler),
       });
     }
   }
@@ -320,7 +327,7 @@ interface EventHandlerRegistration {
 
 export class EventRegistry {
   private registrations = new Map<string, EventHandlerRegistration[]>();
-  
+
   // Register handler with metadata
   register<T extends IDomainEvent>(
     eventType: string,
@@ -339,8 +346,8 @@ export class EventRegistry {
         name: metadata.name || handler.constructor.name,
         version: metadata.version || '1.0.0',
         priority: metadata.priority || 0,
-        async: metadata.async ?? true
-      }
+        async: metadata.async ?? true,
+      },
     };
 
     if (!this.registrations.has(eventType)) {
@@ -349,9 +356,11 @@ export class EventRegistry {
 
     const handlers = this.registrations.get(eventType)!;
     handlers.push(registration);
-    
+
     // Sort by priority (higher priority first)
-    handlers.sort((a, b) => (b.metadata.priority || 0) - (a.metadata.priority || 0));
+    handlers.sort(
+      (a, b) => (b.metadata.priority || 0) - (a.metadata.priority || 0)
+    );
   }
 
   // Get handlers for event type
@@ -381,7 +390,7 @@ export class EventRegistry {
     return {
       totalEventTypes: this.registrations.size,
       totalHandlers,
-      handlersByType
+      handlersByType,
     };
   }
 
@@ -389,7 +398,7 @@ export class EventRegistry {
   discoverHandlers(handlers: any[]): void {
     for (const handlerClass of handlers) {
       const instance = new handlerClass();
-      
+
       // Check if handler implements IEventHandler
       if (typeof instance.handle === 'function') {
         // Try to get event type from metadata or method
@@ -434,7 +443,7 @@ export class CustomerProfileUpdatedIntegrationEvent implements IDomainEvent {
   public readonly eventType = 'Integration.CustomerProfileUpdated';
   public readonly eventVersion = '1.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -461,7 +470,7 @@ export class CustomerProfileUpdatedIntegrationEvent implements IDomainEvent {
       timestamp: this.occurredAt,
       source: 'CustomerDomain',
       destination: ['OrderDomain', 'MarketingDomain'],
-      ...metadata
+      ...metadata,
     };
   }
 }
@@ -471,7 +480,7 @@ export class PaymentProcessedExternalEvent implements IDomainEvent {
   public readonly eventType = 'External.PaymentProcessed';
   public readonly eventVersion = '1.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -491,11 +500,12 @@ export class PaymentProcessedExternalEvent implements IDomainEvent {
   ) {
     this.occurredAt = new Date();
     this.metadata = {
-      correlationId: metadata.correlationId || `payment-${this.payload.paymentId}`,
+      correlationId:
+        metadata.correlationId || `payment-${this.payload.paymentId}`,
       timestamp: this.occurredAt,
       source: 'PaymentGateway',
       externalTransactionId: this.payload.externalTransactionId,
-      ...metadata
+      ...metadata,
     };
   }
 }
@@ -512,7 +522,7 @@ export class UserCreatedEventV1 implements IDomainEvent {
   public readonly eventType = 'UserCreated';
   public readonly eventVersion = '1.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -531,7 +541,7 @@ export class UserCreatedEventV2 implements IDomainEvent {
   public readonly eventType = 'UserCreated';
   public readonly eventVersion = '2.0.0';
   public readonly occurredAt: Date;
-  
+
   constructor(
     public readonly aggregateId: string,
     public readonly payload: {
@@ -566,13 +576,13 @@ export class EventMigrator {
         subscriptionPlan: 'free',
         preferences: {
           newsletter: true,
-          notifications: true
-        }
+          notifications: true,
+        },
       },
       {
         ...event.metadata,
         migratedFrom: event.eventVersion,
-        migrationTimestamp: new Date()
+        migrationTimestamp: new Date(),
       }
     );
   }

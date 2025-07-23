@@ -4,7 +4,8 @@ export const packageExampleConfig: PackageExampleConfig = {
   packageName: 'projections',
   displayName: 'Event Projections',
   version: '1.0.0',
-  description: 'Event projections system with capabilities, engines, and advanced orchestration patterns',
+  description:
+    'Event projections system with capabilities, engines, and advanced orchestration patterns',
   domain: 'Architecture',
   patterns: ['projection-pattern', 'event-sourcing', 'cqrs'],
   dependencies: ['@vytches-ddd/events', '@vytches-ddd/domain-primitives'],
@@ -14,20 +15,20 @@ export const packageExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic projection patterns'
+      description: 'Basic projection patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced patterns with optional DI'
+      description: 'Advanced patterns with optional DI',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise patterns requiring DI'
-    }
+      description: 'Enterprise patterns requiring DI',
+    },
   },
 
   frameworks: [
@@ -36,8 +37,8 @@ export const packageExampleConfig: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS framework integration',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common']
-    }
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+    },
   ],
 
   examples: [
@@ -50,7 +51,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic event projection implementation for user data views',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-basic-capabilities',
@@ -60,7 +61,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Event projection enhanced with checkpoint and circuit-breaker capabilities',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-basic-engine',
@@ -70,7 +71,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Projection engine with multiple projections and basic management',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-basic-implementation',
@@ -80,7 +81,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Comprehensive guide to implementing basic event projections',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-basic-use-cases',
@@ -90,7 +91,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'low',
       description: 'Real-world use cases for basic event projection patterns',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Intermediate Level Examples
@@ -102,7 +103,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced projection rebuilding with snapshots and optimization',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-intermediate-multi-tenant',
@@ -112,7 +113,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'SaaS projection system with tenant isolation and scaling',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-intermediate-analytics',
@@ -122,7 +123,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Business intelligence projections with real-time analytics',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-intermediate-implementation',
@@ -132,7 +133,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Advanced implementation patterns for scalable projections',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-intermediate-use-cases',
@@ -142,7 +143,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'low',
       description: 'Enterprise use cases for intermediate projection patterns',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Advanced Level Examples
@@ -154,7 +155,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Enterprise-scale projection orchestration across multiple regions',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-advanced-ai-enhanced',
@@ -164,7 +165,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Machine learning enhanced projections with predictive analytics',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-advanced-stream-processing',
@@ -174,7 +175,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Extreme performance projections for high-throughput systems',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-advanced-implementation',
@@ -184,7 +185,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Enterprise-grade implementation strategies for complex projection systems',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-advanced-use-cases',
@@ -194,7 +195,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'low',
       description: 'Global-scale use cases for mission-critical projection systems',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // NestJS Framework Integration
@@ -206,7 +207,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Basic NestJS projection setup with manual service registration',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-nestjs-basic-di',
@@ -216,7 +217,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'NestJS projection with basic dependency injection patterns',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-nestjs-intermediate-advanced-di',
@@ -226,7 +227,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Advanced NestJS integration with VytchesDDD DI system',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-nestjs-intermediate-capabilities',
@@ -236,7 +237,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'low',
       description: 'NestJS projection service with full capability integration',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'projections-nestjs-advanced-orchestration',
@@ -246,15 +247,15 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'low',
       description: 'Enterprise NestJS projection orchestration with microservices',
-      validation: { fileExists: true }
-    }
+      validation: { fileExists: true },
+    },
   ],
 
   tags: {
     core: ['projections:basic', 'projections:intermediate', 'projections:advanced'],
     integrations: ['nestjs:basic', 'nestjs:intermediate', 'nestjs:advanced'],
     frameworks: ['nestjs'],
-    patterns: ['projection-pattern', 'event-sourcing', 'cqrs']
+    patterns: ['projection-pattern', 'event-sourcing', 'cqrs'],
   },
 
   contentConfig: {
@@ -264,7 +265,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -272,22 +273,21 @@ export const packageExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   sections: ['implementation', 'use-case', 'framework-integration'],
 
   relatedPackages: {
-    'events': {
+    events: {
       priority: 'high',
       relationship: 'consumes-from',
-      integrationExamples: ['projections-basic-simple']
+      integrationExamples: ['projections-basic-simple'],
     },
-    'aggregates': {
+    aggregates: {
       priority: 'high',
       relationship: 'consumes-from',
-      integrationExamples: ['projections-intermediate-rebuilder']
-    }
-  }
+      integrationExamples: ['projections-intermediate-rebuilder'],
+    },
+  },
 };
-

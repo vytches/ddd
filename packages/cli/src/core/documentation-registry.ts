@@ -60,14 +60,14 @@ export class DocumentationRegistry implements IDocumentationRegistry {
     this.frameworkExamples.clear();
 
     const packagesDir = path.join(this.workspaceRoot, 'packages');
-    
+
     try {
       const packages = await fs.readdir(packagesDir);
-      
+
       for (const packageName of packages) {
         const packagePath = path.join(packagesDir, packageName);
         const examplesConfigPath = path.join(packagePath, 'src', 'examples', 'config.ts');
-        
+
         try {
           // Try to load package example configuration
           await this.loadPackageExamples(packageName, examplesConfigPath);
@@ -103,29 +103,29 @@ export class DocumentationRegistry implements IDocumentationRegistry {
     }
 
     if (options.domain) {
-      results = results.filter(example => 
-        example.tags.includes(`domain:${options.domain}`) || 
-        example.description.toLowerCase().includes(options.domain!.toLowerCase())
+      results = results.filter(
+        example =>
+          example.tags.includes(`domain:${options.domain}`) ||
+          example.description.toLowerCase().includes(options.domain!.toLowerCase())
       );
     }
 
     if (options.pattern) {
-      results = results.filter(example => 
-        example.tags.includes(`pattern:${options.pattern}`) ||
-        example.tags.includes(options.pattern!)
+      results = results.filter(
+        example =>
+          example.tags.includes(`pattern:${options.pattern}`) ||
+          example.tags.includes(options.pattern!)
       );
     }
 
     if (options.framework) {
-      results = results.filter(example => 
+      results = results.filter(example =>
         example.frameworkIntegrations?.some(fi => fi.framework === options.framework)
       );
     }
 
     if (options.tags && options.tags.length > 0) {
-      results = results.filter(example => 
-        options.tags!.some(tag => example.tags.includes(tag))
-      );
+      results = results.filter(example => options.tags!.some(tag => example.tags.includes(tag)));
     }
 
     return results;
@@ -177,17 +177,20 @@ export class DocumentationRegistry implements IDocumentationRegistry {
     try {
       // Read and evaluate the config file
       const configContent = await fs.readFile(configPath, 'utf-8');
-      
+
       // Extract examples from config (this is a simplified approach)
       // In a real implementation, you might use dynamic imports or a more sophisticated parser
       const examples = this.parseConfigExamples(configContent, packageName);
-      
+
       if (examples.length > 0) {
-        this.packageExamples.set(packageName, examples.map(e => e.id));
-        
+        this.packageExamples.set(
+          packageName,
+          examples.map(e => e.id)
+        );
+
         for (const example of examples) {
           this.examples.set(example.id, example);
-          
+
           // Track frameworks
           if (example.frameworkIntegrations) {
             for (const integration of example.frameworkIntegrations) {
@@ -207,13 +210,16 @@ export class DocumentationRegistry implements IDocumentationRegistry {
   /**
    * Parse example definitions from config content
    */
-  private parseConfigExamples(configContent: string, packageName: string): EnhancedExampleDefinition[] {
+  private parseConfigExamples(
+    configContent: string,
+    packageName: string
+  ): EnhancedExampleDefinition[] {
     // This is a simplified parser - in reality you'd want more sophisticated parsing
     const examples: EnhancedExampleDefinition[] = [];
-    
+
     // Basic regex-based parsing (this should be replaced with proper AST parsing in production)
     const exampleMatches = configContent.matchAll(/examples:\s*\[([\s\S]*?)\]/g);
-    
+
     for (const match of exampleMatches) {
       try {
         // Extract example objects (simplified)
@@ -226,7 +232,7 @@ export class DocumentationRegistry implements IDocumentationRegistry {
         console.warn(`Failed to parse examples from ${packageName}:`, error);
       }
     }
-    
+
     return examples;
   }
 
@@ -248,7 +254,7 @@ export class DocumentationRegistry implements IDocumentationRegistry {
         description: `Basic example for ${packageName} package`,
         package: packageName,
         diSupport: true,
-      }
+      },
     ];
   }
 }

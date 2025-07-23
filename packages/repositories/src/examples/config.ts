@@ -122,33 +122,33 @@ export const basicConfig: ExampleConfig = {
     port: 5432,
     database: 'vytches_ddd_examples',
     connectionPoolSize: 10,
-    timeout: 30000
+    timeout: 30000,
   },
   cache: {
     enabled: true,
     provider: 'in-memory',
     ttl: 300000, // 5 minutes
-    maxSize: 10000
+    maxSize: 10000,
   },
   performance: {
     batchSize: 100,
     maxConcurrentOperations: 50,
     enableOptimisticLocking: true,
     enableQueryOptimization: true,
-    enableMetrics: true
+    enableMetrics: true,
   },
   eventSourcing: {
     enableEventStore: false,
     eventStoreType: 'postgresql',
     snapshotFrequency: 100,
-    enableProjections: false
+    enableProjections: false,
   },
   multiTenant: {
     enabled: false,
     isolationLevel: 'SHARED',
     tenantIdField: 'tenantId',
     enableTenantValidation: true,
-    enableCrossTenantQueries: false
+    enableCrossTenantQueries: false,
   },
   ai: {
     enabled: false,
@@ -157,20 +157,20 @@ export const basicConfig: ExampleConfig = {
     retrainingThreshold: 0.1,
     enablePredictiveCaching: false,
     enableQueryOptimization: false,
-    enableAccessPatternLearning: false
+    enableAccessPatternLearning: false,
   },
   distributed: {
     enabled: false,
     regions: ['local'],
     consistencyLevel: 'strong',
     replicationStrategy: 'master-slave',
-    enableCrossRegionFailover: false
+    enableCrossRegionFailover: false,
   },
   logging: {
     level: 'info',
     enableStructuredLogging: true,
-    enableMetrics: true
-  }
+    enableMetrics: true,
+  },
 };
 
 /**
@@ -182,33 +182,33 @@ export const intermediateConfig: ExampleConfig = {
     ...basicConfig.cache,
     provider: 'redis',
     ttl: 600000, // 10 minutes
-    compressionEnabled: true
+    compressionEnabled: true,
   },
   performance: {
     ...basicConfig.performance,
     batchSize: 1000,
     maxConcurrentOperations: 100,
-    memoryPoolSize: 50000
+    memoryPoolSize: 50000,
   },
   eventSourcing: {
     enableEventStore: true,
     eventStoreType: 'postgresql',
     snapshotFrequency: 50,
     enableProjections: true,
-    compressionAlgorithm: 'gzip'
+    compressionAlgorithm: 'gzip',
   },
   multiTenant: {
     enabled: true,
     isolationLevel: 'ISOLATED',
     tenantIdField: 'tenantId',
     enableTenantValidation: true,
-    enableCrossTenantQueries: true
+    enableCrossTenantQueries: true,
   },
   logging: {
     level: 'debug',
     enableStructuredLogging: true,
-    enableMetrics: true
-  }
+    enableMetrics: true,
+  },
 };
 
 /**
@@ -219,27 +219,27 @@ export const advancedConfig: ExampleConfig = {
   database: {
     ...intermediateConfig.database,
     connectionPoolSize: 100,
-    timeout: 60000
+    timeout: 60000,
   },
   cache: {
     ...intermediateConfig.cache,
     maxSize: 1000000,
-    compressionEnabled: true
+    compressionEnabled: true,
   },
   performance: {
     ...intermediateConfig.performance,
     batchSize: 10000,
     maxConcurrentOperations: 500,
-    memoryPoolSize: 1000000
+    memoryPoolSize: 1000000,
   },
   eventSourcing: {
     ...intermediateConfig.eventSourcing,
     snapshotFrequency: 25,
-    compressionAlgorithm: 'lz4'
+    compressionAlgorithm: 'lz4',
   },
   multiTenant: {
     ...intermediateConfig.multiTenant,
-    isolationLevel: 'DEDICATED'
+    isolationLevel: 'DEDICATED',
   },
   ai: {
     enabled: true,
@@ -248,15 +248,15 @@ export const advancedConfig: ExampleConfig = {
     retrainingThreshold: 0.05,
     enablePredictiveCaching: true,
     enableQueryOptimization: true,
-    enableAccessPatternLearning: true
+    enableAccessPatternLearning: true,
   },
   distributed: {
     enabled: true,
     regions: ['us-east', 'eu-west', 'asia-pacific'],
     consistencyLevel: 'linearizable',
     replicationStrategy: 'multi-master',
-    enableCrossRegionFailover: true
-  }
+    enableCrossRegionFailover: true,
+  },
 };
 
 /**
@@ -270,13 +270,13 @@ export const highFrequencyTradingConfig: ExampleConfig = {
     database: 'hft_trading',
     connectionPoolSize: 200,
     timeout: 1000, // Very short timeout
-    ssl: false // Disable SSL for performance
+    ssl: false, // Disable SSL for performance
   },
   cache: {
     enabled: true,
     provider: 'in-memory', // Fastest cache
     ttl: 1000, // 1 second TTL
-    maxSize: 10000000 // Large cache
+    maxSize: 10000000, // Large cache
   },
   performance: {
     batchSize: 50000,
@@ -284,21 +284,21 @@ export const highFrequencyTradingConfig: ExampleConfig = {
     enableOptimisticLocking: true,
     enableQueryOptimization: true,
     memoryPoolSize: 100000000, // 100MB pool
-    enableMetrics: true
+    enableMetrics: true,
   },
   eventSourcing: {
     enableEventStore: true,
     eventStoreType: 'postgresql',
     snapshotFrequency: 10000, // Frequent snapshots
     enableProjections: true,
-    compressionAlgorithm: 'lz4' // Fast compression
+    compressionAlgorithm: 'lz4', // Fast compression
   },
   multiTenant: {
     enabled: false, // Disabled for performance
     isolationLevel: 'SHARED',
     tenantIdField: 'tenantId',
     enableTenantValidation: false,
-    enableCrossTenantQueries: false
+    enableCrossTenantQueries: false,
   },
   ai: {
     enabled: true,
@@ -307,20 +307,20 @@ export const highFrequencyTradingConfig: ExampleConfig = {
     retrainingThreshold: 0.02,
     enablePredictiveCaching: true,
     enableQueryOptimization: true,
-    enableAccessPatternLearning: true
+    enableAccessPatternLearning: true,
   },
   distributed: {
     enabled: true,
     regions: ['us-east-1a', 'us-east-1b', 'us-east-1c'], // Same AZ for lowest latency
     consistencyLevel: 'eventual', // Accept eventual consistency for speed
     replicationStrategy: 'master-slave',
-    enableCrossRegionFailover: true
+    enableCrossRegionFailover: true,
   },
   logging: {
     level: 'warn', // Minimal logging for performance
     enableStructuredLogging: true,
-    enableMetrics: true
-  }
+    enableMetrics: true,
+  },
 };
 
 // ===== CONFIGURATION COLLECTIONS =====
@@ -332,18 +332,18 @@ export const exampleConfig = {
   basic: {
     userRepository: basicConfig,
     productRepository: basicConfig,
-    orderRepository: basicConfig
+    orderRepository: basicConfig,
   },
   intermediate: {
     financialUnitOfWork: intermediateConfig,
     productSpecification: intermediateConfig,
-    multiTenantUser: intermediateConfig
+    multiTenantUser: intermediateConfig,
   },
   advanced: {
     globalTradingAccount: advancedConfig,
     highFrequencyTrading: highFrequencyTradingConfig,
-    intelligentCustomer: advancedConfig
-  }
+    intelligentCustomer: advancedConfig,
+  },
 };
 
 // ===== FRAMEWORK-SPECIFIC CONFIGURATIONS =====
@@ -357,47 +357,37 @@ export const nestjsConfigurations = {
       imports: ['TypeOrmModule', 'CacheModule'],
       providers: ['UserRepository', 'UserService'],
       controllers: ['UserController'],
-      exports: ['UserService']
+      exports: ['UserService'],
     },
     decoratorConfig: {
       useInjectableDecorator: true,
       useRepositoryDecorator: false,
-      useEntityDecorator: true
+      useEntityDecorator: true,
     },
     diConfig: {
       useNestJSDI: true,
       useVytchesDI: false,
-      containerType: 'standard'
-    }
+      containerType: 'standard',
+    },
   },
   intermediate: {
     moduleConfig: {
-      imports: [
-        'TypeOrmModule',
-        'CacheModule',
-        'EventEmitterModule',
-        'BullModule'
-      ],
-      providers: [
-        'UserRepository',
-        'UserService',
-        'UnitOfWorkFactory',
-        'SpecificationRegistry'
-      ],
+      imports: ['TypeOrmModule', 'CacheModule', 'EventEmitterModule', 'BullModule'],
+      providers: ['UserRepository', 'UserService', 'UnitOfWorkFactory', 'SpecificationRegistry'],
       controllers: ['UserController', 'AdminController'],
-      exports: ['UserService', 'UnitOfWorkFactory']
+      exports: ['UserService', 'UnitOfWorkFactory'],
     },
     decoratorConfig: {
       useInjectableDecorator: true,
       useRepositoryDecorator: true,
       useEntityDecorator: true,
-      useEventHandlerDecorator: true
+      useEventHandlerDecorator: true,
     },
     diConfig: {
       useNestJSDI: true,
       useVytchesDI: true, // Hybrid approach
-      containerType: 'advanced'
-    }
+      containerType: 'advanced',
+    },
   },
   advanced: {
     moduleConfig: {
@@ -407,17 +397,17 @@ export const nestjsConfigurations = {
         'EventEmitterModule',
         'BullModule',
         'ElasticsearchModule',
-        'PrometheusModule'
+        'PrometheusModule',
       ],
       providers: [
         'UserRepository',
         'UserService',
         'AIRepositoryOrchestrator',
         'GlobalConsistencyManager',
-        'TensorFlowModule'
+        'TensorFlowModule',
       ],
       controllers: ['UserController', 'AdminController', 'MetricsController'],
-      exports: ['UserService', 'AIRepositoryOrchestrator']
+      exports: ['UserService', 'AIRepositoryOrchestrator'],
     },
     decoratorConfig: {
       useInjectableDecorator: true,
@@ -425,14 +415,14 @@ export const nestjsConfigurations = {
       useEntityDecorator: true,
       useEventHandlerDecorator: true,
       useMetricsDecorator: true,
-      useCircuitBreakerDecorator: true
+      useCircuitBreakerDecorator: true,
     },
     diConfig: {
       useNestJSDI: false, // Use only VytchesDDD DI for advanced scenarios
       useVytchesDI: true,
-      containerType: 'enterprise'
-    }
-  }
+      containerType: 'enterprise',
+    },
+  },
 };
 
 /**
@@ -444,8 +434,8 @@ export const expressConfigurations = {
     routeConfig: {
       prefix: '/api',
       versionPrefix: '/v1',
-      enableOpenAPI: false
-    }
+      enableOpenAPI: false,
+    },
   },
   intermediate: {
     middlewares: ['cors', 'body-parser', 'helmet', 'compression', 'rate-limiter'],
@@ -453,8 +443,8 @@ export const expressConfigurations = {
       prefix: '/api',
       versionPrefix: '/v1',
       enableOpenAPI: true,
-      enableMetrics: true
-    }
+      enableMetrics: true,
+    },
   },
   advanced: {
     middlewares: [
@@ -464,16 +454,16 @@ export const expressConfigurations = {
       'compression',
       'rate-limiter',
       'prometheus-metrics',
-      'request-tracing'
+      'request-tracing',
     ],
     routeConfig: {
       prefix: '/api',
       versionPrefix: '/v1',
       enableOpenAPI: true,
       enableMetrics: true,
-      enableTracing: true
-    }
-  }
+      enableTracing: true,
+    },
+  },
 };
 
 // ===== CONFIGURATION UTILITIES =====
@@ -485,7 +475,7 @@ export function getFrameworkConfig(
   framework: 'nestjs' | 'express' | 'fastify',
   complexity: ComplexityLevel
 ): FrameworkConfig {
-  const level = complexity
+  const level = complexity;
 
   // Get the appropriate config based on complexity level
   let baseConfig: ExampleConfig;
@@ -511,14 +501,14 @@ export function getFrameworkConfig(
         framework,
         moduleConfig: nestjsConfigurations[complexity].moduleConfig,
         decoratorConfig: nestjsConfigurations[complexity].decoratorConfig,
-        diConfig: nestjsConfigurations[complexity].diConfig
+        diConfig: nestjsConfigurations[complexity].diConfig,
       };
 
     case 'express':
       return {
         ...baseConfig,
         framework,
-        moduleConfig: expressConfigurations[complexity]
+        moduleConfig: expressConfigurations[complexity],
       };
 
     case 'fastify':
@@ -527,8 +517,8 @@ export function getFrameworkConfig(
         framework,
         moduleConfig: {
           plugins: ['@fastify/cors', '@fastify/helmet', '@fastify/redis'],
-          routePrefix: '/api/v1'
-        }
+          routePrefix: '/api/v1',
+        },
       };
 
     default:
@@ -539,24 +529,26 @@ export function getFrameworkConfig(
 /**
  * Get environment-specific configuration overrides
  */
-export function getEnvironmentConfig(environment: 'development' | 'staging' | 'production'): Partial<ExampleConfig> {
+export function getEnvironmentConfig(
+  environment: 'development' | 'staging' | 'production'
+): Partial<ExampleConfig> {
   const commonOverrides = {
     development: {
       logging: { level: 'debug' as const },
       database: { timeout: 60000 },
-      cache: { ttl: 60000 } // 1 minute cache in dev
+      cache: { ttl: 60000 }, // 1 minute cache in dev
     },
     staging: {
       logging: { level: 'info' as const },
       database: { timeout: 30000 },
-      performance: { enableMetrics: true }
+      performance: { enableMetrics: true },
     },
     production: {
       logging: { level: 'warn' as const },
       database: { timeout: 15000, ssl: true },
       cache: { compressionEnabled: true },
-      performance: { enableMetrics: true, enableQueryOptimization: true }
-    }
+      performance: { enableMetrics: true, enableQueryOptimization: true },
+    },
   };
 
   return commonOverrides[environment] as Partial<ExampleConfig>;
@@ -613,7 +605,7 @@ export function validateConfiguration(config: ExampleConfig): { valid: boolean; 
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -629,8 +621,8 @@ export function generateSampleDataConfig(recordCount = 1000): any {
         email: () => `user${Math.floor(Math.random() * 10000)}@example.com`,
         name: () => `User ${Math.floor(Math.random() * 10000)}`,
         createdAt: () => new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
-        isActive: () => Math.random() > 0.1
-      }
+        isActive: () => Math.random() > 0.1,
+      },
     },
     products: {
       count: Math.floor(recordCount * 0.1),
@@ -638,9 +630,9 @@ export function generateSampleDataConfig(recordCount = 1000): any {
         id: () => EntityId.createUuid(randomUUID()).value,
         name: () => `Product ${Math.floor(Math.random() * 1000)}`,
         price: () => Math.floor(Math.random() * 10000) / 100,
-        inStock: () => Math.random() > 0.2
-      }
-    }
+        inStock: () => Math.random() > 0.2,
+      },
+    },
   };
 }
 
@@ -676,21 +668,21 @@ export const configurationPresets = {
       isolationLevel: 'ISOLATED',
       tenantIdField: 'tenantId',
       enableTenantValidation: true,
-      enableCrossTenantQueries: false
+      enableCrossTenantQueries: false,
     },
     cache: {
       enabled: true,
       provider: 'redis',
       ttl: 300000,
-      maxSize: 100000
+      maxSize: 100000,
     },
     performance: {
       batchSize: 500,
       maxConcurrentOperations: 200,
       enableOptimisticLocking: true,
       enableQueryOptimization: true,
-      enableMetrics: true
-    }
+      enableMetrics: true,
+    },
   }),
 
   /**
@@ -702,20 +694,20 @@ export const configurationPresets = {
       eventStoreType: 'postgresql',
       snapshotFrequency: 10,
       enableProjections: true,
-      compressionAlgorithm: 'lz4'
+      compressionAlgorithm: 'lz4',
     },
     distributed: {
       enabled: true,
       regions: ['us-east-1', 'eu-west-1'],
       replicationStrategy: 'master-slave',
       consistencyLevel: 'linearizable',
-      enableCrossRegionFailover: true
+      enableCrossRegionFailover: true,
     },
     logging: {
       level: 'info',
       enableStructuredLogging: true,
-      enableMetrics: true
-    }
+      enableMetrics: true,
+    },
   }),
 
   /**
@@ -727,12 +719,12 @@ export const configurationPresets = {
       maxConcurrentOperations: 1000,
       enableOptimisticLocking: true,
       enableQueryOptimization: true,
-      enableMetrics: true
+      enableMetrics: true,
     },
     cache: {
       enabled: true,
       ttl: 60000,
-      provider: 'redis'
+      provider: 'redis',
     },
     ai: {
       enabled: true,
@@ -741,8 +733,8 @@ export const configurationPresets = {
       retrainingThreshold: 0.8,
       enablePredictiveCaching: true,
       enableQueryOptimization: true,
-      enableAccessPatternLearning: true
-    }
+      enableAccessPatternLearning: true,
+    },
   }),
 
   /**
@@ -752,23 +744,23 @@ export const configurationPresets = {
     cache: {
       enabled: true,
       ttl: 30000,
-      provider: 'in-memory'
+      provider: 'in-memory',
     },
     performance: {
       enableOptimisticLocking: false,
       batchSize: 1000,
       maxConcurrentOperations: 500,
       enableQueryOptimization: true,
-      enableMetrics: true
+      enableMetrics: true,
     },
     distributed: {
       enabled: true,
       regions: ['us-west-2'],
       replicationStrategy: 'multi-master',
       consistencyLevel: 'eventual',
-      enableCrossRegionFailover: false
-    }
-  })
+      enableCrossRegionFailover: false,
+    },
+  }),
 };
 
 // Export default configuration

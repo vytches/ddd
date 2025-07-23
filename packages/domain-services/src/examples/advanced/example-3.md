@@ -1,53 +1,56 @@
 # Enterprise Domain Service - Expert Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: expert
-**Domain**: order-management
-**Patterns**: domain-service, enterprise, full-stack
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/enterprise
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+expert **Domain**: order-management **Patterns**: domain-service, enterprise,
+full-stack **Dependencies**: @vytches-ddd/core, @vytches-ddd/enterprise
 
 ## Description
 
-This example demonstrates a comprehensive enterprise domain service that combines all advanced patterns: event sourcing, CQRS, sagas, resilience, policies, logging, and monitoring. It represents a production-ready implementation.
+This example demonstrates a comprehensive enterprise domain service that
+combines all advanced patterns: event sourcing, CQRS, sagas, resilience,
+policies, logging, and monitoring. It represents a production-ready
+implementation.
 
 ## Business Context
 
-Enterprise applications require services that can handle complex business operations with high availability, auditability, and maintainability. This example shows how to build a domain service that meets enterprise-grade requirements.
+Enterprise applications require services that can handle complex business
+operations with high availability, auditability, and maintainability. This
+example shows how to build a domain service that meets enterprise-grade
+requirements.
 
 ## Code Example
 
-```typescript
+````typescript
 // enterprise-order.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { 
-  EventStore, 
-  CommandBus, 
-  QueryBus, 
+import {
+  EventStore,
+  CommandBus,
+  QueryBus,
   PolicyRegistry,
   SagaOrchestrator,
   CircuitBreaker,
-  Logger
+  Logger,
 } from '@vytches-ddd/enterprise';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  CreateOrderCommand, 
+import {
+  Order,
+  CreateOrderCommand,
   OrderProcessingResult,
   OrderAggregate,
   OrderCreatedEvent,
-  OrderProcessingContext
+  OrderProcessingContext,
 } from '../types';
 
 /**
  * @llm-summary Enterprise-grade domain service with comprehensive capabilities
  * @llm-domain order-management
  * @llm-complexity Expert
- * 
+ *
  * @description
  * Production-ready domain service combining event sourcing, CQRS, sagas,
  * resilience patterns, policy enforcement, and comprehensive observability.
- * 
+ *
  * @example
  * ```typescript
  * const service = new EnterpriseOrderService(dependencies);
@@ -73,7 +76,7 @@ export class EnterpriseOrderService extends BaseDomainService {
 
   /**
    * Processes enterprise order with full feature set
-   * 
+   *
    * @param command - Order creation command
    * @param context - Processing context with correlation and audit info
    * @returns Result containing processing result or error
@@ -89,34 +92,52 @@ export class EnterpriseOrderService extends BaseDomainService {
       orderId: command.orderId,
       correlationId,
       userId: command.userId,
-      itemCount: command.items.length
+      itemCount: command.items.length,
     });
 
     try {
       // Step 1: Policy validation
       const policyResult = await this.validateOrderPolicies(command, context);
       if (policyResult.isFailure()) {
-        await this.auditFailure('POLICY_VALIDATION_FAILED', policyResult.error, context);
+        await this.auditFailure(
+          'POLICY_VALIDATION_FAILED',
+          policyResult.error,
+          context
+        );
         return Result.failure(policyResult.error);
       }
 
       // Step 2: Create order aggregate with event sourcing
       const aggregateResult = await this.createOrderAggregate(command, context);
       if (aggregateResult.isFailure()) {
-        await this.auditFailure('AGGREGATE_CREATION_FAILED', aggregateResult.error, context);
+        await this.auditFailure(
+          'AGGREGATE_CREATION_FAILED',
+          aggregateResult.error,
+          context
+        );
         return Result.failure(aggregateResult.error);
       }
       const orderAggregate = aggregateResult.value;
 
       // Step 3: Execute CQRS commands
-      const cqrsResult = await this.executeCQRSCommands(orderAggregate, context);
+      const cqrsResult = await this.executeCQRSCommands(
+        orderAggregate,
+        context
+      );
       if (cqrsResult.isFailure()) {
-        await this.auditFailure('CQRS_EXECUTION_FAILED', cqrsResult.error, context);
+        await this.auditFailure(
+          'CQRS_EXECUTION_FAILED',
+          cqrsResult.error,
+          context
+        );
         return Result.failure(cqrsResult.error);
       }
 
       // Step 4: Start saga orchestration
-      const sagaResult = await this.startSagaOrchestration(orderAggregate, context);
+      const sagaResult = await this.startSagaOrchestration(
+        orderAggregate,
+        context
+      );
       if (sagaResult.isFailure()) {
         await this.auditFailure('SAGA_START_FAILED', sagaResult.error, context);
         return Result.failure(sagaResult.error);
@@ -135,21 +156,22 @@ export class EnterpriseOrderService extends BaseDomainService {
         orderId: result.orderId,
         correlationId,
         duration: Date.now() - startTime,
-        status: result.status
+        status: result.status,
       });
 
       return Result.success(result);
-
     } catch (error) {
       this.logger.error('Enterprise order processing failed', {
         orderId: command.orderId,
         correlationId,
         error: error.message,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       });
 
       await this.auditFailure('UNEXPECTED_ERROR', error, context);
-      return Result.failure(new Error(`Enterprise order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Enterprise order processing failed: ${error.message}`)
+      );
     }
   }
 
@@ -160,16 +182,16 @@ export class EnterpriseOrderService extends BaseDomainService {
     command: CreateOrderCommand,
     context: OrderProcessingContext
   ): Promise<Result<void, Error>> {
-    
     this.logger.debug('Validating order policies', {
       orderId: command.orderId,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     try {
       // Get comprehensive policy suite
-      const policies = await this.policyRegistry.findByDomain('order-management');
-      
+      const policies =
+        await this.policyRegistry.findByDomain('order-management');
+
       for (const policy of policies) {
         const policyResult = await policy.check({
           entity: command,
@@ -178,8 +200,8 @@ export class EnterpriseOrderService extends BaseDomainService {
             userId: context.userId,
             requestId: context.requestId,
             timestamp: context.timestamp,
-            source: 'EnterpriseOrderService'
-          }
+            source: 'EnterpriseOrderService',
+          },
         });
 
         if (policyResult.isFailure()) {
@@ -187,23 +209,28 @@ export class EnterpriseOrderService extends BaseDomainService {
           this.logger.warn('Policy validation failed', {
             policyId: policy.id,
             violations: violations.length,
-            correlationId: context.correlationId
+            correlationId: context.correlationId,
           });
-          
-          return Result.failure(new Error(`Policy validation failed: ${violations.map(v => v.message).join(', ')}`));
+
+          return Result.failure(
+            new Error(
+              `Policy validation failed: ${violations.map(v => v.message).join(', ')}`
+            )
+          );
         }
       }
 
       return Result.success();
-
     } catch (error) {
       this.logger.error('Policy validation error', {
         orderId: command.orderId,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Policy validation error: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Policy validation error: ${error.message}`)
+      );
     }
   }
 
@@ -214,10 +241,9 @@ export class EnterpriseOrderService extends BaseDomainService {
     command: CreateOrderCommand,
     context: OrderProcessingContext
   ): Promise<Result<OrderAggregate, Error>> {
-    
     this.logger.debug('Creating order aggregate', {
       orderId: command.orderId,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     try {
@@ -229,8 +255,8 @@ export class EnterpriseOrderService extends BaseDomainService {
         metadata: {
           correlationId: context.correlationId,
           requestId: context.requestId,
-          source: 'EnterpriseOrderService'
-        }
+          source: 'EnterpriseOrderService',
+        },
       });
 
       // Validate aggregate state
@@ -240,15 +266,16 @@ export class EnterpriseOrderService extends BaseDomainService {
       }
 
       return Result.success(orderAggregate);
-
     } catch (error) {
       this.logger.error('Aggregate creation failed', {
         orderId: command.orderId,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Aggregate creation failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Aggregate creation failed: ${error.message}`)
+      );
     }
   }
 
@@ -259,37 +286,54 @@ export class EnterpriseOrderService extends BaseDomainService {
     orderAggregate: OrderAggregate,
     context: OrderProcessingContext
   ): Promise<Result<void, Error>> {
-    
     this.logger.debug('Executing CQRS commands', {
       orderId: orderAggregate.id,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     try {
       // Execute commands through command bus
       const commands = [
-        { type: 'ValidateInventory', payload: { orderId: orderAggregate.id, items: orderAggregate.items } },
-        { type: 'CalculatePricing', payload: { orderId: orderAggregate.id, customerId: orderAggregate.userId } },
-        { type: 'ApplyDiscounts', payload: { orderId: orderAggregate.id, customerId: orderAggregate.userId } }
+        {
+          type: 'ValidateInventory',
+          payload: { orderId: orderAggregate.id, items: orderAggregate.items },
+        },
+        {
+          type: 'CalculatePricing',
+          payload: {
+            orderId: orderAggregate.id,
+            customerId: orderAggregate.userId,
+          },
+        },
+        {
+          type: 'ApplyDiscounts',
+          payload: {
+            orderId: orderAggregate.id,
+            customerId: orderAggregate.userId,
+          },
+        },
       ];
 
       for (const command of commands) {
         const result = await this.commandBus.send(command);
         if (result.isFailure()) {
-          return Result.failure(new Error(`CQRS command failed: ${command.type}`));
+          return Result.failure(
+            new Error(`CQRS command failed: ${command.type}`)
+          );
         }
       }
 
       return Result.success();
-
     } catch (error) {
       this.logger.error('CQRS execution failed', {
         orderId: orderAggregate.id,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`CQRS execution failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`CQRS execution failed: ${error.message}`)
+      );
     }
   }
 
@@ -300,10 +344,9 @@ export class EnterpriseOrderService extends BaseDomainService {
     orderAggregate: OrderAggregate,
     context: OrderProcessingContext
   ): Promise<Result<void, Error>> {
-    
     this.logger.debug('Starting saga orchestration', {
       orderId: orderAggregate.id,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     try {
@@ -318,34 +361,40 @@ export class EnterpriseOrderService extends BaseDomainService {
         metadata: {
           correlationId: context.correlationId,
           requestId: context.requestId,
-          source: 'EnterpriseOrderService'
-        }
+          source: 'EnterpriseOrderService',
+        },
       };
 
       // Start saga
-      const sagaResults = await this.sagaOrchestrator.processEvent(sagaStartEvent, {
-        correlationId: context.correlationId,
-        userId: context.userId,
-        metadata: {
-          orderId: orderAggregate.id,
-          priority: context.priority
+      const sagaResults = await this.sagaOrchestrator.processEvent(
+        sagaStartEvent,
+        {
+          correlationId: context.correlationId,
+          userId: context.userId,
+          metadata: {
+            orderId: orderAggregate.id,
+            priority: context.priority,
+          },
         }
-      });
+      );
 
       if (sagaResults.length === 0) {
-        return Result.failure(new Error('No saga found to handle order creation'));
+        return Result.failure(
+          new Error('No saga found to handle order creation')
+        );
       }
 
       return Result.success();
-
     } catch (error) {
       this.logger.error('Saga orchestration failed', {
         orderId: orderAggregate.id,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Saga orchestration failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Saga orchestration failed: ${error.message}`)
+      );
     }
   }
 
@@ -356,11 +405,10 @@ export class EnterpriseOrderService extends BaseDomainService {
     orderAggregate: OrderAggregate,
     context: OrderProcessingContext
   ): Promise<void> {
-    
     this.logger.debug('Persisting events', {
       orderId: orderAggregate.id,
       correlationId: context.correlationId,
-      eventCount: orderAggregate.uncommittedEvents.length
+      eventCount: orderAggregate.uncommittedEvents.length,
     });
 
     try {
@@ -372,8 +420,8 @@ export class EnterpriseOrderService extends BaseDomainService {
           correlationId: context.correlationId,
           requestId: context.requestId,
           userId: context.userId,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }));
 
       // Persist to event store
@@ -385,16 +433,15 @@ export class EnterpriseOrderService extends BaseDomainService {
       this.logger.info('Events persisted successfully', {
         orderId: orderAggregate.id,
         correlationId: context.correlationId,
-        eventCount: events.length
+        eventCount: events.length,
       });
-
     } catch (error) {
       this.logger.error('Event persistence failed', {
         orderId: orderAggregate.id,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
-      
+
       throw new Error(`Event persistence failed: ${error.message}`);
     }
   }
@@ -406,16 +453,15 @@ export class EnterpriseOrderService extends BaseDomainService {
     orderAggregate: OrderAggregate,
     context: OrderProcessingContext
   ): Promise<OrderProcessingResult> {
-    
     // Query for additional data
     const inventoryUpdates = await this.queryBus.send({
       type: 'GetInventoryUpdates',
-      orderId: orderAggregate.id
+      orderId: orderAggregate.id,
     });
 
     const notifications = await this.queryBus.send({
       type: 'GetNotificationStatus',
-      orderId: orderAggregate.id
+      orderId: orderAggregate.id,
     });
 
     return {
@@ -427,8 +473,8 @@ export class EnterpriseOrderService extends BaseDomainService {
         correlationId: context.correlationId,
         requestId: context.requestId,
         processedAt: new Date().toISOString(),
-        processingDuration: Date.now() - context.timestamp.getTime()
-      }
+        processingDuration: Date.now() - context.timestamp.getTime(),
+      },
     };
   }
 
@@ -440,7 +486,6 @@ export class EnterpriseOrderService extends BaseDomainService {
     context: OrderProcessingContext,
     duration: number
   ): Promise<void> {
-    
     await this.auditLogger.info('Order processing completed', {
       orderId: result.orderId,
       correlationId: context.correlationId,
@@ -449,7 +494,7 @@ export class EnterpriseOrderService extends BaseDomainService {
       duration,
       inventoryUpdates: result.inventoryUpdates.length,
       notifications: result.notifications.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -461,13 +506,12 @@ export class EnterpriseOrderService extends BaseDomainService {
     error: Error,
     context: OrderProcessingContext
   ): Promise<void> {
-    
     await this.auditLogger.error('Order processing failed', {
       failureType,
       error: error.message,
       correlationId: context.correlationId,
       userId: context.userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -479,7 +523,7 @@ export class EnterpriseOrderService extends BaseDomainService {
       failureThreshold: 5,
       resetTimeout: 60000,
       monitoringPeriod: 10000,
-      name: 'EnterpriseOrderService'
+      name: 'EnterpriseOrderService',
     });
   }
 
@@ -498,8 +542,8 @@ export class EnterpriseOrderService extends BaseDomainService {
         status: 'healthy',
         uptime: process.uptime(),
         memory: process.memoryUsage(),
-        lastHealthCheck: new Date().toISOString()
-      }
+        lastHealthCheck: new Date().toISOString(),
+      },
     };
   }
 
@@ -512,13 +556,17 @@ export class EnterpriseOrderService extends BaseDomainService {
         this.eventStore.healthCheck(),
         this.commandBus.healthCheck(),
         this.queryBus.healthCheck(),
-        this.sagaOrchestrator.healthCheck()
+        this.sagaOrchestrator.healthCheck(),
       ]);
 
       const failedChecks = checks.filter(check => check.status === 'rejected');
-      
+
       if (failedChecks.length > 0) {
-        return Result.failure(new Error(`Health check failed: ${failedChecks.length} components unhealthy`));
+        return Result.failure(
+          new Error(
+            `Health check failed: ${failedChecks.length} components unhealthy`
+          )
+        );
       }
 
       return Result.success({
@@ -528,10 +576,9 @@ export class EnterpriseOrderService extends BaseDomainService {
           eventStore: 'healthy',
           commandBus: 'healthy',
           queryBus: 'healthy',
-          sagaOrchestrator: 'healthy'
-        }
+          sagaOrchestrator: 'healthy',
+        },
       });
-
     } catch (error) {
       return Result.failure(new Error(`Health check error: ${error.message}`));
     }
@@ -569,7 +616,7 @@ interface HealthCheckResult {
     sagaOrchestrator: string;
   };
 }
-```
+````
 
 ## Key Features
 

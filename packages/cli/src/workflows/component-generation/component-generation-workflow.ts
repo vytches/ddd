@@ -86,7 +86,11 @@ export class ComponentGenerationWorkflow {
         message: 'What type of component do you want to generate?',
         choices: [
           { value: 'entity', name: '🏛️  Entity', description: 'Domain entity with identity' },
-          { value: 'aggregate', name: '📦 Aggregate Root', description: 'Aggregate with business logic' },
+          {
+            value: 'aggregate',
+            name: '📦 Aggregate Root',
+            description: 'Aggregate with business logic',
+          },
           { value: 'value-object', name: '💎 Value Object', description: 'Immutable value type' },
           { value: 'service', name: '⚙️  Domain Service', description: 'Business logic service' },
           { value: 'repository', name: '🗄️  Repository', description: 'Data access interface' },
@@ -214,7 +218,9 @@ export class ComponentGenerationWorkflow {
   /**
    * Get available patterns for component type
    */
-  private getAvailablePatternsFor(componentType: string): Array<{ value: string; name: string; description: string }> {
+  private getAvailablePatternsFor(
+    componentType: string
+  ): Array<{ value: string; name: string; description: string }> {
     const allPatterns = {
       validation: { value: 'validation', name: '✅ Validation', description: 'Input validation' },
       auditing: { value: 'auditing', name: '📋 Auditing', description: 'Audit trail' },
@@ -240,19 +246,29 @@ export class ComponentGenerationWorkflow {
   /**
    * Generate component files
    */
-  private async generateComponent(componentType: string, componentName: string, patterns: string[]): Promise<string[]> {
+  private async generateComponent(
+    componentType: string,
+    componentName: string,
+    patterns: string[]
+  ): Promise<string[]> {
     const files: string[] = [];
     const outputPath = this.options.outputPath;
 
     // Generate main component file
     const mainFile = this.generateMainComponentFile(componentType, componentName, patterns);
-    const mainFilePath = FileSystem.joinPath(outputPath, `${componentName.toLowerCase()}.${componentType}.ts`);
+    const mainFilePath = FileSystem.joinPath(
+      outputPath,
+      `${componentName.toLowerCase()}.${componentType}.ts`
+    );
 
     files.push(mainFilePath);
 
     // Generate test file
     const testFile = this.generateTestFile(componentType, componentName);
-    const testFilePath = FileSystem.joinPath(outputPath, `${componentName.toLowerCase()}.${componentType}.test.ts`);
+    const testFilePath = FileSystem.joinPath(
+      outputPath,
+      `${componentName.toLowerCase()}.${componentType}.test.ts`
+    );
 
     files.push(testFilePath);
 
@@ -268,7 +284,11 @@ export class ComponentGenerationWorkflow {
   /**
    * Generate main component file content
    */
-  private generateMainComponentFile(componentType: string, componentName: string, patterns: string[]): string {
+  private generateMainComponentFile(
+    componentType: string,
+    componentName: string,
+    patterns: string[]
+  ): string {
     const hasValidation = patterns.includes('validation');
     const hasEvents = patterns.includes('events');
 
@@ -328,7 +348,11 @@ describe('${componentName}', () => {
   /**
    * Generate pattern-specific files
    */
-  private generatePatternFiles(componentType: string, componentName: string, pattern: string): string[] {
+  private generatePatternFiles(
+    componentType: string,
+    componentName: string,
+    pattern: string
+  ): string[] {
     // This would generate additional files based on patterns
     return [];
   }

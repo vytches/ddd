@@ -1,15 +1,17 @@
 # Result Pattern with NestJS - Basic Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: Basic
-**Framework**: NestJS
-**Base Example**: [Result Pattern Fundamentals](../../basic/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: Basic
+**Framework**: NestJS **Base Example**:
+[Result Pattern Fundamentals](../../basic/example-1.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/utils
 
 ## Business Context
 
-This example demonstrates basic integration of the Result pattern from @vytches-ddd/utils with NestJS services. It shows manual setup and configuration without complex dependency injection patterns, making it ideal for teams starting with functional error handling in NestJS applications. Perfect for user validation services, API response handling, and basic business operations.
+This example demonstrates basic integration of the Result pattern from
+@vytches-ddd/utils with NestJS services. It shows manual setup and configuration
+without complex dependency injection patterns, making it ideal for teams
+starting with functional error handling in NestJS applications. Perfect for user
+validation services, API response handling, and basic business operations.
 
 ## Service Implementation
 
@@ -17,11 +19,11 @@ This example demonstrates basic integration of the Result pattern from @vytches-
 // user-validation.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Result } from '@vytches-ddd/utils';
-import type { 
-  UserData, 
-  ValidationError, 
+import type {
+  UserData,
+  ValidationError,
   UserRegistrationRequest,
-  UserProfile
+  UserProfile,
 } from '../types'; // From your application
 
 @Injectable()
@@ -42,7 +44,7 @@ export class UserValidationService {
 
     if (!userData.name || userData.name.trim().length < 2) {
       return Result.fail<UserData, ValidationError>({
-        field: 'name', 
+        field: 'name',
         message: 'Name must be at least 2 characters',
         value: userData.name,
       });
@@ -58,13 +60,13 @@ export class UserValidationService {
     try {
       // Validate input using Result pattern
       const validationResult = this.validateUser(request.userData);
-      
+
       if (validationResult.isFailure) {
         return Result.fail(validationResult.error);
       }
 
       const validUser = validationResult.value;
-      
+
       // Simulate async operation
       const userProfile: UserProfile = {
         id: `user-${Date.now()}`,
@@ -72,7 +74,7 @@ export class UserValidationService {
         name: validUser.name,
         role: validUser.role || 'user',
         createdAt: new Date(),
-        isActive: true
+        isActive: true,
       };
 
       return Result.ok(userProfile);
@@ -81,7 +83,7 @@ export class UserValidationService {
       return Result.fail({
         field: 'system',
         message: `Registration failed: ${(error as Error).message}`,
-        value: null
+        value: null,
       });
     }
   }
@@ -95,17 +97,23 @@ export class UserValidationService {
   }
 
   // ✅ FOCUS: Transform Result to NestJS response format
-  formatValidationResponse(userData: UserData): { success: boolean; data?: UserData; error?: string } {
+  formatValidationResponse(userData: UserData): {
+    success: boolean;
+    data?: UserData;
+    error?: string;
+  } {
     const result = this.validateUser(userData);
-    
+
     return result.match(
-      (user) => ({ success: true, data: user }),
-      (error) => ({ success: false, error: error.message })
+      user => ({ success: true, data: user }),
+      error => ({ success: false, error: error.message })
     );
   }
 
   // ✅ FOCUS: Chained validation operations
-  validateAndTransformUser(userData: UserData): Result<string, ValidationError> {
+  validateAndTransformUser(
+    userData: UserData
+  ): Result<string, ValidationError> {
     return this.validateUser(userData)
       .map(user => user.name.trim())
       .map(name => name.toUpperCase())
@@ -117,27 +125,34 @@ export class UserValidationService {
 ## Controller Usage
 
 ```typescript
-// user.controller.ts  
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+// user.controller.ts
+import {
+  Controller,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserValidationService } from './user-validation.service';
 import type { UserRegistrationRequest, ApiResponse } from '../types'; // From your application
 
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userValidationService: UserValidationService
-  ) {}
+  constructor(private readonly userValidationService: UserValidationService) {}
 
   @Post('register')
-  async registerUser(@Body() request: UserRegistrationRequest): Promise<ApiResponse> {
+  async registerUser(
+    @Body() request: UserRegistrationRequest
+  ): Promise<ApiResponse> {
     // ⭐ FOCUS: Using Result pattern in NestJS controller
-    const result = await this.userValidationService.processRegistration(request);
-    
+    const result =
+      await this.userValidationService.processRegistration(request);
+
     if (result.isFailure) {
       // Convert Result failure to NestJS HTTP exception
       throw new BadRequestException({
         message: 'User registration failed',
-        details: result.error
+        details: result.error,
       });
     }
 
@@ -145,7 +160,7 @@ export class UserController {
     return {
       success: true,
       data: result.value,
-      message: 'User registered successfully'
+      message: 'User registered successfully',
     };
   }
 
@@ -153,29 +168,28 @@ export class UserController {
   async validateUser(@Body() userData: any): Promise<ApiResponse> {
     // Parse and validate using Result pattern
     const parseResult = Result.try<UserData>(() => userData as UserData);
-    
+
     if (parseResult.isFailure) {
       throw new BadRequestException({
         message: 'Invalid user data format',
-        details: parseResult.error.message
+        details: parseResult.error.message,
       });
     }
 
-    const validationResponse = this.userValidationService.formatValidationResponse(
-      parseResult.value
-    );
+    const validationResponse =
+      this.userValidationService.formatValidationResponse(parseResult.value);
 
     if (!validationResponse.success) {
       throw new BadRequestException({
         message: 'User validation failed',
-        details: validationResponse.error
+        details: validationResponse.error,
       });
     }
 
     return {
       success: true,
       data: validationResponse.data,
-      message: 'User data is valid'
+      message: 'User data is valid',
     };
   }
 }
@@ -199,24 +213,35 @@ export class UserModule {}
 
 ## Key Features
 
-- **Type-Safe Error Handling**: Result pattern ensures all errors are handled explicitly
-- **NestJS Integration**: Seamless integration with NestJS controllers and services
-- **HTTP Exception Mapping**: Convert Result failures to appropriate HTTP responses
+- **Type-Safe Error Handling**: Result pattern ensures all errors are handled
+  explicitly
+- **NestJS Integration**: Seamless integration with NestJS controllers and
+  services
+- **HTTP Exception Mapping**: Convert Result failures to appropriate HTTP
+  responses
 - **Manual Setup**: Simple configuration without complex dependency injection
 - **Functional Composition**: Chain operations safely with map and flatMap
-- **Exception Wrapping**: Convert throwing operations to Result pattern with Result.try
+- **Exception Wrapping**: Convert throwing operations to Result pattern with
+  Result.try
 
 ## Common Pitfalls
 
 - **Not checking isFailure**: Always verify Result state before accessing value
-- **Inconsistent error handling**: Use either Result pattern or exceptions, not both
-- **Missing HTTP status mapping**: Map validation errors to appropriate HTTP status codes
+- **Inconsistent error handling**: Use either Result pattern or exceptions, not
+  both
+- **Missing HTTP status mapping**: Map validation errors to appropriate HTTP
+  status codes
 - **Accessing value on failure**: Will throw error - always use type guards
-- **Forgetting async operations**: Use proper Promise<Result<T, E>> for async operations
+- **Forgetting async operations**: Use proper Promise<Result<T, E>> for async
+  operations
 
 ## Related Examples
 
-- [Result Pattern Fundamentals](../../basic/example-1.md) - Core Result pattern concepts
-- [Advanced Result Patterns](../../intermediate/example-1.md) - Complex Result operations  
-- [Async Result Patterns](../../intermediate/example-2.md) - Async Result handling
-- [Intermediate NestJS Integration](../intermediate/example-1.md) - Advanced VytchesDDD DI integration
+- [Result Pattern Fundamentals](../../basic/example-1.md) - Core Result pattern
+  concepts
+- [Advanced Result Patterns](../../intermediate/example-1.md) - Complex Result
+  operations
+- [Async Result Patterns](../../intermediate/example-2.md) - Async Result
+  handling
+- [Intermediate NestJS Integration](../intermediate/example-1.md) - Advanced
+  VytchesDDD DI integration

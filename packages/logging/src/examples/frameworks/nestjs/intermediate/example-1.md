@@ -1,26 +1,35 @@
 # NestJS Advanced DI Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging + @vytches-ddd/di + NestJS
-**Complexity**: intermediate
-**Framework**: NestJS
-**Integration**: VytchesDDD DI integration with bridge pattern
-**Dependencies**: @nestjs/common, @vytches-ddd/logging, @vytches-ddd/di
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/di + NestJS
+**Complexity**: intermediate **Framework**: NestJS **Integration**: VytchesDDD
+DI integration with bridge pattern **Dependencies**: @nestjs/common,
+@vytches-ddd/logging, @vytches-ddd/di
 
 ## Description
 
-Advanced NestJS integration with VytchesDDD dependency injection system using the bridge pattern. This example demonstrates enterprise-grade logging integration that combines NestJS framework capabilities with VytchesDDD's advanced DI features for complex applications.
+Advanced NestJS integration with VytchesDDD dependency injection system using
+the bridge pattern. This example demonstrates enterprise-grade logging
+integration that combines NestJS framework capabilities with VytchesDDD's
+advanced DI features for complex applications.
 
 ## Business Context
 
-Enterprise NestJS applications require sophisticated logging that integrates with domain-driven design patterns and advanced dependency injection capabilities. This integration enables enterprise-grade logging with automatic service discovery, context isolation, and advanced architectural patterns while maintaining NestJS framework benefits.
+Enterprise NestJS applications require sophisticated logging that integrates
+with domain-driven design patterns and advanced dependency injection
+capabilities. This integration enables enterprise-grade logging with automatic
+service discovery, context isolation, and advanced architectural patterns while
+maintaining NestJS framework benefits.
 
 ## Code Example
 
 ```typescript
 // logging.domain-service.ts - VytchesDDD domain service
 import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
-import { Logger, LoggerConfiguration, CQRSLoggingOptions } from '@vytches-ddd/logging';
+import {
+  Logger,
+  LoggerConfiguration,
+  CQRSLoggingOptions,
+} from '@vytches-ddd/logging';
 import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 
 @DomainService({
@@ -32,10 +41,12 @@ import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
   metadata: {
     description: 'Enterprise logging service with advanced capabilities',
     version: '2.0.0',
-    tags: ['logging', 'enterprise', 'observability']
-  }
+    tags: ['logging', 'enterprise', 'observability'],
+  },
 })
-export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDestroy {
+export class EnterpriseLoggingDomainService
+  implements OnModuleInit, OnModuleDestroy
+{
   private logger: Logger;
   private metricsCollector: any;
   private configService: any;
@@ -53,11 +64,11 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
 
     // Configure enterprise logging
     await this.setupEnterpriseConfiguration();
-    
+
     this.logger.info('Enterprise logging service initialized', {
       serviceId: 'enterpriseLoggingService',
       context: 'Logging',
-      dependencies: ['configService', 'metricsCollector']
+      dependencies: ['configService', 'metricsCollector'],
     });
   }
 
@@ -73,20 +84,28 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       enableConsoleOutput: true,
       enableFileOutput: true,
       enableRemoteLogging: process.env.ENABLE_REMOTE_LOGGING === 'true',
-      
+
       contextDetection: {
         enabled: true,
         stackTraceAnalysis: true,
         boundedContextDetection: true,
-        performanceTracking: true
+        performanceTracking: true,
       },
-      
+
       masking: {
         enabled: true,
         auditSensitiveAccess: true,
         sensitiveKeys: [
-          'password', 'secret', 'token', 'apiKey', 'cardNumber', 'ssn',
-          'phoneNumber', 'authorization', 'cookie', 'refreshToken'
+          'password',
+          'secret',
+          'token',
+          'apiKey',
+          'cardNumber',
+          'ssn',
+          'phoneNumber',
+          'authorization',
+          'cookie',
+          'refreshToken',
         ],
         replacement: '[ENTERPRISE_MASKED]',
         customMaskers: {
@@ -95,17 +114,17 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
             return `${local[0]}***@${domain}`;
           },
           creditCard: (card: string) => `****-****-****-${card.slice(-4)}`,
-          ssn: (ssn: string) => `***-**-${ssn.slice(-4)}`
-        }
+          ssn: (ssn: string) => `***-**-${ssn.slice(-4)}`,
+        },
       },
-      
+
       formatting: {
         colorize: false, // Enterprise logging typically uses structured format
         timestamp: true,
         prettyPrint: false,
         includeMetadata: true,
-        includeCorrelationId: true
-      }
+        includeCorrelationId: true,
+      },
     };
 
     Logger.configure(config);
@@ -122,7 +141,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
         maskSensitiveData: true,
         performanceThreshold: 2000, // 2 seconds for commands
         customSerializer: (command: any) => this.serializeForAudit(command),
-        auditTrail: true
+        auditTrail: true,
       },
       queries: {
         includePayload: true,
@@ -132,27 +151,27 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
         includeResultCount: true,
         warnOnSlowQuery: true,
         slowQueryThreshold: 2000,
-        auditTrail: false // Queries typically don't need audit trail
-      }
+        auditTrail: false, // Queries typically don't need audit trail
+      },
     };
 
     Logger.configureCQRSLogging(cqrsOptions);
 
     // Set up performance monitoring callbacks
-    Logger.onCQRSPerformanceThresholdExceeded((event) => {
+    Logger.onCQRSPerformanceThresholdExceeded(event => {
       this.handlePerformanceAlert(event);
     });
 
     this.logger.info('Enterprise CQRS logging configured', {
       commandThreshold: cqrsOptions.commands.performanceThreshold,
       queryThreshold: cqrsOptions.queries.performanceThreshold,
-      auditTrailEnabled: cqrsOptions.commands.auditTrail
+      auditTrailEnabled: cqrsOptions.commands.auditTrail,
     });
   }
 
   // ⭐ FOCUS: Enterprise context management
   createEnterpriseLogger(
-    contextName: string, 
+    contextName: string,
     businessContext: Record<string, any>,
     correlationId?: string
   ): Logger {
@@ -160,11 +179,11 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       ...businessContext,
       correlationId: correlationId || this.generateCorrelationId(),
       timestamp: new Date(),
-      serviceId: 'enterpriseLoggingService'
+      serviceId: 'enterpriseLoggingService',
     };
 
     const logger = Logger.forContext(contextName).withContext(enrichedContext);
-    
+
     // Store active context for metrics
     const contextKey = `${contextName}-${enrichedContext.correlationId}`;
     this.activeContexts.set(contextKey, logger);
@@ -174,15 +193,15 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
 
   // ⭐ FOCUS: Business domain event logging
   logDomainEvent(
-    eventType: string, 
-    aggregateId: string, 
+    eventType: string,
+    aggregateId: string,
     eventData: Record<string, any>,
     metadata?: Record<string, any>
   ): void {
     const domainLogger = this.createEnterpriseLogger('DomainEvents', {
       eventType,
       aggregateId,
-      boundedContext: metadata?.boundedContext || 'Unknown'
+      boundedContext: metadata?.boundedContext || 'Unknown',
     });
 
     domainLogger.info(`Domain event: ${eventType}`, {
@@ -192,7 +211,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       metadata: metadata || {},
       eventId: this.generateEventId(),
       version: metadata?.version || 1,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Collect metrics
@@ -206,11 +225,14 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
     context: Record<string, any> = {}
   ): Promise<T> {
     const performanceId = this.generatePerformanceId();
-    const performanceLogger = this.createEnterpriseLogger('PerformanceTracking', {
-      operation: operationName,
-      performanceId,
-      ...context
-    });
+    const performanceLogger = this.createEnterpriseLogger(
+      'PerformanceTracking',
+      {
+        operation: operationName,
+        performanceId,
+        ...context,
+      }
+    );
 
     const startTime = Date.now();
     const startMetrics = this.captureSystemMetrics();
@@ -218,7 +240,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
     performanceLogger.debug('Operation performance tracking started', {
       operation: operationName,
       performanceId,
-      startMetrics
+      startMetrics,
     });
 
     try {
@@ -233,18 +255,18 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
         duration,
         performanceCategory: this.categorizePerformance(duration),
         systemMetrics: {
-          memoryDelta: endMetrics.memoryUsage.heapUsed - startMetrics.memoryUsage.heapUsed,
+          memoryDelta:
+            endMetrics.memoryUsage.heapUsed - startMetrics.memoryUsage.heapUsed,
           cpuTime: endMetrics.cpuUsage.user - startMetrics.cpuUsage.user,
-          activeHandles: endMetrics.activeHandles
+          activeHandles: endMetrics.activeHandles,
         },
-        success: true
+        success: true,
       });
 
       // Store metrics for analysis
       this.storePerformanceMetrics(operationName, duration, true);
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
@@ -253,7 +275,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
         performanceId,
         duration,
         error: error,
-        success: false
+        success: false,
       });
 
       // Store failure metrics
@@ -265,14 +287,18 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
 
   // ⭐ FOCUS: Security audit logging
   logSecurityEvent(
-    eventType: 'authentication' | 'authorization' | 'data_access' | 'security_violation',
+    eventType:
+      | 'authentication'
+      | 'authorization'
+      | 'data_access'
+      | 'security_violation',
     details: Record<string, any>,
     severity: 'low' | 'medium' | 'high' | 'critical' = 'medium'
   ): void {
     const securityLogger = this.createEnterpriseLogger('SecurityAudit', {
       eventType,
       severity,
-      requiresAudit: true
+      requiresAudit: true,
     });
 
     // ⭐ FOCUS: Security event logging with audit trail
@@ -284,7 +310,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       requiresInvestigation: severity === 'high' || severity === 'critical',
       eventId: this.generateSecurityEventId(),
       timestamp: new Date(),
-      investigationRequired: severity === 'critical'
+      investigationRequired: severity === 'critical',
     });
 
     // Trigger alerts for high-severity events
@@ -308,8 +334,8 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
         activeContexts: this.activeContexts.size,
         totalRequests: this.requestMetrics.size,
         errorRate: this.calculateErrorRate(),
-        averageResponseTime: this.calculateAverageResponseTime()
-      }
+        averageResponseTime: this.calculateAverageResponseTime(),
+      },
     };
 
     // Log enterprise metrics
@@ -318,7 +344,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       activeContexts: enterpriseMetrics.logging.activeContexts,
       errorRate: enterpriseMetrics.logging.errorRate,
       averageResponseTime: enterpriseMetrics.logging.averageResponseTime,
-      systemHealth: systemHealth.status
+      systemHealth: systemHealth.status,
     });
 
     return enterpriseMetrics;
@@ -328,10 +354,10 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
   private async cleanup(): Promise<void> {
     // Clear active contexts
     this.activeContexts.clear();
-    
+
     // Clear metrics data
     this.requestMetrics.clear();
-    
+
     // Flush any pending logs
     await this.flushPendingLogs();
   }
@@ -354,16 +380,20 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
 
   private serializeForAudit(data: any): any {
     // Custom serialization for audit trails
-    return JSON.parse(JSON.stringify(data, (key, value) => {
-      if (typeof value === 'function') return '[Function]';
-      if (value instanceof Date) return value.toISOString();
-      return value;
-    }));
+    return JSON.parse(
+      JSON.stringify(data, (key, value) => {
+        if (typeof value === 'function') return '[Function]';
+        if (value instanceof Date) return value.toISOString();
+        return value;
+      })
+    );
   }
 
-  private sanitizeEventData(eventData: Record<string, any>): Record<string, any> {
+  private sanitizeEventData(
+    eventData: Record<string, any>
+  ): Record<string, any> {
     const sanitized = { ...eventData };
-    
+
     // Remove or mask sensitive fields
     const sensitiveFields = ['password', 'secret', 'token', 'apiKey'];
     sensitiveFields.forEach(field => {
@@ -375,15 +405,17 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
     return sanitized;
   }
 
-  private sanitizeSecurityData(details: Record<string, any>): Record<string, any> {
+  private sanitizeSecurityData(
+    details: Record<string, any>
+  ): Record<string, any> {
     const sanitized = { ...details };
-    
+
     // Mask IP addresses partially for security
     if (sanitized.ipAddress) {
       const parts = sanitized.ipAddress.split('.');
       sanitized.ipAddress = `${parts[0]}.${parts[1]}.***.***.`;
     }
-    
+
     // Mask user agents
     if (sanitized.userAgent) {
       sanitized.userAgent = sanitized.userAgent.substring(0, 50) + '...';
@@ -397,7 +429,7 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       memoryUsage: process.memoryUsage(),
       cpuUsage: process.cpuUsage(),
       uptime: process.uptime(),
-      activeHandles: (process as any)._getActiveHandles().length
+      activeHandles: (process as any)._getActiveHandles().length,
     };
   }
 
@@ -416,64 +448,75 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
       operation: event.name,
       actualDuration: event.duration,
       threshold: event.threshold,
-      exceedBy: event.duration - event.threshold
+      exceedBy: event.duration - event.threshold,
     });
 
     // Could integrate with monitoring systems
     this.metricsCollector?.recordAlert?.({
       type: 'performance',
       severity: 'medium',
-      data: event
+      data: event,
     });
   }
 
   private collectEventMetrics(eventType: string, aggregateId: string): void {
     const key = `${eventType}:${new Date().toISOString().split('T')[0]}`;
-    const current = this.requestMetrics.get(key) || { count: 0, aggregates: new Set() };
-    
+    const current = this.requestMetrics.get(key) || {
+      count: 0,
+      aggregates: new Set(),
+    };
+
     this.requestMetrics.set(key, {
       count: current.count + 1,
-      aggregates: current.aggregates.add(aggregateId)
+      aggregates: current.aggregates.add(aggregateId),
     });
   }
 
-  private storePerformanceMetrics(operation: string, duration: number, success: boolean): void {
+  private storePerformanceMetrics(
+    operation: string,
+    duration: number,
+    success: boolean
+  ): void {
     const key = `${operation}:performance`;
-    const metrics = this.requestMetrics.get(key) || { 
-      totalDuration: 0, 
-      count: 0, 
-      successCount: 0, 
-      failureCount: 0 
+    const metrics = this.requestMetrics.get(key) || {
+      totalDuration: 0,
+      count: 0,
+      successCount: 0,
+      failureCount: 0,
     };
-    
+
     this.requestMetrics.set(key, {
       totalDuration: metrics.totalDuration + duration,
       count: metrics.count + 1,
       successCount: success ? metrics.successCount + 1 : metrics.successCount,
-      failureCount: success ? metrics.failureCount : metrics.failureCount + 1
+      failureCount: success ? metrics.failureCount : metrics.failureCount + 1,
     });
   }
 
-  private triggerSecurityAlert(eventType: string, severity: string, details: any): void {
+  private triggerSecurityAlert(
+    eventType: string,
+    severity: string,
+    details: any
+  ): void {
     this.logger.error('Security alert triggered', {
       alertType: 'security_event',
       eventType,
       severity,
       requiresImmediateAction: severity === 'critical',
-      alertId: this.generateSecurityEventId()
+      alertId: this.generateSecurityEventId(),
     });
 
     // Could integrate with security monitoring systems
     this.metricsCollector?.recordSecurityAlert?.({
       eventType,
       severity,
-      details: this.sanitizeSecurityData(details)
+      details: this.sanitizeSecurityData(details),
     });
   }
 
   private aggregatePerformanceMetrics(): any {
     const performanceData: any = {};
-    
+
     for (const [key, metrics] of this.requestMetrics.entries()) {
       if (key.includes(':performance')) {
         const operation = key.split(':')[0];
@@ -481,70 +524,75 @@ export class EnterpriseLoggingDomainService implements OnModuleInit, OnModuleDes
           averageDuration: metrics.totalDuration / metrics.count,
           totalRequests: metrics.count,
           successRate: (metrics.successCount / metrics.count) * 100,
-          failureRate: (metrics.failureCount / metrics.count) * 100
+          failureRate: (metrics.failureCount / metrics.count) * 100,
         };
       }
     }
-    
+
     return performanceData;
   }
 
   private aggregateEventMetrics(): any {
     const eventData: any = {};
-    
+
     for (const [key, metrics] of this.requestMetrics.entries()) {
       if (!key.includes(':performance')) {
         const eventType = key.split(':')[0];
         eventData[eventType] = {
           eventCount: metrics.count,
-          uniqueAggregates: metrics.aggregates.size
+          uniqueAggregates: metrics.aggregates.size,
         };
       }
     }
-    
+
     return eventData;
   }
 
   private assessSystemHealth(): any {
     const memoryUsage = process.memoryUsage();
     const heapPercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
-    
+
     return {
-      status: heapPercent > 90 ? 'critical' : heapPercent > 70 ? 'warning' : 'healthy',
+      status:
+        heapPercent > 90
+          ? 'critical'
+          : heapPercent > 70
+            ? 'warning'
+            : 'healthy',
       memoryUsage: {
         heapPercent,
         totalMB: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-        usedMB: Math.round(memoryUsage.heapUsed / 1024 / 1024)
+        usedMB: Math.round(memoryUsage.heapUsed / 1024 / 1024),
       },
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 
   private calculateErrorRate(): number {
     let totalRequests = 0;
     let totalFailures = 0;
-    
+
     for (const metrics of this.requestMetrics.values()) {
       if (typeof metrics === 'object' && metrics.count) {
         totalRequests += metrics.count;
         totalFailures += metrics.failureCount || 0;
       }
     }
-    
+
     return totalRequests > 0 ? (totalFailures / totalRequests) * 100 : 0;
   }
 
   private calculateAverageResponseTime(): number {
     let totalDuration = 0;
     let totalCount = 0;
-    
+
     for (const [key, metrics] of this.requestMetrics.entries()) {
       if (key.includes(':performance') && typeof metrics === 'object') {
         totalDuration += metrics.totalDuration || 0;
         totalCount += metrics.count || 0;
       }
     }
-    
+
     return totalCount > 0 ? totalDuration / totalCount : 0;
   }
 
@@ -566,22 +614,33 @@ export class LoggingBridgeService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     // ⭐ FOCUS: Bridge Pattern - Get existing instance from VytchesDDD
-    this.enterpriseLoggingService = VytchesDDD.resolve<EnterpriseLoggingDomainService>(
-      'enterpriseLoggingService'
-    );
+    this.enterpriseLoggingService =
+      VytchesDDD.resolve<EnterpriseLoggingDomainService>(
+        'enterpriseLoggingService'
+      );
   }
 
   // ⭐ FOCUS: Delegate to enterprise domain service
-  createLogger(contextName: string, businessContext: Record<string, any>): Logger {
-    return this.enterpriseLoggingService.createEnterpriseLogger(contextName, businessContext);
+  createLogger(
+    contextName: string,
+    businessContext: Record<string, any>
+  ): Logger {
+    return this.enterpriseLoggingService.createEnterpriseLogger(
+      contextName,
+      businessContext
+    );
   }
 
   logDomainEvent(
-    eventType: string, 
-    aggregateId: string, 
+    eventType: string,
+    aggregateId: string,
     eventData: Record<string, any>
   ): void {
-    return this.enterpriseLoggingService.logDomainEvent(eventType, aggregateId, eventData);
+    return this.enterpriseLoggingService.logDomainEvent(
+      eventType,
+      aggregateId,
+      eventData
+    );
   }
 
   async trackPerformance<T>(
@@ -590,18 +649,26 @@ export class LoggingBridgeService implements OnModuleInit {
     context?: Record<string, any>
   ): Promise<T> {
     return this.enterpriseLoggingService.trackOperationPerformance(
-      operationName, 
-      operation, 
+      operationName,
+      operation,
       context
     );
   }
 
   logSecurityEvent(
-    eventType: 'authentication' | 'authorization' | 'data_access' | 'security_violation',
+    eventType:
+      | 'authentication'
+      | 'authorization'
+      | 'data_access'
+      | 'security_violation',
     details: Record<string, any>,
     severity?: 'low' | 'medium' | 'high' | 'critical'
   ): void {
-    return this.enterpriseLoggingService.logSecurityEvent(eventType, details, severity);
+    return this.enterpriseLoggingService.logSecurityEvent(
+      eventType,
+      details,
+      severity
+    );
   }
 
   generateMetrics(): any {
@@ -625,7 +692,7 @@ export class EnterpriseUserService implements OnModuleInit {
     this.logger = this.loggingBridge.createLogger('EnterpriseUserService', {
       service: 'user-management',
       version: '2.0.0',
-      boundedContext: 'UserManagement'
+      boundedContext: 'UserManagement',
     });
   }
 
@@ -637,7 +704,7 @@ export class EnterpriseUserService implements OnModuleInit {
         this.logger.info('Enterprise user creation started', {
           operation: 'createUser',
           userEmail: userData.email, // Automatically masked
-          hasComplexData: !!userData.preferences
+          hasComplexData: !!userData.preferences,
         });
 
         try {
@@ -645,35 +712,30 @@ export class EnterpriseUserService implements OnModuleInit {
           const user = await this.saveUser(userData);
 
           // ⭐ FOCUS: Log domain event through bridge
-          this.loggingBridge.logDomainEvent(
-            'UserCreated',
-            user.id,
-            {
-              email: user.email,
-              role: user.role,
-              createdAt: user.createdAt
-            }
-          );
+          this.loggingBridge.logDomainEvent('UserCreated', user.id, {
+            email: user.email,
+            role: user.role,
+            createdAt: user.createdAt,
+          });
 
           this.logger.info('Enterprise user creation completed', {
             userId: user.id,
             userEmail: user.email, // Masked
-            role: user.role
+            role: user.role,
           });
 
           return user;
-
         } catch (error) {
           this.logger.error('Enterprise user creation failed', {
             error: error,
-            userData: userData
+            userData: userData,
           });
           throw error;
         }
       },
       {
         userEmail: userData.email, // Context for performance tracking
-        operation: 'user_creation'
+        operation: 'user_creation',
       }
     );
   }
@@ -686,14 +748,14 @@ export class EnterpriseUserService implements OnModuleInit {
         username: credentials.username,
         ipAddress: credentials.ipAddress,
         userAgent: credentials.userAgent,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       'medium'
     );
 
     this.logger.info('User authentication attempt', {
       username: credentials.username,
-      ipAddress: credentials.ipAddress
+      ipAddress: credentials.ipAddress,
     });
 
     // Authentication logic...
@@ -705,7 +767,7 @@ export class EnterpriseUserService implements OnModuleInit {
         {
           username: credentials.username,
           success: true,
-          sessionId: authResult.sessionId
+          sessionId: authResult.sessionId,
         },
         'low'
       );
@@ -715,7 +777,7 @@ export class EnterpriseUserService implements OnModuleInit {
         {
           username: credentials.username,
           reason: authResult.failureReason,
-          attemptCount: authResult.attemptCount
+          attemptCount: authResult.attemptCount,
         },
         authResult.attemptCount > 3 ? 'high' : 'medium'
       );
@@ -729,19 +791,19 @@ export class EnterpriseUserService implements OnModuleInit {
     return {
       id: `user-${Date.now()}`,
       ...userData,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
   private async performAuthentication(credentials: any): Promise<any> {
     // Simulate authentication
     const success = Math.random() > 0.1; // 90% success rate
-    
+
     return {
       success,
       sessionId: success ? `session-${Date.now()}` : undefined,
       failureReason: success ? undefined : 'invalid_credentials',
-      attemptCount: success ? 1 : Math.floor(Math.random() * 5) + 1
+      attemptCount: success ? 1 : Math.floor(Math.random() * 5) + 1,
     };
   }
 }
@@ -753,43 +815,41 @@ import { LoggingBridgeService } from './logging-bridge.service';
 import { EnterpriseUserService } from '../user/enterprise-user.service';
 
 @Module({
-  providers: [
-    LoggingBridgeService,
-    EnterpriseUserService
-  ],
-  exports: [LoggingBridgeService]
+  providers: [LoggingBridgeService, EnterpriseUserService],
+  exports: [LoggingBridgeService],
 })
 export class EnterpriseLoggingModule implements OnModuleInit {
-  
   async onModuleInit() {
     try {
       // ⭐ CRITICAL: Initialize VytchesDDD BEFORE framework DI
       const container = new SimpleContainer();
-      
+
       // Register enterprise dependencies
       container.registerInstance('configService', {
         get: (key: string) => process.env[key],
         getLoggingConfig: () => ({
           level: 'info',
           enableAuditTrail: true,
-          enablePerformanceTracking: true
-        })
+          enablePerformanceTracking: true,
+        }),
       });
-      
+
       container.registerInstance('metricsCollector', {
         recordAlert: (alert: any) => console.log('Alert recorded:', alert),
-        recordSecurityAlert: (alert: any) => console.log('Security alert:', alert),
+        recordSecurityAlert: (alert: any) =>
+          console.log('Security alert:', alert),
         collectSystemMetrics: () => ({
           memoryUsage: process.memoryUsage(),
-          cpuUsage: process.cpuUsage()
-        })
+          cpuUsage: process.cpuUsage(),
+        }),
       });
-      
+
       // Configure VytchesDDD with auto-discovery
       await VytchesDDD.configure(container);
-      
-      console.log('✅ Enterprise Logging Module initialized with VytchesDDD integration');
-      
+
+      console.log(
+        '✅ Enterprise Logging Module initialized with VytchesDDD integration'
+      );
     } catch (error) {
       console.error('Failed to initialize Enterprise Logging Module:', error);
       throw error;
@@ -809,7 +869,7 @@ export class EnterpriseController {
   constructor(private readonly loggingBridge: LoggingBridgeService) {
     this.logger = this.loggingBridge.createLogger('EnterpriseController', {
       layer: 'presentation',
-      version: '2.0.0'
+      version: '2.0.0',
     });
   }
 
@@ -820,22 +880,23 @@ export class EnterpriseController {
       async () => {
         this.logger.info('Create user endpoint called', {
           endpoint: 'POST /enterprise/users',
-          requestData: createUserDto
+          requestData: createUserDto,
         });
 
         // Business logic here...
-        const result = await this.enterpriseUserService.createUser(createUserDto);
+        const result =
+          await this.enterpriseUserService.createUser(createUserDto);
 
         this.logger.info('Create user endpoint completed', {
           userId: result.id,
-          success: true
+          success: true,
         });
 
         return result;
       },
       {
         endpoint: 'POST /enterprise/users',
-        userRole: createUserDto.role
+        userRole: createUserDto.role,
       }
     );
   }
@@ -850,36 +911,54 @@ export class EnterpriseController {
 
 ## Key Features
 
-- **VytchesDDD Integration**: Full integration with VytchesDDD dependency injection system
-- **Bridge Pattern**: Seamless integration between NestJS and VytchesDDD without conflicts
-- **Enterprise Capabilities**: Advanced logging with audit trails, performance tracking, security events
+- **VytchesDDD Integration**: Full integration with VytchesDDD dependency
+  injection system
+- **Bridge Pattern**: Seamless integration between NestJS and VytchesDDD without
+  conflicts
+- **Enterprise Capabilities**: Advanced logging with audit trails, performance
+  tracking, security events
 - **Domain Event Logging**: Built-in support for domain-driven design patterns
-- **Security Audit Trail**: Comprehensive security event logging with severity levels
-- **Performance Analytics**: Advanced performance tracking with metrics aggregation
+- **Security Audit Trail**: Comprehensive security event logging with severity
+  levels
+- **Performance Analytics**: Advanced performance tracking with metrics
+  aggregation
 - **Context Management**: Enterprise-grade context propagation and correlation
-- **Auto-Discovery**: Automatic service registration through VytchesDDD decorators
+- **Auto-Discovery**: Automatic service registration through VytchesDDD
+  decorators
 
 ## Best Practices
 
-1. **Always use Bridge Pattern** - Never use both `@Injectable()` and `@DomainService()` on the same class
-2. **Initialize VytchesDDD First** - Configure VytchesDDD before NestJS DI in `OnModuleInit`
-3. **Cache Service References** - Resolve VytchesDDD services once during initialization
-4. **Use Enterprise Features** - Leverage audit trails, security logging, and performance tracking
-5. **Maintain Separation** - Keep business logic in domain services, use NestJS services as bridges
-6. **Handle Errors Appropriately** - Log errors at both framework and domain levels
-7. **Monitor Performance** - Use built-in performance tracking for critical operations
+1. **Always use Bridge Pattern** - Never use both `@Injectable()` and
+   `@DomainService()` on the same class
+2. **Initialize VytchesDDD First** - Configure VytchesDDD before NestJS DI in
+   `OnModuleInit`
+3. **Cache Service References** - Resolve VytchesDDD services once during
+   initialization
+4. **Use Enterprise Features** - Leverage audit trails, security logging, and
+   performance tracking
+5. **Maintain Separation** - Keep business logic in domain services, use NestJS
+   services as bridges
+6. **Handle Errors Appropriately** - Log errors at both framework and domain
+   levels
+7. **Monitor Performance** - Use built-in performance tracking for critical
+   operations
 
 ## Common Pitfalls
 
-- **Double Instance Creation**: Using both DI systems on the same class creates conflicts
-- **Wrong Initialization Order**: VytchesDDD must be configured before NestJS tries to resolve services
-- **Missing Bridge Pattern**: Direct usage of domain services in controllers breaks separation
-- **Performance Overhead**: Enterprise logging has more overhead, monitor in high-traffic scenarios
-- **Context Leaks**: Properly clean up logging contexts in long-running operations
+- **Double Instance Creation**: Using both DI systems on the same class creates
+  conflicts
+- **Wrong Initialization Order**: VytchesDDD must be configured before NestJS
+  tries to resolve services
+- **Missing Bridge Pattern**: Direct usage of domain services in controllers
+  breaks separation
+- **Performance Overhead**: Enterprise logging has more overhead, monitor in
+  high-traffic scenarios
+- **Context Leaks**: Properly clean up logging contexts in long-running
+  operations
 
 ## Related Examples
 
 - [Enterprise Monitoring](./example-2.md)
-- [Multi-Tenant DI Integration](./example-2.md) 
+- [Multi-Tenant DI Integration](./example-2.md)
 - [Basic Manual Setup](../basic/example-1.md)
 - [Basic Service Integration](../basic/example-2.md)

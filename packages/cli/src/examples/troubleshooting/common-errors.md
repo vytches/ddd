@@ -1,7 +1,7 @@
 # Common Errors & Solutions
 
-**Focus**: Quick solutions to frequent CLI issues
-**Goal**: Get back to productive development fast
+**Focus**: Quick solutions to frequent CLI issues **Goal**: Get back to
+productive development fast
 
 ## Quick Diagnostics
 
@@ -21,12 +21,14 @@ vytches-ddd validate --project
 ### "Component not found" Error
 
 **Error:**
+
 ```
 ❌ CLI Error: Component type 'agreggate' not found
 Available components: aggregate, entity, value-object, command, query
 ```
 
 **Solution:**
+
 ```bash
 # Check available components
 vytches-ddd generate --list-components
@@ -41,11 +43,13 @@ vytches-ddd g aggregate User  # 'g' is alias for 'generate'
 ### "Domain not found" Error
 
 **Error:**
+
 ```
 ❌ Domain 'UserMangement' not found in project
 ```
 
 **Solutions:**
+
 ```bash
 # List existing domains
 ls src/domain/
@@ -63,12 +67,14 @@ vytches-ddd g aggregate User --domain UserManagement --skip-validation
 ### Template Rendering Errors
 
 **Error:**
+
 ```
 ❌ Template Error: Missing required context 'properties'
 Template: aggregate.hbs
 ```
 
 **Solutions:**
+
 ```bash
 # Use interactive mode to provide missing context
 vytches-ddd g aggregate User --interactive
@@ -88,6 +94,7 @@ vytches-ddd g aggregate User --dry-run --debug
 ### Missing Import Errors
 
 **Error:**
+
 ```typescript
 // Generated code has missing imports
 export class UserAggregate extends AggregateRoot {
@@ -95,6 +102,7 @@ export class UserAggregate extends AggregateRoot {
 ```
 
 **Solutions:**
+
 ```bash
 # Fix imports automatically
 vytches-ddd validate --fix-imports
@@ -107,6 +115,7 @@ cat .vytches/config.json
 ```
 
 **.vytches/config.json fix:**
+
 ```json
 {
   "imports": {
@@ -124,12 +133,14 @@ cat .vytches/config.json
 ### Circular Dependency Issues
 
 **Error:**
+
 ```
 ❌ Circular dependency detected:
 OrderAggregate → Customer → Order → OrderAggregate
 ```
 
 **Solutions:**
+
 ```bash
 # Analyze dependencies
 vytches-ddd domain --context-map --check-cycles
@@ -142,6 +153,7 @@ vytches-ddd g contract CustomerData --for-domains Order,Customer
 ```
 
 **Fixed with shared contract:**
+
 ```typescript
 // src/shared/contracts/customer-data.contract.ts
 export interface CustomerDataContract {
@@ -159,6 +171,7 @@ import { CustomerDataContract } from '@shared/contracts/customer-data.contract';
 ### Interactive Mode Stuck
 
 **Problem:**
+
 ```
 🎯 VytchesDDD Domain Builder
 ? What domain are you building? OrderManagement
@@ -166,6 +179,7 @@ import { CustomerDataContract } from '@shared/contracts/customer-data.contract';
 ```
 
 **Solutions:**
+
 ```bash
 # Skip AI analysis, use manual mode
 vytches-ddd domain OrderManagement --manual
@@ -184,6 +198,7 @@ vytches-ddd config reset
 ### Domain Validation Failures
 
 **Error:**
+
 ```
 🔍 Domain Validation: OrderManagement
 ❌ Repository pattern - Missing interfaces
@@ -192,6 +207,7 @@ Score: 45/100 (Needs improvement)
 ```
 
 **Solutions:**
+
 ```bash
 # Auto-fix common issues
 vytches-ddd domain OrderManagement --validate --fix
@@ -208,11 +224,13 @@ vytches-ddd domain OrderManagement --template enterprise --regenerate
 ### Permission Errors
 
 **Error:**
+
 ```
 ❌ EACCES: permission denied, mkdir '/src/domain/user-management'
 ```
 
 **Solutions:**
+
 ```bash
 # Check current directory permissions
 ls -la
@@ -230,11 +248,13 @@ vytches-ddd g aggregate User --output ./custom-output/
 ### Path Resolution Errors
 
 **Error:**
+
 ```
 ❌ Cannot resolve path: @domain/user-management/user.aggregate
 ```
 
 **Solutions:**
+
 ```bash
 # Check tsconfig.json paths
 cat tsconfig.json
@@ -247,6 +267,7 @@ vytches-ddd g aggregate User --absolute-paths
 ```
 
 **Fixed tsconfig.json:**
+
 ```json
 {
   "compilerOptions": {
@@ -266,12 +287,14 @@ vytches-ddd g aggregate User --absolute-paths
 ### Template Not Found
 
 **Error:**
+
 ```
 ❌ Template 'enterprise' not found
 Available templates: basic, default
 ```
 
 **Solutions:**
+
 ```bash
 # List all available templates
 vytches-ddd template list --verbose
@@ -289,12 +312,14 @@ vytches-ddd g aggregate User  # Uses default template
 ### Configuration File Corruption
 
 **Error:**
+
 ```
 ❌ Invalid configuration file: .vytches/config.json
 SyntaxError: Unexpected token } in JSON
 ```
 
 **Solutions:**
+
 ```bash
 # Validate configuration
 vytches-ddd config validate
@@ -315,12 +340,14 @@ vytches-ddd config init
 ### Package Documentation Generation Fails
 
 **Error:**
+
 ```
 ❌ Failed to generate examples for package 'cqrs'
 Error: Package configuration not found
 ```
 
 **Solutions:**
+
 ```bash
 # Check if package exists
 ls packages/cqrs/src/examples/
@@ -338,12 +365,14 @@ vytches-ddd examples generate cqrs --force --clean
 ### Bundle Generation Issues
 
 **Error:**
+
 ```
 ❌ Bundle generation failed: Conflicting example IDs
 Example 'basic-command-handler' found in multiple packages
 ```
 
 **Solutions:**
+
 ```bash
 # Check for conflicts
 vytches-ddd examples find-conflicts
@@ -359,10 +388,10 @@ vytches-ddd examples bundle --packages cqrs,events --unique-ids
 
 ### Slow Generation Times
 
-**Problem:**
-CLI takes 30+ seconds to generate simple components
+**Problem:** CLI takes 30+ seconds to generate simple components
 
 **Solutions:**
+
 ```bash
 # Clear cache
 rm -rf .vytches/cache
@@ -381,11 +410,13 @@ vytches-ddd g aggregate User --profile --debug
 ### Memory Issues
 
 **Error:**
+
 ```
 ❌ JavaScript heap out of memory
 ```
 
 **Solutions:**
+
 ```bash
 # Increase Node.js memory limit
 NODE_OPTIONS="--max-old-space-size=4096" vytches-ddd domain OrderManagement
@@ -402,12 +433,14 @@ vytches-ddd examples generate cqrs,events  # Instead of --all
 ### Node.js Version Incompatibility
 
 **Error:**
+
 ```
 ❌ Node.js version 14.x is not supported
-Required: Node.js 16+ 
+Required: Node.js 16+
 ```
 
 **Solutions:**
+
 ```bash
 # Check Node version
 node --version
@@ -423,11 +456,13 @@ npx --node-version=18 vytches-ddd generate aggregate User
 ### Missing Dependencies
 
 **Error:**
+
 ```
 ❌ Cannot find module '@vytches-ddd/core'
 ```
 
 **Solutions:**
+
 ```bash
 # Install required dependencies
 npm install @vytches-ddd/core @vytches-ddd/cqrs @vytches-ddd/events
@@ -447,12 +482,14 @@ npm list @vytches-ddd/core
 ### Framework Integration Errors
 
 **Error:**
+
 ```typescript
 // NestJS integration
 ❌ Cannot resolve dependency CommandBus
 ```
 
 **Solutions:**
+
 ```bash
 # Generate proper NestJS integration
 vytches-ddd g module UserManagement --framework nestjs
@@ -465,6 +502,7 @@ vytches-ddd validate --fix-di --framework nestjs
 ```
 
 **Fixed module:**
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -472,7 +510,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 @Module({
   imports: [CqrsModule],
   providers: [UserService],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -480,11 +518,13 @@ export class UserModule {}
 ### Test Generation Issues
 
 **Error:**
+
 ```
 ❌ Test generation failed: Cannot mock abstract class
 ```
 
 **Solutions:**
+
 ```bash
 # Generate with concrete implementations
 vytches-ddd g test UserAggregate --with-mocks --concrete
@@ -560,12 +600,14 @@ vytches-ddd g aggregate TestCase --dry-run --minimal
 ## Prevention Tips
 
 ### Best Practices
+
 - **Validate early**: Run `--validate` after major changes
 - **Use version control**: Commit before major CLI operations
 - **Start simple**: Use basic templates first, enhance later
 - **Test templates**: Validate custom templates thoroughly
 
 ### Regular Maintenance
+
 - **Update CLI**: Keep CLI version current
 - **Clear cache**: Periodic cache cleanup
 - **Validate project**: Regular project structure validation

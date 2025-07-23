@@ -1,8 +1,8 @@
 # Enterprise NestJS Integration - Advanced
 
-**Focus**: Complete enterprise setup with all features
-**Base Example**: [Enterprise Domain Service](../../../advanced/example-3.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/core, @vytches-ddd/enterprise
+**Focus**: Complete enterprise setup with all features **Base Example**:
+[Enterprise Domain Service](../../../advanced/example-3.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/core, @vytches-ddd/enterprise
 
 ## Service Implementation
 
@@ -12,12 +12,12 @@ import { Injectable } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   Order,
   CreateOrderCommand,
   OrderProcessingResult,
   OrderProcessingContext,
-  EnterpriseOrderService
+  EnterpriseOrderService,
 } from '../types';
 
 @Injectable()
@@ -42,12 +42,11 @@ export class EnterpriseOrderNestJSService {
     userId: string,
     requestId: string
   ): Promise<Result<OrderProcessingResult, Error>> {
-    
     this.logger.info('Processing enterprise order through NestJS', {
       orderId: command.orderId,
       correlationId,
       userId,
-      requestId
+      requestId,
     });
 
     try {
@@ -58,7 +57,7 @@ export class EnterpriseOrderNestJSService {
         requestId,
         timestamp: new Date(),
         source: 'NestJS-API',
-        priority: 'normal'
+        priority: 'normal',
       };
 
       // ⭐ FOCUS: Delegate to enterprise domain service
@@ -71,28 +70,29 @@ export class EnterpriseOrderNestJSService {
         this.logger.error('Enterprise order processing failed', {
           orderId: command.orderId,
           correlationId,
-          error: result.error.message
+          error: result.error.message,
         });
-        
+
         return Result.failure(result.error);
       }
 
       this.logger.info('Enterprise order processed successfully', {
         orderId: result.value.orderId,
         correlationId,
-        status: result.value.status
+        status: result.value.status,
       });
 
       return Result.success(result.value);
-
     } catch (error) {
       this.logger.error('Unexpected error in NestJS service', {
         orderId: command.orderId,
         correlationId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`NestJS service error: ${error.message}`));
+
+      return Result.failure(
+        new Error(`NestJS service error: ${error.message}`)
+      );
     }
   }
 
@@ -103,7 +103,7 @@ export class EnterpriseOrderNestJSService {
     try {
       // ⭐ FOCUS: Health check delegation
       const healthResult = await this.enterpriseOrderService.healthCheck();
-      
+
       if (healthResult.isFailure()) {
         return Result.failure(healthResult.error);
       }
@@ -111,9 +111,8 @@ export class EnterpriseOrderNestJSService {
       return Result.success({
         ...healthResult.value,
         nestjsIntegration: 'healthy',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       return Result.failure(new Error(`Health check failed: ${error.message}`));
     }
@@ -125,27 +124,27 @@ export class EnterpriseOrderNestJSService {
   async getServiceMetrics(): Promise<any> {
     try {
       // ⭐ FOCUS: Metrics aggregation
-      const enterpriseMetrics = await this.enterpriseOrderService.getServiceMetrics();
-      
+      const enterpriseMetrics =
+        await this.enterpriseOrderService.getServiceMetrics();
+
       return {
         ...enterpriseMetrics,
         nestjsIntegration: {
           version: process.env.npm_package_version,
           nodeVersion: process.version,
           uptime: process.uptime(),
-          memoryUsage: process.memoryUsage()
+          memoryUsage: process.memoryUsage(),
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       this.logger.error('Failed to get service metrics', {
-        error: error.message
+        error: error.message,
       });
-      
+
       return {
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -156,14 +155,14 @@ export class EnterpriseOrderNestJSService {
 
 ```typescript
 // enterprise-order.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Body, 
-  Headers, 
-  HttpException, 
-  HttpStatus 
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Headers,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { EnterpriseOrderNestJSService } from './enterprise-order-nestjs.service';
 import { CreateOrderCommand } from '../types';
@@ -194,7 +193,7 @@ export class EnterpriseOrderController {
         {
           message: result.error.message,
           correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         HttpStatus.BAD_REQUEST
       );
@@ -204,7 +203,7 @@ export class EnterpriseOrderController {
       success: true,
       data: result.value,
       correlationId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -212,13 +211,13 @@ export class EnterpriseOrderController {
   async healthCheck() {
     // ⭐ FOCUS: Health check endpoint
     const result = await this.enterpriseOrderService.getHealthStatus();
-    
+
     if (result.isFailure()) {
       throw new HttpException(
         {
           message: 'Service unhealthy',
           error: result.error.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         HttpStatus.SERVICE_UNAVAILABLE
       );
@@ -227,7 +226,7 @@ export class EnterpriseOrderController {
     return {
       success: true,
       data: result.value,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -235,11 +234,11 @@ export class EnterpriseOrderController {
   async getMetrics() {
     // ⭐ FOCUS: Metrics endpoint
     const metrics = await this.enterpriseOrderService.getServiceMetrics();
-    
+
     return {
       success: true,
       data: metrics,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -266,7 +265,7 @@ import { EnterpriseOrderNestJSService } from './enterprise-order-nestjs.service'
 @Module({
   controllers: [EnterpriseOrderController],
   providers: [EnterpriseOrderNestJSService],
-  exports: [EnterpriseOrderNestJSService]
+  exports: [EnterpriseOrderNestJSService],
 })
 export class EnterpriseOrderModule implements OnModuleInit {
   private readonly logger = Logger.forContext('EnterpriseOrderModule');
@@ -279,19 +278,22 @@ export class EnterpriseOrderModule implements OnModuleInit {
         enableLogging: true,
         enableMetrics: true,
         enableHealthChecks: true,
-        contexts: ['OrderManagement', 'PaymentProcessing', 'InventoryManagement']
+        contexts: [
+          'OrderManagement',
+          'PaymentProcessing',
+          'InventoryManagement',
+        ],
       });
 
       this.logger.info('Enterprise module initialized successfully', {
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       this.logger.error('Failed to initialize enterprise module', {
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       throw error;
     }
   }
@@ -308,47 +310,56 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = Logger.forContext('Bootstrap');
-  
+
   try {
     const app = await NestFactory.create(AppModule);
-    
+
     // ⭐ FOCUS: Enterprise application setup
     app.enableCors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+        'http://localhost:3000',
+      ],
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id', 'x-user-id', 'x-request-id']
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'x-correlation-id',
+        'x-user-id',
+        'x-request-id',
+      ],
     });
 
     // Global middleware for enterprise features
     app.use((req, res, next) => {
       // Add correlation ID if not present
       if (!req.headers['x-correlation-id']) {
-        req.headers['x-correlation-id'] = `corr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        req.headers['x-correlation-id'] =
+          `corr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       }
-      
+
       // Add request ID if not present
       if (!req.headers['x-request-id']) {
-        req.headers['x-request-id'] = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        req.headers['x-request-id'] =
+          `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       }
-      
+
       next();
     });
 
     const port = process.env.PORT || 3000;
     await app.listen(port);
-    
+
     logger.info('Enterprise application started successfully', {
       port,
       environment: process.env.NODE_ENV,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Failed to start enterprise application', {
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     process.exit(1);
   }
 }
@@ -406,7 +417,7 @@ services:
   enterprise-order-service:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -444,7 +455,7 @@ services:
       - EVENTSTORE_RUN_PROJECTIONS=All
       - EVENTSTORE_START_STANDARD_PROJECTIONS=true
     ports:
-      - "2113:2113"
+      - '2113:2113'
     networks:
       - enterprise-network
 
@@ -458,8 +469,10 @@ networks:
 
 ## Key Points
 
-- **Enterprise Integration**: Complete enterprise setup with all VytchesDDD features
-- **Service Resolution**: Uses VytchesDDD.resolve() for enterprise service access
+- **Enterprise Integration**: Complete enterprise setup with all VytchesDDD
+  features
+- **Service Resolution**: Uses VytchesDDD.resolve() for enterprise service
+  access
 - **Context Propagation**: Proper context creation and propagation
 - **Health Checks**: Comprehensive health monitoring
 - **Metrics Collection**: Enterprise-grade metrics aggregation
@@ -469,6 +482,9 @@ networks:
 
 ## Related Examples
 
-- [DI Integration](../intermediate/di-integration.md) - Advanced dependency injection
-- [Enterprise Domain Service](../../../advanced/example-3.md) - Core enterprise patterns
-- [Enterprise examples](../../../../../enterprise/examples/) - Complete enterprise features
+- [DI Integration](../intermediate/di-integration.md) - Advanced dependency
+  injection
+- [Enterprise Domain Service](../../../advanced/example-3.md) - Core enterprise
+  patterns
+- [Enterprise examples](../../../../../enterprise/examples/) - Complete
+  enterprise features

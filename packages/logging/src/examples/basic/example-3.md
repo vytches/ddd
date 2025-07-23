@@ -1,32 +1,36 @@
 # Result Pattern Logging
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging + @vytches-ddd/utils
-**Complexity**: basic
-**Domain**: Result Pattern Integration
-**Patterns**: Success/failure tracking, error context, extensions
-**Dependencies**: @vytches-ddd/logging, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/utils
+**Complexity**: basic **Domain**: Result Pattern Integration **Patterns**:
+Success/failure tracking, error context, extensions **Dependencies**:
+@vytches-ddd/logging, @vytches-ddd/utils
 
 ## Description
 
-Integration between @vytches-ddd/logging and @vytches-ddd/utils Result pattern for automatic success/failure tracking. This example demonstrates how to extend Result pattern with logging capabilities for comprehensive operation tracking and error analysis.
+Integration between @vytches-ddd/logging and @vytches-ddd/utils Result pattern
+for automatic success/failure tracking. This example demonstrates how to extend
+Result pattern with logging capabilities for comprehensive operation tracking
+and error analysis.
 
 ## Business Context
 
-Business operations often use Result pattern to handle success/failure scenarios without throwing exceptions. Adding automatic logging to Result pattern provides consistent operation tracking, error analysis, and debugging capabilities across the entire application without cluttering business logic.
+Business operations often use Result pattern to handle success/failure scenarios
+without throwing exceptions. Adding automatic logging to Result pattern provides
+consistent operation tracking, error analysis, and debugging capabilities across
+the entire application without cluttering business logic.
 
 ## Code Example
 
 ```typescript
 // result-pattern-logging.ts
-import { 
+import {
   Logger,
   LogLevel,
   withLogging,
-  ResultLogger
+  ResultLogger,
 } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   UserData,
   OrderData,
   ValidationError,
@@ -35,7 +39,7 @@ import {
   CreateUserCommand,
   ProcessOrderCommand,
   PaymentData,
-  InventoryItem
+  InventoryItem,
 } from '../types'; // From your application
 
 // ✅ FOCUS: Result extension with logging
@@ -48,19 +52,23 @@ export class ResultPatternLogging {
   ): Promise<Result<UserData, Error>> {
     const operationLogger = this.logger.withContext({
       operation: 'createUser',
-      userEmail: userData.email // Will be masked
+      userEmail: userData.email, // Will be masked
     });
 
     try {
       // Validate input
       if (!userData.email || !userData.email.includes('@')) {
-        const error = new ValidationError('Invalid email format', 'email', userData.email);
-        
+        const error = new ValidationError(
+          'Invalid email format',
+          'email',
+          userData.email
+        );
+
         // ⭐ FOCUS: Log failure with context
         operationLogger.error('User creation failed - validation error', {
           error: error,
           field: error.field,
-          value: error.value // Will be masked if sensitive
+          value: error.value, // Will be masked if sensitive
         });
 
         return Result.fail(error);
@@ -74,23 +82,22 @@ export class ResultPatternLogging {
         role: userData.role,
         createdAt: new Date(),
         isActive: true,
-        preferences: userData.initialPreferences || {}
+        preferences: userData.initialPreferences || {},
       };
 
       // ⭐ FOCUS: Log success with context
       operationLogger.info('User created successfully', {
         userId: newUser.id,
         role: newUser.role,
-        hasPreferences: !!userData.initialPreferences
+        hasPreferences: !!userData.initialPreferences,
       });
 
       return Result.success(newUser);
-
     } catch (error) {
       // ⭐ FOCUS: Log unexpected errors
       operationLogger.error('User creation failed - unexpected error', {
         error: error,
-        operation: 'createUser'
+        operation: 'createUser',
       });
 
       return Result.fail(error as Error);
@@ -104,7 +111,7 @@ export class ResultPatternLogging {
     // ⭐ FOCUS: Create ResultLogger with context
     const resultLogger = new ResultLogger(this.logger, {
       operation: 'processOrder',
-      orderId: orderCommand.orderId
+      orderId: orderCommand.orderId,
     });
 
     return resultLogger.execute(async () => {
@@ -118,18 +125,17 @@ export class ResultPatternLogging {
       // Payment phase
       const paymentResult = await this.processPayment({
         orderId: orderCommand.orderId,
-        amount: 100.00,
-        method: 'credit-card'
+        amount: 100.0,
+        method: 'credit-card',
       });
 
       if (paymentResult.isFailure()) {
         // Automatically logged with phase context
         return Result.fail(
-          new BusinessError(
-            'Payment processing failed',
-            'PAYMENT_FAILED',
-            { orderId: orderCommand.orderId, reason: paymentResult.error.message }
-          )
+          new BusinessError('Payment processing failed', 'PAYMENT_FAILED', {
+            orderId: orderCommand.orderId,
+            reason: paymentResult.error.message,
+          })
         );
       }
 
@@ -138,10 +144,10 @@ export class ResultPatternLogging {
         id: orderCommand.orderId,
         customerId: 'customer-123',
         items: [],
-        totalAmount: 100.00,
+        totalAmount: 100.0,
         status: 'processing',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       return Result.success(order);
@@ -154,7 +160,7 @@ export class ResultPatternLogging {
   ): Promise<Result<OrderData, Error>> {
     const chainLogger = this.logger.withContext({
       operation: 'completeOrderProcessing',
-      orderId
+      orderId,
     });
 
     // Step 1: Load order
@@ -162,14 +168,14 @@ export class ResultPatternLogging {
     if (loadResult.isFailure()) {
       chainLogger.error('Failed to load order', {
         step: 'loadOrder',
-        error: loadResult.error
+        error: loadResult.error,
       });
       return loadResult;
     }
 
     chainLogger.debug('Order loaded successfully', {
       step: 'loadOrder',
-      orderStatus: loadResult.value.status
+      orderStatus: loadResult.value.status,
     });
 
     // Step 2: Check inventory
@@ -178,14 +184,14 @@ export class ResultPatternLogging {
       chainLogger.error('Inventory check failed', {
         step: 'checkInventory',
         error: inventoryResult.error,
-        itemCount: loadResult.value.items.length
+        itemCount: loadResult.value.items.length,
       });
       return Result.fail(inventoryResult.error);
     }
 
     chainLogger.info('Inventory verified', {
       step: 'checkInventory',
-      availableItems: inventoryResult.value.length
+      availableItems: inventoryResult.value.length,
     });
 
     // Step 3: Process shipment
@@ -193,7 +199,7 @@ export class ResultPatternLogging {
     if (shipmentResult.isFailure()) {
       chainLogger.error('Shipment processing failed', {
         step: 'processShipment',
-        error: shipmentResult.error
+        error: shipmentResult.error,
       });
       return Result.fail(shipmentResult.error);
     }
@@ -202,14 +208,14 @@ export class ResultPatternLogging {
     const completedOrder = {
       ...loadResult.value,
       status: 'shipped' as const,
-      shippedAt: new Date()
+      shippedAt: new Date(),
     };
 
     chainLogger.info('Order processing completed successfully', {
       orderId: completedOrder.id,
       totalSteps: 3,
       finalStatus: completedOrder.status,
-      processingTime: Date.now() - loadResult.value.createdAt.getTime()
+      processingTime: Date.now() - loadResult.value.createdAt.getTime(),
     });
 
     return Result.success(completedOrder);
@@ -221,14 +227,14 @@ export class ResultPatternLogging {
     logLevel: 'info',
     includeArgs: true,
     includeResult: true,
-    maskSensitiveData: true
+    maskSensitiveData: true,
   })
   async updateUserPreferences(
-    userId: string, 
+    userId: string,
     preferences: Record<string, any>
   ): Promise<Result<UserData, Error>> {
     // ⭐ FOCUS: Method automatically logged by decorator
-    
+
     // Validate user exists
     const user = await this.findUserById(userId);
     if (!user) {
@@ -241,7 +247,7 @@ export class ResultPatternLogging {
     const updatedUser: UserData = {
       ...user,
       preferences: { ...user.preferences, ...preferences },
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Return result - success/failure automatically logged
@@ -254,27 +260,27 @@ export class ResultPatternLogging {
   ): Promise<Result<{ successful: string[]; failed: string[] }, Error>> {
     const bulkLogger = this.logger.withContext({
       operation: 'bulkProcessOrders',
-      totalOrders: orderIds.length
+      totalOrders: orderIds.length,
     });
 
     bulkLogger.info('Starting bulk order processing', {
-      orderCount: orderIds.length
+      orderCount: orderIds.length,
     });
 
     const results = await Promise.all(
-      orderIds.map(async (orderId) => {
+      orderIds.map(async orderId => {
         const result = await this.processOrderWithResultLogger({
           orderId,
-          processingNotes: 'Bulk processing'
+          processingNotes: 'Bulk processing',
         });
 
         // Log individual result
         if (result.isSuccess()) {
           bulkLogger.debug('Order processed successfully', { orderId });
         } else {
-          bulkLogger.warn('Order processing failed', { 
+          bulkLogger.warn('Order processing failed', {
             orderId,
-            error: result.error.message 
+            error: result.error.message,
           });
         }
 
@@ -286,7 +292,7 @@ export class ResultPatternLogging {
     const successful = results
       .filter(r => r.result.isSuccess())
       .map(r => r.orderId);
-    
+
     const failed = results
       .filter(r => r.result.isFailure())
       .map(r => r.orderId);
@@ -296,12 +302,13 @@ export class ResultPatternLogging {
       totalProcessed: orderIds.length,
       successCount: successful.length,
       failureCount: failed.length,
-      successRate: (successful.length / orderIds.length * 100).toFixed(2) + '%'
+      successRate:
+        ((successful.length / orderIds.length) * 100).toFixed(2) + '%',
     });
 
     if (failed.length > 0) {
       bulkLogger.warn('Some orders failed processing', {
-        failedOrderIds: failed
+        failedOrderIds: failed,
       });
     }
 
@@ -318,13 +325,13 @@ export class ResultPatternLogging {
     const operationLogger = this.logger.withContext({
       operationId,
       operation,
-      ...context
+      ...context,
     });
 
     // Log operation start
     operationLogger.info(`Starting operation: ${operation}`, {
       context,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const startTime = Date.now();
@@ -339,7 +346,7 @@ export class ResultPatternLogging {
           operationId,
           duration,
           resultType: result.value?.constructor?.name || 'unknown',
-          hasValue: result.value !== null && result.value !== undefined
+          hasValue: result.value !== null && result.value !== undefined,
         });
       } else {
         // ⭐ FOCUS: Detailed failure logging
@@ -349,21 +356,20 @@ export class ResultPatternLogging {
           errorType: result.error.constructor.name,
           errorMessage: result.error.message,
           errorCode: (result.error as any).code,
-          errorDetails: (result.error as any).details
+          errorDetails: (result.error as any).details,
         });
       }
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // ⭐ FOCUS: Unexpected error logging
       operationLogger.error(`Operation crashed: ${operation}`, {
         operationId,
         duration,
         error: error,
-        errorType: 'UnexpectedException'
+        errorType: 'UnexpectedException',
       });
 
       return Result.fail(error as Error);
@@ -377,13 +383,13 @@ export class ResultPatternLogging {
   ): Promise<Result<T, Error>> {
     const metricsLogger = this.logger.withContext({
       operation,
-      metrics: true
+      metrics: true,
     });
 
     const metrics = {
       startTime: Date.now(),
       memoryBefore: process.memoryUsage().heapUsed,
-      operation
+      operation,
     };
 
     const result = await fn();
@@ -392,7 +398,7 @@ export class ResultPatternLogging {
       duration: Date.now() - metrics.startTime,
       memoryAfter: process.memoryUsage().heapUsed,
       memoryDelta: process.memoryUsage().heapUsed - metrics.memoryBefore,
-      success: result.isSuccess()
+      success: result.isSuccess(),
     };
 
     // ⭐ FOCUS: Log performance metrics with result
@@ -401,24 +407,32 @@ export class ResultPatternLogging {
       duration: endMetrics.duration,
       memoryUsed: `${(endMetrics.memoryDelta / 1024 / 1024).toFixed(2)} MB`,
       success: endMetrics.success,
-      performanceCategory: this.categorizePerformance(endMetrics.duration)
+      performanceCategory: this.categorizePerformance(endMetrics.duration),
     });
 
     return result;
   }
 
   // Helper methods
-  private async validateOrder(orderId: string): Promise<Result<boolean, Error>> {
+  private async validateOrder(
+    orderId: string
+  ): Promise<Result<boolean, Error>> {
     if (!orderId || orderId.length < 5) {
-      return Result.fail(new ValidationError('Invalid order ID', 'orderId', orderId));
+      return Result.fail(
+        new ValidationError('Invalid order ID', 'orderId', orderId)
+      );
     }
     return Result.success(true);
   }
 
-  private async processPayment(payment: PaymentData): Promise<Result<PaymentData, Error>> {
+  private async processPayment(
+    payment: PaymentData
+  ): Promise<Result<PaymentData, Error>> {
     // Simulate payment processing
     if (Math.random() > 0.8) {
-      return Result.fail(new BusinessError('Payment declined', 'PAYMENT_DECLINED'));
+      return Result.fail(
+        new BusinessError('Payment declined', 'PAYMENT_DECLINED')
+      );
     }
     return Result.success(payment);
   }
@@ -426,25 +440,35 @@ export class ResultPatternLogging {
   private async loadOrder(orderId: string): Promise<Result<OrderData, Error>> {
     // Simulate order loading
     if (orderId === 'not-found') {
-      return Result.fail(new BusinessError('Order not found', 'ORDER_NOT_FOUND'));
+      return Result.fail(
+        new BusinessError('Order not found', 'ORDER_NOT_FOUND')
+      );
     }
 
     const order: OrderData = {
       id: orderId,
       customerId: 'customer-123',
       items: [
-        { id: 'item-1', productId: 'prod-1', name: 'Product 1', quantity: 2, price: 50 }
+        {
+          id: 'item-1',
+          productId: 'prod-1',
+          name: 'Product 1',
+          quantity: 2,
+          price: 50,
+        },
       ],
       totalAmount: 100,
       status: 'pending',
       createdAt: new Date(Date.now() - 3600000), // 1 hour ago
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return Result.success(order);
   }
 
-  private async checkInventory(items: any[]): Promise<Result<InventoryItem[], Error>> {
+  private async checkInventory(
+    items: any[]
+  ): Promise<Result<InventoryItem[], Error>> {
     // Simulate inventory check
     if (items.length === 0) {
       return Result.fail(new BusinessError('No items to check', 'EMPTY_ORDER'));
@@ -454,20 +478,22 @@ export class ResultPatternLogging {
       productId: item.productId,
       available: 10,
       reserved: 2,
-      location: 'Warehouse A'
+      location: 'Warehouse A',
     }));
 
     return Result.success(inventory);
   }
 
-  private async processShipment(order: OrderData): Promise<Result<string, Error>> {
+  private async processShipment(
+    order: OrderData
+  ): Promise<Result<string, Error>> {
     // Simulate shipment processing
     return Result.success(`SHIP-${order.id}-${Date.now()}`);
   }
 
   private async findUserById(userId: string): Promise<UserData | null> {
     if (userId === 'not-found') return null;
-    
+
     return {
       id: userId,
       name: 'John Doe',
@@ -475,7 +501,7 @@ export class ResultPatternLogging {
       role: 'user',
       createdAt: new Date(),
       isActive: true,
-      preferences: {}
+      preferences: {},
     };
   }
 
@@ -497,25 +523,25 @@ export class EnhancedResultLogger extends ResultLogger {
   // Override to add custom behavior
   protected onSuccess<T>(value: T, duration: number): void {
     super.onSuccess(value, duration);
-    
+
     // Add custom success metrics
     this.logger.info('Result success metrics', {
       valueType: value?.constructor?.name || 'unknown',
       processingTime: duration,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   protected onFailure(error: Error, duration: number): void {
     super.onFailure(error, duration);
-    
+
     // Add custom failure analysis
     this.logger.error('Result failure analysis', {
       errorType: error.constructor.name,
       errorCode: (error as any).code,
       processingTime: duration,
       stackTrace: error.stack,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 }
@@ -528,19 +554,19 @@ export const withResultLogging = <T, E extends Error>(
   return (fn: () => Promise<Result<T, E>>): Promise<Result<T, E>> => {
     return async () => {
       const contextLogger = logger.withContext({ operation });
-      
+
       contextLogger.debug(`Starting operation: ${operation}`);
-      
+
       const result = await fn();
-      
+
       if (result.isSuccess()) {
         contextLogger.info(`Operation succeeded: ${operation}`);
       } else {
         contextLogger.error(`Operation failed: ${operation}`, {
-          error: result.error
+          error: result.error,
         });
       }
-      
+
       return result;
     };
   };
@@ -557,7 +583,7 @@ const resultLogging = new ResultPatternLogging();
 const userResult = await resultLogging.createUserWithLogging({
   name: 'Jane Smith',
   email: 'jane@example.com',
-  role: 'admin'
+  role: 'admin',
 });
 
 if (userResult.isFailure()) {
@@ -568,13 +594,14 @@ if (userResult.isFailure()) {
 // Example 2: Using ResultLogger
 const orderResult = await resultLogging.processOrderWithResultLogger({
   orderId: 'order-789',
-  processingNotes: 'Express shipping'
+  processingNotes: 'Express shipping',
 });
 
 // Automatic logging of success/failure with context
 
 // Example 3: Chain operations with logging
-const completionResult = await resultLogging.completeOrderProcessing('order-123');
+const completionResult =
+  await resultLogging.completeOrderProcessing('order-123');
 
 if (completionResult.isSuccess()) {
   console.log('Order shipped:', completionResult.value.status);
@@ -586,7 +613,7 @@ const bulkResult = await resultLogging.bulkProcessOrders([
   'order-2',
   'order-3',
   'order-4',
-  'order-5'
+  'order-5',
 ]);
 
 if (bulkResult.isSuccess()) {
@@ -601,7 +628,7 @@ const customResult = await resultLogging.executeWithDetailedLogging(
   async () => {
     // Complex business logic
     const result = await performComplexCalculation();
-    return result > 0 
+    return result > 0
       ? Result.success(result)
       : Result.fail(new BusinessError('Calculation failed', 'CALC_ERROR'));
   }
@@ -623,16 +650,16 @@ const loggedOperation = withResultLogging(logger, 'validatePayment');
 
 const validationResult = await loggedOperation(async () => {
   const isValid = await validatePaymentMethod('credit-card');
-  return isValid 
+  return isValid
     ? Result.success(true)
     : Result.fail(new ValidationError('Invalid payment method'));
 });
 
 // Example 8: Using enhanced ResultLogger
-const enhancedLogger = new EnhancedResultLogger(
-  Logger.forContext(),
-  { service: 'payment', region: 'us-east-1' }
-);
+const enhancedLogger = new EnhancedResultLogger(Logger.forContext(), {
+  service: 'payment',
+  region: 'us-east-1',
+});
 
 const enhancedResult = await enhancedLogger.execute(async () => {
   // Business operation with enhanced logging
@@ -704,7 +731,8 @@ const enhancedResult = await enhancedLogger.execute(async () => {
 
 ## Key Features
 
-- **Automatic Success/Failure Logging**: Log Result outcomes without cluttering business logic
+- **Automatic Success/Failure Logging**: Log Result outcomes without cluttering
+  business logic
 - **Context Preservation**: Maintain operation context throughout Result chains
 - **Error Details Capture**: Comprehensive error information for debugging
 - **Performance Tracking**: Built-in duration and memory usage tracking
@@ -716,14 +744,16 @@ const enhancedResult = await enhancedLogger.execute(async () => {
 
 - Use `ResultLogger` for operations that need detailed tracking
 - Add operation context early and maintain it through chains
-- Log at appropriate levels (error for failures, info for success, debug for details)
+- Log at appropriate levels (error for failures, info for success, debug for
+  details)
 - Include business context in error logging for better debugging
 - Use performance tracking for critical operations
 - Implement bulk logging for batch operations to avoid log spam
 
 ## Common Pitfalls
 
-- **Over-logging Result Details**: Don't log entire Result values if they contain large data
+- **Over-logging Result Details**: Don't log entire Result values if they
+  contain large data
 - **Missing Context**: Always provide operation context for meaningful logs
 - **Ignoring Performance**: Track duration for operations that might be slow
 - **Duplicate Logging**: Avoid logging the same failure at multiple levels

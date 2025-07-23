@@ -1,6 +1,6 @@
 /**
  * Domain Services Examples - Type Definitions
- * 
+ *
  * These types represent common domain entities and value objects
  * used throughout the domain services examples.
  */
@@ -79,7 +79,7 @@ export interface Address {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 export enum OrderStatus {
@@ -88,13 +88,13 @@ export enum OrderStatus {
   PROCESSING = 'processing',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export enum ProductStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  DISCONTINUED = 'discontinued'
+  DISCONTINUED = 'discontinued',
 }
 
 export enum PaymentStatus {
@@ -102,21 +102,21 @@ export enum PaymentStatus {
   PROCESSING = 'processing',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  REFUNDED = 'refunded'
+  REFUNDED = 'refunded',
 }
 
 export enum PaymentMethod {
   CREDIT_CARD = 'credit_card',
   DEBIT_CARD = 'debit_card',
   PAYPAL = 'paypal',
-  BANK_TRANSFER = 'bank_transfer'
+  BANK_TRANSFER = 'bank_transfer',
 }
 
 export enum LoyaltyLevel {
   BRONZE = 'bronze',
   SILVER = 'silver',
   GOLD = 'gold',
-  PLATINUM = 'platinum'
+  PLATINUM = 'platinum',
 }
 
 // Command Types

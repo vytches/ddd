@@ -1,46 +1,50 @@
 # Performance-Optimized Utilities
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: advanced
-**Domain**: Infrastructure
-**Patterns**: Performance optimization, memoization, lazy evaluation, algorithmic efficiency
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: advanced
+**Domain**: Infrastructure **Patterns**: Performance optimization, memoization,
+lazy evaluation, algorithmic efficiency **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-Advanced performance optimization techniques for utility functions including memoization, lazy evaluation, batch processing, and algorithmic optimizations. This example demonstrates how to build high-performance utility systems that maintain functionality while maximizing efficiency.
+Advanced performance optimization techniques for utility functions including
+memoization, lazy evaluation, batch processing, and algorithmic optimizations.
+This example demonstrates how to build high-performance utility systems that
+maintain functionality while maximizing efficiency.
 
 ## Business Context
 
 Performance-critical applications require optimized utilities:
+
 - High-frequency trading systems with microsecond latency requirements
 - Real-time analytics processing millions of events per second
 - Large-scale batch processing with memory and CPU constraints
 - Mobile applications with limited resources
 - IoT systems with constrained computing environments
 
-Performance-optimized utilities ensure applications can scale to enterprise demands while maintaining responsiveness.
+Performance-optimized utilities ensure applications can scale to enterprise
+demands while maintaining responsiveness.
 
 ## Code Example
 
 ```typescript
 // performance-optimized-utilities.ts
 import { Result, LibUtils } from '@vytches-ddd/utils';
-import { 
-  UserData, 
+import {
+  UserData,
   PerformanceMetrics,
   OptimizationHints,
   MemoizeConfig,
   ThrottleConfig,
-  RetryConfig 
+  RetryConfig,
 } from '../types';
 
 // ✅ FOCUS: High-performance utility implementations
 export class PerformanceOptimizedUtilities {
-
   // 1. Advanced Memoization System
-  private memoCache = new Map<string, { value: any; timestamp: number; hitCount: number }>();
+  private memoCache = new Map<
+    string,
+    { value: any; timestamp: number; hitCount: number }
+  >();
   private performanceMetrics = new Map<string, PerformanceMetrics>();
 
   createMemoizedFunction<T extends (...args: any[]) => any>(
@@ -54,10 +58,10 @@ export class PerformanceOptimizedUtilities {
     const memoizedFn = ((...args: Parameters<T>): ReturnType<T> => {
       const key = config.keyGenerator?.(...args) || JSON.stringify(args);
       const now = Date.now();
-      
+
       // Check cache hit
       const cached = this.memoCache.get(key);
-      if (cached && (now - cached.timestamp) < config.maxAge) {
+      if (cached && now - cached.timestamp < config.maxAge) {
         cached.hitCount++;
         return cached.value;
       }
@@ -97,7 +101,7 @@ export class PerformanceOptimizedUtilities {
     const entries = Array.from(this.memoCache.entries())
       .sort(([, a], [, b]) => a.timestamp - b.timestamp)
       .slice(0, count);
-    
+
     entries.forEach(([key]) => this.memoCache.delete(key));
   }
 
@@ -105,13 +109,15 @@ export class PerformanceOptimizedUtilities {
     const entries = Array.from(this.memoCache.values());
     const totalHits = entries.reduce((sum, entry) => sum + entry.hitCount, 0);
     const avgHits = entries.length > 0 ? totalHits / entries.length : 0;
-    
+
     return {
       size: this.memoCache.size,
       totalHits,
       averageHits: avgHits,
-      oldestEntry: entries.length > 0 ? Math.min(...entries.map(e => e.timestamp)) : null,
-      newestEntry: entries.length > 0 ? Math.max(...entries.map(e => e.timestamp)) : null,
+      oldestEntry:
+        entries.length > 0 ? Math.min(...entries.map(e => e.timestamp)) : null,
+      newestEntry:
+        entries.length > 0 ? Math.max(...entries.map(e => e.timestamp)) : null,
     };
   }
 
@@ -126,7 +132,7 @@ export class PerformanceOptimizedUtilities {
   ): (data: T) => Result<T, string[]> {
     // Sort rules by priority for optimal execution order
     const sortedRules = validationRules.sort((a, b) => b.priority - a.priority);
-    
+
     // Pre-compile validation functions for better performance
     const compiledValidators = sortedRules.map(rule => ({
       ...rule,
@@ -146,10 +152,10 @@ export class PerformanceOptimizedUtilities {
         // Execute validations in priority order
         for (const rule of compiledValidators) {
           const value = (data as any)[rule.field];
-          
+
           if (!rule.compiledValidate(value)) {
             errors.push(rule.message);
-            
+
             // Early termination for critical validation failures
             if (rule.priority >= 100) {
               break;
@@ -161,14 +167,15 @@ export class PerformanceOptimizedUtilities {
         this.updatePerformanceMetrics('validation', endTime - startTime);
 
         return errors.length > 0 ? Result.fail(errors) : Result.ok(data);
-
       } catch (error) {
         return Result.fail([`Validation error: ${(error as Error).message}`]);
       }
     };
   }
 
-  private compileValidationFunction(fn: (value: any) => boolean): (value: any) => boolean {
+  private compileValidationFunction(
+    fn: (value: any) => boolean
+  ): (value: any) => boolean {
     // In a real implementation, this could use techniques like:
     // - Function inlining
     // - Bytecode compilation
@@ -203,7 +210,7 @@ export class PerformanceOptimizedUtilities {
       // Process in batches to manage memory usage
       for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
-        
+
         // Check memory usage before processing
         const memoryUsage = this.getMemoryUsage();
         if (memoryUsage.heapUsed > memoryThreshold * 1024 * 1024) {
@@ -211,7 +218,7 @@ export class PerformanceOptimizedUtilities {
           if (global.gc) {
             global.gc();
           }
-          
+
           // Wait a bit for GC to complete
           await LibUtils.sleep(10);
         }
@@ -247,7 +254,6 @@ export class PerformanceOptimizedUtilities {
 
       console.log('Batch processing metrics:', metrics);
       return Result.ok(results);
-
     } catch (error) {
       return Result.fail(error as Error);
     }
@@ -275,7 +281,11 @@ export class PerformanceOptimizedUtilities {
     return results;
   }
 
-  private getMemoryUsage(): { heapUsed: number; heapTotal: number; external: number } {
+  private getMemoryUsage(): {
+    heapUsed: number;
+    heapTotal: number;
+    external: number;
+  } {
     // In Node.js environment
     if (typeof process !== 'undefined' && process.memoryUsage) {
       const usage = process.memoryUsage();
@@ -285,7 +295,7 @@ export class PerformanceOptimizedUtilities {
         external: usage.external,
       };
     }
-    
+
     // In browser environment (limited info)
     if (typeof window !== 'undefined' && (window as any).performance?.memory) {
       const memory = (window as any).performance.memory;
@@ -316,7 +326,10 @@ export class PerformanceOptimizedUtilities {
   }
 
   // 7. Performance Monitoring and Profiling
-  private updatePerformanceMetrics(operation: string, executionTime: number): void {
+  private updatePerformanceMetrics(
+    operation: string,
+    executionTime: number
+  ): void {
     const existing = this.performanceMetrics.get(operation) || {
       executionTime: 0,
       memoryUsage: { before: 0, after: 0, delta: 0 },
@@ -363,8 +376,8 @@ class StringProcessor {
 
     // Use efficient Levenshtein distance algorithm
     const result = this.levenshteinDistance(str1, str2);
-    const similarity = 1 - (result / Math.max(str1.length, str2.length));
-    
+    const similarity = 1 - result / Math.max(str1.length, str2.length);
+
     this.cache.set(key, similarity);
     return similarity;
   }
@@ -374,24 +387,26 @@ class StringProcessor {
     const n = str2.length;
 
     // Use single array instead of 2D matrix for better memory efficiency
-    let prev = Array(n + 1).fill(0).map((_, i) => i);
+    let prev = Array(n + 1)
+      .fill(0)
+      .map((_, i) => i);
     let curr = Array(n + 1).fill(0);
 
     for (let i = 1; i <= m; i++) {
       curr[0] = i;
-      
+
       for (let j = 1; j <= n; j++) {
         if (str1[i - 1] === str2[j - 1]) {
           curr[j] = prev[j - 1];
         } else {
           curr[j] = Math.min(
-            prev[j] + 1,     // deletion
+            prev[j] + 1, // deletion
             curr[j - 1] + 1, // insertion
-            prev[j - 1] + 1  // substitution
+            prev[j - 1] + 1 // substitution
           );
         }
       }
-      
+
       // Swap arrays
       [prev, curr] = [curr, prev];
     }
@@ -400,21 +415,24 @@ class StringProcessor {
   }
 
   // Optimized text tokenization
-  tokenize(text: string, options: { caseSensitive?: boolean; stemming?: boolean } = {}): string[] {
+  tokenize(
+    text: string,
+    options: { caseSensitive?: boolean; stemming?: boolean } = {}
+  ): string[] {
     const key = `${text}|${JSON.stringify(options)}`;
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
 
     let processed = text;
-    
+
     if (!options.caseSensitive) {
       processed = processed.toLowerCase();
     }
 
     // Efficient tokenization using regex
     const tokens = processed.match(/\b\w+\b/g) || [];
-    
+
     if (options.stemming) {
       // Simple stemming - in production would use Porter Stemmer
       tokens.forEach((token, index) => {
@@ -449,7 +467,7 @@ class ObjectComparator {
 
     // Perform deep comparison
     const result = this.performDeepComparison(obj1, obj2);
-    
+
     // Cache result
     if (!this.comparisonCache.has(obj1 as object)) {
       this.comparisonCache.set(obj1 as object, new Map());
@@ -470,12 +488,13 @@ class ObjectComparator {
     if (obj1 && obj2 && typeof obj1 === 'object' && typeof obj2 === 'object') {
       const keys1 = Object.keys(obj1);
       const keys2 = Object.keys(obj2);
-      
+
       if (keys1.length !== keys2.length) return false;
-      
-      return keys1.every(key => 
-        keys2.includes(key) && 
-        this.deepEqual((obj1 as any)[key], (obj2 as any)[key])
+
+      return keys1.every(
+        key =>
+          keys2.includes(key) &&
+          this.deepEqual((obj1 as any)[key], (obj2 as any)[key])
       );
     }
 
@@ -577,12 +596,15 @@ class ResourcePool<T> {
     // Check for available resource
     while (this.available.length > 0) {
       const resource = this.available.pop()!;
-      
+
       // Validate resource if validator provided
-      if (this.options.validateResource && !this.options.validateResource(resource)) {
+      if (
+        this.options.validateResource &&
+        !this.options.validateResource(resource)
+      ) {
         continue;
       }
-      
+
       this.inUse.add(resource);
       return resource;
     }
@@ -629,10 +651,14 @@ class ResourcePool<T> {
 
 ## Key Features
 
-- **Advanced Memoization**: LRU cache eviction, hit rate tracking, configurable expiration
-- **Optimized Validation**: Priority-based rule execution, early termination, compiled validators
-- **Batch Processing**: Memory-aware processing, controlled concurrency, progress tracking
-- **String Processing**: Efficient similarity calculations, optimized tokenization
+- **Advanced Memoization**: LRU cache eviction, hit rate tracking, configurable
+  expiration
+- **Optimized Validation**: Priority-based rule execution, early termination,
+  compiled validators
+- **Batch Processing**: Memory-aware processing, controlled concurrency,
+  progress tracking
+- **String Processing**: Efficient similarity calculations, optimized
+  tokenization
 - **Object Comparison**: Cached deep equality, optimized for performance
 - **Lazy Evaluation**: Deferred computation, error handling, reset capability
 - **Resource Pooling**: Managed resource lifecycle, validation, statistics
@@ -669,9 +695,24 @@ console.timeEnd('second-call');
 
 // Optimized validator
 const userValidator = optimizer.createOptimizedValidator<UserData>([
-  { field: 'email', validate: (v) => !!v && v.includes('@'), message: 'Invalid email', priority: 100 },
-  { field: 'name', validate: (v) => !!v && v.length >= 2, message: 'Name too short', priority: 90 },
-  { field: 'role', validate: (v) => ['user', 'admin'].includes(v), message: 'Invalid role', priority: 50 },
+  {
+    field: 'email',
+    validate: v => !!v && v.includes('@'),
+    message: 'Invalid email',
+    priority: 100,
+  },
+  {
+    field: 'name',
+    validate: v => !!v && v.length >= 2,
+    message: 'Name too short',
+    priority: 90,
+  },
+  {
+    field: 'role',
+    validate: v => ['user', 'admin'].includes(v),
+    message: 'Invalid role',
+    priority: 50,
+  },
 ]);
 
 const validationResult = userValidator({
@@ -683,16 +724,20 @@ const validationResult = userValidator({
 });
 
 // Batch processing with memory management
-const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, value: Math.random() }));
+const items = Array.from({ length: 10000 }, (_, i) => ({
+  id: i,
+  value: Math.random(),
+}));
 
 const batchResult = await optimizer.processBatchOptimized(
   items,
-  async (item) => ({ ...item, processed: true }),
+  async item => ({ ...item, processed: true }),
   {
     batchSize: 100,
     maxConcurrency: 5,
     memoryThreshold: 200, // 200MB
-    progressCallback: (progress) => console.log(`Progress: ${progress.toFixed(1)}%`),
+    progressCallback: progress =>
+      console.log(`Progress: ${progress.toFixed(1)}%`),
   }
 );
 
@@ -703,21 +748,25 @@ console.log('Performance report:', optimizer.getPerformanceReport());
 ## Performance Optimization Techniques
 
 ### **Memoization Strategies**
+
 - **LRU Eviction**: Remove least recently used items when cache is full
 - **Time-based Expiration**: Invalidate entries after specified duration
 - **Hit Rate Tracking**: Monitor cache effectiveness
 
 ### **Batch Processing**
+
 - **Memory Monitoring**: Track heap usage and trigger cleanup
 - **Controlled Concurrency**: Limit parallel operations to prevent overload
 - **Progressive Processing**: Process in chunks to maintain responsiveness
 
 ### **Algorithmic Optimizations**
+
 - **Space-Time Tradeoffs**: Use more memory to reduce computation time
 - **Early Termination**: Stop processing when conditions are met
 - **Vectorized Operations**: Process multiple items simultaneously
 
 ### **Resource Management**
+
 - **Object Pooling**: Reuse expensive-to-create objects
 - **Lazy Loading**: Defer computation until needed
 - **Resource Validation**: Ensure pooled resources are still valid

@@ -9,11 +9,15 @@
 
 ## Description
 
-This example shows how to use the Anti-Corruption Layer for translating inventory data from a legacy system with different schema and field naming conventions.
+This example shows how to use the Anti-Corruption Layer for translating
+inventory data from a legacy system with different schema and field naming
+conventions.
 
 ## Business Context
 
-A retail company needs to integrate with multiple inventory management systems that have different data formats. The ACL ensures consistent product data representation regardless of the source system.
+A retail company needs to integrate with multiple inventory management systems
+that have different data formats. The ACL ensures consistent product data
+representation regardless of the source system.
 
 ## Code Example
 
@@ -23,12 +27,16 @@ import { IDataTranslator } from '@vytches-ddd/acl';
 import { Result } from '@vytches-ddd/utils';
 import { Product, LegacyInventoryData } from '../types'; // From your application
 
-export class InventoryDataTranslator implements IDataTranslator<LegacyInventoryData, Product> {
+export class InventoryDataTranslator
+  implements IDataTranslator<LegacyInventoryData, Product>
+{
   translate(legacyData: LegacyInventoryData): Result<Product, Error> {
     try {
       // Validate required fields
       if (!legacyData.sku || !legacyData.product_name) {
-        return Result.failure(new Error('Missing required fields: sku or product_name'));
+        return Result.failure(
+          new Error('Missing required fields: sku or product_name')
+        );
       }
 
       const product: Product = {
@@ -42,24 +50,28 @@ export class InventoryDataTranslator implements IDataTranslator<LegacyInventoryD
           inStock: legacyData.stock_info.available,
           quantity: legacyData.stock_info.count,
           warehouse: legacyData.stock_info.location,
-          estimatedDelivery: this.parseDeliveryDate(legacyData.stock_info.delivery_estimate)
-        }
+          estimatedDelivery: this.parseDeliveryDate(
+            legacyData.stock_info.delivery_estimate
+          ),
+        },
       };
 
       return Result.success(product);
     } catch (error) {
-      return Result.failure(new Error(`Inventory translation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Inventory translation failed: ${error.message}`)
+      );
     }
   }
 
   private mapCategoryId(categoryId: string): string {
     // Map legacy category IDs to meaningful names
     const categoryMap: Record<string, string> = {
-      'CAT001': 'Electronics',
-      'CAT002': 'Clothing',
-      'CAT003': 'Books',
-      'CAT004': 'Home & Garden',
-      'CAT005': 'Sports & Outdoors'
+      CAT001: 'Electronics',
+      CAT002: 'Clothing',
+      CAT003: 'Books',
+      CAT004: 'Home & Garden',
+      CAT005: 'Sports & Outdoors',
     };
 
     return categoryMap[categoryId] || 'Uncategorized';
@@ -67,7 +79,7 @@ export class InventoryDataTranslator implements IDataTranslator<LegacyInventoryD
 
   private parseDeliveryDate(dateString: string | null): Date | undefined {
     if (!dateString) return undefined;
-    
+
     try {
       // Handle different date formats from legacy system
       if (dateString.includes('/')) {
@@ -93,7 +105,10 @@ export class InventoryDataTranslator implements IDataTranslator<LegacyInventoryD
 import { AntiCorruptionLayer } from '@vytches-ddd/acl';
 import { Product, LegacyInventoryData, ProductSyncRequest } from '../types'; // From your application
 
-export class InventoryACL extends AntiCorruptionLayer<LegacyInventoryData, Product> {
+export class InventoryACL extends AntiCorruptionLayer<
+  LegacyInventoryData,
+  Product
+> {
   constructor(private legacyInventoryAPI: LegacyInventoryAPI) {
     super(new InventoryDataTranslator());
   }
@@ -103,16 +118,21 @@ export class InventoryACL extends AntiCorruptionLayer<LegacyInventoryData, Produ
       const legacyData = await this.legacyInventoryAPI.getProduct(productId);
       return this.translateData(legacyData);
     } catch (error) {
-      return Result.failure(new Error(`Failed to get product: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to get product: ${error.message}`)
+      );
     }
   }
 
-  async getProductsByCategory(category: string): Promise<Result<Product[], Error>> {
+  async getProductsByCategory(
+    category: string
+  ): Promise<Result<Product[], Error>> {
     try {
       // Convert domain category to legacy category ID
       const legacyCategoryId = this.convertCategoryToLegacyId(category);
-      const legacyProducts = await this.legacyInventoryAPI.getProductsByCategory(legacyCategoryId);
-      
+      const legacyProducts =
+        await this.legacyInventoryAPI.getProductsByCategory(legacyCategoryId);
+
       // Translate all products
       const translatedProducts: Product[] = [];
       const errors: string[] = [];
@@ -127,20 +147,27 @@ export class InventoryACL extends AntiCorruptionLayer<LegacyInventoryData, Produ
       }
 
       if (errors.length > 0 && translatedProducts.length === 0) {
-        return Result.failure(new Error(`All products failed translation: ${errors.join(', ')}`));
+        return Result.failure(
+          new Error(`All products failed translation: ${errors.join(', ')}`)
+        );
       }
 
       return Result.success(translatedProducts);
     } catch (error) {
-      return Result.failure(new Error(`Failed to get products by category: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to get products by category: ${error.message}`)
+      );
     }
   }
 
-  async syncProducts(request: ProductSyncRequest): Promise<Result<Product[], Error>> {
+  async syncProducts(
+    request: ProductSyncRequest
+  ): Promise<Result<Product[], Error>> {
     try {
       const legacyRequest = this.convertSyncRequest(request);
-      const legacyProducts = await this.legacyInventoryAPI.getUpdatedProducts(legacyRequest);
-      
+      const legacyProducts =
+        await this.legacyInventoryAPI.getUpdatedProducts(legacyRequest);
+
       const products: Product[] = [];
       for (const legacyProduct of legacyProducts) {
         const result = this.translateData(legacyProduct);
@@ -157,11 +184,11 @@ export class InventoryACL extends AntiCorruptionLayer<LegacyInventoryData, Produ
 
   private convertCategoryToLegacyId(category: string): string {
     const categoryMap: Record<string, string> = {
-      'Electronics': 'CAT001',
-      'Clothing': 'CAT002',
-      'Books': 'CAT003',
+      Electronics: 'CAT001',
+      Clothing: 'CAT002',
+      Books: 'CAT003',
       'Home & Garden': 'CAT004',
-      'Sports & Outdoors': 'CAT005'
+      'Sports & Outdoors': 'CAT005',
     };
 
     return categoryMap[category] || 'CAT999'; // Default category
@@ -169,9 +196,11 @@ export class InventoryACL extends AntiCorruptionLayer<LegacyInventoryData, Produ
 
   private convertSyncRequest(request: ProductSyncRequest): LegacySyncRequest {
     return {
-      category_id: request.category ? this.convertCategoryToLegacyId(request.category) : undefined,
+      category_id: request.category
+        ? this.convertCategoryToLegacyId(request.category)
+        : undefined,
       modified_since: request.modifiedSince?.toISOString(),
-      warehouse_code: request.warehouseId
+      warehouse_code: request.warehouseId,
     };
   }
 }
@@ -184,14 +213,16 @@ export class ProductCatalogService {
     return await this.inventoryACL.getProduct(productId);
   }
 
-  async searchProductsByCategory(category: string): Promise<Result<Product[], Error>> {
+  async searchProductsByCategory(
+    category: string
+  ): Promise<Result<Product[], Error>> {
     return await this.inventoryACL.getProductsByCategory(category);
   }
 
   async refreshCatalog(category?: string): Promise<Result<Product[], Error>> {
     const syncRequest: ProductSyncRequest = {
       category,
-      modifiedSince: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+      modifiedSince: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
     };
 
     return await this.inventoryACL.syncProducts(syncRequest);
@@ -202,7 +233,9 @@ export class ProductCatalogService {
 interface LegacyInventoryAPI {
   getProduct(sku: string): Promise<LegacyInventoryData>;
   getProductsByCategory(categoryId: string): Promise<LegacyInventoryData[]>;
-  getUpdatedProducts(request: LegacySyncRequest): Promise<LegacyInventoryData[]>;
+  getUpdatedProducts(
+    request: LegacySyncRequest
+  ): Promise<LegacyInventoryData[]>;
 }
 
 interface LegacySyncRequest {

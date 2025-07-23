@@ -291,7 +291,9 @@ describe('ComponentGenerationWorkflow', () => {
     });
 
     it('should display progress messages', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { return });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        return;
+      });
 
       vi.mocked(Prompts.ask).mockResolvedValue('User');
       vi.mocked(Prompts.confirm).mockResolvedValue(true);
@@ -310,12 +312,8 @@ describe('ComponentGenerationWorkflow', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(2/4) Component Configuration')
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(3/4) Pattern Integration')
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(4/4) Code Generation')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(3/4) Pattern Integration'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(4/4) Code Generation'));
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('✅ Component generation completed!')
       );

@@ -1,25 +1,34 @@
 # Event Deduplication and Idempotency
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/events
-**Complexity**: intermediate
-**Domain**: Architecture
-**Patterns**: event-deduplication, idempotency, duplicate-detection, event-fingerprinting
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: intermediate
+**Domain**: Architecture **Patterns**: event-deduplication, idempotency,
+duplicate-detection, event-fingerprinting **Dependencies**: @vytches-ddd/events,
+@vytches-ddd/utils, @vytches-ddd/logging
 
 ## Description
 
-Advanced event deduplication and idempotency handling system to ensure reliable event processing in distributed systems. This example demonstrates enterprise patterns for detecting and handling duplicate events, ensuring exactly-once semantics, and maintaining system consistency.
+Advanced event deduplication and idempotency handling system to ensure reliable
+event processing in distributed systems. This example demonstrates enterprise
+patterns for detecting and handling duplicate events, ensuring exactly-once
+semantics, and maintaining system consistency.
 
 ## Business Context
 
-Distributed systems often produce duplicate events due to network retries, system failures, or concurrent processing. Business operations must remain consistent regardless of duplicate events, requiring sophisticated deduplication mechanisms that can identify duplicates across time windows and processing contexts.
+Distributed systems often produce duplicate events due to network retries,
+system failures, or concurrent processing. Business operations must remain
+consistent regardless of duplicate events, requiring sophisticated deduplication
+mechanisms that can identify duplicates across time windows and processing
+contexts.
 
 ## Code Example
 
 ```typescript
 // event-deduplication.ts
-import { DomainEvent, IEventHandler, UnifiedEventBus } from '@vytches-ddd/events';
+import {
+  DomainEvent,
+  IEventHandler,
+  UnifiedEventBus,
+} from '@vytches-ddd/events';
 import { EntityId } from '@vytches-ddd/value-objects';
 import { Result } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
@@ -54,7 +63,7 @@ export abstract class DeduplicatedEvent extends DomainEvent {
       idempotencyKey: this.idempotencyKey,
       sourceSystem: this.sourceSystem,
       // Include relevant payload fields for fingerprinting
-      payloadHash: this.createPayloadHash()
+      payloadHash: this.createPayloadHash(),
     };
 
     return this.hashObject(fingerprintData);
@@ -71,7 +80,7 @@ export abstract class DeduplicatedEvent extends DomainEvent {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return hash.toString(36);
@@ -102,7 +111,7 @@ export class PaymentInitiatedEvent extends DeduplicatedEvent {
       orderId: orderId.value,
       amount,
       currency,
-      paymentMethod
+      paymentMethod,
     };
   }
 
@@ -112,9 +121,9 @@ export class PaymentInitiatedEvent extends DeduplicatedEvent {
       orderId: this.orderId.value,
       amount: this.amount,
       currency: this.currency,
-      paymentMethod: this.paymentMethod
+      paymentMethod: this.paymentMethod,
     };
-    
+
     const str = JSON.stringify(payloadData, Object.keys(payloadData).sort());
     return this.simpleHash(str);
   }
@@ -123,7 +132,7 @@ export class PaymentInitiatedEvent extends DeduplicatedEvent {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return hash.toString(36);
@@ -153,7 +162,7 @@ export class OrderStatusChangedEvent extends DeduplicatedEvent {
       previousStatus,
       newStatus,
       reason,
-      statusChangeTime: timestamp.toISOString()
+      statusChangeTime: timestamp.toISOString(),
     };
   }
 
@@ -164,9 +173,9 @@ export class OrderStatusChangedEvent extends DeduplicatedEvent {
       newStatus: this.newStatus,
       reason: this.reason,
       // Include timestamp for status change events to ensure uniqueness
-      timestamp: this.timestamp.toISOString()
+      timestamp: this.timestamp.toISOString(),
     };
-    
+
     return this.hashObject(payloadData);
   }
 
@@ -179,7 +188,7 @@ export class OrderStatusChangedEvent extends DeduplicatedEvent {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return hash.toString(36);
@@ -189,8 +198,14 @@ export class OrderStatusChangedEvent extends DeduplicatedEvent {
 // ⭐ FOCUS: Deduplication store interface
 export interface DeduplicationStore {
   hasBeenProcessed(fingerprint: string): Promise<Result<boolean, Error>>;
-  markAsProcessed(fingerprint: string, eventId: string, processedAt: Date): Promise<Result<void, Error>>;
-  getProcessingRecord(fingerprint: string): Promise<Result<ProcessingRecord | null, Error>>;
+  markAsProcessed(
+    fingerprint: string,
+    eventId: string,
+    processedAt: Date
+  ): Promise<Result<void, Error>>;
+  getProcessingRecord(
+    fingerprint: string
+  ): Promise<Result<ProcessingRecord | null, Error>>;
   cleanupExpiredRecords(olderThan: Date): Promise<Result<number, Error>>;
 }
 
@@ -208,7 +223,8 @@ export class InMemoryDeduplicationStore implements DeduplicationStore {
   private readonly ttlMs: number;
   private readonly logger = Logger.forContext('InMemoryDeduplicationStore');
 
-  constructor(ttlMs: number = 24 * 60 * 60 * 1000) { // Default: 24 hours
+  constructor(ttlMs: number = 24 * 60 * 60 * 1000) {
+    // Default: 24 hours
     this.ttlMs = ttlMs;
     this.startCleanupTimer();
   }
@@ -217,63 +233,75 @@ export class InMemoryDeduplicationStore implements DeduplicationStore {
     try {
       const record = this.records.get(fingerprint);
       const hasBeenProcessed = !!record && this.isRecordValid(record);
-      
+
       this.logger.debug('Deduplication check performed', {
         fingerprint,
         hasBeenProcessed,
         recordExists: !!record,
-        recordValid: record ? this.isRecordValid(record) : false
+        recordValid: record ? this.isRecordValid(record) : false,
       });
 
       return Result.ok(hasBeenProcessed);
     } catch (error) {
-      return Result.fail(new Error(`Failed to check processing status: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to check processing status: ${error.message}`)
+      );
     }
   }
 
-  async markAsProcessed(fingerprint: string, eventId: string, processedAt: Date): Promise<Result<void, Error>> {
+  async markAsProcessed(
+    fingerprint: string,
+    eventId: string,
+    processedAt: Date
+  ): Promise<Result<void, Error>> {
     try {
       const record: ProcessingRecord = {
         fingerprint,
         eventId,
         processedAt,
         sourceSystem: 'unknown',
-        eventType: 'unknown'
+        eventType: 'unknown',
       };
 
       this.records.set(fingerprint, record);
-      
+
       this.logger.debug('Event marked as processed', {
         fingerprint,
         eventId,
         processedAt,
-        totalRecords: this.records.size
+        totalRecords: this.records.size,
       });
 
       return Result.ok();
     } catch (error) {
-      return Result.fail(new Error(`Failed to mark as processed: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to mark as processed: ${error.message}`)
+      );
     }
   }
 
-  async getProcessingRecord(fingerprint: string): Promise<Result<ProcessingRecord | null, Error>> {
+  async getProcessingRecord(
+    fingerprint: string
+  ): Promise<Result<ProcessingRecord | null, Error>> {
     try {
       const record = this.records.get(fingerprint);
-      
+
       if (!record || !this.isRecordValid(record)) {
         return Result.ok(null);
       }
 
       return Result.ok(record);
     } catch (error) {
-      return Result.fail(new Error(`Failed to get processing record: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to get processing record: ${error.message}`)
+      );
     }
   }
 
   async cleanupExpiredRecords(olderThan: Date): Promise<Result<number, Error>> {
     try {
       let cleanedCount = 0;
-      
+
       for (const [fingerprint, record] of this.records.entries()) {
         if (record.processedAt < olderThan) {
           this.records.delete(fingerprint);
@@ -284,12 +312,14 @@ export class InMemoryDeduplicationStore implements DeduplicationStore {
       this.logger.info('Expired deduplication records cleaned up', {
         cleanedCount,
         remainingRecords: this.records.size,
-        olderThan: olderThan.toISOString()
+        olderThan: olderThan.toISOString(),
       });
 
       return Result.ok(cleanedCount);
     } catch (error) {
-      return Result.fail(new Error(`Failed to cleanup expired records: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to cleanup expired records: ${error.message}`)
+      );
     }
   }
 
@@ -300,10 +330,13 @@ export class InMemoryDeduplicationStore implements DeduplicationStore {
 
   private startCleanupTimer(): void {
     // Cleanup expired records every hour
-    setInterval(async () => {
-      const cutoffTime = new Date(Date.now() - this.ttlMs);
-      await this.cleanupExpiredRecords(cutoffTime);
-    }, 60 * 60 * 1000);
+    setInterval(
+      async () => {
+        const cutoffTime = new Date(Date.now() - this.ttlMs);
+        await this.cleanupExpiredRecords(cutoffTime);
+      },
+      60 * 60 * 1000
+    );
   }
 }
 
@@ -321,16 +354,19 @@ export class EventDeduplicationMiddleware {
 
     try {
       // ⭐ FOCUS: Check if event has already been processed
-      const duplicationCheck = await this.deduplicationStore.hasBeenProcessed(event.fingerprint);
-      
+      const duplicationCheck = await this.deduplicationStore.hasBeenProcessed(
+        event.fingerprint
+      );
+
       if (duplicationCheck.isFailure()) {
         return Result.fail(duplicationCheck.error);
       }
 
       if (duplicationCheck.value) {
         // ⭐ FOCUS: Event is a duplicate - log and skip processing
-        const existingRecord = await this.deduplicationStore.getProcessingRecord(event.fingerprint);
-        
+        const existingRecord =
+          await this.deduplicationStore.getProcessingRecord(event.fingerprint);
+
         this.logger.warn('Duplicate event detected and skipped', {
           eventType: event.eventType,
           eventId: event.eventId,
@@ -338,8 +374,10 @@ export class EventDeduplicationMiddleware {
           idempotencyKey: event.idempotencyKey,
           sourceSystem: event.sourceSystem,
           correlationId: event.correlationId,
-          originalProcessingRecord: existingRecord.isSuccess() ? existingRecord.value : null,
-          detectionTime: Date.now() - startTime
+          originalProcessingRecord: existingRecord.isSuccess()
+            ? existingRecord.value
+            : null,
+          detectionTime: Date.now() - startTime,
         });
 
         return Result.ok(); // Successfully skipped duplicate
@@ -352,7 +390,7 @@ export class EventDeduplicationMiddleware {
         fingerprint: event.fingerprint,
         idempotencyKey: event.idempotencyKey,
         sourceSystem: event.sourceSystem,
-        correlationId: event.correlationId
+        correlationId: event.correlationId,
       });
 
       const processingResult = await handler(event);
@@ -363,7 +401,7 @@ export class EventDeduplicationMiddleware {
           eventId: event.eventId,
           fingerprint: event.fingerprint,
           error: processingResult.error,
-          processingTime: Date.now() - startTime
+          processingTime: Date.now() - startTime,
         });
         return processingResult;
       }
@@ -380,7 +418,7 @@ export class EventDeduplicationMiddleware {
           eventType: event.eventType,
           eventId: event.eventId,
           fingerprint: event.fingerprint,
-          error: markResult.error
+          error: markResult.error,
         });
         // Continue despite marking failure - event was processed successfully
       }
@@ -393,11 +431,15 @@ export class EventDeduplicationMiddleware {
         fingerprint: event.fingerprint,
         idempotencyKey: event.idempotencyKey,
         processingTime,
-        performanceCategory: processingTime < 100 ? 'fast' : processingTime < 1000 ? 'normal' : 'slow'
+        performanceCategory:
+          processingTime < 100
+            ? 'fast'
+            : processingTime < 1000
+              ? 'normal'
+              : 'slow',
       });
 
       return Result.ok();
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
@@ -406,10 +448,12 @@ export class EventDeduplicationMiddleware {
         eventId: event.eventId,
         fingerprint: event.fingerprint,
         error: error,
-        processingTime
+        processingTime,
       });
 
-      return Result.fail(new Error(`Deduplication middleware error: ${error.message}`));
+      return Result.fail(
+        new Error(`Deduplication middleware error: ${error.message}`)
+      );
     }
   }
 }
@@ -419,7 +463,9 @@ export function IdempotentHandler(deduplicationStore: DeduplicationStore) {
   return function <T extends DeduplicatedEvent>(
     target: any,
     propertyName: string,
-    descriptor: TypedPropertyDescriptor<(event: T) => Promise<Result<void, Error>>>
+    descriptor: TypedPropertyDescriptor<
+      (event: T) => Promise<Result<void, Error>>
+    >
   ) {
     const originalMethod = descriptor.value!;
     const middleware = new EventDeduplicationMiddleware(deduplicationStore);
@@ -444,7 +490,9 @@ export class PaymentProcessingService {
   }
 
   @IdempotentHandler(new InMemoryDeduplicationStore())
-  async handlePaymentInitiated(event: PaymentInitiatedEvent): Promise<Result<void, Error>> {
+  async handlePaymentInitiated(
+    event: PaymentInitiatedEvent
+  ): Promise<Result<void, Error>> {
     try {
       // ⭐ FOCUS: Idempotent business logic
       this.logger.info('Processing payment initiation', {
@@ -452,7 +500,7 @@ export class PaymentProcessingService {
         orderId: event.orderId.value,
         amount: event.amount,
         currency: event.currency,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
       // Simulate payment processing
@@ -463,25 +511,28 @@ export class PaymentProcessingService {
       this.logger.info('Payment initiation completed successfully', {
         paymentId: event.paymentId.value,
         orderId: event.orderId.value,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
       return Result.ok();
-
     } catch (error) {
       this.logger.error('Payment initiation failed', {
         paymentId: event.paymentId.value,
         orderId: event.orderId.value,
         error: error,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
-      return Result.fail(new Error(`Payment initiation failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Payment initiation failed: ${error.message}`)
+      );
     }
   }
 
   @IdempotentHandler(new InMemoryDeduplicationStore())
-  async handleOrderStatusChanged(event: OrderStatusChangedEvent): Promise<Result<void, Error>> {
+  async handleOrderStatusChanged(
+    event: OrderStatusChangedEvent
+  ): Promise<Result<void, Error>> {
     try {
       // ⭐ FOCUS: Idempotent status update logic
       this.logger.info('Processing order status change', {
@@ -489,7 +540,7 @@ export class PaymentProcessingService {
         previousStatus: event.previousStatus,
         newStatus: event.newStatus,
         reason: event.reason,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
       // Idempotent operations
@@ -501,80 +552,97 @@ export class PaymentProcessingService {
       this.logger.info('Order status change processed successfully', {
         orderId: event.orderId.value,
         newStatus: event.newStatus,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
       return Result.ok();
-
     } catch (error) {
       this.logger.error('Order status change processing failed', {
         orderId: event.orderId.value,
         newStatus: event.newStatus,
         error: error,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
       });
 
-      return Result.fail(new Error(`Order status change failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Order status change failed: ${error.message}`)
+      );
     }
   }
 
   // Private idempotent operation methods
-  private async initiatePaymentWithProvider(event: PaymentInitiatedEvent): Promise<void> {
+  private async initiatePaymentWithProvider(
+    event: PaymentInitiatedEvent
+  ): Promise<void> {
     // Idempotent payment provider integration
     this.logger.debug('Initiating payment with provider', {
       paymentId: event.paymentId.value,
       amount: event.amount,
       currency: event.currency,
-      paymentMethod: event.paymentMethod
+      paymentMethod: event.paymentMethod,
     });
   }
 
-  private async updateOrderPaymentStatus(orderId: EntityId, status: string): Promise<void> {
+  private async updateOrderPaymentStatus(
+    orderId: EntityId,
+    status: string
+  ): Promise<void> {
     // Idempotent database update
     this.logger.debug('Updating order payment status', {
       orderId: orderId.value,
-      status
+      status,
     });
   }
 
-  private async sendPaymentConfirmation(event: PaymentInitiatedEvent): Promise<void> {
+  private async sendPaymentConfirmation(
+    event: PaymentInitiatedEvent
+  ): Promise<void> {
     // Idempotent notification sending
     this.logger.debug('Sending payment confirmation', {
       paymentId: event.paymentId.value,
-      orderId: event.orderId.value
+      orderId: event.orderId.value,
     });
   }
 
-  private async updateOrderStatusInDatabase(orderId: EntityId, status: string): Promise<void> {
+  private async updateOrderStatusInDatabase(
+    orderId: EntityId,
+    status: string
+  ): Promise<void> {
     // Idempotent database operation using upsert/conditional updates
     this.logger.debug('Updating order status in database', {
       orderId: orderId.value,
-      status
+      status,
     });
   }
 
-  private async notifyCustomerOfStatusChange(event: OrderStatusChangedEvent): Promise<void> {
+  private async notifyCustomerOfStatusChange(
+    event: OrderStatusChangedEvent
+  ): Promise<void> {
     // Idempotent customer notification
     this.logger.debug('Notifying customer of status change', {
       orderId: event.orderId.value,
-      newStatus: event.newStatus
+      newStatus: event.newStatus,
     });
   }
 
-  private async updateInventoryIfNeeded(event: OrderStatusChangedEvent): Promise<void> {
+  private async updateInventoryIfNeeded(
+    event: OrderStatusChangedEvent
+  ): Promise<void> {
     // Conditional idempotent inventory update
     if (event.newStatus === 'cancelled') {
       this.logger.debug('Releasing inventory for cancelled order', {
-        orderId: event.orderId.value
+        orderId: event.orderId.value,
       });
     }
   }
 
-  private async triggerDownstreamProcesses(event: OrderStatusChangedEvent): Promise<void> {
+  private async triggerDownstreamProcesses(
+    event: OrderStatusChangedEvent
+  ): Promise<void> {
     // Idempotent downstream process triggering
     this.logger.debug('Triggering downstream processes', {
       orderId: event.orderId.value,
-      newStatus: event.newStatus
+      newStatus: event.newStatus,
     });
   }
 }
@@ -585,13 +653,15 @@ export class PaymentProcessingService {
 ```typescript
 // Setting up deduplication system
 async function setupDeduplicationSystem() {
-  const deduplicationStore = new InMemoryDeduplicationStore(24 * 60 * 60 * 1000); // 24 hour TTL
+  const deduplicationStore = new InMemoryDeduplicationStore(
+    24 * 60 * 60 * 1000
+  ); // 24 hour TTL
   const paymentService = new PaymentProcessingService(deduplicationStore);
-  
+
   // ⭐ FOCUS: Process events with automatic deduplication
   const orderId = EntityId.createUuid();
   const paymentId = EntityId.createUuid();
-  
+
   // Create idempotent payment event
   const paymentEvent = new PaymentInitiatedEvent(
     paymentId,
@@ -606,12 +676,18 @@ async function setupDeduplicationSystem() {
   // First processing - should succeed
   console.log('Processing payment event (first time)...');
   const result1 = await paymentService.handlePaymentInitiated(paymentEvent);
-  console.log('First processing result:', result1.isSuccess() ? 'SUCCESS' : 'FAILED');
+  console.log(
+    'First processing result:',
+    result1.isSuccess() ? 'SUCCESS' : 'FAILED'
+  );
 
   // Duplicate processing - should be skipped
   console.log('Processing payment event (duplicate)...');
   const result2 = await paymentService.handlePaymentInitiated(paymentEvent);
-  console.log('Duplicate processing result:', result2.isSuccess() ? 'SKIPPED' : 'FAILED');
+  console.log(
+    'Duplicate processing result:',
+    result2.isSuccess() ? 'SKIPPED' : 'FAILED'
+  );
 
   // Different event with same idempotency key - should be skipped
   const duplicateEvent = new PaymentInitiatedEvent(
@@ -626,18 +702,25 @@ async function setupDeduplicationSystem() {
 
   console.log('Processing event with same idempotency key...');
   const result3 = await paymentService.handlePaymentInitiated(duplicateEvent);
-  console.log('Same key processing result:', result3.isSuccess() ? 'SKIPPED' : 'FAILED');
+  console.log(
+    'Same key processing result:',
+    result3.isSuccess() ? 'SKIPPED' : 'FAILED'
+  );
 
   // Check deduplication statistics
-  const hasBeenProcessed = await deduplicationStore.hasBeenProcessed(paymentEvent.fingerprint);
+  const hasBeenProcessed = await deduplicationStore.hasBeenProcessed(
+    paymentEvent.fingerprint
+  );
   console.log('Event marked as processed:', hasBeenProcessed.value);
 
-  const processingRecord = await deduplicationStore.getProcessingRecord(paymentEvent.fingerprint);
+  const processingRecord = await deduplicationStore.getProcessingRecord(
+    paymentEvent.fingerprint
+  );
   if (processingRecord.isSuccess() && processingRecord.value) {
     console.log('Processing record:', {
       fingerprint: processingRecord.value.fingerprint,
       eventId: processingRecord.value.eventId,
-      processedAt: processingRecord.value.processedAt
+      processedAt: processingRecord.value.processedAt,
     });
   }
 }
@@ -664,7 +747,8 @@ setupDeduplicationSystem();
 
 ## Common Pitfalls
 
-- **Fingerprint Collisions**: Ensure fingerprint algorithm prevents false positives
+- **Fingerprint Collisions**: Ensure fingerprint algorithm prevents false
+  positives
 - **TTL Configuration**: Balance memory usage with business requirements
 - **Async Processing**: Handle race conditions in concurrent event processing
 - **Storage Failures**: Gracefully handle deduplication store failures

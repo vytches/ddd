@@ -1,14 +1,15 @@
 # Base Types
 
-These are shared fundamental types used across package examples. Import them from your application's base type definitions.
+These are shared fundamental types used across package examples. Import them
+from your application's base type definitions.
 
 ```typescript
 // Import from your application
-import { 
-  BaseEntity, 
-  Money, 
-  EntityId, 
-  Result, 
+import {
+  BaseEntity,
+  Money,
+  EntityId,
+  Result,
   BaseDomainEvent,
   DomainError,
   ValidationResult,
@@ -16,7 +17,7 @@ import {
   Pagination,
   QueryResult,
   CommandResult,
-  ServiceResponse
+  ServiceResponse,
 } from './types';
 
 // Or define inline if needed:

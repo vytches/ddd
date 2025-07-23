@@ -8,18 +8,26 @@
 
 ## Description
 
-This example shows how to manually integrate the @vytches-ddd/messaging outbox pattern with NestJS using standard framework patterns and manual service instantiation.
+This example shows how to manually integrate the @vytches-ddd/messaging outbox
+pattern with NestJS using standard framework patterns and manual service
+instantiation.
 
 ## Business Context
 
-An e-commerce order service needs reliable message delivery when orders are created. Using manual setup provides clear understanding of dependencies and full control over configuration.
+An e-commerce order service needs reliable message delivery when orders are
+created. Using manual setup provides clear understanding of dependencies and
+full control over configuration.
 
 ## Code Example
 
 ```typescript
 // order.service.ts - Domain service using outbox pattern
 import { Injectable } from '@nestjs/common';
-import { OutboxMessageHandler, OutboxMessage, MessagePriority } from '@vytches-ddd/messaging';
+import {
+  OutboxMessageHandler,
+  OutboxMessage,
+  MessagePriority,
+} from '@vytches-ddd/messaging';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { Order } from './types'; // From your application
@@ -38,12 +46,12 @@ export class OrderService {
       storage: this.createOutboxStorage(),
       publisher: this.createMessagePublisher(),
       batchSize: 50,
-      pollInterval: 5000
+      pollInterval: 5000,
     });
   }
 
   async createOrder(orderData: CreateOrderData): Promise<Order> {
-    return await this.entityManager.transaction(async (tx) => {
+    return await this.entityManager.transaction(async tx => {
       // 1. Create and save order
       const order = this.orderRepository.create(orderData);
       const savedOrder = await tx.save(order);
@@ -52,38 +60,43 @@ export class OrderService {
       const outboxMessages = [
         OutboxMessage.create({
           messageType: 'OrderCreated',
-          payload: { 
+          payload: {
             orderId: savedOrder.id,
             customerId: savedOrder.customerId,
-            amount: savedOrder.totalAmount
+            amount: savedOrder.totalAmount,
           },
           targetService: 'inventory-service',
-          priority: MessagePriority.HIGH
+          priority: MessagePriority.HIGH,
         }),
         OutboxMessage.create({
           messageType: 'SendConfirmationEmail',
           payload: {
             orderId: savedOrder.id,
             customerEmail: orderData.customerEmail,
-            orderSummary: this.generateOrderSummary(savedOrder)
+            orderSummary: this.generateOrderSummary(savedOrder),
           },
           targetService: 'notification-service',
           priority: MessagePriority.NORMAL,
-          delay: 5000 // 5 second delay
-        })
+          delay: 5000, // 5 second delay
+        }),
       ];
 
       await this.outboxHandler.storeMessages(outboxMessages, tx);
-      
+
       return savedOrder;
     });
   }
 
-  async processPayment(orderId: string, paymentData: PaymentData): Promise<void> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+  async processPayment(
+    orderId: string,
+    paymentData: PaymentData
+  ): Promise<void> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) throw new Error('Order not found');
 
-    await this.entityManager.transaction(async (tx) => {
+    await this.entityManager.transaction(async tx => {
       // Update order status
       order.status = 'payment_processing';
       await tx.save(order);
@@ -97,8 +110,8 @@ export class OrderService {
         retryPolicy: {
           maxAttempts: 5,
           backoffType: 'exponential',
-          initialDelay: 1000
-        }
+          initialDelay: 1000,
+        },
       });
 
       await this.outboxHandler.storeMessages([paymentMessage], tx);
@@ -119,15 +132,17 @@ export class OrderService {
     // Custom storage implementation using TypeORM
     return {
       async store(messages: OutboxMessage[], tx: EntityManager): Promise<void> {
-        const entities = messages.map(msg => tx.create('OutboxEntry', {
-          id: msg.id,
-          messageType: msg.messageType,
-          payload: JSON.stringify(msg.payload),
-          targetService: msg.targetService,
-          status: 'pending',
-          createdAt: new Date(),
-          priority: msg.priority
-        }));
+        const entities = messages.map(msg =>
+          tx.create('OutboxEntry', {
+            id: msg.id,
+            messageType: msg.messageType,
+            payload: JSON.stringify(msg.payload),
+            targetService: msg.targetService,
+            status: 'pending',
+            createdAt: new Date(),
+            priority: msg.priority,
+          })
+        );
         await tx.save(entities);
       },
 
@@ -135,17 +150,19 @@ export class OrderService {
         const entries = await this.entityManager.find('OutboxEntry', {
           where: { status: 'pending' },
           order: { createdAt: 'ASC' },
-          take: batchSize
+          take: batchSize,
         });
 
-        return entries.map(entry => OutboxMessage.create({
-          id: entry.id,
-          messageType: entry.messageType,
-          payload: JSON.parse(entry.payload),
-          targetService: entry.targetService,
-          priority: entry.priority
-        }));
-      }
+        return entries.map(entry =>
+          OutboxMessage.create({
+            id: entry.id,
+            messageType: entry.messageType,
+            payload: JSON.parse(entry.payload),
+            targetService: entry.targetService,
+            priority: entry.priority,
+          })
+        );
+      },
     };
   }
 
@@ -162,7 +179,7 @@ export class OrderService {
         } catch (error) {
           throw new Error(`Failed to publish message: ${error.message}`);
         }
-      }
+      },
     };
   }
 
@@ -171,7 +188,7 @@ export class OrderService {
       items: order.items,
       total: order.totalAmount,
       currency: order.currency,
-      estimatedDelivery: this.calculateDeliveryDate(order)
+      estimatedDelivery: this.calculateDeliveryDate(order),
     };
   }
 }
@@ -192,12 +209,12 @@ export class OrderController {
       return {
         success: true,
         orderId: order.id,
-        status: 'processing'
+        status: 'processing',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -211,12 +228,12 @@ export class OrderController {
       await this.orderService.processPayment(orderId, paymentDto);
       return {
         success: true,
-        message: 'Payment processing initiated'
+        message: 'Payment processing initiated',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -230,21 +247,22 @@ import { OrderController } from './order.controller';
 import { Order } from './entities/order.entity'; // From your application
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Order])
-  ],
+  imports: [TypeOrmModule.forFeature([Order])],
   controllers: [OrderController],
   providers: [OrderService],
-  exports: [OrderService]
+  exports: [OrderService],
 })
 export class OrderModule {}
 ```
 
 ## Key Features
 
-- **Manual Setup**: Full control over outbox handler configuration and dependencies
-- **Framework Integration**: Uses standard NestJS patterns (@Injectable, lifecycle hooks)
-- **Transaction Safety**: Ensures messages are stored in same database transaction
+- **Manual Setup**: Full control over outbox handler configuration and
+  dependencies
+- **Framework Integration**: Uses standard NestJS patterns (@Injectable,
+  lifecycle hooks)
+- **Transaction Safety**: Ensures messages are stored in same database
+  transaction
 - **Error Handling**: Proper error handling and rollback scenarios
 - **Type Safety**: Full TypeScript support with proper interfaces
 
@@ -258,9 +276,11 @@ export class OrderModule {}
 ## Common Pitfalls
 
 - **Memory Leaks**: Ensure outbox processing is stopped on module destruction
-- **Transaction Boundaries**: Always store outbox messages within business transaction
+- **Transaction Boundaries**: Always store outbox messages within business
+  transaction
 - **Error Handling**: Handle publisher failures gracefully to avoid data loss
-- **Resource Management**: Properly manage database connections and message broker connections
+- **Resource Management**: Properly manage database connections and message
+  broker connections
 
 ## Related Examples
 

@@ -1,13 +1,13 @@
 # Value Objects - Basic Use Cases
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Focus**: Real-world applications and business scenarios
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Focus**: Real-world applications and business scenarios
 
 ## Overview
 
-This document outlines common real-world use cases where basic value objects provide immediate business value. These scenarios demonstrate how value objects solve practical problems in everyday applications.
+This document outlines common real-world use cases where basic value objects
+provide immediate business value. These scenarios demonstrate how value objects
+solve practical problems in everyday applications.
 
 ## E-Commerce Platform
 
@@ -27,30 +27,33 @@ class Product {
   applyDiscount(percentage: number): Product {
     const discountAmount = this.price.multiply(percentage / 100);
     const newPrice = this.price.subtract(discountAmount);
-    
+
     return new Product(this.id, this.name, newPrice);
   }
 }
 
 // ✅ Shopping cart calculations
 class ShoppingCart {
-  private items: Map<string, { product: Product; quantity: number }> = new Map();
-  
+  private items: Map<string, { product: Product; quantity: number }> =
+    new Map();
+
   addItem(product: Product, quantity: number): void {
     const existingItem = this.items.get(product.id);
-    const newQuantity = existingItem ? existingItem.quantity + quantity : quantity;
-    
+    const newQuantity = existingItem
+      ? existingItem.quantity + quantity
+      : quantity;
+
     this.items.set(product.id, { product, quantity: newQuantity });
   }
 
   getSubtotal(): Money {
     let total = Money.create(0, 'USD');
-    
+
     for (const { product, quantity } of this.items.values()) {
       const lineTotal = product.price.multiply(quantity);
       total = total.add(lineTotal);
     }
-    
+
     return total;
   }
 
@@ -88,8 +91,16 @@ class Customer {
 }
 
 // Usage example
-const laptop = new Product('laptop-001', 'Gaming Laptop', Money.create(1299.99, 'USD'));
-const mouse = new Product('mouse-001', 'Wireless Mouse', Money.create(79.99, 'USD'));
+const laptop = new Product(
+  'laptop-001',
+  'Gaming Laptop',
+  Money.create(1299.99, 'USD')
+);
+const mouse = new Product(
+  'mouse-001',
+  'Wireless Mouse',
+  Money.create(79.99, 'USD')
+);
 
 const cart = new ShoppingCart();
 cart.addItem(laptop, 1);
@@ -101,12 +112,13 @@ const customer = new Customer(
   Address.create('123 Main St', 'Springfield', 'IL', '62701', 'US')
 );
 
-console.log(`Subtotal: ${cart.getSubtotal()}`);     // $1,459.97
-console.log(`Total: ${cart.getTotal(0.08)}`);       // $1,576.77
-console.log(`Customer: ${customer.email}`);         // john.doe@example.com
+console.log(`Subtotal: ${cart.getSubtotal()}`); // $1,459.97
+console.log(`Total: ${cart.getTotal(0.08)}`); // $1,576.77
+console.log(`Customer: ${customer.email}`); // john.doe@example.com
 ```
 
 ### **Business Impact**:
+
 - **Currency Safety**: Prevents mixing different currencies in calculations
 - **Precision Accuracy**: Avoids floating-point arithmetic errors
 - **Data Integrity**: Ensures valid email addresses and addresses
@@ -151,12 +163,7 @@ class UserAccount {
 
   static create(emailAddress: string): UserAccount {
     const email = Email.create(emailAddress);
-    return new UserAccount(
-      generateId(),
-      email,
-      new Date(),
-      true
-    );
+    return new UserAccount(generateId(), email, new Date(), true);
   }
 
   requiresEmailVerification(): boolean {
@@ -165,7 +172,12 @@ class UserAccount {
 
   verifyEmail(): UserAccount {
     const verifiedEmail = this.email.markAsVerified();
-    return new UserAccount(this.id, verifiedEmail, this.createdAt, this.isActive);
+    return new UserAccount(
+      this.id,
+      verifiedEmail,
+      this.createdAt,
+      this.isActive
+    );
   }
 
   deactivate(): UserAccount {
@@ -176,7 +188,7 @@ class UserAccount {
 // ✅ Tenant organization
 class Organization {
   private users: UserAccount[] = [];
-  
+
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -184,11 +196,15 @@ class Organization {
     public readonly adminEmail: Email
   ) {}
 
-  addUser(emailAddress: string): { success: boolean; user?: UserAccount; error?: string } {
+  addUser(emailAddress: string): {
+    success: boolean;
+    user?: UserAccount;
+    error?: string;
+  } {
     if (this.users.length >= this.plan.maxUsers) {
-      return { 
-        success: false, 
-        error: `Cannot exceed plan limit of ${this.plan.maxUsers} users` 
+      return {
+        success: false,
+        error: `Cannot exceed plan limit of ${this.plan.maxUsers} users`,
       };
     }
 
@@ -197,9 +213,9 @@ class Organization {
       this.users.push(user);
       return { success: true, user };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -207,7 +223,7 @@ class Organization {
   calculateMonthlyBill(): Money {
     const activeUsers = this.users.filter(u => u.isActive).length;
     const usedSlots = Math.max(activeUsers, 1); // Minimum billing
-    
+
     return this.plan.getPricePerUser().multiply(usedSlots);
   }
 
@@ -217,8 +233,16 @@ class Organization {
 }
 
 // Usage example
-const starterPlan = new SubscriptionPlan('Starter', Money.create(29.99, 'USD'), 5);
-const proPlan = new SubscriptionPlan('Professional', Money.create(99.99, 'USD'), 25);
+const starterPlan = new SubscriptionPlan(
+  'Starter',
+  Money.create(29.99, 'USD'),
+  5
+);
+const proPlan = new SubscriptionPlan(
+  'Professional',
+  Money.create(99.99, 'USD'),
+  25
+);
 
 const org = new Organization(
   'org-001',
@@ -230,8 +254,8 @@ const org = new Organization(
 // Add team members
 const results = [
   'john@acmecorp.com',
-  'jane@acmecorp.com', 
-  'invalid-email'  // This will fail
+  'jane@acmecorp.com',
+  'invalid-email', // This will fail
 ].map(email => org.addUser(email));
 
 results.forEach((result, index) => {
@@ -251,9 +275,12 @@ function generateId(): string {
 ```
 
 ### **Business Impact**:
+
 - **Email Validation**: Prevents invalid email addresses in user accounts
-- **Billing Accuracy**: Precise subscription calculations without rounding errors
-- **Multi-Currency Support**: Handle global customers with proper currency handling
+- **Billing Accuracy**: Precise subscription calculations without rounding
+  errors
+- **Multi-Currency Support**: Handle global customers with proper currency
+  handling
 - **Data Consistency**: Immutable user accounts ensure audit trails
 
 ---
@@ -279,7 +306,12 @@ class TradingPosition {
   }
 
   updatePrice(newPrice: Money): TradingPosition {
-    return new TradingPosition(this.symbol, this.quantity, this.entryPrice, newPrice);
+    return new TradingPosition(
+      this.symbol,
+      this.quantity,
+      this.entryPrice,
+      newPrice
+    );
   }
 
   getUnrealizedPnL(): Money {
@@ -308,7 +340,7 @@ class TradingPosition {
 // ✅ Portfolio management
 class Portfolio {
   private positions: Map<string, TradingPosition> = new Map();
-  
+
   constructor(
     public readonly accountId: string,
     public readonly baseCurrency: string
@@ -329,26 +361,26 @@ class Portfolio {
 
   getTotalMarketValue(): Money {
     let total = Money.create(0, this.baseCurrency);
-    
+
     for (const position of this.positions.values()) {
       // Note: In real implementation, would need currency conversion
       if (position.currentPrice.currency === this.baseCurrency) {
         total = total.add(position.getMarketValue());
       }
     }
-    
+
     return total;
   }
 
   getTotalPnL(): Money {
     let totalPnL = Money.create(0, this.baseCurrency);
-    
+
     for (const position of this.positions.values()) {
       if (position.currentPrice.currency === this.baseCurrency) {
         totalPnL = totalPnL.add(position.getUnrealizedPnL());
       }
     }
-    
+
     return totalPnL;
   }
 
@@ -366,7 +398,7 @@ class Portfolio {
 
     for (const position of this.positions.values()) {
       const pnl = position.getUnrealizedPnL();
-      
+
       if (pnl.isPositive()) {
         profitableCount++;
         if (pnl.isGreaterThan(largestGain)) {
@@ -385,7 +417,7 @@ class Portfolio {
       profitablePositions: profitableCount,
       losingPositions: losingCount,
       largestGain,
-      largestLoss
+      largestLoss,
     };
   }
 }
@@ -395,24 +427,24 @@ const portfolio = new Portfolio('account-001', 'USD');
 
 // Add positions
 const applePosition = new TradingPosition(
-  'AAPL', 
-  100, 
-  Money.create(150.00, 'USD'), 
-  Money.create(155.50, 'USD')
+  'AAPL',
+  100,
+  Money.create(150.0, 'USD'),
+  Money.create(155.5, 'USD')
 );
 
 const googlePosition = new TradingPosition(
   'GOOGL',
   50,
-  Money.create(2800.00, 'USD'),
-  Money.create(2750.00, 'USD')
+  Money.create(2800.0, 'USD'),
+  Money.create(2750.0, 'USD')
 );
 
 portfolio.addPosition(applePosition);
 portfolio.addPosition(googlePosition);
 
 // Update prices
-portfolio.updatePositionPrice('AAPL', Money.create(158.00, 'USD'));
+portfolio.updatePositionPrice('AAPL', Money.create(158.0, 'USD'));
 
 console.log(`Total Portfolio Value: ${portfolio.getTotalMarketValue()}`);
 console.log(`Total P&L: ${portfolio.getTotalPnL()}`);
@@ -425,6 +457,7 @@ console.log(`Largest Loss: ${metrics.largestLoss}`);
 ```
 
 ### **Business Impact**:
+
 - **Precision Trading**: Exact profit/loss calculations without rounding errors
 - **Risk Management**: Accurate portfolio value and exposure calculations
 - **Currency Consistency**: Prevents mixing different currency positions
@@ -483,8 +516,10 @@ class Restaurant {
 
     // Base delivery fee + distance charge
     const baseFee = Money.create(2.99, orderTotal.currency);
-    const distanceFee = Money.create(0.50, orderTotal.currency).multiply(Math.ceil(distance));
-    
+    const distanceFee = Money.create(0.5, orderTotal.currency).multiply(
+      Math.ceil(distance)
+    );
+
     return baseFee.add(distanceFee);
   }
 }
@@ -492,7 +527,7 @@ class Restaurant {
 // ✅ Order with delivery calculations
 class DeliveryOrder {
   private items: { item: MenuItem; quantity: number }[] = [];
-  
+
   constructor(
     public readonly id: string,
     public readonly restaurant: Restaurant,
@@ -510,12 +545,12 @@ class DeliveryOrder {
 
   getSubtotal(): Money {
     let total = Money.create(0, 'USD');
-    
+
     for (const { item, quantity } of this.items) {
       const lineTotal = item.basePrice.multiply(quantity);
       total = total.add(lineTotal);
     }
-    
+
     return total;
   }
 
@@ -532,32 +567,34 @@ class DeliveryOrder {
     const subtotal = this.getSubtotal();
     const deliveryFee = this.getDeliveryFee();
     const tax = this.getTax(taxRate);
-    
+
     return subtotal.add(deliveryFee).add(tax);
   }
 
   meetsMinimumOrder(): boolean {
-    return this.getSubtotal().isGreaterThan(this.restaurant.minimumOrder) ||
-           this.getSubtotal().isEqualTo(this.restaurant.minimumOrder);
+    return (
+      this.getSubtotal().isGreaterThan(this.restaurant.minimumOrder) ||
+      this.getSubtotal().isEqualTo(this.restaurant.minimumOrder)
+    );
   }
 }
 
 // ✅ Delivery fleet management
 class DeliveryFleet {
   private orders: DeliveryOrder[] = [];
-  
+
   addOrder(order: DeliveryOrder): boolean {
     if (!order.meetsMinimumOrder()) {
       return false;
     }
-    
+
     this.orders.push(order);
     return true;
   }
 
   getOrdersByRegion(): Map<string, DeliveryOrder[]> {
     const regions = new Map<string, DeliveryOrder[]>();
-    
+
     this.orders.forEach(order => {
       const region = `${order.deliveryAddress.city}, ${order.deliveryAddress.state}`;
       if (!regions.has(region)) {
@@ -565,17 +602,17 @@ class DeliveryFleet {
       }
       regions.get(region)!.push(order);
     });
-    
+
     return regions;
   }
 
   getTotalRevenue(taxRate: number): Money {
     let total = Money.create(0, 'USD');
-    
+
     this.orders.forEach(order => {
       total = total.add(order.getTotal(taxRate));
     });
-    
+
     return total;
   }
 }
@@ -590,32 +627,49 @@ const restaurant = new Restaurant(
     'IL',
     '60601',
     'US',
-    41.8781, -87.6298
+    41.8781,
+    -87.6298
   ),
   10, // 10km delivery radius
-  Money.create(15.00, 'USD') // $15 minimum order
+  Money.create(15.0, 'USD') // $15 minimum order
 );
 
-const pizza = new MenuItem('pizza-001', 'Margherita Pizza', Money.create(18.99, 'USD'), 'Main');
-const salad = new MenuItem('salad-001', 'Caesar Salad', Money.create(12.99, 'USD'), 'Sides');
+const pizza = new MenuItem(
+  'pizza-001',
+  'Margherita Pizza',
+  Money.create(18.99, 'USD'),
+  'Main'
+);
+const salad = new MenuItem(
+  'salad-001',
+  'Caesar Salad',
+  Money.create(12.99, 'USD'),
+  'Sides'
+);
 
 const customerAddress = Address.createWithCoordinates(
   '456 Customer St',
-  'Chicago', 
+  'Chicago',
   'IL',
   '60610',
   'US',
-  41.8841, -87.6190  // About 3km away
+  41.8841,
+  -87.619 // About 3km away
 );
 
-const order = new DeliveryOrder('order-001', restaurant, customerAddress, 'customer-001');
+const order = new DeliveryOrder(
+  'order-001',
+  restaurant,
+  customerAddress,
+  'customer-001'
+);
 order.addItem(pizza, 2);
 order.addItem(salad, 1);
 
 console.log(`Can deliver: ${restaurant.canDeliverTo(customerAddress)}`);
-console.log(`Subtotal: ${order.getSubtotal()}`);           // $50.97
-console.log(`Delivery fee: ${order.getDeliveryFee()}`);    // $4.49 (base + distance)
-console.log(`Total: ${order.getTotal(0.08)}`);             // ~$59.36 with tax
+console.log(`Subtotal: ${order.getSubtotal()}`); // $50.97
+console.log(`Delivery fee: ${order.getDeliveryFee()}`); // $4.49 (base + distance)
+console.log(`Total: ${order.getTotal(0.08)}`); // ~$59.36 with tax
 console.log(`Meets minimum: ${order.meetsMinimumOrder()}`); // true
 
 const fleet = new DeliveryFleet();
@@ -625,6 +679,7 @@ console.log(`Fleet revenue: ${fleet.getTotalRevenue(0.08)}`);
 ```
 
 ### **Business Impact**:
+
 - **Delivery Optimization**: Accurate distance calculations for delivery fees
 - **Order Validation**: Ensures minimum order requirements are met
 - **Geographic Awareness**: Location-based service availability
@@ -634,13 +689,16 @@ console.log(`Fleet revenue: ${fleet.getTotalRevenue(0.08)}`);
 
 ## Summary
 
-These basic use cases demonstrate how value objects provide immediate practical benefits:
+These basic use cases demonstrate how value objects provide immediate practical
+benefits:
 
-1. **Data Integrity**: Invalid data is caught early with comprehensive validation
+1. **Data Integrity**: Invalid data is caught early with comprehensive
+   validation
 2. **Business Logic**: Domain rules are encoded directly in the objects
 3. **Calculation Accuracy**: Precise monetary and numeric calculations
 4. **Type Safety**: Prevents common errors like currency mixing
 5. **Immutability**: Ensures data consistency and enables audit trails
 6. **Reusability**: Common value objects work across different business contexts
 
-The examples show progressive complexity while maintaining the core value object principles of immutability, validation, and business rule encapsulation.
+The examples show progressive complexity while maintaining the core value object
+principles of immutability, validation, and business rule encapsulation.

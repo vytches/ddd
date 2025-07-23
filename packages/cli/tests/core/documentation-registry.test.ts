@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import { DocumentationRegistry, globalDocumentationRegistry } from '../../src/core/documentation-registry';
-import type { EnhancedExampleDefinition, ExampleQueryOptions } from '../../src/types/documentation-types';
+import {
+  DocumentationRegistry,
+  globalDocumentationRegistry,
+} from '../../src/core/documentation-registry';
+import type {
+  EnhancedExampleDefinition,
+  ExampleQueryOptions,
+} from '../../src/types/documentation-types';
 import { promises as fs } from 'fs';
 
 // Mock fs module specifically the promises import
@@ -9,7 +15,7 @@ vi.mock('fs', () => ({
   promises: {
     readdir: vi.fn(),
     readFile: vi.fn(),
-  }
+  },
 }));
 
 describe('DocumentationRegistry', () => {
@@ -80,8 +86,10 @@ export const domainServicesExampleConfig = {
   describe('loadAll', () => {
     it('should load examples from all packages', async () => {
       // Mock fs.readdir to return package list - this gets called, but catches error
-      (mockFs.readdir as any).mockRejectedValue(new Error('ENOENT: no such file or directory, scandir \'/test/workspace/packages\''));
-      
+      (mockFs.readdir as any).mockRejectedValue(
+        new Error("ENOENT: no such file or directory, scandir '/test/workspace/packages'")
+      );
+
       // Mock fs.readFile to return config content with examples pattern
       (mockFs.readFile as any).mockResolvedValue('examples: [{ basic: true }]');
 
@@ -93,8 +101,10 @@ export const domainServicesExampleConfig = {
 
     it('should handle packages without examples gracefully', async () => {
       // Mock readdir to fail - loadAll handles this gracefully
-      (mockFs.readdir as any).mockRejectedValue(new Error('ENOENT: no such file or directory, scandir \'/test/workspace/packages\''));
-      
+      (mockFs.readdir as any).mockRejectedValue(
+        new Error("ENOENT: no such file or directory, scandir '/test/workspace/packages'")
+      );
+
       const [error] = await safeRun(async () => await registry.loadAll());
 
       // loadAll catches errors gracefully
@@ -104,14 +114,13 @@ export const domainServicesExampleConfig = {
 
     it('should handle readdir errors gracefully', async () => {
       (mockFs.readdir as any).mockRejectedValue(new Error('Permission denied'));
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { return });
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       await registry.loadAll();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to load examples:',
-        expect.any(Error)
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load examples:', expect.any(Error));
 
       consoleSpy.mockRestore();
     });
@@ -119,7 +128,7 @@ export const domainServicesExampleConfig = {
     it('should clear existing data before loading', async () => {
       // Setup test data manually since loadAll doesn't work with mocks
       registry['packageExamples'].set('test-package', ['example-1']);
-      
+
       // Verify something was loaded
       const firstLoad = registry.getPackages();
       expect(firstLoad.length).toBeGreaterThan(0);
@@ -210,8 +219,8 @@ export const domainServicesExampleConfig = {
         id: 'nestjs-example',
         complexity: 'basic' as const,
         frameworkIntegrations: [
-          { framework: 'nestjs', components: ['service'], path: 'frameworks/nestjs/service.md' }
-        ]
+          { framework: 'nestjs', components: ['service'], path: 'frameworks/nestjs/service.md' },
+        ],
       };
 
       registry['examples'].set('nestjs-example', exampleWithFramework);
@@ -235,7 +244,7 @@ export const domainServicesExampleConfig = {
       const options: ExampleQueryOptions = {
         package: 'domain-services',
         complexity: 'basic',
-        tags: ['basic']
+        tags: ['basic'],
       };
       const results = registry.query(options);
 
@@ -268,9 +277,17 @@ export const domainServicesExampleConfig = {
         id: 'multi-framework-example',
         complexity: 'basic' as const,
         frameworkIntegrations: [
-          { framework: 'nestjs', components: ['service', 'module'], path: 'frameworks/nestjs/service.md' },
-          { framework: 'express', components: ['middleware'], path: 'frameworks/express/middleware.md' }
-        ]
+          {
+            framework: 'nestjs',
+            components: ['service', 'module'],
+            path: 'frameworks/nestjs/service.md',
+          },
+          {
+            framework: 'express',
+            components: ['middleware'],
+            path: 'frameworks/express/middleware.md',
+          },
+        ],
       };
 
       await registry.loadAll();
@@ -303,9 +320,17 @@ export const domainServicesExampleConfig = {
         id: 'component-example',
         complexity: 'basic' as const,
         frameworkIntegrations: [
-          { framework: 'nestjs', components: ['service', 'module', 'controller'], path: 'frameworks/nestjs/service.md' },
-          { framework: 'express', components: ['middleware'], path: 'frameworks/express/middleware.md' }
-        ]
+          {
+            framework: 'nestjs',
+            components: ['service', 'module', 'controller'],
+            path: 'frameworks/nestjs/service.md',
+          },
+          {
+            framework: 'express',
+            components: ['middleware'],
+            path: 'frameworks/express/middleware.md',
+          },
+        ],
       };
 
       await registry.loadAll();
@@ -363,7 +388,7 @@ export const domainServicesExampleConfig = {
       // Clear any existing data first
       registry['examples'].clear();
       registry['packageExamples'].clear();
-      
+
       // Manually set up test data since loadAll can't work with proper mocks
       registry['packageExamples'].set('domain-services', ['example-1']);
       // Don't add aggregates or value-objects to simulate they have no examples
@@ -387,8 +412,12 @@ export const domainServicesExampleConfig = {
         complexity: 'basic' as const,
         frameworkIntegrations: [
           { framework: 'nestjs', components: ['service'], path: 'frameworks/nestjs/service.md' },
-          { framework: 'express', components: ['middleware'], path: 'frameworks/express/middleware.md' }
-        ]
+          {
+            framework: 'express',
+            components: ['middleware'],
+            path: 'frameworks/express/middleware.md',
+          },
+        ],
       };
 
       await registry.loadAll();
@@ -421,7 +450,9 @@ export const domainServicesExampleConfig = {
     });
 
     it('should handle malformed config content', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { return });
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       const result = registry['parseConfigExamples']('invalid config', 'test-package');
 
@@ -450,7 +481,7 @@ export const domainServicesExampleConfig = {
         complexity: 'basic' as const,
         priority: 'medium' as const,
         package: 'another-package',
-        diSupport: true
+        diSupport: true,
       });
     });
   });
@@ -460,8 +491,8 @@ export const domainServicesExampleConfig = {
       // Mock readFile to reject with error
       (mockFs.readFile as any).mockRejectedValue(new Error('File not found'));
 
-      const [error] = await safeRun(async () => 
-        await registry['loadPackageExamples']('test-package', '/test/config.ts')
+      const [error] = await safeRun(
+        async () => await registry['loadPackageExamples']('test-package', '/test/config.ts')
       );
 
       // Should fail due to file not existing, but we test the calling pattern
@@ -476,10 +507,14 @@ export const domainServicesExampleConfig = {
         id: 'framework-package-basic-example',
         package: 'framework-package',
         frameworkIntegrations: [
-          { framework: 'nestjs' as const, components: ['service' as const], path: 'frameworks/nestjs/service.md' }
-        ]
+          {
+            framework: 'nestjs' as const,
+            components: ['service' as const],
+            path: 'frameworks/nestjs/service.md',
+          },
+        ],
       };
-      
+
       registry['examples'].set('framework-package-basic-example', exampleWithFramework);
       registry['frameworkExamples'].set('nestjs', new Set(['framework-package-basic-example']));
 
@@ -490,8 +525,8 @@ export const domainServicesExampleConfig = {
     it('should throw error on file read failure', async () => {
       (mockFs.readFile as any).mockRejectedValue(new Error('File not found'));
 
-      const [error] = await safeRun(async () =>
-        await registry['loadPackageExamples']('test-package', '/nonexistent/config.ts')
+      const [error] = await safeRun(
+        async () => await registry['loadPackageExamples']('test-package', '/nonexistent/config.ts')
       );
 
       expect(error).toBeInstanceOf(Error);

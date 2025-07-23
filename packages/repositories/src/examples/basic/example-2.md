@@ -1,17 +1,21 @@
 # Event-Sourced Repository - Event Stream Management
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/repositories
-**Complexity**: beginner
-**Domain**: product-management
-**Patterns**: event-sourcing, event-store, aggregate-reconstruction
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+beginner **Domain**: product-management **Patterns**: event-sourcing,
+event-store, aggregate-reconstruction **Dependencies**:
+@vytches-ddd/repositories, @vytches-ddd/events
 
 ## Description
-Event-sourced repository implementation showing how to persist and reconstruct aggregates from event streams using the @vytches-ddd/repositories event store capabilities.
+
+Event-sourced repository implementation showing how to persist and reconstruct
+aggregates from event streams using the @vytches-ddd/repositories event store
+capabilities.
 
 ## Business Context
-Product catalog system requiring complete audit trails and ability to replay state changes. Event sourcing provides immutable history and enables temporal queries for business analytics.
+
+Product catalog system requiring complete audit trails and ability to replay
+state changes. Event sourcing provides immutable history and enables temporal
+queries for business analytics.
 
 ## Code Example
 
@@ -30,7 +34,7 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
   // ✅ FOCUS: Create product with initial events
   async createProduct(productData: CreateProductData): Promise<Product> {
     const productId = EntityId.generate();
-    
+
     // Create initial domain events
     const events: DomainEvent[] = [
       {
@@ -44,12 +48,12 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
           price: productData.price,
           category: productData.category,
           sku: productData.sku,
-          tags: productData.tags || []
+          tags: productData.tags || [],
         },
         eventVersion: 1,
         timestamp: new Date(),
-        metadata: {}
-      }
+        metadata: {},
+      },
     ];
 
     if (productData.initialQuantity && productData.initialQuantity > 0) {
@@ -60,17 +64,17 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
         aggregateType: 'Product',
         eventData: {
           quantity: productData.initialQuantity,
-          minStock: productData.minStock || 0
+          minStock: productData.minStock || 0,
         },
         eventVersion: 2,
         timestamp: new Date(),
-        metadata: {}
+        metadata: {},
       });
     }
 
     // ✅ FOCUS: Use library saveEvents method
     await this.saveEvents(productId, events, 0); // Expected version 0 (new aggregate)
-    
+
     // Reconstruct and return the product
     return await this.getById(productId);
   }
@@ -82,9 +86,13 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
   }
 
   // ✅ FOCUS: Update product by appending events
-  async updateProductPrice(id: string, newPrice: number, reason: string): Promise<Product | null> {
+  async updateProductPrice(
+    id: string,
+    newPrice: number,
+    reason: string
+  ): Promise<Product | null> {
     const productId = EntityId.fromString(id);
-    
+
     // Load current version
     const currentProduct = await this.getById(productId);
     if (!currentProduct) return null;
@@ -98,16 +106,20 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
       eventData: {
         oldPrice: currentProduct.price,
         newPrice,
-        reason
+        reason,
       },
       eventVersion: currentProduct.version + 1,
       timestamp: new Date(),
-      metadata: { reason }
+      metadata: { reason },
     };
 
     // ✅ FOCUS: Append event using library method
-    await this.saveEvents(productId, [priceUpdateEvent], currentProduct.version);
-    
+    await this.saveEvents(
+      productId,
+      [priceUpdateEvent],
+      currentProduct.version
+    );
+
     // Return updated product
     return await this.getById(productId);
   }
@@ -124,11 +136,11 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
       aggregateType: 'Product',
       eventData: {
         addedTags: newTags,
-        previousTags: currentProduct.tags
+        previousTags: currentProduct.tags,
       },
       eventVersion: currentProduct.version + 1,
       timestamp: new Date(),
-      metadata: {}
+      metadata: {},
     };
 
     await this.saveEvents(productId, [tagsAddedEvent], currentProduct.version);
@@ -138,15 +150,18 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
   // ✅ FOCUS: Get event history using library methods
   async getProductHistory(id: string): Promise<StoredEvent[]> {
     const productId = EntityId.fromString(id);
-    
+
     // Use library getEventStream method
     const eventStream = await this.getEventStream(productId);
     return eventStream?.events || [];
   }
 
-  async getProductVersionAt(id: string, timestamp: Date): Promise<Product | null> {
+  async getProductVersionAt(
+    id: string,
+    timestamp: Date
+  ): Promise<Product | null> {
     const productId = EntityId.fromString(id);
-    
+
     // ✅ FOCUS: Reconstruct aggregate at specific point in time
     return await this.getVersionAt(productId, timestamp);
   }
@@ -198,11 +213,11 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
         reserved: 0,
         available: 0,
         minStock: 0,
-        locations: []
+        locations: [],
       },
       createdAt: firstEvent.timestamp,
       updatedAt: firstEvent.timestamp,
-      version: 0
+      version: 0,
     };
 
     // Apply each event to build current state
@@ -225,19 +240,19 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
           price: event.eventData.price,
           category: event.eventData.category,
           sku: event.eventData.sku,
-          tags: event.eventData.tags || []
+          tags: event.eventData.tags || [],
         };
 
       case 'ProductPriceChanged':
         return {
           ...product,
-          price: event.eventData.newPrice
+          price: event.eventData.newPrice,
         };
 
       case 'ProductTagsAdded':
         return {
           ...product,
-          tags: [...product.tags, ...event.eventData.addedTags]
+          tags: [...product.tags, ...event.eventData.addedTags],
         };
 
       case 'InventoryAdded':
@@ -247,8 +262,8 @@ export class ProductEventRepository extends EventSourcedRepository<Product> {
             ...product.inventory,
             quantity: product.inventory.quantity + event.eventData.quantity,
             available: product.inventory.available + event.eventData.quantity,
-            minStock: event.eventData.minStock || product.inventory.minStock
-          }
+            minStock: event.eventData.minStock || product.inventory.minStock,
+          },
         };
 
       default:
@@ -270,7 +285,7 @@ async function demonstrateEventSourcing() {
     sku: 'LAPTOP-001',
     tags: ['gaming', 'laptop'],
     initialQuantity: 50,
-    minStock: 10
+    minStock: 10,
   });
   console.log('Created product:', newProduct.id);
 
@@ -285,7 +300,7 @@ async function demonstrateEventSourcing() {
   // View event history
   const history = await productRepo.getProductHistory(newProduct.id);
   console.log('Event history count:', history.length);
-  
+
   for (const event of history) {
     console.log(`Event: ${event.eventType} at ${event.timestamp}`);
   }
@@ -300,6 +315,7 @@ async function demonstrateEventSourcing() {
 ```
 
 ## Key Features
+
 - Event-sourced persistence with complete audit trail
 - Aggregate reconstruction from event streams
 - Time travel queries (point-in-time state reconstruction)
@@ -307,11 +323,13 @@ async function demonstrateEventSourcing() {
 - Event stream management and querying capabilities
 
 ## Common Pitfalls
+
 - Not handling event versioning properly for concurrency control
 - Forgetting to implement all event types in reconstruction logic
 - Creating too many fine-grained events (performance impact)
 - Not considering event schema evolution for long-term storage
 
 ## Related Examples
+
 - [Generic Repository Pattern](example-1.md) - Basic CRUD operations
 - [Cached Repository](example-3.md) - Repository with caching layer

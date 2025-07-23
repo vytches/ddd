@@ -101,6 +101,7 @@ export interface ProjectionPerformanceMetrics {
 
 export interface EventSourcedProjection {
   projectionName: string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   eventHandlers: Map<string, Function>;
   currentState: any;
   version: number;
@@ -296,7 +297,7 @@ export interface ServiceResponse<T> {
   };
 }
 
-export type ProjectionEventType = 
+export type ProjectionEventType =
   | 'UserRegistered'
   | 'UserUpdated'
   | 'UserDeactivated'

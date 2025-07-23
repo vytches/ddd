@@ -7,7 +7,9 @@
 
 ## Implementation Philosophy
 
-Advanced NestJS integration with @vytches-ddd/messaging focuses on enterprise-scale patterns using the VytchesDDD DI container for sophisticated service management, global coordination, and cross-cutting concerns.
+Advanced NestJS integration with @vytches-ddd/messaging focuses on
+enterprise-scale patterns using the VytchesDDD DI container for sophisticated
+service management, global coordination, and cross-cutting concerns.
 
 ## Key Architectural Patterns
 
@@ -18,7 +20,7 @@ Advanced NestJS integration with @vytches-ddd/messaging focuses on enterprise-sc
 @DomainService({
   serviceId: 'eventMeshService',
   lifetime: ServiceLifetime.Singleton,
-  context: 'Enterprise'
+  context: 'Enterprise',
 })
 export class EventMeshService {
   // Business logic with cross-cutting concerns
@@ -38,7 +40,8 @@ export class MessagingCoordinationService {
 
 - **Multi-Region Sagas**: Coordinate transactions across geographic regions
 - **Event Mesh Architecture**: Global event routing with ultra-low latency
-- **Distributed State Management**: Eventual consistency with conflict resolution
+- **Distributed State Management**: Eventual consistency with conflict
+  resolution
 
 ### 3. **Enterprise Service Management**
 
@@ -57,7 +60,7 @@ export class EnterpriseModule implements OnModuleInit {
     // Initialize VytchesDDD before framework DI
     await VytchesDDD.configure({
       enableGlobalCoordination: true,
-      regions: ['us', 'eu', 'asia']
+      regions: ['us', 'eu', 'asia'],
     });
   }
 }

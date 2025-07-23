@@ -4,9 +4,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade event scheduling and delayed processing for Domain-Driven Design**
+> **Enterprise-grade event scheduling and delayed processing for Domain-Driven
+> Design**
 
-Complete event scheduling system with time-based execution, priority management, recurring patterns, and high-availability clustering. Built for enterprise applications requiring precise timing control and reliable delayed processing.
+Complete event scheduling system with time-based execution, priority management,
+recurring patterns, and high-availability clustering. Built for enterprise
+applications requiring precise timing control and reliable delayed processing.
 
 ## 📋 Table of Contents
 
@@ -72,7 +75,10 @@ npm install @vytches-ddd/core @vytches-ddd/events
 Events that execute at specific times or intervals:
 
 ```typescript
-import { ScheduledEvent, SchedulePriority } from '@vytches-ddd/event-scheduling';
+import {
+  ScheduledEvent,
+  SchedulePriority,
+} from '@vytches-ddd/event-scheduling';
 
 class OrderReminderEvent extends ScheduledEvent<OrderData> {
   constructor(orderId: string, data: OrderData, scheduleAt: Date) {
@@ -80,7 +86,7 @@ class OrderReminderEvent extends ScheduledEvent<OrderData> {
       scheduleAt,
       priority: SchedulePriority.HIGH,
       maxRetries: 3,
-      retryBackoff: 'exponential'
+      retryBackoff: 'exponential',
     });
   }
 }
@@ -96,7 +102,7 @@ import { InMemorySchedulerAdapter } from '@vytches-ddd/event-scheduling';
 const scheduler = new InMemorySchedulerAdapter({
   maxConcurrency: 10,
   enableMetrics: true,
-  defaultTimeout: 30000
+  defaultTimeout: 30000,
 });
 
 // Schedule an event
@@ -108,7 +114,7 @@ await scheduler.cancel(eventId);
 // Query scheduled events
 const pendingEvents = await scheduler.query({
   status: 'pending',
-  priority: SchedulePriority.HIGH
+  priority: SchedulePriority.HIGH,
 });
 ```
 
@@ -117,30 +123,40 @@ const pendingEvents = await scheduler.query({
 ### Basic Event Scheduling
 
 ```typescript
-import { 
-  InMemorySchedulerAdapter, 
+import {
+  InMemorySchedulerAdapter,
   ScheduledEvent,
-  SchedulePriority 
+  SchedulePriority,
 } from '@vytches-ddd/event-scheduling';
 
 // Create scheduler instance
 const scheduler = new InMemorySchedulerAdapter({
   maxConcurrency: 5,
-  enableMetrics: true
+  enableMetrics: true,
 });
 
 // Define custom scheduled event
-class PaymentReminderEvent extends ScheduledEvent<{ orderId: string; amount: number }> {
+class PaymentReminderEvent extends ScheduledEvent<{
+  orderId: string;
+  amount: number;
+}> {
   constructor(orderId: string, amount: number, scheduleAt: Date) {
-    super('PaymentReminder', orderId, { orderId, amount }, {
-      scheduleAt,
-      priority: SchedulePriority.HIGH,
-      maxRetries: 3
-    });
+    super(
+      'PaymentReminder',
+      orderId,
+      { orderId, amount },
+      {
+        scheduleAt,
+        priority: SchedulePriority.HIGH,
+        maxRetries: 3,
+      }
+    );
   }
 
   async execute(): Promise<void> {
-    console.log(`Processing payment reminder for order ${this.payload.orderId}`);
+    console.log(
+      `Processing payment reminder for order ${this.payload.orderId}`
+    );
     // Your business logic here
   }
 }
@@ -167,20 +183,16 @@ const systemMaintenanceEvent = new SystemMaintenanceEvent(
   {
     scheduleAt: maintenanceTime,
     priority: SchedulePriority.CRITICAL,
-    maxRetries: 0 // No retries for maintenance
+    maxRetries: 0, // No retries for maintenance
   }
 );
 
 // Regular business events
-const marketingEmailEvent = new MarketingEmailEvent(
-  'campaign-002',
-  emailData,
-  {
-    scheduleAt: sendTime,
-    priority: SchedulePriority.LOW,
-    maxRetries: 5
-  }
-);
+const marketingEmailEvent = new MarketingEmailEvent('campaign-002', emailData, {
+  scheduleAt: sendTime,
+  priority: SchedulePriority.LOW,
+  maxRetries: 5,
+});
 
 // Schedule with different priorities
 await scheduler.schedule(systemMaintenanceEvent);
@@ -196,14 +208,14 @@ import { CronExpression } from '@vytches-ddd/event-scheduling';
 const backupEvent = new BackupEvent('daily-backup', backupConfig, {
   cronExpression: '0 2 * * *',
   timezone: 'UTC',
-  maxRetries: 2
+  maxRetries: 2,
 });
 
 // Weekly report every Monday at 9 AM
 const reportEvent = new WeeklyReportEvent('weekly-reports', reportConfig, {
   cronExpression: '0 9 * * 1',
   timezone: 'America/New_York',
-  maxRetries: 1
+  maxRetries: 1,
 });
 
 await scheduler.scheduleRecurring(backupEvent);
@@ -214,7 +226,8 @@ await scheduler.scheduleRecurring(reportEvent);
 
 ### Adapter Pattern
 
-The library uses the adapter pattern for flexible storage and scheduling backends:
+The library uses the adapter pattern for flexible storage and scheduling
+backends:
 
 ```typescript
 // In-memory adapter (development/testing)
@@ -224,14 +237,14 @@ const memoryAdapter = new InMemorySchedulerAdapter(config);
 const redisAdapter = new RedisSchedulerAdapter({
   redis: { host: 'localhost', port: 6379 },
   keyPrefix: 'scheduler:',
-  maxConcurrency: 50
+  maxConcurrency: 50,
 });
 
 // Database adapter (persistent scheduling)
 const dbAdapter = new DatabaseSchedulerAdapter({
   connection: dbConnection,
   tableName: 'scheduled_events',
-  maxConcurrency: 20
+  maxConcurrency: 20,
 });
 ```
 
@@ -268,18 +281,18 @@ abstract class ScheduledEvent<T = any> {
     aggregateId: string,
     payload: T,
     options: IScheduleOptions
-  )
-  
-  abstract execute(): Promise<void>
-  
+  );
+
+  abstract execute(): Promise<void>;
+
   // Properties
-  readonly id: string
-  readonly eventType: string
-  readonly aggregateId: string
-  readonly payload: T
-  readonly scheduledAt: Date
-  readonly priority: SchedulePriority
-  readonly maxRetries: number
+  readonly id: string;
+  readonly eventType: string;
+  readonly aggregateId: string;
+  readonly payload: T;
+  readonly scheduledAt: Date;
+  readonly priority: SchedulePriority;
+  readonly maxRetries: number;
 }
 ```
 
@@ -289,11 +302,11 @@ Abstract base class for scheduler implementations:
 
 ```typescript
 abstract class BaseSchedulerAdapter implements IEventScheduler {
-  abstract schedule(event: IScheduledEvent): Promise<void>
-  abstract cancel(eventId: string): Promise<boolean>
-  abstract query(filter: IJobFilter): Promise<IJobQueryResult>
-  abstract start(): Promise<void>
-  abstract stop(): Promise<void>
+  abstract schedule(event: IScheduledEvent): Promise<void>;
+  abstract cancel(eventId: string): Promise<boolean>;
+  abstract query(filter: IJobFilter): Promise<IJobQueryResult>;
+  abstract start(): Promise<void>;
+  abstract stop(): Promise<void>;
 }
 ```
 
@@ -303,14 +316,14 @@ abstract class BaseSchedulerAdapter implements IEventScheduler {
 
 ```typescript
 interface IScheduleOptions {
-  scheduleAt: Date
-  priority?: SchedulePriority
-  maxRetries?: number
-  retryBackoff?: BackoffStrategy
-  timeout?: number
-  cronExpression?: string
-  timezone?: string
-  metadata?: Record<string, any>
+  scheduleAt: Date;
+  priority?: SchedulePriority;
+  maxRetries?: number;
+  retryBackoff?: BackoffStrategy;
+  timeout?: number;
+  cronExpression?: string;
+  timezone?: string;
+  metadata?: Record<string, any>;
 }
 ```
 
@@ -318,10 +331,10 @@ interface IScheduleOptions {
 
 ```typescript
 enum SchedulePriority {
-  CRITICAL = 0,  // System-critical events
-  HIGH = 1,      // Important business events  
-  NORMAL = 2,    // Regular events (default)
-  LOW = 3        // Background/maintenance events
+  CRITICAL = 0, // System-critical events
+  HIGH = 1, // Important business events
+  NORMAL = 2, // Regular events (default)
+  LOW = 3, // Background/maintenance events
 }
 ```
 
@@ -329,11 +342,11 @@ enum SchedulePriority {
 
 ### Throughput Benchmarks
 
-| Scenario | Events/Second | Latency (p95) | Memory Usage |
-|----------|---------------|---------------|--------------|
-| In-Memory | 100,000+ | < 1ms | 50MB |
-| Redis Cluster | 50,000+ | < 5ms | 100MB |
-| Database | 10,000+ | < 10ms | 200MB |
+| Scenario      | Events/Second | Latency (p95) | Memory Usage |
+| ------------- | ------------- | ------------- | ------------ |
+| In-Memory     | 100,000+      | < 1ms         | 50MB         |
+| Redis Cluster | 50,000+       | < 5ms         | 100MB        |
+| Database      | 10,000+       | < 10ms        | 200MB        |
 
 ### Optimization Tips
 
@@ -347,24 +360,24 @@ enum SchedulePriority {
 ### Test Utilities
 
 ```typescript
-import { 
+import {
   TestScheduledEvent,
   TestEventFactory,
-  FailingScheduledEvent 
+  FailingScheduledEvent,
 } from '@vytches-ddd/event-scheduling';
 
 describe('Event Scheduling', () => {
   it('should execute scheduled events', async () => {
     const event = TestEventFactory.createSimple({
       scheduleAt: new Date(Date.now() + 1000),
-      priority: SchedulePriority.HIGH
+      priority: SchedulePriority.HIGH,
     });
 
     await scheduler.schedule(event);
-    
+
     // Wait for execution
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     expect(event.executed).toBe(true);
   });
 
@@ -376,7 +389,7 @@ describe('Event Scheduling', () => {
     );
 
     await scheduler.schedule(failingEvent);
-    
+
     // Verify retry behavior
     expect(failingEvent.attemptCount).toBe(3); // Initial + 2 retries
   });
@@ -386,34 +399,52 @@ describe('Event Scheduling', () => {
 ## 📖 Examples
 
 ### Basic Usage
-- [Simple Event Scheduling](./src/examples/basic/example-1.md) - Time-based scheduling with cancellation
-- [Priority-Based Scheduling](./src/examples/basic/example-2.md) - Priority queues and fairness algorithms  
-- [Recurring Event Patterns](./src/examples/basic/example-3.md) - Cron expressions and intervals
+
+- [Simple Event Scheduling](./src/examples/basic/example-1.md) - Time-based
+  scheduling with cancellation
+- [Priority-Based Scheduling](./src/examples/basic/example-2.md) - Priority
+  queues and fairness algorithms
+- [Recurring Event Patterns](./src/examples/basic/example-3.md) - Cron
+  expressions and intervals
 
 ### Intermediate Usage
-- [Cron Expression Scheduling](./src/examples/intermediate/example-1.md) - Advanced cron patterns with business logic
-- [Event Queue Management](./src/examples/intermediate/example-2.md) - Buffer management and batch processing
-- [Complex Scheduling Patterns](./src/examples/intermediate/example-3.md) - Multi-tenant conditional scheduling
+
+- [Cron Expression Scheduling](./src/examples/intermediate/example-1.md) -
+  Advanced cron patterns with business logic
+- [Event Queue Management](./src/examples/intermediate/example-2.md) - Buffer
+  management and batch processing
+- [Complex Scheduling Patterns](./src/examples/intermediate/example-3.md) -
+  Multi-tenant conditional scheduling
 
 ### Advanced Usage
-- [Enterprise Scheduling Platform](./src/examples/advanced/example-1.md) - Global multi-region coordination
-- [High Availability Scheduling](./src/examples/advanced/example-2.md) - Clustering with automatic failover
-- [Performance-Optimized Scheduling](./src/examples/advanced/example-3.md) - Ultra-high throughput optimization
+
+- [Enterprise Scheduling Platform](./src/examples/advanced/example-1.md) -
+  Global multi-region coordination
+- [High Availability Scheduling](./src/examples/advanced/example-2.md) -
+  Clustering with automatic failover
+- [Performance-Optimized Scheduling](./src/examples/advanced/example-3.md) -
+  Ultra-high throughput optimization
 
 ### Framework Integration
-- [NestJS Basic Integration](./src/examples/frameworks/nestjs/basic/example-1.md) - Manual setup patterns
-- [NestJS Advanced Integration](./src/examples/frameworks/nestjs/intermediate/example-1.md) - VytchesDDD DI integration
-- [Enterprise Platform](./src/examples/frameworks/nestjs/advanced/example-1.md) - Complete enterprise setup
+
+- [NestJS Basic Integration](./src/examples/frameworks/nestjs/basic/example-1.md) -
+  Manual setup patterns
+- [NestJS Advanced Integration](./src/examples/frameworks/nestjs/intermediate/example-1.md) -
+  VytchesDDD DI integration
+- [Enterprise Platform](./src/examples/frameworks/nestjs/advanced/example-1.md) -
+  Complete enterprise setup
 
 ## 🏷️ LLM-METADATA
 
 ### Package Information
+
 - **Package Name**: @vytches-ddd/event-scheduling
 - **Version**: 0.2.0
 - **Layer**: Infrastructure
 - **Category**: Scheduling & Time Management
 
 ### Key Exports
+
 - `ScheduledEvent<T>` - Base class for scheduled events
 - `InMemorySchedulerAdapter` - In-memory scheduling implementation
 - `BaseSchedulerAdapter` - Abstract scheduler base class
@@ -422,17 +453,20 @@ describe('Event Scheduling', () => {
 - `JobStatus` - Event execution status tracking
 
 ### Dependencies
+
 - **Core**: @vytches-ddd/core, @vytches-ddd/events
 - **Types**: @vytches-ddd/contracts (for interfaces)
 - **Testing**: @vytches-ddd/testing (for test utilities)
 
 ### Use Cases
+
 - **E-commerce**: Order reminders, payment processing, inventory updates
 - **Notifications**: Email campaigns, push notifications, SMS scheduling
 - **System Operations**: Backups, maintenance, cleanup tasks, monitoring
 - **Business Processes**: Workflow orchestration, SLA monitoring, reporting
 
 ### Integration Patterns
+
 - **Event-Driven**: Integrates with @vytches-ddd/events for event publishing
 - **Domain Services**: Works with domain services for business logic execution
 - **Repository Pattern**: Can trigger repository operations on schedule
@@ -440,7 +474,8 @@ describe('Event Scheduling', () => {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+We welcome contributions! Please see our
+[Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -466,4 +501,5 @@ MIT License - see [LICENSE](../../LICENSE) for details.
 
 **Built with ❤️ by the VytchesDDD Team**
 
-For more information, visit our [documentation](https://vytches-ddd.dev) or join our [community](https://discord.gg/vytches-ddd).
+For more information, visit our [documentation](https://vytches-ddd.dev) or join
+our [community](https://discord.gg/vytches-ddd).

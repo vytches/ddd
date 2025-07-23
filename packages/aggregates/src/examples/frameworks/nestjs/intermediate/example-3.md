@@ -1,7 +1,7 @@
 # Multi-Tenant Loan Application - NestJS Integration
 
-**Focus**: Multi-tenant loan workflow management in NestJS
-**Base Example**: [Multi-Tenant Loan Application](../../intermediate/example-3.md)
+**Focus**: Multi-tenant loan workflow management in NestJS **Base Example**:
+[Multi-Tenant Loan Application](../../intermediate/example-3.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
 
 ## Service Implementation
@@ -11,14 +11,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   LoanApplication,
   CreateLoanData,
   ApprovalStep,
   DocumentUpload,
   RiskAssessment,
   TenantConfig,
-  WorkflowStatus
+  WorkflowStatus,
 } from './types'; // From your application
 
 @Injectable()
@@ -32,8 +32,10 @@ export class LoanApplicationService {
     tenantConfig: TenantConfig
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+
       // Use library factory with tenant configuration
       const loanAggregate = LoanApplicationAggregateClass.create(
         tenantId,
@@ -41,10 +43,12 @@ export class LoanApplicationService {
         loanData,
         tenantConfig
       );
-      
+
       const loan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Loan application created: ${loan.applicationNumber} for tenant ${tenantId}`);
+
+      this.logger.log(
+        `Loan application created: ${loan.applicationNumber} for tenant ${tenantId}`
+      );
       return loan;
     } catch (error) {
       this.logger.error(`Failed to create loan application: ${error.message}`);
@@ -60,15 +64,22 @@ export class LoanApplicationService {
     uploadedBy: string
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library document management method
       loanAggregate.uploadDocument(documentType, documentId, uploadedBy);
-      
+
       const updatedLoan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Document uploaded for application ${applicationId}: ${documentType}`);
+
+      this.logger.log(
+        `Document uploaded for application ${applicationId}: ${documentType}`
+      );
       return updatedLoan;
     } catch (error) {
       this.logger.error(`Failed to upload document: ${error.message}`);
@@ -86,15 +97,28 @@ export class LoanApplicationService {
     conditions?: string[]
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library workflow method
-      loanAggregate.processApprovalStep(stepName, approver, decision, comments, conditions);
-      
+      loanAggregate.processApprovalStep(
+        stepName,
+        approver,
+        decision,
+        comments,
+        conditions
+      );
+
       const updatedLoan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Approval step processed for ${applicationId}: ${stepName} -> ${decision}`);
+
+      this.logger.log(
+        `Approval step processed for ${applicationId}: ${stepName} -> ${decision}`
+      );
       return updatedLoan;
     } catch (error) {
       this.logger.error(`Failed to process approval step: ${error.message}`);
@@ -111,15 +135,27 @@ export class LoanApplicationService {
     assessedBy: string
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library risk assessment method
-      loanAggregate.updateRiskAssessment(assessmentType, score, factors, assessedBy);
-      
+      loanAggregate.updateRiskAssessment(
+        assessmentType,
+        score,
+        factors,
+        assessedBy
+      );
+
       const updatedLoan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Risk assessment updated for ${applicationId}: score ${score}`);
+
+      this.logger.log(
+        `Risk assessment updated for ${applicationId}: score ${score}`
+      );
       return updatedLoan;
     } catch (error) {
       this.logger.error(`Failed to update risk assessment: ${error.message}`);
@@ -136,15 +172,27 @@ export class LoanApplicationService {
     conditions: string[] = []
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library final approval method
-      loanAggregate.finalApproval(approver, approvedAmount, interestRate, conditions);
-      
+      loanAggregate.finalApproval(
+        approver,
+        approvedAmount,
+        interestRate,
+        conditions
+      );
+
       const updatedLoan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Loan approved: ${applicationId}, amount: ${approvedAmount}`);
+
+      this.logger.log(
+        `Loan approved: ${applicationId}, amount: ${approvedAmount}`
+      );
       return updatedLoan;
     } catch (error) {
       this.logger.error(`Failed to approve loan: ${error.message}`);
@@ -158,15 +206,22 @@ export class LoanApplicationService {
     reasons: string[]
   ): Promise<LoanApplication> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library rejection method
       loanAggregate.reject(rejectedBy, reasons);
-      
+
       const updatedLoan = loanAggregate.toSnapshot();
-      
-      this.logger.log(`Loan rejected: ${applicationId}, reasons: ${reasons.join(', ')}`);
+
+      this.logger.log(
+        `Loan rejected: ${applicationId}, reasons: ${reasons.join(', ')}`
+      );
       return updatedLoan;
     } catch (error) {
       this.logger.error(`Failed to reject loan: ${error.message}`);
@@ -175,11 +230,18 @@ export class LoanApplicationService {
   }
 
   // ✅ FOCUS: Query operations
-  async getLoanApplication(applicationId: string): Promise<LoanApplication | null> {
+  async getLoanApplication(
+    applicationId: string
+  ): Promise<LoanApplication | null> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       return loanAggregate.toSnapshot();
     } catch (error) {
       this.logger.warn(`Loan application not found: ${applicationId}`);
@@ -189,9 +251,14 @@ export class LoanApplicationService {
 
   async getWorkflowStatus(applicationId: string): Promise<WorkflowStatus> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library workflow status method
       return loanAggregate.getWorkflowStatus();
     } catch (error) {
@@ -202,9 +269,14 @@ export class LoanApplicationService {
 
   async getApprovalChain(applicationId: string): Promise<ApprovalStep[]> {
     try {
-      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>('MultiTenantLoanApplicationAggregate');
-      const loanAggregate = await this.loadLoanApplication(applicationId, LoanApplicationAggregateClass);
-      
+      const LoanApplicationAggregateClass = VytchesDDD.resolve<any>(
+        'MultiTenantLoanApplicationAggregate'
+      );
+      const loanAggregate = await this.loadLoanApplication(
+        applicationId,
+        LoanApplicationAggregateClass
+      );
+
       // Use library approval chain method
       return loanAggregate.getApprovalChain();
     } catch (error) {
@@ -214,7 +286,10 @@ export class LoanApplicationService {
   }
 
   // Helper method for aggregate loading
-  private async loadLoanApplication(applicationId: string, LoanApplicationAggregateClass: any): Promise<any> {
+  private async loadLoanApplication(
+    applicationId: string,
+    LoanApplicationAggregateClass: any
+  ): Promise<any> {
     // Mock implementation - in reality would load from repository
     return LoanApplicationAggregateClass.fromSnapshot({
       id: applicationId,
@@ -230,7 +305,7 @@ export class LoanApplicationService {
       riskAssessments: [],
       conditions: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }
@@ -253,12 +328,14 @@ export class LoanApplicationModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Multi-tenant workflow management with tenant-specific configurations
 - Document upload and management integrated with workflow progression
 - Risk assessment integration with automated workflow decisions
 - Approval chain tracking with complete audit history
 
 **Usage Example:**
+
 ```typescript
 @Controller('loan-applications')
 export class LoanApplicationController {
@@ -267,7 +344,11 @@ export class LoanApplicationController {
   @Post()
   async createApplication(@Body() data: CreateLoanData & { tenantId: string }) {
     const tenantConfig = await this.getTenantConfig(data.tenantId);
-    return await this.loanService.createLoanApplication(data.tenantId, data, tenantConfig);
+    return await this.loanService.createLoanApplication(
+      data.tenantId,
+      data,
+      tenantConfig
+    );
   }
 
   @Put(':id/documents')
@@ -275,13 +356,24 @@ export class LoanApplicationController {
     @Param('id') id: string,
     @Body() doc: { type: string; documentId: string; uploadedBy: string }
   ) {
-    return await this.loanService.uploadDocument(id, doc.type, doc.documentId, doc.uploadedBy);
+    return await this.loanService.uploadDocument(
+      id,
+      doc.type,
+      doc.documentId,
+      doc.uploadedBy
+    );
   }
 
   @Put(':id/approve')
   async approveStep(
     @Param('id') id: string,
-    @Body() approval: { stepName: string; approver: string; decision: string; comments: string }
+    @Body()
+    approval: {
+      stepName: string;
+      approver: string;
+      decision: string;
+      comments: string;
+    }
   ) {
     return await this.loanService.processApprovalStep(
       id,

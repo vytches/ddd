@@ -1,45 +1,55 @@
 # NestJS Advanced DI Integration - VytchesDDD Dependency Injection
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Framework**: NestJS
-**Complexity**: intermediate
-**Integration**: Advanced VytchesDDD DI integration with enterprise scheduling features
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Framework**:
+NestJS **Complexity**: intermediate **Integration**: Advanced VytchesDDD DI
+integration with enterprise scheduling features
 
 ## Description
 
-Advanced NestJS integration using @vytches-ddd/di for sophisticated dependency injection, distributed scheduling capabilities, and enterprise-grade event management with comprehensive monitoring and health checks.
+Advanced NestJS integration using @vytches-ddd/di for sophisticated dependency
+injection, distributed scheduling capabilities, and enterprise-grade event
+management with comprehensive monitoring and health checks.
 
 ## Business Context
 
-Enterprise e-commerce platform requiring advanced scheduling capabilities including distributed coordination, sophisticated retry policies, and integration with the VytchesDDD ecosystem for complex business workflows and event-driven architecture.
+Enterprise e-commerce platform requiring advanced scheduling capabilities
+including distributed coordination, sophisticated retry policies, and
+integration with the VytchesDDD ecosystem for complex business workflows and
+event-driven architecture.
 
 ## Code Example
 
 ```typescript
 // enterprise-scheduling.service.ts
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { 
+import {
   DistributedSchedulerService,
   DistributedScheduledEvent,
-  HAScheduledEvent 
+  HAScheduledEvent,
 } from '@vytches-ddd/event-scheduling';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   EnterpriseOrderData,
   ComplianceSchedulingData,
   DistributedSchedulingConfig,
-  SchedulingMetrics
+  SchedulingMetrics,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Domain service with VytchesDDD DI
 @DomainService('enterpriseSchedulingService', {
   lifetime: ServiceLifetime.Singleton,
   context: 'OrderManagement',
-  dependencies: ['distributedCoordinator', 'complianceManager']
+  dependencies: ['distributedCoordinator', 'complianceManager'],
 })
-export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestroy {
+export class EnterpriseSchedulingService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(EnterpriseSchedulingService.name);
   private distributedScheduler: DistributedSchedulerService;
   private isInitialized = false;
@@ -56,20 +66,25 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         nodes: ['node-1', 'node-2', 'node-3'],
         partitionCount: 16,
         replicationFactor: 2,
-        leaderElectionTimeout: 10000
+        leaderElectionTimeout: 10000,
       };
 
       // Get distributed scheduler from VytchesDDD container
-      this.distributedScheduler = VytchesDDD.resolve<DistributedSchedulerService>(
-        'distributedSchedulerService'
-      ) || new DistributedSchedulerService('node-1', distributedConfig);
+      this.distributedScheduler =
+        VytchesDDD.resolve<DistributedSchedulerService>(
+          'distributedSchedulerService'
+        ) || new DistributedSchedulerService('node-1', distributedConfig);
 
       await this.distributedScheduler.start();
       this.isInitialized = true;
 
-      this.logger.log('Enterprise scheduling service initialized with VytchesDDD DI');
+      this.logger.log(
+        'Enterprise scheduling service initialized with VytchesDDD DI'
+      );
     } catch (error) {
-      this.logger.error(`Failed to initialize enterprise scheduling service: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize enterprise scheduling service: ${error.message}`
+      );
       throw error;
     }
   }
@@ -81,7 +96,9 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
       }
       this.logger.log('Enterprise scheduling service destroyed');
     } catch (error) {
-      this.logger.error(`Error destroying enterprise scheduling service: ${error.message}`);
+      this.logger.error(
+        `Error destroying enterprise scheduling service: ${error.message}`
+      );
     }
   }
 
@@ -93,7 +110,9 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
   ): Promise<Result<string, Error>> {
     try {
       if (!this.isInitialized) {
-        return Result.fail(new Error('Enterprise scheduling service not initialized'));
+        return Result.fail(
+          new Error('Enterprise scheduling service not initialized')
+        );
       }
 
       // Create distributed scheduled event with high availability
@@ -105,27 +124,36 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           ...orderData,
           scheduledAt: new Date(),
           priority: orderData.customerTier === 'enterprise' ? 'high' : 'normal',
-          complianceRequired: orderData.regulatedIndustry
+          complianceRequired: orderData.regulatedIndustry,
         },
         `customer-${orderData.customerId}`, // Partition by customer
         3 // High replication for enterprise orders
       );
 
-      const result = await this.distributedScheduler.scheduleDistributedEvent(distributedEvent);
+      const result =
+        await this.distributedScheduler.scheduleDistributedEvent(
+          distributedEvent
+        );
 
       if (result.isSuccess()) {
-        this.logger.log(`Enterprise order scheduled: ${orderId} -> ${result.value}`);
-        
+        this.logger.log(
+          `Enterprise order scheduled: ${orderId} -> ${result.value}`
+        );
+
         // Emit domain event for audit trail
         await this.emitOrderScheduledEvent(orderId, orderData);
-        
+
         return Result.ok(result.value);
       } else {
         return result;
       }
     } catch (error) {
-      this.logger.error(`Failed to schedule enterprise order: ${error.message}`);
-      return Result.fail(new Error(`Enterprise order scheduling failed: ${error.message}`));
+      this.logger.error(
+        `Failed to schedule enterprise order: ${error.message}`
+      );
+      return Result.fail(
+        new Error(`Enterprise order scheduling failed: ${error.message}`)
+      );
     }
   }
 
@@ -149,7 +177,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           ...complianceData,
           regulatoryDeadline: deadlineDate,
           auditTrail: true,
-          encryptionRequired: true
+          encryptionRequired: true,
         },
         5, // Maximum replication for compliance
         'linearizable', // Strongest consistency
@@ -171,8 +199,12 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         return Result.fail(result.error);
       }
     } catch (error) {
-      this.logger.error(`Failed to schedule compliance reporting: ${error.message}`);
-      return Result.fail(new Error(`Compliance scheduling failed: ${error.message}`));
+      this.logger.error(
+        `Failed to schedule compliance reporting: ${error.message}`
+      );
+      return Result.fail(
+        new Error(`Compliance scheduling failed: ${error.message}`)
+      );
     }
   }
 
@@ -186,10 +218,14 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
   ): Promise<Result<string, Error>> {
     try {
       // Use global coordination manager for cross-border transactions
-      const globalCoordinator = VytchesDDD.resolve<any>('globalCoordinationManager');
-      
+      const globalCoordinator = VytchesDDD.resolve<any>(
+        'globalCoordinationManager'
+      );
+
       if (!globalCoordinator) {
-        return Result.fail(new Error('Global coordination manager not available'));
+        return Result.fail(
+          new Error('Global coordination manager not available')
+        );
       }
 
       const result = await globalCoordinator.scheduleCrossBorderTransaction(
@@ -199,7 +235,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           sourceRegion,
           destinationRegion,
           scheduledAt: new Date(),
-          complianceChecks: ['AML', 'KYC', 'OFAC']
+          complianceChecks: ['AML', 'KYC', 'OFAC'],
         },
         sourceRegion as any,
         destinationRegion as any,
@@ -213,8 +249,14 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         return result;
       }
     } catch (error) {
-      this.logger.error(`Failed to schedule cross-border transaction: ${error.message}`);
-      return Result.fail(new Error(`Cross-border transaction scheduling failed: ${error.message}`));
+      this.logger.error(
+        `Failed to schedule cross-border transaction: ${error.message}`
+      );
+      return Result.fail(
+        new Error(
+          `Cross-border transaction scheduling failed: ${error.message}`
+        )
+      );
     }
   }
 
@@ -225,7 +267,8 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         throw new Error('Distributed scheduler not initialized');
       }
 
-      const distributedMetrics = await this.distributedScheduler.getDistributedMetrics();
+      const distributedMetrics =
+        await this.distributedScheduler.getDistributedMetrics();
       const clusterStatus = this.distributedScheduler.getClusterStatus();
 
       // Get additional metrics from VytchesDDD services
@@ -242,9 +285,9 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           activePartitions: distributedMetrics.partitions?.length || 0,
           crossRegionEvents: distributedMetrics.cluster?.globalEventCount || 0,
           complianceJobs: await this.getActiveComplianceJobs(),
-          averageLatency: distributedMetrics.cluster?.averageLatency || 0
+          averageLatency: distributedMetrics.cluster?.averageLatency || 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       this.logger.error(`Failed to get enterprise metrics: ${error.message}`);
@@ -255,9 +298,9 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           activePartitions: 0,
           crossRegionEvents: 0,
           complianceJobs: 0,
-          averageLatency: 0
+          averageLatency: 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -270,7 +313,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         services: {},
         dependencies: {},
         metrics: {},
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Check distributed scheduler health
@@ -282,19 +325,21 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
             details: {
               totalNodes: clusterStatus.totalNodes,
               healthyNodes: clusterStatus.healthyNodes,
-              hasQuorum: clusterStatus.healthyNodes > Math.floor(clusterStatus.totalNodes / 2)
-            }
+              hasQuorum:
+                clusterStatus.healthyNodes >
+                Math.floor(clusterStatus.totalNodes / 2),
+            },
           };
         } catch (error) {
           healthStatus.services.distributedScheduler = {
             status: 'unhealthy',
-            error: error.message
+            error: error.message,
           };
           healthStatus.overall = 'degraded';
         }
       } else {
         healthStatus.services.distributedScheduler = {
-          status: 'not-initialized'
+          status: 'not-initialized',
         };
         healthStatus.overall = 'unhealthy';
       }
@@ -304,7 +349,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         'globalCoordinationManager',
         'haSchedulingService',
         'complianceManager',
-        'distributedCoordinator'
+        'distributedCoordinator',
       ];
 
       for (const dependency of dependencyChecks) {
@@ -312,7 +357,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
           const service = VytchesDDD.resolve<any>(dependency);
           healthStatus.dependencies[dependency] = {
             status: service ? 'available' : 'unavailable',
-            type: service?.constructor?.name || 'unknown'
+            type: service?.constructor?.name || 'unknown',
           };
 
           if (!service) {
@@ -321,7 +366,7 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         } catch (error) {
           healthStatus.dependencies[dependency] = {
             status: 'error',
-            error: error.message
+            error: error.message,
           };
           healthStatus.overall = 'degraded';
         }
@@ -332,13 +377,16 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         const metrics = await this.getEnterpriseMetrics();
         healthStatus.metrics = {
           averageLatency: metrics.enterprise.averageLatency,
-          healthyNodesRatio: metrics.enterprise.totalNodes > 0 ? 
-            metrics.enterprise.healthyNodes / metrics.enterprise.totalNodes : 0,
-          activePartitions: metrics.enterprise.activePartitions
+          healthyNodesRatio:
+            metrics.enterprise.totalNodes > 0
+              ? metrics.enterprise.healthyNodes / metrics.enterprise.totalNodes
+              : 0,
+          activePartitions: metrics.enterprise.activePartitions,
         };
 
         // Check if performance is degraded
-        if (healthStatus.metrics.averageLatency > 1000) { // > 1 second latency
+        if (healthStatus.metrics.averageLatency > 1000) {
+          // > 1 second latency
           healthStatus.overall = 'degraded';
         }
       } catch (error) {
@@ -353,12 +401,15 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
         services: {},
         dependencies: {},
         metrics: { error: error.message },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
 
-  private async emitOrderScheduledEvent(orderId: string, orderData: EnterpriseOrderData): Promise<void> {
+  private async emitOrderScheduledEvent(
+    orderId: string,
+    orderData: EnterpriseOrderData
+  ): Promise<void> {
     try {
       // Emit domain event through VytchesDDD event system
       const eventBus = VytchesDDD.resolve<any>('eventBus');
@@ -370,21 +421,25 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
             orderId,
             customerId: orderData.customerId,
             scheduledAt: new Date(),
-            processingType: 'enterprise'
+            processingType: 'enterprise',
           },
           version: 1,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     } catch (error) {
-      this.logger.warn(`Failed to emit order scheduled event: ${error.message}`);
+      this.logger.warn(
+        `Failed to emit order scheduled event: ${error.message}`
+      );
     }
   }
 
   private async getActiveComplianceJobs(): Promise<number> {
     try {
       const complianceManager = VytchesDDD.resolve<any>('complianceManager');
-      return complianceManager ? await complianceManager.getActiveJobCount() : 0;
+      return complianceManager
+        ? await complianceManager.getActiveJobCount()
+        : 0;
     } catch (error) {
       return 0;
     }
@@ -394,15 +449,28 @@ export class EnterpriseSchedulingService implements OnModuleInit, OnModuleDestro
 
 ```typescript
 // enterprise-scheduling.controller.ts
-import { Controller, Post, Get, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   ScheduleEnterpriseOrderDto,
   ScheduleComplianceReportDto,
   ScheduleCrossBorderTransactionDto,
-  EnterpriseMetricsDto
+  EnterpriseMetricsDto,
 } from './dto'; // From your app
 
 @ApiTags('enterprise-scheduling')
@@ -411,12 +479,17 @@ import {
 export class EnterpriseSchedulingController {
   // ⭐ FOCUS: Service resolution through VytchesDDD container
   private get enterpriseSchedulingService() {
-    return VytchesDDD.resolve<EnterpriseSchedulingService>('enterpriseSchedulingService');
+    return VytchesDDD.resolve<EnterpriseSchedulingService>(
+      'enterpriseSchedulingService'
+    );
   }
 
   @Post('enterprise-order')
   @ApiOperation({ summary: 'Schedule enterprise order processing' })
-  @ApiResponse({ status: 201, description: 'Enterprise order scheduled successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Enterprise order scheduled successfully',
+  })
   async scheduleEnterpriseOrder(@Body() dto: ScheduleEnterpriseOrderDto) {
     const service = this.enterpriseSchedulingService;
     if (!service) {
@@ -434,7 +507,7 @@ export class EnterpriseSchedulingController {
         regulatedIndustry: dto.regulatedIndustry,
         complianceLevel: dto.complianceLevel,
         priorityProcessing: dto.priorityProcessing,
-        crossBorderTransaction: dto.crossBorderTransaction
+        crossBorderTransaction: dto.crossBorderTransaction,
       },
       dto.processingDelayMinutes
     );
@@ -447,13 +520,16 @@ export class EnterpriseSchedulingController {
       success: true,
       jobId: result.value,
       message: 'Enterprise order scheduled successfully',
-      distributedCoordination: true
+      distributedCoordination: true,
     };
   }
 
   @Post('compliance-report')
   @ApiOperation({ summary: 'Schedule compliance reporting' })
-  @ApiResponse({ status: 201, description: 'Compliance report scheduled successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Compliance report scheduled successfully',
+  })
   async scheduleComplianceReport(@Body() dto: ScheduleComplianceReportDto) {
     const service = this.enterpriseSchedulingService;
     if (!service) {
@@ -469,7 +545,7 @@ export class EnterpriseSchedulingController {
         dataRequirements: dto.dataRequirements,
         auditTrail: dto.auditTrailRequired,
         encryptionRequired: dto.encryptionRequired,
-        retentionPeriod: dto.retentionYears
+        retentionPeriod: dto.retentionYears,
       },
       new Date(dto.deadline)
     );
@@ -483,14 +559,19 @@ export class EnterpriseSchedulingController {
       reportId: result.value,
       message: 'Compliance report scheduled successfully',
       highAvailability: true,
-      deadline: dto.deadline
+      deadline: dto.deadline,
     };
   }
 
   @Post('cross-border-transaction')
   @ApiOperation({ summary: 'Schedule cross-border transaction' })
-  @ApiResponse({ status: 201, description: 'Cross-border transaction scheduled successfully' })
-  async scheduleCrossBorderTransaction(@Body() dto: ScheduleCrossBorderTransactionDto) {
+  @ApiResponse({
+    status: 201,
+    description: 'Cross-border transaction scheduled successfully',
+  })
+  async scheduleCrossBorderTransaction(
+    @Body() dto: ScheduleCrossBorderTransactionDto
+  ) {
     const service = this.enterpriseSchedulingService;
     if (!service) {
       throw new Error('Enterprise scheduling service not available');
@@ -506,7 +587,7 @@ export class EnterpriseSchedulingController {
         targetCurrency: dto.targetCurrency,
         transactionType: dto.transactionType,
         complianceChecks: dto.complianceChecks,
-        regulatoryRequirements: dto.regulatoryRequirements
+        regulatoryRequirements: dto.regulatoryRequirements,
       },
       dto.processingDelayMinutes
     );
@@ -521,13 +602,16 @@ export class EnterpriseSchedulingController {
       message: 'Cross-border transaction scheduled successfully',
       globalCoordination: true,
       sourceRegion: dto.sourceRegion,
-      destinationRegion: dto.destinationRegion
+      destinationRegion: dto.destinationRegion,
     };
   }
 
   @Get('metrics')
   @ApiOperation({ summary: 'Get comprehensive enterprise scheduling metrics' })
-  @ApiResponse({ status: 200, description: 'Enterprise metrics retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Enterprise metrics retrieved successfully',
+  })
   async getEnterpriseMetrics(): Promise<EnterpriseMetricsDto> {
     const service = this.enterpriseSchedulingService;
     if (!service) {
@@ -535,20 +619,21 @@ export class EnterpriseSchedulingController {
     }
 
     const metrics = await service.getEnterpriseMetrics();
-    
+
     return {
       distributed: {
         totalNodes: metrics.enterprise.totalNodes,
         healthyNodes: metrics.enterprise.healthyNodes,
-        clusterHealth: metrics.enterprise.healthyNodes > 0 ? 'healthy' : 'unhealthy'
+        clusterHealth:
+          metrics.enterprise.healthyNodes > 0 ? 'healthy' : 'unhealthy',
       },
       enterprise: {
         activePartitions: metrics.enterprise.activePartitions,
         crossRegionEvents: metrics.enterprise.crossRegionEvents,
         complianceJobs: metrics.enterprise.complianceJobs,
-        averageLatency: metrics.enterprise.averageLatency
+        averageLatency: metrics.enterprise.averageLatency,
       },
-      timestamp: metrics.timestamp
+      timestamp: metrics.timestamp,
     };
   }
 
@@ -561,7 +646,7 @@ export class EnterpriseSchedulingController {
       return {
         overall: 'unhealthy',
         reason: 'Enterprise scheduling service not available',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -578,11 +663,11 @@ export class EnterpriseSchedulingController {
     }
 
     const metrics = await service.getEnterpriseMetrics();
-    
+
     return {
       cluster: metrics.cluster,
       distributed: metrics.distributed,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -599,7 +684,7 @@ import { EnterpriseSchedulingController } from './enterprise-scheduling.controll
 @Module({
   providers: [EnterpriseSchedulingService],
   controllers: [EnterpriseSchedulingController],
-  exports: [EnterpriseSchedulingService]
+  exports: [EnterpriseSchedulingService],
 })
 export class EnterpriseSchedulingModule implements OnModuleInit {
   constructor(private moduleRef: ModuleRef) {}
@@ -609,14 +694,16 @@ export class EnterpriseSchedulingModule implements OnModuleInit {
     try {
       const adapter = new NestJSContainerAdapter(this.moduleRef);
       await VytchesDDD.configure(adapter);
-      
+
       console.log('✅ VytchesDDD container configured with NestJS adapter');
-      
+
       // Register additional enterprise services
       await this.registerEnterpriseServices();
-      
     } catch (error) {
-      console.error('❌ Failed to configure VytchesDDD container:', error.message);
+      console.error(
+        '❌ Failed to configure VytchesDDD container:',
+        error.message
+      );
       throw error;
     }
   }
@@ -632,7 +719,15 @@ export class EnterpriseSchedulingModule implements OnModuleInit {
 ```typescript
 // dto/enterprise-scheduling.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, IsDateString, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsIn,
+} from 'class-validator';
 
 export class ScheduleEnterpriseOrderDto {
   @ApiProperty({ description: 'Enterprise order ID' })
@@ -804,72 +899,82 @@ export class EnterpriseUsageService {
   async demonstrateEnterpriseScheduling(): Promise<void> {
     try {
       // ⭐ FOCUS: Get service through VytchesDDD container
-      const enterpriseScheduler = VytchesDDD.resolve<EnterpriseSchedulingService>(
-        'enterpriseSchedulingService'
-      );
+      const enterpriseScheduler =
+        VytchesDDD.resolve<EnterpriseSchedulingService>(
+          'enterpriseSchedulingService'
+        );
 
       if (!enterpriseScheduler) {
         throw new Error('Enterprise scheduling service not available');
       }
 
       // Schedule enterprise order with distributed coordination
-      const enterpriseOrderResult = await enterpriseScheduler.scheduleEnterpriseOrder(
-        'ENT-ORDER-789',
-        {
-          orderId: 'ENT-ORDER-789',
-          customerId: 'ENTERPRISE-CLIENT-456',
-          customerTier: 'enterprise',
-          orderValue: 500000,
-          currency: 'USD',
-          regulatedIndustry: true,
-          complianceLevel: 'critical',
-          priorityProcessing: true,
-          crossBorderTransaction: true
-        },
-        30 // 30 minutes processing delay
-      );
+      const enterpriseOrderResult =
+        await enterpriseScheduler.scheduleEnterpriseOrder(
+          'ENT-ORDER-789',
+          {
+            orderId: 'ENT-ORDER-789',
+            customerId: 'ENTERPRISE-CLIENT-456',
+            customerTier: 'enterprise',
+            orderValue: 500000,
+            currency: 'USD',
+            regulatedIndustry: true,
+            complianceLevel: 'critical',
+            priorityProcessing: true,
+            crossBorderTransaction: true,
+          },
+          30 // 30 minutes processing delay
+        );
 
       if (enterpriseOrderResult.isSuccess()) {
-        this.logger.log(`Enterprise order scheduled: ${enterpriseOrderResult.value}`);
+        this.logger.log(
+          `Enterprise order scheduled: ${enterpriseOrderResult.value}`
+        );
       }
 
       // Schedule compliance reporting
-      const complianceResult = await enterpriseScheduler.scheduleComplianceReporting(
-        'SOX-404-Q4',
-        {
-          regulationType: 'SOX-404',
-          regulatoryDeadline: new Date('2024-01-31'),
-          originRegion: 'us-east-1',
-          dataRequirements: ['financial-statements', 'internal-controls'],
-          auditTrail: true,
-          encryptionRequired: true,
-          retentionPeriod: 7
-        },
-        new Date('2024-01-31')
-      );
+      const complianceResult =
+        await enterpriseScheduler.scheduleComplianceReporting(
+          'SOX-404-Q4',
+          {
+            regulationType: 'SOX-404',
+            regulatoryDeadline: new Date('2024-01-31'),
+            originRegion: 'us-east-1',
+            dataRequirements: ['financial-statements', 'internal-controls'],
+            auditTrail: true,
+            encryptionRequired: true,
+            retentionPeriod: 7,
+          },
+          new Date('2024-01-31')
+        );
 
       if (complianceResult.isSuccess()) {
-        this.logger.log(`Compliance report scheduled: ${complianceResult.value}`);
+        this.logger.log(
+          `Compliance report scheduled: ${complianceResult.value}`
+        );
       }
 
       // Schedule cross-border transaction
-      const crossBorderResult = await enterpriseScheduler.scheduleCrossBorderTransaction(
-        'XBORDER-TXN-123',
-        'us-east-1',
-        'eu-west-1',
-        {
-          amount: 1000000,
-          sourceCurrency: 'USD',
-          targetCurrency: 'EUR',
-          transactionType: 'wire-transfer',
-          complianceChecks: ['AML', 'KYC', 'OFAC'],
-          regulatoryRequirements: ['MiFID-II', 'PSD2']
-        },
-        60 // 1 hour processing delay
-      );
+      const crossBorderResult =
+        await enterpriseScheduler.scheduleCrossBorderTransaction(
+          'XBORDER-TXN-123',
+          'us-east-1',
+          'eu-west-1',
+          {
+            amount: 1000000,
+            sourceCurrency: 'USD',
+            targetCurrency: 'EUR',
+            transactionType: 'wire-transfer',
+            complianceChecks: ['AML', 'KYC', 'OFAC'],
+            regulatoryRequirements: ['MiFID-II', 'PSD2'],
+          },
+          60 // 1 hour processing delay
+        );
 
       if (crossBorderResult.isSuccess()) {
-        this.logger.log(`Cross-border transaction scheduled: ${crossBorderResult.value}`);
+        this.logger.log(
+          `Cross-border transaction scheduled: ${crossBorderResult.value}`
+        );
       }
 
       // Get comprehensive enterprise metrics
@@ -878,15 +983,17 @@ export class EnterpriseUsageService {
         totalNodes: metrics.enterprise.totalNodes,
         activePartitions: metrics.enterprise.activePartitions,
         crossRegionEvents: metrics.enterprise.crossRegionEvents,
-        averageLatency: metrics.enterprise.averageLatency
+        averageLatency: metrics.enterprise.averageLatency,
       });
 
       // Perform advanced health check
-      const healthStatus = await enterpriseScheduler.performAdvancedHealthCheck();
+      const healthStatus =
+        await enterpriseScheduler.performAdvancedHealthCheck();
       this.logger.log(`Enterprise scheduler health: ${healthStatus.overall}`);
-
     } catch (error) {
-      this.logger.error(`Enterprise scheduling demonstration failed: ${error.message}`);
+      this.logger.error(
+        `Enterprise scheduling demonstration failed: ${error.message}`
+      );
     }
   }
 }
@@ -894,26 +1001,38 @@ export class EnterpriseUsageService {
 
 ## Key Features
 
-- **VytchesDDD Integration**: Full integration with @vytches-ddd/di container and service resolution
-- **Distributed Scheduling**: Multi-node coordination with partition management and leader election
-- **High Availability**: Critical events use HA scheduling with replication and consensus
-- **Enterprise Compliance**: Built-in regulatory compliance with audit trails and encryption
-- **Global Coordination**: Cross-region transaction processing with regulatory compliance
-- **Advanced Health Checks**: Comprehensive health monitoring with dependency validation
+- **VytchesDDD Integration**: Full integration with @vytches-ddd/di container
+  and service resolution
+- **Distributed Scheduling**: Multi-node coordination with partition management
+  and leader election
+- **High Availability**: Critical events use HA scheduling with replication and
+  consensus
+- **Enterprise Compliance**: Built-in regulatory compliance with audit trails
+  and encryption
+- **Global Coordination**: Cross-region transaction processing with regulatory
+  compliance
+- **Advanced Health Checks**: Comprehensive health monitoring with dependency
+  validation
 - **Enterprise Metrics**: Detailed performance and operational metrics
 - **Domain Events**: Integration with VytchesDDD event system for audit trails
 
 ## Common Pitfalls
 
-- **Container Initialization**: Ensure VytchesDDD container is configured before service resolution
-- **Service Dependencies**: Verify all required services are registered in the container
+- **Container Initialization**: Ensure VytchesDDD container is configured before
+  service resolution
+- **Service Dependencies**: Verify all required services are registered in the
+  container
 - **Module Lifecycle**: Properly handle async initialization in OnModuleInit
 - **Error Handling**: Handle service resolution failures gracefully
 - **Resource Management**: Monitor distributed scheduler resources and health
 
 ## Related Examples
 
-- [Basic NestJS Integration](../basic/example-1.md) - Simple manual setup patterns
-- [NestJS Enterprise Platform](../advanced/example-1.md) - Full enterprise architecture
-- [Distributed Event Scheduling](../../../intermediate/example-1.md) - Core distributed concepts
-- [Enterprise Scheduling Platform](../../../advanced/example-1.md) - Global coordination patterns
+- [Basic NestJS Integration](../basic/example-1.md) - Simple manual setup
+  patterns
+- [NestJS Enterprise Platform](../advanced/example-1.md) - Full enterprise
+  architecture
+- [Distributed Event Scheduling](../../../intermediate/example-1.md) - Core
+  distributed concepts
+- [Enterprise Scheduling Platform](../../../advanced/example-1.md) - Global
+  coordination patterns

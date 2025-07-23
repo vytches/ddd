@@ -1,19 +1,20 @@
 # EntityId Usage Patterns
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Basic
-**Domain**: Foundation
-**Patterns**: entity-id, identity-patterns, factory-methods
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Domain**: Foundation **Patterns**: entity-id, identity-patterns,
+factory-methods **Dependencies**: @vytches-ddd/contracts
 
 ## Description
 
-EntityId is the fundamental building block for entity identification throughout the VytchesDDD library. This example shows comprehensive usage patterns including factory methods, validation, type safety, and best practices.
+EntityId is the fundamental building block for entity identification throughout
+the VytchesDDD library. This example shows comprehensive usage patterns
+including factory methods, validation, type safety, and best practices.
 
 ## Business Context
 
-Every domain entity needs a unique identifier. EntityId provides type-safe, validated, and consistent identity management across your entire domain model, supporting multiple ID formats while maintaining architectural integrity.
+Every domain entity needs a unique identifier. EntityId provides type-safe,
+validated, and consistent identity management across your entire domain model,
+supporting multiple ID formats while maintaining architectural integrity.
 
 ## Core EntityId Implementation
 
@@ -25,7 +26,6 @@ import { EntityId } from '@vytches-ddd/contracts';
 
 // Basic EntityId creation
 export class BasicEntityIdUsage {
-  
   // Text-based IDs
   static createTextId(): EntityId<string> {
     const id = EntityId.createText('user-12345');
@@ -72,7 +72,6 @@ export class BasicEntityIdUsage {
 ```typescript
 // src/domain/users/user-id.ts
 export class UserId {
-  
   // Safe factory methods with validation
   static fromUuid(value: string): EntityId<string> {
     try {
@@ -108,7 +107,7 @@ export class UserId {
     if (!externalId || externalId.length < 3) {
       throw new Error('External ID must be at least 3 characters');
     }
-    
+
     // Add prefix to distinguish external IDs
     const prefixedId = `ext_${externalId}`;
     return EntityId.createText(prefixedId);
@@ -121,16 +120,15 @@ export class UserId {
 ```typescript
 // src/domain/foundation/entity-id-operations.ts
 export class EntityIdOperations {
-  
   // Equality comparison
   static demonstrateEquality(): void {
     const id1 = EntityId.createText('user-123');
     const id2 = EntityId.createText('user-123');
     const id3 = EntityId.createText('user-456');
-    
+
     console.log('Same value:', id1.equals(id2)); // true
     console.log('Different value:', id1.equals(id3)); // false
-    
+
     // Type-aware equality
     const textId = EntityId.createText('123');
     const intId = EntityId.createInteger(123);
@@ -145,7 +143,7 @@ export class EntityIdOperations {
         console.warn(`Invalid ID: ${id.getValue()}`);
         return false;
       }
-      
+
       // Type-specific validation
       switch (id.getType()) {
         case 'uuid':
@@ -161,22 +159,23 @@ export class EntityIdOperations {
   }
 
   private static isValidUuid(value: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(value);
   }
 
   // Serialization patterns
   static demonstrateSerialization(): void {
     const id = EntityId.createUuid('550e8400-e29b-41d4-a716-446655440000');
-    
+
     // String representation
     const stringValue = id.toString();
     console.log('String:', stringValue);
-    
+
     // JSON serialization
     const jsonValue = id.toJSON();
     console.log('JSON:', jsonValue);
-    
+
     // Parse back from JSON
     const parsed = JSON.parse(jsonValue);
     const recreated = new EntityId(parsed.value, parsed.type);
@@ -243,7 +242,7 @@ export class User {
   toPlainObject(): { id: string; data: UserData } {
     return {
       id: this._id.getValue(),
-      data: this._data
+      data: this._data,
     };
   }
 
@@ -314,14 +313,19 @@ export class InMemoryUserRepository implements IUserRepository {
 ```typescript
 // src/domain/foundation/advanced-entity-id.ts
 export class AdvancedEntityIdPatterns {
-  
   // Composite ID pattern for multi-tenant scenarios
-  static createTenantScopedId(tenantId: string, entityId: string): EntityId<string> {
+  static createTenantScopedId(
+    tenantId: string,
+    entityId: string
+  ): EntityId<string> {
     const compositeId = `${tenantId}:${entityId}`;
     return EntityId.createText(compositeId);
   }
 
-  static parseTenantScopedId(id: EntityId<string>): { tenantId: string; entityId: string } {
+  static parseTenantScopedId(id: EntityId<string>): {
+    tenantId: string;
+    entityId: string;
+  } {
     const parts = id.getValue().split(':');
     if (parts.length !== 2) {
       throw new Error('Invalid tenant-scoped ID format');
@@ -337,10 +341,12 @@ export class AdvancedEntityIdPatterns {
 
   // Typed ID wrapper for domain safety
   static createTypedId<T extends string>(
-    value: string, 
+    value: string,
     type: T
   ): EntityId<string> & { entityType: T } {
-    const id = EntityId.createText(value) as EntityId<string> & { entityType: T };
+    const id = EntityId.createText(value) as EntityId<string> & {
+      entityType: T;
+    };
     id.entityType = type;
     return id;
   }
@@ -350,17 +356,17 @@ export class AdvancedEntityIdPatterns {
     value: string,
     metadata: Record<string, any>
   ): EntityId<string> & { metadata: Record<string, any> } {
-    const id = EntityId.createText(value) as EntityId<string> & { 
-      metadata: Record<string, any> 
+    const id = EntityId.createText(value) as EntityId<string> & {
+      metadata: Record<string, any>;
     };
     id.metadata = metadata;
     return id;
   }
 
   // Batch ID operations
-  static validateBatch(ids: EntityId<string>[]): { 
-    valid: EntityId<string>[]; 
-    invalid: { id: EntityId<string>; reason: string }[] 
+  static validateBatch(ids: EntityId<string>[]): {
+    valid: EntityId<string>[];
+    invalid: { id: EntityId<string>; reason: string }[];
   } {
     const valid: EntityId<string>[] = [];
     const invalid: { id: EntityId<string>; reason: string }[] = [];
@@ -373,9 +379,9 @@ export class AdvancedEntityIdPatterns {
           invalid.push({ id, reason: 'Failed basic validation' });
         }
       } catch (error) {
-        invalid.push({ 
-          id, 
-          reason: error instanceof Error ? error.message : 'Unknown error' 
+        invalid.push({
+          id,
+          reason: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -388,12 +394,12 @@ export class AdvancedEntityIdPatterns {
     if (textId.getType() === 'uuid') {
       return textId;
     }
-    
+
     // Generate deterministic UUID from text (example)
     const text = textId.getValue();
     const hash = this.simpleHash(text);
     const uuid = this.hashToUuid(hash);
-    
+
     return EntityId.createUuid(uuid);
   }
 
@@ -401,7 +407,7 @@ export class AdvancedEntityIdPatterns {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash);
@@ -427,9 +433,11 @@ export class AdvancedEntityIdPatterns {
 ## Common Pitfalls
 
 - **Type Mixing**: Don't compare EntityIds of different types expecting equality
-- **Direct Construction**: Use factory methods instead of direct constructor calls
+- **Direct Construction**: Use factory methods instead of direct constructor
+  calls
 - **Validation Skipping**: Always validate IDs from external sources
-- **Serialization Assumptions**: Remember to preserve type information when serializing
+- **Serialization Assumptions**: Remember to preserve type information when
+  serializing
 
 ## Related Examples
 

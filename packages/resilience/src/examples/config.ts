@@ -4,14 +4,32 @@ export const config: PackageExampleConfig = {
   packageName: 'resilience',
   displayName: 'Resilience Patterns',
   version: '1.0.0',
-  description: 'Resilience Patterns provides comprehensive fault tolerance patterns including Circuit Breaker, Retry, Bulkhead, and Timeout strategies with enterprise-grade observability.',
+  description:
+    'Resilience Patterns provides comprehensive fault tolerance patterns including Circuit Breaker, Retry, Bulkhead, and Timeout strategies with enterprise-grade observability.',
   domain: 'Infrastructure',
-  patterns: ['circuit-breaker', 'retry-pattern', 'bulkhead-pattern', 'timeout-strategy', 'composite-resilience'],
+  patterns: [
+    'circuit-breaker',
+    'retry-pattern',
+    'bulkhead-pattern',
+    'timeout-strategy',
+    'composite-resilience',
+  ],
   tags: {
     core: ['resilience:core', 'resilience:patterns', 'resilience:fault-tolerance'],
-    integrations: ['resilience:observability', 'resilience:metrics', 'resilience:events', 'resilience:policies'],
+    integrations: [
+      'resilience:observability',
+      'resilience:metrics',
+      'resilience:events',
+      'resilience:policies',
+    ],
     frameworks: ['resilience:nestjs', 'resilience:express', 'resilience:fastify'],
-    patterns: ['resilience:circuit-breaker', 'resilience:retry', 'resilience:bulkhead', 'resilience:timeout', 'resilience:composite']
+    patterns: [
+      'resilience:circuit-breaker',
+      'resilience:retry',
+      'resilience:bulkhead',
+      'resilience:timeout',
+      'resilience:composite',
+    ],
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/resilience', '@vytches-ddd/utils'],
   sections: [
@@ -24,27 +42,28 @@ export const config: PackageExampleConfig = {
     'frameworkIntegration',
     'commonPitfalls',
     'troubleshooting',
-    'performance'
+    'performance',
   ],
   complexityLevels: {
     basic: {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic resilience patterns with simple fault tolerance'
+      description: 'Basic resilience patterns with simple fault tolerance',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: true,
-      description: 'Advanced resilience patterns with events integration and observability'
+      description: 'Advanced resilience patterns with events integration and observability',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise resilience system with policies, messaging, and comprehensive monitoring'
-    }
+      description:
+        'Enterprise resilience system with policies, messaging, and comprehensive monitoring',
+    },
   },
   frameworks: [
     {
@@ -52,15 +71,15 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'Integration with NestJS framework',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/common', '@nestjs/config']
+      dependencies: ['@nestjs/common', '@nestjs/config'],
     },
     {
       name: 'express',
       displayName: 'Express',
       description: 'Integration with Express framework',
       complexityLevels: ['basic', 'intermediate'],
-      dependencies: ['express']
-    }
+      dependencies: ['express'],
+    },
   ],
   examples: [
     {
@@ -71,7 +90,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic circuit breaker pattern for external service calls',
-      dependencies: ['@vytches-ddd/resilience', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/resilience', '@vytches-ddd/utils'],
     },
     {
       id: 'intermediate-resilience-events',
@@ -81,18 +100,35 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced resilience patterns integrated with events system for observability',
-      dependencies: ['@vytches-ddd/resilience', '@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
+      dependencies: [
+        '@vytches-ddd/resilience',
+        '@vytches-ddd/events',
+        '@vytches-ddd/di',
+        '@vytches-ddd/utils',
+      ],
     },
     {
       id: 'advanced-enterprise-resilience',
       name: 'Enterprise Resilience System',
       file: 'advanced/implementation.md',
-      tags: ['resilience:enterprise', 'resilience:policies', 'resilience:messaging', 'resilience:comprehensive'],
+      tags: [
+        'resilience:enterprise',
+        'resilience:policies',
+        'resilience:messaging',
+        'resilience:comprehensive',
+      ],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise resilience system with policies, messaging, and comprehensive fault tolerance',
-      dependencies: ['@vytches-ddd/resilience', '@vytches-ddd/policies', '@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/di']
-    }
+      description:
+        'Enterprise resilience system with policies, messaging, and comprehensive fault tolerance',
+      dependencies: [
+        '@vytches-ddd/resilience',
+        '@vytches-ddd/policies',
+        '@vytches-ddd/messaging',
+        '@vytches-ddd/events',
+        '@vytches-ddd/di',
+      ],
+    },
   ],
   contentConfig: {
     showImportStatements: true,
@@ -101,35 +137,35 @@ export const config: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
   llmSupport: {
     enabled: true,
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
   relatedPackages: {
-    'events': {
+    events: {
       priority: 'high',
       relationship: 'publishes-to',
-      integrationExamples: ['resilience-events', 'failure-notifications']
+      integrationExamples: ['resilience-events', 'failure-notifications'],
     },
-    'policies': {
+    policies: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['resilience-policies', 'failure-policies']
+      integrationExamples: ['resilience-policies', 'failure-policies'],
     },
-    'messaging': {
+    messaging: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['resilient-messaging', 'outbox-resilience']
+      integrationExamples: ['resilient-messaging', 'outbox-resilience'],
     },
-    'logging': {
+    logging: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['resilience-logging', 'failure-audit']
-    }
-  }
+      integrationExamples: ['resilience-logging', 'failure-audit'],
+    },
+  },
 };

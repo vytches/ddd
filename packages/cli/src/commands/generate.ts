@@ -226,7 +226,8 @@ export const generateCommand: Command = {
 
       // Check if this is documentation generation (package name as first arg, no type)
       const firstArg = args[0];
-      const isDocumentationGeneration = firstArg && !options.type && !options.name && !options.example && !options.domain;
+      const isDocumentationGeneration =
+        firstArg && !options.type && !options.name && !options.example && !options.domain;
 
       if (isDocumentationGeneration) {
         // Documentation generation mode
@@ -305,7 +306,11 @@ class ComponentGenerator {
       // Suggest similar examples
       const allExamples = globalDocumentationRegistry.query({});
       const suggestions = allExamples
-        .filter(ex => ex.id.includes(this.options.example!) || ex.name.toLowerCase().includes(this.options.example!.toLowerCase()))
+        .filter(
+          ex =>
+            ex.id.includes(this.options.example!) ||
+            ex.name.toLowerCase().includes(this.options.example!.toLowerCase())
+        )
         .slice(0, 3);
 
       if (suggestions.length > 0) {
@@ -330,13 +335,15 @@ class ComponentGenerator {
     }
 
     // Check framework availability and prompt if needed
-    const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(this.options.example!);
+    const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(
+      this.options.example!
+    );
 
     if (!this.options.framework || this.options.framework === 'standalone') {
       if (availableFrameworks.length > 0) {
         this.options.framework = await promptForChoice('Select framework:', [
           { name: 'Base only (no framework)', value: 'standalone' },
-          ...availableFrameworks.map(fw => ({ name: fw.toUpperCase(), value: fw }))
+          ...availableFrameworks.map(fw => ({ name: fw.toUpperCase(), value: fw })),
         ]);
       } else {
         this.options.framework = 'standalone';
@@ -344,8 +351,16 @@ class ComponentGenerator {
     }
 
     // Validate framework availability
-    if (this.options.framework !== 'standalone' && this.options.framework && !availableFrameworks.includes(this.options.framework)) {
-      console.error(Colors.error(`❌ Framework '${this.options.framework}' not available for example '${this.options.example}'.`));
+    if (
+      this.options.framework !== 'standalone' &&
+      this.options.framework &&
+      !availableFrameworks.includes(this.options.framework)
+    ) {
+      console.error(
+        Colors.error(
+          `❌ Framework '${this.options.framework}' not available for example '${this.options.example}'.`
+        )
+      );
       if (availableFrameworks.length > 0) {
         console.log(`💡 Available frameworks: ${availableFrameworks.join(', ')}`);
       } else {
@@ -363,16 +378,24 @@ class ComponentGenerator {
 
     if (this.options.exclude) {
       if (typeof this.options.exclude === 'string') {
-        this.options.exclude = (this.options.exclude as string).split(',').map((s: string) => s.trim());
+        this.options.exclude = (this.options.exclude as string)
+          .split(',')
+          .map((s: string) => s.trim());
       }
     }
 
     // Show component filtering options if framework is selected
     if (this.options.framework !== 'standalone') {
-      const availableComponents = globalDocumentationRegistry.getAvailableComponents(this.options.example!, this.options.framework!);
+      const availableComponents = globalDocumentationRegistry.getAvailableComponents(
+        this.options.example!,
+        this.options.framework!
+      );
 
       if (availableComponents.length > 0 && !this.options.only && !this.options.exclude) {
-        const showComponents = await promptForConfirmation('Show available components for filtering?', false);
+        const showComponents = await promptForConfirmation(
+          'Show available components for filtering?',
+          false
+        );
 
         if (showComponents) {
           console.log(`\n🧩 Available components for ${this.options.framework!.toUpperCase()}:`);
@@ -382,18 +405,25 @@ class ComponentGenerator {
           const filterChoice = await promptForChoice('Component filtering:', [
             { name: 'Generate all components', value: 'all' },
             { name: 'Select specific components only', value: 'only' },
-            { name: 'Exclude specific components', value: 'exclude' }
+            { name: 'Exclude specific components', value: 'exclude' },
           ]);
 
           if (filterChoice === 'only') {
-            const selectedComponents = await promptForInput('Enter components to include (comma-separated):', {
-              validate: (input: string) => input.trim() ? true : 'At least one component is required'
-            });
+            const selectedComponents = await promptForInput(
+              'Enter components to include (comma-separated):',
+              {
+                validate: (input: string) =>
+                  input.trim() ? true : 'At least one component is required',
+              }
+            );
             this.options.only = selectedComponents.split(',').map(s => s.trim());
           } else if (filterChoice === 'exclude') {
-            const excludedComponents = await promptForInput('Enter components to exclude (comma-separated):', {
-              required: false
-            });
+            const excludedComponents = await promptForInput(
+              'Enter components to exclude (comma-separated):',
+              {
+                required: false,
+              }
+            );
             if (excludedComponents) {
               this.options.exclude = excludedComponents.split(',').map(s => s.trim());
             }
@@ -1963,7 +1993,8 @@ class ComponentGenerator {
       const parser = new UnifiedExampleParser();
       const parsedExample = await parser.parseExample({
         exampleId: this.options.example!,
-        framework: this.options.framework === 'standalone' ? undefined : this.options.framework as any,
+        framework:
+          this.options.framework === 'standalone' ? undefined : (this.options.framework as any),
       });
 
       // Prepare context from parsed example
@@ -1997,14 +2028,20 @@ class ComponentGenerator {
         }
 
         if (parsedExample.framework) {
-          console.log(`  ${Colors.cyan('Framework Components:')} ${Array.from(parsedExample.framework.components.keys()).join(', ')}`);
+          console.log(
+            `  ${Colors.cyan('Framework Components:')} ${Array.from(parsedExample.framework.components.keys()).join(', ')}`
+          );
         }
 
         this.showNextSteps();
       }
     } catch (error) {
       console.error('');
-      console.error(Colors.error(`❌ Failed to generate from example: ${error instanceof Error ? error.message : error}`));
+      console.error(
+        Colors.error(
+          `❌ Failed to generate from example: ${error instanceof Error ? error.message : error}`
+        )
+      );
       throw error;
     }
   }
@@ -2092,11 +2129,14 @@ class ComponentGenerator {
     const componentName = context.className as string;
 
     content = content.replace(new RegExp(exampleName, 'g'), componentName);
-    content = content.replace(new RegExp(this.toKebabCase(exampleName), 'g'), context.fileName as string);
+    content = content.replace(
+      new RegExp(this.toKebabCase(exampleName), 'g'),
+      context.fileName as string
+    );
 
     // Add supporting types
     if (baseContent.supportingTypes) {
-      content += `\n\n${  baseContent.supportingTypes}`;
+      content += `\n\n${baseContent.supportingTypes}`;
     }
 
     return content;
@@ -2117,13 +2157,10 @@ class ComponentGenerator {
 
     // Filter components based on only/exclude options
     const parser = new UnifiedExampleParser();
-    const filteredComponents = parser.filterComponents(
-      parsedExample.framework.components,
-      {
-        only: this.options.only as any,
-        exclude: this.options.exclude as any,
-      }
-    );
+    const filteredComponents = parser.filterComponents(parsedExample.framework.components, {
+      only: this.options.only as any,
+      exclude: this.options.exclude as any,
+    });
 
     // Generate file for each component
     for (const [componentType, componentCode] of filteredComponents.entries()) {
@@ -2190,7 +2227,10 @@ class ComponentGenerator {
   /**
    * Get framework file path from example
    */
-  private getFrameworkFilePathFromExample(context: Record<string, unknown>, componentType: string): string {
+  private getFrameworkFilePathFromExample(
+    context: Record<string, unknown>,
+    componentType: string
+  ): string {
     const output = this.options.output || './src';
     const fileName = `${context.fileName}.${componentType}.ts`;
 
@@ -2224,7 +2264,10 @@ class ComponentGenerator {
 /**
  * Generate documentation for a package
  */
-async function generateDocumentationForPackage(packageName: string, options: GenerateOptions): Promise<void> {
+async function generateDocumentationForPackage(
+  packageName: string,
+  options: GenerateOptions
+): Promise<void> {
   try {
     console.log(Colors.cyan(`📚 Generating documentation for package: ${packageName}`));
     console.log('');
@@ -2248,7 +2291,7 @@ async function generateDocumentationForPackage(packageName: string, options: Gen
       randomize: !options.noRandomize,
       ...(options.seed && { seed: options.seed }),
       ...(options.diOnly && { diOnly: options.diOnly }),
-      ...(options.output && { outputPath: options.output })
+      ...(options.output && { outputPath: options.output }),
     });
 
     console.log(Colors.green(`✅ Documentation generated: ${result.outputPath}`));
@@ -2258,11 +2301,16 @@ async function generateDocumentationForPackage(packageName: string, options: Gen
     }
 
     if (result.randomizedExamples && result.randomizedExamples.length > 0) {
-      console.log(Colors.yellow('🎲 Examples were randomized. Run again to see different examples'));
+      console.log(
+        Colors.yellow('🎲 Examples were randomized. Run again to see different examples')
+      );
     }
-
   } catch (error) {
-    console.error(Colors.red(`❌ Failed to generate documentation: ${error instanceof Error ? error.message : error}`));
+    console.error(
+      Colors.red(
+        `❌ Failed to generate documentation: ${error instanceof Error ? error.message : error}`
+      )
+    );
     process.exit(1);
   }
 }

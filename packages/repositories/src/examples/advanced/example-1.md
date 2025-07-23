@@ -1,34 +1,39 @@
 # Distributed Event-Sourced Repository - Global Scale Architecture
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/repositories
-**Complexity**: advanced
-**Domain**: global-financial-system
-**Patterns**: distributed-event-sourcing, global-consistency, cross-region-replication, saga-coordination
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/events, @vytches-ddd/messaging
+**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+advanced **Domain**: global-financial-system **Patterns**:
+distributed-event-sourcing, global-consistency, cross-region-replication,
+saga-coordination **Dependencies**: @vytches-ddd/repositories,
+@vytches-ddd/events, @vytches-ddd/messaging
 
 ## Description
-Enterprise-scale distributed event sourcing implementation with global consistency, cross-region replication, and sophisticated conflict resolution using advanced @vytches-ddd/repositories capabilities.
+
+Enterprise-scale distributed event sourcing implementation with global
+consistency, cross-region replication, and sophisticated conflict resolution
+using advanced @vytches-ddd/repositories capabilities.
 
 ## Business Context
-Global financial trading platform requiring microsecond-precision event ordering, cross-region consistency, regulatory compliance across jurisdictions, and 99.99% availability for high-frequency trading operations.
+
+Global financial trading platform requiring microsecond-precision event
+ordering, cross-region consistency, regulatory compliance across jurisdictions,
+and 99.99% availability for high-frequency trading operations.
 
 ## Code Example
 
 ```typescript
 // distributed-event-repository.ts
-import { 
-  DistributedEventSourcedRepository, 
+import {
+  DistributedEventSourcedRepository,
   GlobalConsistencyManager,
-  CrossRegionReplicator 
+  CrossRegionReplicator,
 } from '@vytches-ddd/repositories';
 import { EntityId, DomainEvent } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   GlobalTradingAccount,
   TradingEvent,
   RegionalEventStore,
   ConsistencyModel,
-  ReplicationStrategy
+  ReplicationStrategy,
 } from './types'; // From your application
 
 // ✅ FOCUS: Distributed event-sourced repository with global coordination
@@ -44,7 +49,7 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
       replicationStrategy: 'multi-master-conflict-resolution',
       partitionStrategy: 'account-based-sharding',
       globalOrderingEnabled: true,
-      crossRegionConsistencyChecks: true
+      crossRegionConsistencyChecks: true,
     });
   }
 
@@ -55,20 +60,20 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     expectedVersion: number,
     regionalContext: RegionalContext
   ): Promise<GlobalEventResult> {
-    
     // Step 1: Acquire global ordering tokens
-    const globalSequenceNumbers = await this.consistencyManager.reserveGlobalSequences(
-      events.length,
-      regionalContext.region
-    );
-    
+    const globalSequenceNumbers =
+      await this.consistencyManager.reserveGlobalSequences(
+        events.length,
+        regionalContext.region
+      );
+
     // Step 2: Attach global ordering metadata
     const globallyOrderedEvents = events.map((event, index) => ({
       ...event,
       globalSequenceNumber: globalSequenceNumbers[index],
       globalTimestamp: this.consistencyManager.getGlobalTimestamp(),
       regionalOrigin: regionalContext.region,
-      causalityVector: this.buildCausalityVector(event, regionalContext)
+      causalityVector: this.buildCausalityVector(event, regionalContext),
     }));
 
     try {
@@ -94,9 +99,8 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
         success: true,
         globalSequenceNumbers,
         replicationStatus: writeResults,
-        consistencyLevel: 'globally-consistent'
+        consistencyLevel: 'globally-consistent',
       };
-
     } catch (error) {
       // Conflict resolution and compensation
       return await this.handleGlobalWriteConflict(
@@ -113,59 +117,64 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     accountId: EntityId,
     consistencyLevel: 'eventual' | 'strong' | 'linearizable' = 'strong'
   ): Promise<GlobalTradingAccount | null> {
-    
     switch (consistencyLevel) {
       case 'linearizable':
         return await this.getWithLinearizableConsistency(accountId);
-      
+
       case 'strong':
         return await this.getWithStrongConsistency(accountId);
-      
+
       case 'eventual':
         return await this.getWithEventualConsistency(accountId);
-      
+
       default:
         throw new Error(`Unsupported consistency level: ${consistencyLevel}`);
     }
   }
 
   // ✅ FOCUS: Cross-region conflict resolution
-  private async getWithLinearizableConsistency(accountId: EntityId): Promise<GlobalTradingAccount | null> {
+  private async getWithLinearizableConsistency(
+    accountId: EntityId
+  ): Promise<GlobalTradingAccount | null> {
     // Step 1: Gather events from all regions
-    const regionalEventStreams = await this.gatherRegionalEventStreams(accountId);
-    
+    const regionalEventStreams =
+      await this.gatherRegionalEventStreams(accountId);
+
     // Step 2: Perform global linearization
-    const linearizedEvents = await this.consistencyManager.linearizeGlobalEvents(
-      regionalEventStreams
-    );
-    
+    const linearizedEvents =
+      await this.consistencyManager.linearizeGlobalEvents(regionalEventStreams);
+
     // Step 3: Detect and resolve conflicts
     const resolvedEvents = await this.resolveEventConflicts(linearizedEvents);
-    
+
     // Step 4: Reconstruct account state
     return this.reconstructFromGlobalEvents(resolvedEvents);
   }
 
-  private async getWithStrongConsistency(accountId: EntityId): Promise<GlobalTradingAccount | null> {
+  private async getWithStrongConsistency(
+    accountId: EntityId
+  ): Promise<GlobalTradingAccount | null> {
     // Use consensus-based approach for strong consistency
     const consensusRound = await this.consistencyManager.initiateConsensusRound(
       accountId,
       this.getAllRegions()
     );
-    
+
     const eventStream = await consensusRound.getConsistentEventStream();
     return this.reconstructFromGlobalEvents(eventStream.events);
   }
 
   // ✅ FOCUS: Advanced event conflict resolution algorithms
-  private async resolveEventConflicts(events: TradingEvent[]): Promise<TradingEvent[]> {
+  private async resolveEventConflicts(
+    events: TradingEvent[]
+  ): Promise<TradingEvent[]> {
     const conflictResolver = new TradingEventConflictResolver();
-    
+
     // Group events by potential conflicts
     const conflictGroups = this.identifyConflictGroups(events);
-    
+
     const resolvedEvents: TradingEvent[] = [];
-    
+
     for (const group of conflictGroups) {
       if (group.length === 1) {
         // No conflict
@@ -174,14 +183,16 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
         // Resolve conflict based on business rules
         const resolution = await conflictResolver.resolveConflict(group);
         resolvedEvents.push(...resolution.resolvedEvents);
-        
+
         // Log conflict resolution for audit
         await this.logConflictResolution(group, resolution);
       }
     }
-    
+
     // Sort by global sequence number
-    return resolvedEvents.sort((a, b) => a.globalSequenceNumber - b.globalSequenceNumber);
+    return resolvedEvents.sort(
+      (a, b) => a.globalSequenceNumber - b.globalSequenceNumber
+    );
   }
 
   // ✅ FOCUS: Global snapshot management with regional optimization
@@ -189,38 +200,40 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     accountId: EntityId,
     snapshotStrategy: GlobalSnapshotStrategy = 'consensus-based'
   ): Promise<GlobalSnapshot> {
-    
     switch (snapshotStrategy) {
       case 'consensus-based':
         return await this.createConsensusBasedSnapshot(accountId);
-      
+
       case 'regional-merge':
         return await this.createRegionalMergeSnapshot(accountId);
-      
+
       case 'authoritative-region':
         return await this.createAuthoritativeRegionSnapshot(accountId);
-      
+
       default:
         throw new Error(`Unknown snapshot strategy: ${snapshotStrategy}`);
     }
   }
 
-  private async createConsensusBasedSnapshot(accountId: EntityId): Promise<GlobalSnapshot> {
+  private async createConsensusBasedSnapshot(
+    accountId: EntityId
+  ): Promise<GlobalSnapshot> {
     // Step 1: Initiate snapshot consensus across regions
-    const consensusRound = await this.consistencyManager.initiateSnapshotConsensus(accountId);
-    
+    const consensusRound =
+      await this.consistencyManager.initiateSnapshotConsensus(accountId);
+
     // Step 2: Gather regional snapshots
     const regionalSnapshots = await this.gatherRegionalSnapshots(accountId);
-    
+
     // Step 3: Merge snapshots using conflict resolution
     const mergedSnapshot = await this.mergeSnapshots(regionalSnapshots);
-    
+
     // Step 4: Validate global consistency
     await this.validateSnapshotConsistency(mergedSnapshot, consensusRound);
-    
+
     // Step 5: Store globally consistent snapshot
     await this.storeGlobalSnapshot(accountId, mergedSnapshot);
-    
+
     return mergedSnapshot;
   }
 
@@ -229,43 +242,52 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     accountId: EntityId,
     forceFullSync: boolean = false
   ): Promise<GlobalSyncResult> {
-    
     const syncCoordinator = new GlobalStateSyncCoordinator(
       this.regionalEventStores,
       this.consistencyManager
     );
-    
+
     try {
       // Step 1: Detect drift between regions
       const driftAnalysis = await syncCoordinator.analyzeDrift(accountId);
-      
+
       if (!driftAnalysis.hasDrift && !forceFullSync) {
-        return { success: true, syncType: 'no-sync-required', driftCorrected: 0 };
+        return {
+          success: true,
+          syncType: 'no-sync-required',
+          driftCorrected: 0,
+        };
       }
-      
+
       // Step 2: Execute incremental or full synchronization
-      const syncType = driftAnalysis.requiresFullSync || forceFullSync ? 'full' : 'incremental';
-      
-      const syncResult = syncType === 'full'
-        ? await syncCoordinator.executeFullSync(accountId)
-        : await syncCoordinator.executeIncrementalSync(accountId, driftAnalysis);
-      
+      const syncType =
+        driftAnalysis.requiresFullSync || forceFullSync
+          ? 'full'
+          : 'incremental';
+
+      const syncResult =
+        syncType === 'full'
+          ? await syncCoordinator.executeFullSync(accountId)
+          : await syncCoordinator.executeIncrementalSync(
+              accountId,
+              driftAnalysis
+            );
+
       // Step 3: Verify synchronization success
       await this.verifySynchronizationSuccess(accountId, syncResult);
-      
+
       return {
         success: true,
         syncType,
         driftCorrected: syncResult.correctedEvents.length,
-        regionsInvolved: syncResult.regionsInvolved
+        regionsInvolved: syncResult.regionsInvolved,
       };
-      
     } catch (error) {
       await this.handleSynchronizationFailure(accountId, error);
       return {
         success: false,
         syncType: 'failed',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -275,29 +297,35 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     querySpec: GlobalAccountQuerySpecification,
     queryOptions: GlobalQueryOptions = {}
   ): Promise<GlobalQueryResult<GlobalTradingAccount>> {
-    
     const queryEngine = new DistributedQueryEngine(this.regionalEventStores);
-    
+
     // Step 1: Analyze query for regional optimization
-    const queryPlan = await queryEngine.optimizeGlobalQuery(querySpec, queryOptions);
-    
+    const queryPlan = await queryEngine.optimizeGlobalQuery(
+      querySpec,
+      queryOptions
+    );
+
     // Step 2: Execute parallel regional queries
     const regionalResults = await queryEngine.executeRegionalQueries(
       queryPlan.regionalQueries
     );
-    
+
     // Step 3: Merge and deduplicate results
     const mergedResults = await queryEngine.mergeRegionalResults(
       regionalResults,
       queryPlan.mergeStrategy
     );
-    
+
     // Step 4: Apply global consistency checks if required
     if (queryOptions.consistencyLevel === 'strong') {
-      const consistentResults = await this.applyConsistencyFiltering(mergedResults);
-      return { results: consistentResults, totalCount: consistentResults.length };
+      const consistentResults =
+        await this.applyConsistencyFiltering(mergedResults);
+      return {
+        results: consistentResults,
+        totalCount: consistentResults.length,
+      };
     }
-    
+
     return { results: mergedResults, totalCount: mergedResults.length };
   }
 
@@ -307,12 +335,11 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     targetRegion: string,
     failoverScope: FailoverScope
   ): Promise<FailoverResult> {
-    
     const failoverCoordinator = new RegionalFailoverCoordinator(
       this.regionalEventStores,
       this.crossRegionReplicator
     );
-    
+
     try {
       // Step 1: Assess failover impact
       const impact = await failoverCoordinator.assessFailoverImpact(
@@ -320,27 +347,30 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
         targetRegion,
         failoverScope
       );
-      
+
       // Step 2: Prepare target region for increased load
       await failoverCoordinator.prepareTargetRegion(targetRegion, impact);
-      
+
       // Step 3: Redirect traffic and update routing
       await failoverCoordinator.redirectTraffic(failedRegion, targetRegion);
-      
+
       // Step 4: Ensure data consistency during failover
-      await this.ensureFailoverConsistency(failedRegion, targetRegion, failoverScope);
-      
+      await this.ensureFailoverConsistency(
+        failedRegion,
+        targetRegion,
+        failoverScope
+      );
+
       // Step 5: Update global routing configuration
       await this.updateGlobalRouting(failedRegion, targetRegion);
-      
+
       return {
         success: true,
         failoverTime: Date.now(),
         affectedAccounts: impact.affectedAccounts,
         targetRegion,
-        estimatedRecoveryTime: impact.estimatedRecoveryTime
+        estimatedRecoveryTime: impact.estimatedRecoveryTime,
       };
-      
     } catch (error) {
       await this.handleFailoverFailure(failedRegion, targetRegion, error);
       throw error;
@@ -352,11 +382,15 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     timeRange: TimeRange,
     metricsLevel: 'basic' | 'detailed' | 'comprehensive' = 'detailed'
   ): Promise<GlobalRepositoryMetrics> {
-    
-    const metricsCollector = new GlobalMetricsCollector(this.regionalEventStores);
-    
-    const metrics = await metricsCollector.collectMetrics(timeRange, metricsLevel);
-    
+    const metricsCollector = new GlobalMetricsCollector(
+      this.regionalEventStores
+    );
+
+    const metrics = await metricsCollector.collectMetrics(
+      timeRange,
+      metricsLevel
+    );
+
     return {
       timeRange,
       globalThroughput: metrics.globalThroughput,
@@ -364,7 +398,7 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
       consistencyMetrics: metrics.consistencyMetrics,
       replicationHealth: metrics.replicationHealth,
       conflictResolutionStats: metrics.conflictResolutionStats,
-      performanceIndicators: metrics.performanceIndicators
+      performanceIndicators: metrics.performanceIndicators,
     };
   }
 
@@ -375,40 +409,46 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     expectedVersion: number,
     regionalContext: RegionalContext
   ): Promise<RegionalWriteResult[]> {
-    
     const writePromises = Array.from(this.regionalEventStores.entries()).map(
       async ([region, eventStore]) => {
         try {
-          const result = await eventStore.saveEvents(accountId, events, expectedVersion);
+          const result = await eventStore.saveEvents(
+            accountId,
+            events,
+            expectedVersion
+          );
           return { region, success: true, result };
         } catch (error) {
           return { region, success: false, error };
         }
       }
     );
-    
+
     return Promise.all(writePromises);
   }
 
-  private buildCausalityVector(event: TradingEvent, context: RegionalContext): CausalityVector {
+  private buildCausalityVector(
+    event: TradingEvent,
+    context: RegionalContext
+  ): CausalityVector {
     return {
       regionSequences: new Map(context.lastKnownSequences),
       eventDependencies: event.dependencies || [],
-      causalRelationships: this.extractCausalRelationships(event)
+      causalRelationships: this.extractCausalRelationships(event),
     };
   }
 
   private identifyConflictGroups(events: TradingEvent[]): TradingEvent[][] {
     // Group events that might conflict (same account, overlapping time windows)
     const groups: Map<string, TradingEvent[]> = new Map();
-    
+
     for (const event of events) {
       const conflictKey = this.generateConflictKey(event);
       const existing = groups.get(conflictKey) || [];
       existing.push(event);
       groups.set(conflictKey, existing);
     }
-    
+
     return Array.from(groups.values());
   }
 
@@ -417,61 +457,71 @@ export class GlobalTradingAccountRepository extends DistributedEventSourcedRepos
     return `${event.aggregateId}_${Math.floor(event.globalTimestamp.getTime() / 1000)}_${event.eventType}`;
   }
 
-  private async gatherRegionalEventStreams(accountId: EntityId): Promise<Map<string, TradingEvent[]>> {
+  private async gatherRegionalEventStreams(
+    accountId: EntityId
+  ): Promise<Map<string, TradingEvent[]>> {
     const streams = new Map<string, TradingEvent[]>();
-    
+
     const gatherPromises = Array.from(this.regionalEventStores.entries()).map(
       async ([region, eventStore]) => {
         const events = await eventStore.getEventStream(accountId);
         return { region, events };
       }
     );
-    
+
     const results = await Promise.all(gatherPromises);
-    
+
     for (const { region, events } of results) {
       streams.set(region, events);
     }
-    
+
     return streams;
   }
 
-  private reconstructFromGlobalEvents(events: TradingEvent[]): GlobalTradingAccount {
+  private reconstructFromGlobalEvents(
+    events: TradingEvent[]
+  ): GlobalTradingAccount {
     // Reconstruct account state from globally ordered events
-    let account: GlobalTradingAccount = this.createEmptyAccount(events[0]?.aggregateId);
-    
+    let account: GlobalTradingAccount = this.createEmptyAccount(
+      events[0]?.aggregateId
+    );
+
     for (const event of events) {
       account = this.applyEventToAccount(account, event);
     }
-    
+
     return account;
   }
 }
 
 // Supporting classes and types for advanced distributed operations
 class TradingEventConflictResolver {
-  async resolveConflict(conflictingEvents: TradingEvent[]): Promise<ConflictResolution> {
+  async resolveConflict(
+    conflictingEvents: TradingEvent[]
+  ): Promise<ConflictResolution> {
     // Implement sophisticated conflict resolution logic
     // considering business rules, timestamps, regional priorities
-    
+
     const strategy = this.selectResolutionStrategy(conflictingEvents);
-    
+
     switch (strategy) {
       case 'last-writer-wins':
         return this.resolveByTimestamp(conflictingEvents);
-      
+
       case 'business-rule-priority':
         return this.resolveByBusinessRules(conflictingEvents);
-      
+
       case 'merge-compatible':
         return this.mergeCompatibleEvents(conflictingEvents);
-      
+
       default:
         throw new Error(`Unknown resolution strategy: ${strategy}`);
     }
   }
-  
-  private selectResolutionStrategy(events: TradingEvent[]): ConflictResolutionStrategy {
+
+  private selectResolutionStrategy(
+    events: TradingEvent[]
+  ): ConflictResolutionStrategy {
     // Analyze events to determine best resolution strategy
     return 'business-rule-priority'; // Simplified
   }
@@ -482,14 +532,14 @@ class GlobalStateSyncCoordinator {
     private regionalStores: Map<string, RegionalEventStore>,
     private consistencyManager: GlobalConsistencyManager
   ) {}
-  
+
   async analyzeDrift(accountId: EntityId): Promise<DriftAnalysis> {
     // Compare account states across regions to detect drift
     const regionalStates = await this.gatherRegionalStates(accountId);
-    
+
     return this.calculateDrift(regionalStates);
   }
-  
+
   async executeFullSync(accountId: EntityId): Promise<SyncResult> {
     // Implement full synchronization logic
     return { correctedEvents: [], regionsInvolved: [] };
@@ -504,14 +554,14 @@ async function demonstrateDistributedEventSourcing() {
     new Map([
       ['us-east', new RegionalEventStore('us-east')],
       ['eu-west', new RegionalEventStore('eu-west')],
-      ['asia-pacific', new RegionalEventStore('asia-pacific')]
+      ['asia-pacific', new RegionalEventStore('asia-pacific')],
     ])
   );
 
   const accountId = EntityId.fromString('trading-account-123');
-  
+
   console.log('=== Global Trading Operations ===');
-  
+
   // Global event persistence with ordering
   const tradingEvents: TradingEvent[] = [
     {
@@ -521,8 +571,8 @@ async function demonstrateDistributedEventSourcing() {
       eventData: { symbol: 'AAPL', quantity: 1000, price: 150.25 },
       timestamp: new Date(),
       globalSequenceNumber: 0, // Will be assigned
-      globalTimestamp: new Date()
-    }
+      globalTimestamp: new Date(),
+    },
   ];
 
   const writeResult = await globalRepo.saveEventsGlobally(
@@ -531,20 +581,26 @@ async function demonstrateDistributedEventSourcing() {
     0,
     { region: 'us-east', lastKnownSequences: new Map() }
   );
-  
+
   console.log('Global write result:', writeResult.success);
-  
+
   // Retrieve with different consistency levels
-  const eventualAccount = await globalRepo.getGlobalAccount(accountId, 'eventual');
+  const eventualAccount = await globalRepo.getGlobalAccount(
+    accountId,
+    'eventual'
+  );
   const strongAccount = await globalRepo.getGlobalAccount(accountId, 'strong');
-  const linearizableAccount = await globalRepo.getGlobalAccount(accountId, 'linearizable');
-  
+  const linearizableAccount = await globalRepo.getGlobalAccount(
+    accountId,
+    'linearizable'
+  );
+
   console.log('Retrieved accounts with different consistency levels');
-  
+
   // Global synchronization
   const syncResult = await globalRepo.synchronizeGlobalState(accountId, false);
   console.log('Sync result:', syncResult.success);
-  
+
   // Global metrics
   const metrics = await globalRepo.getGlobalRepositoryMetrics(
     { start: new Date(Date.now() - 3600000), end: new Date() },
@@ -582,6 +638,7 @@ interface ConflictResolution {
 ```
 
 ## Key Features
+
 - Global event ordering with microsecond precision across regions
 - Sophisticated conflict resolution algorithms for concurrent events
 - Cross-region replication with eventual and strong consistency options
@@ -590,6 +647,7 @@ interface ConflictResolution {
 - Regional failover capabilities with automatic traffic redirection
 
 ## Common Pitfalls
+
 - Not handling network partitions properly in distributed consensus
 - Underestimating the complexity of cross-region clock synchronization
 - Poor conflict resolution strategies leading to data inconsistency
@@ -597,5 +655,6 @@ interface ConflictResolution {
 - Not planning for regional failover scenarios from the beginning
 
 ## Related Examples
+
 - [High-Performance Repository](example-2.md) - Optimized for extreme throughput
 - [AI-Powered Repository](example-3.md) - Machine learning integration

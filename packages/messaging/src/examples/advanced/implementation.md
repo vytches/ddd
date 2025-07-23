@@ -1,13 +1,17 @@
 # Enterprise Saga Orchestration Implementation
 
-**Focus**: Enterprise saga orchestration with policies, events, and comprehensive fault tolerance  
+**Focus**: Enterprise saga orchestration with policies, events, and
+comprehensive fault tolerance  
 **Domain**: Cross-Border Payment System  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/policies, @vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/policies,
+@vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates enterprise-grade saga orchestration for a cross-border payment system that requires:
+This example demonstrates enterprise-grade saga orchestration for a cross-border
+payment system that requires:
+
 - Policy-driven saga behavior based on compliance requirements
 - Integration with events system for comprehensive audit trail
 - Resilience patterns for reliable cross-border communication
@@ -18,32 +22,32 @@ This example demonstrates enterprise-grade saga orchestration for a cross-border
 
 ```typescript
 // cross-border-payment-saga.ts
-import { 
-  BaseSaga, 
-  SagaState, 
+import {
+  BaseSaga,
+  SagaState,
   SagaStatus,
   ISagaActionResult,
   ISagaExecutionContext,
-  SagaStep 
+  SagaStep,
 } from '@vytches-ddd/messaging';
-import { 
-  PolicyBuilder, 
-  PolicyContext, 
-  ISpecification 
+import {
+  PolicyBuilder,
+  PolicyContext,
+  ISpecification,
 } from '@vytches-ddd/policies';
 import { DomainEvent } from '@vytches-ddd/events';
-import { 
+import {
   ResiliencePolicyBuilder,
-  CircuitBreakerState 
+  CircuitBreakerState,
 } from '@vytches-ddd/resilience';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  PaymentRequest, 
-  ComplianceCheck, 
-  ExchangeRate, 
+import {
+  PaymentRequest,
+  ComplianceCheck,
+  ExchangeRate,
   PaymentStatus,
-  CompensationAction
+  CompensationAction,
 } from '../types'; // ALWAYS import from app
 
 // Domain events for saga orchestration
@@ -66,7 +70,7 @@ export class CrossBorderPaymentInitiatedEvent extends DomainEvent {
       sourceCurrency,
       targetCurrency,
       paymentPurpose,
-      initiatedAt
+      initiatedAt,
     });
   }
 }
@@ -82,7 +86,7 @@ export class SagaStepCompletedEvent extends DomainEvent {
       sagaId,
       stepName,
       stepResult,
-      completedAt
+      completedAt,
     });
   }
 }
@@ -100,7 +104,7 @@ export class SagaCompensationTriggeredEvent extends DomainEvent {
       failedStep,
       compensationSteps,
       reason,
-      triggeredAt
+      triggeredAt,
     });
   }
 }
@@ -108,7 +112,7 @@ export class SagaCompensationTriggeredEvent extends DomainEvent {
 // Policy specifications for cross-border payments
 class HighValuePaymentSpec implements ISpecification<PaymentRequest> {
   constructor(private threshold: number) {}
-  
+
   isSatisfiedBy(payment: PaymentRequest): boolean {
     return payment.amount > this.threshold;
   }
@@ -116,7 +120,7 @@ class HighValuePaymentSpec implements ISpecification<PaymentRequest> {
 
 class SanctionedCountrySpec implements ISpecification<PaymentRequest> {
   constructor(private sanctionedCountries: string[]) {}
-  
+
   isSatisfiedBy(payment: PaymentRequest): boolean {
     return this.sanctionedCountries.includes(payment.destinationCountry);
   }
@@ -157,21 +161,23 @@ export class CrossBorderPaymentSaga extends BaseSaga {
         recoveryTimeout: 60000,
         onStateChange: (previous, current, reason) => {
           this.handleCircuitBreakerStateChange(previous, current, reason);
-        }
+        },
       })
       .withRetry({
         maxAttempts: 3,
         baseDelay: 2000,
         maxDelay: 30000,
         backoffMultiplier: 2,
-        shouldRetry: (error) => {
-          return error.message.includes('timeout') || 
-                 error.message.includes('rate limit') ||
-                 error.message.includes('temporarily unavailable');
-        }
+        shouldRetry: error => {
+          return (
+            error.message.includes('timeout') ||
+            error.message.includes('rate limit') ||
+            error.message.includes('temporarily unavailable')
+          );
+        },
       })
       .withTimeout({
-        timeout: 30000
+        timeout: 30000,
       })
       .build();
   }
@@ -189,18 +195,21 @@ export class CrossBorderPaymentSaga extends BaseSaga {
         previousState: previous,
         currentState: current,
         reason,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
   // Main saga orchestration method
-  async handleEvent(event: any, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  async handleEvent(
+    event: any,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     try {
       this.logger.info('Saga handling event', {
         sagaId: this.sagaId,
         eventType: event.eventType,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       });
 
       switch (event.eventType) {
@@ -217,19 +226,19 @@ export class CrossBorderPaymentSaga extends BaseSaga {
         default:
           return {
             success: false,
-            error: { message: 'Unhandled event type', code: 'UNHANDLED_EVENT' }
+            error: { message: 'Unhandled event type', code: 'UNHANDLED_EVENT' },
           };
       }
     } catch (error) {
       this.logger.error('Saga event handling failed', {
         sagaId: this.sagaId,
         eventType: event.eventType,
-        error: error.message
+        error: error.message,
       });
 
       return {
         success: false,
-        error: { message: error.message, code: 'SAGA_EXECUTION_ERROR' }
+        error: { message: error.message, code: 'SAGA_EXECUTION_ERROR' },
       };
     }
   }
@@ -243,19 +252,22 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       this.sagaState.updateState({
         currentStep: 'compliance-check',
         paymentData: event.payload,
-        startedAt: new Date()
+        startedAt: new Date(),
       });
 
       // Evaluate payment policies
-      const policyResult = await this.evaluatePaymentPolicies(event.payload, context);
-      
+      const policyResult = await this.evaluatePaymentPolicies(
+        event.payload,
+        context
+      );
+
       if (policyResult.isFailure()) {
         return {
           success: false,
-          error: { 
-            message: `Policy violation: ${policyResult.error.message}`, 
-            code: 'POLICY_VIOLATION' 
-          }
+          error: {
+            message: `Policy violation: ${policyResult.error.message}`,
+            code: 'POLICY_VIOLATION',
+          },
         };
       }
 
@@ -270,7 +282,7 @@ export class CrossBorderPaymentSaga extends BaseSaga {
             amount: event.amount,
             sourceCurrency: event.sourceCurrency,
             targetCurrency: event.targetCurrency,
-            paymentPurpose: event.paymentPurpose
+            paymentPurpose: event.paymentPurpose,
           });
         },
         context
@@ -279,33 +291,37 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       if (complianceResult.isFailure()) {
         return {
           success: false,
-          error: { 
-            message: `Compliance check failed: ${complianceResult.error.message}`, 
-            code: 'COMPLIANCE_FAILED' 
-          }
+          error: {
+            message: `Compliance check failed: ${complianceResult.error.message}`,
+            code: 'COMPLIANCE_FAILED',
+          },
         };
       }
 
       // Publish step completion event
-      await this.publishStepCompletedEvent('compliance-check', complianceResult.value);
+      await this.publishStepCompletedEvent(
+        'compliance-check',
+        complianceResult.value
+      );
 
       return {
         success: true,
         nextStep: 'exchange-rate',
-        commands: [{
-          type: 'GetExchangeRate',
-          payload: {
-            sourceCurrency: event.sourceCurrency,
-            targetCurrency: event.targetCurrency,
-            amount: event.amount
-          }
-        }]
+        commands: [
+          {
+            type: 'GetExchangeRate',
+            payload: {
+              sourceCurrency: event.sourceCurrency,
+              targetCurrency: event.targetCurrency,
+              amount: event.amount,
+            },
+          },
+        ],
       };
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'INITIATION_FAILED' }
+        error: { message: error.message, code: 'INITIATION_FAILED' },
       };
     }
   }
@@ -317,7 +333,7 @@ export class CrossBorderPaymentSaga extends BaseSaga {
     try {
       this.sagaState.updateState({
         currentStep: 'exchange-rate',
-        complianceResult: event.payload
+        complianceResult: event.payload,
       });
 
       // Get exchange rate with resilience
@@ -335,32 +351,36 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       if (exchangeRateResult.isFailure()) {
         return {
           success: false,
-          error: { 
-            message: `Exchange rate failed: ${exchangeRateResult.error.message}`, 
-            code: 'EXCHANGE_RATE_FAILED' 
-          }
+          error: {
+            message: `Exchange rate failed: ${exchangeRateResult.error.message}`,
+            code: 'EXCHANGE_RATE_FAILED',
+          },
         };
       }
 
-      await this.publishStepCompletedEvent('exchange-rate', exchangeRateResult.value);
+      await this.publishStepCompletedEvent(
+        'exchange-rate',
+        exchangeRateResult.value
+      );
 
       return {
         success: true,
         nextStep: 'payment-execution',
-        commands: [{
-          type: 'ExecutePayment',
-          payload: {
-            ...this.sagaState.getState().paymentData,
-            exchangeRate: exchangeRateResult.value,
-            complianceApproval: event.payload.approvalId
-          }
-        }]
+        commands: [
+          {
+            type: 'ExecutePayment',
+            payload: {
+              ...this.sagaState.getState().paymentData,
+              exchangeRate: exchangeRateResult.value,
+              complianceApproval: event.payload.approvalId,
+            },
+          },
+        ],
       };
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'COMPLIANCE_PROCESSING_FAILED' }
+        error: { message: error.message, code: 'COMPLIANCE_PROCESSING_FAILED' },
       };
     }
   }
@@ -372,7 +392,7 @@ export class CrossBorderPaymentSaga extends BaseSaga {
     try {
       this.sagaState.updateState({
         currentStep: 'payment-execution',
-        exchangeRate: event.payload
+        exchangeRate: event.payload,
       });
 
       // Execute payment with resilience
@@ -388,7 +408,7 @@ export class CrossBorderPaymentSaga extends BaseSaga {
             sourceCurrency: state.paymentData.sourceCurrency,
             targetCurrency: state.paymentData.targetCurrency,
             exchangeRate: state.exchangeRate,
-            complianceApproval: state.complianceResult.approvalId
+            complianceApproval: state.complianceResult.approvalId,
           });
         },
         context
@@ -397,32 +417,39 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       if (paymentResult.isFailure()) {
         return {
           success: false,
-          error: { 
-            message: `Payment execution failed: ${paymentResult.error.message}`, 
-            code: 'PAYMENT_EXECUTION_FAILED' 
-          }
+          error: {
+            message: `Payment execution failed: ${paymentResult.error.message}`,
+            code: 'PAYMENT_EXECUTION_FAILED',
+          },
         };
       }
 
-      await this.publishStepCompletedEvent('payment-execution', paymentResult.value);
+      await this.publishStepCompletedEvent(
+        'payment-execution',
+        paymentResult.value
+      );
 
       return {
         success: true,
         nextStep: 'notification',
-        commands: [{
-          type: 'SendNotification',
-          payload: {
-            paymentId: paymentResult.value.paymentId,
-            status: 'completed',
-            recipients: ['sender', 'receiver']
-          }
-        }]
+        commands: [
+          {
+            type: 'SendNotification',
+            payload: {
+              paymentId: paymentResult.value.paymentId,
+              status: 'completed',
+              recipients: ['sender', 'receiver'],
+            },
+          },
+        ],
       };
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'EXCHANGE_RATE_PROCESSING_FAILED' }
+        error: {
+          message: error.message,
+          code: 'EXCHANGE_RATE_PROCESSING_FAILED',
+        },
       };
     }
   }
@@ -435,14 +462,14 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       this.sagaState.updateState({
         currentStep: 'notification',
         paymentResult: event.payload,
-        status: SagaStatus.COMPLETED
+        status: SagaStatus.COMPLETED,
       });
 
       // Send notification
       await this.notificationService.sendPaymentCompletedNotification({
         paymentId: event.payload.paymentId,
         status: 'completed',
-        completedAt: new Date()
+        completedAt: new Date(),
       });
 
       await this.publishStepCompletedEvent('notification', { status: 'sent' });
@@ -450,19 +477,20 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       return {
         success: true,
         sagaStatus: SagaStatus.COMPLETED,
-        events: [{
-          eventType: 'CrossBorderPaymentCompleted',
-          payload: {
-            paymentId: event.payload.paymentId,
-            completedAt: new Date()
-          }
-        }]
+        events: [
+          {
+            eventType: 'CrossBorderPaymentCompleted',
+            payload: {
+              paymentId: event.payload.paymentId,
+              completedAt: new Date(),
+            },
+          },
+        ],
       };
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'NOTIFICATION_FAILED' }
+        error: { message: error.message, code: 'NOTIFICATION_FAILED' },
       };
     }
   }
@@ -475,75 +503,84 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       this.logger.error('Payment failed, triggering compensation', {
         sagaId: this.sagaId,
         paymentId: event.payload.paymentId,
-        reason: event.payload.reason
+        reason: event.payload.reason,
       });
 
       // Trigger compensation
-      const compensationResult = await this.compensate('payment-execution', context);
-      
+      const compensationResult = await this.compensate(
+        'payment-execution',
+        context
+      );
+
       if (compensationResult.success) {
         this.sagaState.updateState({
           status: SagaStatus.COMPENSATED,
           compensationReason: event.payload.reason,
-          compensatedAt: new Date()
+          compensatedAt: new Date(),
         });
 
         return {
           success: true,
           sagaStatus: SagaStatus.COMPENSATED,
-          events: [{
-            eventType: 'CrossBorderPaymentCompensated',
-            payload: {
-              paymentId: event.payload.paymentId,
-              reason: event.payload.reason,
-              compensatedAt: new Date()
-            }
-          }]
+          events: [
+            {
+              eventType: 'CrossBorderPaymentCompensated',
+              payload: {
+                paymentId: event.payload.paymentId,
+                reason: event.payload.reason,
+                compensatedAt: new Date(),
+              },
+            },
+          ],
         };
       } else {
         this.sagaState.updateState({
           status: SagaStatus.FAILED,
           failureReason: event.payload.reason,
-          failedAt: new Date()
+          failedAt: new Date(),
         });
 
         return {
           success: false,
           sagaStatus: SagaStatus.FAILED,
-          error: { 
-            message: `Payment failed and compensation failed: ${compensationResult.error?.message}`, 
-            code: 'COMPENSATION_FAILED' 
-          }
+          error: {
+            message: `Payment failed and compensation failed: ${compensationResult.error?.message}`,
+            code: 'COMPENSATION_FAILED',
+          },
         };
       }
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'FAILURE_HANDLING_ERROR' }
+        error: { message: error.message, code: 'FAILURE_HANDLING_ERROR' },
       };
     }
   }
 
   // Compensation logic
-  async compensate(stepName: string, context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  async compensate(
+    stepName: string,
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     try {
       this.logger.info('Starting compensation', {
         sagaId: this.sagaId,
         stepName,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       });
 
       const compensationSteps = this.determineCompensationSteps(stepName);
-      
+
       // Publish compensation event
-      await this.eventBus.publish(new SagaCompensationTriggeredEvent(
-        this.sagaId,
-        stepName,
-        compensationSteps,
-        `Compensation triggered for failed step: ${stepName}`,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new SagaCompensationTriggeredEvent(
+          this.sagaId,
+          stepName,
+          compensationSteps,
+          `Compensation triggered for failed step: ${stepName}`,
+          new Date()
+        )
+      );
 
       // Execute compensation steps
       for (const step of compensationSteps) {
@@ -551,23 +588,22 @@ export class CrossBorderPaymentSaga extends BaseSaga {
         if (stepResult.isFailure()) {
           return {
             success: false,
-            error: { 
-              message: `Compensation step failed: ${step} - ${stepResult.error.message}`, 
-              code: 'COMPENSATION_STEP_FAILED' 
-            }
+            error: {
+              message: `Compensation step failed: ${step} - ${stepResult.error.message}`,
+              code: 'COMPENSATION_STEP_FAILED',
+            },
           };
         }
       }
 
       return {
         success: true,
-        compensationSteps: compensationSteps
+        compensationSteps: compensationSteps,
       };
-
     } catch (error) {
       return {
         success: false,
-        error: { message: error.message, code: 'COMPENSATION_ERROR' }
+        error: { message: error.message, code: 'COMPENSATION_ERROR' },
       };
     }
   }
@@ -626,7 +662,9 @@ export class CrossBorderPaymentSaga extends BaseSaga {
             this.sagaState.getState().paymentData.paymentId
           );
         default:
-          return Result.failure(new Error(`Unknown compensation step: ${step}`));
+          return Result.failure(
+            new Error(`Unknown compensation step: ${step}`)
+          );
       }
     } catch (error) {
       return Result.failure(error);
@@ -639,8 +677,11 @@ export class CrossBorderPaymentSaga extends BaseSaga {
     context: ISagaExecutionContext
   ): Promise<Result<void, Error>> {
     try {
-      const policyResult = await this.policyEngine.evaluatePayment(paymentData, context);
-      
+      const policyResult = await this.policyEngine.evaluatePayment(
+        paymentData,
+        context
+      );
+
       if (policyResult.isFailure()) {
         await this.eventBus.publish({
           eventType: 'PaymentPolicyViolation',
@@ -648,8 +689,8 @@ export class CrossBorderPaymentSaga extends BaseSaga {
             sagaId: this.sagaId,
             paymentId: paymentData.paymentId,
             violations: policyResult.error.violations,
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         });
       }
 
@@ -667,11 +708,11 @@ export class CrossBorderPaymentSaga extends BaseSaga {
   ): Promise<Result<T, Error>> {
     try {
       const result = await this.resiliencePolicy.execute(operation);
-      
+
       this.logger.info('Saga step executed successfully', {
         sagaId: this.sagaId,
         stepName,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       });
 
       return Result.success(result);
@@ -680,20 +721,20 @@ export class CrossBorderPaymentSaga extends BaseSaga {
         sagaId: this.sagaId,
         stepName,
         correlationId: context.correlationId,
-        error: error.message
+        error: error.message,
       });
 
       return Result.failure(error);
     }
   }
 
-  private async publishStepCompletedEvent(stepName: string, result: any): Promise<void> {
-    await this.eventBus.publish(new SagaStepCompletedEvent(
-      this.sagaId,
-      stepName,
-      result,
-      new Date()
-    ));
+  private async publishStepCompletedEvent(
+    stepName: string,
+    result: any
+  ): Promise<void> {
+    await this.eventBus.publish(
+      new SagaStepCompletedEvent(this.sagaId, stepName, result, new Date())
+    );
   }
 
   // Saga metadata
@@ -703,7 +744,7 @@ export class CrossBorderPaymentSaga extends BaseSaga {
       'ComplianceCheckCompleted',
       'ExchangeRateObtained',
       'PaymentExecuted',
-      'PaymentFailed'
+      'PaymentFailed',
     ].includes(event.eventType);
   }
 
@@ -766,13 +807,22 @@ export class PaymentPolicyEngine {
         .build();
 
       // Evaluate all policies
-      const policies = [this.highValuePolicy, this.sanctionsPolicy, this.compliancePolicy];
-      
+      const policies = [
+        this.highValuePolicy,
+        this.sanctionsPolicy,
+        this.compliancePolicy,
+      ];
+
       for (const policy of policies) {
-        const result = await policy.check({ entity: paymentData, context: policyContext });
-        
+        const result = await policy.check({
+          entity: paymentData,
+          context: policyContext,
+        });
+
         if (result.isFailure()) {
-          return Result.failure(new Error(`Policy violation: ${result.error.message}`));
+          return Result.failure(
+            new Error(`Policy violation: ${result.error.message}`)
+          );
         }
       }
 
@@ -784,17 +834,17 @@ export class PaymentPolicyEngine {
 }
 
 // enterprise-saga-orchestrator.ts
-import { 
-  SagaOrchestrator, 
+import {
+  SagaOrchestrator,
   ISagaDefinition,
-  InMemorySagaRepository 
+  InMemorySagaRepository,
 } from '@vytches-ddd/messaging';
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
 
 // ⭐ Enterprise Saga Orchestrator with Full Integration
 @DomainService('enterpriseSagaOrchestrator', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'PaymentProcessing'
+  context: 'PaymentProcessing',
 })
 export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
   private logger = Logger.forContext('EnterpriseSagaOrchestrator');
@@ -812,15 +862,15 @@ export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
       retentionPolicy: {
         completedAfterDays: 30,
         compensatedAfterDays: 90,
-        failedAfterDays: 180
-      }
+        failedAfterDays: 180,
+      },
     });
 
     super(sagaRepository, {
       maxConcurrentExecutions: 100,
       enableMetrics: true,
       enableAutoRetry: true,
-      enableCircuitBreaker: true
+      enableCircuitBreaker: true,
     });
 
     this.registerSagas();
@@ -831,7 +881,8 @@ export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
     const crossBorderPaymentSaga: ISagaDefinition = {
       sagaType: 'CrossBorderPaymentSaga',
       displayName: 'Cross-Border Payment Processing',
-      description: 'Handles cross-border payment processing with compliance and exchange rate management',
+      description:
+        'Handles cross-border payment processing with compliance and exchange rate management',
       startEvents: ['CrossBorderPaymentInitiated'],
       defaultTimeout: 1800000, // 30 minutes
       maxInstances: 1000,
@@ -839,7 +890,7 @@ export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
         { name: 'compliance-check', timeout: 300000, retries: 3 },
         { name: 'exchange-rate', timeout: 60000, retries: 2 },
         { name: 'payment-execution', timeout: 600000, retries: 1 },
-        { name: 'notification', timeout: 30000, retries: 3 }
+        { name: 'notification', timeout: 30000, retries: 3 },
       ],
       createInstance: async (event, context) => {
         return new CrossBorderPaymentSaga(
@@ -850,20 +901,21 @@ export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
           this.notificationService
         );
       },
-      getCorrelationData: (event) => ({ paymentId: event.payload.paymentId }),
-      validate: (event) => {
+      getCorrelationData: event => ({ paymentId: event.payload.paymentId }),
+      validate: event => {
         const errors = [];
         if (!event.payload.paymentId) errors.push('paymentId is required');
-        if (!event.payload.amount || event.payload.amount <= 0) errors.push('amount must be positive');
+        if (!event.payload.amount || event.payload.amount <= 0)
+          errors.push('amount must be positive');
         return errors;
-      }
+      },
     };
 
     this.registerSagaDefinition(crossBorderPaymentSaga);
 
     this.logger.info('Enterprise saga orchestrator initialized', {
       registeredSagas: 1,
-      maxConcurrentExecutions: 100
+      maxConcurrentExecutions: 100,
     });
   }
 }
@@ -874,7 +926,8 @@ export class EnterpriseSagaOrchestrator extends SagaOrchestrator {
 - **Policy-Driven Behavior**: Business rules determine saga execution paths
 - **Comprehensive Resilience**: Circuit breaker, retry, and timeout patterns
 - **Event-Driven Architecture**: Full integration with events system
-- **Advanced Compensation**: Sophisticated rollback logic for failed transactions
+- **Advanced Compensation**: Sophisticated rollback logic for failed
+  transactions
 - **Regulatory Compliance**: Complete audit trail and monitoring
 - **Enterprise Orchestration**: Scalable saga management with metrics
 
@@ -907,7 +960,7 @@ export class PaymentController {
       // Start saga through orchestrator
       const sagaResult = await this.sagaOrchestrator.processEvent(event, {
         correlationId: paymentRequest.paymentId,
-        userId: paymentRequest.initiatorId
+        userId: paymentRequest.initiatorId,
       });
 
       if (sagaResult.isFailure()) {
@@ -915,11 +968,12 @@ export class PaymentController {
       }
 
       return Result.success({
-        sagaId: sagaResult.value.sagaId
+        sagaId: sagaResult.value.sagaId,
       });
-
     } catch (error) {
-      return Result.failure(new Error(`Payment initiation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment initiation failed: ${error.message}`)
+      );
     }
   }
 
@@ -930,12 +984,12 @@ export class PaymentController {
     errors: any[];
   }> {
     const saga = await this.sagaOrchestrator.getSaga(sagaId);
-    
+
     return {
       status: saga.status,
       currentStep: saga.currentStep,
       completedSteps: saga.completedSteps,
-      errors: saga.errors
+      errors: saga.errors,
     };
   }
 }
@@ -944,8 +998,11 @@ export class PaymentController {
 ## Common Pitfalls
 
 - **Saga Complexity**: Keep sagas focused on orchestration, not business logic
-- **Compensation Order**: Ensure compensation steps are executed in reverse order
+- **Compensation Order**: Ensure compensation steps are executed in reverse
+  order
 - **State Management**: Maintain consistent saga state across failures
-- **Policy Integration**: Don't duplicate business rules between policies and sagas
+- **Policy Integration**: Don't duplicate business rules between policies and
+  sagas
 - **Timeout Configuration**: Set appropriate timeouts for external service calls
-- **Event Correlation**: Maintain proper correlation IDs throughout the saga lifecycle
+- **Event Correlation**: Maintain proper correlation IDs throughout the saga
+  lifecycle

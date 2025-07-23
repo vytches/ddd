@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import type { PackageExampleConfig } from '../types/example-types';
 import path from 'path';
 import fs from 'fs/promises';
@@ -25,14 +26,7 @@ export class PackageConfigLoader {
       }
     }
 
-    const configPath = path.join(
-      rootDir,
-      'packages',
-      packageName,
-      'src',
-      'examples',
-      'config.ts'
-    );
+    const configPath = path.join(rootDir, 'packages', packageName, 'src', 'examples', 'config.ts');
 
     try {
       // Check if config file exists
@@ -42,7 +36,7 @@ export class PackageConfigLoader {
       const configModule = await import(configPath);
 
       // Try different export patterns
-      const camelCasePackageName = packageName.replace(/-([a-z])/g, (g) => g[1]?.toUpperCase() || '');
+      const camelCasePackageName = packageName.replace(/-([a-z])/g, g => g[1]?.toUpperCase() || '');
       const config =
         configModule.default ||
         configModule[`${packageName}ExampleConfig`] ||
@@ -62,7 +56,9 @@ export class PackageConfigLoader {
 
       return config;
     } catch (error) {
-      throw new Error(`Failed to load package config for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load package config for ${packageName}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -105,7 +101,9 @@ export class PackageConfigLoader {
 
       return packages.sort();
     } catch (error) {
-      throw new Error(`Failed to read packages directory: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to read packages directory: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

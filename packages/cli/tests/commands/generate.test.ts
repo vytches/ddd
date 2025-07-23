@@ -68,8 +68,12 @@ describe('generateCommand', () => {
     });
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -78,7 +82,9 @@ describe('generateCommand', () => {
   describe('command configuration', () => {
     it('should have correct name and description', () => {
       expect(generateCommand.name).toBe('generate');
-      expect(generateCommand.description).toBe('Generate DDD components, patterns, and complete domains');
+      expect(generateCommand.description).toBe(
+        'Generate DDD components, patterns, and complete domains'
+      );
       expect(generateCommand.aliases).toEqual(['g']);
     });
 
@@ -99,7 +105,7 @@ describe('generateCommand', () => {
 
     it('should have examples', () => {
       expect(generateCommand.examples).toBeDefined();
-      expect((generateCommand.examples as any[] || []).length).toBeGreaterThan(0);
+      expect(((generateCommand.examples as any[]) || []).length).toBeGreaterThan(0);
     });
   });
 
@@ -149,7 +155,7 @@ describe('generateCommand', () => {
         noRandomize: true,
         seed: 'test-seed',
         diOnly: true,
-        output: './custom-output'
+        output: './custom-output',
       };
 
       const [error] = await safeRun(async () => {
@@ -175,7 +181,9 @@ describe('generateCommand', () => {
       const args: string[] = ['invalid-package'];
       const options = {};
 
-      mockDocumentationGenerator.prototype.generate.mockRejectedValue(new Error('Package not found'));
+      mockDocumentationGenerator.prototype.generate.mockRejectedValue(
+        new Error('Package not found')
+      );
 
       const [error] = await safeRun(async () => {
         await generateCommand.action(args, options);
@@ -193,7 +201,7 @@ describe('generateCommand', () => {
         type: 'aggregate',
         name: 'Order',
         output: './src',
-        framework: 'standalone'
+        framework: 'standalone',
       };
 
       const [error] = await safeRun(async () => {
@@ -209,7 +217,7 @@ describe('generateCommand', () => {
       const options = {
         example: 'order-example',
         name: 'CustomerOrder',
-        framework: 'nestjs'
+        framework: 'nestjs',
       };
 
       // Mock example finding
@@ -234,13 +242,13 @@ describe('generateCommand', () => {
       const args: string[] = [];
       const options = {
         example: 'non-existent-example',
-        name: 'Test'
+        name: 'Test',
       };
 
       // Mock example not found
       mockDocumentationRegistry.findById.mockReturnValue(null);
       mockDocumentationRegistry.query.mockReturnValue([
-        { id: 'similar-example', name: 'Similar Example' }
+        { id: 'similar-example', name: 'Similar Example' },
       ]);
 
       const [error] = await safeRun(async () => {
@@ -257,7 +265,7 @@ describe('generateCommand', () => {
       const options = {
         domain: 'ecommerce',
         fullDomain: true,
-        output: './src'
+        output: './src',
       };
 
       const [error] = await safeRun(async () => {
@@ -271,7 +279,7 @@ describe('generateCommand', () => {
       const args: string[] = [];
       const options = {
         domain: 'ecommerce',
-        output: './src'
+        output: './src',
         // fullDomain: false (default)
       };
 
@@ -377,7 +385,7 @@ describe('generateCommand', () => {
     it('should trigger interactive mode when no type specified', async () => {
       const args: string[] = [];
       const options = {
-        name: 'Order'
+        name: 'Order',
         // type: undefined
       };
 
@@ -391,7 +399,7 @@ describe('generateCommand', () => {
     it('should trigger interactive mode when no name specified', async () => {
       const args: string[] = [];
       const options = {
-        type: 'aggregate'
+        type: 'aggregate',
         // name: undefined
       };
 
@@ -407,7 +415,7 @@ describe('generateCommand', () => {
       const options = {
         interactive: true,
         type: 'aggregate',
-        name: 'Order'
+        name: 'Order',
       };
 
       const [error] = await safeRun(async () => {
@@ -583,9 +591,7 @@ describe('generateCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Test template not found')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Test template not found'));
     });
   });
 
@@ -602,9 +608,7 @@ describe('generateCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Generation completed in')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Generation completed in'));
     });
   });
 });

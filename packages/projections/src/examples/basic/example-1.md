@@ -1,48 +1,51 @@
 # Simple Event Projection
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: basic
-**Domain**: Event Sourcing
-**Patterns**: Event projection, read models, event handling
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Domain**: Event Sourcing **Patterns**: Event projection, read models, event
+handling **Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
 
 ## Description
 
-Basic event projection implementation that creates read models from domain events. This example demonstrates the fundamental concepts of event projections, including event handling, state building, and read model generation for efficient querying.
+Basic event projection implementation that creates read models from domain
+events. This example demonstrates the fundamental concepts of event projections,
+including event handling, state building, and read model generation for
+efficient querying.
 
 ## Business Context
 
 Applications need optimized views for different use cases:
+
 - User profiles aggregated from registration and update events
 - Order summaries combining multiple order-related events
 - Product catalogs built from inventory and pricing events
 - Dashboard metrics calculated from business activity events
 
-Event projections transform write-side events into read-optimized data structures, enabling fast queries and reporting without impacting the write side performance.
+Event projections transform write-side events into read-optimized data
+structures, enabling fast queries and reporting without impacting the write side
+performance.
 
 ## Code Example
 
 ```typescript
 // simple-event-projection.ts
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   ProjectionProcessor,
-  EventHandler 
+  EventHandler,
 } from '@vytches-ddd/projections';
 import { IDomainEvent } from '@vytches-ddd/events';
-import { 
+import {
   UserData,
   ProjectionData,
   ProjectionMetadata,
-  ProjectionEventType 
+  ProjectionEventType,
 } from '../types';
 
 // ✅ FOCUS: Simple event projection implementation
 export class UserProfileProjection extends ProjectionBase<UserData> {
   constructor() {
     super('UserProfileProjection', 'v1.0');
-    
+
     // Initialize with empty state
     this.setState({
       users: new Map<string, UserData>(),
@@ -56,7 +59,7 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   @EventHandler('UserRegistered')
   async onUserRegistered(event: IDomainEvent): Promise<void> {
     const userData = event.payload;
-    
+
     try {
       // Create user profile from registration data
       const userProfile: UserData = {
@@ -79,8 +82,9 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
       this.setState(currentState);
 
       // Log successful projection update
-      console.log(`User profile created: ${userProfile.name} (${userProfile.id})`);
-      
+      console.log(
+        `User profile created: ${userProfile.name} (${userProfile.id})`
+      );
     } catch (error) {
       console.error('Error processing UserRegistered event:', error);
       throw error;
@@ -91,11 +95,11 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   @EventHandler('UserProfileUpdated')
   async onUserProfileUpdated(event: IDomainEvent): Promise<void> {
     const updateData = event.payload;
-    
+
     try {
       const currentState = this.getState();
       const existingUser = currentState.users.get(updateData.userId);
-      
+
       if (!existingUser) {
         console.warn(`User ${updateData.userId} not found for profile update`);
         return;
@@ -115,11 +119,12 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
 
       currentState.users.set(updatedUser.id, updatedUser);
       currentState.lastUpdated = new Date();
-      
+
       this.setState(currentState);
 
-      console.log(`User profile updated: ${updatedUser.name} (${updatedUser.id})`);
-      
+      console.log(
+        `User profile updated: ${updatedUser.name} (${updatedUser.id})`
+      );
     } catch (error) {
       console.error('Error processing UserProfileUpdated event:', error);
       throw error;
@@ -130,11 +135,11 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   @EventHandler('UserLoggedIn')
   async onUserLoggedIn(event: IDomainEvent): Promise<void> {
     const loginData = event.payload;
-    
+
     try {
       const currentState = this.getState();
       const existingUser = currentState.users.get(loginData.userId);
-      
+
       if (!existingUser) {
         console.warn(`User ${loginData.userId} not found for login tracking`);
         return;
@@ -148,11 +153,12 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
 
       currentState.users.set(updatedUser.id, updatedUser);
       currentState.lastUpdated = new Date();
-      
+
       this.setState(currentState);
 
-      console.log(`User login tracked: ${updatedUser.name} at ${updatedUser.lastLoginAt}`);
-      
+      console.log(
+        `User login tracked: ${updatedUser.name} at ${updatedUser.lastLoginAt}`
+      );
     } catch (error) {
       console.error('Error processing UserLoggedIn event:', error);
       throw error;
@@ -163,13 +169,15 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   @EventHandler('UserDeactivated')
   async onUserDeactivated(event: IDomainEvent): Promise<void> {
     const deactivationData = event.payload;
-    
+
     try {
       const currentState = this.getState();
       const existingUser = currentState.users.get(deactivationData.userId);
-      
+
       if (!existingUser) {
-        console.warn(`User ${deactivationData.userId} not found for deactivation`);
+        console.warn(
+          `User ${deactivationData.userId} not found for deactivation`
+        );
         return;
       }
 
@@ -185,14 +193,16 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
       };
 
       currentState.users.set(deactivatedUser.id, deactivatedUser);
-      currentState.activeUsers = Array.from(currentState.users.values())
-        .filter(user => user.role !== 'deactivated').length;
+      currentState.activeUsers = Array.from(currentState.users.values()).filter(
+        user => user.role !== 'deactivated'
+      ).length;
       currentState.lastUpdated = new Date();
-      
+
       this.setState(currentState);
 
-      console.log(`User deactivated: ${deactivatedUser.name} (${deactivatedUser.id})`);
-      
+      console.log(
+        `User deactivated: ${deactivatedUser.name} (${deactivatedUser.id})`
+      );
     } catch (error) {
       console.error('Error processing UserDeactivated event:', error);
       throw error;
@@ -209,28 +219,31 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   }
 
   getActiveUsers(): UserData[] {
-    return Array.from(this.getState().users.values())
-      .filter(user => user.role !== 'deactivated');
+    return Array.from(this.getState().users.values()).filter(
+      user => user.role !== 'deactivated'
+    );
   }
 
   getUsersByRole(role: string): UserData[] {
-    return Array.from(this.getState().users.values())
-      .filter(user => user.role === role);
+    return Array.from(this.getState().users.values()).filter(
+      user => user.role === role
+    );
   }
 
   getRecentlyActiveUsers(daysBack: number = 30): UserData[] {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysBack);
-    
-    return Array.from(this.getState().users.values())
-      .filter(user => user.lastLoginAt && user.lastLoginAt >= cutoffDate);
+
+    return Array.from(this.getState().users.values()).filter(
+      user => user.lastLoginAt && user.lastLoginAt >= cutoffDate
+    );
   }
 
   // Projection statistics and health
   getProjectionStatistics() {
     const state = this.getState();
     const users = Array.from(state.users.values());
-    
+
     return {
       totalUsers: state.totalUsers,
       activeUsers: state.activeUsers,
@@ -246,11 +259,11 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   private getUserRoleDistribution(): Record<string, number> {
     const users = Array.from(this.getState().users.values());
     const distribution: Record<string, number> = {};
-    
+
     users.forEach(user => {
       distribution[user.role] = (distribution[user.role] || 0) + 1;
     });
-    
+
     return distribution;
   }
 
@@ -262,7 +275,7 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
       activeUsers: 0,
       lastUpdated: new Date(),
     });
-    
+
     console.log(`${this.projectionName} has been reset`);
   }
 
@@ -270,34 +283,41 @@ export class UserProfileProjection extends ProjectionBase<UserData> {
   validateState(): { isValid: boolean; errors: string[] } {
     const state = this.getState();
     const errors: string[] = [];
-    
+
     // Check if user count matches map size
     if (state.totalUsers !== state.users.size) {
-      errors.push(`Total user count mismatch: expected ${state.users.size}, got ${state.totalUsers}`);
+      errors.push(
+        `Total user count mismatch: expected ${state.users.size}, got ${state.totalUsers}`
+      );
     }
-    
+
     // Check if active user count is correct
-    const actualActiveUsers = Array.from(state.users.values())
-      .filter(user => user.role !== 'deactivated').length;
+    const actualActiveUsers = Array.from(state.users.values()).filter(
+      user => user.role !== 'deactivated'
+    ).length;
     if (state.activeUsers !== actualActiveUsers) {
-      errors.push(`Active user count mismatch: expected ${actualActiveUsers}, got ${state.activeUsers}`);
+      errors.push(
+        `Active user count mismatch: expected ${actualActiveUsers}, got ${state.activeUsers}`
+      );
     }
-    
+
     // Validate user data integrity
     for (const [id, user] of state.users) {
       if (user.id !== id) {
-        errors.push(`User ID mismatch: map key ${id} does not match user.id ${user.id}`);
+        errors.push(
+          `User ID mismatch: map key ${id} does not match user.id ${user.id}`
+        );
       }
-      
+
       if (!user.email || !user.email.includes('@')) {
         errors.push(`Invalid email for user ${user.id}: ${user.email}`);
       }
-      
+
       if (!user.name || user.name.trim().length === 0) {
         errors.push(`Empty name for user ${user.id}`);
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors,
@@ -326,9 +346,9 @@ export class SimpleProjectionProcessor {
     if (!this.isProcessing) {
       await this.processEventsFromQueue();
     }
-    
+
     this.eventQueue.push(event);
-    
+
     if (!this.isProcessing) {
       await this.processEventsFromQueue();
     }
@@ -340,7 +360,7 @@ export class SimpleProjectionProcessor {
     }
 
     this.isProcessing = true;
-    
+
     try {
       while (this.eventQueue.length > 0) {
         const event = this.eventQueue.shift()!;
@@ -353,9 +373,9 @@ export class SimpleProjectionProcessor {
 
   private async processSingleEvent(event: IDomainEvent): Promise<void> {
     this.processingStats.totalEvents++;
-    
+
     const promises: Promise<void>[] = [];
-    
+
     for (const [name, projection] of this.projections) {
       try {
         // Check if projection can handle this event type
@@ -363,11 +383,14 @@ export class SimpleProjectionProcessor {
           promises.push(projection.handle(event));
         }
       } catch (error) {
-        console.error(`Error processing event ${event.eventType} in projection ${name}:`, error);
+        console.error(
+          `Error processing event ${event.eventType} in projection ${name}:`,
+          error
+        );
         this.processingStats.failedEvents++;
       }
     }
-    
+
     // Process all projections in parallel
     try {
       await Promise.all(promises);
@@ -376,7 +399,7 @@ export class SimpleProjectionProcessor {
       console.error(`Error in parallel projection processing:`, error);
       this.processingStats.failedEvents++;
     }
-    
+
     this.processingStats.lastProcessedAt = new Date();
   }
 
@@ -403,7 +426,7 @@ export class SimpleProjectionProcessor {
     while (this.isProcessing) {
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-    
+
     console.log('Projection processor stopped');
   }
 }
@@ -438,10 +461,10 @@ await processor.processEvent({
     email: 'john@example.com',
     name: 'John Doe',
     role: 'user',
-    preferences: { theme: 'dark' }
+    preferences: { theme: 'dark' },
   },
   timestamp: new Date(),
-  version: 1
+  version: 1,
 });
 
 await processor.processEvent({
@@ -450,10 +473,10 @@ await processor.processEvent({
   aggregateId: 'user-1',
   payload: {
     userId: 'user-1',
-    loginTime: new Date()
+    loginTime: new Date(),
   },
   timestamp: new Date(),
-  version: 2
+  version: 2,
 });
 
 // Query the projection
@@ -480,29 +503,36 @@ console.log('Processing statistics:', processingStats);
 ## Event Handling Patterns
 
 ### **Idempotent Operations**
+
 Handle duplicate events gracefully without corrupting state.
 
-### **State Validation**  
+### **State Validation**
+
 Ensure projection consistency with built-in validation methods.
 
 ### **Error Recovery**
+
 Proper error handling prevents projection corruption from bad events.
 
 ### **Query Optimization**
+
 Provide multiple query methods optimized for different access patterns.
 
 ## Best Practices
 
 - **Single Responsibility**: Each projection handles one specific read model
 - **Event Versioning**: Handle different versions of the same event type
-- **State Immutability**: Create new state objects rather than mutating existing ones
+- **State Immutability**: Create new state objects rather than mutating existing
+  ones
 - **Error Handling**: Graceful handling of malformed or unexpected events
 - **Performance**: Optimize for read patterns, not write complexity
 
 ## Common Pitfalls
 
-- **State Mutations**: Directly modifying projection state can cause race conditions
-- **Missing Events**: Not handling all relevant events leads to incomplete projections
+- **State Mutations**: Directly modifying projection state can cause race
+  conditions
+- **Missing Events**: Not handling all relevant events leads to incomplete
+  projections
 - **Memory Growth**: Long-running projections need cleanup strategies
 - **Event Ordering**: Ensure events are processed in the correct order
 

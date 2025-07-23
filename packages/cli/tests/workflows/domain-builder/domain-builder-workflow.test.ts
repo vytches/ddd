@@ -95,7 +95,7 @@ describe('DomainBuilderWorkflow', () => {
       };
 
       // Mock prompts
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('domain name')) {
           return 'E-commerce Platform';
         }
@@ -171,7 +171,12 @@ describe('DomainBuilderWorkflow', () => {
       const result = await workflow.execute();
 
       expect(result.success).toBe(true);
-      expect(result.boundedContexts).toEqual(['Accounts', 'Transactions', 'Customers', 'Compliance']);
+      expect(result.boundedContexts).toEqual([
+        'Accounts',
+        'Transactions',
+        'Customers',
+        'Compliance',
+      ]);
     });
 
     it('should handle unknown domain defaults', async () => {
@@ -253,29 +258,25 @@ describe('DomainBuilderWorkflow', () => {
     it('should progress through all workflow steps', async () => {
       const workflow = new DomainBuilderWorkflow(mockOptions);
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { return });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        return;
+      });
 
       await workflow.execute();
 
       // Check that progress messages were logged
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(1/6) Domain Discovery')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(1/6) Domain Discovery'));
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(2/6) Architecture Planning')
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(3/6) Bounded Context Mapping')
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(4/6) Pattern Selection')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(4/6) Pattern Selection'));
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(5/6) Security & Compliance')
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(6/6) Code Generation')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(6/6) Code Generation'));
 
       consoleSpy.mockRestore();
     });
@@ -286,7 +287,7 @@ describe('DomainBuilderWorkflow', () => {
       const guidedOptions = {
         ...mockOptions,
         guided: true,
-        domainName:  undefined as unknown as string,
+        domainName: undefined as unknown as string,
       };
 
       vi.mocked(Prompts.ask).mockRejectedValue(new Error('Validation failed'));

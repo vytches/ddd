@@ -5,8 +5,8 @@ import type { Arguments } from 'yargs';
 // Mock dependencies
 vi.mock('../../../src/parsers/unified-parser', () => ({
   UnifiedExampleParser: vi.fn().mockImplementation(() => ({
-    parseExample: vi.fn()
-  }))
+    parseExample: vi.fn(),
+  })),
 }));
 
 vi.mock('../../../src/core/documentation-registry', () => ({
@@ -15,13 +15,17 @@ vi.mock('../../../src/core/documentation-registry', () => ({
     findById: vi.fn(),
     query: vi.fn(),
     getAvailableFrameworks: vi.fn(),
-    getAvailableComponents: vi.fn()
-  }
+    getAvailableComponents: vi.fn(),
+  },
 }));
 
 // Mock console methods
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => { return });
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => { return });
+const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+  return;
+});
+const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+  return;
+});
 const mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
 describe('commands/examples/show', () => {
@@ -37,13 +41,15 @@ describe('commands/examples/show', () => {
     showCommand = await import('../../../src/commands/examples/show');
 
     // Get the mocked dependencies
-    const { globalDocumentationRegistry } = await import('../../../src/core/documentation-registry');
+    const { globalDocumentationRegistry } = await import(
+      '../../../src/core/documentation-registry'
+    );
     const { UnifiedExampleParser } = await import('../../../src/parsers/unified-parser');
 
     mockRegistry = globalDocumentationRegistry;
     mockParser = UnifiedExampleParser;
     mockParserInstance = {
-      parseExample: vi.fn()
+      parseExample: vi.fn(),
     };
     mockParser.mockImplementation(() => mockParserInstance);
 
@@ -56,10 +62,10 @@ describe('commands/examples/show', () => {
     mockParserInstance.parseExample.mockResolvedValue({
       base: {
         content: {
-          businessContext: 'Sample business context'
-        }
+          businessContext: 'Sample business context',
+        },
       },
-      framework: null
+      framework: null,
     });
   });
 
@@ -77,7 +83,7 @@ describe('commands/examples/show', () => {
       const mockYargs = {
         positional: vi.fn().mockReturnThis(),
         option: vi.fn().mockReturnThis(),
-        example: vi.fn().mockReturnThis()
+        example: vi.fn().mockReturnThis(),
       };
 
       showCommand.builder(mockYargs);
@@ -85,20 +91,26 @@ describe('commands/examples/show', () => {
       expect(mockYargs.positional).toHaveBeenCalledWith('example', {
         type: 'string',
         describe: 'Example ID to show',
-        demandOption: true
+        demandOption: true,
       });
 
-      expect(mockYargs.option).toHaveBeenCalledWith('framework', expect.objectContaining({
-        type: 'string',
-        describe: 'Show framework-specific implementation',
-        choices: ['nestjs', 'express', 'fastify']
-      }));
+      expect(mockYargs.option).toHaveBeenCalledWith(
+        'framework',
+        expect.objectContaining({
+          type: 'string',
+          describe: 'Show framework-specific implementation',
+          choices: ['nestjs', 'express', 'fastify'],
+        })
+      );
 
-      expect(mockYargs.option).toHaveBeenCalledWith('raw', expect.objectContaining({
-        type: 'boolean',
-        describe: 'Show raw markdown content',
-        default: false
-      }));
+      expect(mockYargs.option).toHaveBeenCalledWith(
+        'raw',
+        expect.objectContaining({
+          type: 'boolean',
+          describe: 'Show raw markdown content',
+          default: false,
+        })
+      );
 
       expect(mockYargs.example).toHaveBeenCalledTimes(4);
     });
@@ -118,9 +130,9 @@ describe('commands/examples/show', () => {
       frameworkIntegrations: [
         {
           framework: 'nestjs',
-          components: ['controller', 'service', 'module']
-        }
-      ]
+          components: ['controller', 'service', 'module'],
+        },
+      ],
     };
 
     it('should show example details in formatted view', async () => {
@@ -140,7 +152,7 @@ describe('commands/examples/show', () => {
       expect(mockParserInstance.parseExample).toHaveBeenCalledWith({
         exampleId: 'order-example',
         framework: undefined,
-        version: undefined
+        version: undefined,
       });
 
       // Example details shown in formatted view
@@ -152,7 +164,7 @@ describe('commands/examples/show', () => {
 
       const argv: Arguments<any> = {
         example: 'order-example',
-        framework: 'nestjs'
+        framework: 'nestjs',
       } as any;
 
       const result = await safeRun(async () => {
@@ -164,12 +176,8 @@ describe('commands/examples/show', () => {
       expect(mockParserInstance.parseExample).toHaveBeenCalledWith({
         exampleId: 'order-example',
         framework: 'nestjs',
-        version: undefined
+        version: undefined,
       });
-
-      
-      
-      
     });
 
     it('should show raw markdown content when raw flag is true', async () => {
@@ -179,7 +187,7 @@ describe('commands/examples/show', () => {
       const argv: Arguments<any> = {
         example: 'order-example',
         raw: true,
-        framework: 'nestjs'
+        framework: 'nestjs',
       } as any;
 
       const result = await safeRun(async () => {
@@ -188,22 +196,22 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
-      
-      
-      
     });
 
     it('should show available components when components flag is true', async () => {
       mockRegistry.findById.mockReturnValue(mockExample);
       mockRegistry.getAvailableFrameworks.mockReturnValue(['nestjs']);
-      mockRegistry.getAvailableComponents.mockReturnValue(['controller', 'service', 'module', 'guard']);
+      mockRegistry.getAvailableComponents.mockReturnValue([
+        'controller',
+        'service',
+        'module',
+        'guard',
+      ]);
 
       const argv: Arguments<any> = {
         example: 'order-example',
         framework: 'nestjs',
-        components: true
+        components: true,
       } as any;
 
       const result = await safeRun(async () => {
@@ -213,18 +221,13 @@ describe('commands/examples/show', () => {
 
       expect(error).toBeUndefined();
       expect(mockRegistry.getAvailableComponents).toHaveBeenCalledWith('order-example', 'nestjs');
-      
-      
-      
-      
-      
     });
 
     it('should handle example not found', async () => {
       mockRegistry.findById.mockReturnValue(null);
       mockRegistry.query.mockReturnValue([
         { id: 'order-basic', name: 'Basic Order Example' },
-        { id: 'order-advanced', name: 'Advanced Order Example' }
+        { id: 'order-advanced', name: 'Advanced Order Example' },
       ]);
 
       const argv: Arguments<any> = { example: 'order-missing' } as any;
@@ -235,10 +238,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
-      
-      
     });
 
     it('should handle framework not available for example', async () => {
@@ -247,7 +246,7 @@ describe('commands/examples/show', () => {
 
       const argv: Arguments<any> = {
         example: 'order-example',
-        framework: 'fastify'
+        framework: 'fastify',
       } as any;
 
       const result = await safeRun(async () => {
@@ -256,8 +255,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
     });
 
     it('should handle example with no framework integrations', async () => {
@@ -267,7 +264,7 @@ describe('commands/examples/show', () => {
 
       const argv: Arguments<any> = {
         example: 'order-example',
-        framework: 'nestjs'
+        framework: 'nestjs',
       } as any;
 
       const result = await safeRun(async () => {
@@ -276,8 +273,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
     });
 
     it('should handle example with null optional fields', async () => {
@@ -291,7 +286,7 @@ describe('commands/examples/show', () => {
         tags: [],
         dependencies: null,
         description: 'Minimal example',
-        frameworkIntegrations: null
+        frameworkIntegrations: null,
       };
 
       mockRegistry.findById.mockReturnValue(minimalExample);
@@ -305,9 +300,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
-      
     });
 
     it('should show business context when available', async () => {
@@ -315,9 +307,9 @@ describe('commands/examples/show', () => {
       mockParserInstance.parseExample.mockResolvedValue({
         base: {
           content: {
-            businessContext: 'This example demonstrates order processing in e-commerce domain'
-          }
-        }
+            businessContext: 'This example demonstrates order processing in e-commerce domain',
+          },
+        },
       });
 
       const argv: Arguments<any> = { example: 'order-example' } as any;
@@ -328,8 +320,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
     });
 
     it('should show usage examples with framework integration', async () => {
@@ -344,10 +334,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
-      
-      
-      
     });
 
     it('should show usage examples without framework integration', async () => {
@@ -363,7 +349,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
     });
 
     it('should handle components request with no components available', async () => {
@@ -374,7 +359,7 @@ describe('commands/examples/show', () => {
       const argv: Arguments<any> = {
         example: 'order-example',
         framework: 'nestjs',
-        components: true
+        components: true,
       } as any;
 
       const result = await safeRun(async () => {
@@ -383,7 +368,6 @@ describe('commands/examples/show', () => {
       const error = result[0] as Error | undefined;
 
       expect(error).toBeUndefined();
-      
     });
 
     it('should handle registry errors gracefully', async () => {
@@ -437,9 +421,9 @@ describe('commands/examples/show', () => {
         frameworkIntegrations: [
           {
             framework: 'nestjs',
-            components: ['controller', 'service', 'saga', 'events']
-          }
-        ]
+            components: ['controller', 'service', 'saga', 'events'],
+          },
+        ],
       };
 
       mockRegistry.findById.mockReturnValue(complexExample);
@@ -447,18 +431,19 @@ describe('commands/examples/show', () => {
       mockParserInstance.parseExample.mockResolvedValue({
         base: {
           content: {
-            businessContext: 'Payment processing in fintech applications requires careful handling of money transfers'
-          }
+            businessContext:
+              'Payment processing in fintech applications requires careful handling of money transfers',
+          },
         },
         framework: {
-          content: 'NestJS specific implementation details'
-        }
+          content: 'NestJS specific implementation details',
+        },
       });
 
       const argv: Arguments<any> = {
         example: 'payment-processor',
         framework: 'nestjs',
-        version: '1.2.0'
+        version: '1.2.0',
       } as any;
 
       const result = await safeRun(async () => {
@@ -471,13 +456,8 @@ describe('commands/examples/show', () => {
       expect(mockParserInstance.parseExample).toHaveBeenCalledWith({
         exampleId: 'payment-processor',
         framework: 'nestjs',
-        version: '1.2.0'
+        version: '1.2.0',
       });
-
-      
-      
-      
-      
     });
   });
 });

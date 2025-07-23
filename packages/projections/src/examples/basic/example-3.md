@@ -1,19 +1,21 @@
 # Projection Engine Setup
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: basic
-**Domain**: Event Sourcing
-**Patterns**: Projection engine, orchestration, multi-projection management
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Domain**: Event Sourcing **Patterns**: Projection engine, orchestration,
+multi-projection management **Dependencies**: @vytches-ddd/projections,
+@vytches-ddd/events
 
 ## Description
 
-Projection engine implementation for managing multiple projections in a coordinated manner. This example demonstrates how to set up a projection engine that handles multiple projections, manages their lifecycle, coordinates event distribution, and provides centralized monitoring and control.
+Projection engine implementation for managing multiple projections in a
+coordinated manner. This example demonstrates how to set up a projection engine
+that handles multiple projections, manages their lifecycle, coordinates event
+distribution, and provides centralized monitoring and control.
 
 ## Business Context
 
 Enterprise applications require coordinated projection management:
+
 - Multiple read models serving different business needs
 - Coordinated startup and shutdown sequences
 - Centralized monitoring and health checking
@@ -21,37 +23,38 @@ Enterprise applications require coordinated projection management:
 - Resource management and performance optimization
 - Deployment and maintenance coordination
 
-A projection engine provides the infrastructure for managing complex projection ecosystems at scale.
+A projection engine provides the infrastructure for managing complex projection
+ecosystems at scale.
 
 ## Code Example
 
 ```typescript
 // projection-engine-setup.ts
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   ProjectionEngine,
   ProjectionRegistry,
-  ProjectionProcessor
+  ProjectionProcessor,
 } from '@vytches-ddd/projections';
 import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
-import { 
+import {
   UserData,
   OrderData,
   ProductData,
   ProjectionInstance,
   ProjectionEngine as ProjectionEngineType,
   ProjectionStatistics,
-  ServiceResponse 
+  ServiceResponse,
 } from '../types';
 
 // User Profile Projection
 class UserProfileProjection extends ProjectionBase<any> {
   constructor() {
     super('UserProfileProjection', 'v1.0');
-    this.setState({ 
+    this.setState({
       users: new Map<string, UserData>(),
       totalUsers: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -59,20 +62,20 @@ class UserProfileProjection extends ProjectionBase<any> {
   async onUserRegistered(event: IDomainEvent): Promise<void> {
     const userData = event.payload;
     const state = this.getState();
-    
+
     const user: UserData = {
       id: userData.userId,
       email: userData.email,
       name: userData.name,
       role: userData.role || 'user',
       createdAt: new Date(event.timestamp),
-      preferences: userData.preferences || {}
+      preferences: userData.preferences || {},
     };
 
     state.users.set(user.id, user);
     state.totalUsers = state.users.size;
     state.lastUpdated = new Date();
-    
+
     this.setState(state);
     console.log(`User profile created: ${user.name} (${user.id})`);
   }
@@ -82,19 +85,22 @@ class UserProfileProjection extends ProjectionBase<any> {
     const updateData = event.payload;
     const state = this.getState();
     const existingUser = state.users.get(updateData.userId);
-    
+
     if (existingUser) {
       const updatedUser: UserData = {
         ...existingUser,
         name: updateData.name || existingUser.name,
         email: updateData.email || existingUser.email,
-        preferences: { ...existingUser.preferences, ...(updateData.preferences || {}) }
+        preferences: {
+          ...existingUser.preferences,
+          ...(updateData.preferences || {}),
+        },
       };
-      
+
       state.users.set(updatedUser.id, updatedUser);
       state.lastUpdated = new Date();
       this.setState(state);
-      
+
       console.log(`User profile updated: ${updatedUser.name}`);
     }
   }
@@ -112,12 +118,12 @@ class UserProfileProjection extends ProjectionBase<any> {
 class OrderSummaryProjection extends ProjectionBase<any> {
   constructor() {
     super('OrderSummaryProjection', 'v1.0');
-    this.setState({ 
+    this.setState({
       orders: new Map<string, OrderData>(),
       dailySummaries: new Map<string, any>(),
       totalRevenue: 0,
       totalOrders: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -125,7 +131,7 @@ class OrderSummaryProjection extends ProjectionBase<any> {
   async onOrderPlaced(event: IDomainEvent): Promise<void> {
     const orderData = event.payload;
     const state = this.getState();
-    
+
     const order: OrderData = {
       id: orderData.orderId,
       customerId: orderData.customerId,
@@ -133,31 +139,33 @@ class OrderSummaryProjection extends ProjectionBase<any> {
       total: orderData.total || 0,
       status: 'pending',
       createdAt: new Date(event.timestamp),
-      shippingAddress: orderData.shippingAddress
+      shippingAddress: orderData.shippingAddress,
     };
 
     state.orders.set(order.id, order);
-    
+
     // Update daily summary
     const orderDate = order.createdAt.toISOString().split('T')[0];
     const dailySummary = state.dailySummaries.get(orderDate) || {
       date: orderDate,
       orderCount: 0,
       totalRevenue: 0,
-      orders: []
+      orders: [],
     };
-    
+
     dailySummary.orderCount += 1;
     dailySummary.totalRevenue += order.total;
     dailySummary.orders.push(order.id);
     state.dailySummaries.set(orderDate, dailySummary);
-    
+
     // Update totals
     state.totalOrders = state.orders.size;
-    state.totalRevenue = Array.from(state.orders.values())
-      .reduce((sum, o) => sum + o.total, 0);
+    state.totalRevenue = Array.from(state.orders.values()).reduce(
+      (sum, o) => sum + o.total,
+      0
+    );
     state.lastUpdated = new Date();
-    
+
     this.setState(state);
     console.log(`Order placed: ${order.id} - $${order.total}`);
   }
@@ -170,25 +178,27 @@ class OrderSummaryProjection extends ProjectionBase<any> {
     const orderData = event.payload;
     const state = this.getState();
     const order = state.orders.get(orderData.orderId);
-    
+
     if (order) {
       const statusMap: Record<string, string> = {
-        'OrderConfirmed': 'confirmed',
-        'OrderShipped': 'shipped', 
-        'OrderDelivered': 'delivered',
-        'OrderCancelled': 'cancelled'
+        OrderConfirmed: 'confirmed',
+        OrderShipped: 'shipped',
+        OrderDelivered: 'delivered',
+        OrderCancelled: 'cancelled',
       };
-      
+
       const updatedOrder: OrderData = {
         ...order,
-        status: statusMap[event.eventType] as any
+        status: statusMap[event.eventType] as any,
       };
-      
+
       state.orders.set(updatedOrder.id, updatedOrder);
       state.lastUpdated = new Date();
       this.setState(state);
-      
-      console.log(`Order ${event.eventType.replace('Order', '').toLowerCase()}: ${updatedOrder.id}`);
+
+      console.log(
+        `Order ${event.eventType.replace('Order', '').toLowerCase()}: ${updatedOrder.id}`
+      );
     }
   }
 
@@ -209,11 +219,11 @@ class OrderSummaryProjection extends ProjectionBase<any> {
 class ProductCatalogProjection extends ProjectionBase<any> {
   constructor() {
     super('ProductCatalogProjection', 'v1.0');
-    this.setState({ 
+    this.setState({
       products: new Map<string, ProductData>(),
       categories: new Map<string, any>(),
       totalProducts: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -221,7 +231,7 @@ class ProductCatalogProjection extends ProjectionBase<any> {
   async onProductCreated(event: IDomainEvent): Promise<void> {
     const productData = event.payload;
     const state = this.getState();
-    
+
     const product: ProductData = {
       id: productData.productId,
       name: productData.name,
@@ -229,29 +239,30 @@ class ProductCatalogProjection extends ProjectionBase<any> {
       price: productData.price || 0,
       category: productData.category || 'uncategorized',
       inStock: productData.inStock !== false,
-      metadata: productData.metadata || {}
+      metadata: productData.metadata || {},
     };
 
     state.products.set(product.id, product);
-    
+
     // Update category counts
     const categoryStats = state.categories.get(product.category) || {
       name: product.category,
       productCount: 0,
       averagePrice: 0,
-      products: []
+      products: [],
     };
-    
+
     categoryStats.productCount += 1;
     categoryStats.products.push(product.id);
-    categoryStats.averagePrice = Array.from(state.products.values())
-      .filter(p => p.category === product.category)
-      .reduce((sum, p) => sum + p.price, 0) / categoryStats.productCount;
-    
+    categoryStats.averagePrice =
+      Array.from(state.products.values())
+        .filter(p => p.category === product.category)
+        .reduce((sum, p) => sum + p.price, 0) / categoryStats.productCount;
+
     state.categories.set(product.category, categoryStats);
     state.totalProducts = state.products.size;
     state.lastUpdated = new Date();
-    
+
     this.setState(state);
     console.log(`Product created: ${product.name} (${product.id})`);
   }
@@ -261,21 +272,30 @@ class ProductCatalogProjection extends ProjectionBase<any> {
     const updateData = event.payload;
     const state = this.getState();
     const existingProduct = state.products.get(updateData.productId);
-    
+
     if (existingProduct) {
       const updatedProduct: ProductData = {
         ...existingProduct,
         name: updateData.name || existingProduct.name,
         description: updateData.description || existingProduct.description,
-        price: updateData.price !== undefined ? updateData.price : existingProduct.price,
-        inStock: updateData.inStock !== undefined ? updateData.inStock : existingProduct.inStock,
-        metadata: { ...existingProduct.metadata, ...(updateData.metadata || {}) }
+        price:
+          updateData.price !== undefined
+            ? updateData.price
+            : existingProduct.price,
+        inStock:
+          updateData.inStock !== undefined
+            ? updateData.inStock
+            : existingProduct.inStock,
+        metadata: {
+          ...existingProduct.metadata,
+          ...(updateData.metadata || {}),
+        },
       };
-      
+
       state.products.set(updatedProduct.id, updatedProduct);
       state.lastUpdated = new Date();
       this.setState(state);
-      
+
       console.log(`Product updated: ${updatedProduct.name}`);
     }
   }
@@ -285,8 +305,9 @@ class ProductCatalogProjection extends ProjectionBase<any> {
   }
 
   getProductsByCategory(category: string): ProductData[] {
-    return Array.from(this.getState().products.values())
-      .filter(product => product.category === category);
+    return Array.from(this.getState().products.values()).filter(
+      product => product.category === category
+    );
   }
 
   getCategoryStats(category: string): any {
@@ -315,7 +336,7 @@ export class BasicProjectionEngine implements ProjectionEngineType {
       averageProcessingTime: 0,
       errorsPerHour: 0,
       throughputPerSecond: 0,
-      uptime: 0
+      uptime: 0,
     };
 
     this.eventProcessor = new ProjectionProcessor();
@@ -323,17 +344,23 @@ export class BasicProjectionEngine implements ProjectionEngineType {
   }
 
   private setupEventProcessor(): void {
-    this.eventProcessor.on('eventProcessed', (event: IDomainEvent, projectionName: string, duration: number) => {
-      this.statistics.totalEventsProcessed++;
-      this.updateAverageProcessingTime(duration);
-      this.updateProjectionStatistics(projectionName, true);
-    });
+    this.eventProcessor.on(
+      'eventProcessed',
+      (event: IDomainEvent, projectionName: string, duration: number) => {
+        this.statistics.totalEventsProcessed++;
+        this.updateAverageProcessingTime(duration);
+        this.updateProjectionStatistics(projectionName, true);
+      }
+    );
 
-    this.eventProcessor.on('eventProcessingFailed', (event: IDomainEvent, projectionName: string, error: Error) => {
-      this.statistics.errorsPerHour++;
-      this.updateProjectionStatistics(projectionName, false);
-      console.error(`Event processing failed in ${projectionName}:`, error);
-    });
+    this.eventProcessor.on(
+      'eventProcessingFailed',
+      (event: IDomainEvent, projectionName: string, error: Error) => {
+        this.statistics.errorsPerHour++;
+        this.updateProjectionStatistics(projectionName, false);
+        console.error(`Event processing failed in ${projectionName}:`, error);
+      }
+    );
   }
 
   async initialize(): Promise<ServiceResponse<void>> {
@@ -346,16 +373,15 @@ export class BasicProjectionEngine implements ProjectionEngineType {
       await this.registerProjection(new ProductCatalogProjection());
 
       this.status = 'stopped';
-      
+
       return {
         success: true,
         metadata: {
           timestamp: new Date(),
           requestId: 'init-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-
     } catch (error) {
       this.status = 'error';
       return {
@@ -363,37 +389,37 @@ export class BasicProjectionEngine implements ProjectionEngineType {
         error: {
           code: 'ENGINE_INITIALIZATION_FAILED',
           message: 'Failed to initialize projection engine',
-          details: { error: (error as Error).message }
+          details: { error: (error as Error).message },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'init-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
 
   async registerProjection(projection: ProjectionBase<any>): Promise<void> {
     const projectionName = projection.projectionName;
-    
+
     if (this.projectionInstances.has(projectionName)) {
       throw new Error(`Projection ${projectionName} is already registered`);
     }
 
     this.projectionInstances.set(projectionName, projection);
-    
+
     const projectionInstance: ProjectionInstance = {
       name: projectionName,
       status: 'inactive',
       position: 0,
       lastProcessed: new Date(),
       errorCount: 0,
-      processingRate: 0
+      processingRate: 0,
     };
 
     this.projections.push(projectionInstance);
-    
+
     console.log(`Registered projection: ${projectionName}`);
   }
 
@@ -404,18 +430,18 @@ export class BasicProjectionEngine implements ProjectionEngineType {
           success: false,
           error: {
             code: 'ENGINE_ALREADY_RUNNING',
-            message: 'Projection engine is already running'
+            message: 'Projection engine is already running',
           },
           metadata: {
             timestamp: new Date(),
             requestId: 'start-' + Date.now(),
-            duration: 0
-          }
+            duration: 0,
+          },
         };
       }
 
       console.log('Starting projection engine...');
-      
+
       // Start all projections
       for (const projectionInstance of this.projections) {
         projectionInstance.status = 'active';
@@ -424,14 +450,16 @@ export class BasicProjectionEngine implements ProjectionEngineType {
 
       this.status = 'running';
       this.startTime = new Date();
-      
+
       // Start health checks
       this.startHealthChecks();
-      
+
       // Start event processing
       this.startEventProcessing();
 
-      console.log(`Projection engine started with ${this.projections.length} projections`);
+      console.log(
+        `Projection engine started with ${this.projections.length} projections`
+      );
 
       return {
         success: true,
@@ -439,10 +467,9 @@ export class BasicProjectionEngine implements ProjectionEngineType {
         metadata: {
           timestamp: new Date(),
           requestId: 'start-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-
     } catch (error) {
       this.status = 'error';
       return {
@@ -450,13 +477,13 @@ export class BasicProjectionEngine implements ProjectionEngineType {
         error: {
           code: 'ENGINE_START_FAILED',
           message: 'Failed to start projection engine',
-          details: { error: (error as Error).message }
+          details: { error: (error as Error).message },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'start-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
@@ -468,7 +495,7 @@ export class BasicProjectionEngine implements ProjectionEngineType {
 
     // Add to event queue
     this.eventQueue.push(event);
-    
+
     // Process queue if not already processing
     if (!this.isProcessing) {
       await this.processEventQueue();
@@ -504,7 +531,10 @@ export class BasicProjectionEngine implements ProjectionEngineType {
           promises.push(this.processEventInProjection(event, projection));
         }
       } catch (error) {
-        console.error(`Error checking if ${projectionName} can handle ${event.eventType}:`, error);
+        console.error(
+          `Error checking if ${projectionName} can handle ${event.eventType}:`,
+          error
+        );
         this.updateProjectionStatistics(projectionName, false);
       }
     }
@@ -518,34 +548,51 @@ export class BasicProjectionEngine implements ProjectionEngineType {
     this.updateThroughput();
   }
 
-  private async processEventInProjection(event: IDomainEvent, projection: ProjectionBase<any>): Promise<void> {
+  private async processEventInProjection(
+    event: IDomainEvent,
+    projection: ProjectionBase<any>
+  ): Promise<void> {
     const projectionName = projection.projectionName;
     const startTime = performance.now();
 
     try {
       await projection.handle(event);
-      
+
       const processingTime = performance.now() - startTime;
-      this.eventProcessor.emit('eventProcessed', event, projectionName, processingTime);
-      
+      this.eventProcessor.emit(
+        'eventProcessed',
+        event,
+        projectionName,
+        processingTime
+      );
+
       // Update projection instance
-      const projectionInstance = this.projections.find(p => p.name === projectionName);
+      const projectionInstance = this.projections.find(
+        p => p.name === projectionName
+      );
       if (projectionInstance) {
         projectionInstance.lastProcessed = new Date();
         projectionInstance.position++;
-        projectionInstance.processingRate = this.calculateProcessingRate(projectionName);
+        projectionInstance.processingRate =
+          this.calculateProcessingRate(projectionName);
       }
-
     } catch (error) {
-      this.eventProcessor.emit('eventProcessingFailed', event, projectionName, error);
-      
+      this.eventProcessor.emit(
+        'eventProcessingFailed',
+        event,
+        projectionName,
+        error
+      );
+
       // Update projection instance error count
-      const projectionInstance = this.projections.find(p => p.name === projectionName);
+      const projectionInstance = this.projections.find(
+        p => p.name === projectionName
+      );
       if (projectionInstance) {
         projectionInstance.errorCount++;
         projectionInstance.status = 'error';
       }
-      
+
       throw error;
     }
   }
@@ -578,23 +625,22 @@ export class BasicProjectionEngine implements ProjectionEngineType {
         metadata: {
           timestamp: new Date(),
           requestId: 'stop-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-
     } catch (error) {
       return {
         success: false,
         error: {
           code: 'ENGINE_STOP_FAILED',
           message: 'Failed to stop projection engine',
-          details: { error: (error as Error).message }
+          details: { error: (error as Error).message },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'stop-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
@@ -625,30 +671,40 @@ export class BasicProjectionEngine implements ProjectionEngineType {
   private async performHealthCheck(): Promise<void> {
     for (const projectionInstance of this.projections) {
       // Check if projection is responsive
-      const timeSinceLastProcessed = Date.now() - projectionInstance.lastProcessed.getTime();
-      
-      if (timeSinceLastProcessed > 5 * 60 * 1000 && this.eventQueue.length > 0) { // 5 minutes
-        console.warn(`Projection ${projectionInstance.name} may be stuck - no processing in 5 minutes`);
+      const timeSinceLastProcessed =
+        Date.now() - projectionInstance.lastProcessed.getTime();
+
+      if (
+        timeSinceLastProcessed > 5 * 60 * 1000 &&
+        this.eventQueue.length > 0
+      ) {
+        // 5 minutes
+        console.warn(
+          `Projection ${projectionInstance.name} may be stuck - no processing in 5 minutes`
+        );
         projectionInstance.status = 'error';
       }
 
       // Check error rate
       if (projectionInstance.errorCount > 10) {
-        console.warn(`Projection ${projectionInstance.name} has high error count: ${projectionInstance.errorCount}`);
+        console.warn(
+          `Projection ${projectionInstance.name} has high error count: ${projectionInstance.errorCount}`
+        );
       }
     }
   }
 
   // Statistics helpers
   private updateAverageProcessingTime(newTime: number): void {
-    this.statistics.averageProcessingTime = 
-      (this.statistics.averageProcessingTime * 0.9) + (newTime * 0.1);
+    this.statistics.averageProcessingTime =
+      this.statistics.averageProcessingTime * 0.9 + newTime * 0.1;
   }
 
   private updateThroughput(): void {
     if (this.startTime) {
       const uptimeSeconds = (Date.now() - this.startTime.getTime()) / 1000;
-      this.statistics.throughputPerSecond = this.statistics.totalEventsProcessed / Math.max(uptimeSeconds, 1);
+      this.statistics.throughputPerSecond =
+        this.statistics.totalEventsProcessed / Math.max(uptimeSeconds, 1);
     }
   }
 
@@ -657,12 +713,15 @@ export class BasicProjectionEngine implements ProjectionEngineType {
     if (!projection || !this.startTime) {
       return 0;
     }
-    
+
     const uptimeSeconds = (Date.now() - this.startTime.getTime()) / 1000;
     return projection.position / Math.max(uptimeSeconds, 1);
   }
 
-  private updateProjectionStatistics(projectionName: string, success: boolean): void {
+  private updateProjectionStatistics(
+    projectionName: string,
+    success: boolean
+  ): void {
     // Implementation would update projection-specific statistics
   }
 }
@@ -672,11 +731,13 @@ export class ProjectionEngineFactory {
   static async createBasicEngine(): Promise<BasicProjectionEngine> {
     const engine = new BasicProjectionEngine();
     const result = await engine.initialize();
-    
+
     if (!result.success) {
-      throw new Error(`Failed to create projection engine: ${result.error?.message}`);
+      throw new Error(
+        `Failed to create projection engine: ${result.error?.message}`
+      );
     }
-    
+
     return engine;
   }
 
@@ -684,18 +745,20 @@ export class ProjectionEngineFactory {
     projections: ProjectionBase<any>[]
   ): Promise<BasicProjectionEngine> {
     const engine = new BasicProjectionEngine();
-    
+
     // Register custom projections
     for (const projection of projections) {
       await engine.registerProjection(projection);
     }
-    
+
     const result = await engine.initialize();
-    
+
     if (!result.success) {
-      throw new Error(`Failed to create projection engine: ${result.error?.message}`);
+      throw new Error(
+        `Failed to create projection engine: ${result.error?.message}`
+      );
     }
-    
+
     return engine;
   }
 }
@@ -703,9 +766,11 @@ export class ProjectionEngineFactory {
 
 ## Key Features
 
-- **Multi-Projection Management**: Coordinate multiple projections in a single engine
+- **Multi-Projection Management**: Coordinate multiple projections in a single
+  engine
 - **Event Distribution**: Automatically route events to relevant projections
-- **Lifecycle Management**: Coordinated startup, shutdown, and restart procedures
+- **Lifecycle Management**: Coordinated startup, shutdown, and restart
+  procedures
 - **Health Monitoring**: Continuous health checks and error tracking
 - **Performance Statistics**: Comprehensive metrics and throughput monitoring
 - **Query Interface**: Access projections and their data through the engine
@@ -719,7 +784,7 @@ const startResult = await engine.start();
 
 if (startResult.success) {
   console.log('Projection engine started successfully');
-  
+
   // Process various events
   await engine.processEvent({
     eventId: '1001',
@@ -729,10 +794,10 @@ if (startResult.success) {
       userId: 'user-1',
       email: 'john@example.com',
       name: 'John Doe',
-      role: 'user'
+      role: 'user',
     },
     timestamp: new Date(),
-    version: 1
+    version: 1,
   });
 
   await engine.processEvent({
@@ -749,11 +814,11 @@ if (startResult.success) {
         city: 'City',
         state: 'State',
         zipCode: '12345',
-        country: 'US'
-      }
+        country: 'US',
+      },
     },
     timestamp: new Date(),
-    version: 1
+    version: 1,
   });
 
   await engine.processEvent({
@@ -766,10 +831,10 @@ if (startResult.success) {
       description: 'A useful widget',
       price: 25,
       category: 'widgets',
-      inStock: true
+      inStock: true,
     },
     timestamp: new Date(),
-    version: 1
+    version: 1,
   });
 
   // Query projections through the engine
@@ -783,18 +848,20 @@ if (startResult.success) {
   if (orderProjection) {
     const order = orderProjection.getOrderById('order-1');
     console.log('Order details:', order);
-    
+
     const todaysSummary = orderProjection.getDailySummary(
       new Date().toISOString().split('T')[0]
     );
-    console.log('Today\'s sales summary:', todaysSummary);
+    console.log("Today's sales summary:", todaysSummary);
   }
 
-  const productProjection = engine.getProjection<any>('ProductCatalogProjection');
+  const productProjection = engine.getProjection<any>(
+    'ProductCatalogProjection'
+  );
   if (productProjection) {
     const product = productProjection.getProductById('product-1');
     console.log('Product details:', product);
-    
+
     const widgetProducts = productProjection.getProductsByCategory('widgets');
     console.log('Widget products:', widgetProducts.length);
   }
@@ -815,31 +882,37 @@ if (startResult.success) {
 ## Engine Management Benefits
 
 ### **Coordinated Lifecycle**
+
 - Simultaneous startup and shutdown of all projections
 - Dependency management between projections
 - Graceful handling of failures
 
 ### **Event Distribution**
+
 - Automatic routing to interested projections
 - Parallel processing for improved performance
 - Error isolation prevents cascade failures
 
 ### **Centralized Monitoring**
+
 - Single point for health checking all projections
 - Aggregated statistics and metrics
 - Performance tracking and optimization
 
 ### **Operational Management**
+
 - Easy deployment and configuration
 - Centralized logging and debugging
 - Simplified maintenance procedures
 
 ## Best Practices
 
-- **Projection Independence**: Design projections to be independent of each other
+- **Projection Independence**: Design projections to be independent of each
+  other
 - **Error Isolation**: Ensure one projection's failure doesn't affect others
 - **Resource Management**: Monitor memory and CPU usage across all projections
-- **Deployment Strategy**: Plan for rolling deployments and blue-green strategies
+- **Deployment Strategy**: Plan for rolling deployments and blue-green
+  strategies
 - **Monitoring Setup**: Implement comprehensive alerting and dashboards
 
 ## Common Pitfalls

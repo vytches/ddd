@@ -1,7 +1,7 @@
 # Generate Command
 
-**Focus**: Generate DDD components with intelligent templates
-**Command**: `vytches-ddd generate` | `vytches-ddd g`
+**Focus**: Generate DDD components with intelligent templates **Command**:
+`vytches-ddd generate` | `vytches-ddd g`
 
 ## Quick Start
 
@@ -25,6 +25,7 @@ vytches-ddd generate aggregate User --domain UserManagement
 ```
 
 **Generated Output:**
+
 ```typescript
 // src/domain/user-management/user.aggregate.ts
 import { AggregateRoot } from '@vytches-ddd/core';
@@ -42,12 +43,10 @@ export class UserAggregate extends AggregateRoot {
   updateProfile(name: string, email: string): void {
     this.name = name;
     this.email = email;
-    
-    this.addDomainEvent(new UserProfileUpdatedEvent(
-      this.id,
-      this.name,
-      this.email
-    ));
+
+    this.addDomainEvent(
+      new UserProfileUpdatedEvent(this.id, this.name, this.email)
+    );
   }
 }
 ```
@@ -59,6 +58,7 @@ vytches-ddd generate value-object Email --domain UserManagement
 ```
 
 **Generated Output:**
+
 ```typescript
 // src/domain/user-management/value-objects/email.vo.ts
 import { ValueObject } from '@vytches-ddd/core';
@@ -88,29 +88,23 @@ vytches-ddd generate domain-service UserRegistration --domain UserManagement
 ```
 
 **Generated Output:**
+
 ```typescript
 // src/domain/user-management/services/user-registration.service.ts
 import { DomainService } from '@vytches-ddd/di';
 
 @DomainService('userRegistrationService', {
   context: 'UserManagement',
-  lifetime: 'scoped'
+  lifetime: 'scoped',
 })
 export class UserRegistrationService {
-  async registerUser(
-    name: string,
-    email: string
-  ): Promise<UserAggregate> {
+  async registerUser(name: string, email: string): Promise<UserAggregate> {
     // Domain logic for user registration
-    const user = new UserAggregate(
-      generateId(),
-      name,
-      email
-    );
-    
+    const user = new UserAggregate(generateId(), name, email);
+
     // Business rules validation
     await this.validateRegistrationRules(user);
-    
+
     return user;
   }
 }
@@ -126,6 +120,7 @@ vytches-ddd generate domain OrderManagement --interactive
 ```
 
 **Interactive Prompts:**
+
 - Domain name: `OrderManagement`
 - Main aggregate: `Order`
 - Entities: `OrderItem`, `Customer`
@@ -135,6 +130,7 @@ vytches-ddd generate domain OrderManagement --interactive
 - Include ACL? `Yes`
 
 **Generated Structure:**
+
 ```
 src/domain/order-management/
 ├── order.aggregate.ts
@@ -167,21 +163,22 @@ vytches-ddd generate aggregate User --framework nestjs
 
 ## Common Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--domain` | Bounded context name | `--domain UserManagement` |
-| `--output` | Custom output directory | `--output ./src/modules` |
-| `--template` | Custom template name | `--template enterprise` |
-| `--framework` | Target framework | `--framework nestjs` |
-| `--interactive` | Interactive mode | `--interactive` |
-| `--dry-run` | Preview without generating | `--dry-run` |
+| Option          | Description                | Example                   |
+| --------------- | -------------------------- | ------------------------- |
+| `--domain`      | Bounded context name       | `--domain UserManagement` |
+| `--output`      | Custom output directory    | `--output ./src/modules`  |
+| `--template`    | Custom template name       | `--template enterprise`   |
+| `--framework`   | Target framework           | `--framework nestjs`      |
+| `--interactive` | Interactive mode           | `--interactive`           |
+| `--dry-run`     | Preview without generating | `--dry-run`               |
 
 ## Component Types
 
 ### Available Components
+
 - `aggregate` - Domain aggregates with business logic
 - `entity` - Domain entities
-- `value-object` - Immutable value objects  
+- `value-object` - Immutable value objects
 - `domain-service` - Domain services with business logic
 - `repository` - Data access repositories
 - `event` - Domain events
@@ -193,6 +190,7 @@ vytches-ddd generate aggregate User --framework nestjs
 - `saga` - Long-running processes
 
 ### Framework Integration
+
 - `nestjs` - NestJS controllers, modules, DTOs
 - `express` - Express routes and middleware
 - `fastify` - Fastify routes and schemas
@@ -200,6 +198,7 @@ vytches-ddd generate aggregate User --framework nestjs
 ## Quick Workflows
 
 ### 1. New Feature Development
+
 ```bash
 # 1. Generate core aggregate
 vytches-ddd g aggregate Order --domain OrderManagement
@@ -214,13 +213,14 @@ vytches-ddd g command CreateOrder --domain OrderManagement
 ```
 
 ### 2. Complete Domain Setup
+
 ```bash
 # Generate everything at once
 vytches-ddd g domain OrderManagement --interactive
 
 # Or step by step
 vytches-ddd g aggregate Order --domain OrderManagement
-vytches-ddd g value-object Money --domain OrderManagement  
+vytches-ddd g value-object Money --domain OrderManagement
 vytches-ddd g event OrderCreated --domain OrderManagement
 vytches-ddd g repository Order --domain OrderManagement
 ```
@@ -229,7 +229,8 @@ vytches-ddd g repository Order --domain OrderManagement
 
 - **Use interactive mode** for complex domains: `--interactive`
 - **Preview first** with `--dry-run` before generating
-- **Follow naming conventions**: PascalCase for components, kebab-case for domains
+- **Follow naming conventions**: PascalCase for components, kebab-case for
+  domains
 - **Group related components** in the same domain context
 - **Use framework options** when targeting specific frameworks
 - **Customize templates** for consistent project patterns
@@ -237,16 +238,19 @@ vytches-ddd g repository Order --domain OrderManagement
 ## Troubleshooting
 
 **Component not found?**
+
 ```bash
 vytches-ddd g --list-components
 ```
 
 **Template issues?**
+
 ```bash
 vytches-ddd g --list-templates
 ```
 
 **Preview generation:**
+
 ```bash
 vytches-ddd g aggregate User --dry-run
 ```

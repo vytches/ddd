@@ -5,25 +5,31 @@
 **Complexity**: Advanced  
 **Domain**: Global Financial Services  
 **Patterns**: Event Mesh, Multi-Region Saga, Event Streaming, CQRS Integration  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/cqrs, @vytches-ddd/event-store
+**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
+@vytches-ddd/cqrs, @vytches-ddd/event-store
 
 ## Description
 
-This example demonstrates building an enterprise-scale event mesh that spans multiple regions, handles millions of events per second, and coordinates complex distributed transactions across global financial systems.
+This example demonstrates building an enterprise-scale event mesh that spans
+multiple regions, handles millions of events per second, and coordinates complex
+distributed transactions across global financial systems.
 
 ## Business Context
 
-A global investment bank needs to process trades across multiple markets, ensuring consistency, compliance, and real-time risk management. The system must handle market data streams, trade execution, settlement, and regulatory reporting across different time zones and jurisdictions.
+A global investment bank needs to process trades across multiple markets,
+ensuring consistency, compliance, and real-time risk management. The system must
+handle market data streams, trade execution, settlement, and regulatory
+reporting across different time zones and jurisdictions.
 
 ## Code Example
 
 ```typescript
 // enterprise-event-mesh.ts
-import { 
-  EventMesh, 
-  MeshNode, 
+import {
+  EventMesh,
+  MeshNode,
   StreamProcessor,
-  GlobalSagaCoordinator 
+  GlobalSagaCoordinator,
 } from '@vytches-ddd/messaging';
 import { EventStore, EventStream } from '@vytches-ddd/event-store';
 import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
@@ -40,20 +46,20 @@ export class GlobalEventMesh {
     this.globalCoordinator = new GlobalSagaCoordinator({
       regions: ['us-east', 'eu-west', 'asia-pacific'],
       coordinationStrategy: 'eventual-consistency',
-      conflictResolution: 'last-write-wins'
+      conflictResolution: 'last-write-wins',
     });
   }
 
   async initializeMesh(): Promise<void> {
     // Initialize regional nodes
     const regions = ['us-east', 'eu-west', 'asia-pacific'];
-    
+
     for (const region of regions) {
       const node = new MeshNode({
         nodeId: `node-${region}`,
         region,
         capabilities: ['trading', 'settlement', 'reporting'],
-        eventStore: this.eventStore.getRegionalStore(region)
+        eventStore: this.eventStore.getRegionalStore(region),
       });
 
       // Configure stream processors
@@ -67,7 +73,7 @@ export class GlobalEventMesh {
       node.enableReplication({
         targets: regions.filter(r => r !== region),
         strategy: 'async-eventual',
-        conflictHandler: this.createConflictHandler(region)
+        conflictHandler: this.createConflictHandler(region),
       });
 
       this.nodes.set(region, node);
@@ -78,58 +84,60 @@ export class GlobalEventMesh {
   }
 
   // Global trade execution saga
-  async executeGlobalTrade(tradeRequest: GlobalTradeRequest): Promise<TradeResult> {
+  async executeGlobalTrade(
+    tradeRequest: GlobalTradeRequest
+  ): Promise<TradeResult> {
     const saga = new GlobalTradeSaga({
       id: `trade-${tradeRequest.id}`,
       timeout: 300000, // 5 minutes
-      regions: this.determineAffectedRegions(tradeRequest)
+      regions: this.determineAffectedRegions(tradeRequest),
     });
 
     // Define distributed steps
     saga.addStep({
       name: 'ValidateCompliance',
       regions: ['all'],
-      handler: async (ctx) => {
+      handler: async ctx => {
         const complianceResults = await Promise.all(
-          ctx.regions.map(region => 
+          ctx.regions.map(region =>
             this.validateRegionalCompliance(region, ctx.data)
           )
         );
 
         return {
           success: complianceResults.every(r => r.compliant),
-          results: complianceResults
+          results: complianceResults,
         };
-      }
+      },
     });
 
     saga.addStep({
       name: 'ReserveCapital',
       regions: this.getCapitalRegions(tradeRequest),
-      handler: async (ctx) => {
+      handler: async ctx => {
         return await this.coordinatedCapitalReservation(ctx);
       },
-      compensator: async (ctx) => {
+      compensator: async ctx => {
         await this.releaseCapitalReservations(ctx);
-      }
+      },
     });
 
     saga.addStep({
       name: 'ExecuteTrade',
       regions: [tradeRequest.primaryMarket],
-      handler: async (ctx) => {
+      handler: async ctx => {
         const execution = await this.executeTrade(ctx);
-        
+
         // Stream execution event globally
         await this.broadcastEvent({
           type: 'TradeExecuted',
           payload: execution,
           priority: 'critical',
-          regions: 'all'
+          regions: 'all',
         });
 
         return { success: true, execution };
-      }
+      },
     });
 
     // Execute saga with global coordination
@@ -140,12 +148,10 @@ export class GlobalEventMesh {
   createEventStreamProcessor(): StreamProcessor {
     return new StreamProcessor({
       name: 'global-trade-stream',
-      
+
       async processEvent(event: TradeEvent): Promise<void> {
         // Update read models via CQRS
-        await this.commandBus.send(
-          new UpdateTradePositionCommand(event)
-        );
+        await this.commandBus.send(new UpdateTradePositionCommand(event));
 
         // Calculate real-time risk
         const riskQuery = new CalculatePortfolioRiskQuery(event.portfolioId);
@@ -164,10 +170,10 @@ export class GlobalEventMesh {
       async handleOutOfOrder(event: TradeEvent): Promise<void> {
         const stream = await this.eventStore.getStream(event.streamId);
         const reordered = stream.reorderEvents([event]);
-        
+
         // Replay from last consistent state
         await this.replayFromSnapshot(stream, reordered);
-      }
+      },
     });
   }
 
@@ -180,13 +186,13 @@ export class GlobalEventMesh {
 
     // Try optimistic reservation
     const reservations = await Promise.allSettled(
-      regions.map(region => 
+      regions.map(region =>
         this.nodes.get(region)!.reserveCapital(amount / regions.length)
       )
     );
 
     const successful = reservations.filter(r => r.status === 'fulfilled');
-    
+
     if (successful.length === regions.length) {
       return { success: true, reservations: successful };
     }
@@ -203,9 +209,7 @@ export class GlobalEventMesh {
     }
 
     // Rollback successful reservations
-    await Promise.all(
-      successful.map(r => r.value.rollback())
-    );
+    await Promise.all(successful.map(r => r.value.rollback()));
 
     return { success: false, reason: 'Insufficient global capital' };
   }
@@ -217,7 +221,7 @@ export class GlobalEventMesh {
         region,
         status: await node.getHealth(),
         metrics: await node.getMetrics(),
-        latency: await this.measureRegionalLatency(region)
+        latency: await this.measureRegionalLatency(region),
       }))
     );
 
@@ -225,7 +229,7 @@ export class GlobalEventMesh {
       overall: this.calculateOverallHealth(nodeHealth),
       nodes: nodeHealth,
       eventThroughput: await this.getGlobalThroughput(),
-      sagaMetrics: await this.globalCoordinator.getMetrics()
+      sagaMetrics: await this.globalCoordinator.getMetrics(),
     };
   }
 }
@@ -258,7 +262,6 @@ export class GlobalSagaCoordinator {
       await this.finalizeTransaction(dtx);
 
       return { success: true, result: dtx.result };
-
     } catch (error) {
       // Coordinated rollback
       await this.coordinatedRollback(saga);
@@ -295,9 +298,12 @@ export class GlobalSagaCoordinator {
 
 ## Common Pitfalls
 
-- **Network Partitions**: Design for split-brain scenarios in distributed systems
-- **Event Ordering**: Global ordering is impossible; design for eventual consistency
-- **Cascade Failures**: Implement circuit breakers to prevent regional failures from spreading
+- **Network Partitions**: Design for split-brain scenarios in distributed
+  systems
+- **Event Ordering**: Global ordering is impossible; design for eventual
+  consistency
+- **Cascade Failures**: Implement circuit breakers to prevent regional failures
+  from spreading
 - **Data Sovereignty**: Ensure compliance with regional data regulations
 
 ## Related Examples

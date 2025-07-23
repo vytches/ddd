@@ -1,33 +1,18 @@
-// Intermediate Domain Service Implementation
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
-import { DomainEvent } from '@vytches-ddd/events';
-import { 
-  Order, 
-  OrderItem, 
-  CreateOrderCommand,
-  OrderCreatedEvent,
-  InventoryService,
-  PricingService,
-  OrderRepository
-} from '../types';
+// Intermediate Domain Service Implementation import { BaseDomainService } from
+'@vytches-ddd/domain-services'; import { Result } from '@vytches-ddd/utils';
+import { DomainEvent } from '@vytches-ddd/events'; import { Order, OrderItem,
+CreateOrderCommand, OrderCreatedEvent, InventoryService, PricingService,
+OrderRepository } from '../types';
 
-export class OrderProcessingService extends BaseDomainService {
-  constructor(
-    private orderRepository: OrderRepository,
-    private inventoryService: InventoryService,
-    private pricingService: PricingService
-  ) {
-    super('OrderProcessingService');
-  }
+export class OrderProcessingService extends BaseDomainService { constructor(
+private orderRepository: OrderRepository, private inventoryService:
+InventoryService, private pricingService: PricingService ) {
+super('OrderProcessingService'); }
 
-  async createOrder(command: CreateOrderCommand): Promise<Result<Order, Error>> {
-    try {
-      // Step 1: Validate order items
-      const validation = await this.validateOrderItems(command.items);
-      if (validation.isFailure()) {
-        return validation;
-      }
+async createOrder(command: CreateOrderCommand): Promise<Result<Order, Error>> {
+try { // Step 1: Validate order items const validation = await
+this.validateOrderItems(command.items); if (validation.isFailure()) { return
+validation; }
 
       // Step 2: Check inventory
       const inventoryCheck = await this.checkInventory(command.items);
@@ -65,7 +50,7 @@ export class OrderProcessingService extends BaseDomainService {
         itemCount: order.items.length,
         timestamp: new Date()
       };
-      
+
       await this.publishEvent(new DomainEvent(
         'OrderCreated',
         event,
@@ -80,12 +65,12 @@ export class OrderProcessingService extends BaseDomainService {
         new Error(`Order creation failed: ${error.message}`)
       );
     }
-  }
 
-  private async validateOrderItems(items: OrderItem[]): Promise<Result<void, Error>> {
-    if (!items || items.length === 0) {
-      return Result.failure(new Error('Order must contain at least one item'));
-    }
+}
+
+private async validateOrderItems(items: OrderItem[]): Promise<Result<void,
+Error>> { if (!items || items.length === 0) { return Result.failure(new
+Error('Order must contain at least one item')); }
 
     for (const item of items) {
       if (item.quantity <= 0) {
@@ -96,11 +81,12 @@ export class OrderProcessingService extends BaseDomainService {
     }
 
     return Result.success();
-  }
 
-  private async checkInventory(items: OrderItem[]): Promise<Result<void, Error>> {
-    const availability = await this.inventoryService.checkAvailability(items);
-    
+}
+
+private async checkInventory(items: OrderItem[]): Promise<Result<void, Error>> {
+const availability = await this.inventoryService.checkAvailability(items);
+
     if (!availability.allAvailable) {
       const unavailable = availability.unavailableItems.join(', ');
       return Result.failure(
@@ -109,20 +95,13 @@ export class OrderProcessingService extends BaseDomainService {
     }
 
     return Result.success();
-  }
 
-  private async calculatePricing(items: OrderItem[]): Promise<Result<number, Error>> {
-    try {
-      const total = await this.pricingService.calculateTotal(items);
-      return Result.success(total);
-    } catch (error) {
-      return Result.failure(
-        new Error(`Pricing calculation failed: ${error.message}`)
-      );
-    }
-  }
-
-  private generateOrderId(): string {
-    return `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
 }
+
+private async calculatePricing(items: OrderItem[]): Promise<Result<number,
+Error>> { try { const total = await this.pricingService.calculateTotal(items);
+return Result.success(total); } catch (error) { return Result.failure( new
+Error(`Pricing calculation failed: ${error.message}`) ); } }
+
+private generateOrderId(): string { return
+`order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; } }

@@ -119,13 +119,13 @@ export interface Order extends BaseEntity {
   metadata?: Record<string, any>;
 }
 
-export type OrderStatus = 
-  | 'pending' 
-  | 'confirmed' 
-  | 'processing' 
-  | 'shipped' 
-  | 'delivered' 
-  | 'cancelled' 
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
   | 'refunded';
 
 export interface OrderItem {
@@ -290,10 +290,20 @@ export interface WhereClause {
   logical?: LogicalOperator;
 }
 
-export type ComparisonOperator = 
-  | 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte'
-  | 'in' | 'notIn' | 'like' | 'notLike'
-  | 'isNull' | 'isNotNull' | 'between';
+export type ComparisonOperator =
+  | 'eq'
+  | 'ne'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'in'
+  | 'notIn'
+  | 'like'
+  | 'notLike'
+  | 'isNull'
+  | 'isNotNull'
+  | 'between';
 
 export type LogicalOperator = 'AND' | 'OR';
 

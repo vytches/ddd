@@ -7,7 +7,9 @@
 
 ## Implementation Philosophy
 
-Advanced NestJS integration with @vytches-ddd/acl focuses on enterprise-scale patterns using VytchesDDD DI for sophisticated service management, global coordination, and AI-enhanced data transformation.
+Advanced NestJS integration with @vytches-ddd/acl focuses on enterprise-scale
+patterns using VytchesDDD DI for sophisticated service management, global
+coordination, and AI-enhanced data transformation.
 
 ## Key Architectural Patterns
 
@@ -18,7 +20,7 @@ Advanced NestJS integration with @vytches-ddd/acl focuses on enterprise-scale pa
 @DomainService({
   serviceId: 'enterpriseACLOrchestrator',
   lifetime: ServiceLifetime.Singleton,
-  context: 'GlobalIntegration'
+  context: 'GlobalIntegration',
 })
 export class EnterpriseACLOrchestratorService {
   // Business logic with cross-cutting concerns
@@ -29,7 +31,9 @@ export class EnterpriseACLOrchestratorService {
 export class GlobalIntegrationBridgeService {
   constructor() {
     // Get VytchesDDD managed instance
-    this.orchestrator = VytchesDDD.resolve<EnterpriseACLOrchestratorService>('enterpriseACLOrchestrator');
+    this.orchestrator = VytchesDDD.resolve<EnterpriseACLOrchestratorService>(
+      'enterpriseACLOrchestrator'
+    );
   }
 }
 ```
@@ -60,7 +64,7 @@ export class EnterpriseIntegrationModule implements OnModuleInit {
     await VytchesDDD.configure({
       enableGlobalCoordination: true,
       regions: ['us-east', 'eu-west', 'asia-pacific'],
-      aiEnhanced: true
+      aiEnhanced: true,
     });
   }
 }
@@ -68,22 +72,28 @@ export class EnterpriseIntegrationModule implements OnModuleInit {
 
 ### Service Integration
 
-1. **Business Logic**: Implement in @DomainService classes with enterprise features
-2. **Framework Integration**: Use NestJS services as thin bridges to domain services
+1. **Business Logic**: Implement in @DomainService classes with enterprise
+   features
+2. **Framework Integration**: Use NestJS services as thin bridges to domain
+   services
 3. **Global Coordination**: Leverage VytchesDDD's global service locator
 4. **AI Enhancement**: Integrate machine learning for adaptive behaviors
 
 ## Best Practices
 
-- **VytchesDDD First**: Initialize VytchesDDD container with enterprise features before NestJS DI
+- **VytchesDDD First**: Initialize VytchesDDD container with enterprise features
+  before NestJS DI
 - **Bridge Pattern**: Keep NestJS services as minimal delegation layers
-- **Enterprise Features**: Leverage AI, global coordination, and advanced resilience
-- **Global Consistency**: Design for multi-region consistency and conflict resolution
+- **Enterprise Features**: Leverage AI, global coordination, and advanced
+  resilience
+- **Global Consistency**: Design for multi-region consistency and conflict
+  resolution
 
 ## Common Patterns
 
 - **Global Integration**: Multi-region data synchronization and consistency
-- **AI-Powered Translation**: Adaptive data transformation using machine learning
+- **AI-Powered Translation**: Adaptive data transformation using machine
+  learning
 - **Enterprise Orchestration**: Complex business process coordination
 - **Intelligent Routing**: AI-driven routing and optimization decisions
 
@@ -91,5 +101,6 @@ export class EnterpriseIntegrationModule implements OnModuleInit {
 
 - **Global Latency**: Optimize for multi-region communication patterns
 - **AI Processing**: Balance intelligence with performance requirements
-- **Resource Management**: Proper cleanup and lifecycle management across regions
+- **Resource Management**: Proper cleanup and lifecycle management across
+  regions
 - **Enterprise Monitoring**: Comprehensive observability and alerting

@@ -1,46 +1,49 @@
 # Projection with Capabilities
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: basic
-**Domain**: Event Sourcing
-**Patterns**: Projection capabilities, checkpoints, circuit breakers
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Domain**: Event Sourcing **Patterns**: Projection capabilities, checkpoints,
+circuit breakers **Dependencies**: @vytches-ddd/projections,
+@vytches-ddd/events, @vytches-ddd/resilience
 
 ## Description
 
-Event projection enhanced with capabilities for checkpoint management, circuit breaker protection, and resilience. This example demonstrates how to add production-ready features to projections including automatic checkpointing, error recovery, and failure protection.
+Event projection enhanced with capabilities for checkpoint management, circuit
+breaker protection, and resilience. This example demonstrates how to add
+production-ready features to projections including automatic checkpointing,
+error recovery, and failure protection.
 
 ## Business Context
 
 Production projections need reliability features:
+
 - Checkpoint management for resuming from failures
 - Circuit breaker protection against cascading failures
 - Dead letter queues for handling problematic events
 - Performance monitoring and health checks
 - Automatic recovery from transient errors
 
-These capabilities ensure projections can handle real-world production scenarios with high availability and data consistency guarantees.
+These capabilities ensure projections can handle real-world production scenarios
+with high availability and data consistency guarantees.
 
 ## Code Example
 
 ```typescript
 // enhanced-projection-with-capabilities.ts
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   CheckpointCapability,
   CircuitBreakerCapability,
   DeadLetterCapability,
-  ProjectionEngine
+  ProjectionEngine,
 } from '@vytches-ddd/projections';
 import { IDomainEvent } from '@vytches-ddd/events';
-import { 
+import {
   OrderData,
   OrderItem,
   ProjectionCheckpoint,
   ProjectionCapability,
   ProjectionError,
-  ProjectionPerformanceMetrics 
+  ProjectionPerformanceMetrics,
 } from '../types';
 
 // ✅ FOCUS: Enhanced projection with capabilities
@@ -52,7 +55,7 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
   constructor() {
     super('OrderSummaryProjection', 'v1.0');
-    
+
     // Initialize projection state
     this.setState({
       orders: new Map<string, OrderData>(),
@@ -66,7 +69,7 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
     // Initialize capabilities
     this.setupCapabilities();
-    
+
     // Initialize performance metrics
     this.performanceMetrics = {
       eventsPerSecond: 0,
@@ -108,9 +111,14 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
   private setupCapabilityEventHandlers(): void {
     // Checkpoint events
-    this.checkpointCapability.on('checkpointCreated', (checkpoint: ProjectionCheckpoint) => {
-      console.log(`Checkpoint created for ${this.projectionName} at position ${checkpoint.position}`);
-    });
+    this.checkpointCapability.on(
+      'checkpointCreated',
+      (checkpoint: ProjectionCheckpoint) => {
+        console.log(
+          `Checkpoint created for ${this.projectionName} at position ${checkpoint.position}`
+        );
+      }
+    );
 
     // Circuit breaker events
     this.circuitBreakerCapability.on('circuitOpened', () => {
@@ -122,14 +130,20 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
     });
 
     // Dead letter events
-    this.deadLetterCapability.on('eventSentToDeadLetter', (eventId: string, error: Error) => {
-      console.error(`Event ${eventId} sent to dead letter queue:`, error.message);
-    });
+    this.deadLetterCapability.on(
+      'eventSentToDeadLetter',
+      (eventId: string, error: Error) => {
+        console.error(
+          `Event ${eventId} sent to dead letter queue:`,
+          error.message
+        );
+      }
+    );
   }
 
   async handle(event: IDomainEvent): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
       // Check circuit breaker status
       if (this.circuitBreakerCapability.isOpen()) {
@@ -143,25 +157,24 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
       // Record successful processing
       this.circuitBreakerCapability.recordSuccess();
-      
+
       // Update checkpoint
       await this.checkpointCapability.updatePosition(
-        event.aggregateId, 
+        event.aggregateId,
         this.getCurrentEventPosition(event)
       );
 
       // Update performance metrics
       this.updatePerformanceMetrics(startTime, true);
-
     } catch (error) {
       console.error(`Error processing event ${event.eventId}:`, error);
-      
+
       // Record failure for circuit breaker
       this.circuitBreakerCapability.recordFailure();
-      
+
       // Update performance metrics
       this.updatePerformanceMetrics(startTime, false);
-      
+
       throw error;
     }
   }
@@ -195,14 +208,14 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
       timestamp: new Date(event.timestamp),
     };
     currentState.lastUpdated = new Date();
-    
+
     this.setState(currentState);
   }
 
   private async handleOrderPlaced(event: IDomainEvent): Promise<void> {
     const orderData = event.payload;
     const currentState = this.getState();
-    
+
     // Create order record
     const order: OrderData = {
       id: orderData.orderId,
@@ -216,7 +229,7 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
     // Store order
     currentState.orders.set(order.id, order);
-    
+
     // Update daily summary
     const orderDate = order.createdAt.toISOString().split('T')[0];
     const dailySummary = currentState.dailySummaries.get(orderDate) || {
@@ -226,26 +239,27 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
       averageOrderValue: 0,
       orders: [],
     };
-    
+
     dailySummary.orderCount += 1;
     dailySummary.totalRevenue += order.total;
-    dailySummary.averageOrderValue = dailySummary.totalRevenue / dailySummary.orderCount;
+    dailySummary.averageOrderValue =
+      dailySummary.totalRevenue / dailySummary.orderCount;
     dailySummary.orders.push(order.id);
-    
+
     currentState.dailySummaries.set(orderDate, dailySummary);
-    
+
     // Update global statistics
     this.recalculateGlobalStatistics(currentState);
-    
+
     this.setState(currentState);
-    
+
     console.log(`Order placed: ${order.id} - $${order.total}`);
   }
 
   private async handleOrderConfirmed(event: IDomainEvent): Promise<void> {
     const confirmData = event.payload;
     const currentState = this.getState();
-    
+
     const order = currentState.orders.get(confirmData.orderId);
     if (!order) {
       console.warn(`Order ${confirmData.orderId} not found for confirmation`);
@@ -260,14 +274,14 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
     currentState.orders.set(confirmedOrder.id, confirmedOrder);
     this.setState(currentState);
-    
+
     console.log(`Order confirmed: ${confirmedOrder.id}`);
   }
 
   private async handleOrderShipped(event: IDomainEvent): Promise<void> {
     const shipData = event.payload;
     const currentState = this.getState();
-    
+
     const order = currentState.orders.get(shipData.orderId);
     if (!order) {
       console.warn(`Order ${shipData.orderId} not found for shipping`);
@@ -282,14 +296,14 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
     currentState.orders.set(shippedOrder.id, shippedOrder);
     this.setState(currentState);
-    
+
     console.log(`Order shipped: ${shippedOrder.id}`);
   }
 
   private async handleOrderDelivered(event: IDomainEvent): Promise<void> {
     const deliveryData = event.payload;
     const currentState = this.getState();
-    
+
     const order = currentState.orders.get(deliveryData.orderId);
     if (!order) {
       console.warn(`Order ${deliveryData.orderId} not found for delivery`);
@@ -304,14 +318,14 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
     currentState.orders.set(deliveredOrder.id, deliveredOrder);
     this.setState(currentState);
-    
+
     console.log(`Order delivered: ${deliveredOrder.id}`);
   }
 
   private async handleOrderCancelled(event: IDomainEvent): Promise<void> {
     const cancelData = event.payload;
     const currentState = this.getState();
-    
+
     const order = currentState.orders.get(cancelData.orderId);
     if (!order) {
       console.warn(`Order ${cancelData.orderId} not found for cancellation`);
@@ -325,39 +339,48 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
     };
 
     currentState.orders.set(cancelledOrder.id, cancelledOrder);
-    
+
     // Adjust daily summary (subtract cancelled order)
     const orderDate = order.createdAt.toISOString().split('T')[0];
     const dailySummary = currentState.dailySummaries.get(orderDate);
-    
+
     if (dailySummary) {
       dailySummary.orderCount = Math.max(0, dailySummary.orderCount - 1);
-      dailySummary.totalRevenue = Math.max(0, dailySummary.totalRevenue - order.total);
-      dailySummary.averageOrderValue = dailySummary.orderCount > 0 
-        ? dailySummary.totalRevenue / dailySummary.orderCount 
-        : 0;
-      
+      dailySummary.totalRevenue = Math.max(
+        0,
+        dailySummary.totalRevenue - order.total
+      );
+      dailySummary.averageOrderValue =
+        dailySummary.orderCount > 0
+          ? dailySummary.totalRevenue / dailySummary.orderCount
+          : 0;
+
       // Remove order from daily list
       dailySummary.orders = dailySummary.orders.filter(id => id !== order.id);
-      
+
       currentState.dailySummaries.set(orderDate, dailySummary);
     }
-    
+
     // Recalculate global statistics
     this.recalculateGlobalStatistics(currentState);
-    
+
     this.setState(currentState);
-    
+
     console.log(`Order cancelled: ${cancelledOrder.id}`);
   }
 
   private recalculateGlobalStatistics(state: any): void {
-    const activeOrders = Array.from(state.orders.values())
-      .filter(order => order.status !== 'cancelled');
-    
+    const activeOrders = Array.from(state.orders.values()).filter(
+      order => order.status !== 'cancelled'
+    );
+
     state.totalOrders = activeOrders.length;
-    state.totalRevenue = activeOrders.reduce((sum, order) => sum + order.total, 0);
-    state.averageOrderValue = state.totalOrders > 0 ? state.totalRevenue / state.totalOrders : 0;
+    state.totalRevenue = activeOrders.reduce(
+      (sum, order) => sum + order.total,
+      0
+    );
+    state.averageOrderValue =
+      state.totalOrders > 0 ? state.totalRevenue / state.totalOrders : 0;
   }
 
   // Query methods
@@ -370,19 +393,20 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
   }
 
   getOrdersByStatus(status: string): OrderData[] {
-    return Array.from(this.getState().orders.values())
-      .filter(order => order.status === status);
+    return Array.from(this.getState().orders.values()).filter(
+      order => order.status === status
+    );
   }
 
   getRevenueByDateRange(startDate: string, endDate: string): number {
     let totalRevenue = 0;
-    
+
     for (const [date, summary] of this.getState().dailySummaries) {
       if (date >= startDate && date <= endDate) {
         totalRevenue += summary.totalRevenue;
       }
     }
-    
+
     return totalRevenue;
   }
 
@@ -397,7 +421,9 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
       return false;
     }
 
-    console.log(`Loading ${this.projectionName} from checkpoint at position ${checkpoint.position}`);
+    console.log(
+      `Loading ${this.projectionName} from checkpoint at position ${checkpoint.position}`
+    );
     // In a real implementation, this would restore state from the checkpoint
     return true;
   }
@@ -406,7 +432,8 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
     return {
       checkpoint: {
         lastCheckpoint: this.checkpointCapability.getLastCheckpointTime(),
-        eventsSinceLastCheckpoint: this.checkpointCapability.getEventsSinceLastCheckpoint(),
+        eventsSinceLastCheckpoint:
+          this.checkpointCapability.getEventsSinceLastCheckpoint(),
       },
       circuitBreaker: {
         state: this.circuitBreakerCapability.getState(), // 'closed', 'open', 'half-open'
@@ -428,32 +455,38 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
   // Health check method
   async healthCheck(): Promise<{ healthy: boolean; issues: string[] }> {
     const issues: string[] = [];
-    
+
     // Check circuit breaker
     if (this.circuitBreakerCapability.isOpen()) {
       issues.push('Circuit breaker is open');
     }
-    
+
     // Check dead letter queue size
     const deadLetterSize = this.deadLetterCapability.getQueueSize();
     if (deadLetterSize > 10) {
       issues.push(`High number of dead letter events: ${deadLetterSize}`);
     }
-    
+
     // Check error rate
-    if (this.performanceMetrics.errorRate > 0.05) { // 5%
-      issues.push(`High error rate: ${(this.performanceMetrics.errorRate * 100).toFixed(2)}%`);
+    if (this.performanceMetrics.errorRate > 0.05) {
+      // 5%
+      issues.push(
+        `High error rate: ${(this.performanceMetrics.errorRate * 100).toFixed(2)}%`
+      );
     }
-    
+
     // Check if projection is significantly behind
-    const lastCheckpoint = await this.checkpointCapability.getLatestCheckpoint();
+    const lastCheckpoint =
+      await this.checkpointCapability.getLatestCheckpoint();
     if (lastCheckpoint) {
-      const timeSinceLastCheckpoint = Date.now() - lastCheckpoint.processedAt.getTime();
-      if (timeSinceLastCheckpoint > 5 * 60 * 1000) { // 5 minutes
+      const timeSinceLastCheckpoint =
+        Date.now() - lastCheckpoint.processedAt.getTime();
+      if (timeSinceLastCheckpoint > 5 * 60 * 1000) {
+        // 5 minutes
         issues.push('Projection may be lagging behind event stream');
       }
     }
-    
+
     return {
       healthy: issues.length === 0,
       issues,
@@ -467,15 +500,15 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
 
   private updatePerformanceMetrics(startTime: number, success: boolean): void {
     const processingTime = performance.now() - startTime;
-    
+
     // Update latency metrics (simplified)
-    this.performanceMetrics.latency.p50 = 
-      (this.performanceMetrics.latency.p50 * 0.9) + (processingTime * 0.1);
-    
+    this.performanceMetrics.latency.p50 =
+      this.performanceMetrics.latency.p50 * 0.9 + processingTime * 0.1;
+
     // Update error rate (simplified)
     const currentErrorRate = success ? 0 : 1;
-    this.performanceMetrics.errorRate = 
-      (this.performanceMetrics.errorRate * 0.95) + (currentErrorRate * 0.05);
+    this.performanceMetrics.errorRate =
+      this.performanceMetrics.errorRate * 0.95 + currentErrorRate * 0.05;
   }
 
   // Capability cleanup
@@ -483,7 +516,7 @@ export class OrderSummaryProjection extends ProjectionBase<any> {
     await this.checkpointCapability.dispose();
     await this.circuitBreakerCapability.dispose();
     await this.deadLetterCapability.dispose();
-    
+
     console.log(`${this.projectionName} capabilities disposed`);
   }
 }
@@ -506,12 +539,12 @@ export class ProjectionWithCapabilitiesRunner {
     } else {
       console.log('Starting projection from beginning');
     }
-    
+
     this.isRunning = true;
-    
+
     // Start health check monitoring
     this.startHealthChecks();
-    
+
     console.log('Projection with capabilities started');
   }
 
@@ -519,38 +552,37 @@ export class ProjectionWithCapabilitiesRunner {
     if (!this.isRunning) {
       throw new Error('Projection runner is not running');
     }
-    
+
     await this.projection.handle(event);
   }
 
   private startHealthChecks(): void {
     this.healthCheckInterval = setInterval(async () => {
       const health = await this.projection.healthCheck();
-      
+
       if (!health.healthy) {
         console.warn('Projection health issues detected:', health.issues);
       }
-      
+
       // Log capability status
       const capabilities = this.projection.getCapabilityStatus();
       console.log('Capability status:', capabilities);
-      
     }, 60000); // Every minute
   }
 
   async stop(): Promise<void> {
     this.isRunning = false;
-    
+
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
-    
+
     // Create final checkpoint
     await this.projection.createCheckpoint();
-    
+
     // Dispose capabilities
     await this.projection.dispose();
-    
+
     console.log('Projection with capabilities stopped');
   }
 
@@ -585,7 +617,13 @@ await runner.processEvent({
     orderId: 'order-1',
     customerId: 'customer-1',
     items: [
-      { productId: 'product-1', name: 'Widget', quantity: 2, price: 25, total: 50 }
+      {
+        productId: 'product-1',
+        name: 'Widget',
+        quantity: 2,
+        price: 25,
+        total: 50,
+      },
     ],
     total: 50,
     shippingAddress: {
@@ -593,11 +631,11 @@ await runner.processEvent({
       city: 'City',
       state: 'State',
       zipCode: '12345',
-      country: 'US'
-    }
+      country: 'US',
+    },
   },
   timestamp: new Date(),
-  version: 1
+  version: 1,
 });
 
 await runner.processEvent({
@@ -605,10 +643,10 @@ await runner.processEvent({
   eventType: 'OrderConfirmed',
   aggregateId: 'order-1',
   payload: {
-    orderId: 'order-1'
+    orderId: 'order-1',
   },
   timestamp: new Date(),
-  version: 2
+  version: 2,
 });
 
 // Query the projection
@@ -619,7 +657,7 @@ console.log('Order details:', order);
 const todaysSummary = projection.getDailySummary(
   new Date().toISOString().split('T')[0]
 );
-console.log('Today\'s summary:', todaysSummary);
+console.log("Today's summary:", todaysSummary);
 
 // Check health and capabilities
 const health = await projection.healthCheck();
@@ -638,21 +676,25 @@ await runner.stop();
 ## Capability Benefits
 
 ### **Checkpoint Management**
+
 - Automatic progress saving prevents data loss on failures
 - Configurable intervals balance performance vs. durability
 - Fast recovery from known positions
 
 ### **Circuit Breaker Protection**
+
 - Prevents cascade failures in projection chains
 - Automatic recovery when conditions improve
 - Failure threshold configuration
 
 ### **Dead Letter Handling**
+
 - Retry logic for transient failures
 - Isolation of problematic events
 - Manual intervention capabilities
 
 ### **Performance Monitoring**
+
 - Real-time metrics collection
 - Health check automation
 - Proactive issue detection
@@ -668,8 +710,10 @@ await runner.stop();
 ## Common Pitfalls
 
 - **Over-Checkpointing**: Too frequent checkpoints impact performance
-- **Circuit Breaker Sensitivity**: Too sensitive breakers cause unnecessary downtime
-- **Dead Letter Accumulation**: Unmonitored dead letters indicate systemic issues
+- **Circuit Breaker Sensitivity**: Too sensitive breakers cause unnecessary
+  downtime
+- **Dead Letter Accumulation**: Unmonitored dead letters indicate systemic
+  issues
 - **Resource Leaks**: Always dispose capabilities properly
 
 ## Related Examples

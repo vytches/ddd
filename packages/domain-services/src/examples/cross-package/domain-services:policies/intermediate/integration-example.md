@@ -1,37 +1,22 @@
-// Domain Service with Policy Integration
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
-import { User, Order, CreateOrderCommand } from '../types';
+// Domain Service with Policy Integration import { BaseDomainService } from
+'@vytches-ddd/domain-services'; import { PolicyBuilder, PolicyContext } from
+'@vytches-ddd/policies'; import { Result } from '@vytches-ddd/utils'; import {
+User, Order, CreateOrderCommand } from '../types';
 
-export class OrderValidationService extends BaseDomainService {
-  private orderPolicy = PolicyBuilder.create<Order>()
-    .withId('order-validation')
-    .withDomain('orders')
-    .must(order => order.total > 0)
-    .withCode('INVALID_TOTAL')
-    .withMessage('Order total must be greater than zero')
-    .and()
-    .must(order => order.items.length > 0)
-    .withCode('NO_ITEMS')
-    .withMessage('Order must contain at least one item')
-    .and()
-    .mustAsync(async order => {
-      const user = await this.getUserById(order.userId);
-      return user && user.isActive;
-    })
-    .withCode('INVALID_USER')
-    .withMessage('Order user must be active')
-    .build();
+export class OrderValidationService extends BaseDomainService { private
+orderPolicy = PolicyBuilder.create<Order>() .withId('order-validation')
+.withDomain('orders') .must(order => order.total > 0) .withCode('INVALID_TOTAL')
+.withMessage('Order total must be greater than zero') .and() .must(order =>
+order.items.length > 0) .withCode('NO_ITEMS') .withMessage('Order must contain
+at least one item') .and() .mustAsync(async order => { const user = await
+this.getUserById(order.userId); return user && user.isActive; })
+.withCode('INVALID_USER') .withMessage('Order user must be active') .build();
 
-  constructor() {
-    super('OrderValidationService');
-  }
+constructor() { super('OrderValidationService'); }
 
-  async validateAndCreateOrder(command: CreateOrderCommand): Promise<Result<Order, Error>> {
-    try {
-      // Step 1: Create order from command
-      const order = Order.create(command);
+async validateAndCreateOrder(command: CreateOrderCommand): Promise<Result<Order,
+Error>> { try { // Step 1: Create order from command const order =
+Order.create(command);
 
       // Step 2: Create policy context
       const context = PolicyContext.create()
@@ -60,15 +45,16 @@ export class OrderValidationService extends BaseDomainService {
     } catch (error) {
       return Result.failure(new Error(`Order validation failed: ${error.message}`));
     }
-  }
 
-  async validateOrderBatch(commands: CreateOrderCommand[]): Promise<Result<Order[], Error>> {
-    const validOrders: Order[] = [];
-    const errors: string[] = [];
+}
+
+async validateOrderBatch(commands: CreateOrderCommand[]):
+Promise<Result<Order[], Error>> { const validOrders: Order[] = []; const errors:
+string[] = [];
 
     for (const command of commands) {
       const result = await this.validateAndCreateOrder(command);
-      
+
       if (result.isSuccess()) {
         validOrders.push(result.value!);
       } else {
@@ -81,15 +67,12 @@ export class OrderValidationService extends BaseDomainService {
     }
 
     return Result.success(validOrders);
-  }
 
-  private async getUserById(userId: string): Promise<User | null> {
-    // Get user logic here
-    return { id: userId, isActive: true } as User;
-  }
-
-  private async applyBusinessRules(order: Order, context: PolicyContext): Promise<Result<void, Error>> {
-    // Additional business rules logic
-    return Result.success(undefined);
-  }
 }
+
+private async getUserById(userId: string): Promise<User | null> { // Get user
+logic here return { id: userId, isActive: true } as User; }
+
+private async applyBusinessRules(order: Order, context: PolicyContext):
+Promise<Result<void, Error>> { // Additional business rules logic return
+Result.success(undefined); } }

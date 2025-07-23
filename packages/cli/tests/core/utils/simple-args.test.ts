@@ -195,7 +195,7 @@ describe('SimpleArgsParser', () => {
           'domain-service',
         ];
 
-        shortcuts.forEach((shortcut) => {
+        shortcuts.forEach(shortcut => {
           const result = SimpleArgsParser.parse(['node', 'script.js', `--${shortcut}`]);
           expect(result.options.type).toBe(shortcut);
         });
@@ -337,7 +337,11 @@ describe('SimpleArgsParser', () => {
       });
 
       it('should handle options with multiple equals signs', () => {
-        const result = SimpleArgsParser.parse(['node', 'script.js', '--url=http://example.com?a=b']);
+        const result = SimpleArgsParser.parse([
+          'node',
+          'script.js',
+          '--url=http://example.com?a=b',
+        ]);
         expect(result).toEqual({
           command: undefined,
           args: [],
@@ -352,26 +356,32 @@ describe('SimpleArgsParser', () => {
 
     beforeEach(() => {
       consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
-        return
+        return;
       });
     });
 
     it('should show general help when no command specified', () => {
       SimpleArgsParser.showHelp();
-      expect(consoleLogSpy).toHaveBeenCalledWith('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder');
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'
+      );
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('generate'));
     });
 
     it('should show generate command help', () => {
       SimpleArgsParser.showHelp('generate');
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: vytches-ddd generate'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Usage: vytches-ddd generate')
+      );
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('--type'));
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('--name'));
     });
 
     it('should show domain command help', () => {
       SimpleArgsParser.showHelp('domain');
-      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: vytches-ddd domain'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Usage: vytches-ddd domain')
+      );
       expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('--guided'));
     });
   });

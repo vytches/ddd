@@ -5,19 +5,26 @@
 **Complexity**: beginner  
 **Domain**: Order Management  
 **Patterns**: repository-pattern, domain-events, automatic-publishing  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/repositories, @vytches-ddd/aggregates
+**Dependencies**: @vytches-ddd/events, @vytches-ddd/repositories,
+@vytches-ddd/aggregates
 
 ## Description
 
-Demonstrates the core event publishing pattern where domain events are automatically published when aggregates are saved through repositories. This is the foundational pattern that makes event-driven architecture transparent and reliable.
+Demonstrates the core event publishing pattern where domain events are
+automatically published when aggregates are saved through repositories. This is
+the foundational pattern that makes event-driven architecture transparent and
+reliable.
 
 ## Business Context
 
-When an order is created in an e-commerce system, multiple downstream processes need to be triggered: inventory reservation, payment processing, and customer notifications. The repository pattern with automatic event publishing ensures these events are reliably emitted without manual intervention.
+When an order is created in an e-commerce system, multiple downstream processes
+need to be triggered: inventory reservation, payment processing, and customer
+notifications. The repository pattern with automatic event publishing ensures
+these events are reliably emitted without manual intervention.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-aggregate.ts
 import { AggregateRoot } from '@vytches-ddd/aggregates';
 import { DomainEvent } from '@vytches-ddd/events';
@@ -27,17 +34,17 @@ import { Order, CreateOrderCommand, OrderCreatedEventData } from '../types';
  * @llm-summary Order aggregate that demonstrates automatic event publishing
  * @llm-domain Order Management
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Order aggregate that emits domain events when business operations occur.
  * Events are automatically published when the aggregate is saved through repository.
- * 
+ *
  * @example
  * ```typescript
  * const order = OrderAggregate.create(createOrderCommand);
  * await orderRepository.save(order); // Events published automatically
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
@@ -51,7 +58,7 @@ export class OrderAggregate extends AggregateRoot {
 
   /**
    * @llm-summary Creates new order and emits OrderCreated domain event
-   * @llm-domain Order Management  
+   * @llm-domain Order Management
    * @llm-complexity Simple
    *
    * @description
@@ -69,7 +76,7 @@ export class OrderAggregate extends AggregateRoot {
    *   shippingAddress: { street: '123 Main St', city: 'Boston', ... },
    *   paymentMethod: 'credit_card'
    * };
-   * 
+   *
    * const orderAggregate = OrderAggregate.create(command);
    * ```
    *
@@ -78,21 +85,24 @@ export class OrderAggregate extends AggregateRoot {
    */
   public static create(command: CreateOrderCommand): OrderAggregate {
     const orderId = `order-${Date.now()}`;
-    const total = command.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const total = command.items.reduce(
+      (sum, item) => sum + item.quantity * item.price,
+      0
+    );
 
     const order: Order = {
       id: orderId,
       userId: command.userId,
       items: command.items.map(item => ({
         ...item,
-        total: item.quantity * item.price
+        total: item.quantity * item.price,
       })),
       status: 'pending',
       total,
       shippingAddress: command.shippingAddress,
       paymentMethod: command.paymentMethod,
       notes: command.notes,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     const aggregate = new OrderAggregate(order);
@@ -103,11 +113,11 @@ export class OrderAggregate extends AggregateRoot {
       userId: order.userId,
       total: order.total,
       items: order.items,
-      createdAt: order.createdAt
+      createdAt: order.createdAt,
     };
 
     aggregate.addDomainEvent(new OrderCreatedEvent(eventData));
-    
+
     return aggregate;
   }
 
@@ -137,10 +147,12 @@ export class OrderAggregate extends AggregateRoot {
     this.order.status = 'confirmed';
     this.order.updatedAt = new Date();
 
-    this.addDomainEvent(new OrderConfirmedEvent({
-      orderId: this.order.id,
-      confirmedAt: new Date()
-    }));
+    this.addDomainEvent(
+      new OrderConfirmedEvent({
+        orderId: this.order.id,
+        confirmedAt: new Date(),
+      })
+    );
   }
 
   public getOrder(): Order {
@@ -166,14 +178,17 @@ export class OrderCreatedEvent extends DomainEvent<OrderCreatedEventData> {
   }
 }
 
-export class OrderConfirmedEvent extends DomainEvent<{ orderId: string; confirmedAt: Date }> {
+export class OrderConfirmedEvent extends DomainEvent<{
+  orderId: string;
+  confirmedAt: Date;
+}> {
   constructor(data: { orderId: string; confirmedAt: Date }) {
     super('OrderConfirmed', data);
   }
 }
-```
+````
 
-```typescript
+````typescript
 // order-repository.ts
 import { IBaseRepository } from '@vytches-ddd/repositories';
 import { UniversalEventDispatcher } from '@vytches-ddd/events';
@@ -230,19 +245,21 @@ export class OrderRepository implements IBaseRepository<OrderAggregate> {
       // 1. Persist aggregate state
       const order = aggregate.getOrder();
       this.dataStore.set(order.id, order);
-      
+
       // 2. Get domain events before clearing them
       const events = aggregate.getUncommittedEvents();
-      
+
       // 3. Publish events automatically
       if (events.length > 0) {
         await this.eventDispatcher.publishMany(events);
       }
-      
+
       // 4. Mark events as committed
       aggregate.markEventsAsCommitted();
-      
-      console.log(`Order ${order.id} saved and ${events.length} events published`);
+
+      console.log(
+        `Order ${order.id} saved and ${events.length} events published`
+      );
     } catch (error) {
       console.error('Failed to save order:', error);
       throw error;
@@ -252,20 +269,20 @@ export class OrderRepository implements IBaseRepository<OrderAggregate> {
   async findById(id: string): Promise<OrderAggregate | null> {
     const order = this.dataStore.get(id);
     if (!order) return null;
-    
+
     // In real implementation, reconstruct aggregate from stored state
     return OrderAggregate.create({
       userId: order.userId,
       items: order.items,
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
-      notes: order.notes
+      notes: order.notes,
     });
   }
 }
-```
+````
 
-```typescript
+````typescript
 // usage-example.ts
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
 import { OrderRepository, OrderAggregate, CreateOrderCommand } from '../types';
@@ -296,7 +313,7 @@ export class OrderService {
     // Setup event infrastructure
     const eventBus = new UnifiedEventBus();
     const eventDispatcher = new UniversalEventDispatcher(eventBus);
-    
+
     // Repository handles automatic event publishing
     this.orderRepository = new OrderRepository(eventDispatcher);
   }
@@ -321,7 +338,7 @@ export class OrderService {
    *   shippingAddress: address,
    *   paymentMethod: 'credit_card'
    * };
-   * 
+   *
    * const order = await orderService.createOrder(command);
    * ```
    *
@@ -332,14 +349,14 @@ export class OrderService {
     try {
       // 1. Create aggregate with business logic
       const orderAggregate = OrderAggregate.create(command);
-      
+
       // 2. Save through repository - events published automatically
       await this.orderRepository.save(orderAggregate);
       // ↳ This automatically publishes OrderCreated event
-      
+
       const order = orderAggregate.getOrder();
       console.log(`Order ${order.id} created successfully`);
-      
+
       return order;
     } catch (error) {
       console.error('Failed to create order:', error);
@@ -355,7 +372,7 @@ export class OrderService {
 
     // Business logic + event emission
     orderAggregate.confirm();
-    
+
     // Save automatically publishes OrderConfirmed event
     await this.orderRepository.save(orderAggregate);
   }
@@ -368,17 +385,27 @@ async function demonstrateBasicEventPublishing(): Promise<void> {
   const command: CreateOrderCommand = {
     userId: 'user-123',
     items: [
-      { productId: 'laptop-pro', name: 'Laptop Pro', quantity: 1, price: 1299.99 },
-      { productId: 'mouse-wireless', name: 'Wireless Mouse', quantity: 1, price: 49.99 }
+      {
+        productId: 'laptop-pro',
+        name: 'Laptop Pro',
+        quantity: 1,
+        price: 1299.99,
+      },
+      {
+        productId: 'mouse-wireless',
+        name: 'Wireless Mouse',
+        quantity: 1,
+        price: 49.99,
+      },
     ],
     shippingAddress: {
       street: '123 Tech Street',
       city: 'San Francisco',
       state: 'CA',
       zipCode: '94105',
-      country: 'USA'
+      country: 'USA',
     },
-    paymentMethod: 'credit_card'
+    paymentMethod: 'credit_card',
   };
 
   try {
@@ -386,33 +413,41 @@ async function demonstrateBasicEventPublishing(): Promise<void> {
     const order = await orderService.createOrder(command);
     console.log('Order created:', order.id);
 
-    // Confirm order - more events published automatically  
+    // Confirm order - more events published automatically
     await orderService.confirmOrder(order.id);
     console.log('Order confirmed:', order.id);
-    
   } catch (error) {
     console.error('Order processing failed:', error);
   }
 }
-```
+````
 
 ## Key Features
 
-- **🔄 Automatic Publishing**: Events published transparently during repository save operations
-- **📦 Repository Pattern**: Clean separation between business logic and event publishing  
-- **🎯 Domain Events**: Business-focused events that represent meaningful domain occurrences
+- **🔄 Automatic Publishing**: Events published transparently during repository
+  save operations
+- **📦 Repository Pattern**: Clean separation between business logic and event
+  publishing
+- **🎯 Domain Events**: Business-focused events that represent meaningful domain
+  occurrences
 - **⚡ Transaction Safety**: Events and state changes happen atomically
 - **🏗️ Aggregate-Driven**: Events originate from aggregate business methods
 
 ## Common Pitfalls
 
-- **❌ Manual Event Publishing**: Don't manually publish events outside the repository pattern
-- **❌ Forgetting to Save**: Events are only published when `repository.save()` is called
-- **❌ Multiple Saves**: Avoid calling save multiple times for the same operation
+- **❌ Manual Event Publishing**: Don't manually publish events outside the
+  repository pattern
+- **❌ Forgetting to Save**: Events are only published when `repository.save()`
+  is called
+- **❌ Multiple Saves**: Avoid calling save multiple times for the same
+  operation
 - **❌ Event Mutation**: Don't modify event data after adding to aggregate
 
 ## Related Examples
 
-- [Example 2: Event Handlers](./example-2.md) - Creating handlers for published events
-- [Example 3: Context Filtering](./example-3.md) - Context-aware event processing
-- [Intermediate: Batch Publishing](../intermediate/example-1.md) - Publishing multiple events efficiently
+- [Example 2: Event Handlers](./example-2.md) - Creating handlers for published
+  events
+- [Example 3: Context Filtering](./example-3.md) - Context-aware event
+  processing
+- [Intermediate: Batch Publishing](../intermediate/example-1.md) - Publishing
+  multiple events efficiently

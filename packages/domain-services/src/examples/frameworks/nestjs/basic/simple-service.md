@@ -1,8 +1,8 @@
 # Simple NestJS Domain Service - Basic
 
-**Focus**: Simple domain service integration with NestJS
-**Base Example**: [Domain Service with Repository](../../../basic/example-2.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/core
+**Focus**: Simple domain service integration with NestJS **Base Example**:
+[Domain Service with Repository](../../../basic/example-2.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/core
 
 ## Service Implementation
 
@@ -11,12 +11,12 @@
 import { Injectable } from '@nestjs/common';
 import { BaseDomainService } from '@vytches-ddd/domain-services';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  CreateOrderCommand, 
+import {
+  Order,
+  CreateOrderCommand,
   OrderProcessingResult,
   IOrderRepository,
-  IProductRepository
+  IProductRepository,
 } from '../types';
 
 @Injectable()
@@ -31,7 +31,9 @@ export class OrderProcessingService extends BaseDomainService {
   /**
    * Processes order with product validation
    */
-  async processOrder(command: CreateOrderCommand): Promise<Result<OrderProcessingResult, Error>> {
+  async processOrder(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       // ⭐ FOCUS: Domain service orchestration pattern
       const validation = await this.validateOrderItems(command.items);
@@ -39,7 +41,9 @@ export class OrderProcessingService extends BaseDomainService {
         return Result.failure(validation.error);
       }
 
-      const availabilityCheck = await this.checkProductAvailability(command.items);
+      const availabilityCheck = await this.checkProductAvailability(
+        command.items
+      );
       if (availabilityCheck.isFailure()) {
         return Result.failure(availabilityCheck.error);
       }
@@ -47,74 +51,92 @@ export class OrderProcessingService extends BaseDomainService {
       const totalAmount = await this.calculateOrderTotal(command.items);
       const order = await this.createOrder(command, totalAmount);
       const savedOrder = await this.orderRepository.save(order);
-      
+
       await this.updateProductInventory(command.items);
       await this.publishOrderCreatedEvent(savedOrder);
-      
+
       const result: OrderProcessingResult = {
         orderId: savedOrder.id,
         status: savedOrder.status,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
-      
+
       return Result.success(result);
-      
     } catch (error) {
-      return Result.failure(new Error(`Order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order processing failed: ${error.message}`)
+      );
     }
   }
 
-  private async validateOrderItems(items: CreateOrderItemCommand[]): Promise<Result<void, Error>> {
+  private async validateOrderItems(
+    items: CreateOrderItemCommand[]
+  ): Promise<Result<void, Error>> {
     if (!items || items.length === 0) {
       return Result.failure(new Error('Order must contain at least one item'));
     }
-    
+
     for (const item of items) {
       if (!item.productId || item.quantity <= 0) {
-        return Result.failure(new Error('Invalid item: productId and positive quantity required'));
+        return Result.failure(
+          new Error('Invalid item: productId and positive quantity required')
+        );
       }
     }
-    
+
     return Result.success();
   }
 
-  private async checkProductAvailability(items: CreateOrderItemCommand[]): Promise<Result<void, Error>> {
+  private async checkProductAvailability(
+    items: CreateOrderItemCommand[]
+  ): Promise<Result<void, Error>> {
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
-      
+
       if (!product) {
-        return Result.failure(new Error(`Product not found: ${item.productId}`));
+        return Result.failure(
+          new Error(`Product not found: ${item.productId}`)
+        );
       }
-      
+
       if (product.status !== 'active') {
-        return Result.failure(new Error(`Product not available: ${product.name}`));
+        return Result.failure(
+          new Error(`Product not available: ${product.name}`)
+        );
       }
-      
+
       if (product.inventory < item.quantity) {
-        return Result.failure(new Error(`Insufficient inventory for product: ${product.name}`));
+        return Result.failure(
+          new Error(`Insufficient inventory for product: ${product.name}`)
+        );
       }
     }
-    
+
     return Result.success();
   }
 
-  private async calculateOrderTotal(items: CreateOrderItemCommand[]): Promise<number> {
+  private async calculateOrderTotal(
+    items: CreateOrderItemCommand[]
+  ): Promise<number> {
     let total = 0;
-    
+
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
         total += product.price * item.quantity;
       }
     }
-    
+
     return total;
   }
 
-  private async createOrder(command: CreateOrderCommand, totalAmount: number): Promise<Order> {
+  private async createOrder(
+    command: CreateOrderCommand,
+    totalAmount: number
+  ): Promise<Order> {
     const orderItems = await this.buildOrderItems(command.items);
-    
+
     return {
       id: this.generateOrderId(),
       userId: command.userId,
@@ -122,13 +144,15 @@ export class OrderProcessingService extends BaseDomainService {
       status: 'pending',
       totalAmount,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
-  private async buildOrderItems(items: CreateOrderItemCommand[]): Promise<OrderItem[]> {
+  private async buildOrderItems(
+    items: CreateOrderItemCommand[]
+  ): Promise<OrderItem[]> {
     const orderItems: OrderItem[] = [];
-    
+
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
@@ -136,15 +160,17 @@ export class OrderProcessingService extends BaseDomainService {
           productId: item.productId,
           quantity: item.quantity,
           price: product.price,
-          name: product.name
+          name: product.name,
         });
       }
     }
-    
+
     return orderItems;
   }
 
-  private async updateProductInventory(items: CreateOrderItemCommand[]): Promise<void> {
+  private async updateProductInventory(
+    items: CreateOrderItemCommand[]
+  ): Promise<void> {
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
@@ -160,9 +186,9 @@ export class OrderProcessingService extends BaseDomainService {
       userId: order.userId,
       items: order.items,
       totalAmount: order.totalAmount,
-      createdAt: order.createdAt
+      createdAt: order.createdAt,
     };
-    
+
     console.log('Publishing OrderCreatedEvent:', event);
   }
 
@@ -190,11 +216,11 @@ export class OrderController {
   async processOrder(@Body() command: CreateOrderCommand) {
     // ⭐ FOCUS: Thin wrapper around domain service
     const result = await this.orderProcessingService.processOrder(command);
-    
+
     if (result.isFailure()) {
       throw new Error(result.error.message);
     }
-    
+
     return result.value;
   }
 }
@@ -215,14 +241,14 @@ import { OrderProcessingService } from './order-processing.service';
     // Repository providers would be injected here
     {
       provide: 'IOrderRepository',
-      useClass: OrderRepository
+      useClass: OrderRepository,
     },
     {
       provide: 'IProductRepository',
-      useClass: ProductRepository
-    }
+      useClass: ProductRepository,
+    },
   ],
-  exports: [OrderProcessingService]
+  exports: [OrderProcessingService],
 })
 export class OrderModule {}
 ```
@@ -238,5 +264,7 @@ export class OrderModule {}
 ## Related Examples
 
 - [Manual Setup](./manual-setup.md) - Simple manual instantiation
-- [Domain Service with Repository](../../../basic/example-2.md) - Core library patterns
-- [Event Integration](../intermediate/event-integration.md) - Advanced event patterns
+- [Domain Service with Repository](../../../basic/example-2.md) - Core library
+  patterns
+- [Event Integration](../intermediate/event-integration.md) - Advanced event
+  patterns

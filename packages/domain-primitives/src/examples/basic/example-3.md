@@ -7,7 +7,9 @@
 
 ## Overview
 
-Domain interfaces define contracts that ensure consistency across your domain layer. They establish clear boundaries and enable loose coupling between domain components.
+Domain interfaces define contracts that ensure consistency across your domain
+layer. They establish clear boundaries and enable loose coupling between domain
+components.
 
 ## Core Domain Interfaces
 
@@ -25,7 +27,7 @@ export interface IEntity<TId = string> {
 export interface IAggregateRoot<TId = string> extends IEntity<TId> {
   readonly version: number;
   readonly uncommittedEvents: IDomainEvent[];
-  
+
   markEventsAsCommitted(): void;
   getUncommittedEvents(): IDomainEvent[];
 }
@@ -82,8 +84,9 @@ export interface IWriteRepository<T extends IEntity> {
 }
 
 // ✅ Full repository interface
-export interface IRepository<T extends IEntity> 
-  extends IReadRepository<T>, IWriteRepository<T> {
+export interface IRepository<T extends IEntity>
+  extends IReadRepository<T>,
+    IWriteRepository<T> {
   count(): Promise<number>;
 }
 
@@ -162,7 +165,9 @@ export class Product implements IEntity<string> {
 }
 
 // ✅ Implementing a value object
-export class Money implements IValueObject<{ amount: number; currency: string }> {
+export class Money
+  implements IValueObject<{ amount: number; currency: string }>
+{
   constructor(
     private readonly amount: number,
     private readonly currency: string
@@ -177,8 +182,9 @@ export class Money implements IValueObject<{ amount: number; currency: string }>
       return false;
     }
     const otherValue = other.getValue();
-    return this.amount === otherValue.amount && 
-           this.currency === otherValue.currency;
+    return (
+      this.amount === otherValue.amount && this.currency === otherValue.currency
+    );
   }
 
   getValue(): { amount: number; currency: string } {
@@ -226,8 +232,9 @@ class AndSpecification<T> implements ISpecification<T> {
   ) {}
 
   isSatisfiedBy(candidate: T): boolean {
-    return this.left.isSatisfiedBy(candidate) && 
-           this.right.isSatisfiedBy(candidate);
+    return (
+      this.left.isSatisfiedBy(candidate) && this.right.isSatisfiedBy(candidate)
+    );
   }
 
   and(other: ISpecification<T>): ISpecification<T> {
@@ -276,9 +283,13 @@ export class InMemoryProductRepository implements IRepository<Product> {
   }
 
   // Additional query methods
-  async findByPriceRange(minPrice: number, maxPrice: number): Promise<Product[]> {
-    return Array.from(this.products.values())
-      .filter(p => p.getPrice() >= minPrice && p.getPrice() <= maxPrice);
+  async findByPriceRange(
+    minPrice: number,
+    maxPrice: number
+  ): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(
+      p => p.getPrice() >= minPrice && p.getPrice() <= maxPrice
+    );
   }
 }
 ```
@@ -331,9 +342,9 @@ export class CreateProductCommand {
   ) {}
 }
 
-export class CreateProductCommandHandler 
-  implements ICommandHandler<CreateProductCommand, Product> {
-  
+export class CreateProductCommandHandler
+  implements ICommandHandler<CreateProductCommand, Product>
+{
   constructor(
     private repository: IRepository<Product>,
     private pricingService: PricingService
@@ -350,11 +361,7 @@ export class CreateProductCommandHandler
     }
 
     // Create product
-    const product = new Product(
-      this.generateId(),
-      command.name,
-      command.price
-    );
+    const product = new Product(this.generateId(), command.name, command.price);
 
     // Save to repository
     await this.repository.save(product);

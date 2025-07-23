@@ -1,26 +1,28 @@
 # Basic Use Cases
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: basic
-**Domain**: Event Sourcing
-**Patterns**: Real-world scenarios, business applications
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Domain**: Event Sourcing **Patterns**: Real-world scenarios, business
+applications **Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
 
 ## Description
 
-Real-world use cases demonstrating basic event projection patterns in common business scenarios. These examples show practical applications of projections for building read models, dashboards, and analytics across different industries and domains.
+Real-world use cases demonstrating basic event projection patterns in common
+business scenarios. These examples show practical applications of projections
+for building read models, dashboards, and analytics across different industries
+and domains.
 
 ## Business Context
 
 Event projections solve common business challenges:
+
 - Creating optimized views for different user interfaces
 - Building real-time dashboards and analytics
 - Supporting complex queries without impacting write performance
 - Maintaining denormalized data for fast reporting
 - Tracking business metrics and KPIs in real-time
 
-These use cases demonstrate how projections transform event streams into valuable business insights.
+These use cases demonstrate how projections transform event streams into
+valuable business insights.
 
 ## Use Case Examples
 
@@ -43,7 +45,7 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
     super('CustomerDashboardProjection', 'v1.0');
     this.setState({
       customerDashboards: new Map<string, any>(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -57,22 +59,22 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
         email: customerData.email,
         registrationDate: new Date(event.timestamp),
         tier: 'Bronze',
-        loyaltyPoints: 0
+        loyaltyPoints: 0,
       },
       orderSummary: {
         totalOrders: 0,
         totalSpent: 0,
         averageOrderValue: 0,
         lastOrderDate: null,
-        favoriteCategories: []
+        favoriteCategories: [],
       },
       recentActivity: [],
       supportTickets: {
         open: 0,
         resolved: 0,
-        averageResolutionTime: 0
+        averageResolutionTime: 0,
       },
-      recommendations: []
+      recommendations: [],
     };
 
     const state = this.getState();
@@ -93,16 +95,21 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
       // Update order summary
       dashboard.orderSummary.totalOrders += 1;
       dashboard.orderSummary.totalSpent += orderData.total;
-      dashboard.orderSummary.averageOrderValue = 
+      dashboard.orderSummary.averageOrderValue =
         dashboard.orderSummary.totalSpent / dashboard.orderSummary.totalOrders;
       dashboard.orderSummary.lastOrderDate = new Date(event.timestamp);
 
       // Update tier based on spending
-      dashboard.profile.tier = this.calculateCustomerTier(dashboard.orderSummary.totalSpent);
+      dashboard.profile.tier = this.calculateCustomerTier(
+        dashboard.orderSummary.totalSpent
+      );
 
       // Track category preferences
       orderData.items?.forEach((item: any) => {
-        this.updateCategoryPreference(dashboard.orderSummary.favoriteCategories, item.category);
+        this.updateCategoryPreference(
+          dashboard.orderSummary.favoriteCategories,
+          item.category
+        );
       });
 
       // Add to recent activity
@@ -110,7 +117,7 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
         type: 'order_placed',
         orderId: orderData.orderId,
         amount: orderData.total,
-        timestamp: new Date(event.timestamp)
+        timestamp: new Date(event.timestamp),
       });
 
       // Keep only last 10 activities
@@ -133,12 +140,12 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
 
     if (dashboard) {
       dashboard.supportTickets.open += 1;
-      
+
       dashboard.recentActivity.unshift({
         type: 'support_ticket_opened',
         ticketId: ticketData.ticketId,
         subject: ticketData.subject,
-        timestamp: new Date(event.timestamp)
+        timestamp: new Date(event.timestamp),
       });
 
       state.customerDashboards.set(ticketData.customerId, dashboard);
@@ -152,8 +159,9 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
   }
 
   getCustomersByTier(tier: string): any[] {
-    return Array.from(this.getState().customerDashboards.values())
-      .filter(dashboard => dashboard.profile.tier === tier);
+    return Array.from(this.getState().customerDashboards.values()).filter(
+      dashboard => dashboard.profile.tier === tier
+    );
   }
 
   private calculateCustomerTier(totalSpent: number): string {
@@ -170,7 +178,7 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
     } else {
       categories.push({ name: category, count: 1 });
     }
-    
+
     // Sort by count and keep top 5
     categories.sort((a, b) => b.count - a.count);
     categories.splice(5);
@@ -182,7 +190,7 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
     return topCategories.map((cat: any) => ({
       type: 'category_recommendation',
       category: cat.name,
-      reason: `Based on your ${cat.count} previous purchases in ${cat.name}`
+      reason: `Based on your ${cat.count} previous purchases in ${cat.name}`,
     }));
   }
 }
@@ -212,9 +220,9 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
         activeSubscriptions: 0,
         totalRevenue: 0,
         churnRate: 0,
-        averageRevenuePerUser: 0
+        averageRevenuePerUser: 0,
       },
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -232,23 +240,24 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
       monthlyRevenue: tenantData.monthlyFee || 0,
       features: {
         totalFeatureUsage: 0,
-        mostUsedFeatures: []
+        mostUsedFeatures: [],
       },
       engagement: {
         dailyActiveUsers: 0,
         monthlyActiveUsers: 0,
-        lastActivityDate: null
+        lastActivityDate: null,
       },
-      status: 'active'
+      status: 'active',
     };
 
     state.tenants.set(tenantData.tenantId, tenant);
-    
+
     // Update subscription metrics
     state.subscriptionMetrics.activeSubscriptions += 1;
     state.subscriptionMetrics.totalRevenue += tenant.monthlyRevenue;
-    state.subscriptionMetrics.averageRevenuePerUser = 
-      state.subscriptionMetrics.totalRevenue / state.subscriptionMetrics.activeSubscriptions;
+    state.subscriptionMetrics.averageRevenuePerUser =
+      state.subscriptionMetrics.totalRevenue /
+      state.subscriptionMetrics.activeSubscriptions;
 
     state.lastUpdated = new Date();
     this.setState(state);
@@ -266,20 +275,21 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
       // Update tenant feature usage
       tenant.features.totalFeatureUsage += 1;
       tenant.engagement.lastActivityDate = new Date(event.timestamp);
-      
+
       // Track feature popularity
       const featureName = usageData.featureName;
       const currentUsage = state.featureUsage.get(featureName) || {
         name: featureName,
         totalUsage: 0,
         uniqueUsers: new Set(),
-        averageUsagePerUser: 0
+        averageUsagePerUser: 0,
       };
-      
+
       currentUsage.totalUsage += 1;
       currentUsage.uniqueUsers.add(usageData.userId);
-      currentUsage.averageUsagePerUser = currentUsage.totalUsage / currentUsage.uniqueUsers.size;
-      
+      currentUsage.averageUsagePerUser =
+        currentUsage.totalUsage / currentUsage.uniqueUsers.size;
+
       state.featureUsage.set(featureName, currentUsage);
 
       // Update daily metrics
@@ -289,12 +299,12 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
         activeUsers: new Set(),
         featureUsage: 0,
         newTenants: 0,
-        revenue: 0
+        revenue: 0,
       };
-      
+
       dailyMetric.activeUsers.add(usageData.userId);
       dailyMetric.featureUsage += 1;
-      
+
       state.dailyMetrics.set(date, dailyMetric);
       state.tenants.set(usageData.tenantId, tenant);
       state.lastUpdated = new Date();
@@ -316,17 +326,20 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
       // Update subscription metrics
       state.subscriptionMetrics.activeSubscriptions -= 1;
       state.subscriptionMetrics.totalRevenue -= tenant.monthlyRevenue;
-      
+
       if (state.subscriptionMetrics.activeSubscriptions > 0) {
-        state.subscriptionMetrics.averageRevenuePerUser = 
-          state.subscriptionMetrics.totalRevenue / state.subscriptionMetrics.activeSubscriptions;
+        state.subscriptionMetrics.averageRevenuePerUser =
+          state.subscriptionMetrics.totalRevenue /
+          state.subscriptionMetrics.activeSubscriptions;
       }
 
       // Update churn rate (simplified calculation)
       const totalTenants = state.tenants.size;
-      const cancelledTenants = Array.from(state.tenants.values())
-        .filter(t => t.status === 'cancelled').length;
-      state.subscriptionMetrics.churnRate = (cancelledTenants / totalTenants) * 100;
+      const cancelledTenants = Array.from(state.tenants.values()).filter(
+        t => t.status === 'cancelled'
+      ).length;
+      state.subscriptionMetrics.churnRate =
+        (cancelledTenants / totalTenants) * 100;
 
       state.tenants.set(cancellationData.tenantId, tenant);
       state.lastUpdated = new Date();
@@ -337,18 +350,21 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
   // Analytics query methods
   getDashboardMetrics(): any {
     const state = this.getState();
-    const activeTenants = Array.from(state.tenants.values())
-      .filter(t => t.status === 'active');
+    const activeTenants = Array.from(state.tenants.values()).filter(
+      t => t.status === 'active'
+    );
 
     return {
       subscriptionMetrics: state.subscriptionMetrics,
       tenantMetrics: {
         activeTenants: activeTenants.length,
         totalTenants: state.tenants.size,
-        averageUsersPerTenant: activeTenants.reduce((sum, t) => sum + t.users, 0) / activeTenants.length
+        averageUsersPerTenant:
+          activeTenants.reduce((sum, t) => sum + t.users, 0) /
+          activeTenants.length,
       },
       topFeatures: this.getTopFeatures(5),
-      growthMetrics: this.calculateGrowthMetrics()
+      growthMetrics: this.calculateGrowthMetrics(),
     };
   }
 
@@ -359,7 +375,7 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
       .map(feature => ({
         name: feature.name,
         usage: feature.totalUsage,
-        uniqueUsers: feature.uniqueUsers.size
+        uniqueUsers: feature.uniqueUsers.size,
       }));
   }
 
@@ -370,57 +386,68 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
     return {
       ...tenant,
       healthScore: this.calculateTenantHealthScore(tenant),
-      riskLevel: this.assessChurnRisk(tenant)
+      riskLevel: this.assessChurnRisk(tenant),
     };
   }
 
   private calculateGrowthMetrics(): any {
-    const last30Days = Array.from(this.getState().dailyMetrics.values())
-      .filter(metric => {
+    const last30Days = Array.from(this.getState().dailyMetrics.values()).filter(
+      metric => {
         const metricDate = new Date(metric.date);
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         return metricDate >= thirtyDaysAgo;
-      });
+      }
+    );
 
-    const totalNewTenants = last30Days.reduce((sum, metric) => sum + metric.newTenants, 0);
-    const averageDailyActiveUsers = last30Days.reduce((sum, metric) => 
-      sum + metric.activeUsers.size, 0) / Math.max(last30Days.length, 1);
+    const totalNewTenants = last30Days.reduce(
+      (sum, metric) => sum + metric.newTenants,
+      0
+    );
+    const averageDailyActiveUsers =
+      last30Days.reduce((sum, metric) => sum + metric.activeUsers.size, 0) /
+      Math.max(last30Days.length, 1);
 
     return {
       newTenantsLast30Days: totalNewTenants,
       averageDailyActiveUsers,
-      growthRate: this.calculateMonthlyGrowthRate()
+      growthRate: this.calculateMonthlyGrowthRate(),
     };
   }
 
   private calculateTenantHealthScore(tenant: any): number {
     let score = 0;
-    
+
     // Feature usage score (0-40 points)
     if (tenant.features.totalFeatureUsage > 100) score += 40;
     else if (tenant.features.totalFeatureUsage > 50) score += 30;
     else if (tenant.features.totalFeatureUsage > 10) score += 20;
     else score += 10;
-    
+
     // Engagement score (0-30 points)
-    const daysSinceLastActivity = tenant.engagement.lastActivityDate ? 
-      (Date.now() - tenant.engagement.lastActivityDate.getTime()) / (24 * 60 * 60 * 1000) : 999;
-    
+    const daysSinceLastActivity = tenant.engagement.lastActivityDate
+      ? (Date.now() - tenant.engagement.lastActivityDate.getTime()) /
+        (24 * 60 * 60 * 1000)
+      : 999;
+
     if (daysSinceLastActivity <= 1) score += 30;
     else if (daysSinceLastActivity <= 7) score += 20;
     else if (daysSinceLastActivity <= 30) score += 10;
-    
+
     // Plan score (0-30 points)
-    const planScores: Record<string, number> = { 'enterprise': 30, 'pro': 20, 'basic': 10 };
+    const planScores: Record<string, number> = {
+      enterprise: 30,
+      pro: 20,
+      basic: 10,
+    };
     score += planScores[tenant.plan.toLowerCase()] || 0;
-    
+
     return Math.min(score, 100);
   }
 
   private assessChurnRisk(tenant: any): 'low' | 'medium' | 'high' {
     const healthScore = this.calculateTenantHealthScore(tenant);
-    
+
     if (healthScore >= 80) return 'low';
     if (healthScore >= 50) return 'medium';
     return 'high';
@@ -428,22 +455,29 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
 
   private calculateMonthlyGrowthRate(): number {
     // Simplified growth rate calculation
-    const activeTenants = Array.from(this.getState().tenants.values())
-      .filter(t => t.status === 'active');
-    
+    const activeTenants = Array.from(this.getState().tenants.values()).filter(
+      t => t.status === 'active'
+    );
+
     const thisMonth = activeTenants.filter(t => {
       const regDate = new Date(t.registrationDate);
       const now = new Date();
-      return regDate.getMonth() === now.getMonth() && regDate.getFullYear() === now.getFullYear();
+      return (
+        regDate.getMonth() === now.getMonth() &&
+        regDate.getFullYear() === now.getFullYear()
+      );
     }).length;
-    
+
     const lastMonth = activeTenants.filter(t => {
       const regDate = new Date(t.registrationDate);
       const lastMonth = new Date();
       lastMonth.setMonth(lastMonth.getMonth() - 1);
-      return regDate.getMonth() === lastMonth.getMonth() && regDate.getFullYear() === lastMonth.getFullYear();
+      return (
+        regDate.getMonth() === lastMonth.getMonth() &&
+        regDate.getFullYear() === lastMonth.getFullYear()
+      );
     }).length;
-    
+
     return lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
   }
 }
@@ -472,9 +506,9 @@ export class PatientCareProjection extends ProjectionBase<any> {
         patientSatisfactionAvg: 0,
         treatmentSuccessRate: 0,
         averageWaitTime: 0,
-        missedAppointmentRate: 0
+        missedAppointmentRate: 0,
       },
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -489,28 +523,28 @@ export class PatientCareProjection extends ProjectionBase<any> {
         name: patientData.name,
         dateOfBirth: patientData.dateOfBirth,
         gender: patientData.gender,
-        contactInfo: patientData.contactInfo
+        contactInfo: patientData.contactInfo,
       },
       medicalHistory: {
         allergies: patientData.allergies || [],
         chronicConditions: patientData.chronicConditions || [],
         medications: [],
-        procedures: []
+        procedures: [],
       },
       careTeam: {
         primaryPhysician: null,
-        specialists: []
+        specialists: [],
       },
       appointments: {
         upcoming: [],
         completed: [],
         missed: 0,
-        totalScheduled: 0
+        totalScheduled: 0,
       },
       treatmentPlans: [],
       vitalSigns: [],
       registrationDate: new Date(event.timestamp),
-      riskLevel: 'low'
+      riskLevel: 'low',
     };
 
     // Assess initial risk level based on chronic conditions
@@ -520,7 +554,9 @@ export class PatientCareProjection extends ProjectionBase<any> {
     state.lastUpdated = new Date();
     this.setState(state);
 
-    console.log(`Patient registered: ${patientData.name} (Risk: ${patient.riskLevel})`);
+    console.log(
+      `Patient registered: ${patientData.name} (Risk: ${patient.riskLevel})`
+    );
   }
 
   @EventHandler('MedicalRecordAdded')
@@ -537,15 +573,18 @@ export class PatientCareProjection extends ProjectionBase<any> {
         treatment: recordData.treatment,
         physician: recordData.physician,
         date: new Date(event.timestamp),
-        notes: recordData.notes
+        notes: recordData.notes,
       };
 
       patient.medicalHistory.procedures.push(record);
 
       // Update risk level based on new diagnosis
-      if (recordData.diagnosis && this.isHighRiskCondition(recordData.diagnosis)) {
+      if (
+        recordData.diagnosis &&
+        this.isHighRiskCondition(recordData.diagnosis)
+      ) {
         patient.riskLevel = 'high';
-        
+
         // Create care alert
         const alert = {
           alertId: `alert-${Date.now()}`,
@@ -554,7 +593,7 @@ export class PatientCareProjection extends ProjectionBase<any> {
           message: `New high-risk condition diagnosed: ${recordData.diagnosis}`,
           severity: 'critical',
           createdAt: new Date(event.timestamp),
-          acknowledged: false
+          acknowledged: false,
         };
 
         const patientAlerts = state.careAlerts.get(recordData.patientId) || [];
@@ -582,16 +621,19 @@ export class PatientCareProjection extends ProjectionBase<any> {
         temperature: vitalData.temperature,
         weight: vitalData.weight,
         recordedAt: new Date(event.timestamp),
-        recordedBy: vitalData.recordedBy
+        recordedBy: vitalData.recordedBy,
       };
 
       patient.vitalSigns.push(vitalSigns);
-      
+
       // Keep only last 50 vital sign records
       patient.vitalSigns = patient.vitalSigns.slice(-50);
 
       // Check for abnormal readings and create alerts
-      const alerts = this.checkVitalSignsForAlerts(vitalData.patientId, vitalSigns);
+      const alerts = this.checkVitalSignsForAlerts(
+        vitalData.patientId,
+        vitalSigns
+      );
       if (alerts.length > 0) {
         const patientAlerts = state.careAlerts.get(vitalData.patientId) || [];
         patientAlerts.push(...alerts);
@@ -618,7 +660,7 @@ export class PatientCareProjection extends ProjectionBase<any> {
         outcome: appointmentData.outcome,
         notes: appointmentData.notes,
         satisfactionScore: appointmentData.satisfactionScore,
-        completedAt: new Date(event.timestamp)
+        completedAt: new Date(event.timestamp),
       };
 
       patient.appointments.completed.push(appointment);
@@ -639,8 +681,9 @@ export class PatientCareProjection extends ProjectionBase<any> {
   }
 
   getHighRiskPatients(): any[] {
-    return Array.from(this.getState().patients.values())
-      .filter(patient => patient.riskLevel === 'high');
+    return Array.from(this.getState().patients.values()).filter(
+      patient => patient.riskLevel === 'high'
+    );
   }
 
   getPatientAlerts(patientId: string): any[] {
@@ -652,7 +695,9 @@ export class PatientCareProjection extends ProjectionBase<any> {
     for (const alerts of this.getState().careAlerts.values()) {
       allAlerts.push(...alerts.filter(alert => !alert.acknowledged));
     }
-    return allAlerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return allAlerts.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }
 
   getQualityMetrics(): any {
@@ -671,10 +716,15 @@ export class PatientCareProjection extends ProjectionBase<any> {
 
   private isHighRiskCondition(diagnosis: string): boolean {
     const highRiskConditions = [
-      'diabetes', 'heart failure', 'copd', 'cancer', 
-      'kidney disease', 'stroke', 'heart attack'
+      'diabetes',
+      'heart failure',
+      'copd',
+      'cancer',
+      'kidney disease',
+      'stroke',
+      'heart attack',
     ];
-    return highRiskConditions.some(condition => 
+    return highRiskConditions.some(condition =>
       diagnosis.toLowerCase().includes(condition)
     );
   }
@@ -693,7 +743,7 @@ export class PatientCareProjection extends ProjectionBase<any> {
           message: `Critical blood pressure reading: ${vitals.bloodPressure}`,
           severity: 'critical',
           createdAt: new Date(),
-          acknowledged: false
+          acknowledged: false,
         });
       }
     }
@@ -707,7 +757,7 @@ export class PatientCareProjection extends ProjectionBase<any> {
         message: `Abnormal heart rate: ${vitals.heartRate} bpm`,
         severity: 'high',
         createdAt: new Date(),
-        acknowledged: false
+        acknowledged: false,
       });
     }
 
@@ -716,19 +766,25 @@ export class PatientCareProjection extends ProjectionBase<any> {
 
   private updateQualityMetrics(state: any, appointment: any): void {
     const metrics = state.qualityMetrics;
-    
+
     // Update satisfaction average
     if (appointment.satisfactionScore) {
       const totalPatients = state.patients.size;
-      metrics.patientSatisfactionAvg = 
-        (metrics.patientSatisfactionAvg * (totalPatients - 1) + appointment.satisfactionScore) / totalPatients;
+      metrics.patientSatisfactionAvg =
+        (metrics.patientSatisfactionAvg * (totalPatients - 1) +
+          appointment.satisfactionScore) /
+        totalPatients;
     }
 
     // Treatment success rate (simplified)
     if (appointment.outcome === 'successful') {
-      const totalAppointments = Array.from(state.patients.values())
-        .reduce((sum, patient) => sum + patient.appointments.completed.length, 0);
-      metrics.treatmentSuccessRate = (metrics.treatmentSuccessRate * (totalAppointments - 1) + 1) / totalAppointments;
+      const totalAppointments = Array.from(state.patients.values()).reduce(
+        (sum, patient) => sum + patient.appointments.completed.length,
+        0
+      );
+      metrics.treatmentSuccessRate =
+        (metrics.treatmentSuccessRate * (totalAppointments - 1) + 1) /
+        totalAppointments;
     }
   }
 
@@ -737,11 +793,14 @@ export class PatientCareProjection extends ProjectionBase<any> {
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   }
 }
@@ -750,26 +809,34 @@ export class PatientCareProjection extends ProjectionBase<any> {
 ## Business Benefits by Industry
 
 ### **E-Commerce**
-- **Real-time customer insights**: Instant view of customer behavior and preferences
-- **Personalized experiences**: Dynamic recommendations based on purchase history
+
+- **Real-time customer insights**: Instant view of customer behavior and
+  preferences
+- **Personalized experiences**: Dynamic recommendations based on purchase
+  history
 - **Revenue optimization**: Track metrics that drive conversion and retention
 - **Customer service excellence**: Complete context for support interactions
 
 ### **SaaS Platforms**
+
 - **Product analytics**: Understanding feature usage and user engagement
 - **Churn prediction**: Early identification of at-risk customers
 - **Revenue tracking**: Real-time subscription and growth metrics
 - **Performance monitoring**: System health and user experience metrics
 
 ### **Healthcare**
-- **Patient safety**: Real-time alerts for critical conditions and abnormal readings
+
+- **Patient safety**: Real-time alerts for critical conditions and abnormal
+  readings
 - **Care coordination**: Complete patient history accessible to entire care team
-- **Quality improvement**: Metrics for treatment outcomes and patient satisfaction
+- **Quality improvement**: Metrics for treatment outcomes and patient
+  satisfaction
 - **Compliance reporting**: Automated tracking for regulatory requirements
 
 ## Implementation Patterns
 
 ### **Dashboard Projections**
+
 ```typescript
 // Common pattern for dashboard data
 interface DashboardProjection {
@@ -782,6 +849,7 @@ interface DashboardProjection {
 ```
 
 ### **Analytics Projections**
+
 ```typescript
 // Pattern for analytics and reporting
 interface AnalyticsProjection {
@@ -793,6 +861,7 @@ interface AnalyticsProjection {
 ```
 
 ### **Operational Projections**
+
 ```typescript
 // Pattern for operational monitoring
 interface OperationalProjection {

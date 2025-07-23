@@ -1,12 +1,12 @@
 # New Project Workflow
 
-**Focus**: Creating a complete DDD project from scratch
-**Time**: 15-30 minutes
+**Focus**: Creating a complete DDD project from scratch **Time**: 15-30 minutes
 **Result**: Production-ready DDD project structure
 
 ## Overview
 
-This workflow guides you through creating a new DDD project with VytchesDDD CLI, from initial setup to a working application with multiple bounded contexts.
+This workflow guides you through creating a new DDD project with VytchesDDD CLI,
+from initial setup to a working application with multiple bounded contexts.
 
 ## Prerequisites
 
@@ -34,6 +34,7 @@ npm install -D typescript @types/node ts-node
 ```
 
 **Generated package.json:**
+
 ```json
 {
   "name": "my-ddd-project",
@@ -61,6 +62,7 @@ npx tsc --init
 ```
 
 **tsconfig.json:**
+
 ```json
 {
   "compilerOptions": {
@@ -95,6 +97,7 @@ vytches-ddd domain UserManagement --guided --template enterprise
 ```
 
 **Interactive Session:**
+
 ```
 🎯 VytchesDDD Domain Builder
 
@@ -106,7 +109,7 @@ vytches-ddd domain UserManagement --guided --template enterprise
 
 ? Main use cases?
   ✓ Register new user
-  ✓ Authenticate user  
+  ✓ Authenticate user
   ✓ Update profile
   ✓ Manage roles
 
@@ -114,6 +117,7 @@ Generating enterprise domain structure...
 ```
 
 **Generated Structure:**
+
 ```
 src/domain/user-management/
 ├── aggregates/
@@ -148,6 +152,7 @@ vytches-ddd domain OrderManagement --template ecommerce
 ```
 
 **Generated Structure:**
+
 ```
 src/domain/order-management/
 ├── aggregates/
@@ -182,19 +187,22 @@ src/domain/order-management/
 vytches-ddd generate command-handler RegisterUser --domain UserManagement
 vytches-ddd generate query-handler GetUserProfile --domain UserManagement
 
-# Generate handlers for OrderManagement  
+# Generate handlers for OrderManagement
 vytches-ddd generate command-handler CreateOrder --domain OrderManagement
 vytches-ddd generate command-handler ProcessPayment --domain OrderManagement
 ```
 
 **Generated Command Handler:**
+
 ```typescript
 // src/application/user-management/handlers/register-user.handler.ts
 import { CommandHandler, ICommandHandler } from '@vytches-ddd/cqrs';
 import { RegisterUserCommand } from '@domain/user-management/commands/register-user.command';
 
 @CommandHandler(RegisterUserCommand)
-export class RegisterUserHandler implements ICommandHandler<RegisterUserCommand> {
+export class RegisterUserHandler
+  implements ICommandHandler<RegisterUserCommand>
+{
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly userRegistrationService: UserRegistrationService
@@ -224,6 +232,7 @@ vytches-ddd generate event-bus --framework inmemory
 ```
 
 **Generated Repository:**
+
 ```typescript
 // src/infrastructure/user-management/user.repository.ts
 import { IUserRepository } from '@domain/user-management/repositories/user.repository';
@@ -259,6 +268,7 @@ touch src/index.ts
 ```
 
 **src/index.ts:**
+
 ```typescript
 import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
 import { EventBus } from '@vytches-ddd/events';
@@ -282,7 +292,7 @@ async function bootstrap() {
   commandBus.register(CreateOrderHandler);
 
   console.log('🚀 DDD Application started successfully!');
-  
+
   // Example usage
   await demonstrateUsage(commandBus, queryBus);
 }
@@ -295,10 +305,10 @@ async function demonstrateUsage(commandBus: CommandBus, queryBus: QueryBus) {
     {
       firstName: 'John',
       lastName: 'Doe',
-      dateOfBirth: new Date('1990-01-01')
+      dateOfBirth: new Date('1990-01-01'),
     }
   );
-  
+
   await commandBus.execute(registerCommand);
   console.log('✅ User registered successfully');
 
@@ -307,12 +317,12 @@ async function demonstrateUsage(commandBus: CommandBus, queryBus: QueryBus) {
     'user-123',
     [
       { productId: 'product-1', quantity: 2, price: 29.99 },
-      { productId: 'product-2', quantity: 1, price: 49.99 }
+      { productId: 'product-2', quantity: 1, price: 49.99 },
     ],
     {
       street: '123 Main St',
       city: 'New York',
-      zipCode: '10001'
+      zipCode: '10001',
     }
   );
 
@@ -334,22 +344,19 @@ npx ts-jest config:init
 ```
 
 **jest.config.js:**
+
 ```javascript
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/index.ts'
-  ],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/index.ts'],
   moduleNameMapping: {
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',
     '^@application/(.*)$': '<rootDir>/src/application/$1',
-    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1'
-  }
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+  },
 };
 ```
 
@@ -371,6 +378,7 @@ npm run dev
 ```
 
 **Expected Output:**
+
 ```
 🚀 DDD Application started successfully!
 ✅ User registered successfully
@@ -418,18 +426,23 @@ my-ddd-project/
 ## Next Steps
 
 ### Development
-1. **Add more domains**: `vytches-ddd domain ProductCatalog --template ecommerce`
-2. **Enhance infrastructure**: Add database repositories, external service integrations
+
+1. **Add more domains**:
+   `vytches-ddd domain ProductCatalog --template ecommerce`
+2. **Enhance infrastructure**: Add database repositories, external service
+   integrations
 3. **Add security**: Authentication, authorization, audit logging
 4. **Performance**: Add caching, async processing, event sourcing
 
 ### Production Readiness
+
 1. **Containerization**: Add Docker configuration
 2. **Monitoring**: Add logging, metrics, health checks
 3. **CI/CD**: Add build, test, and deployment pipelines
 4. **Documentation**: API docs, architecture decision records
 
 ### Scaling
+
 1. **Microservices**: Split domains into separate services
 2. **Event Sourcing**: Add event store for audit and replay
 3. **CQRS Read Models**: Add optimized query models
@@ -438,16 +451,19 @@ my-ddd-project/
 ## Troubleshooting
 
 **Dependencies not found?**
+
 ```bash
 npm install --save-dev @types/node
 ```
 
 **TypeScript errors?**
+
 ```bash
 vytches-ddd validate --fix-imports
 ```
 
 **Domain validation fails?**
+
 ```bash
 vytches-ddd domain MyDomain --validate --debug
 ```

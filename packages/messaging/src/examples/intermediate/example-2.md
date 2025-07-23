@@ -5,25 +5,31 @@
 **Complexity**: Intermediate  
 **Domain**: Multi-Tenant SaaS Platform  
 **Patterns**: Message Routing, Content-Based Router, Message Enrichment  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/policies
+**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
+@vytches-ddd/policies
 
 ## Description
 
-This example demonstrates sophisticated message routing based on content, context, and business rules. It shows how to build a flexible routing system that can dynamically determine message destinations and apply transformations.
+This example demonstrates sophisticated message routing based on content,
+context, and business rules. It shows how to build a flexible routing system
+that can dynamically determine message destinations and apply transformations.
 
 ## Business Context
 
-A multi-tenant SaaS platform needs to route messages to different services based on tenant configuration, message type, and business rules. Premium tenants get priority routing, while standard tenants use regular queues. Messages may need enrichment before routing.
+A multi-tenant SaaS platform needs to route messages to different services based
+on tenant configuration, message type, and business rules. Premium tenants get
+priority routing, while standard tenants use regular queues. Messages may need
+enrichment before routing.
 
 ## Code Example
 
 ```typescript
 // message-router.service.ts
-import { 
-  MessageRouter, 
-  RouteDefinition, 
+import {
+  MessageRouter,
+  RouteDefinition,
   MessageEnricher,
-  RoutingContext 
+  RoutingContext,
 } from '@vytches-ddd/messaging';
 import { PolicyEngine, PolicyContext } from '@vytches-ddd/policies';
 import { Customer, NotificationRequest } from './types';
@@ -48,19 +54,18 @@ export class TenantAwareMessageRouter extends MessageRouter {
       },
       destination: 'premium-processing-queue',
       priority: 'high',
-      enrichers: [new TenantEnricher(), new PriorityEnricher()]
+      enrichers: [new TenantEnricher(), new PriorityEnricher()],
     });
 
     // Route based on message content
     this.addRoute({
       name: 'critical-notification-route',
       predicate: (msg: NotificationRequest) => {
-        return msg.priority === 'critical' || 
-               msg.type === 'security-alert';
+        return msg.priority === 'critical' || msg.type === 'security-alert';
       },
       destination: 'critical-notifications-queue',
       priority: 'critical',
-      transformers: [new SecurityNotificationTransformer()]
+      transformers: [new SecurityNotificationTransformer()],
     });
 
     // Policy-based routing
@@ -74,7 +79,7 @@ export class TenantAwareMessageRouter extends MessageRouter {
         return policyResult.requiresSpecialHandling;
       },
       destination: context => `region-${context.dataRegion}-queue`,
-      enrichers: [new ComplianceEnricher()]
+      enrichers: [new ComplianceEnricher()],
     });
 
     // Default route
@@ -82,7 +87,7 @@ export class TenantAwareMessageRouter extends MessageRouter {
       name: 'default-route',
       predicate: () => true,
       destination: 'standard-processing-queue',
-      priority: 'normal'
+      priority: 'normal',
     });
   }
 
@@ -104,14 +109,18 @@ export class TenantAwareMessageRouter extends MessageRouter {
         // Apply transformations
         if (route.transformers) {
           for (const transformer of route.transformers) {
-            enrichedMessage = await transformer.transform(enrichedMessage, context);
+            enrichedMessage = await transformer.transform(
+              enrichedMessage,
+              context
+            );
           }
         }
 
         // Determine destination
-        const destination = typeof route.destination === 'function'
-          ? route.destination(context)
-          : route.destination;
+        const destination =
+          typeof route.destination === 'function'
+            ? route.destination(context)
+            : route.destination;
 
         return {
           routeName: route.name,
@@ -122,8 +131,8 @@ export class TenantAwareMessageRouter extends MessageRouter {
             routedAt: new Date(),
             routingContext: context,
             appliedEnrichers: route.enrichers?.map(e => e.name) || [],
-            appliedTransformers: route.transformers?.map(t => t.name) || []
-          }
+            appliedTransformers: route.transformers?.map(t => t.name) || [],
+          },
         };
       }
     }
@@ -138,15 +147,15 @@ export class TenantEnricher implements MessageEnricher {
 
   async enrich<T>(message: T, context: RoutingContext): Promise<T> {
     const tenant = await this.loadTenant(context.tenantId);
-    
+
     return {
       ...message,
       _tenant: {
         id: tenant.id,
         name: tenant.name,
         tier: tenant.tier,
-        settings: tenant.settings
-      }
+        settings: tenant.settings,
+      },
     };
   }
 }
@@ -164,9 +173,9 @@ export class ComplianceEnricher implements MessageEnricher {
         auditLog: {
           processedAt: new Date(),
           processedBy: context.userId,
-          complianceChecks: ['GDPR', 'SOC2', 'HIPAA']
-        }
-      }
+          complianceChecks: ['GDPR', 'SOC2', 'HIPAA'],
+        },
+      },
     };
   }
 
@@ -199,13 +208,13 @@ export class MessageDispatchService {
       userId: metadata.userId,
       correlationId: metadata.correlationId,
       dataRegion: metadata.dataRegion || 'us-east-1',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     try {
       // Route the message
       const routingResult = await this.router.routeMessage(message, context);
-      
+
       // Send to determined destination
       await this.messageQueue.send(
         routingResult.destination,
@@ -214,14 +223,15 @@ export class MessageDispatchService {
           priority: routingResult.priority,
           metadata: {
             ...metadata,
-            routing: routingResult.metadata
-          }
+            routing: routingResult.metadata,
+          },
         }
       );
 
       // Log routing decision
-      console.log(`Message routed via ${routingResult.routeName} to ${routingResult.destination}`);
-      
+      console.log(
+        `Message routed via ${routingResult.routeName} to ${routingResult.destination}`
+      );
     } catch (error) {
       // Handle routing failures
       await this.handleRoutingError(message, context, error);
@@ -240,8 +250,8 @@ export class MessageDispatchService {
       error: {
         message: error.message,
         stack: error.stack,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 }
@@ -260,7 +270,8 @@ export class MessageDispatchService {
 - **Order Matters**: Route evaluation order affects which route is selected
 - **Performance Impact**: Complex routing logic can slow down message processing
 - **Missing Fallback**: Always include a default route to prevent message loss
-- **Enrichment Side Effects**: Ensure enrichers don't modify original messages unintentionally
+- **Enrichment Side Effects**: Ensure enrichers don't modify original messages
+  unintentionally
 
 ## Related Examples
 

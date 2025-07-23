@@ -1,13 +1,17 @@
 # Enterprise Event Sourcing System Implementation
 
-**Focus**: Enterprise event sourcing with projections and event store integration  
+**Focus**: Enterprise event sourcing with projections and event store
+integration  
 **Domain**: Financial Trading Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/event-store, @vytches-ddd/projections, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/events, @vytches-ddd/event-store,
+@vytches-ddd/projections, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates an enterprise-grade event sourcing system for a financial trading platform:
+This example demonstrates an enterprise-grade event sourcing system for a
+financial trading platform:
+
 - Complete event sourcing with aggregate reconstruction
 - Event store integration with snapshots and versioning
 - Real-time projections for read models
@@ -38,7 +42,7 @@ export class AccountCreatedEvent extends DomainEvent {
       accountType,
       initialBalance,
       currency,
-      riskProfile
+      riskProfile,
     });
   }
 }
@@ -64,7 +68,7 @@ export class TradeExecutedEvent extends DomainEvent {
       price,
       executedAt,
       commission,
-      marketData
+      marketData,
     });
   }
 }
@@ -86,7 +90,7 @@ export class PositionUpdatedEvent extends DomainEvent {
       newQuantity,
       averagePrice,
       unrealizedPnL,
-      lastUpdated
+      lastUpdated,
     });
   }
 }
@@ -97,7 +101,12 @@ export class AccountBalanceChangedEvent extends DomainEvent {
     public readonly previousBalance: number,
     public readonly newBalance: number,
     public readonly changeAmount: number,
-    public readonly changeType: 'trade' | 'deposit' | 'withdrawal' | 'dividend' | 'fee',
+    public readonly changeType:
+      | 'trade'
+      | 'deposit'
+      | 'withdrawal'
+      | 'dividend'
+      | 'fee',
     public readonly referenceId: string
   ) {
     super('AccountBalanceChanged', {
@@ -106,7 +115,7 @@ export class AccountBalanceChangedEvent extends DomainEvent {
       newBalance,
       changeAmount,
       changeType,
-      referenceId
+      referenceId,
     });
   }
 }
@@ -126,7 +135,7 @@ export class RiskLimitExceededEvent extends DomainEvent {
       currentValue,
       limitValue,
       severity,
-      actionRequired
+      actionRequired,
     });
   }
 }
@@ -165,32 +174,37 @@ export class TradingAccountAggregate extends AggregateRoot {
     riskProfile: 'conservative' | 'moderate' | 'aggressive'
   ): TradingAccountAggregate {
     const account = new TradingAccountAggregate(accountId);
-    
+
     // Raise domain event
-    account.addDomainEvent(new AccountCreatedEvent(
-      accountId,
-      customerId,
-      accountType,
-      initialBalance,
-      currency,
-      riskProfile
-    ));
-    
+    account.addDomainEvent(
+      new AccountCreatedEvent(
+        accountId,
+        customerId,
+        accountType,
+        initialBalance,
+        currency,
+        riskProfile
+      )
+    );
+
     return account;
   }
 
   // ⭐ Event Sourcing: Rebuild aggregate from events
-  static fromEvents(accountId: string, events: DomainEvent[]): TradingAccountAggregate {
+  static fromEvents(
+    accountId: string,
+    events: DomainEvent[]
+  ): TradingAccountAggregate {
     const account = new TradingAccountAggregate(accountId);
-    
+
     // Apply all events to rebuild state
     events.forEach(event => {
       account.applyEvent(event);
     });
-    
+
     // Clear uncommitted events (these are historical)
     account.clearEvents();
-    
+
     return account;
   }
 
@@ -212,7 +226,8 @@ export class TradingAccountAggregate extends AggregateRoot {
 
       const commission = this.calculateCommission(quantity, price);
       const tradeValue = quantity * price;
-      const totalCost = side === 'buy' ? tradeValue + commission : tradeValue - commission;
+      const totalCost =
+        side === 'buy' ? tradeValue + commission : tradeValue - commission;
 
       // Check sufficient balance for buy orders
       if (side === 'buy' && this._balance < totalCost) {
@@ -221,18 +236,20 @@ export class TradingAccountAggregate extends AggregateRoot {
 
       // Execute trade
       const executedAt = new Date();
-      
-      this.addDomainEvent(new TradeExecutedEvent(
-        this._accountId,
-        tradeId,
-        symbol,
-        side,
-        quantity,
-        price,
-        executedAt,
-        commission,
-        marketData
-      ));
+
+      this.addDomainEvent(
+        new TradeExecutedEvent(
+          this._accountId,
+          tradeId,
+          symbol,
+          side,
+          quantity,
+          price,
+          executedAt,
+          commission,
+          marketData
+        )
+      );
 
       // Update position
       this.updatePosition(symbol, side, quantity, price);
@@ -246,7 +263,9 @@ export class TradingAccountAggregate extends AggregateRoot {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Trade execution failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Trade execution failed: ${error.message}`)
+      );
     }
   }
 
@@ -302,7 +321,7 @@ export class TradingAccountAggregate extends AggregateRoot {
     this._riskProfile = event.riskProfile;
     this._createdAt = event.timestamp;
     this._lastUpdated = event.timestamp;
-    
+
     // Initialize risk limits based on profile
     this.initializeRiskLimits();
   }
@@ -315,9 +334,9 @@ export class TradingAccountAggregate extends AggregateRoot {
       quantity: event.quantity,
       price: event.price,
       executedAt: event.executedAt,
-      commission: event.commission
+      commission: event.commission,
     };
-    
+
     this._trades.push(trade);
     this._lastUpdated = event.timestamp;
   }
@@ -328,15 +347,15 @@ export class TradingAccountAggregate extends AggregateRoot {
       quantity: event.newQuantity,
       averagePrice: event.averagePrice,
       unrealizedPnL: event.unrealizedPnL,
-      lastUpdated: event.lastUpdated
+      lastUpdated: event.lastUpdated,
     };
-    
+
     if (event.newQuantity === 0) {
       this._positions.delete(event.symbol);
     } else {
       this._positions.set(event.symbol, position);
     }
-    
+
     this._lastUpdated = event.timestamp;
   }
 
@@ -350,71 +369,96 @@ export class TradingAccountAggregate extends AggregateRoot {
     this._lastUpdated = event.timestamp;
   }
 
-  private updatePosition(symbol: string, side: 'buy' | 'sell', quantity: number, price: number): void {
+  private updatePosition(
+    symbol: string,
+    side: 'buy' | 'sell',
+    quantity: number,
+    price: number
+  ): void {
     const currentPosition = this._positions.get(symbol);
-    
+
     if (!currentPosition) {
       // New position
       const newQuantity = side === 'buy' ? quantity : -quantity;
-      
-      this.addDomainEvent(new PositionUpdatedEvent(
-        this._accountId,
-        symbol,
-        0,
-        newQuantity,
-        price,
-        0, // No unrealized PnL yet
-        new Date()
-      ));
+
+      this.addDomainEvent(
+        new PositionUpdatedEvent(
+          this._accountId,
+          symbol,
+          0,
+          newQuantity,
+          price,
+          0, // No unrealized PnL yet
+          new Date()
+        )
+      );
     } else {
       // Update existing position
       const currentQuantity = currentPosition.quantity;
       const positionChange = side === 'buy' ? quantity : -quantity;
       const newQuantity = currentQuantity + positionChange;
-      
+
       // Calculate new average price
       let newAveragePrice = currentPosition.averagePrice;
-      if ((currentQuantity >= 0 && positionChange > 0) || (currentQuantity <= 0 && positionChange < 0)) {
+      if (
+        (currentQuantity >= 0 && positionChange > 0) ||
+        (currentQuantity <= 0 && positionChange < 0)
+      ) {
         // Adding to position
-        const totalValue = (currentQuantity * currentPosition.averagePrice) + (positionChange * price);
+        const totalValue =
+          currentQuantity * currentPosition.averagePrice +
+          positionChange * price;
         newAveragePrice = totalValue / newQuantity;
       }
-      
-      this.addDomainEvent(new PositionUpdatedEvent(
-        this._accountId,
-        symbol,
-        currentQuantity,
-        newQuantity,
-        newAveragePrice,
-        0, // Would calculate based on current market price
-        new Date()
-      ));
+
+      this.addDomainEvent(
+        new PositionUpdatedEvent(
+          this._accountId,
+          symbol,
+          currentQuantity,
+          newQuantity,
+          newAveragePrice,
+          0, // Would calculate based on current market price
+          new Date()
+        )
+      );
     }
   }
 
-  private updateBalance(changeAmount: number, changeType: string, referenceId: string): void {
+  private updateBalance(
+    changeAmount: number,
+    changeType: string,
+    referenceId: string
+  ): void {
     const previousBalance = this._balance;
     const newBalance = previousBalance + changeAmount;
-    
-    this.addDomainEvent(new AccountBalanceChangedEvent(
-      this._accountId,
-      previousBalance,
-      newBalance,
-      changeAmount,
-      changeType as any,
-      referenceId
-    ));
+
+    this.addDomainEvent(
+      new AccountBalanceChangedEvent(
+        this._accountId,
+        previousBalance,
+        newBalance,
+        changeAmount,
+        changeType as any,
+        referenceId
+      )
+    );
   }
 
-  private validateTrade(symbol: string, side: 'buy' | 'sell', quantity: number, price: number): Result<void, Error> {
+  private validateTrade(
+    symbol: string,
+    side: 'buy' | 'sell',
+    quantity: number,
+    price: number
+  ): Result<void, Error> {
     if (quantity <= 0) {
       return Result.failure(new Error('Trade quantity must be positive'));
     }
-    
+
     if (price <= 0) {
       return Result.failure(new Error('Trade price must be positive'));
     }
-    
+
     return Result.success(undefined);
   }
 
@@ -425,19 +469,23 @@ export class TradingAccountAggregate extends AggregateRoot {
 
   private checkRiskLimits(): void {
     // Check position limits
-    const totalExposure = Array.from(this._positions.values())
-      .reduce((sum, pos) => sum + Math.abs(pos.quantity * pos.averagePrice), 0);
-    
+    const totalExposure = Array.from(this._positions.values()).reduce(
+      (sum, pos) => sum + Math.abs(pos.quantity * pos.averagePrice),
+      0
+    );
+
     const exposureLimit = this._riskLimits.get('exposure') || 0;
     if (totalExposure > exposureLimit) {
-      this.addDomainEvent(new RiskLimitExceededEvent(
-        this._accountId,
-        'exposure',
-        totalExposure,
-        exposureLimit,
-        'warning',
-        false
-      ));
+      this.addDomainEvent(
+        new RiskLimitExceededEvent(
+          this._accountId,
+          'exposure',
+          totalExposure,
+          exposureLimit,
+          'warning',
+          false
+        )
+      );
     }
   }
 
@@ -459,11 +507,21 @@ export class TradingAccountAggregate extends AggregateRoot {
   }
 
   // Getters
-  get accountId(): string { return this._accountId; }
-  get customerId(): string { return this._customerId; }
-  get balance(): number { return this._balance; }
-  get positions(): Map<string, Position> { return new Map(this._positions); }
-  get trades(): Trade[] { return [...this._trades]; }
+  get accountId(): string {
+    return this._accountId;
+  }
+  get customerId(): string {
+    return this._customerId;
+  }
+  get balance(): number {
+    return this._balance;
+  }
+  get positions(): Map<string, Position> {
+    return new Map(this._positions);
+  }
+  get trades(): Trade[] {
+    return [...this._trades];
+  }
 }
 
 // event-sourced-repository.ts
@@ -474,7 +532,7 @@ import { Logger } from '@vytches-ddd/logging';
 // ⭐ Event-Sourced Repository
 @DomainService('tradingAccountRepository', {
   lifetime: ServiceLifetime.Scoped,
-  context: 'Trading'
+  context: 'Trading',
 })
 export class TradingAccountRepository {
   private logger = Logger.forContext('TradingAccountRepository');
@@ -488,31 +546,31 @@ export class TradingAccountRepository {
     try {
       // Get uncommitted events
       const events = aggregate.getUncommittedEvents();
-      
+
       if (events.length === 0) {
         return Result.success(undefined);
       }
 
       this.logger.info('Saving aggregate events', {
         accountId: aggregate.accountId,
-        eventCount: events.length
+        eventCount: events.length,
       });
 
       // Save events to event store
       const streamId = `account-${aggregate.accountId}`;
       const saveResult = await this.eventStore.appendToStream(streamId, events);
-      
+
       if (saveResult.isFailure()) {
         return Result.failure(saveResult.error);
       }
 
       // Publish events for projections and handlers
       const publishResult = await this.eventDispatcher.publishMany(events);
-      
+
       if (publishResult.isFailure()) {
         this.logger.error('Failed to publish events', {
           accountId: aggregate.accountId,
-          error: publishResult.error.message
+          error: publishResult.error.message,
         });
         return Result.failure(publishResult.error);
       }
@@ -524,20 +582,24 @@ export class TradingAccountRepository {
     } catch (error) {
       this.logger.error('Failed to save aggregate', {
         accountId: aggregate.accountId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Aggregate save failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Aggregate save failed: ${error.message}`)
+      );
     }
   }
 
-  async findById(accountId: string): Promise<Result<TradingAccountAggregate | null, Error>> {
+  async findById(
+    accountId: string
+  ): Promise<Result<TradingAccountAggregate | null, Error>> {
     try {
       this.logger.info('Loading aggregate from events', { accountId });
 
       const streamId = `account-${accountId}`;
       const eventsResult = await this.eventStore.getEventStream(streamId);
-      
+
       if (eventsResult.isFailure()) {
         return Result.failure(eventsResult.error);
       }
@@ -548,32 +610,45 @@ export class TradingAccountRepository {
       }
 
       // Reconstruct aggregate from events
-      const aggregate = TradingAccountAggregate.fromEvents(accountId, stream.events);
-      
+      const aggregate = TradingAccountAggregate.fromEvents(
+        accountId,
+        stream.events
+      );
+
       this.logger.info('Aggregate loaded from events', {
         accountId,
         eventCount: stream.events.length,
-        version: stream.version
+        version: stream.version,
       });
 
       return Result.success(aggregate);
     } catch (error) {
       this.logger.error('Failed to load aggregate', {
         accountId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Aggregate load failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Aggregate load failed: ${error.message}`)
+      );
     }
   }
 
-  async findByIdAtVersion(accountId: string, version: number): Promise<Result<TradingAccountAggregate | null, Error>> {
+  async findByIdAtVersion(
+    accountId: string,
+    version: number
+  ): Promise<Result<TradingAccountAggregate | null, Error>> {
     try {
-      this.logger.info('Loading aggregate at specific version', { accountId, version });
+      this.logger.info('Loading aggregate at specific version', {
+        accountId,
+        version,
+      });
 
       const streamId = `account-${accountId}`;
-      const eventsResult = await this.eventStore.getEventStream(streamId, { toVersion: version });
-      
+      const eventsResult = await this.eventStore.getEventStream(streamId, {
+        toVersion: version,
+      });
+
       if (eventsResult.isFailure()) {
         return Result.failure(eventsResult.error);
       }
@@ -584,12 +659,15 @@ export class TradingAccountRepository {
       }
 
       // Reconstruct aggregate from events up to version
-      const aggregate = TradingAccountAggregate.fromEvents(accountId, stream.events);
-      
+      const aggregate = TradingAccountAggregate.fromEvents(
+        accountId,
+        stream.events
+      );
+
       this.logger.info('Aggregate loaded at version', {
         accountId,
         version,
-        eventCount: stream.events.length
+        eventCount: stream.events.length,
       });
 
       return Result.success(aggregate);
@@ -597,20 +675,30 @@ export class TradingAccountRepository {
       this.logger.error('Failed to load aggregate at version', {
         accountId,
         version,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Aggregate load failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Aggregate load failed: ${error.message}`)
+      );
     }
   }
 
-  async replayEvents(accountId: string, fromVersion: number = 0): Promise<Result<void, Error>> {
+  async replayEvents(
+    accountId: string,
+    fromVersion: number = 0
+  ): Promise<Result<void, Error>> {
     try {
-      this.logger.info('Replaying events for aggregate', { accountId, fromVersion });
+      this.logger.info('Replaying events for aggregate', {
+        accountId,
+        fromVersion,
+      });
 
       const streamId = `account-${accountId}`;
-      const eventsResult = await this.eventStore.getEventStream(streamId, { fromVersion });
-      
+      const eventsResult = await this.eventStore.getEventStream(streamId, {
+        fromVersion,
+      });
+
       if (eventsResult.isFailure()) {
         return Result.failure(eventsResult.error);
       }
@@ -621,24 +709,26 @@ export class TradingAccountRepository {
       }
 
       // Republish events for projections
-      const publishResult = await this.eventDispatcher.publishMany(stream.events);
-      
+      const publishResult = await this.eventDispatcher.publishMany(
+        stream.events
+      );
+
       if (publishResult.isFailure()) {
         return Result.failure(publishResult.error);
       }
 
       this.logger.info('Events replayed successfully', {
         accountId,
-        replayedCount: stream.events.length
+        replayedCount: stream.events.length,
       });
 
       return Result.success(undefined);
     } catch (error) {
       this.logger.error('Failed to replay events', {
         accountId,
-        error: error.message
+        error: error.message,
       });
-      
+
       return Result.failure(new Error(`Event replay failed: ${error.message}`));
     }
   }
@@ -646,11 +736,11 @@ export class TradingAccountRepository {
 
 // trading-projections.ts
 import { ProjectionEngine, BaseProjection } from '@vytches-ddd/projections';
-import { 
-  AccountCreatedEvent, 
-  TradeExecutedEvent, 
+import {
+  AccountCreatedEvent,
+  TradeExecutedEvent,
   PositionUpdatedEvent,
-  AccountBalanceChangedEvent
+  AccountBalanceChangedEvent,
 } from './trading-events';
 
 // ⭐ Account Summary Projection
@@ -670,7 +760,7 @@ export class AccountSummaryProjection extends BaseProjection {
       totalTrades: 0,
       totalPnL: 0,
       createdAt: event.timestamp,
-      lastUpdated: event.timestamp
+      lastUpdated: event.timestamp,
     };
 
     await this.upsert('account_summaries', summary);
@@ -678,8 +768,9 @@ export class AccountSummaryProjection extends BaseProjection {
 
   async handleTradeExecuted(event: TradeExecutedEvent): Promise<void> {
     // Update trade count
-    await this.increment('account_summaries', 
-      { accountId: event.accountId }, 
+    await this.increment(
+      'account_summaries',
+      { accountId: event.accountId },
       { totalTrades: 1 }
     );
 
@@ -692,18 +783,21 @@ export class AccountSummaryProjection extends BaseProjection {
       quantity: event.quantity,
       price: event.price,
       commission: event.commission,
-      executedAt: event.executedAt
+      executedAt: event.executedAt,
     };
 
     await this.insert('trades', trade);
   }
 
-  async handleAccountBalanceChanged(event: AccountBalanceChangedEvent): Promise<void> {
-    await this.update('account_summaries',
+  async handleAccountBalanceChanged(
+    event: AccountBalanceChangedEvent
+  ): Promise<void> {
+    await this.update(
+      'account_summaries',
       { accountId: event.accountId },
-      { 
+      {
         balance: event.newBalance,
-        lastUpdated: event.timestamp
+        lastUpdated: event.timestamp,
       }
     );
   }
@@ -720,7 +814,7 @@ export class PositionSummaryProjection extends BaseProjection {
       // Position closed
       await this.delete('positions', {
         accountId: event.accountId,
-        symbol: event.symbol
+        symbol: event.symbol,
       });
     } else {
       // Position opened or updated
@@ -730,7 +824,7 @@ export class PositionSummaryProjection extends BaseProjection {
         quantity: event.newQuantity,
         averagePrice: event.averagePrice,
         unrealizedPnL: event.unrealizedPnL,
-        lastUpdated: event.lastUpdated
+        lastUpdated: event.lastUpdated,
       };
 
       await this.upsert('positions', position);
@@ -778,16 +872,18 @@ export class TradingService {
 
       // Save aggregate (events are persisted and published)
       const saveResult = await this.accountRepository.save(account);
-      
+
       if (saveResult.isFailure()) {
         return Result.failure(saveResult.error);
       }
 
       // Projections are updated automatically via event handlers
-      
+
       return Result.success(account);
     } catch (error) {
-      return Result.failure(new Error(`Account creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Account creation failed: ${error.message}`)
+      );
     }
   }
 
@@ -803,30 +899,39 @@ export class TradingService {
     try {
       // Load aggregate from events
       const accountResult = await this.accountRepository.findById(accountId);
-      
+
       if (accountResult.isFailure() || !accountResult.value) {
         return Result.failure(new Error('Account not found'));
       }
 
       const account = accountResult.value;
-      
+
       // Execute trade (raises events)
-      const tradeResult = account.executeTrade(tradeId, symbol, side, quantity, price, marketData);
-      
+      const tradeResult = account.executeTrade(
+        tradeId,
+        symbol,
+        side,
+        quantity,
+        price,
+        marketData
+      );
+
       if (tradeResult.isFailure()) {
         return Result.failure(tradeResult.error);
       }
 
       // Save aggregate (events are persisted)
       const saveResult = await this.accountRepository.save(account);
-      
+
       if (saveResult.isFailure()) {
         return Result.failure(saveResult.error);
       }
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Trade execution failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Trade execution failed: ${error.message}`)
+      );
     }
   }
 
@@ -844,7 +949,9 @@ export class TradingService {
         return await this.accountRepository.findById(accountId);
       }
     } catch (error) {
-      return Result.failure(new Error(`Account history failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Account history failed: ${error.message}`)
+      );
     }
   }
 }
@@ -852,7 +959,8 @@ export class TradingService {
 
 ## Common Pitfalls
 
-- **Event Versioning**: Plan for event schema evolution and backward compatibility
+- **Event Versioning**: Plan for event schema evolution and backward
+  compatibility
 - **Snapshot Strategy**: Balance between performance and storage with snapshots
 - **Projection Consistency**: Handle eventual consistency in read models
 - **Event Ordering**: Ensure correct event ordering for aggregate reconstruction

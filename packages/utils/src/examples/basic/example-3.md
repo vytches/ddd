@@ -1,26 +1,28 @@
 # Library Utilities
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: basic
-**Domain**: Infrastructure
-**Patterns**: Utility functions, validation, helpers, UUID generation
-**Dependencies**: uuid
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Domain**: Infrastructure **Patterns**: Utility functions, validation, helpers,
+UUID generation **Dependencies**: uuid
 
 ## Description
 
-The `LibUtils` class provides essential utility functions for common operations like UUID generation, validation, type checking, and object comparison. These utilities support the core functionality of the @vytches-ddd library and provide helpful functions for general development tasks.
+The `LibUtils` class provides essential utility functions for common operations
+like UUID generation, validation, type checking, and object comparison. These
+utilities support the core functionality of the @vytches-ddd library and provide
+helpful functions for general development tasks.
 
 ## Business Context
 
 Every application needs basic utility functions for:
+
 - Generating unique identifiers (UUIDs)
 - Validating data formats and types
 - Checking if values are empty, truthy, or falsy
 - Comparing objects for equality
 - Performing common operations safely
 
-The `LibUtils` class centralizes these operations with consistent, well-tested implementations.
+The `LibUtils` class centralizes these operations with consistent, well-tested
+implementations.
 
 ## Code Example
 
@@ -36,7 +38,7 @@ export class UtilityService {
     // Generate UUID v4 (default)
     const uuid1 = LibUtils.getUUID();
     const uuid2 = LibUtils.getUUID('v4');
-    
+
     console.log('Generated UUIDs:');
     console.log('UUID 1:', uuid1);
     console.log('UUID 2:', uuid2);
@@ -93,7 +95,7 @@ export class UtilityService {
     testIds.forEach(id => {
       console.log(`ID: "${id}"`);
       console.log(`  Text ID valid: ${LibUtils.isValidTextId(id)}`);
-      
+
       // Test UUID validation if it looks like a UUID
       if (id.length === 36 && id.includes('-')) {
         console.log(`  UUID valid: ${LibUtils.isValidUUID(id)}`);
@@ -132,17 +134,14 @@ export class UtilityService {
 
   // ID normalization
   normalizeIdentifiers(): void {
-    const mixedIds = [
-      'string-id',
-      42,
-      BigInt(12345),
-      0,
-    ];
+    const mixedIds = ['string-id', 42, BigInt(12345), 0];
 
     console.log('\nID Normalization:');
     mixedIds.forEach(id => {
       const normalized = LibUtils.normalizeIdToString(id);
-      console.log(`Original: ${id} (${typeof id}) -> Normalized: "${normalized}"`);
+      console.log(
+        `Original: ${id} (${typeof id}) -> Normalized: "${normalized}"`
+      );
     });
   }
 
@@ -162,22 +161,25 @@ export class UtilityService {
     // Circular reference handling
     const circular1: any = { name: 'test' };
     circular1.self = circular1;
-    
+
     const circular2: any = { name: 'test' };
     circular2.self = circular2;
 
-    console.log('deepEqual with circular refs:', LibUtils.deepEqual(circular1, circular2));
+    console.log(
+      'deepEqual with circular refs:',
+      LibUtils.deepEqual(circular1, circular2)
+    );
   }
 
   // Async operations
   async demonstrateAsyncUtils(): Promise<void> {
     console.log('\nAsync Utilities:');
-    
+
     const startTime = Date.now();
     console.log('Starting sleep for 1 second...');
-    
+
     await LibUtils.sleep(1000);
-    
+
     const endTime = Date.now();
     console.log(`Sleep completed after ${endTime - startTime}ms`);
   }
@@ -204,7 +206,7 @@ export class UtilityService {
   processUserData(userData: UserData): UserData {
     // Normalize and validate user data
     const normalizedId = LibUtils.normalizeIdToString(userData.id);
-    
+
     if (!LibUtils.hasValue(userData.email) || LibUtils.isEmpty(userData.name)) {
       throw new Error('Invalid user data: email and name are required');
     }
@@ -222,7 +224,8 @@ export class UtilityService {
 ## Key Features
 
 - **UUID Generation**: Generate and validate UUID v4 identifiers
-- **Value Checking**: Comprehensive empty/truthy/falsy checks including edge cases
+- **Value Checking**: Comprehensive empty/truthy/falsy checks including edge
+  cases
 - **ID Validation**: Validate UUIDs, integers, BigInts, and text IDs
 - **Object Comparison**: Deep equality checking with circular reference handling
 - **Type Safety**: Full TypeScript support with proper type guards
@@ -265,10 +268,12 @@ console.log('Done waiting');
 ## Common Pitfalls
 
 - **UUID validation**: Not all string IDs are UUIDs - validate accordingly
-- **Edge cases**: Special values like `Infinity`, `NaN`, empty objects need careful handling
+- **Edge cases**: Special values like `Infinity`, `NaN`, empty objects need
+  careful handling
 - **Performance**: Deep equality is expensive for large objects - use sparingly
 - **BigInt strings**: Only numeric strings are valid BigInt inputs
-- **Circular references**: While handled, they can still cause performance issues
+- **Circular references**: While handled, they can still cause performance
+  issues
 
 ## Related Examples
 

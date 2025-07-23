@@ -9,37 +9,47 @@
 
 ## Description
 
-Demonstrates the CQRS query pattern with automatic handler registration, caching strategies, and performance optimization. Shows how to create queries that retrieve data efficiently with pagination, filtering, and caching support.
+Demonstrates the CQRS query pattern with automatic handler registration, caching
+strategies, and performance optimization. Shows how to create queries that
+retrieve data efficiently with pagination, filtering, and caching support.
 
 ## Business Context
 
-Data retrieval operations in applications often have different performance requirements than write operations. Queries for user lists, search results, and reports need optimization strategies like caching, pagination, and specialized read models to provide fast, responsive user experiences.
+Data retrieval operations in applications often have different performance
+requirements than write operations. Queries for user lists, search results, and
+reports need optimization strategies like caching, pagination, and specialized
+read models to provide fast, responsive user experiences.
 
 ## Code Example
 
-```typescript
+````typescript
 // user-queries.ts
-import { BaseQuery, GetUserByIdQuery, GetUsersByRoleQuery, SearchUsersQuery } from '../types';
+import {
+  BaseQuery,
+  GetUserByIdQuery,
+  GetUsersByRoleQuery,
+  SearchUsersQuery,
+} from '../types';
 
 /**
  * @llm-summary Query for retrieving single user by ID
  * @llm-domain User Management
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Represents a request to retrieve a specific user by their unique identifier
  * with optional inclusion of profile and preference data.
- * 
+ *
  * @example
  * ```typescript
  * const query = new GetUserByIdQuery('user-123', {
  *   includeProfile: true,
  *   includePreferences: false
  * });
- * 
+ *
  * const result = await queryBus.execute(query);
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
@@ -125,7 +135,7 @@ export class GetUsersByRoleQuery implements GetUsersByRoleQuery {
       pageSize: 20,
       sortBy: 'createdAt',
       sortDirection: 'desc',
-      ...pagination
+      ...pagination,
     };
   }
 
@@ -134,7 +144,7 @@ export class GetUsersByRoleQuery implements GetUsersByRoleQuery {
     const inactivePart = this.includeInactive ? 'with-inactive' : 'active-only';
     const pagePart = `page-${this.pagination.page}-size-${this.pagination.pageSize}`;
     const sortPart = `sort-${this.pagination.sortBy}-${this.pagination.sortDirection}`;
-    
+
     return `users-by-role:${this.role}:${statusPart}:${inactivePart}:${pagePart}:${sortPart}`;
   }
 
@@ -177,25 +187,29 @@ export class SearchUsersQuery implements SearchUsersQuery {
       pageSize: 20,
       sortBy: 'relevance',
       sortDirection: 'desc',
-      ...pagination
+      ...pagination,
     };
     this.filters = {
       searchTerm: this.searchTerm,
       role: this.role,
       status: this.status,
       createdAfter: this.createdAfter,
-      createdBefore: this.createdBefore
+      createdBefore: this.createdBefore,
     };
   }
 
   getCacheKey(): string {
-    const searchPart = this.searchTerm ? `search-${encodeURIComponent(this.searchTerm)}` : 'no-search';
+    const searchPart = this.searchTerm
+      ? `search-${encodeURIComponent(this.searchTerm)}`
+      : 'no-search';
     const rolePart = this.role || 'all-roles';
     const statusPart = this.status || 'all-status';
-    const datePart = this.createdAfter || this.createdBefore ? 
-      `dates-${this.createdAfter?.getTime() || 0}-${this.createdBefore?.getTime() || 0}` : 'no-dates';
+    const datePart =
+      this.createdAfter || this.createdBefore
+        ? `dates-${this.createdAfter?.getTime() || 0}-${this.createdBefore?.getTime() || 0}`
+        : 'no-dates';
     const pagePart = `page-${this.pagination.page}-size-${this.pagination.pageSize}`;
-    
+
     return `search-users:${searchPart}:${rolePart}:${statusPart}:${datePart}:${pagePart}`;
   }
 
@@ -219,23 +233,25 @@ export class SearchUsersQuery implements SearchUsersQuery {
    * @public
    */
   shouldUseIndexedSearch(): boolean {
-    return !!(this.searchTerm && this.searchTerm.length >= 3) || 
-           !!(this.role || this.status || this.createdAfter || this.createdBefore);
+    return (
+      !!(this.searchTerm && this.searchTerm.length >= 3) ||
+      !!(this.role || this.status || this.createdAfter || this.createdBefore)
+    );
   }
 }
-```
+````
 
-```typescript
+````typescript
 // user-query-handlers.ts
 import { QueryHandler } from '@vytches-ddd/cqrs';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   GetUserByIdQuery,
   GetUsersByRoleQuery,
   SearchUsersQuery,
   User,
   UserListResult,
-  QueryResult
+  QueryResult,
 } from '../types';
 
 /**
@@ -262,7 +278,7 @@ import {
   autoRegister: true,
   enableCaching: true,
   timeout: 5000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class GetUserByIdQueryHandler {
   constructor(
@@ -286,7 +302,7 @@ export class GetUserByIdQueryHandler {
    * ```typescript
    * const query = new GetUserByIdQuery('user-123', true, false);
    * const result = await handler.handle(query);
-   * 
+   *
    * if (result.success) {
    *   console.log('User found:', result.data?.name);
    * }
@@ -297,38 +313,35 @@ export class GetUserByIdQueryHandler {
    */
   async handle(query: GetUserByIdQuery): Promise<QueryResult<User>> {
     const startTime = Date.now();
-    
+
     try {
       console.log(`🔍 Processing GetUserById query: ${query.queryId}`);
 
       // 1. Check cache first
       const cacheKey = query.getCacheKey();
       const cachedUser = await this.cacheService.get<User>(cacheKey);
-      
+
       if (cachedUser) {
         console.log(`⚡ Cache hit for user ${query.userId}`);
-        
+
         return {
           success: true,
           data: cachedUser,
           metadata: {
             queryId: query.queryId,
             cacheHit: true,
-            executionTime: Date.now() - startTime
-          }
+            executionTime: Date.now() - startTime,
+          },
         };
       }
 
       console.log(`💾 Cache miss for user ${query.userId}, querying database`);
 
       // 2. Load user from repository
-      const user = await this.userRepository.findById(
-        query.userId,
-        {
-          includeProfile: query.includeProfile,
-          includePreferences: query.includePreferences
-        }
-      );
+      const user = await this.userRepository.findById(query.userId, {
+        includeProfile: query.includeProfile,
+        includePreferences: query.includePreferences,
+      });
 
       if (!user) {
         return {
@@ -337,20 +350,18 @@ export class GetUserByIdQueryHandler {
           metadata: {
             queryId: query.queryId,
             cacheHit: false,
-            executionTime: Date.now() - startTime
-          }
+            executionTime: Date.now() - startTime,
+          },
         };
       }
 
       // 3. Cache the result
-      await this.cacheService.set(
-        cacheKey,
-        user,
-        query.getCacheTTL()
-      );
+      await this.cacheService.set(cacheKey, user, query.getCacheTTL());
 
       const executionTime = Date.now() - startTime;
-      console.log(`✅ User retrieved successfully: ${user.id} (${executionTime}ms)`);
+      console.log(
+        `✅ User retrieved successfully: ${user.id} (${executionTime}ms)`
+      );
 
       return {
         success: true,
@@ -359,22 +370,21 @@ export class GetUserByIdQueryHandler {
           queryId: query.queryId,
           cacheHit: false,
           executionTime,
-          correlationId: query.correlationId
-        }
+          correlationId: query.correlationId,
+        },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
       console.error(`❌ Failed to retrieve user:`, error);
-      
+
       return {
         success: false,
         error: `User retrieval failed: ${error.message}`,
         metadata: {
           queryId: query.queryId,
           executionTime,
-          errorType: error.constructor.name
-        }
+          errorType: error.constructor.name,
+        },
       };
     }
   }
@@ -396,7 +406,7 @@ export class GetUserByIdQueryHandler {
   autoRegister: true,
   enableCaching: true,
   timeout: 8000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class GetUsersByRoleQueryHandler {
   constructor(
@@ -419,19 +429,22 @@ export class GetUsersByRoleQueryHandler {
    * @since 1.0.0
    * @public
    */
-  async handle(query: GetUsersByRoleQuery): Promise<QueryResult<UserListResult>> {
+  async handle(
+    query: GetUsersByRoleQuery
+  ): Promise<QueryResult<UserListResult>> {
     const startTime = Date.now();
-    
+
     try {
       console.log(`📋 Processing GetUsersByRole query: ${query.queryId}`);
 
       // 1. Check cache for list results
       const cacheKey = query.getCacheKey();
-      const cachedResult = await this.cacheService.get<UserListResult>(cacheKey);
-      
+      const cachedResult =
+        await this.cacheService.get<UserListResult>(cacheKey);
+
       if (cachedResult) {
         console.log(`⚡ Cache hit for user list by role ${query.role}`);
-        
+
         return {
           success: true,
           data: cachedResult,
@@ -440,8 +453,8 @@ export class GetUsersByRoleQueryHandler {
           metadata: {
             queryId: query.queryId,
             cacheHit: true,
-            executionTime: Date.now() - startTime
-          }
+            executionTime: Date.now() - startTime,
+          },
         };
       }
 
@@ -457,32 +470,27 @@ export class GetUsersByRoleQueryHandler {
       const pageInfo = this.calculatePageInfo(query.pagination, totalCount);
 
       // 5. Load users with pagination
-      const users = await this.userRepository.findByRole(
-        filters,
-        {
-          page: query.pagination.page,
-          pageSize: query.pagination.pageSize,
-          sortBy: query.pagination.sortBy,
-          sortDirection: query.pagination.sortDirection
-        }
-      );
+      const users = await this.userRepository.findByRole(filters, {
+        page: query.pagination.page,
+        pageSize: query.pagination.pageSize,
+        sortBy: query.pagination.sortBy,
+        sortDirection: query.pagination.sortDirection,
+      });
 
       // 6. Build result
       const result: UserListResult = {
         users,
         totalCount,
-        pageInfo
+        pageInfo,
       };
 
       // 7. Cache the result
-      await this.cacheService.set(
-        cacheKey,
-        result,
-        query.getCacheTTL()
-      );
+      await this.cacheService.set(cacheKey, result, query.getCacheTTL());
 
       const executionTime = Date.now() - startTime;
-      console.log(`✅ Users retrieved successfully: ${users.length} users (${executionTime}ms)`);
+      console.log(
+        `✅ Users retrieved successfully: ${users.length} users (${executionTime}ms)`
+      );
 
       return {
         success: true,
@@ -493,22 +501,21 @@ export class GetUsersByRoleQueryHandler {
           queryId: query.queryId,
           cacheHit: false,
           executionTime,
-          resultCount: users.length
-        }
+          resultCount: users.length,
+        },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
       console.error(`❌ Failed to retrieve users by role:`, error);
-      
+
       return {
         success: false,
         error: `User list retrieval failed: ${error.message}`,
         metadata: {
           queryId: query.queryId,
           executionTime,
-          errorType: error.constructor.name
-        }
+          errorType: error.constructor.name,
+        },
       };
     }
   }
@@ -532,7 +539,7 @@ export class GetUsersByRoleQueryHandler {
     return {
       role: query.role,
       status: query.status,
-      includeInactive: query.includeInactive
+      includeInactive: query.includeInactive,
     };
   }
 
@@ -552,15 +559,18 @@ export class GetUsersByRoleQueryHandler {
    * @since 1.0.0
    * @private
    */
-  private calculatePageInfo(pagination: PaginationOptions, totalCount: number): PageInfo {
+  private calculatePageInfo(
+    pagination: PaginationOptions,
+    totalCount: number
+  ): PageInfo {
     const totalPages = Math.ceil(totalCount / pagination.pageSize);
-    
+
     return {
       page: pagination.page,
       pageSize: pagination.pageSize,
       totalPages,
       hasNextPage: pagination.page < totalPages,
-      hasPreviousPage: pagination.page > 1
+      hasPreviousPage: pagination.page > 1,
     };
   }
 }
@@ -581,7 +591,7 @@ export class GetUsersByRoleQueryHandler {
   autoRegister: true,
   enableCaching: true,
   timeout: 12000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class SearchUsersQueryHandler {
   constructor(
@@ -607,17 +617,18 @@ export class SearchUsersQueryHandler {
    */
   async handle(query: SearchUsersQuery): Promise<QueryResult<UserListResult>> {
     const startTime = Date.now();
-    
+
     try {
       console.log(`🔍 Processing SearchUsers query: ${query.queryId}`);
 
       // 1. Check cache for search results
       const cacheKey = query.getCacheKey();
-      const cachedResult = await this.cacheService.get<UserListResult>(cacheKey);
-      
+      const cachedResult =
+        await this.cacheService.get<UserListResult>(cacheKey);
+
       if (cachedResult) {
         console.log(`⚡ Cache hit for user search`);
-        
+
         return {
           success: true,
           data: cachedResult,
@@ -626,8 +637,8 @@ export class SearchUsersQueryHandler {
           metadata: {
             queryId: query.queryId,
             cacheHit: true,
-            executionTime: Date.now() - startTime
-          }
+            executionTime: Date.now() - startTime,
+          },
         };
       }
 
@@ -635,7 +646,7 @@ export class SearchUsersQueryHandler {
 
       // 2. Determine search strategy
       let result: UserListResult;
-      
+
       if (query.shouldUseIndexedSearch()) {
         // Use optimized indexed search for specific criteria
         result = await this.executeIndexedSearch(query);
@@ -645,14 +656,12 @@ export class SearchUsersQueryHandler {
       }
 
       // 3. Cache the results
-      await this.cacheService.set(
-        cacheKey,
-        result,
-        query.getCacheTTL()
-      );
+      await this.cacheService.set(cacheKey, result, query.getCacheTTL());
 
       const executionTime = Date.now() - startTime;
-      console.log(`✅ Search completed: ${result.users.length} users found (${executionTime}ms)`);
+      console.log(
+        `✅ Search completed: ${result.users.length} users found (${executionTime}ms)`
+      );
 
       return {
         success: true,
@@ -664,22 +673,23 @@ export class SearchUsersQueryHandler {
           cacheHit: false,
           executionTime,
           resultCount: result.users.length,
-          searchStrategy: query.shouldUseIndexedSearch() ? 'indexed' : 'fulltext'
-        }
+          searchStrategy: query.shouldUseIndexedSearch()
+            ? 'indexed'
+            : 'fulltext',
+        },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
       console.error(`❌ Failed to search users:`, error);
-      
+
       return {
         success: false,
         error: `User search failed: ${error.message}`,
         metadata: {
           queryId: query.queryId,
           executionTime,
-          errorType: error.constructor.name
-        }
+          errorType: error.constructor.name,
+        },
       };
     }
   }
@@ -699,21 +709,23 @@ export class SearchUsersQueryHandler {
    * @since 1.0.0
    * @private
    */
-  private async executeIndexedSearch(query: SearchUsersQuery): Promise<UserListResult> {
+  private async executeIndexedSearch(
+    query: SearchUsersQuery
+  ): Promise<UserListResult> {
     const searchFilters = {
       searchTerm: query.searchTerm,
       role: query.role,
       status: query.status,
       createdAfter: query.createdAfter,
-      createdBefore: query.createdBefore
+      createdBefore: query.createdBefore,
     };
 
     // Get total count
     const totalCount = await this.userRepository.countBySearch(searchFilters);
-    
+
     // Calculate pagination
     const pageInfo = this.calculatePageInfo(query.pagination, totalCount);
-    
+
     // Execute search
     const users = await this.userRepository.searchUsers(
       searchFilters,
@@ -723,7 +735,7 @@ export class SearchUsersQueryHandler {
     return {
       users,
       totalCount,
-      pageInfo
+      pageInfo,
     };
   }
 
@@ -742,7 +754,9 @@ export class SearchUsersQueryHandler {
    * @since 1.0.0
    * @private
    */
-  private async executeFullTextSearch(query: SearchUsersQuery): Promise<UserListResult> {
+  private async executeFullTextSearch(
+    query: SearchUsersQuery
+  ): Promise<UserListResult> {
     if (!query.searchTerm) {
       // No search term provided, return empty results
       return {
@@ -753,8 +767,8 @@ export class SearchUsersQueryHandler {
           pageSize: query.pagination.pageSize,
           totalPages: 0,
           hasNextPage: false,
-          hasPreviousPage: false
-        }
+          hasPreviousPage: false,
+        },
       };
     }
 
@@ -765,7 +779,7 @@ export class SearchUsersQueryHandler {
         role: query.role,
         status: query.status,
         createdAfter: query.createdAfter,
-        createdBefore: query.createdBefore
+        createdBefore: query.createdBefore,
       },
       query.pagination
     );
@@ -773,25 +787,37 @@ export class SearchUsersQueryHandler {
     return searchResult;
   }
 
-  private calculatePageInfo(pagination: PaginationOptions, totalCount: number): PageInfo {
+  private calculatePageInfo(
+    pagination: PaginationOptions,
+    totalCount: number
+  ): PageInfo {
     const totalPages = Math.ceil(totalCount / pagination.pageSize);
-    
+
     return {
       page: pagination.page,
       pageSize: pagination.pageSize,
       totalPages,
       hasNextPage: pagination.page < totalPages,
-      hasPreviousPage: pagination.page > 1
+      hasPreviousPage: pagination.page > 1,
     };
   }
 }
 
 // Service interfaces
 interface UserReadRepository {
-  findById(id: string, options?: { includeProfile?: boolean; includePreferences?: boolean }): Promise<User | null>;
-  findByRole(filters: UserRoleFilters, pagination: PaginationOptions): Promise<User[]>;
+  findById(
+    id: string,
+    options?: { includeProfile?: boolean; includePreferences?: boolean }
+  ): Promise<User | null>;
+  findByRole(
+    filters: UserRoleFilters,
+    pagination: PaginationOptions
+  ): Promise<User[]>;
   countByRole(filters: UserRoleFilters): Promise<number>;
-  searchUsers(filters: UserSearchFilters, pagination: PaginationOptions): Promise<User[]>;
+  searchUsers(
+    filters: UserSearchFilters,
+    pagination: PaginationOptions
+  ): Promise<User[]>;
   countBySearch(filters: UserSearchFilters): Promise<number>;
 }
 
@@ -803,7 +829,11 @@ interface CacheService {
 }
 
 interface SearchService {
-  searchUsers(searchTerm: string, filters: any, pagination: PaginationOptions): Promise<UserListResult>;
+  searchUsers(
+    searchTerm: string,
+    filters: any,
+    pagination: PaginationOptions
+  ): Promise<UserListResult>;
 }
 
 interface UserRoleFilters {
@@ -819,16 +849,16 @@ interface UserSearchFilters {
   createdAfter?: Date;
   createdBefore?: Date;
 }
-```
+````
 
-```typescript
+````typescript
 // query-bus-setup.ts
 import { QueryBus } from '@vytches-ddd/cqrs';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   GetUserByIdQueryHandler,
   GetUsersByRoleQueryHandler,
-  SearchUsersQueryHandler 
+  SearchUsersQueryHandler,
 } from '../types';
 
 /**
@@ -856,7 +886,7 @@ export class QueryBusSetup {
     this.queryBus = new QueryBus({
       enableCaching: true,
       enableMetrics: true,
-      defaultTimeout: 10000
+      defaultTimeout: 10000,
     });
   }
 
@@ -880,26 +910,38 @@ export class QueryBusSetup {
       VytchesDDD.registerInstance('queryBus', this.queryBus);
 
       // Register services
-      VytchesDDD.registerInstance('userReadRepository', new InMemoryUserReadRepository());
+      VytchesDDD.registerInstance(
+        'userReadRepository',
+        new InMemoryUserReadRepository()
+      );
       VytchesDDD.registerInstance('cacheService', new InMemoryCacheService());
       VytchesDDD.registerInstance('searchService', new MockSearchService());
 
       // Register query handlers
-      VytchesDDD.registerInstance('getUserByIdQueryHandler', new GetUserByIdQueryHandler(
-        VytchesDDD.resolve('userReadRepository'),
-        VytchesDDD.resolve('cacheService')
-      ));
-      
-      VytchesDDD.registerInstance('getUsersByRoleQueryHandler', new GetUsersByRoleQueryHandler(
-        VytchesDDD.resolve('userReadRepository'),
-        VytchesDDD.resolve('cacheService')
-      ));
-      
-      VytchesDDD.registerInstance('searchUsersQueryHandler', new SearchUsersQueryHandler(
-        VytchesDDD.resolve('userReadRepository'),
-        VytchesDDD.resolve('searchService'),
-        VytchesDDD.resolve('cacheService')
-      ));
+      VytchesDDD.registerInstance(
+        'getUserByIdQueryHandler',
+        new GetUserByIdQueryHandler(
+          VytchesDDD.resolve('userReadRepository'),
+          VytchesDDD.resolve('cacheService')
+        )
+      );
+
+      VytchesDDD.registerInstance(
+        'getUsersByRoleQueryHandler',
+        new GetUsersByRoleQueryHandler(
+          VytchesDDD.resolve('userReadRepository'),
+          VytchesDDD.resolve('cacheService')
+        )
+      );
+
+      VytchesDDD.registerInstance(
+        'searchUsersQueryHandler',
+        new SearchUsersQueryHandler(
+          VytchesDDD.resolve('userReadRepository'),
+          VytchesDDD.resolve('searchService'),
+          VytchesDDD.resolve('cacheService')
+        )
+      );
 
       // Configure auto-discovery
       await VytchesDDD.configure();
@@ -908,7 +950,6 @@ export class QueryBusSetup {
       console.log('  - GetUserByIdQueryHandler (caching enabled)');
       console.log('  - GetUsersByRoleQueryHandler (pagination + caching)');
       console.log('  - SearchUsersQueryHandler (full-text search + caching)');
-
     } catch (error) {
       console.error('❌ Failed to initialize query bus:', error);
       throw error;
@@ -923,44 +964,46 @@ export class QueryBusSetup {
 // Demonstration
 async function demonstrateQueryHandling(): Promise<void> {
   console.log('🚀 Setting up query bus...');
-  
+
   const setup = new QueryBusSetup();
   await setup.initialize();
-  
+
   const queryBus = setup.getQueryBus();
-  
+
   console.log('\n🔍 Single user query...');
-  
+
   // Single user query
   const getUserQuery = new GetUserByIdQuery('user-123', true, true);
   const userResult = await queryBus.execute(getUserQuery);
-  
+
   if (userResult.success) {
     console.log('✅ User found:', userResult.data?.name);
     console.log(`⚡ Execution time: ${userResult.metadata?.executionTime}ms`);
     console.log(`💾 Cache hit: ${userResult.metadata?.cacheHit}`);
   }
-  
+
   console.log('\n📋 User list query...');
-  
+
   // User list query with pagination
-  const getUsersQuery = new GetUsersByRoleQuery(
-    'user',
-    'active',
-    false,
-    { page: 1, pageSize: 10, sortBy: 'name', sortDirection: 'asc' }
-  );
-  
+  const getUsersQuery = new GetUsersByRoleQuery('user', 'active', false, {
+    page: 1,
+    pageSize: 10,
+    sortBy: 'name',
+    sortDirection: 'asc',
+  });
+
   const usersResult = await queryBus.execute(getUsersQuery);
-  
+
   if (usersResult.success && usersResult.data) {
     console.log(`✅ Found ${usersResult.data.users.length} users`);
     console.log(`📊 Total count: ${usersResult.totalCount}`);
-    console.log(`📄 Page ${usersResult.pageInfo?.page} of ${usersResult.pageInfo?.totalPages}`);
+    console.log(
+      `📄 Page ${usersResult.pageInfo?.page} of ${usersResult.pageInfo?.totalPages}`
+    );
   }
-  
+
   console.log('\n🔍 Search query...');
-  
+
   // Search query
   const searchQuery = new SearchUsersQuery(
     'john',
@@ -970,48 +1013,60 @@ async function demonstrateQueryHandling(): Promise<void> {
     undefined,
     { page: 1, pageSize: 5 }
   );
-  
+
   const searchResult = await queryBus.execute(searchQuery);
-  
+
   if (searchResult.success && searchResult.data) {
     console.log(`✅ Search found ${searchResult.data.users.length} users`);
     console.log(`🔍 Search strategy: ${searchResult.metadata?.searchStrategy}`);
   }
 }
-```
+````
 
 ## Key Features
 
-- **⚡ Intelligent Caching**: Multi-level caching with TTL and cache key optimization
-- **📊 Pagination Support**: Efficient pagination with metadata and navigation info
+- **⚡ Intelligent Caching**: Multi-level caching with TTL and cache key
+  optimization
+- **📊 Pagination Support**: Efficient pagination with metadata and navigation
+  info
 - **🔍 Advanced Search**: Full-text search with indexed query optimization
 - **📈 Performance Monitoring**: Built-in execution timing and cache hit metrics
 - **🎯 Query Optimization**: Different strategies for different query patterns
-- **🔄 Automatic Registration**: Query handlers discovered and registered automatically
+- **🔄 Automatic Registration**: Query handlers discovered and registered
+  automatically
 
 ## Query Design Patterns
 
-1. **Self-Describing Queries**: Queries include caching and optimization metadata
+1. **Self-Describing Queries**: Queries include caching and optimization
+   metadata
 2. **Immutable Query Objects**: Query properties are readonly after construction
 3. **Flexible Inclusion**: Optional data inclusion for performance optimization
 4. **Cache-Aware**: Queries provide their own cache keys and TTL values
 
 ## Performance Benefits
 
-1. **Reduced Database Load**: Intelligent caching reduces repetitive database queries
+1. **Reduced Database Load**: Intelligent caching reduces repetitive database
+   queries
 2. **Optimized Pagination**: Efficient page calculation and navigation metadata
-3. **Smart Search Strategy**: Indexed vs full-text search based on query characteristics
+3. **Smart Search Strategy**: Indexed vs full-text search based on query
+   characteristics
 4. **Cache Locality**: Related queries share cache patterns for better hit rates
 
 ## Common Pitfalls
 
-- **❌ Over-Caching**: Don't cache data that changes frequently or is user-specific
-- **❌ Large Result Sets**: Always use pagination for potentially large data sets
+- **❌ Over-Caching**: Don't cache data that changes frequently or is
+  user-specific
+- **❌ Large Result Sets**: Always use pagination for potentially large data
+  sets
 - **❌ Complex Queries**: Keep query objects focused and avoid complex logic
-- **❌ Cache Invalidation**: Plan cache invalidation strategy for data consistency
+- **❌ Cache Invalidation**: Plan cache invalidation strategy for data
+  consistency
 
 ## Related Examples
 
-- [Example 1: Command Handlers](./example-1.md) - Command handling for state changes
-- [Example 3: Middleware Pipeline](./example-3.md) - Cross-cutting concerns with middleware
-- [Intermediate: Event Integration](../intermediate/example-1.md) - Queries with event-driven updates
+- [Example 1: Command Handlers](./example-1.md) - Command handling for state
+  changes
+- [Example 3: Middleware Pipeline](./example-3.md) - Cross-cutting concerns with
+  middleware
+- [Intermediate: Event Integration](../intermediate/example-1.md) - Queries with
+  event-driven updates

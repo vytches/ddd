@@ -5,21 +5,32 @@
 **Complexity**: intermediate  
 **Domain**: Enterprise Rule Management  
 **Patterns**: registry-pattern, dynamic-rules, policy-versioning  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/validation
+**Dependencies**: @vytches-ddd/policies, @vytches-ddd/di,
+@vytches-ddd/validation
 
 ## Description
 
-Demonstrates the Policy Registry for centralized policy management, dynamic rule updates, and versioned policy deployment. Shows how to organize, discover, and manage policies across multiple domains with runtime updates and A/B testing capabilities.
+Demonstrates the Policy Registry for centralized policy management, dynamic rule
+updates, and versioned policy deployment. Shows how to organize, discover, and
+manage policies across multiple domains with runtime updates and A/B testing
+capabilities.
 
 ## Business Context
 
-Large enterprises need centralized policy management for consistency, governance, and rapid business rule changes. The Policy Registry enables business users to update rules without code deployment, supports A/B testing of policy changes, and provides audit trails for regulatory compliance.
+Large enterprises need centralized policy management for consistency,
+governance, and rapid business rule changes. The Policy Registry enables
+business users to update rules without code deployment, supports A/B testing of
+policy changes, and provides audit trails for regulatory compliance.
 
 ## Code Example
 
-```typescript
+````typescript
 // policy-registry-setup.ts
-import { PolicyRegistry, PolicyMetadata, PolicyVersion } from '@vytches-ddd/policies';
+import {
+  PolicyRegistry,
+  PolicyMetadata,
+  PolicyVersion,
+} from '@vytches-ddd/policies';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { LoanApplication, InsuranceQuote, UserRegistration } from '../types';
 
@@ -70,10 +81,10 @@ export class EnterprisePolicyRegistry {
 
     // Register financial services policies
     await this.registerFinancialPolicies();
-    
+
     // Register insurance policies
     await this.registerInsurancePolicies();
-    
+
     // Register user management policies
     await this.registerUserManagementPolicies();
 
@@ -81,7 +92,9 @@ export class EnterprisePolicyRegistry {
     await this.setupPolicyMonitoring();
 
     console.log('✅ Enterprise Policy Registry initialized');
-    console.log(`📊 Total policies registered: ${this.registry.getAllPolicies().length}`);
+    console.log(
+      `📊 Total policies registered: ${this.registry.getAllPolicies().length}`
+    );
   }
 
   /**
@@ -121,13 +134,13 @@ export class EnterprisePolicyRegistry {
         ...metadata,
         registeredAt: new Date(),
         registeredBy: metadata.registeredBy || 'system',
-        status: 'registered'
+        status: 'registered',
       },
       deploymentConfig: {
         environment: metadata.environment || 'development',
         rolloutPercentage: metadata.rolloutPercentage || 0,
-        abTestGroup: metadata.abTestGroup
-      }
+        abTestGroup: metadata.abTestGroup,
+      },
     };
 
     // Store version
@@ -144,7 +157,7 @@ export class EnterprisePolicyRegistry {
       policy,
       version,
       tags: metadata.tags || [],
-      metadata: metadata
+      metadata: metadata,
     });
 
     console.log(`✅ Policy ${policyId}@${version} registered successfully`);
@@ -177,7 +190,9 @@ export class EnterprisePolicyRegistry {
       canaryDuration?: number;
     }
   ): Promise<void> {
-    console.log(`🚀 Deploying policy ${policyId}@${version} with ${rolloutConfig.percentage}% rollout`);
+    console.log(
+      `🚀 Deploying policy ${policyId}@${version} with ${rolloutConfig.percentage}% rollout`
+    );
 
     const versions = this.policyVersions.get(policyId);
     if (!versions) {
@@ -195,7 +210,7 @@ export class EnterprisePolicyRegistry {
       environment: rolloutConfig.environment,
       rolloutPercentage: rolloutConfig.percentage,
       abTestGroup: rolloutConfig.abTestGroup,
-      deployedAt: new Date()
+      deployedAt: new Date(),
     };
 
     targetVersion.metadata.status = 'deployed';
@@ -203,9 +218,13 @@ export class EnterprisePolicyRegistry {
     // If 100% rollout, set as active version
     if (rolloutConfig.percentage === 100) {
       this.activePolicies.set(policyId, version);
-      console.log(`✅ Policy ${policyId}@${version} fully deployed and activated`);
+      console.log(
+        `✅ Policy ${policyId}@${version} fully deployed and activated`
+      );
     } else {
-      console.log(`⚡ Policy ${policyId}@${version} deployed with ${rolloutConfig.percentage}% traffic`);
+      console.log(
+        `⚡ Policy ${policyId}@${version} deployed with ${rolloutConfig.percentage}% traffic`
+      );
     }
 
     // Set up monitoring for the deployment
@@ -244,22 +263,29 @@ export class EnterprisePolicyRegistry {
     }
 
     // Select version based on context and rollout rules
-    const selectedVersion = this.selectPolicyVersion(policyId, versions, context);
-    
+    const selectedVersion = this.selectPolicyVersion(
+      policyId,
+      versions,
+      context
+    );
+
     if (!selectedVersion) {
       console.warn(`⚠️ No suitable version found for policy ${policyId}`);
       return null;
     }
 
-    console.log(`🎯 Resolved policy ${policyId}@${selectedVersion.version} for context:`, {
-      userId: context.userId,
-      abTestGroup: context.abTestGroup
-    });
+    console.log(
+      `🎯 Resolved policy ${policyId}@${selectedVersion.version} for context:`,
+      {
+        userId: context.userId,
+        abTestGroup: context.abTestGroup,
+      }
+    );
 
     return {
       policy: selectedVersion.policy,
       version: selectedVersion.version,
-      metadata: selectedVersion.metadata
+      metadata: selectedVersion.metadata,
     };
   }
 
@@ -279,61 +305,78 @@ export class EnterprisePolicyRegistry {
    * @public
    */
   getPolicyAnalytics(policyId?: string): {
-    usage: { [policyId: string]: { executions: number; successRate: number; avgExecutionTime: number } };
-    abTestResults: { [testId: string]: { variantA: any; variantB: any; confidence: number } };
-    deploymentStatus: { [policyId: string]: { activeVersion: string; rolloutPercentage: number } };
-    performanceMetrics: { [policyId: string]: { p95: number; p99: number; errorRate: number } };
+    usage: {
+      [policyId: string]: {
+        executions: number;
+        successRate: number;
+        avgExecutionTime: number;
+      };
+    };
+    abTestResults: {
+      [testId: string]: { variantA: any; variantB: any; confidence: number };
+    };
+    deploymentStatus: {
+      [policyId: string]: { activeVersion: string; rolloutPercentage: number };
+    };
+    performanceMetrics: {
+      [policyId: string]: { p95: number; p99: number; errorRate: number };
+    };
   } {
     const analytics = {
       usage: {} as any,
       abTestResults: {} as any,
       deploymentStatus: {} as any,
-      performanceMetrics: {} as any
+      performanceMetrics: {} as any,
     };
 
-    const policiesToAnalyze = policyId 
-      ? [policyId] 
+    const policiesToAnalyze = policyId
+      ? [policyId]
       : Array.from(this.policyVersions.keys());
 
     policiesToAnalyze.forEach(id => {
       const versions = this.policyVersions.get(id);
       if (!versions) return;
 
-      const activeVersion = this.activePolicies.get(id) || versions[versions.length - 1].version;
-      
+      const activeVersion =
+        this.activePolicies.get(id) || versions[versions.length - 1].version;
+
       // Simulate analytics data (in real implementation, this would come from monitoring systems)
       analytics.usage[id] = {
         executions: Math.floor(Math.random() * 10000) + 1000,
         successRate: 0.95 + Math.random() * 0.05,
-        avgExecutionTime: Math.floor(Math.random() * 100) + 50
+        avgExecutionTime: Math.floor(Math.random() * 100) + 50,
       };
 
       analytics.deploymentStatus[id] = {
         activeVersion,
-        rolloutPercentage: versions.find(v => v.version === activeVersion)?.deploymentConfig.rolloutPercentage || 100
+        rolloutPercentage:
+          versions.find(v => v.version === activeVersion)?.deploymentConfig
+            .rolloutPercentage || 100,
       };
 
       analytics.performanceMetrics[id] = {
         p95: Math.floor(Math.random() * 200) + 100,
         p99: Math.floor(Math.random() * 500) + 200,
-        errorRate: Math.random() * 0.01
+        errorRate: Math.random() * 0.01,
       };
 
       // A/B test results for policies with multiple active versions
-      const abTestVersions = versions.filter(v => v.deploymentConfig.abTestGroup);
+      const abTestVersions = versions.filter(
+        v => v.deploymentConfig.abTestGroup
+      );
       if (abTestVersions.length > 1) {
         analytics.abTestResults[`${id}-ab-test`] = {
           variantA: {
             version: abTestVersions[0].version,
             successRate: 0.85 + Math.random() * 0.1,
-            conversionRate: 0.12 + Math.random() * 0.05
+            conversionRate: 0.12 + Math.random() * 0.05,
           },
           variantB: {
             version: abTestVersions[1].version,
             successRate: 0.87 + Math.random() * 0.1,
-            conversionRate: 0.14 + Math.random() * 0.05
+            conversionRate: 0.14 + Math.random() * 0.05,
           },
-          confidence: 0.8 + Math.random() * 0.2
+          confidence: 0.8 + Math.random() * 0.2,
         };
       }
     });
@@ -354,7 +397,7 @@ export class EnterprisePolicyRegistry {
         description: 'Enhanced loan approval with multi-path qualification',
         tags: ['loan', 'approval', 'financial'],
         registeredBy: 'financial-team',
-        environment: 'production'
+        environment: 'production',
       }
     );
 
@@ -370,7 +413,7 @@ export class EnterprisePolicyRegistry {
         registeredBy: 'ai-team',
         environment: 'staging',
         rolloutPercentage: 10,
-        abTestGroup: 'ai-enhancement'
+        abTestGroup: 'ai-enhancement',
       }
     );
   }
@@ -386,7 +429,7 @@ export class EnterprisePolicyRegistry {
         description: 'Comprehensive risk assessment for insurance products',
         tags: ['insurance', 'underwriting', 'risk'],
         registeredBy: 'insurance-team',
-        environment: 'production'
+        environment: 'production',
       }
     );
   }
@@ -402,12 +445,15 @@ export class EnterprisePolicyRegistry {
         description: 'User validation and eligibility rules',
         tags: ['user', 'registration', 'validation'],
         registeredBy: 'platform-team',
-        environment: 'production'
+        environment: 'production',
       }
     );
   }
 
-  private async validatePolicy(policy: any, metadata: PolicyMetadata): Promise<void> {
+  private async validatePolicy(
+    policy: any,
+    metadata: PolicyMetadata
+  ): Promise<void> {
     // Validate policy structure and metadata
     if (!policy || typeof policy.check !== 'function') {
       throw new Error('Policy must implement check method');
@@ -427,16 +473,18 @@ export class EnterprisePolicyRegistry {
     context: any
   ): PolicyVersion | null {
     // Filter to deployed versions
-    const deployedVersions = versions.filter(v => v.metadata.status === 'deployed');
-    
+    const deployedVersions = versions.filter(
+      v => v.metadata.status === 'deployed'
+    );
+
     if (deployedVersions.length === 0) {
       return versions[versions.length - 1]; // Return latest if none deployed
     }
 
     // A/B testing logic
     if (context.abTestGroup) {
-      const abTestVersion = deployedVersions.find(v => 
-        v.deploymentConfig.abTestGroup === context.abTestGroup
+      const abTestVersion = deployedVersions.find(
+        v => v.deploymentConfig.abTestGroup === context.abTestGroup
       );
       if (abTestVersion) {
         return abTestVersion;
@@ -447,9 +495,10 @@ export class EnterprisePolicyRegistry {
     if (context.userId) {
       const userId = context.userId;
       const hash = this.hashUserId(userId);
-      
+
       for (const version of deployedVersions) {
-        const rolloutPercentage = version.deploymentConfig.rolloutPercentage || 100;
+        const rolloutPercentage =
+          version.deploymentConfig.rolloutPercentage || 100;
         if (hash < rolloutPercentage) {
           return version;
         }
@@ -471,7 +520,7 @@ export class EnterprisePolicyRegistry {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash) % 100;
@@ -508,7 +557,7 @@ export class EnterprisePolicyRegistry {
     return { check: async () => ({ isSuccess: () => true }) };
   }
 }
-```
+````
 
 ```typescript
 // dynamic-policy-management.ts
@@ -562,7 +611,7 @@ export class DynamicPolicyManager {
     metadata: any;
   }> {
     const startTime = Date.now();
-    
+
     console.log(`🎯 Executing dynamic policy: ${policyId}`);
 
     // Resolve policy with dynamic version selection
@@ -570,7 +619,7 @@ export class DynamicPolicyManager {
       userId: context.userId,
       environment: context.metadata?.environment || 'production',
       abTestGroup: context.metadata?.abTestGroup,
-      featureFlags: context.metadata?.featureFlags
+      featureFlags: context.metadata?.featureFlags,
     });
 
     if (!resolvedPolicy) {
@@ -582,13 +631,15 @@ export class DynamicPolicyManager {
       const result = await resolvedPolicy.policy.check({ entity, context });
       const executionTime = Date.now() - startTime;
 
-      console.log(`✅ Policy ${policyId}@${resolvedPolicy.version} executed in ${executionTime}ms`);
+      console.log(
+        `✅ Policy ${policyId}@${resolvedPolicy.version} executed in ${executionTime}ms`
+      );
 
       // Record execution metrics
       await this.recordPolicyExecution(policyId, resolvedPolicy.version, {
         success: result.isSuccess(),
         executionTime,
-        context
+        context,
       });
 
       return {
@@ -600,22 +651,23 @@ export class DynamicPolicyManager {
           dynamicSelection: true,
           contextUsed: {
             userId: context.userId,
-            abTestGroup: context.metadata?.abTestGroup
-          }
-        }
+            abTestGroup: context.metadata?.abTestGroup,
+          },
+        },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      console.error(`❌ Policy ${policyId}@${resolvedPolicy.version} failed: ${error.message}`);
+
+      console.error(
+        `❌ Policy ${policyId}@${resolvedPolicy.version} failed: ${error.message}`
+      );
 
       // Record failure metrics
       await this.recordPolicyExecution(policyId, resolvedPolicy.version, {
         success: false,
         executionTime,
         error: error.message,
-        context
+        context,
       });
 
       throw error;
@@ -648,7 +700,9 @@ export class DynamicPolicyManager {
     recommendation: string;
     statisticalSignificance: boolean;
   }> {
-    console.log(`📊 Analyzing A/B test for policy ${policyId} over ${testDuration} days`);
+    console.log(
+      `📊 Analyzing A/B test for policy ${policyId} over ${testDuration} days`
+    );
 
     const analytics = this.registry.getPolicyAnalytics(policyId);
     const abTestData = analytics.abTestResults[`${policyId}-ab-test`];
@@ -659,7 +713,7 @@ export class DynamicPolicyManager {
         variants: {},
         winner: null,
         recommendation: 'No A/B test data available',
-        statisticalSignificance: false
+        statisticalSignificance: false,
       };
     }
 
@@ -672,12 +726,21 @@ export class DynamicPolicyManager {
     const aScore = variantA.successRate * 0.6 + variantA.conversionRate * 0.4;
     const bScore = variantB.successRate * 0.6 + variantB.conversionRate * 0.4;
 
-    const winner = aScore > bScore 
-      ? { version: variantA.version, score: aScore, improvement: ((aScore - bScore) / bScore) * 100 }
-      : { version: variantB.version, score: bScore, improvement: ((bScore - aScore) / aScore) * 100 };
+    const winner =
+      aScore > bScore
+        ? {
+            version: variantA.version,
+            score: aScore,
+            improvement: ((aScore - bScore) / bScore) * 100,
+          }
+        : {
+            version: variantB.version,
+            score: bScore,
+            improvement: ((bScore - aScore) / aScore) * 100,
+          };
 
     const statisticalSignificance = confidence > 0.95;
-    
+
     let recommendation = '';
     if (statisticalSignificance) {
       if (winner.improvement > 5) {
@@ -689,7 +752,9 @@ export class DynamicPolicyManager {
       recommendation = `Continue A/B test - statistical significance not reached (${(confidence * 100).toFixed(1)}%)`;
     }
 
-    console.log(`🏆 A/B test analysis complete - Winner: ${winner.version} (${winner.improvement.toFixed(1)}% improvement)`);
+    console.log(
+      `🏆 A/B test analysis complete - Winner: ${winner.version} (${winner.improvement.toFixed(1)}% improvement)`
+    );
 
     return {
       testId: `${policyId}-ab-test`,
@@ -697,21 +762,21 @@ export class DynamicPolicyManager {
         [variantA.version]: {
           successRate: variantA.successRate,
           conversionRate: variantA.conversionRate,
-          score: aScore
+          score: aScore,
         },
         [variantB.version]: {
           successRate: variantB.successRate,
           conversionRate: variantB.conversionRate,
-          score: bScore
-        }
+          score: bScore,
+        },
       },
       winner: {
         version: winner.version,
         confidence,
-        improvement: winner.improvement
+        improvement: winner.improvement,
       },
       recommendation,
-      statisticalSignificance
+      statisticalSignificance,
     };
   }
 
@@ -736,7 +801,11 @@ export class DynamicPolicyManager {
     policyId: string,
     version: string,
     rolloutPlan: {
-      phases: { percentage: number; durationHours: number; successCriteria: any }[];
+      phases: {
+        percentage: number;
+        durationHours: number;
+        successCriteria: any;
+      }[];
       rollbackThreshold: { errorRate: number; performanceDegradation: number };
       monitoring: { alertChannels: string[]; dashboardUrl: string };
     }
@@ -755,12 +824,14 @@ export class DynamicPolicyManager {
     const rolloutMetrics: any[] = [];
 
     for (const phase of rolloutPlan.phases) {
-      console.log(`📈 Phase ${currentPhase + 1}: Rolling out to ${phase.percentage}% of traffic`);
+      console.log(
+        `📈 Phase ${currentPhase + 1}: Rolling out to ${phase.percentage}% of traffic`
+      );
 
       // Deploy phase
       await this.registry.deployPolicyVersion(policyId, version, {
         percentage: phase.percentage,
-        environment: 'production'
+        environment: 'production',
       });
 
       // Monitor phase
@@ -775,14 +846,18 @@ export class DynamicPolicyManager {
 
       // Check success criteria
       if (!this.evaluateSuccessCriteria(phaseMetrics, phase.successCriteria)) {
-        console.log(`❌ Phase ${currentPhase + 1} failed success criteria - triggering rollback`);
+        console.log(
+          `❌ Phase ${currentPhase + 1} failed success criteria - triggering rollback`
+        );
         rollbackTriggered = true;
         break;
       }
 
       // Check rollback thresholds
       if (this.shouldRollback(phaseMetrics, rolloutPlan.rollbackThreshold)) {
-        console.log(`🚨 Rollback threshold exceeded in phase ${currentPhase + 1} - triggering rollback`);
+        console.log(
+          `🚨 Rollback threshold exceeded in phase ${currentPhase + 1} - triggering rollback`
+        );
         rollbackTriggered = true;
         break;
       }
@@ -796,19 +871,25 @@ export class DynamicPolicyManager {
       return {
         success: false,
         phasesCompleted: currentPhase,
-        finalPercentage: currentPhase > 0 ? rolloutPlan.phases[currentPhase - 1].percentage : 0,
+        finalPercentage:
+          currentPhase > 0
+            ? rolloutPlan.phases[currentPhase - 1].percentage
+            : 0,
         metrics: rolloutMetrics,
-        rollbackReason: 'Failed success criteria or exceeded rollback threshold'
+        rollbackReason:
+          'Failed success criteria or exceeded rollback threshold',
       };
     }
 
-    console.log(`🎉 Gradual rollout of ${policyId}@${version} completed successfully`);
+    console.log(
+      `🎉 Gradual rollout of ${policyId}@${version} completed successfully`
+    );
 
     return {
       success: true,
       phasesCompleted: rolloutPlan.phases.length,
       finalPercentage: 100,
-      metrics: rolloutMetrics
+      metrics: rolloutMetrics,
     };
   }
 
@@ -821,7 +902,7 @@ export class DynamicPolicyManager {
     // Record execution metrics for analytics
     console.log(`📊 Recording execution metrics for ${policyId}@${version}:`, {
       success: metrics.success,
-      executionTime: metrics.executionTime
+      executionTime: metrics.executionTime,
     });
   }
 
@@ -838,7 +919,7 @@ export class DynamicPolicyManager {
       errorRate: Math.random() * 0.02, // 0-2% error rate
       avgResponseTime: 50 + Math.random() * 100, // 50-150ms
       successRate: 0.95 + Math.random() * 0.05, // 95-100%
-      throughput: 100 + Math.random() * 200 // 100-300 requests/second
+      throughput: 100 + Math.random() * 200, // 100-300 requests/second
     };
   }
 
@@ -849,17 +930,21 @@ export class DynamicPolicyManager {
 
   private shouldRollback(metrics: any, threshold: any): boolean {
     // Check if metrics exceed rollback thresholds
-    return metrics.errorRate > threshold.errorRate || 
-           metrics.avgResponseTime > 200; // Performance degradation threshold
+    return (
+      metrics.errorRate > threshold.errorRate || metrics.avgResponseTime > 200
+    ); // Performance degradation threshold
   }
 
-  private async performRollback(policyId: string, version: string): Promise<void> {
+  private async performRollback(
+    policyId: string,
+    version: string
+  ): Promise<void> {
     console.log(`🔄 Performing rollback for ${policyId}@${version}`);
-    
+
     // Deploy previous stable version
     await this.registry.deployPolicyVersion(policyId, 'previous-stable', {
       percentage: 100,
-      environment: 'production'
+      environment: 'production',
     });
 
     console.log(`✅ Rollback completed for ${policyId}`);
@@ -869,34 +954,46 @@ export class DynamicPolicyManager {
 
 ## Key Features
 
-- **🏢 Centralized Registry**: Single source of truth for all enterprise policies
-- **📝 Version Management**: Complete policy versioning with metadata and deployment tracking
-- **🎯 Dynamic Resolution**: Automatic version selection based on context and A/B testing
-- **📊 A/B Testing**: Built-in support for policy variant testing with statistical analysis
-- **🚀 Gradual Rollouts**: Controlled deployment with monitoring and automatic rollback
+- **🏢 Centralized Registry**: Single source of truth for all enterprise
+  policies
+- **📝 Version Management**: Complete policy versioning with metadata and
+  deployment tracking
+- **🎯 Dynamic Resolution**: Automatic version selection based on context and
+  A/B testing
+- **📊 A/B Testing**: Built-in support for policy variant testing with
+  statistical analysis
+- **🚀 Gradual Rollouts**: Controlled deployment with monitoring and automatic
+  rollback
 - **📈 Analytics**: Comprehensive policy performance and usage analytics
 
 ## Policy Registry Patterns
 
-1. **Version Lifecycle**: Register → Deploy → Monitor → Rollback/Promote workflow
-2. **A/B Testing**: Parallel version deployment with traffic splitting and analysis
-3. **Gradual Rollouts**: Phased deployment with success criteria and rollback triggers
-4. **Dynamic Selection**: Context-aware policy resolution based on user attributes
+1. **Version Lifecycle**: Register → Deploy → Monitor → Rollback/Promote
+   workflow
+2. **A/B Testing**: Parallel version deployment with traffic splitting and
+   analysis
+3. **Gradual Rollouts**: Phased deployment with success criteria and rollback
+   triggers
+4. **Dynamic Selection**: Context-aware policy resolution based on user
+   attributes
 5. **Performance Monitoring**: Real-time metrics collection and alerting
 
 ## Enterprise Benefits
 
 ### **Business Agility**
+
 - **Rapid Rule Changes**: Deploy policy updates without code releases
 - **Risk Mitigation**: Gradual rollouts with automatic rollback capabilities
 - **Data-Driven Decisions**: A/B testing for policy optimization
 
 ### **Governance and Compliance**
+
 - **Audit Trails**: Complete history of policy changes and deployments
 - **Version Control**: Comprehensive versioning with rollback capabilities
 - **Access Control**: Role-based policy management and deployment approval
 
 ### **Operational Excellence**
+
 - **Performance Monitoring**: Real-time policy execution metrics
 - **Automated Rollbacks**: Automatic failure detection and recovery
 - **Centralized Management**: Single interface for all policy operations
@@ -906,10 +1003,14 @@ export class DynamicPolicyManager {
 - **❌ Version Sprawl**: Implement proper cleanup of old policy versions
 - **❌ Context Leakage**: Ensure A/B test groups don't overlap unintentionally
 - **❌ Rollback Delays**: Set up proper monitoring for fast failure detection
-- **❌ Registry Performance**: Implement caching for high-traffic policy resolution
+- **❌ Registry Performance**: Implement caching for high-traffic policy
+  resolution
 
 ## Related Examples
 
-- [Example 1: Policy Behaviors](./example-1.md) - Cross-cutting concerns and policy composition
-- [Basic: Fluent Policy Builder](../basic/example-1.md) - Foundation policy patterns
-- [Advanced: Enterprise Orchestration](../advanced/example-1.md) - Large-scale policy system design
+- [Example 1: Policy Behaviors](./example-1.md) - Cross-cutting concerns and
+  policy composition
+- [Basic: Fluent Policy Builder](../basic/example-1.md) - Foundation policy
+  patterns
+- [Advanced: Enterprise Orchestration](../advanced/example-1.md) - Large-scale
+  policy system design

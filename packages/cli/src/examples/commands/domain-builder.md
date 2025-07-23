@@ -1,7 +1,7 @@
 # Domain Builder Command
 
-**Focus**: Interactive domain modeling with AI-assisted guidance
-**Command**: `vytches-ddd domain` | `vytches-ddd domain-builder`
+**Focus**: Interactive domain modeling with AI-assisted guidance **Command**:
+`vytches-ddd domain` | `vytches-ddd domain-builder`
 
 ## Quick Start
 
@@ -25,15 +25,16 @@ vytches-ddd domain
 ```
 
 **Interactive Flow:**
+
 ```
 🎯 VytchesDDD Domain Builder
 
 ? What domain are you building? OrderManagement
 ? Main business focus? E-commerce order processing
 ? Key entities? Order, Customer, Product, Payment
-? Main use cases? 
+? Main use cases?
   ✓ Create order
-  ✓ Process payment  
+  ✓ Process payment
   ✓ Track shipment
   ✓ Handle returns
 
@@ -42,6 +43,7 @@ Generating domain structure...
 ```
 
 **Generated Structure:**
+
 ```
 src/domain/order-management/
 ├── aggregates/
@@ -78,6 +80,7 @@ vytches-ddd domain --guided
 ```
 
 **AI-Assisted Questions:**
+
 ```
 🧠 Domain Analysis Assistant
 
@@ -86,7 +89,7 @@ vytches-ddd domain --guided
 
 💡 AI Suggestion: I detect an Order Management domain with these patterns:
    - Order aggregate with lifecycle management
-   - Payment subdomain integration  
+   - Payment subdomain integration
    - Shipping and fulfillment tracking
    - Customer relationship management
 
@@ -112,12 +115,13 @@ vytches-ddd domain OrderManagement --analyze-gaps
 ```
 
 **Gap Analysis Output:**
+
 ```
 🔍 Domain Analysis: OrderManagement
 
 Current Structure:
 ✅ Order aggregate - Complete
-✅ Customer aggregate - Complete  
+✅ Customer aggregate - Complete
 ⚠️  Payment handling - Missing error handling
 ❌ Shipping integration - Not implemented
 ❌ Audit trail - Missing
@@ -126,7 +130,7 @@ Current Structure:
 Recommendations:
 1. Add PaymentFailedEvent and compensation logic
 2. Implement ShippingService with tracking
-3. Add AuditLogAggregate for compliance  
+3. Add AuditLogAggregate for compliance
 4. Create OrderValidationPolicy for business rules
 
 ? Apply these recommendations? Yes
@@ -145,8 +149,9 @@ vytches-ddd domain --template enterprise --domain OrderManagement
 ```
 
 **Available Templates:**
+
 - `ecommerce` - Online retail patterns
-- `fintech` - Financial services patterns  
+- `fintech` - Financial services patterns
 - `healthcare` - Patient and care management
 - `enterprise` - Full enterprise patterns
 - `saas` - Multi-tenant SaaS patterns
@@ -163,6 +168,7 @@ vytches-ddd domain OrderManagement --analyze-dependencies
 ```
 
 **Context Map Output:**
+
 ```
 📊 Context Map Analysis
 
@@ -182,7 +188,7 @@ Domains Detected:
 
 Recommendations:
 - Add OrderInventoryACL for inventory integration
-- Implement PaymentGatewayACL for external payment processing  
+- Implement PaymentGatewayACL for external payment processing
 - Create shared OrderShippedEvent for shipping domain
 ```
 
@@ -197,12 +203,13 @@ vytches-ddd domain OrderManagement --check-patterns
 ```
 
 **Validation Results:**
+
 ```
 🔍 Domain Validation: OrderManagement
 
 DDD Pattern Compliance:
 ✅ Aggregates have clear boundaries
-✅ Entities have identity and lifecycle  
+✅ Entities have identity and lifecycle
 ✅ Value objects are immutable
 ⚠️  Domain services - Some business logic in aggregates
 ❌ Repository pattern - Missing interfaces
@@ -234,6 +241,7 @@ vytches-ddd domain OrderManagement --generate commands,events,repositories
 ```
 
 **Generated Code Example:**
+
 ```typescript
 // Generated: src/domain/order-management/commands/create-order.command.ts
 export class CreateOrderCommand extends Command {
@@ -247,7 +255,7 @@ export class CreateOrderCommand extends Command {
   }
 }
 
-// Generated: src/domain/order-management/aggregates/order.aggregate.ts  
+// Generated: src/domain/order-management/aggregates/order.aggregate.ts
 export class OrderAggregate extends AggregateRoot {
   private constructor(
     id: string,
@@ -266,11 +274,9 @@ export class OrderAggregate extends AggregateRoot {
       OrderStatus.CREATED
     );
 
-    order.addDomainEvent(new OrderCreatedEvent(
-      order.id,
-      order.customerId,
-      order.calculateTotal()
-    ));
+    order.addDomainEvent(
+      new OrderCreatedEvent(order.id, order.customerId, order.calculateTotal())
+    );
 
     return order;
   }
@@ -279,25 +285,26 @@ export class OrderAggregate extends AggregateRoot {
 
 ## Available Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--guided` | AI-assisted domain analysis | `--guided` |
-| `--template` | Use predefined template | `--template ecommerce` |
-| `--refine` | Refine existing domain | `--refine` |
-| `--context-map` | Analyze domain relationships | `--context-map` |
-| `--validate` | Validate domain patterns | `--validate` |
-| `--generate-all` | Generate all components | `--generate-all` |
-| `--analyze-gaps` | Find missing patterns | `--analyze-gaps` |
-| `--interactive` | Interactive mode | `--interactive` |
+| Option           | Description                  | Example                |
+| ---------------- | ---------------------------- | ---------------------- |
+| `--guided`       | AI-assisted domain analysis  | `--guided`             |
+| `--template`     | Use predefined template      | `--template ecommerce` |
+| `--refine`       | Refine existing domain       | `--refine`             |
+| `--context-map`  | Analyze domain relationships | `--context-map`        |
+| `--validate`     | Validate domain patterns     | `--validate`           |
+| `--generate-all` | Generate all components      | `--generate-all`       |
+| `--analyze-gaps` | Find missing patterns        | `--analyze-gaps`       |
+| `--interactive`  | Interactive mode             | `--interactive`        |
 
 ## Common Workflows
 
 ### 1. New Domain from Scratch
+
 ```bash
 # 1. Start with guided analysis
 vytches-ddd domain --guided
 
-# 2. Refine based on feedback  
+# 2. Refine based on feedback
 vytches-ddd domain MyDomain --refine --analyze-gaps
 
 # 3. Generate implementation
@@ -308,6 +315,7 @@ vytches-ddd domain MyDomain --validate --check-patterns
 ```
 
 ### 2. Existing Domain Enhancement
+
 ```bash
 # 1. Analyze current domain
 vytches-ddd domain ExistingDomain --analyze-gaps
@@ -323,13 +331,14 @@ vytches-ddd domain ExistingDomain --validate
 ```
 
 ### 3. Multi-Domain Architecture
+
 ```bash
 # 1. Map domain relationships
 vytches-ddd domain --context-map
 
 # 2. Build each domain with context
 vytches-ddd domain OrderManagement --template ecommerce
-vytches-ddd domain UserManagement --template enterprise  
+vytches-ddd domain UserManagement --template enterprise
 
 # 3. Validate cross-domain integration
 vytches-ddd domain --validate --analyze-dependencies
@@ -338,21 +347,27 @@ vytches-ddd domain --validate --analyze-dependencies
 ## Domain Templates
 
 ### E-commerce Template
+
 ```bash
 vytches-ddd domain --template ecommerce
 ```
+
 **Includes**: Order management, cart, checkout, inventory, customer
 
-### Enterprise Template  
+### Enterprise Template
+
 ```bash
 vytches-ddd domain --template enterprise
 ```
+
 **Includes**: Full DDD patterns, audit, security, multi-tenancy
 
 ### FinTech Template
+
 ```bash
 vytches-ddd domain --template fintech
 ```
+
 **Includes**: Account management, transactions, risk assessment, compliance
 
 ## Tips & Best Practices
@@ -367,16 +382,19 @@ vytches-ddd domain --template fintech
 ## Troubleshooting
 
 **Domain analysis stuck?**
+
 ```bash
 vytches-ddd domain --interactive --debug
 ```
 
 **Missing patterns?**
+
 ```bash
 vytches-ddd domain MyDomain --analyze-gaps --verbose
 ```
 
 **Validation errors?**
+
 ```bash
 vytches-ddd domain MyDomain --validate --check-patterns --debug
 ```

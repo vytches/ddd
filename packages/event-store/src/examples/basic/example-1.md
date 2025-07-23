@@ -1,25 +1,32 @@
 # In-Memory Event Store
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-store
-**Complexity**: basic
-**Domain**: Infrastructure
-**Patterns**: event-storage, stream-management, basic-persistence, in-memory-storage
-**Dependencies**: @vytches-ddd/event-store, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Domain**: Infrastructure **Patterns**: event-storage, stream-management,
+basic-persistence, in-memory-storage **Dependencies**: @vytches-ddd/event-store,
+@vytches-ddd/events
 
 ## Description
 
-Basic event storage and retrieval using the in-memory event store implementation. This example demonstrates fundamental event storage concepts including stream management, event appending, reading, and basic error handling patterns.
+Basic event storage and retrieval using the in-memory event store
+implementation. This example demonstrates fundamental event storage concepts
+including stream management, event appending, reading, and basic error handling
+patterns.
 
 ## Business Context
 
-Every event-driven application needs persistent storage for domain events. The in-memory event store provides a simple starting point for development, testing, and small applications where events need to be stored and retrieved reliably within a single process lifecycle.
+Every event-driven application needs persistent storage for domain events. The
+in-memory event store provides a simple starting point for development, testing,
+and small applications where events need to be stored and retrieved reliably
+within a single process lifecycle.
 
 ## Code Example
 
 ```typescript
 // basic-event-storage.ts
-import { InMemoryEventStore, JsonEventSerializer } from '@vytches-ddd/event-store';
+import {
+  InMemoryEventStore,
+  JsonEventSerializer,
+} from '@vytches-ddd/event-store';
 import { DomainEvent, EntityId } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
 import { CreateOrderData, Order, OrderStatus } from './types'; // From your app
@@ -33,25 +40,27 @@ export class OrderEventStoreService {
     // ⭐ FOCUS: Initialize with in-memory implementation
     this.eventStore = new InMemoryEventStore({
       serializer: this.serializer,
-      enableSnapshots: false
+      enableSnapshots: false,
     });
   }
 
   async appendOrderEvents(
-    orderId: string, 
-    events: DomainEvent[], 
+    orderId: string,
+    events: DomainEvent[],
     expectedVersion: number = -1
   ): Promise<Result<void, Error>> {
     try {
       // ⭐ FOCUS: Append events to stream
       const result = await this.eventStore.appendEvents(
-        `order-${orderId}`, 
-        events, 
+        `order-${orderId}`,
+        events,
         expectedVersion
       );
 
       if (result.isFailure()) {
-        return Result.fail(new Error(`Failed to append events: ${result.error.message}`));
+        return Result.fail(
+          new Error(`Failed to append events: ${result.error.message}`)
+        );
       }
 
       console.log(`Appended ${events.length} events to order-${orderId}`);
@@ -61,13 +70,17 @@ export class OrderEventStoreService {
     }
   }
 
-  async readOrderEvents(orderId: string): Promise<Result<DomainEvent[], Error>> {
+  async readOrderEvents(
+    orderId: string
+  ): Promise<Result<DomainEvent[], Error>> {
     try {
       // ⭐ FOCUS: Read all events from stream
       const result = await this.eventStore.readStream(`order-${orderId}`);
 
       if (result.isFailure()) {
-        return Result.fail(new Error(`Failed to read stream: ${result.error.message}`));
+        return Result.fail(
+          new Error(`Failed to read stream: ${result.error.message}`)
+        );
       }
 
       const events = result.value.events;
@@ -88,7 +101,7 @@ export class OrderEventStoreService {
       // ⭐ FOCUS: Read stream with pagination
       const result = await this.eventStore.readStream(`order-${orderId}`, {
         fromEventNumber,
-        maxCount
+        maxCount,
       });
 
       if (result.isFailure()) {
@@ -104,29 +117,33 @@ export class OrderEventStoreService {
   async getStreamInfo(orderId: string): Promise<Result<any, Error>> {
     try {
       // ⭐ FOCUS: Get metadata about stream
-      const streamExists = await this.eventStore.streamExists(`order-${orderId}`);
-      
+      const streamExists = await this.eventStore.streamExists(
+        `order-${orderId}`
+      );
+
       if (!streamExists) {
         return Result.fail(new Error(`Stream order-${orderId} does not exist`));
       }
 
       const result = await this.eventStore.readStream(`order-${orderId}`);
-      
+
       if (result.isFailure()) {
         return Result.fail(result.error);
       }
 
       const stream = result.value;
-      
+
       return Result.ok({
         streamId: `order-${orderId}`,
         eventCount: stream.events.length,
         firstEventNumber: stream.events.length > 0 ? 0 : -1,
         lastEventNumber: stream.events.length - 1,
-        exists: true
+        exists: true,
       });
     } catch (error) {
-      return Result.fail(new Error(`Stream info retrieval failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Stream info retrieval failed: ${error.message}`)
+      );
     }
   }
 
@@ -136,7 +153,9 @@ export class OrderEventStoreService {
       const streams = await this.eventStore.getAllStreamIds();
       return Result.ok(streams);
     } catch (error) {
-      return Result.fail(new Error(`Failed to get all streams: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to get all streams: ${error.message}`)
+      );
     }
   }
 
@@ -144,7 +163,7 @@ export class OrderEventStoreService {
     try {
       // ⭐ FOCUS: Delete entire stream (use with caution)
       const result = await this.eventStore.deleteStream(`order-${orderId}`);
-      
+
       if (result.isFailure()) {
         return Result.fail(result.error);
       }
@@ -199,7 +218,7 @@ export class OrderProcessingService {
   async createOrder(orderData: CreateOrderData): Promise<Result<Order, Error>> {
     try {
       const orderId = EntityId.createUuid().value;
-      
+
       // ⭐ FOCUS: Create and store domain events
       const events: DomainEvent[] = [
         new OrderCreatedEvent(
@@ -208,22 +227,27 @@ export class OrderProcessingService {
           orderData.totalAmount,
           orderData.currency,
           orderData.items
-        )
+        ),
       ];
 
       // Add events for each item
       for (const item of orderData.items) {
-        events.push(new OrderItemAddedEvent(
-          EntityId.fromString(orderId),
-          item.productId,
-          item.quantity,
-          item.unitPrice
-        ));
+        events.push(
+          new OrderItemAddedEvent(
+            EntityId.fromString(orderId),
+            item.productId,
+            item.quantity,
+            item.unitPrice
+          )
+        );
       }
 
       // ⭐ FOCUS: Append events to store
-      const appendResult = await this.eventStore.appendOrderEvents(orderId, events);
-      
+      const appendResult = await this.eventStore.appendOrderEvents(
+        orderId,
+        events
+      );
+
       if (appendResult.isFailure()) {
         return Result.fail(appendResult.error);
       }
@@ -237,7 +261,7 @@ export class OrderProcessingService {
         totalAmount: orderData.totalAmount,
         currency: orderData.currency,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       return Result.ok(order);
@@ -247,21 +271,21 @@ export class OrderProcessingService {
   }
 
   async changeOrderStatus(
-    orderId: string, 
-    newStatus: OrderStatus, 
+    orderId: string,
+    newStatus: OrderStatus,
     reason?: string
   ): Promise<Result<void, Error>> {
     try {
       // ⭐ FOCUS: Read existing events to get current state
       const eventsResult = await this.eventStore.readOrderEvents(orderId);
-      
+
       if (eventsResult.isFailure()) {
         return Result.fail(eventsResult.error);
       }
 
       // Determine current status from events
       const currentStatus = this.getCurrentStatusFromEvents(eventsResult.value);
-      
+
       if (currentStatus === newStatus) {
         return Result.ok(); // No change needed
       }
@@ -276,35 +300,37 @@ export class OrderProcessingService {
 
       // Append new event with optimistic concurrency
       const appendResult = await this.eventStore.appendOrderEvents(
-        orderId, 
+        orderId,
         [statusChangeEvent],
         eventsResult.value.length - 1 // Expected version
       );
-      
+
       return appendResult;
     } catch (error) {
       return Result.fail(new Error(`Status change failed: ${error.message}`));
     }
   }
 
-  async reconstructOrderFromEvents(orderId: string): Promise<Result<Order | null, Error>> {
+  async reconstructOrderFromEvents(
+    orderId: string
+  ): Promise<Result<Order | null, Error>> {
     try {
       // ⭐ FOCUS: Reconstruct aggregate from event stream
       const eventsResult = await this.eventStore.readOrderEvents(orderId);
-      
+
       if (eventsResult.isFailure()) {
         return Result.fail(eventsResult.error);
       }
 
       const events = eventsResult.value;
-      
+
       if (events.length === 0) {
         return Result.ok(null);
       }
 
       // ⭐ FOCUS: Replay events to build current state
       let order: Order | null = null;
-      
+
       for (const event of events) {
         switch (event.eventType) {
           case 'OrderCreated':
@@ -317,21 +343,21 @@ export class OrderProcessingService {
               totalAmount: createdEvent.totalAmount,
               currency: createdEvent.currency,
               createdAt: event.timestamp,
-              updatedAt: event.timestamp
+              updatedAt: event.timestamp,
             };
             break;
-            
+
           case 'OrderItemAdded':
             const itemEvent = event as OrderItemAddedEvent;
             if (order) {
               order.items.push({
                 productId: itemEvent.productId,
                 quantity: itemEvent.quantity,
-                unitPrice: itemEvent.unitPrice
+                unitPrice: itemEvent.unitPrice,
               });
             }
             break;
-            
+
           case 'OrderStatusChanged':
             const statusEvent = event as OrderStatusChangedEvent;
             if (order) {
@@ -344,20 +370,22 @@ export class OrderProcessingService {
 
       return Result.ok(order);
     } catch (error) {
-      return Result.fail(new Error(`Order reconstruction failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Order reconstruction failed: ${error.message}`)
+      );
     }
   }
 
   private getCurrentStatusFromEvents(events: DomainEvent[]): OrderStatus {
     let status: OrderStatus = 'draft';
-    
+
     for (const event of events) {
       if (event.eventType === 'OrderStatusChanged') {
         const statusEvent = event as OrderStatusChangedEvent;
         status = statusEvent.newStatus;
       }
     }
-    
+
     return status;
   }
 }
@@ -367,7 +395,10 @@ export class OrderProcessingService {
 
 ```typescript
 // Complete workflow example
-import { OrderProcessingService, OrderEventStoreService } from './basic-event-storage';
+import {
+  OrderProcessingService,
+  OrderEventStoreService,
+} from './basic-event-storage';
 
 async function demonstrateBasicEventStore() {
   // ⭐ FOCUS: Setup event store services
@@ -381,26 +412,26 @@ async function demonstrateBasicEventStore() {
     currency: 'USD',
     items: [
       { productId: 'product-1', quantity: 2, unitPrice: 99.99 },
-      { productId: 'product-2', quantity: 1, unitPrice: 100.01 }
+      { productId: 'product-2', quantity: 1, unitPrice: 100.01 },
     ],
     shippingAddress: {
       street: '123 Main St',
       city: 'New York',
       state: 'NY',
       zipCode: '10001',
-      country: 'US'
+      country: 'US',
     },
     billingAddress: {
       street: '123 Main St',
       city: 'New York',
       state: 'NY',
       zipCode: '10001',
-      country: 'US'
-    }
+      country: 'US',
+    },
   };
 
   const createResult = await orderService.createOrder(orderData);
-  
+
   if (createResult.isFailure()) {
     console.error('Order creation failed:', createResult.error.message);
     return;
@@ -410,21 +441,34 @@ async function demonstrateBasicEventStore() {
   console.log('Order created:', order.id);
 
   // ⭐ FOCUS: Change order status
-  await orderService.changeOrderStatus(order.id, 'confirmed', 'Payment received');
-  await orderService.changeOrderStatus(order.id, 'processing', 'Order picked for fulfillment');
+  await orderService.changeOrderStatus(
+    order.id,
+    'confirmed',
+    'Payment received'
+  );
+  await orderService.changeOrderStatus(
+    order.id,
+    'processing',
+    'Order picked for fulfillment'
+  );
 
   // ⭐ FOCUS: Reconstruct order from events
-  const reconstructedResult = await orderService.reconstructOrderFromEvents(order.id);
-  
+  const reconstructedResult = await orderService.reconstructOrderFromEvents(
+    order.id
+  );
+
   if (reconstructedResult.isSuccess()) {
     const reconstructed = reconstructedResult.value;
     console.log('Reconstructed order status:', reconstructed?.status);
-    console.log('Total events processed:', reconstructed ? 'success' : 'no events');
+    console.log(
+      'Total events processed:',
+      reconstructed ? 'success' : 'no events'
+    );
   }
 
   // ⭐ FOCUS: Get stream information
   const streamInfoResult = await eventStore.getStreamInfo(order.id);
-  
+
   if (streamInfoResult.isSuccess()) {
     const info = streamInfoResult.value;
     console.log(`Stream ${info.streamId} contains ${info.eventCount} events`);
@@ -432,7 +476,7 @@ async function demonstrateBasicEventStore() {
 
   // ⭐ FOCUS: List all streams
   const streamsResult = await eventStore.getAllStreams();
-  
+
   if (streamsResult.isSuccess()) {
     console.log('All streams:', streamsResult.value);
   }
@@ -441,9 +485,9 @@ async function demonstrateBasicEventStore() {
   const paginatedResult = await eventStore.readOrderEventsWithPagination(
     order.id,
     0, // Start from first event
-    2  // Read 2 events maximum
+    2 // Read 2 events maximum
   );
-  
+
   if (paginatedResult.isSuccess()) {
     console.log(`Read ${paginatedResult.value.length} events from pagination`);
   }
@@ -455,8 +499,10 @@ demonstrateBasicEventStore().catch(console.error);
 
 ## Key Features
 
-- **Simple Setup**: Easy-to-use in-memory event store for development and testing
-- **Stream Management**: Organize events by aggregate/stream with unique identifiers
+- **Simple Setup**: Easy-to-use in-memory event store for development and
+  testing
+- **Stream Management**: Organize events by aggregate/stream with unique
+  identifiers
 - **Event Appending**: Store events with optimistic concurrency control
 - **Stream Reading**: Retrieve events with pagination and filtering options
 - **Event Reconstruction**: Rebuild aggregate state from stored events
@@ -489,7 +535,8 @@ demonstrateBasicEventStore().catch(console.error);
 ## Common Pitfalls
 
 - **Memory Limits**: In-memory store not suitable for large event volumes
-- **Data Loss**: Events lost on application restart (use persistent store for production)
+- **Data Loss**: Events lost on application restart (use persistent store for
+  production)
 - **Concurrency Issues**: Always use expected version for consistency
 - **Event Schema**: Plan for event versioning from the beginning
 

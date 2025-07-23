@@ -35,7 +35,7 @@ describe('SmartTagFinder', () => {
         tags: ['aggregate', 'entity'],
         dependencies: [],
         diSupport: false,
-        frameworkIntegrations: ['nestjs']
+        frameworkIntegrations: ['nestjs'],
       },
       {
         id: 'events-intermediate-example',
@@ -49,7 +49,7 @@ describe('SmartTagFinder', () => {
         tags: ['domain-events', 'aggregate'],
         dependencies: ['core'],
         diSupport: true,
-        frameworkIntegrations: []
+        frameworkIntegrations: [],
       },
       {
         id: 'cqrs-advanced-example',
@@ -63,8 +63,8 @@ describe('SmartTagFinder', () => {
         tags: ['commands', 'queries'],
         dependencies: ['core', 'events'],
         diSupport: true,
-        frameworkIntegrations: ['express']
-      }
+        frameworkIntegrations: ['express'],
+      },
     ];
 
     // Mock package config
@@ -75,33 +75,39 @@ describe('SmartTagFinder', () => {
       frameworks: ['nestjs', 'express'],
       tags: {
         core: ['aggregate', 'entity'],
-        integrations: ['integration:with:events']
+        integrations: ['integration:with:events'],
       },
       complexityLevels: {
         basic: {
           level: 'basic',
           description: 'Basic functionality',
-          diSupport: false
+          diSupport: false,
         },
         intermediate: {
           level: 'intermediate',
           description: 'Intermediate functionality',
-          diSupport: true
-        }
-      }
+          diSupport: true,
+        },
+      },
     };
 
     // Setup mocks
-    mockPackageConfigLoader.prototype.getAvailablePackages = vi.fn().mockResolvedValue(['core', 'events', 'cqrs']);
-    mockPackageConfigLoader.prototype.loadPackageConfig = vi.fn().mockResolvedValue(mockPackageConfig);
+    mockPackageConfigLoader.prototype.getAvailablePackages = vi
+      .fn()
+      .mockResolvedValue(['core', 'events', 'cqrs']);
+    mockPackageConfigLoader.prototype.loadPackageConfig = vi
+      .fn()
+      .mockResolvedValue(mockPackageConfig);
 
     // Mock SeededRandom
     mockSeededRandom.mockImplementation(() => ({
-      next: vi.fn().mockReturnValue(0.5)
+      next: vi.fn().mockReturnValue(0.5),
     }));
 
     // Mock console.warn to avoid noise in tests
-    vi.spyOn(console, 'warn').mockImplementation(() => { return });
+    vi.spyOn(console, 'warn').mockImplementation(() => {
+      return;
+    });
   });
 
   describe('findExamplesByTag', () => {
@@ -186,7 +192,7 @@ describe('SmartTagFinder', () => {
       const options = {
         maxExamples: 10,
         randomize: false,
-        priorityTags: []
+        priorityTags: [],
       };
 
       const result = await safeRun(async () => {
@@ -203,7 +209,7 @@ describe('SmartTagFinder', () => {
       const options = {
         maxExamples: 2,
         randomize: false,
-        priorityTags: ['domain-events']
+        priorityTags: ['domain-events'],
       };
 
       const result = await safeRun(async () => {
@@ -221,7 +227,7 @@ describe('SmartTagFinder', () => {
       const options = {
         maxExamples: 2,
         randomize: true,
-        seed: 'test-seed'
+        seed: 'test-seed',
       };
 
       const result = await safeRun(async () => {
@@ -239,7 +245,7 @@ describe('SmartTagFinder', () => {
       const options = {
         maxExamples: 2,
         randomize: true,
-        priorityTags: []
+        priorityTags: [],
       };
 
       const result = await safeRun(async () => {
@@ -291,7 +297,7 @@ describe('SmartTagFinder', () => {
       const manyExamples = Array.from({ length: 10 }, (_, i) => ({
         ...mockExamples[0],
         id: `example-${i}`,
-        tags: [`tag-${i}`, `similar-tag-${i}`]
+        tags: [`tag-${i}`, `similar-tag-${i}`],
       }));
 
       vi.spyOn(finder as any, 'loadAllExamples').mockResolvedValue(manyExamples);
@@ -382,8 +388,8 @@ describe('SmartTagFinder', () => {
           ...mockPackageConfig,
           tags: {
             ...mockPackageConfig.tags,
-            integrations: ['integration:with:events', 'integration:with:cqrs']
-          }
+            integrations: ['integration:with:events', 'integration:with:cqrs'],
+          },
         };
 
         const result = await safeRun(async () => {
@@ -406,12 +412,12 @@ describe('SmartTagFinder', () => {
       // Mock the configLoader instance directly
       const mockGetAvailablePackages = vi.fn().mockResolvedValue(['core', 'events', 'cqrs']);
       const mockLoadPackageConfig = vi.fn().mockResolvedValue(mockPackageConfig);
-      
+
       (finder as any).configLoader = {
         getAvailablePackages: mockGetAvailablePackages,
-        loadPackageConfig: mockLoadPackageConfig
+        loadPackageConfig: mockLoadPackageConfig,
       };
-      
+
       const result = await safeRun(async () => {
         return await (finder as any).loadAllExamples();
       });
@@ -443,18 +449,21 @@ describe('SmartTagFinder', () => {
 
     it('should handle package loading errors gracefully', async () => {
       // Setup console.warn spy
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
+
       // Mock the configLoader instance directly with error
       const mockGetAvailablePackages = vi.fn().mockResolvedValue(['core', 'events', 'cqrs']);
-      const mockLoadPackageConfig = vi.fn()
+      const mockLoadPackageConfig = vi
+        .fn()
         .mockResolvedValueOnce(mockPackageConfig)
         .mockRejectedValueOnce(new Error('Package load failed'))
         .mockResolvedValueOnce(mockPackageConfig);
-      
+
       (finder as any).configLoader = {
         getAvailablePackages: mockGetAvailablePackages,
-        loadPackageConfig: mockLoadPackageConfig
+        loadPackageConfig: mockLoadPackageConfig,
       };
 
       const result = await safeRun(async () => {
@@ -465,8 +474,10 @@ describe('SmartTagFinder', () => {
 
       expect(error).toBeUndefined();
       expect(examples).toBeDefined();
-      expect(consoleWarnSpy).toHaveBeenCalledWith('⚠️  Failed to load examples from package: events');
-      
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '⚠️  Failed to load examples from package: events'
+      );
+
       consoleWarnSpy.mockRestore();
     });
   });
@@ -481,7 +492,7 @@ describe('SmartTagFinder', () => {
           framework: 'nestjs',
           maxExamples: 3,
           randomize: true,
-          seed: 'integration-test'
+          seed: 'integration-test',
         });
       });
       const findError = findResult[0] as Error | undefined;
@@ -496,7 +507,7 @@ describe('SmartTagFinder', () => {
           maxExamples: 2,
           randomize: true,
           seed: 'selection-test',
-          priorityTags: ['domain-events']
+          priorityTags: ['domain-events'],
         });
       });
       const selectError = selectResult[0] as Error | undefined;

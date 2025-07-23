@@ -1,15 +1,16 @@
 # Basic Projections - NestJS Implementation Guide
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections + NestJS
-**Complexity**: basic
-**Framework**: NestJS
-**Integration**: Manual setup patterns
-**Dependencies**: @nestjs/common, @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Complexity**: basic **Framework**: NestJS **Integration**: Manual setup
+patterns **Dependencies**: @nestjs/common, @vytches-ddd/projections,
+@vytches-ddd/events
 
 ## Overview
 
-This guide covers basic NestJS integration patterns for @vytches-ddd/projections, focusing on manual setup, standard dependency injection, and fundamental projection management. These patterns provide a solid foundation for event-driven read models in NestJS applications.
+This guide covers basic NestJS integration patterns for
+@vytches-ddd/projections, focusing on manual setup, standard dependency
+injection, and fundamental projection management. These patterns provide a solid
+foundation for event-driven read models in NestJS applications.
 
 ## Basic Integration Patterns
 
@@ -22,8 +23,10 @@ import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
 import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
-export class BasicProjectionService extends ProjectionBase<any> implements OnModuleInit {
-  
+export class BasicProjectionService
+  extends ProjectionBase<any>
+  implements OnModuleInit
+{
   constructor() {
     super('BasicProjection', 'v1.0');
     this.initializeState();
@@ -38,8 +41,8 @@ export class BasicProjectionService extends ProjectionBase<any> implements OnMod
       items: new Map<string, any>(),
       stats: {
         totalItems: 0,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     });
   }
 
@@ -50,7 +53,7 @@ export class BasicProjectionService extends ProjectionBase<any> implements OnMod
 
     currentState.items.set(itemData.id, {
       ...itemData,
-      createdAt: new Date(event.timestamp)
+      createdAt: new Date(event.timestamp),
     });
 
     currentState.stats.totalItems = currentState.items.size;
@@ -87,10 +90,7 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
 export class EventProcessorService {
-  
-  constructor(
-    private readonly basicProjection: BasicProjectionService
-  ) {}
+  constructor(private readonly basicProjection: BasicProjectionService) {}
 
   async processEvent(event: IDomainEvent): Promise<void> {
     try {
@@ -124,7 +124,6 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Controller('api/projections')
 export class ProjectionApiController {
-
   constructor(
     private readonly basicProjection: BasicProjectionService,
     private readonly eventProcessor: EventProcessorService
@@ -164,17 +163,19 @@ export class ProjectionApiController {
 ```typescript
 // enhanced-projection.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   EventHandler,
   CheckpointCapability,
-  CircuitBreakerCapability
+  CircuitBreakerCapability,
 } from '@vytches-ddd/projections';
 import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
-export class EnhancedProjectionService extends ProjectionBase<any> implements OnModuleInit, OnModuleDestroy {
-  
+export class EnhancedProjectionService
+  extends ProjectionBase<any>
+  implements OnModuleInit, OnModuleDestroy
+{
   private checkpointCapability: CheckpointCapability;
   private circuitBreakerCapability: CircuitBreakerCapability;
 
@@ -200,14 +201,14 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
       projectionName: this.projectionName,
       interval: 60000, // 1 minute
       storage: 'memory',
-      batchSize: 50
+      batchSize: 50,
     });
 
     // Basic circuit breaker
     this.circuitBreakerCapability = new CircuitBreakerCapability({
       projectionName: this.projectionName,
       failureThreshold: 5,
-      resetTimeout: 30000 // 30 seconds
+      resetTimeout: 30000, // 30 seconds
     });
 
     this.addCapability(this.checkpointCapability);
@@ -217,9 +218,9 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
   private async startCapabilities(): Promise<void> {
     await this.checkpointCapability.start();
     await this.circuitBreakerCapability.start();
-    
+
     // Setup capability event handlers
-    this.checkpointCapability.on('checkpointCreated', (checkpoint) => {
+    this.checkpointCapability.on('checkpointCreated', checkpoint => {
       console.log(`Checkpoint created: ${checkpoint.id}`);
     });
 
@@ -230,7 +231,8 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
 
   private async stopCapabilities(): Promise<void> {
     if (this.checkpointCapability) await this.checkpointCapability.stop();
-    if (this.circuitBreakerCapability) await this.circuitBreakerCapability.stop();
+    if (this.circuitBreakerCapability)
+      await this.circuitBreakerCapability.stop();
   }
 
   private initializeState(): void {
@@ -241,8 +243,8 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
         totalOrders: 0,
         totalRevenue: 0,
         lastUpdated: new Date(),
-        errorCount: 0
-      }
+        errorCount: 0,
+      },
     });
   }
 
@@ -263,7 +265,7 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
         id: orderData.orderId,
         customerId: orderData.customerId,
         amount: orderData.totalAmount,
-        createdAt: new Date(event.timestamp)
+        createdAt: new Date(event.timestamp),
       };
 
       currentState.orders.set(order.id, order);
@@ -273,7 +275,7 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
       const dailySummary = currentState.dailySummaries.get(dateKey) || {
         date: dateKey,
         orderCount: 0,
-        revenue: 0
+        revenue: 0,
       };
 
       dailySummary.orderCount++;
@@ -291,11 +293,10 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
       await this.circuitBreakerCapability.recordSuccess();
 
       console.log(`Order processed: ${order.id}`);
-
     } catch (error) {
       // Record failure with circuit breaker
       await this.circuitBreakerCapability.recordFailure();
-      
+
       const currentState = this.getState();
       currentState.stats.errorCount++;
       this.setState(currentState);
@@ -321,7 +322,7 @@ export class EnhancedProjectionService extends ProjectionBase<any> implements On
     return {
       ...state.stats,
       circuitBreakerState: this.circuitBreakerCapability.getState(),
-      lastCheckpoint: this.checkpointCapability.getLastCheckpointTime()
+      lastCheckpoint: this.checkpointCapability.getLastCheckpointTime(),
     };
   }
 
@@ -347,14 +348,14 @@ import { ProjectionApiController } from './projection-api.controller';
   providers: [
     BasicProjectionService,
     EnhancedProjectionService,
-    EventProcessorService
+    EventProcessorService,
   ],
   controllers: [ProjectionApiController],
   exports: [
     BasicProjectionService,
     EnhancedProjectionService,
-    EventProcessorService
-  ]
+    EventProcessorService,
+  ],
 })
 export class ProjectionModule {}
 ```
@@ -402,10 +403,10 @@ describe('BasicProjectionService', () => {
       payload: {
         id: 'item-123',
         name: 'Test Item',
-        category: 'test'
+        category: 'test',
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await service.handle(event);
@@ -449,10 +450,10 @@ describe('Projection Integration', () => {
       aggregateId: 'item-integration',
       payload: {
         id: 'item-integration',
-        name: 'Integration Test Item'
+        name: 'Integration Test Item',
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await eventProcessor.processEvent(event);
@@ -476,7 +477,6 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
 export class ErrorHandlingProjectionService extends ProjectionBase<any> {
-  
   constructor() {
     super('ErrorHandlingProjection', 'v1.0');
   }
@@ -492,7 +492,7 @@ export class ErrorHandlingProjectionService extends ProjectionBase<any> {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
         error: error.message,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Update error statistics
@@ -501,7 +501,7 @@ export class ErrorHandlingProjectionService extends ProjectionBase<any> {
       state.lastError = {
         eventId: event.eventId,
         error: error.message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       this.setState(state);
 
@@ -512,10 +512,11 @@ export class ErrorHandlingProjectionService extends ProjectionBase<any> {
 
   private async processRiskyOperation(event: IDomainEvent): Promise<void> {
     // Simulate risky operation
-    if (Math.random() < 0.1) { // 10% failure rate
+    if (Math.random() < 0.1) {
+      // 10% failure rate
       throw new Error('Random processing failure');
     }
-    
+
     console.log(`Successfully processed risky event: ${event.eventId}`);
   }
 
@@ -523,7 +524,7 @@ export class ErrorHandlingProjectionService extends ProjectionBase<any> {
     const state = this.getState();
     return {
       errorCount: state.errorCount || 0,
-      lastError: state.lastError || null
+      lastError: state.lastError || null,
     };
   }
 }
@@ -561,7 +562,7 @@ export class BatchProcessingProjectionService extends ProjectionBase<any> {
       if (this.batchTimeout) {
         clearTimeout(this.batchTimeout);
       }
-      
+
       this.batchTimeout = setTimeout(async () => {
         if (this.eventQueue.length > 0) {
           await this.processBatch();
@@ -607,30 +608,35 @@ export class BatchProcessingProjectionService extends ProjectionBase<any> {
 ## Best Practices
 
 ### 1. **Service Design**
+
 - Use NestJS lifecycle hooks (`OnModuleInit`, `OnModuleDestroy`)
 - Implement proper error handling and logging
 - Design services to be easily testable
 - Use dependency injection for service composition
 
 ### 2. **State Management**
+
 - Initialize projection state in constructor
 - Use immutable state updates where possible
 - Implement proper state validation
 - Consider state size and memory usage
 
 ### 3. **Event Handling**
+
 - Use `@EventHandler` decorator for clarity
 - Implement idempotent event processing
 - Handle missing or invalid event data gracefully
 - Log significant events for debugging
 
 ### 4. **Performance**
+
 - Consider batch processing for high-throughput scenarios
 - Use appropriate data structures for queries
 - Monitor projection performance and memory usage
 - Implement proper cleanup for long-running projections
 
 ### 5. **Testing**
+
 - Write comprehensive unit tests for event handlers
 - Test error scenarios and edge cases
 - Use integration tests for end-to-end validation

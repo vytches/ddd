@@ -121,5 +121,5 @@ export type {
   ValidationError,
   ValidationFix,
   ValidationResult,
-  ValidationWarning
+  ValidationWarning,
 } from './examples';

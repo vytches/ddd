@@ -1,56 +1,54 @@
 # Basic Implementation Guide
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: basic
-**Domain**: Event Sourcing
-**Patterns**: Implementation strategies, setup patterns, best practices
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Domain**: Event Sourcing **Patterns**: Implementation strategies, setup
+patterns, best practices **Dependencies**: @vytches-ddd/projections,
+@vytches-ddd/events
 
 ## Description
 
-Comprehensive guide for implementing basic event projections in your application. This guide covers setup procedures, implementation patterns, common configurations, and best practices for building reliable projection systems.
+Comprehensive guide for implementing basic event projections in your
+application. This guide covers setup procedures, implementation patterns, common
+configurations, and best practices for building reliable projection systems.
 
 ## Business Context
 
 Implementing event projections requires understanding of:
+
 - Event sourcing fundamentals and read model concepts
 - Projection lifecycle management and error handling
 - Performance considerations for real-time updates
 - Data consistency and eventual consistency patterns
 - Monitoring and maintenance procedures
 
-This guide provides practical implementation strategies for building production-ready projection systems.
+This guide provides practical implementation strategies for building
+production-ready projection systems.
 
 ## Implementation Overview
 
 ```typescript
 // basic-projection-implementation.ts
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   ProjectionEngine,
   CheckpointCapability,
-  CircuitBreakerCapability
+  CircuitBreakerCapability,
 } from '@vytches-ddd/projections';
 import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
-import { 
-  UserData,
-  ProjectionCheckpoint,
-  ServiceResponse 
-} from '../types';
+import { UserData, ProjectionCheckpoint, ServiceResponse } from '../types';
 
 // Step 1: Define Your Projection Class
 export class CustomerProjection extends ProjectionBase<any> {
   constructor() {
     super('CustomerProjection', 'v1.0');
-    
+
     // Initialize projection state
     this.setState({
       customers: new Map<string, any>(),
       totalCustomers: 0,
       activeCustomers: 0,
       customersBySegment: new Map<string, number>(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -59,7 +57,7 @@ export class CustomerProjection extends ProjectionBase<any> {
   async onCustomerRegistered(event: IDomainEvent): Promise<void> {
     const customerData = event.payload;
     const state = this.getState();
-    
+
     const customer = {
       id: customerData.customerId,
       name: customerData.name,
@@ -68,20 +66,23 @@ export class CustomerProjection extends ProjectionBase<any> {
       segment: this.calculateCustomerSegment(customerData),
       status: 'active',
       totalOrders: 0,
-      totalSpent: 0
+      totalSpent: 0,
     };
 
     state.customers.set(customer.id, customer);
     state.totalCustomers = state.customers.size;
     state.activeCustomers += 1;
-    
+
     // Update segment statistics
     const segment = customer.segment;
-    state.customersBySegment.set(segment, (state.customersBySegment.get(segment) || 0) + 1);
-    
+    state.customersBySegment.set(
+      segment,
+      (state.customersBySegment.get(segment) || 0) + 1
+    );
+
     state.lastUpdated = new Date();
     this.setState(state);
-    
+
     console.log(`Customer registered: ${customer.name} (${customer.id})`);
   }
 
@@ -90,27 +91,35 @@ export class CustomerProjection extends ProjectionBase<any> {
     const orderData = event.payload;
     const state = this.getState();
     const customer = state.customers.get(orderData.customerId);
-    
+
     if (customer) {
       customer.totalOrders += 1;
       customer.totalSpent += orderData.orderTotal;
       customer.lastOrderDate = new Date(event.timestamp);
-      
+
       // Recalculate segment based on spending
       const newSegment = this.calculateCustomerSegment(customer);
       if (newSegment !== customer.segment) {
         // Update segment counts
         const oldSegment = customer.segment;
-        state.customersBySegment.set(oldSegment, Math.max(0, (state.customersBySegment.get(oldSegment) || 0) - 1));
-        state.customersBySegment.set(newSegment, (state.customersBySegment.get(newSegment) || 0) + 1);
+        state.customersBySegment.set(
+          oldSegment,
+          Math.max(0, (state.customersBySegment.get(oldSegment) || 0) - 1)
+        );
+        state.customersBySegment.set(
+          newSegment,
+          (state.customersBySegment.get(newSegment) || 0) + 1
+        );
         customer.segment = newSegment;
       }
-      
+
       state.customers.set(customer.id, customer);
       state.lastUpdated = new Date();
       this.setState(state);
-      
-      console.log(`Customer order updated: ${customer.name} - Order #${customer.totalOrders}`);
+
+      console.log(
+        `Customer order updated: ${customer.name} - Order #${customer.totalOrders}`
+      );
     }
   }
 
@@ -120,8 +129,9 @@ export class CustomerProjection extends ProjectionBase<any> {
   }
 
   getCustomersBySegment(segment: string): any[] {
-    return Array.from(this.getState().customers.values())
-      .filter(customer => customer.segment === segment);
+    return Array.from(this.getState().customers.values()).filter(
+      customer => customer.segment === segment
+    );
   }
 
   getTopCustomers(limit: number = 10): any[] {
@@ -142,19 +152,20 @@ export class CustomerProjection extends ProjectionBase<any> {
   validateProjectionState(): { isValid: boolean; errors: string[] } {
     const state = this.getState();
     const errors: string[] = [];
-    
+
     // Validate customer count
     if (state.totalCustomers !== state.customers.size) {
       errors.push('Total customer count mismatch');
     }
-    
+
     // Validate active customers
-    const actualActive = Array.from(state.customers.values())
-      .filter(c => c.status === 'active').length;
+    const actualActive = Array.from(state.customers.values()).filter(
+      c => c.status === 'active'
+    ).length;
     if (state.activeCustomers !== actualActive) {
       errors.push('Active customer count mismatch');
     }
-    
+
     return { isValid: errors.length === 0, errors };
   }
 }
@@ -175,7 +186,7 @@ export class ProductionCustomerProjection extends CustomerProjection {
       projectionName: this.projectionName,
       checkpointInterval: 100,
       timeInterval: 60000, // 1 minute
-      storage: 'database' // Use persistent storage in production
+      storage: 'database', // Use persistent storage in production
     });
 
     // Circuit breaker for resilience
@@ -183,7 +194,7 @@ export class ProductionCustomerProjection extends CustomerProjection {
       projectionName: this.projectionName,
       failureThreshold: 5,
       recoveryTimeout: 30000,
-      monitoringWindow: 60000
+      monitoringWindow: 60000,
     });
   }
 
@@ -196,13 +207,12 @@ export class ProductionCustomerProjection extends CustomerProjection {
     try {
       await super.handle(event);
       this.circuitBreakerCapability.recordSuccess();
-      
+
       // Update checkpoint
       await this.checkpointCapability.updatePosition(
-        event.aggregateId, 
+        event.aggregateId,
         parseInt(event.eventId) || Date.now()
       );
-      
     } catch (error) {
       this.circuitBreakerCapability.recordFailure();
       throw error;
@@ -258,23 +268,22 @@ export class ProjectionSetup {
         metadata: {
           timestamp: new Date(),
           requestId: 'setup-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-
     } catch (error) {
       return {
         success: false,
         error: {
           code: 'PROJECTION_SETUP_FAILED',
           message: 'Failed to setup projection system',
-          details: { error: (error as Error).message }
+          details: { error: (error as Error).message },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'setup-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
@@ -306,8 +315,8 @@ interface CustomerSummary {
 // Plan your event handlers
 const eventTypes = [
   'CustomerRegistered',
-  'CustomerOrderPlaced', 
-  'CustomerDeactivated'
+  'CustomerOrderPlaced',
+  'CustomerDeactivated',
 ];
 ```
 
@@ -318,17 +327,17 @@ const eventTypes = [
 async onCustomerRegistered(event: IDomainEvent): Promise<void> {
   // 1. Extract data from event
   const customerData = event.payload;
-  
+
   // 2. Transform to projection format
   const customer = this.transformCustomerData(customerData, event);
-  
+
   // 3. Update projection state
   const state = this.getState();
   state.customers.set(customer.id, customer);
-  
+
   // 4. Update aggregates
   this.updateAggregateStatistics(state, customer);
-  
+
   // 5. Save state
   this.setState(state);
 }
@@ -347,9 +356,9 @@ getCustomerGrowthMetrics(): GrowthMetrics {
   const customers = Array.from(this.getState().customers.values());
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  
+
   return {
-    newCustomersLast30Days: customers.filter(c => 
+    newCustomersLast30Days: customers.filter(c =>
       c.registrationDate >= thirtyDaysAgo
     ).length,
     totalCustomers: customers.length,
@@ -368,7 +377,7 @@ async handle(event: IDomainEvent): Promise<void> {
   } catch (error) {
     // Log error with context
     console.error(`Projection ${this.projectionName} failed to process event ${event.eventId}:`, error);
-    
+
     // Implement retry logic
     await this.retryEventProcessing(event, error);
   }
@@ -377,7 +386,7 @@ async handle(event: IDomainEvent): Promise<void> {
 private async retryEventProcessing(event: IDomainEvent, originalError: Error): Promise<void> {
   const maxRetries = 3;
   let attempt = 1;
-  
+
   while (attempt <= maxRetries) {
     try {
       await this.processEvent(event);
@@ -389,7 +398,7 @@ private async retryEventProcessing(event: IDomainEvent, originalError: Error): P
         await this.sendToDeadLetterQueue(event, retryError);
         throw retryError;
       }
-      
+
       // Exponential backoff
       await this.sleep(Math.pow(2, attempt) * 1000);
       attempt++;
@@ -423,16 +432,16 @@ const configurations: Record<string, ProjectionConfig> = {
     checkpointInterval: 10, // Frequent checkpoints for testing
     batchSize: 1,
     retryPolicy: { maxRetries: 1, backoffMultiplier: 1 },
-    monitoring: { metricsInterval: 5000, healthCheckInterval: 10000 }
+    monitoring: { metricsInterval: 5000, healthCheckInterval: 10000 },
   },
-  
+
   production: {
     environment: 'production',
     checkpointInterval: 1000, // Less frequent for performance
     batchSize: 100,
     retryPolicy: { maxRetries: 5, backoffMultiplier: 2 },
-    monitoring: { metricsInterval: 30000, healthCheckInterval: 60000 }
-  }
+    monitoring: { metricsInterval: 30000, healthCheckInterval: 60000 },
+  },
 };
 ```
 
@@ -445,7 +454,9 @@ container.register('ProjectionEngine', ProjectionEngine);
 
 // Factory pattern
 export class ProjectionFactory {
-  static createCustomerProjection(config: ProjectionConfig): ProductionCustomerProjection {
+  static createCustomerProjection(
+    config: ProjectionConfig
+  ): ProductionCustomerProjection {
     const projection = new ProductionCustomerProjection();
     projection.configure(config);
     return projection;
@@ -460,7 +471,7 @@ export class ProjectionFactory {
 ```typescript
 describe('CustomerProjection', () => {
   let projection: CustomerProjection;
-  
+
   beforeEach(() => {
     projection = new CustomerProjection();
   });
@@ -473,14 +484,14 @@ describe('CustomerProjection', () => {
       payload: {
         customerId: 'customer-1',
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await projection.handle(event);
-    
+
     const customer = projection.getCustomerById('customer-1');
     expect(customer).toBeDefined();
     expect(customer.name).toBe('John Doe');
@@ -494,7 +505,7 @@ describe('CustomerProjection', () => {
       totalCustomers: 1,
       activeCustomers: 1,
       customersBySegment: new Map(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
 
     const validation = projection.validateProjectionState();
@@ -514,13 +525,13 @@ private cleanupOldData(): void {
   const state = this.getState();
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - 90); // Keep 90 days
-  
+
   for (const [id, customer] of state.customers) {
     if (customer.lastActivity < cutoffDate && customer.status === 'inactive') {
       state.customers.delete(id);
     }
   }
-  
+
   this.setState(state);
 }
 
@@ -535,7 +546,7 @@ setInterval(() => this.cleanupOldData(), 24 * 60 * 60 * 1000); // Daily
 private createIndexes(): void {
   this.segmentIndex = new Map<string, Set<string>>();
   this.statusIndex = new Map<string, Set<string>>();
-  
+
   // Rebuild indexes when state changes
   for (const [id, customer] of this.getState().customers) {
     this.addToIndex(this.segmentIndex, customer.segment, id);
@@ -545,7 +556,7 @@ private createIndexes(): void {
 
 getCustomersBySegmentOptimized(segment: string): any[] {
   const customerIds = this.segmentIndex.get(segment) || new Set();
-  return Array.from(customerIds).map(id => 
+  return Array.from(customerIds).map(id =>
     this.getState().customers.get(id)
   ).filter(Boolean);
 }
@@ -570,13 +581,13 @@ class ProjectionMonitor {
     processingErrors: 0,
     averageProcessingTime: 0,
     lastProcessedEvent: new Date(),
-    projectionLag: 0
+    projectionLag: 0,
   };
 
   recordEventProcessed(processingTime: number): void {
     this.metrics.eventsProcessed++;
-    this.metrics.averageProcessingTime = 
-      (this.metrics.averageProcessingTime * 0.9) + (processingTime * 0.1);
+    this.metrics.averageProcessingTime =
+      this.metrics.averageProcessingTime * 0.9 + processingTime * 0.1;
     this.metrics.lastProcessedEvent = new Date();
   }
 
@@ -585,17 +596,19 @@ class ProjectionMonitor {
   }
 
   getHealthStatus(): 'healthy' | 'warning' | 'critical' {
-    const timeSinceLastEvent = Date.now() - this.metrics.lastProcessedEvent.getTime();
-    const errorRate = this.metrics.processingErrors / Math.max(this.metrics.eventsProcessed, 1);
-    
+    const timeSinceLastEvent =
+      Date.now() - this.metrics.lastProcessedEvent.getTime();
+    const errorRate =
+      this.metrics.processingErrors / Math.max(this.metrics.eventsProcessed, 1);
+
     if (timeSinceLastEvent > 5 * 60 * 1000 || errorRate > 0.1) {
       return 'critical';
     }
-    
+
     if (timeSinceLastEvent > 2 * 60 * 1000 || errorRate > 0.05) {
       return 'warning';
     }
-    
+
     return 'healthy';
   }
 }
@@ -633,7 +646,7 @@ private handleCustomerRegisteredV2(event: IDomainEvent): Promise<void> {
 ```typescript
 async migrateProjectionState(fromVersion: string, toVersion: string): Promise<void> {
   console.log(`Migrating projection from ${fromVersion} to ${toVersion}`);
-  
+
   switch (`${fromVersion}->${toVersion}`) {
     case 'v1.0->v1.1':
       await this.migrateV10ToV11();
@@ -645,13 +658,13 @@ async migrateProjectionState(fromVersion: string, toVersion: string): Promise<vo
 
 private async migrateV10ToV11(): Promise<void> {
   const state = this.getState();
-  
+
   // Add new fields to existing customers
   for (const [id, customer] of state.customers) {
     customer.loyaltyPoints = customer.loyaltyPoints || 0;
     customer.preferredCategories = customer.preferredCategories || [];
   }
-  
+
   this.setState(state);
 }
 ```

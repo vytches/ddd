@@ -1,13 +1,15 @@
 # Value Objects - Intermediate Use Cases
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate
-**Focus**: Advanced business scenarios and complex domain modeling
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Intermediate **Focus**: Advanced business scenarios and complex
+domain modeling
 
 ## Overview
 
-This document outlines intermediate-level use cases where value objects provide sophisticated business logic and domain modeling capabilities. These scenarios demonstrate complex validation, multi-object coordination, and advanced business rules.
+This document outlines intermediate-level use cases where value objects provide
+sophisticated business logic and domain modeling capabilities. These scenarios
+demonstrate complex validation, multi-object coordination, and advanced business
+rules.
 
 ## Manufacturing Quality Control System
 
@@ -20,12 +22,18 @@ import { Measurement, DateRange } from '@vytches-ddd/value-objects';
 class ProductSpecification {
   constructor(
     public readonly partNumber: string,
-    public readonly dimensions: Map<string, { target: Measurement; tolerance: number }>,
+    public readonly dimensions: Map<
+      string,
+      { target: Measurement; tolerance: number }
+    >,
     public readonly material: string,
     public readonly qualityLevel: 'critical' | 'important' | 'standard'
   ) {}
 
-  validateMeasurement(dimension: string, measured: Measurement): {
+  validateMeasurement(
+    dimension: string,
+    measured: Measurement
+  ): {
     passes: boolean;
     deviation: number;
     severity: 'pass' | 'warning' | 'fail';
@@ -37,7 +45,7 @@ class ProductSpecification {
 
     const deviation = Math.abs(measured.getPercentageDifference(spec.target));
     const passes = deviation <= spec.tolerance;
-    
+
     let severity: 'pass' | 'warning' | 'fail' = 'pass';
     if (deviation > spec.tolerance) {
       severity = 'fail';
@@ -53,7 +61,7 @@ class ProductSpecification {
 class QualityControlBatch {
   private measurements: Map<string, Measurement[]> = new Map();
   private inspectionPeriod: DateRange;
-  
+
   constructor(
     public readonly batchId: string,
     public readonly specification: ProductSpecification,
@@ -71,13 +79,16 @@ class QualityControlBatch {
   }
 
   getStatisticalAnalysis(): {
-    dimensions: Map<string, {
-      average: Measurement;
-      standardDeviation: number;
-      cpk: number; // Process capability index
-      outOfSpec: number;
-      trend: 'improving' | 'degrading' | 'stable';
-    }>;
+    dimensions: Map<
+      string,
+      {
+        average: Measurement;
+        standardDeviation: number;
+        cpk: number; // Process capability index
+        outOfSpec: number;
+        trend: 'improving' | 'degrading' | 'stable';
+      }
+    >;
     overallQuality: 'excellent' | 'good' | 'acceptable' | 'poor';
     recommendations: string[];
   } {
@@ -90,9 +101,9 @@ class QualityControlBatch {
       const spec = this.specification.dimensions.get(dimension)!;
       const average = Measurement.calculateAverage(measurements);
       const stdDev = Measurement.calculateStandardDeviation(measurements);
-      
+
       // Calculate process capability (Cpk)
-      const tolerance = spec.target.value * spec.tolerance / 100;
+      const tolerance = (spec.target.value * spec.tolerance) / 100;
       const cpk = Math.min(
         Math.abs(spec.target.value + tolerance - average.value) / (3 * stdDev),
         Math.abs(average.value - (spec.target.value - tolerance)) / (3 * stdDev)
@@ -108,13 +119,17 @@ class QualityControlBatch {
       const midpoint = Math.floor(measurements.length / 2);
       const firstHalf = measurements.slice(0, midpoint);
       const secondHalf = measurements.slice(midpoint);
-      
+
       const firstAvg = Measurement.calculateAverage(firstHalf);
       const secondAvg = Measurement.calculateAverage(secondHalf);
-      
-      const targetDistance1 = Math.abs(firstAvg.getPercentageDifference(spec.target));
-      const targetDistance2 = Math.abs(secondAvg.getPercentageDifference(spec.target));
-      
+
+      const targetDistance1 = Math.abs(
+        firstAvg.getPercentageDifference(spec.target)
+      );
+      const targetDistance2 = Math.abs(
+        secondAvg.getPercentageDifference(spec.target)
+      );
+
       let trend: 'improving' | 'degrading' | 'stable';
       if (Math.abs(targetDistance2 - targetDistance1) < 0.5) {
         trend = 'stable';
@@ -127,7 +142,7 @@ class QualityControlBatch {
         standardDeviation: stdDev,
         cpk,
         outOfSpec,
-        trend
+        trend,
       });
 
       totalOutOfSpec += outOfSpec;
@@ -135,20 +150,26 @@ class QualityControlBatch {
 
       // Add recommendations based on analysis
       if (cpk < 1.0) {
-        recommendations.push(`Improve process capability for ${dimension} (Cpk: ${cpk.toFixed(2)})`);
+        recommendations.push(
+          `Improve process capability for ${dimension} (Cpk: ${cpk.toFixed(2)})`
+        );
       }
       if (trend === 'degrading') {
-        recommendations.push(`Process trending worse for ${dimension} - investigate root cause`);
+        recommendations.push(
+          `Process trending worse for ${dimension} - investigate root cause`
+        );
       }
       if (outOfSpec > measurements.length * 0.05) {
-        recommendations.push(`High defect rate for ${dimension} (${(outOfSpec/measurements.length*100).toFixed(1)}%)`);
+        recommendations.push(
+          `High defect rate for ${dimension} (${((outOfSpec / measurements.length) * 100).toFixed(1)}%)`
+        );
       }
     });
 
     // Overall quality assessment
     const defectRate = totalOutOfSpec / totalMeasurements;
     let overallQuality: 'excellent' | 'good' | 'acceptable' | 'poor';
-    
+
     if (defectRate < 0.01) overallQuality = 'excellent';
     else if (defectRate < 0.03) overallQuality = 'good';
     else if (defectRate < 0.05) overallQuality = 'acceptable';
@@ -157,7 +178,7 @@ class QualityControlBatch {
     return {
       dimensions: dimensionAnalysis,
       overallQuality,
-      recommendations
+      recommendations,
     };
   }
 
@@ -169,13 +190,21 @@ class QualityControlBatch {
     analysis: ReturnType<QualityControlBatch['getStatisticalAnalysis']>;
     controlChartData: Array<{
       dimension: string;
-      measurements: Array<{ sequence: number; value: number; inControl: boolean }>;
+      measurements: Array<{
+        sequence: number;
+        value: number;
+        inControl: boolean;
+      }>;
     }>;
   } {
     const analysis = this.getStatisticalAnalysis();
     const controlChartData: Array<{
       dimension: string;
-      measurements: Array<{ sequence: number; value: number; inControl: boolean }>;
+      measurements: Array<{
+        sequence: number;
+        value: number;
+        inControl: boolean;
+      }>;
     }> = [];
 
     let totalPassed = 0;
@@ -184,11 +213,13 @@ class QualityControlBatch {
     this.measurements.forEach((measurements, dimension) => {
       const dimensionData = analysis.dimensions.get(dimension)!;
       const controlLimit = 3 * dimensionData.standardDeviation;
-      
+
       const chartData = measurements.map((m, index) => {
-        const deviation = Math.abs(m.getPercentageDifference(dimensionData.average));
+        const deviation = Math.abs(
+          m.getPercentageDifference(dimensionData.average)
+        );
         const inControl = deviation <= controlLimit;
-        
+
         const validation = this.specification.validateMeasurement(dimension, m);
         if (validation.passes) totalPassed++;
         totalMeasured++;
@@ -196,14 +227,15 @@ class QualityControlBatch {
         return {
           sequence: index + 1,
           value: m.value,
-          inControl
+          inControl,
         };
       });
 
       controlChartData.push({ dimension, measurements: chartData });
     });
 
-    const passRate = totalMeasured > 0 ? (totalPassed / totalMeasured) * 100 : 0;
+    const passRate =
+      totalMeasured > 0 ? (totalPassed / totalMeasured) * 100 : 0;
 
     return {
       batchId: this.batchId,
@@ -211,7 +243,7 @@ class QualityControlBatch {
       totalParts: totalMeasured,
       passRate,
       analysis,
-      controlChartData
+      controlChartData,
     };
   }
 }
@@ -220,9 +252,18 @@ class QualityControlBatch {
 const spec = new ProductSpecification(
   'BEARING-001',
   new Map([
-    ['outer_diameter', { target: Measurement.create(25.00, 'mm', 3), tolerance: 0.1 }],
-    ['inner_diameter', { target: Measurement.create(15.00, 'mm', 3), tolerance: 0.05 }],
-    ['thickness', { target: Measurement.create(5.00, 'mm', 3), tolerance: 0.02 }]
+    [
+      'outer_diameter',
+      { target: Measurement.create(25.0, 'mm', 3), tolerance: 0.1 },
+    ],
+    [
+      'inner_diameter',
+      { target: Measurement.create(15.0, 'mm', 3), tolerance: 0.05 },
+    ],
+    [
+      'thickness',
+      { target: Measurement.create(5.0, 'mm', 3), tolerance: 0.02 },
+    ],
   ]),
   'Steel-316L',
   'critical'
@@ -237,9 +278,9 @@ const batch = new QualityControlBatch(
 
 // Simulate measurements
 const measurements = [
-  { dim: 'outer_diameter', values: [25.01, 24.99, 25.00, 24.98, 25.02] },
-  { dim: 'inner_diameter', values: [15.001, 14.998, 15.000, 14.999, 15.002] },
-  { dim: 'thickness', values: [5.001, 4.999, 5.000, 4.998, 5.002] }
+  { dim: 'outer_diameter', values: [25.01, 24.99, 25.0, 24.98, 25.02] },
+  { dim: 'inner_diameter', values: [15.001, 14.998, 15.0, 14.999, 15.002] },
+  { dim: 'thickness', values: [5.001, 4.999, 5.0, 4.998, 5.002] },
 ];
 
 measurements.forEach(({ dim, values }) => {
@@ -256,6 +297,7 @@ console.log(`Recommendations: ${report.analysis.recommendations.join('; ')}`);
 ```
 
 ### **Business Impact**:
+
 - **Process Control**: Real-time statistical analysis prevents quality issues
 - **Predictive Quality**: Trend analysis enables proactive adjustments
 - **Compliance**: Automated documentation for quality certifications
@@ -268,7 +310,11 @@ console.log(`Recommendations: ${report.analysis.recommendations.join('; ')}`);
 ### **Scenario**: Continuous vital signs monitoring with alert management
 
 ```typescript
-import { Measurement, DateRange, UserProfile } from '@vytches-ddd/value-objects';
+import {
+  Measurement,
+  DateRange,
+  UserProfile,
+} from '@vytches-ddd/value-objects';
 
 // ✅ Vital signs composite with medical context
 class VitalSigns {
@@ -276,7 +322,10 @@ class VitalSigns {
     public readonly patientId: string,
     public readonly timestamp: Date,
     public readonly heartRate: Measurement,
-    public readonly bloodPressure: { systolic: Measurement; diastolic: Measurement },
+    public readonly bloodPressure: {
+      systolic: Measurement;
+      diastolic: Measurement;
+    },
     public readonly temperature: Measurement,
     public readonly oxygenSaturation: Measurement,
     public readonly metadata?: {
@@ -290,28 +339,43 @@ class VitalSigns {
 
   private validateVitalSigns(): void {
     // Validate heart rate
-    if (this.heartRate.unit !== 'bpm' || this.heartRate.value < 20 || this.heartRate.value > 250) {
+    if (
+      this.heartRate.unit !== 'bpm' ||
+      this.heartRate.value < 20 ||
+      this.heartRate.value > 250
+    ) {
       throw new Error('Invalid heart rate measurement');
     }
 
     // Validate blood pressure
-    if (this.bloodPressure.systolic.unit !== 'mmHg' || this.bloodPressure.diastolic.unit !== 'mmHg') {
+    if (
+      this.bloodPressure.systolic.unit !== 'mmHg' ||
+      this.bloodPressure.diastolic.unit !== 'mmHg'
+    ) {
       throw new Error('Blood pressure must be in mmHg');
     }
 
-    if (this.bloodPressure.systolic.value <= this.bloodPressure.diastolic.value) {
+    if (
+      this.bloodPressure.systolic.value <= this.bloodPressure.diastolic.value
+    ) {
       throw new Error('Systolic pressure must be greater than diastolic');
     }
 
     // Validate temperature range
-    if (this.temperature.unitCategory !== 'temperature' || 
-        (this.temperature.unit === 'C' && (this.temperature.value < 30 || this.temperature.value > 45))) {
+    if (
+      this.temperature.unitCategory !== 'temperature' ||
+      (this.temperature.unit === 'C' &&
+        (this.temperature.value < 30 || this.temperature.value > 45))
+    ) {
       throw new Error('Temperature out of viable range');
     }
 
     // Validate oxygen saturation
-    if (this.oxygenSaturation.unit !== '%' || 
-        this.oxygenSaturation.value < 70 || this.oxygenSaturation.value > 100) {
+    if (
+      this.oxygenSaturation.unit !== '%' ||
+      this.oxygenSaturation.value < 70 ||
+      this.oxygenSaturation.value > 100
+    ) {
       throw new Error('Invalid oxygen saturation');
     }
   }
@@ -345,7 +409,7 @@ class VitalSigns {
     // Blood pressure assessment
     const sys = this.bloodPressure.systolic.value;
     const dia = this.bloodPressure.diastolic.value;
-    
+
     if (sys > 180 || dia > 120) {
       maxLevel = Math.max(maxLevel, 4);
       alerts.push(`Emergency hypertension: ${sys}/${dia} mmHg`);
@@ -359,9 +423,11 @@ class VitalSigns {
     }
 
     // Temperature assessment
-    const temp = this.temperature.unit === 'C' ? this.temperature.value : 
-                 (this.temperature.value - 32) * 5/9;
-    
+    const temp =
+      this.temperature.unit === 'C'
+        ? this.temperature.value
+        : ((this.temperature.value - 32) * 5) / 9;
+
     if (temp > 40 || temp < 35) {
       maxLevel = Math.max(maxLevel, 4);
       alerts.push(`Critical temperature: ${temp.toFixed(1)}°C`);
@@ -386,12 +452,18 @@ class VitalSigns {
       alerts.push(`Borderline oxygen saturation: ${spo2}%`);
     }
 
-    const levels = ['stable', 'watch', 'warning', 'critical', 'emergency'] as const;
-    
+    const levels = [
+      'stable',
+      'watch',
+      'warning',
+      'critical',
+      'emergency',
+    ] as const;
+
     return {
       level: levels[maxLevel],
       alerts,
-      immediateActions
+      immediateActions,
     };
   }
 
@@ -400,7 +472,11 @@ class VitalSigns {
     riskLevel: 'low' | 'medium' | 'high' | 'very_high';
     components: Array<{ parameter: string; value: number; points: number }>;
   } {
-    const components: Array<{ parameter: string; value: number; points: number }> = [];
+    const components: Array<{
+      parameter: string;
+      value: number;
+      points: number;
+    }> = [];
     let totalScore = 0;
 
     // Heart rate scoring
@@ -411,7 +487,7 @@ class VitalSigns {
     else if (hr >= 131) hrPoints = 3;
     else if (hr >= 111) hrPoints = 2;
     else if (hr >= 101) hrPoints = 1;
-    
+
     components.push({ parameter: 'Heart Rate', value: hr, points: hrPoints });
     totalScore += hrPoints;
 
@@ -422,19 +498,25 @@ class VitalSigns {
     else if (sys <= 100) bpPoints = 2;
     else if (sys <= 110) bpPoints = 1;
     else if (sys >= 220) bpPoints = 3;
-    
+
     components.push({ parameter: 'Systolic BP', value: sys, points: bpPoints });
     totalScore += bpPoints;
 
     // Temperature scoring
-    const temp = this.temperature.unit === 'C' ? this.temperature.value : 
-                 (this.temperature.value - 32) * 5/9;
+    const temp =
+      this.temperature.unit === 'C'
+        ? this.temperature.value
+        : ((this.temperature.value - 32) * 5) / 9;
     let tempPoints = 0;
     if (temp <= 35) tempPoints = 3;
     else if (temp >= 39.1) tempPoints = 2;
     else if (temp >= 38.1) tempPoints = 1;
-    
-    components.push({ parameter: 'Temperature', value: temp, points: tempPoints });
+
+    components.push({
+      parameter: 'Temperature',
+      value: temp,
+      points: tempPoints,
+    });
     totalScore += tempPoints;
 
     // Oxygen saturation scoring
@@ -443,7 +525,7 @@ class VitalSigns {
     if (spo2 <= 91) spo2Points = 3;
     else if (spo2 <= 93) spo2Points = 2;
     else if (spo2 <= 95) spo2Points = 1;
-    
+
     components.push({ parameter: 'SpO2', value: spo2, points: spo2Points });
     totalScore += spo2Points;
 
@@ -458,8 +540,10 @@ class VitalSigns {
   }
 
   toString(): string {
-    return `Vitals: HR ${this.heartRate}, BP ${this.bloodPressure.systolic}/${this.bloodPressure.diastolic}, ` +
-           `Temp ${this.temperature}, SpO2 ${this.oxygenSaturation}`;
+    return (
+      `Vitals: HR ${this.heartRate}, BP ${this.bloodPressure.systolic}/${this.bloodPressure.diastolic}, ` +
+      `Temp ${this.temperature}, SpO2 ${this.oxygenSaturation}`
+    );
   }
 }
 
@@ -509,30 +593,41 @@ class PatientMonitor {
 
     // Heart rate trend
     const hrTrend = this.calculateTrend(recent.map(v => v.heartRate.value));
-    if (Math.abs(hrTrend) > 10) { // > 10 bpm change per reading
-      alerts.push(new PatientAlert(
-        patientId,
-        'warning',
-        [`Heart rate trending ${hrTrend > 0 ? 'up' : 'down'}: ${hrTrend.toFixed(1)} bpm/reading`],
-        ['Monitor cardiac status'],
-        recent[recent.length - 1]
-      ));
+    if (Math.abs(hrTrend) > 10) {
+      // > 10 bpm change per reading
+      alerts.push(
+        new PatientAlert(
+          patientId,
+          'warning',
+          [
+            `Heart rate trending ${hrTrend > 0 ? 'up' : 'down'}: ${hrTrend.toFixed(1)} bpm/reading`,
+          ],
+          ['Monitor cardiac status'],
+          recent[recent.length - 1]
+        )
+      );
     }
 
     // Temperature trend
     const tempValues = recent.map(v => {
-      return v.temperature.unit === 'C' ? v.temperature.value : 
-             (v.temperature.value - 32) * 5/9;
+      return v.temperature.unit === 'C'
+        ? v.temperature.value
+        : ((v.temperature.value - 32) * 5) / 9;
     });
     const tempTrend = this.calculateTrend(tempValues);
-    if (Math.abs(tempTrend) > 0.5) { // > 0.5°C change per reading
-      alerts.push(new PatientAlert(
-        patientId,
-        'warning',
-        [`Temperature trending ${tempTrend > 0 ? 'up' : 'down'}: ${tempTrend.toFixed(1)}°C/reading`],
-        ['Investigate cause of temperature change'],
-        recent[recent.length - 1]
-      ));
+    if (Math.abs(tempTrend) > 0.5) {
+      // > 0.5°C change per reading
+      alerts.push(
+        new PatientAlert(
+          patientId,
+          'warning',
+          [
+            `Temperature trending ${tempTrend > 0 ? 'up' : 'down'}: ${tempTrend.toFixed(1)}°C/reading`,
+          ],
+          ['Investigate cause of temperature change'],
+          recent[recent.length - 1]
+        )
+      );
     }
 
     return alerts;
@@ -540,7 +635,7 @@ class PatientMonitor {
 
   private calculateTrend(values: number[]): number {
     if (values.length < 2) return 0;
-    
+
     // Simple linear trend calculation
     let sum = 0;
     for (let i = 1; i < values.length; i++) {
@@ -549,7 +644,10 @@ class PatientMonitor {
     return sum / (values.length - 1);
   }
 
-  getPatientSummary(patientId: string, period: DateRange): {
+  getPatientSummary(
+    patientId: string,
+    period: DateRange
+  ): {
     totalReadings: number;
     averageVitals: {
       heartRate: number;
@@ -570,14 +668,30 @@ class PatientMonitor {
 
     // Calculate averages
     const averages = {
-      heartRate: periodReadings.reduce((sum, v) => sum + v.heartRate.value, 0) / periodReadings.length,
-      systolicBP: periodReadings.reduce((sum, v) => sum + v.bloodPressure.systolic.value, 0) / periodReadings.length,
-      diastolicBP: periodReadings.reduce((sum, v) => sum + v.bloodPressure.diastolic.value, 0) / periodReadings.length,
-      temperature: periodReadings.reduce((sum, v) => {
-        const temp = v.temperature.unit === 'C' ? v.temperature.value : (v.temperature.value - 32) * 5/9;
-        return sum + temp;
-      }, 0) / periodReadings.length,
-      oxygenSaturation: periodReadings.reduce((sum, v) => sum + v.oxygenSaturation.value, 0) / periodReadings.length
+      heartRate:
+        periodReadings.reduce((sum, v) => sum + v.heartRate.value, 0) /
+        periodReadings.length,
+      systolicBP:
+        periodReadings.reduce(
+          (sum, v) => sum + v.bloodPressure.systolic.value,
+          0
+        ) / periodReadings.length,
+      diastolicBP:
+        periodReadings.reduce(
+          (sum, v) => sum + v.bloodPressure.diastolic.value,
+          0
+        ) / periodReadings.length,
+      temperature:
+        periodReadings.reduce((sum, v) => {
+          const temp =
+            v.temperature.unit === 'C'
+              ? v.temperature.value
+              : ((v.temperature.value - 32) * 5) / 9;
+          return sum + temp;
+        }, 0) / periodReadings.length,
+      oxygenSaturation:
+        periodReadings.reduce((sum, v) => sum + v.oxygenSaturation.value, 0) /
+        periodReadings.length,
     };
 
     // Count alert levels
@@ -591,21 +705,32 @@ class PatientMonitor {
 
       // Calculate stability score (0-100, higher is better)
       switch (assessment.level) {
-        case 'stable': stabilityPoints += 10; break;
-        case 'watch': stabilityPoints += 7; break;
-        case 'warning': stabilityPoints += 4; break;
-        case 'critical': stabilityPoints += 1; break;
-        case 'emergency': stabilityPoints += 0; break;
+        case 'stable':
+          stabilityPoints += 10;
+          break;
+        case 'watch':
+          stabilityPoints += 7;
+          break;
+        case 'warning':
+          stabilityPoints += 4;
+          break;
+        case 'critical':
+          stabilityPoints += 1;
+          break;
+        case 'emergency':
+          stabilityPoints += 0;
+          break;
       }
     });
 
-    const stabilityScore = (stabilityPoints / (periodReadings.length * 10)) * 100;
+    const stabilityScore =
+      (stabilityPoints / (periodReadings.length * 10)) * 100;
 
     return {
       totalReadings: periodReadings.length,
       averageVitals: averages,
       alertCounts,
-      stabilityScore
+      stabilityScore,
     };
   }
 
@@ -621,7 +746,12 @@ class PatientMonitor {
 class PatientAlert {
   constructor(
     public readonly patientId: string,
-    public readonly severity: 'stable' | 'watch' | 'warning' | 'critical' | 'emergency',
+    public readonly severity:
+      | 'stable'
+      | 'watch'
+      | 'warning'
+      | 'critical'
+      | 'emergency',
     public readonly messages: string[],
     public readonly actions: string[],
     public readonly vitals: VitalSigns,
@@ -651,14 +781,14 @@ const patientVitals = new VitalSigns(
   Measurement.create(95, 'bpm'),
   {
     systolic: Measurement.create(140, 'mmHg'),
-    diastolic: Measurement.create(90, 'mmHg')
+    diastolic: Measurement.create(90, 'mmHg'),
   },
   Measurement.create(38.5, 'C'),
   Measurement.create(92, '%'),
   {
     deviceId: 'MONITOR-A1',
     wardLocation: 'ICU-BED-3',
-    attendingNurse: 'Sarah Johnson'
+    attendingNurse: 'Sarah Johnson',
   }
 );
 
@@ -666,7 +796,9 @@ const alerts = monitor.addVitalSigns(patientVitals);
 const earlyWarning = patientVitals.calculateEarlyWarningScore();
 
 console.log(`Patient vitals: ${patientVitals}`);
-console.log(`Early Warning Score: ${earlyWarning.score} (${earlyWarning.riskLevel} risk)`);
+console.log(
+  `Early Warning Score: ${earlyWarning.score} (${earlyWarning.riskLevel} risk)`
+);
 console.log(`Alerts generated: ${alerts.length}`);
 
 // Generate summary report
@@ -681,7 +813,9 @@ setTimeout(() => {
     console.log(`\n24-hour summary:`);
     console.log(`- Readings: ${summary.totalReadings}`);
     console.log(`- Stability Score: ${summary.stabilityScore.toFixed(1)}%`);
-    console.log(`- Average HR: ${summary.averageVitals.heartRate.toFixed(0)} bpm`);
+    console.log(
+      `- Average HR: ${summary.averageVitals.heartRate.toFixed(0)} bpm`
+    );
   } catch (error) {
     console.log('Not enough data for summary yet');
   }
@@ -689,6 +823,7 @@ setTimeout(() => {
 ```
 
 ### **Business Impact**:
+
 - **Patient Safety**: Early detection of deteriorating conditions
 - **Resource Optimization**: Prioritizes nursing attention based on severity
 - **Compliance**: Automated documentation for medical records
@@ -701,14 +836,26 @@ setTimeout(() => {
 ### **Scenario**: Multi-sensor environmental monitoring with quality assessment
 
 ```typescript
-import { Measurement, DateRange, UserProfile } from '@vytches-ddd/value-objects';
+import {
+  Measurement,
+  DateRange,
+  UserProfile,
+} from '@vytches-ddd/value-objects';
 
 // ✅ Environmental measurement station
 class EnvironmentalStation {
   constructor(
     public readonly stationId: string,
-    public readonly location: { latitude: number; longitude: number; elevation: number },
-    public readonly stationType: 'urban' | 'industrial' | 'residential' | 'traffic',
+    public readonly location: {
+      latitude: number;
+      longitude: number;
+      elevation: number;
+    },
+    public readonly stationType:
+      | 'urban'
+      | 'industrial'
+      | 'residential'
+      | 'traffic',
     public readonly sensors: Map<string, SensorConfiguration>
   ) {}
 
@@ -728,8 +875,8 @@ class EnvironmentalStation {
       unit,
       {
         temperature: 20, // Would be measured
-        humidity: 50,    // Would be measured
-        pressure: 101325
+        humidity: 50, // Would be measured
+        pressure: 101325,
       },
       'automated',
       `${this.stationId}-${sensorType}`
@@ -769,12 +916,24 @@ class EnvironmentalReading {
 
   assessAirQuality(): {
     aqi: number; // Air Quality Index
-    category: 'good' | 'moderate' | 'unhealthy_sensitive' | 'unhealthy' | 'very_unhealthy' | 'hazardous';
+    category:
+      | 'good'
+      | 'moderate'
+      | 'unhealthy_sensitive'
+      | 'unhealthy'
+      | 'very_unhealthy'
+      | 'hazardous';
     healthAdvice: string[];
     primaryPollutant?: string;
   } {
     let aqi = 0;
-    let category: 'good' | 'moderate' | 'unhealthy_sensitive' | 'unhealthy' | 'very_unhealthy' | 'hazardous' = 'good';
+    let category:
+      | 'good'
+      | 'moderate'
+      | 'unhealthy_sensitive'
+      | 'unhealthy'
+      | 'very_unhealthy'
+      | 'hazardous' = 'good';
     const healthAdvice: string[] = [];
     let primaryPollutant: string | undefined;
 
@@ -785,10 +944,14 @@ class EnvironmentalReading {
       case 'pm2.5':
         // PM2.5 AQI calculation (µg/m³)
         if (value <= 12) aqi = this.calculateSubAQI(value, 0, 12, 0, 50);
-        else if (value <= 35.4) aqi = this.calculateSubAQI(value, 12.1, 35.4, 51, 100);
-        else if (value <= 55.4) aqi = this.calculateSubAQI(value, 35.5, 55.4, 101, 150);
-        else if (value <= 150.4) aqi = this.calculateSubAQI(value, 55.5, 150.4, 151, 200);
-        else if (value <= 250.4) aqi = this.calculateSubAQI(value, 150.5, 250.4, 201, 300);
+        else if (value <= 35.4)
+          aqi = this.calculateSubAQI(value, 12.1, 35.4, 51, 100);
+        else if (value <= 55.4)
+          aqi = this.calculateSubAQI(value, 35.5, 55.4, 101, 150);
+        else if (value <= 150.4)
+          aqi = this.calculateSubAQI(value, 55.5, 150.4, 151, 200);
+        else if (value <= 250.4)
+          aqi = this.calculateSubAQI(value, 150.5, 250.4, 201, 300);
         else aqi = this.calculateSubAQI(value, 250.5, 500.4, 301, 500);
         primaryPollutant = 'PM2.5';
         break;
@@ -796,19 +959,26 @@ class EnvironmentalReading {
       case 'no2':
         // NO2 AQI calculation (ppb)
         if (value <= 53) aqi = this.calculateSubAQI(value, 0, 53, 0, 50);
-        else if (value <= 100) aqi = this.calculateSubAQI(value, 54, 100, 51, 100);
-        else if (value <= 360) aqi = this.calculateSubAQI(value, 101, 360, 101, 150);
-        else if (value <= 649) aqi = this.calculateSubAQI(value, 361, 649, 151, 200);
-        else aqi = Math.min(500, this.calculateSubAQI(value, 650, 1249, 201, 300));
+        else if (value <= 100)
+          aqi = this.calculateSubAQI(value, 54, 100, 51, 100);
+        else if (value <= 360)
+          aqi = this.calculateSubAQI(value, 101, 360, 101, 150);
+        else if (value <= 649)
+          aqi = this.calculateSubAQI(value, 361, 649, 151, 200);
+        else
+          aqi = Math.min(500, this.calculateSubAQI(value, 650, 1249, 201, 300));
         primaryPollutant = 'NO2';
         break;
 
       case 'o3':
         // Ozone AQI calculation (ppb)
         if (value <= 54) aqi = this.calculateSubAQI(value, 0, 54, 0, 50);
-        else if (value <= 70) aqi = this.calculateSubAQI(value, 55, 70, 51, 100);
-        else if (value <= 85) aqi = this.calculateSubAQI(value, 71, 85, 101, 150);
-        else if (value <= 105) aqi = this.calculateSubAQI(value, 86, 105, 151, 200);
+        else if (value <= 70)
+          aqi = this.calculateSubAQI(value, 55, 70, 51, 100);
+        else if (value <= 85)
+          aqi = this.calculateSubAQI(value, 71, 85, 101, 150);
+        else if (value <= 105)
+          aqi = this.calculateSubAQI(value, 86, 105, 151, 200);
         else aqi = this.calculateSubAQI(value, 106, 200, 201, 300);
         primaryPollutant = 'Ozone';
         break;
@@ -827,7 +997,9 @@ class EnvironmentalReading {
     } else if (aqi <= 150) {
       category = 'unhealthy_sensitive';
       healthAdvice.push('Sensitive groups should avoid outdoor activity');
-      healthAdvice.push('Everyone else should limit prolonged outdoor exertion');
+      healthAdvice.push(
+        'Everyone else should limit prolonged outdoor exertion'
+      );
     } else if (aqi <= 200) {
       category = 'unhealthy';
       healthAdvice.push('Everyone should avoid outdoor activity');
@@ -853,8 +1025,9 @@ class EnvironmentalReading {
     indexHigh: number
   ): number {
     return Math.round(
-      ((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) * 
-      (concentration - breakpointLow) + indexLow
+      ((indexHigh - indexLow) / (breakpointHigh - breakpointLow)) *
+        (concentration - breakpointLow) +
+        indexLow
     );
   }
 
@@ -866,24 +1039,26 @@ class EnvironmentalReading {
   } {
     const now = new Date();
     const daysSince = Math.floor(
-      (now.getTime() - this.sensorConfig.calibrationDate.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - this.sensorConfig.calibrationDate.getTime()) /
+        (1000 * 60 * 60 * 24)
     );
 
     const needsCalibration = daysSince > this.sensorConfig.maintenanceInterval;
-    const maintenanceDue = daysSince > (this.sensorConfig.maintenanceInterval * 0.8);
+    const maintenanceDue =
+      daysSince > this.sensorConfig.maintenanceInterval * 0.8;
 
     return {
       isCalibrated: !needsCalibration,
       daysSinceCalibration: daysSince,
       needsCalibration,
-      maintenanceDue
+      maintenanceDue,
     };
   }
 
   generateAlert(): EnvironmentalAlert | null {
     const thresholds = this.sensorConfig.alertThresholds;
     const value = this.measurement.value;
-    
+
     if (thresholds.critical && value >= thresholds.critical) {
       return new EnvironmentalAlert(
         this.stationId,
@@ -893,7 +1068,7 @@ class EnvironmentalReading {
         this
       );
     }
-    
+
     if (thresholds.high && value >= thresholds.high) {
       return new EnvironmentalAlert(
         this.stationId,
@@ -903,7 +1078,7 @@ class EnvironmentalReading {
         this
       );
     }
-    
+
     if (thresholds.low && value <= thresholds.low) {
       return new EnvironmentalAlert(
         this.stationId,
@@ -1008,8 +1183,10 @@ class EnvironmentalNetwork {
 
     this.stations.forEach((station, stationId) => {
       const stationReadings = this.readings.get(stationId) || [];
-      const periodReadings = stationReadings.filter(r => period.contains(r.timestamp));
-      
+      const periodReadings = stationReadings.filter(r =>
+        period.contains(r.timestamp)
+      );
+
       if (periodReadings.length === 0) {
         summaries.push({
           stationId,
@@ -1017,7 +1194,7 @@ class EnvironmentalNetwork {
           averageAQI: 0,
           alertCount: 0,
           worstCategory: 'no_data',
-          sensorStatus: new Map()
+          sensorStatus: new Map(),
         });
         return;
       }
@@ -1029,17 +1206,31 @@ class EnvironmentalNetwork {
         .filter(r => ['pm2.5', 'no2', 'o3'].includes(r.sensorType))
         .map(r => r.assessAirQuality());
 
-      const averageAQI = aqiReadings.length > 0 
-        ? aqiReadings.reduce((sum, aqi) => sum + aqi.aqi, 0) / aqiReadings.length
-        : 0;
+      const averageAQI =
+        aqiReadings.length > 0
+          ? aqiReadings.reduce((sum, aqi) => sum + aqi.aqi, 0) /
+            aqiReadings.length
+          : 0;
 
       // Find worst category
-      const categories = ['good', 'moderate', 'unhealthy_sensitive', 'unhealthy', 'very_unhealthy', 'hazardous'];
-      const worstCategoryIndex = Math.max(...aqiReadings.map(aqi => categories.indexOf(aqi.category)));
-      const worstCategory = worstCategoryIndex >= 0 ? categories[worstCategoryIndex] : 'unknown';
+      const categories = [
+        'good',
+        'moderate',
+        'unhealthy_sensitive',
+        'unhealthy',
+        'very_unhealthy',
+        'hazardous',
+      ];
+      const worstCategoryIndex = Math.max(
+        ...aqiReadings.map(aqi => categories.indexOf(aqi.category))
+      );
+      const worstCategory =
+        worstCategoryIndex >= 0 ? categories[worstCategoryIndex] : 'unknown';
 
       // Count alerts (simplified)
-      const alertCount = periodReadings.filter(r => r.generateAlert() !== null).length;
+      const alertCount = periodReadings.filter(
+        r => r.generateAlert() !== null
+      ).length;
 
       // Check sensor status
       const sensorStatus = new Map<string, boolean>();
@@ -1047,13 +1238,16 @@ class EnvironmentalNetwork {
         const latestReading = periodReadings
           .filter(r => r.sensorType === sensorType)
           .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
-        
-        const isHealthy = latestReading ? 
-          !latestReading.checkCalibrationStatus().needsCalibration : false;
+
+        const isHealthy = latestReading
+          ? !latestReading.checkCalibrationStatus().needsCalibration
+          : false;
         sensorStatus.set(sensorType, isHealthy);
       });
 
-      const stationHealthy = Array.from(sensorStatus.values()).every(status => status);
+      const stationHealthy = Array.from(sensorStatus.values()).every(
+        status => status
+      );
       if (stationHealthy) healthyStations++;
 
       summaries.push({
@@ -1062,18 +1256,18 @@ class EnvironmentalNetwork {
         averageAQI,
         alertCount,
         worstCategory,
-        sensorStatus
+        sensorStatus,
       });
     });
 
-    const networkHealth = this.stations.size > 0 ? 
-      (healthyStations / this.stations.size) * 100 : 0;
+    const networkHealth =
+      this.stations.size > 0 ? (healthyStations / this.stations.size) * 100 : 0;
 
     return {
       totalStations: this.stations.size,
       totalReadings,
       stationSummaries: summaries,
-      networkHealth
+      networkHealth,
     };
   }
 
@@ -1092,33 +1286,42 @@ const network = new EnvironmentalNetwork();
 // Create monitoring station
 const downtownStation = new EnvironmentalStation(
   'DOWNTOWN-001',
-  { latitude: 40.7128, longitude: -74.0060, elevation: 10 },
+  { latitude: 40.7128, longitude: -74.006, elevation: 10 },
   'urban',
   new Map([
-    ['pm2.5', {
-      description: 'Particulate Matter 2.5µm',
-      accuracy: 0.95,
-      range: { min: 0, max: 500 },
-      calibrationDate: new Date('2025-01-01'),
-      maintenanceInterval: 90,
-      alertThresholds: { high: 35, critical: 100 }
-    }],
-    ['no2', {
-      description: 'Nitrogen Dioxide',
-      accuracy: 0.92,
-      range: { min: 0, max: 1000 },
-      calibrationDate: new Date('2025-01-01'),
-      maintenanceInterval: 90,
-      alertThresholds: { high: 100, critical: 300 }
-    }],
-    ['o3', {
-      description: 'Ground-level Ozone',
-      accuracy: 0.88,
-      range: { min: 0, max: 300 },
-      calibrationDate: new Date('2025-01-01'),
-      maintenanceInterval: 90,
-      alertThresholds: { high: 70, critical: 105 }
-    }]
+    [
+      'pm2.5',
+      {
+        description: 'Particulate Matter 2.5µm',
+        accuracy: 0.95,
+        range: { min: 0, max: 500 },
+        calibrationDate: new Date('2025-01-01'),
+        maintenanceInterval: 90,
+        alertThresholds: { high: 35, critical: 100 },
+      },
+    ],
+    [
+      'no2',
+      {
+        description: 'Nitrogen Dioxide',
+        accuracy: 0.92,
+        range: { min: 0, max: 1000 },
+        calibrationDate: new Date('2025-01-01'),
+        maintenanceInterval: 90,
+        alertThresholds: { high: 100, critical: 300 },
+      },
+    ],
+    [
+      'o3',
+      {
+        description: 'Ground-level Ozone',
+        accuracy: 0.88,
+        range: { min: 0, max: 300 },
+        calibrationDate: new Date('2025-01-01'),
+        maintenanceInterval: 90,
+        alertThresholds: { high: 70, critical: 105 },
+      },
+    ],
   ])
 );
 
@@ -1140,7 +1343,7 @@ const o3Reading = downtownStation.recordMeasurement('o3', 65, 'ppb');
 [pm25Reading, no2Reading, o3Reading].forEach(reading => {
   const alerts = network.recordReading(reading);
   const airQuality = reading.assessAirQuality();
-  
+
   console.log(`${reading}`);
   console.log(`  AQI: ${airQuality.aqi} (${airQuality.category})`);
   if (airQuality.primaryPollutant) {
@@ -1162,7 +1365,7 @@ setTimeout(() => {
   console.log(`- Total stations: ${summary.totalStations}`);
   console.log(`- Network health: ${summary.networkHealth.toFixed(1)}%`);
   console.log(`- Total readings: ${summary.totalReadings}`);
-  
+
   summary.stationSummaries.forEach(station => {
     console.log(`\nStation ${station.stationId}:`);
     console.log(`  - Readings: ${station.readingCount}`);
@@ -1174,6 +1377,7 @@ setTimeout(() => {
 ```
 
 ### **Business Impact**:
+
 - **Public Health**: Real-time air quality monitoring protects citizens
 - **Environmental Compliance**: Automated regulatory reporting
 - **Smart City Integration**: Data feeds urban planning decisions
@@ -1185,11 +1389,15 @@ setTimeout(() => {
 
 These intermediate use cases demonstrate how value objects enable:
 
-1. **Complex Domain Logic**: Multi-object validation and business rule enforcement
-2. **Statistical Analysis**: Built-in calculation capabilities for quality control
+1. **Complex Domain Logic**: Multi-object validation and business rule
+   enforcement
+2. **Statistical Analysis**: Built-in calculation capabilities for quality
+   control
 3. **Trend Detection**: Time-series analysis and alerting systems
 4. **System Integration**: Coordination between multiple domain objects
 5. **Quality Assessment**: Automated evaluation and scoring systems
 6. **Real-time Monitoring**: Continuous validation with intelligent alerting
 
-The examples show how value objects can encapsulate sophisticated business intelligence while maintaining immutability and ensuring data integrity across complex workflows.
+The examples show how value objects can encapsulate sophisticated business
+intelligence while maintaining immutability and ensuring data integrity across
+complex workflows.

@@ -1,7 +1,7 @@
 # Examples Command
 
-**Focus**: Manage and work with package examples and documentation
-**Command**: `vytches-ddd examples`
+**Focus**: Manage and work with package examples and documentation **Command**:
+`vytches-ddd examples`
 
 ## Quick Start
 
@@ -26,11 +26,12 @@ vytches-ddd examples generate cqrs
 ```
 
 **Generated Output:**
+
 ```
 packages/cqrs/src/examples/
 ├── basic/
 │   ├── example-1.md         # Command Handlers
-│   ├── example-2.md         # Query Handlers  
+│   ├── example-2.md         # Query Handlers
 │   └── example-3.md         # Middleware Pipeline
 ├── intermediate/
 │   ├── example-1.md         # Event Integration
@@ -60,7 +61,8 @@ vytches-ddd examples generate cqrs --llm-optimized
 ```
 
 **Framework-Specific Output:**
-```typescript
+
+````typescript
 // Generated: packages/cqrs/src/examples/frameworks/nestjs/basic/example-1.md
 
 # NestJS CQRS Integration
@@ -75,7 +77,7 @@ export class OrderService {
     return await this.commandBus.execute(command);
   }
 }
-```
+````
 
 ### 3. Bundle Generation
 
@@ -88,15 +90,18 @@ vytches-ddd examples bundle --packages cqrs,events --framework nestjs
 ```
 
 **Bundle Output:**
+
 ```markdown
 # CQRS + Events + Projections Bundle
 
 ## Package Overview
+
 - @vytches-ddd/cqrs: Command Query Responsibility Segregation
 - @vytches-ddd/events: Domain event handling
 - @vytches-ddd/projections: Event-driven projections
 
 ## Integration Examples
+
 [Combined examples showing how packages work together]
 ```
 
@@ -116,15 +121,16 @@ vytches-ddd examples find-by-tag "nestjs:enterprise" --complexity advanced
 ```
 
 **Search Results:**
+
 ```
 Found 3 examples matching "cqrs:saga":
 
 1. Enterprise Saga Orchestration (advanced)
    Package: @vytches-ddd/cqrs
    File: packages/cqrs/src/examples/advanced/example-1.md
-   
+
 2. NestJS Saga Integration (intermediate)
-   Package: @vytches-ddd/cqrs  
+   Package: @vytches-ddd/cqrs
    File: packages/cqrs/src/examples/frameworks/nestjs/intermediate/example-2.md
 
 3. Distributed Transaction Patterns (advanced)
@@ -146,6 +152,7 @@ vytches-ddd examples validate --all
 ```
 
 **Validation Output:**
+
 ```
 ✅ packages/cqrs/src/examples/basic/example-1.md - Valid
 ⚠️  packages/cqrs/src/examples/basic/example-2.md - Missing import statements
@@ -157,6 +164,7 @@ Summary: 1 valid, 1 warning, 1 error
 ## Generation Options
 
 ### Complexity Levels
+
 ```bash
 # Generate only basic examples
 vytches-ddd examples generate cqrs --complexity basic
@@ -169,6 +177,7 @@ vytches-ddd examples generate cqrs
 ```
 
 ### Framework Targeting
+
 ```bash
 # NestJS-specific examples
 vytches-ddd examples generate cqrs --framework nestjs
@@ -181,6 +190,7 @@ vytches-ddd examples generate cqrs --framework nestjs --complexity basic
 ```
 
 ### Output Customization
+
 ```bash
 # Custom output location
 vytches-ddd examples generate cqrs --output ./custom-docs
@@ -194,32 +204,35 @@ vytches-ddd examples generate cqrs --max-examples 5
 
 ## Available Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--complexity` | Target complexity level | `--complexity intermediate` |
-| `--framework` | Framework integration | `--framework nestjs` |
-| `--llm-optimized` | Optimize for LLM consumption | `--llm-optimized` |
-| `--max-examples` | Limit number of examples | `--max-examples 10` |
-| `--randomize` | Randomize selection | `--randomize` |
-| `--seed` | Seed for reproducible randomization | `--seed "my-project"` |
-| `--output` | Custom output path | `--output ./docs` |
-| `--fix` | Auto-fix validation issues | `--fix` |
+| Option            | Description                         | Example                     |
+| ----------------- | ----------------------------------- | --------------------------- |
+| `--complexity`    | Target complexity level             | `--complexity intermediate` |
+| `--framework`     | Framework integration               | `--framework nestjs`        |
+| `--llm-optimized` | Optimize for LLM consumption        | `--llm-optimized`           |
+| `--max-examples`  | Limit number of examples            | `--max-examples 10`         |
+| `--randomize`     | Randomize selection                 | `--randomize`               |
+| `--seed`          | Seed for reproducible randomization | `--seed "my-project"`       |
+| `--output`        | Custom output path                  | `--output ./docs`           |
+| `--fix`           | Auto-fix validation issues          | `--fix`                     |
 
 ## Supported Packages
 
 ### Core Packages
+
 - `core` - Meta-package with stable API
 - `domain-primitives` - Base classes and errors
 - `value-objects` - Value object implementations
 - `aggregates` - Aggregate root patterns
 
-### Architecture Packages  
+### Architecture Packages
+
 - `cqrs` - Command Query Responsibility Segregation
 - `events` - Domain event handling
 - `projections` - Event-driven projections
 - `messaging` - Outbox pattern and sagas
 
 ### Infrastructure Packages
+
 - `logging` - Structured logging with DDD context
 - `resilience` - Circuit breakers and retry patterns
 - `validation` - Domain validation with specifications
@@ -228,6 +241,7 @@ vytches-ddd examples generate cqrs --max-examples 5
 ## Common Workflows
 
 ### 1. Package Documentation Setup
+
 ```bash
 # 1. Generate core examples
 vytches-ddd examples generate cqrs --complexity basic
@@ -240,6 +254,7 @@ vytches-ddd examples validate --package cqrs --fix
 ```
 
 ### 2. Multi-Package Integration
+
 ```bash
 # 1. Generate bundle for related packages
 vytches-ddd examples bundle --packages cqrs,events,projections
@@ -252,6 +267,7 @@ vytches-ddd examples validate --all
 ```
 
 ### 3. Custom Documentation
+
 ```bash
 # 1. Generate base examples
 vytches-ddd examples generate mypackage --output ./custom-docs
@@ -275,16 +291,19 @@ vytches-ddd examples bundle --packages mypackage,core --seed "my-company"
 ## Troubleshooting
 
 **Package not found?**
+
 ```bash
 vytches-ddd examples --list-packages
 ```
 
 **No examples generated?**
+
 ```bash
 vytches-ddd examples generate mypackage --dry-run
 ```
 
 **Validation errors?**
+
 ```bash
 vytches-ddd examples validate --package mypackage --verbose --fix
 ```

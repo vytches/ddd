@@ -41,12 +41,14 @@ export class UnifiedExampleParser {
     // Parse framework integration if requested
     let frameworkExample: FrameworkIntegrationContent | undefined;
     if (options.framework) {
-      const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(options.exampleId);
+      const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(
+        options.exampleId
+      );
 
       if (!availableFrameworks.includes(options.framework)) {
         throw new Error(
           `Framework '${options.framework}' not available for example '${options.exampleId}'. ` +
-          `Available: ${availableFrameworks.join(', ')}`
+            `Available: ${availableFrameworks.join(', ')}`
         );
       }
 
@@ -69,7 +71,9 @@ export class UnifiedExampleParser {
   /**
    * Parse base example from markdown file
    */
-  private async parseBaseExample(example: EnhancedExampleDefinition): Promise<BaseDocumentationContent> {
+  private async parseBaseExample(
+    example: EnhancedExampleDefinition
+  ): Promise<BaseDocumentationContent> {
     const filePath = this.resolveExamplePath(example);
     const content = await this.readFileContent(filePath);
 
@@ -224,13 +228,7 @@ export class UnifiedExampleParser {
     if (!example.package) {
       throw new Error(`Package not specified for example ${example.id}`);
     }
-    return path.join(
-      this.workspaceRoot,
-      'packages',
-      example.package,
-      'examples',
-      frameworkPath
-    );
+    return path.join(this.workspaceRoot, 'packages', example.package, 'examples', frameworkPath);
   }
 
   /**
@@ -251,7 +249,8 @@ export class UnifiedExampleParser {
     const components = new Map<string, string>();
 
     // Split by file markers like "// filename.ts"
-    const fileMarkerRegex = /\/\/\s+([a-zA-Z0-9-_.]+\.(ts|js))\s*\n([\s\S]*?)(?=\/\/\s+[a-zA-Z0-9-_.]+\.(ts|js)|$)/g;
+    const fileMarkerRegex =
+      /\/\/\s+([a-zA-Z0-9-_.]+\.(ts|js))\s*\n([\s\S]*?)(?=\/\/\s+[a-zA-Z0-9-_.]+\.(ts|js)|$)/g;
 
     let match;
     while ((match = fileMarkerRegex.exec(code)) !== null) {

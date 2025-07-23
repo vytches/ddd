@@ -9,11 +9,13 @@
 
 ## Description
 
-Demonstrates basic integration of the Events package with NestJS using manual instantiation. This approach is perfect for beginners learning the event system without the complexity of dependency injection frameworks.
+Demonstrates basic integration of the Events package with NestJS using manual
+instantiation. This approach is perfect for beginners learning the event system
+without the complexity of dependency injection frameworks.
 
 ## Service Implementation
 
-```typescript
+````typescript
 // order-event.service.ts
 import { Injectable } from '@nestjs/common';
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
@@ -33,7 +35,7 @@ import { OrderAggregate, OrderRepository, CreateOrderCommand } from '../types'; 
  * @Controller('orders')
  * export class OrderController {
  *   constructor(private orderEventService: OrderEventService) {}
- *   
+ *
  *   @Post()
  *   async createOrder(@Body() command: CreateOrderCommand) {
  *     return await this.orderEventService.createOrder(command);
@@ -78,7 +80,7 @@ export class OrderEventService {
    *   items: [{ productId: 'prod-1', quantity: 2, price: 29.99 }],
    *   shippingAddress: address
    * };
-   * 
+   *
    * const result = await service.createOrder(command);
    * ```
    *
@@ -101,15 +103,14 @@ export class OrderEventService {
       return {
         success: true,
         order,
-        message: 'Order created successfully'
+        message: 'Order created successfully',
       };
-
     } catch (error) {
       console.error('❌ Failed to create order:', error);
       return {
         success: false,
         error: error.message,
-        message: 'Order creation failed'
+        message: 'Order creation failed',
       };
     }
   }
@@ -139,7 +140,7 @@ export class OrderEventService {
         return {
           success: false,
           error: 'Order not found',
-          message: `Order ${orderId} does not exist`
+          message: `Order ${orderId} does not exist`,
         };
       }
 
@@ -155,15 +156,14 @@ export class OrderEventService {
       return {
         success: true,
         order,
-        message: 'Order confirmed successfully'
+        message: 'Order confirmed successfully',
       };
-
     } catch (error) {
       console.error(`❌ Failed to confirm order ${orderId}:`, error);
       return {
         success: false,
         error: error.message,
-        message: 'Order confirmation failed'
+        message: 'Order confirmation failed',
       };
     }
   }
@@ -190,12 +190,12 @@ export class OrderEventService {
         return {
           success: false,
           error: 'Order not found',
-          message: `Order ${orderId} does not exist`
+          message: `Order ${orderId} does not exist`,
         };
       }
 
       const order = orderAggregate.getOrder();
-      
+
       return {
         success: true,
         orderId: order.id,
@@ -203,15 +203,14 @@ export class OrderEventService {
         total: order.total,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
-        message: 'Order status retrieved successfully'
+        message: 'Order status retrieved successfully',
       };
-
     } catch (error) {
       console.error(`❌ Failed to get order status ${orderId}:`, error);
       return {
         success: false,
         error: error.message,
-        message: 'Failed to retrieve order status'
+        message: 'Failed to retrieve order status',
       };
     }
   }
@@ -235,19 +234,28 @@ interface OrderStatusResult {
   error?: string;
   message: string;
 }
-```
+````
 
 ## Controller Integration
 
 ```typescript
 // order.controller.ts
-import { Controller, Post, Get, Put, Body, Param, HttpStatus, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Body,
+  Param,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
 import { OrderEventService } from './order-event.service';
 import { CreateOrderCommand, Order } from '../types'; // ALWAYS import from app
 
 /**
  * @llm-summary NestJS controller for order management with event integration
- * @llm-domain Order Management  
+ * @llm-domain Order Management
  * @llm-complexity Simple
  *
  * @description
@@ -311,10 +319,11 @@ export class OrderController {
     const result = await this.orderEventService.confirmOrder(orderId);
 
     if (!result.success) {
-      const statusCode = result.error === 'Order not found' ? 
-        HttpStatus.NOT_FOUND : 
-        HttpStatus.BAD_REQUEST;
-        
+      const statusCode =
+        result.error === 'Order not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST;
+
       throw new HttpException(
         { message: result.message, error: result.error },
         statusCode
@@ -343,10 +352,11 @@ export class OrderController {
     const result = await this.orderEventService.getOrderStatus(orderId);
 
     if (!result.success) {
-      const statusCode = result.error === 'Order not found' ? 
-        HttpStatus.NOT_FOUND : 
-        HttpStatus.INTERNAL_SERVER_ERROR;
-        
+      const statusCode =
+        result.error === 'Order not found'
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+
       throw new HttpException(
         { message: result.message, error: result.error },
         statusCode
@@ -358,7 +368,7 @@ export class OrderController {
       status: result.status,
       total: result.total,
       createdAt: result.createdAt,
-      updatedAt: result.updatedAt
+      updatedAt: result.updatedAt,
     };
   }
 }
@@ -387,7 +397,7 @@ import { OrderEventService } from './order-event.service';
 @Module({
   controllers: [OrderController],
   providers: [OrderEventService],
-  exports: [OrderEventService]
+  exports: [OrderEventService],
 })
 export class OrderModule {}
 ```
@@ -410,11 +420,11 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Standard NestJS setup
   app.enableCors();
   app.setGlobalPrefix('api');
-  
+
   await app.listen(3000);
   console.log('🚀 Application is running on: http://localhost:3000');
   console.log('📦 Event system initialized with manual setup');
@@ -425,11 +435,15 @@ bootstrap();
 
 ## Key Points
 
-- **Simple Setup**: Manual instantiation makes the event system easy to understand for beginners
-- **Standard NestJS**: Uses familiar NestJS patterns (Controller, Service, Module)  
-- **Event Integration**: Events published automatically without additional complexity
+- **Simple Setup**: Manual instantiation makes the event system easy to
+  understand for beginners
+- **Standard NestJS**: Uses familiar NestJS patterns (Controller, Service,
+  Module)
+- **Event Integration**: Events published automatically without additional
+  complexity
 - **Error Handling**: Proper HTTP error responses with meaningful messages
-- **Thin Controllers**: Business logic delegated to services, controllers handle HTTP concerns only
+- **Thin Controllers**: Business logic delegated to services, controllers handle
+  HTTP concerns only
 
 ## Usage Examples
 
@@ -461,13 +475,19 @@ curl http://localhost:3000/api/orders/order-123/status
 
 ## Common Pitfalls
 
-- **❌ Creating Multiple Instances**: Don't create new event bus instances in each method
-- **❌ Missing Error Handling**: Always handle errors from event publishing gracefully
-- **❌ Blocking Operations**: Keep HTTP responses fast, let events handle slow operations
+- **❌ Creating Multiple Instances**: Don't create new event bus instances in
+  each method
+- **❌ Missing Error Handling**: Always handle errors from event publishing
+  gracefully
+- **❌ Blocking Operations**: Keep HTTP responses fast, let events handle slow
+  operations
 - **❌ Large Payloads**: Keep event payloads focused on essential information
 
 ## Next Steps
 
-- [DI Integration](../intermediate/di-integration.md) - Advanced dependency injection setup
-- [Event Integration](../intermediate/event-integration.md) - Complex event handling patterns
-- [Enterprise Setup](../advanced/enterprise-setup.md) - Production-ready configuration
+- [DI Integration](../intermediate/di-integration.md) - Advanced dependency
+  injection setup
+- [Event Integration](../intermediate/event-integration.md) - Complex event
+  handling patterns
+- [Enterprise Setup](../advanced/enterprise-setup.md) - Production-ready
+  configuration

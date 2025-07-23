@@ -778,10 +778,7 @@ export interface ContextAwarePrompt extends PromptConfig {
  */
 export interface SmartPromptEngine {
   analyzeContext: (context: any) => Promise<ProjectAnalysis>;
-  generateSuggestions: (
-    prompt: ContextAwarePrompt,
-    context: any
-  ) => Promise<PromptSuggestion[]>;
+  generateSuggestions: (prompt: ContextAwarePrompt, context: any) => Promise<PromptSuggestion[]>;
   adaptPrompt: (prompt: ContextAwarePrompt, context: any) => Promise<PromptConfig>;
   displayAnalysis: (analysis: ProjectAnalysis) => void;
 }

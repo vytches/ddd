@@ -1,8 +1,9 @@
 # Manual Domain Service Setup - NestJS Basic
 
-**Focus**: Basic @vytches-ddd/domain-services usage in NestJS with manual instantiation
-**Base Example**: [Basic Domain Service](../../../basic/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/core
+**Focus**: Basic @vytches-ddd/domain-services usage in NestJS with manual
+instantiation **Base Example**:
+[Basic Domain Service](../../../basic/example-1.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/core
 
 ## Service Implementation
 
@@ -32,26 +33,29 @@ export class UserManagementService extends BaseDomainService {
 
       const user = await this.buildUser(command);
       const savedUser = await this.saveUser(user);
-      
+
       await this.publishUserCreatedEvent(savedUser);
       await this.sendWelcomeNotification(savedUser);
-      
+
       return Result.success(savedUser);
-      
     } catch (error) {
-      return Result.failure(new Error(`User creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`User creation failed: ${error.message}`)
+      );
     }
   }
 
-  private async validateUser(command: CreateUserCommand): Promise<Result<void, Error>> {
+  private async validateUser(
+    command: CreateUserCommand
+  ): Promise<Result<void, Error>> {
     if (!command.email || !command.email.includes('@')) {
       return Result.failure(new Error('Valid email is required'));
     }
-    
+
     if (!command.name || command.name.trim().length < 2) {
       return Result.failure(new Error('Name must be at least 2 characters'));
     }
-    
+
     return Result.success();
   }
 
@@ -62,7 +66,7 @@ export class UserManagementService extends BaseDomainService {
       name: command.name.trim(),
       status: 'active',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -76,9 +80,9 @@ export class UserManagementService extends BaseDomainService {
       userId: user.id,
       email: user.email,
       name: user.name,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
-    
+
     console.log('Publishing UserCreatedEvent:', event);
   }
 
@@ -102,19 +106,17 @@ import { CreateUserCommand } from '../types';
 
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userManagementService: UserManagementService
-  ) {}
+  constructor(private readonly userManagementService: UserManagementService) {}
 
   @Post()
   async createUser(@Body() command: CreateUserCommand) {
     // ⭐ FOCUS: Direct service usage
     const result = await this.userManagementService.createUser(command);
-    
+
     if (result.isFailure()) {
       throw new Error(result.error.message);
     }
-    
+
     return result.value;
   }
 }
@@ -131,7 +133,7 @@ import { UserManagementService } from './user-management.service';
 @Module({
   controllers: [UserController],
   providers: [UserManagementService],
-  exports: [UserManagementService]
+  exports: [UserManagementService],
 })
 export class UserModule {}
 ```
@@ -140,7 +142,8 @@ export class UserModule {}
 
 - **Manual Setup**: Simple manual instantiation of domain service
 - **Standard NestJS DI**: Uses standard NestJS dependency injection
-- **Direct Library Usage**: Extends BaseDomainService from @vytches-ddd/domain-services
+- **Direct Library Usage**: Extends BaseDomainService from
+  @vytches-ddd/domain-services
 - **Simple Integration**: Minimal configuration required
 - **Framework Pattern**: Follows standard NestJS service patterns
 
@@ -148,4 +151,5 @@ export class UserModule {}
 
 - [Simple NestJS Service](./simple-service.md) - Alternative approach
 - [Basic Domain Service](../../../basic/example-1.md) - Core library usage
-- [DI Integration](../intermediate/di-integration.md) - Advanced dependency injection
+- [DI Integration](../intermediate/di-integration.md) - Advanced dependency
+  injection

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import type { GenerateArgs} from '../../../src/commands/docs/generate';
+import type { GenerateArgs } from '../../../src/commands/docs/generate';
 import { generateCommand } from '../../../src/commands/docs/generate';
 import { DocumentationGenerator } from '../../../src/generators/documentation-generator';
 import { logger } from '../../../src/core/utils/logger';
@@ -25,9 +25,15 @@ describe('generate command', () => {
     vi.mocked(DocumentationGenerator).mockImplementation(() => mockGenerator);
 
     // Mock logger
-    vi.mocked(logger.success).mockImplementation(() => { return });
-    vi.mocked(logger.info).mockImplementation(() => { return });
-    vi.mocked(logger.error).mockImplementation(() => { return });
+    vi.mocked(logger.success).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.info).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.error).mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -106,7 +112,9 @@ describe('generate command', () => {
         randomize: true,
       });
 
-      expect(logger.success).toHaveBeenCalledWith('✅ Documentation generated: /test/policies-docs.md');
+      expect(logger.success).toHaveBeenCalledWith(
+        '✅ Documentation generated: /test/policies-docs.md'
+      );
     });
 
     it('should parse complexity levels from comma-separated string', async () => {
@@ -190,9 +198,15 @@ describe('generate command', () => {
         outputPath: '/custom/path/docs.md',
       });
 
-      expect(logger.success).toHaveBeenCalledWith('✅ Documentation generated: /custom/path/docs.md');
-      expect(logger.info).toHaveBeenCalledWith('💡 Tip: Use this file with LLM prompts for code generation');
-      expect(logger.info).toHaveBeenCalledWith('🎲 Examples were randomized. Run again to see different examples');
+      expect(logger.success).toHaveBeenCalledWith(
+        '✅ Documentation generated: /custom/path/docs.md'
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        '💡 Tip: Use this file with LLM prompts for code generation'
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        '🎲 Examples were randomized. Run again to see different examples'
+      );
     });
 
     it('should handle noRandomize flag correctly', async () => {
@@ -231,7 +245,9 @@ describe('generate command', () => {
 
       await generateCommand.handler!(argv);
 
-      expect(logger.info).toHaveBeenCalledWith('💡 Tip: Use this file with LLM prompts for code generation');
+      expect(logger.info).toHaveBeenCalledWith(
+        '💡 Tip: Use this file with LLM prompts for code generation'
+      );
     });
 
     it('should display randomization message when examples were randomized', async () => {
@@ -247,7 +263,9 @@ describe('generate command', () => {
 
       await generateCommand.handler!(argv);
 
-      expect(logger.info).toHaveBeenCalledWith('🎲 Examples were randomized. Run again to see different examples');
+      expect(logger.info).toHaveBeenCalledWith(
+        '🎲 Examples were randomized. Run again to see different examples'
+      );
     });
 
     it('should not display randomization message when no examples were randomized', async () => {
@@ -263,7 +281,9 @@ describe('generate command', () => {
 
       await generateCommand.handler!(argv);
 
-      expect(logger.info).not.toHaveBeenCalledWith('🎲 Examples were randomized. Run again to see different examples');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '🎲 Examples were randomized. Run again to see different examples'
+      );
     });
 
     it('should handle optional properties correctly', async () => {
@@ -305,7 +325,9 @@ describe('generate command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate documentation: Documentation generation failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate documentation: Documentation generation failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
@@ -323,7 +345,9 @@ describe('generate command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate documentation: String error message');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate documentation: String error message'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
@@ -342,7 +366,9 @@ describe('generate command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to generate documentation: Generator initialization failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to generate documentation: Generator initialization failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
   });

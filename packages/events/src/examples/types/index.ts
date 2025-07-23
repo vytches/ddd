@@ -2,25 +2,25 @@
  * @llm-summary Application types for events package examples
  * @llm-domain Integration
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Shared types used across events package examples to demonstrate
  * real-world integration scenarios and business contexts.
- * 
+ *
  * @example
  * ```typescript
  * import { Order, User, Payment } from './types';
- * 
+ *
  * const order: Order = {
  *   id: 'order-123',
- *   userId: 'user-456', 
+ *   userId: 'user-456',
  *   items: [{ productId: 'prod-1', quantity: 2, price: 29.99 }],
  *   status: 'pending',
  *   total: 59.98,
  *   createdAt: new Date()
  * };
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
@@ -43,7 +43,7 @@ export interface User extends BaseEntity {
   };
 }
 
-// Order domain  
+// Order domain
 export interface OrderItem {
   productId: string;
   name: string;

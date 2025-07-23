@@ -7,12 +7,15 @@
 
 ## Overview
 
-Real-world use cases demonstrating how domain primitives form the foundation of robust applications across different industries.
+Real-world use cases demonstrating how domain primitives form the foundation of
+robust applications across different industries.
 
 ## E-Commerce Platform
 
 ### Scenario
-An online marketplace needs to track all operations for compliance, handle various error scenarios gracefully, and maintain clear domain boundaries.
+
+An online marketplace needs to track all operations for compliance, handle
+various error scenarios gracefully, and maintain clear domain boundaries.
 
 ```typescript
 import {
@@ -21,7 +24,7 @@ import {
   IActor,
   DefaultActorType,
   NotFoundError,
-  InvalidParameterError
+  InvalidParameterError,
 } from '@vytches-ddd/domain-primitives';
 import { UserData, AuditEntry } from '../types';
 
@@ -31,7 +34,7 @@ export class ProductNotAvailableError extends IDomainError {
     super(`Product ${productId} is not available: ${reason}`, {
       code: DomainErrorCode.BusinessRule,
       domain: 'ProductCatalog',
-      data: { productId, reason }
+      data: { productId, reason },
     });
   }
 }
@@ -41,7 +44,7 @@ export class PaymentFailedError extends IDomainError {
     super(`Payment failed for order ${orderId}`, {
       code: DomainErrorCode.ExternalService,
       domain: 'PaymentProcessing',
-      data: { orderId, paymentMethod, reason }
+      data: { orderId, paymentMethod, reason },
     });
   }
 }
@@ -51,7 +54,7 @@ export class ShippingAddressInvalidError extends InvalidParameterError {
     super(`Invalid shipping address: ${field} - ${issue}`, {
       code: DomainErrorCode.InvalidParameter,
       domain: 'Shipping',
-      data: { field, issue }
+      data: { field, issue },
     });
   }
 }
@@ -75,7 +78,7 @@ export class CustomerActor implements IActor {
       email: customer.email,
       tier: customer.tier,
       location: customer.location,
-      sessionStart: new Date()
+      sessionStart: new Date(),
     };
   }
 }
@@ -86,16 +89,12 @@ export class MerchantActor implements IActor {
   id: string;
   metadata: Record<string, unknown>;
 
-  constructor(merchant: {
-    id: string;
-    storeName: string;
-    category: string;
-  }) {
+  constructor(merchant: { id: string; storeName: string; category: string }) {
     this.id = merchant.id;
     this.source = 'merchant-portal';
     this.metadata = {
       storeName: merchant.storeName,
-      category: merchant.category
+      category: merchant.category,
     };
   }
 }
@@ -126,7 +125,7 @@ export class ECommerceOrderService {
           item.productId,
           item.quantity
         );
-        
+
         if (!available) {
           throw new ProductNotAvailableError(
             item.productId,
@@ -136,8 +135,9 @@ export class ECommerceOrderService {
       }
 
       // Calculate total
-      const total = items.reduce((sum, item) => 
-        sum + (item.quantity * item.price), 0
+      const total = items.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
       );
 
       // Process payment
@@ -145,7 +145,7 @@ export class ECommerceOrderService {
         orderId,
         amount: total,
         method: paymentMethod,
-        customerId: actor.id
+        customerId: actor.id,
       });
 
       if (!paymentResult.success) {
@@ -168,15 +168,14 @@ export class ECommerceOrderService {
           items: items.length,
           total,
           paymentMethod: paymentMethod.type,
-          shippingCountry: shippingAddress.country
+          shippingCountry: shippingAddress.country,
         }
       );
 
       return {
         orderId,
-        status: 'confirmed'
+        status: 'confirmed',
       };
-
     } catch (error) {
       // Record failed order attempt
       await this.auditService.recordFailedAction(
@@ -227,7 +226,9 @@ export class ECommerceOrderService {
 ## Healthcare System
 
 ### Scenario
-A healthcare platform needs strict audit trails for compliance, detailed error handling for patient safety, and role-based actor tracking.
+
+A healthcare platform needs strict audit trails for compliance, detailed error
+handling for patient safety, and role-based actor tracking.
 
 ```typescript
 // Healthcare-specific errors
@@ -236,7 +237,7 @@ export class PatientNotFoundError extends NotFoundError {
     super(`Patient record ${patientId} not found`, {
       code: DomainErrorCode.NotFound,
       domain: 'PatientRecords',
-      data: { patientId, timestamp: new Date() }
+      data: { patientId, timestamp: new Date() },
     });
   }
 }
@@ -254,8 +255,8 @@ export class MedicationConflictError extends IDomainError {
         patientId,
         newMedication,
         conflictingMedication,
-        severity: 'high'
-      }
+        severity: 'high',
+      },
     });
   }
 }
@@ -265,7 +266,7 @@ export class UnauthorizedAccessError extends IDomainError {
     super(`Unauthorized access attempt`, {
       code: DomainErrorCode.Unauthorized,
       domain: 'Security',
-      data: { actorId, resource, action }
+      data: { actorId, resource, action },
     });
   }
 }
@@ -291,7 +292,7 @@ export class HealthcareProviderActor implements IActor {
       license: provider.license,
       specialization: provider.specialization,
       facility: provider.facility,
-      accessTime: new Date()
+      accessTime: new Date(),
     };
   }
 }
@@ -302,15 +303,12 @@ export class PatientActor implements IActor {
   id: string;
   metadata: Record<string, unknown>;
 
-  constructor(patient: {
-    id: string;
-    consentGiven: boolean;
-  }) {
+  constructor(patient: { id: string; consentGiven: boolean }) {
     this.id = patient.id;
     this.source = 'patient-portal';
     this.metadata = {
       consentGiven: patient.consentGiven,
-      accessTime: new Date()
+      accessTime: new Date(),
     };
   }
 }
@@ -351,10 +349,7 @@ export class PatientRecordService {
 
       // Check for medication conflicts if updating prescriptions
       if (updates.prescriptions) {
-        await this.checkMedicationConflicts(
-          patientId,
-          updates.prescriptions
-        );
+        await this.checkMedicationConflicts(patientId, updates.prescriptions);
       }
 
       // Apply updates (simplified)
@@ -368,11 +363,10 @@ export class PatientRecordService {
         {
           fieldsUpdated: Object.keys(updates),
           // Don't log actual values for privacy
-          updateType: this.categorizeUpdate(updates)
+          updateType: this.categorizeUpdate(updates),
         },
         'HIPAA_COMPLIANT'
       );
-
     } catch (error) {
       // Record failed attempt
       await this.auditService.recordHealthcareAction(
@@ -396,18 +390,11 @@ export class PatientRecordService {
     try {
       // Verify provider can prescribe
       if (!this.canPrescribe(actor)) {
-        throw new UnauthorizedAccessError(
-          actor.id,
-          'prescriptions',
-          'create'
-        );
+        throw new UnauthorizedAccessError(actor.id, 'prescriptions', 'create');
       }
 
       // Check patient allergies and interactions
-      const conflicts = await this.checkMedicationSafety(
-        patientId,
-        medication
-      );
+      const conflicts = await this.checkMedicationSafety(patientId, medication);
 
       if (conflicts.length > 0) {
         throw new MedicationConflictError(
@@ -421,8 +408,8 @@ export class PatientRecordService {
       await this.createPrescription(prescriptionId, patientId, medication);
 
       // Detailed audit for controlled substances
-      const auditLevel = this.isControlledSubstance(medication.name) 
-        ? 'DEA_REPORTING' 
+      const auditLevel = this.isControlledSubstance(medication.name)
+        ? 'DEA_REPORTING'
         : 'STANDARD';
 
       await this.auditService.recordHealthcareAction(
@@ -433,21 +420,20 @@ export class PatientRecordService {
           patientId,
           medication: medication.name,
           dosage: medication.dosage,
-          duration: medication.duration
+          duration: medication.duration,
         },
         auditLevel
       );
 
       return prescriptionId;
-
     } catch (error) {
       await this.auditService.recordHealthcareAction(
         actor,
         'PRESCRIBE_MEDICATION_FAILED',
         `patient:${patientId}`,
-        { 
+        {
           medication: medication.name,
-          error: (error as Error).message 
+          error: (error as Error).message,
         },
         'CLINICAL_ALERT'
       );
@@ -457,16 +443,16 @@ export class PatientRecordService {
 
   private canPrescribe(actor: HealthcareProviderActor): boolean {
     const metadata = actor.metadata as any;
-    return metadata.license && 
-           ['MD', 'DO', 'NP', 'PA'].includes(metadata.license.substring(0, 2));
+    return (
+      metadata.license &&
+      ['MD', 'DO', 'NP', 'PA'].includes(metadata.license.substring(0, 2))
+    );
   }
 
   private isControlledSubstance(medicationName: string): boolean {
     // Simplified check - real implementation would use drug database
     const controlled = ['oxycodone', 'morphine', 'fentanyl', 'adderall'];
-    return controlled.some(drug => 
-      medicationName.toLowerCase().includes(drug)
-    );
+    return controlled.some(drug => medicationName.toLowerCase().includes(drug));
   }
 
   private async checkMedicationSafety(
@@ -493,11 +479,18 @@ export class PatientRecordService {
     // Apply updates to database
   }
 
-  private async checkMedicationConflicts(patientId: string, prescriptions: any): Promise<void> {
+  private async checkMedicationConflicts(
+    patientId: string,
+    prescriptions: any
+  ): Promise<void> {
     // Check for conflicts
   }
 
-  private async createPrescription(id: string, patientId: string, medication: any): Promise<void> {
+  private async createPrescription(
+    id: string,
+    patientId: string,
+    medication: any
+  ): Promise<void> {
     // Create prescription record
   }
 
@@ -520,12 +513,14 @@ class HealthcareAuditService extends AuditService {
       complianceLevel,
       timestamp: new Date(),
       serverTime: new Date().toISOString(),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
 
     // Additional compliance logging
-    if (complianceLevel === 'HIPAA_COMPLIANT' || 
-        complianceLevel === 'DEA_REPORTING') {
+    if (
+      complianceLevel === 'HIPAA_COMPLIANT' ||
+      complianceLevel === 'DEA_REPORTING'
+    ) {
       await this.sendToComplianceSystem(entry);
     }
 
@@ -542,7 +537,10 @@ class HealthcareAuditService extends AuditService {
 ## Banking System
 
 ### Scenario
-A financial institution needs detailed error tracking for transactions, comprehensive audit trails for regulatory compliance, and strict actor verification.
+
+A financial institution needs detailed error tracking for transactions,
+comprehensive audit trails for regulatory compliance, and strict actor
+verification.
 
 ```typescript
 // Banking-specific errors
@@ -555,8 +553,8 @@ export class InsufficientFundsError extends IDomainError {
         accountId,
         availableBalance: available,
         requestedAmount: requested,
-        shortfall: requested - available
-      }
+        shortfall: requested - available,
+      },
     });
   }
 }
@@ -566,7 +564,7 @@ export class AccountFrozenError extends IDomainError {
     super(`Account ${accountId} is frozen`, {
       code: DomainErrorCode.InvalidState,
       domain: 'AccountManagement',
-      data: { accountId, reason, frozenDate: new Date() }
+      data: { accountId, reason, frozenDate: new Date() },
     });
   }
 }
@@ -581,7 +579,7 @@ export class TransactionLimitExceededError extends IDomainError {
     super(`Transaction limit exceeded for account ${accountId}`, {
       code: DomainErrorCode.BusinessRule,
       domain: 'TransactionProcessing',
-      data: { accountId, limitType, limit, attempted }
+      data: { accountId, limitType, limit, attempted },
     });
   }
 }
@@ -605,7 +603,7 @@ export class BankCustomerActor implements IActor {
       accountNumbers: customer.accountNumbers,
       verificationMethod: customer.verificationMethod,
       ipAddress: customer.ipAddress,
-      sessionStart: new Date()
+      sessionStart: new Date(),
     };
   }
 }
@@ -626,7 +624,7 @@ export class BankTellerActor implements IActor {
     this.metadata = {
       branchId: teller.branchId,
       terminalId: teller.terminalId,
-      shiftStart: new Date()
+      shiftStart: new Date(),
     };
   }
 }
@@ -650,7 +648,7 @@ export class BankingTransactionService {
 
     try {
       // Verify actor can access account
-      if (!await this.canAccessAccount(actor, fromAccountId)) {
+      if (!(await this.canAccessAccount(actor, fromAccountId))) {
         throw new UnauthorizedAccessError(
           actor.id,
           `account:${fromAccountId}`,
@@ -685,14 +683,14 @@ export class BankingTransactionService {
         fromAccount: fromAccountId,
         toAccount: toAccountId,
         amount,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       if (fraudCheck.riskScore > 0.8) {
         throw new IDomainError('Transaction flagged for review', {
           code: DomainErrorCode.BusinessRule,
           domain: 'FraudDetection',
-          data: { transactionId, riskScore: fraudCheck.riskScore }
+          data: { transactionId, riskScore: fraudCheck.riskScore },
         });
       }
 
@@ -711,16 +709,15 @@ export class BankingTransactionService {
           amount,
           currency: 'USD',
           reference,
-          fraudScore: fraudCheck.riskScore
+          fraudScore: fraudCheck.riskScore,
         },
         'SUCCESS'
       );
 
       return {
         transactionId,
-        status: 'completed'
+        status: 'completed',
       };
-
     } catch (error) {
       // Record failed transaction
       await this.auditService.recordFinancialTransaction(
@@ -731,7 +728,7 @@ export class BankingTransactionService {
           fromAccount: fromAccountId,
           toAccount: toAccountId,
           amount,
-          error: (error as Error).message
+          error: (error as Error).message,
         },
         'FAILED'
       );
@@ -761,7 +758,7 @@ export class BankingTransactionService {
     amount: number
   ): Promise<void> {
     const limits = await this.accountService.getTransactionLimits(accountId);
-    
+
     if (amount > limits.singleTransaction) {
       throw new TransactionLimitExceededError(
         accountId,
@@ -771,7 +768,8 @@ export class BankingTransactionService {
       );
     }
 
-    const dailyTotal = await this.accountService.getDailyTransactionTotal(accountId);
+    const dailyTotal =
+      await this.accountService.getDailyTransactionTotal(accountId);
     if (dailyTotal + amount > limits.dailyLimit) {
       throw new TransactionLimitExceededError(
         accountId,
@@ -803,7 +801,7 @@ class FinancialAuditService extends AuditService {
       {
         ...details,
         status,
-        regulatoryReporting: this.requiresRegulatorReport(details)
+        regulatoryReporting: this.requiresRegulatorReport(details),
       }
     );
 
@@ -830,19 +828,24 @@ class FinancialAuditService extends AuditService {
 
 ## Key Takeaways
 
-1. **Domain-Specific Errors**: Each industry has unique error scenarios that need specific handling
-2. **Rich Actor Context**: Capture relevant metadata for compliance and debugging
-3. **Comprehensive Audit Trails**: Essential for regulatory compliance and security
-4. **Business Rule Enforcement**: Use domain primitives to enforce industry-specific rules
-5. **Integration Points**: Domain primitives provide clean integration with external systems
+1. **Domain-Specific Errors**: Each industry has unique error scenarios that
+   need specific handling
+2. **Rich Actor Context**: Capture relevant metadata for compliance and
+   debugging
+3. **Comprehensive Audit Trails**: Essential for regulatory compliance and
+   security
+4. **Business Rule Enforcement**: Use domain primitives to enforce
+   industry-specific rules
+5. **Integration Points**: Domain primitives provide clean integration with
+   external systems
 
 ## Common Patterns Across Industries
 
 ```typescript
 // ✅ Pattern: Industry-specific error hierarchies
-class FinancialError extends IDomainError { }
-class ComplianceError extends FinancialError { }
-class TransactionError extends FinancialError { }
+class FinancialError extends IDomainError {}
+class ComplianceError extends FinancialError {}
+class TransactionError extends FinancialError {}
 
 // ✅ Pattern: Rich actor metadata
 const actor = {
@@ -853,15 +856,15 @@ const actor = {
     deviceId,
     location,
     sessionDuration,
-    permissions
-  }
+    permissions,
+  },
 };
 
 // ✅ Pattern: Audit with compliance levels
 await auditService.recordAction(actor, action, resource, {
   ...details,
   complianceLevel: 'SOC2',
-  retentionPeriod: '7_years'
+  retentionPeriod: '7_years',
 });
 ```
 

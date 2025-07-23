@@ -8,11 +8,15 @@
 
 ## Description
 
-This example demonstrates basic Anti-Corruption Layer integration with NestJS using manual setup and standard dependency injection patterns, providing a clean interface to external customer management systems.
+This example demonstrates basic Anti-Corruption Layer integration with NestJS
+using manual setup and standard dependency injection patterns, providing a clean
+interface to external customer management systems.
 
 ## Business Context
 
-A NestJS e-commerce application needs to integrate with a legacy CRM system while protecting the domain model from external data structure changes and maintaining clean architecture principles.
+A NestJS e-commerce application needs to integrate with a legacy CRM system
+while protecting the domain model from external data structure changes and
+maintaining clean architecture principles.
 
 ## Code Example
 
@@ -24,7 +28,9 @@ import { Result } from '@vytches-ddd/utils';
 import { Customer, ExternalCustomerData } from '../types'; // From your application
 
 // Data translator for customer conversion
-export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerData, Customer> {
+export class CustomerDataTranslator
+  implements IDataTranslator<ExternalCustomerData, Customer>
+{
   translate(external: ExternalCustomerData): Result<Customer, Error> {
     try {
       const customer: Customer = {
@@ -37,13 +43,15 @@ export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerD
           currency: external.settings.preferred_currency,
           language: external.settings.locale,
           notifications: external.settings.email_notifications,
-          marketingConsent: external.settings.marketing_opt_in
-        }
+          marketingConsent: external.settings.marketing_opt_in,
+        },
       };
 
       return Result.success(customer);
     } catch (error) {
-      return Result.failure(new Error(`Customer translation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Customer translation failed: ${error.message}`)
+      );
     }
   }
 
@@ -63,33 +71,43 @@ export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerD
 
 // NestJS service implementing ACL
 @Injectable()
-export class CustomerACLService extends AntiCorruptionLayer<ExternalCustomerData, Customer> {
+export class CustomerACLService extends AntiCorruptionLayer<
+  ExternalCustomerData,
+  Customer
+> {
   constructor(private externalCustomerAPI: ExternalCustomerAPI) {
     super(new CustomerDataTranslator());
   }
 
   async getCustomer(customerId: string): Promise<Result<Customer, Error>> {
     try {
-      const externalData = await this.externalCustomerAPI.getCustomer(customerId);
+      const externalData =
+        await this.externalCustomerAPI.getCustomer(customerId);
       return this.translateData(externalData);
     } catch (error) {
-      return Result.failure(new Error(`Failed to get customer: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to get customer: ${error.message}`)
+      );
     }
   }
 
   async updateCustomer(customer: Customer): Promise<Result<Customer, Error>> {
     try {
       const externalData = this.convertToExternalFormat(customer);
-      const updatedData = await this.externalCustomerAPI.updateCustomer(externalData);
+      const updatedData =
+        await this.externalCustomerAPI.updateCustomer(externalData);
       return this.translateData(updatedData);
     } catch (error) {
-      return Result.failure(new Error(`Failed to update customer: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to update customer: ${error.message}`)
+      );
     }
   }
 
   async syncAllCustomers(): Promise<Result<Customer[], Error>> {
     try {
-      const externalCustomers = await this.externalCustomerAPI.getAllCustomers();
+      const externalCustomers =
+        await this.externalCustomerAPI.getAllCustomers();
       const customers: Customer[] = [];
       const errors: string[] = [];
 
@@ -98,12 +116,16 @@ export class CustomerACLService extends AntiCorruptionLayer<ExternalCustomerData
         if (result.isSuccess()) {
           customers.push(result.value);
         } else {
-          errors.push(`Customer ${externalCustomer.customer_id}: ${result.error.message}`);
+          errors.push(
+            `Customer ${externalCustomer.customer_id}: ${result.error.message}`
+          );
         }
       }
 
       if (customers.length === 0 && errors.length > 0) {
-        return Result.failure(new Error(`All customers failed: ${errors.join(', ')}`));
+        return Result.failure(
+          new Error(`All customers failed: ${errors.join(', ')}`)
+        );
       }
 
       return Result.success(customers);
@@ -123,8 +145,8 @@ export class CustomerACLService extends AntiCorruptionLayer<ExternalCustomerData
         preferred_currency: customer.preferences.currency,
         locale: customer.preferences.language,
         email_notifications: customer.preferences.notifications,
-        marketing_opt_in: customer.preferences.marketingConsent
-      }
+        marketing_opt_in: customer.preferences.marketingConsent,
+      },
     };
   }
 }
@@ -141,14 +163,14 @@ export class CustomerController {
   @Get(':id')
   async getCustomer(@Param('id') customerId: string) {
     const result = await this.customerACL.getCustomer(customerId);
-    
+
     if (result.isFailure()) {
       throw new Error(result.error.message);
     }
-    
+
     return {
       success: true,
-      data: result.value
+      data: result.value,
     };
   }
 
@@ -167,12 +189,12 @@ export class CustomerController {
       // Apply updates
       const updatedCustomer = {
         ...currentResult.value,
-        ...updateDto
+        ...updateDto,
       };
 
       // Save through ACL
       const result = await this.customerACL.updateCustomer(updatedCustomer);
-      
+
       return result.isSuccess()
         ? { success: true, data: result.value }
         : { success: false, error: result.error.message };
@@ -184,7 +206,7 @@ export class CustomerController {
   @Post('sync')
   async syncCustomers() {
     const result = await this.customerACL.syncAllCustomers();
-    
+
     return result.isSuccess()
       ? { success: true, data: result.value, count: result.value.length }
       : { success: false, error: result.error.message };
@@ -208,12 +230,12 @@ import { ExternalCustomerAPI } from './external-customer.api';
         return new ExternalCustomerAPI({
           baseUrl: process.env.EXTERNAL_CRM_URL,
           apiKey: process.env.EXTERNAL_CRM_API_KEY,
-          timeout: 10000
+          timeout: 10000,
         });
-      }
-    }
+      },
+    },
   ],
-  exports: [CustomerACLService]
+  exports: [CustomerACLService],
 })
 export class CustomerModule {}
 
@@ -230,10 +252,10 @@ export class ExternalCustomerAPI {
       `${this.config.baseUrl}/customers/${customerId}`,
       {
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(this.config.timeout)
+        signal: AbortSignal.timeout(this.config.timeout),
       }
     );
 
@@ -244,17 +266,19 @@ export class ExternalCustomerAPI {
     return response.json();
   }
 
-  async updateCustomer(customerData: ExternalCustomerData): Promise<ExternalCustomerData> {
+  async updateCustomer(
+    customerData: ExternalCustomerData
+  ): Promise<ExternalCustomerData> {
     const response = await fetch(
       `${this.config.baseUrl}/customers/${customerData.customer_id}`,
       {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(customerData),
-        signal: AbortSignal.timeout(this.config.timeout)
+        signal: AbortSignal.timeout(this.config.timeout),
       }
     );
 
@@ -266,16 +290,13 @@ export class ExternalCustomerAPI {
   }
 
   async getAllCustomers(): Promise<ExternalCustomerData[]> {
-    const response = await fetch(
-      `${this.config.baseUrl}/customers`,
-      {
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        signal: AbortSignal.timeout(this.config.timeout)
-      }
-    );
+    const response = await fetch(`${this.config.baseUrl}/customers`, {
+      headers: {
+        Authorization: `Bearer ${this.config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      signal: AbortSignal.timeout(this.config.timeout),
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to get customers: ${response.statusText}`);

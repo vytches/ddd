@@ -77,21 +77,27 @@ export class ExampleValidator {
   /**
    * Validate examples (alias for validatePackage for backward compatibility)
    */
-  async validateExamples(packageName: string, options: ValidationOptions = {}): Promise<ValidationResult> {
+  async validateExamples(
+    packageName: string,
+    options: ValidationOptions = {}
+  ): Promise<ValidationResult> {
     return this.validatePackage(packageName, options);
   }
 
   /**
    * Validate all examples in a package
    */
-  async validatePackage(packageName: string, options: ValidationOptions = {}): Promise<ValidationResult> {
+  async validatePackage(
+    packageName: string,
+    options: ValidationOptions = {}
+  ): Promise<ValidationResult> {
     logger.info(`Validating examples for package: ${packageName}`);
 
     const result: ValidationResult = {
       isValid: true,
       errors: [],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
 
     try {
@@ -113,12 +119,11 @@ export class ExampleValidator {
       result.warnings.push(...configResult.warnings);
 
       result.isValid = result.errors.length === 0;
-
     } catch (error) {
       result.isValid = false;
       result.errors.push({
         type: 'invalid_config',
-        message: `Failed to load package configuration: ${error}`
+        message: `Failed to load package configuration: ${error}`,
       });
     }
 
@@ -137,7 +142,7 @@ export class ExampleValidator {
       isValid: true,
       errors: [],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
 
     // Check if example file exists
@@ -147,7 +152,7 @@ export class ExampleValidator {
         type: 'file_not_found',
         message: `Example file not found: ${example.file}`,
         exampleId: example.id,
-        file: example.file
+        file: example.file,
       });
     }
 
@@ -156,7 +161,7 @@ export class ExampleValidator {
       result.errors.push({
         type: 'missing_metadata',
         message: `Example is missing name: ${example.id}`,
-        exampleId: example.id
+        exampleId: example.id,
       });
     }
 
@@ -164,7 +169,7 @@ export class ExampleValidator {
       result.warnings.push({
         type: 'missing_description',
         message: `Example is missing description: ${example.id}`,
-        exampleId: example.id
+        exampleId: example.id,
       });
     }
 
@@ -173,7 +178,7 @@ export class ExampleValidator {
       result.warnings.push({
         type: 'missing_tag',
         message: `Example has no tags: ${example.id}`,
-        exampleId: example.id
+        exampleId: example.id,
       });
     }
 
@@ -183,7 +188,7 @@ export class ExampleValidator {
       result.errors.push({
         type: 'invalid_config',
         message: `Invalid complexity level '${example.complexity}' for example: ${example.id}`,
-        exampleId: example.id
+        exampleId: example.id,
       });
     }
 
@@ -193,7 +198,7 @@ export class ExampleValidator {
       result.warnings.push({
         type: 'low_priority',
         message: `Invalid priority '${example.priority}' for example: ${example.id}`,
-        exampleId: example.id
+        exampleId: example.id,
       });
     }
 
@@ -216,7 +221,7 @@ export class ExampleValidator {
       isValid: true,
       errors: [],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
 
     // Check for duplicate example IDs
@@ -226,19 +231,22 @@ export class ExampleValidator {
         result.errors.push({
           type: 'invalid_config',
           message: `Duplicate example ID: ${example.id}`,
-          exampleId: example.id
+          exampleId: example.id,
         });
       }
       ids.add(example.id);
     }
 
     // Check for balanced complexity distribution
-    const complexityCount = config.examples.reduce((acc, example) => {
-      acc[example.complexity] = (acc[example.complexity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const complexityCount = config.examples.reduce(
+      (acc, example) => {
+        acc[example.complexity] = (acc[example.complexity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    if (complexityCount.basic && complexityCount.basic > (config.examples.length * 0.8)) {
+    if (complexityCount.basic && complexityCount.basic > config.examples.length * 0.8) {
       result.suggestions.push('Consider adding more intermediate and advanced examples');
     }
 
@@ -254,7 +262,7 @@ export class ExampleValidator {
       isValid: true,
       errors: [],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
 
     try {
@@ -278,17 +286,16 @@ export class ExampleValidator {
             type: 'missing_tag',
             message: `Potential syntax issue in code block at line ${i + 1}`,
             exampleId,
-            file: filePath
+            file: filePath,
           });
         }
       }
-
     } catch (error) {
       result.errors.push({
         type: 'syntax_error',
         message: `Failed to validate syntax: ${error}`,
         exampleId,
-        file: filePath
+        file: filePath,
       });
     }
 
@@ -324,7 +331,7 @@ export class ExampleValidator {
         core: [],
         integrations: [],
         frameworks: [],
-        patterns: []
+        patterns: [],
       },
       contentConfig: {
         showImportStatements: true,
@@ -333,17 +340,17 @@ export class ExampleValidator {
         showPerformance: false,
         includeBestPractices: true,
         includeCommonPitfalls: false,
-        showVersionHistory: false
+        showVersionHistory: false,
       },
       llmSupport: {
         enabled: false,
         includePrompts: false,
         includeTips: false,
         includePatterns: false,
-        optimizeForCodeGeneration: false
+        optimizeForCodeGeneration: false,
       },
       sections: [],
-      relatedPackages: {}
+      relatedPackages: {},
     };
   }
 
@@ -365,7 +372,11 @@ export class ExampleValidator {
   /**
    * Create missing example file
    */
-  private async createMissingFile(packageName: string, fileName: string, exampleId?: string): Promise<void> {
+  private async createMissingFile(
+    packageName: string,
+    fileName: string,
+    exampleId?: string
+  ): Promise<void> {
     const filePath = this.getExamplePath(packageName, fileName);
 
     try {
@@ -392,7 +403,6 @@ TODO: Add usage instructions
 
       await fs.writeFile(filePath, content, 'utf-8');
       logger.info(`Created missing example file: ${fileName}`);
-
     } catch (error) {
       logger.error(`Failed to create missing file ${fileName}:`, error);
     }

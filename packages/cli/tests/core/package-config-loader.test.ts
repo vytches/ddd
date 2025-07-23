@@ -18,26 +18,26 @@ describe('PackageConfigLoader', () => {
       basic: {
         level: 'basic',
         description: 'Basic examples',
-        examples: ['example1']
+        examples: ['example1'],
       },
       intermediate: {
         level: 'intermediate',
         description: 'Intermediate examples',
-        examples: ['example2']
-      }
+        examples: ['example2'],
+      },
     },
     tags: {
       core: ['test-package:core', 'test-package:feature'],
       patterns: ['pattern1'],
-      integration: []
+      integration: [],
     },
     sections: [
       {
         title: 'Getting Started',
         complexities: ['basic'],
-        description: 'Introduction'
-      }
-    ]
+        description: 'Introduction',
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -64,9 +64,7 @@ describe('PackageConfigLoader', () => {
         return Promise.resolve();
       });
 
-      const [error] = await safeRun(async () =>
-        loader.loadPackageConfig(packageName)
-      );
+      const [error] = await safeRun(async () => loader.loadPackageConfig(packageName));
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toContain('Failed to load package config');
@@ -85,9 +83,7 @@ describe('PackageConfigLoader', () => {
 
       const packageName = 'test-package';
 
-      const [error] = await safeRun(async () =>
-        loader.loadPackageConfig(packageName)
-      );
+      const [error] = await safeRun(async () => loader.loadPackageConfig(packageName));
 
       // Will fail but should have attempted traversal
       expect(accessCallCount).toBeGreaterThan(2);
@@ -101,12 +97,24 @@ describe('PackageConfigLoader', () => {
 
       // Test the validation method directly since dynamic imports are complex to mock
       const testCases = [
-        { config: { ...validConfig, packageName: undefined }, expectedError: 'missing packageName' },
-        { config: { ...validConfig, displayName: undefined }, expectedError: 'missing displayName' },
-        { config: { ...validConfig, complexityLevels: undefined }, expectedError: 'missing complexityLevels' },
+        {
+          config: { ...validConfig, packageName: undefined },
+          expectedError: 'missing packageName',
+        },
+        {
+          config: { ...validConfig, displayName: undefined },
+          expectedError: 'missing displayName',
+        },
+        {
+          config: { ...validConfig, complexityLevels: undefined },
+          expectedError: 'missing complexityLevels',
+        },
         { config: { ...validConfig, tags: undefined }, expectedError: 'missing core tags' },
-        { config: { ...validConfig, tags: { ...validConfig.tags, core: undefined } }, expectedError: 'missing core tags' },
-        { config: { ...validConfig, sections: undefined }, expectedError: 'missing sections' }
+        {
+          config: { ...validConfig, tags: { ...validConfig.tags, core: undefined } },
+          expectedError: 'missing core tags',
+        },
+        { config: { ...validConfig, sections: undefined }, expectedError: 'missing sections' },
       ];
 
       for (const testCase of testCases) {
@@ -129,9 +137,9 @@ describe('PackageConfigLoader', () => {
           basic: {
             level: 'invalid-level',
             description: 'Basic examples',
-            examples: []
-          }
-        }
+            examples: [],
+          },
+        },
       };
 
       const [error] = safeRun(() => {
@@ -149,8 +157,8 @@ describe('PackageConfigLoader', () => {
         ...validConfig,
         tags: {
           ...validConfig.tags,
-          core: ['wrong-prefix:tag']
-        }
+          core: ['wrong-prefix:tag'],
+        },
       };
 
       const [error] = safeRun(() => {
@@ -168,7 +176,7 @@ describe('PackageConfigLoader', () => {
         { name: 'package1', isDirectory: () => true },
         { name: 'package2', isDirectory: () => true },
         { name: 'package3', isDirectory: () => true },
-        { name: 'file.txt', isDirectory: () => false }
+        { name: 'file.txt', isDirectory: () => false },
       ];
 
       (mockFs.readdir as any).mockResolvedValue(mockPackages);
@@ -198,9 +206,7 @@ describe('PackageConfigLoader', () => {
     it('should throw error if packages directory cannot be read', async () => {
       (mockFs.readdir as any).mockRejectedValue(new Error('Permission denied'));
 
-      const [error] = await safeRun(async () =>
-        await loader.getAvailablePackages()
-      );
+      const [error] = await safeRun(async () => await loader.getAvailablePackages());
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toContain('Failed to read packages directory');
@@ -221,10 +227,10 @@ describe('PackageConfigLoader', () => {
     it('should clear cached configurations', () => {
       // Test cache functionality without dynamic imports
       const packageName = 'test-package';
-      
+
       // Manually set cache entry
       loader['configCache'].set(packageName, validConfig);
-      
+
       // Verify cache has entry
       expect(loader['configCache'].has(packageName)).toBe(true);
       expect(loader['configCache'].get(packageName)).toEqual(validConfig);

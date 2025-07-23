@@ -12,7 +12,7 @@ export class ContentResolver {
       () => this.tryMappedPath(packageName, requestedPath),
       () => this.tryPatternFallback(packageName, requestedPath),
       () => this.tryGeneratedContent(packageName, requestedPath),
-      () => this.getDefaultContent(packageName, requestedPath)
+      () => this.getDefaultContent(packageName, requestedPath),
     ];
 
     for (const strategy of strategies) {
@@ -26,7 +26,7 @@ export class ContentResolver {
   private static tryExactPath(packageName: string, filePath: string): string | null {
     const possiblePaths = [
       path.join(process.cwd(), 'packages', packageName, 'src', 'examples', filePath),
-      path.join(process.cwd(), 'packages', packageName, 'examples', filePath)
+      path.join(process.cwd(), 'packages', packageName, 'examples', filePath),
     ];
 
     for (const fullPath of possiblePaths) {
@@ -41,12 +41,32 @@ export class ContentResolver {
   private static tryMappedPath(packageName: string, filePath: string): string | null {
     // Map expected template paths to common actual paths
     const mappings: Record<string, string[]> = {
-      'basic/implementation.md': ['basic/implementation.md', 'basic/example-1.md', 'basic/basic-example.md'],
-      'intermediate/implementation.md': ['intermediate/implementation.md', 'intermediate/example-1.md', 'intermediate/intermediate-example.md'],
-      'advanced/implementation.md': ['advanced/implementation.md', 'advanced/example-1.md', 'advanced/advanced-example.md'],
+      'basic/implementation.md': [
+        'basic/implementation.md',
+        'basic/example-1.md',
+        'basic/basic-example.md',
+      ],
+      'intermediate/implementation.md': [
+        'intermediate/implementation.md',
+        'intermediate/example-1.md',
+        'intermediate/intermediate-example.md',
+      ],
+      'advanced/implementation.md': [
+        'advanced/implementation.md',
+        'advanced/example-1.md',
+        'advanced/advanced-example.md',
+      ],
       'basic/use-case.md': ['basic/use-case.md', 'basic/example-2.md', 'basic/usage.md'],
-      'intermediate/use-case.md': ['intermediate/use-case.md', 'intermediate/example-2.md', 'intermediate/usage.md'],
-      'advanced/use-case.md': ['advanced/use-case.md', 'advanced/example-2.md', 'advanced/usage.md']
+      'intermediate/use-case.md': [
+        'intermediate/use-case.md',
+        'intermediate/example-2.md',
+        'intermediate/usage.md',
+      ],
+      'advanced/use-case.md': [
+        'advanced/use-case.md',
+        'advanced/example-2.md',
+        'advanced/usage.md',
+      ],
     };
 
     const possiblePaths = mappings[filePath];
@@ -72,10 +92,20 @@ export class ContentResolver {
     const complexityMatch = requestedPath.match(/^(basic|intermediate|advanced)\//);
     if (complexityMatch) {
       const complexity = complexityMatch[1];
-      const exampleDir = path.join(process.cwd(), 'packages', packageName, 'src', 'examples', complexity!);
+      const exampleDir = path.join(
+        process.cwd(),
+        'packages',
+        packageName,
+        'src',
+        'examples',
+        complexity!
+      );
 
       if (fs.existsSync(exampleDir)) {
-        const files = fs.readdirSync(exampleDir).filter(f => f.endsWith('.md')).sort();
+        const files = fs
+          .readdirSync(exampleDir)
+          .filter(f => f.endsWith('.md'))
+          .sort();
         if (files.length > 0) {
           return fs.readFileSync(path.join(exampleDir, files[0]!), 'utf-8');
         }
@@ -143,7 +173,7 @@ export class ContentResolver {
 - **Transaction Management**: Handle complex transaction boundaries
 - **Error Handling**: Built-in Result pattern for clean error propagation`,
 
-      'acl': `Anti-Corruption Layer (ACL) provides a translation layer between your domain model and external systems, ensuring your domain remains pure and isolated from external concerns.
+      acl: `Anti-Corruption Layer (ACL) provides a translation layer between your domain model and external systems, ensuring your domain remains pure and isolated from external concerns.
 
 ## Key Features
 
@@ -153,7 +183,7 @@ export class ContentResolver {
 - **Adapter Pattern**: Implement adapters for different external systems
 - **Testing Support**: Easy mocking of external dependencies`,
 
-      'policies': `Business Policies enable declarative business rule definition with rich validation, conditional logic, and enterprise context support.
+      policies: `Business Policies enable declarative business rule definition with rich validation, conditional logic, and enterprise context support.
 
 ## Key Features
 
@@ -164,7 +194,7 @@ export class ContentResolver {
 - **Context-Aware**: Rich context support for enterprise scenarios
 - **Event Integration**: Automatic policy evaluation events`,
 
-      'resilience': `Resilience patterns provide fault tolerance through circuit breakers, retry policies, bulkheads, and timeout strategies.
+      resilience: `Resilience patterns provide fault tolerance through circuit breakers, retry policies, bulkheads, and timeout strategies.
 
 ## Key Features
 
@@ -175,7 +205,7 @@ export class ContentResolver {
 - **Composite Strategies**: Combine multiple resilience patterns
 - **Observability**: Built-in metrics and monitoring`,
 
-      'messaging': `Messaging infrastructure supports reliable message delivery through the outbox pattern, saga orchestration, and event-driven communication.
+      messaging: `Messaging infrastructure supports reliable message delivery through the outbox pattern, saga orchestration, and event-driven communication.
 
 ## Key Features
 
@@ -186,7 +216,7 @@ export class ContentResolver {
 - **Batch Operations**: Efficient bulk message handling
 - **Middleware Pipeline**: Extensible message processing`,
 
-      'events': `Event system provides unified event handling for domain events, integration events, and audit events with automatic publishing and context-aware routing.
+      events: `Event system provides unified event handling for domain events, integration events, and audit events with automatic publishing and context-aware routing.
 
 ## Key Features
 
@@ -197,7 +227,7 @@ export class ContentResolver {
 - **Type Safety**: Full TypeScript support
 - **Performance**: Optimized for high throughput`,
 
-      'di': `Dependency Injection provides a global service locator with auto-discovery, framework adapters, and enterprise-grade DI capabilities for DDD applications.
+      di: `Dependency Injection provides a global service locator with auto-discovery, framework adapters, and enterprise-grade DI capabilities for DDD applications.
 
 ## Key Features
 
@@ -206,17 +236,20 @@ export class ContentResolver {
 - **Framework Adapters**: Bridge pattern integration with NestJS, InversifyJS, TSyringe
 - **Context Isolation**: Bounded context support for DDD scenarios
 - **Service Lifetimes**: Transient, Singleton, and Scoped registration
-- **Enterprise Ready**: Production-grade service locator with comprehensive error handling`
+- **Enterprise Ready**: Production-grade service locator with comprehensive error handling`,
     };
 
-    return descriptions[packageName] || `The ${packageName} package provides essential functionality for Domain-Driven Design applications.
+    return (
+      descriptions[packageName] ||
+      `The ${packageName} package provides essential functionality for Domain-Driven Design applications.
 
 ## Key Features
 
 - **DDD Patterns**: Implementation of core DDD patterns
 - **Type Safety**: Full TypeScript support
 - **Enterprise Ready**: Production-grade implementation
-- **Integration**: Seamless integration with other vytches-ddd packages`;
+- **Integration**: Seamless integration with other vytches-ddd packages`
+    );
   }
 
   private static generateImportsPattern(packageName: string): string {
@@ -422,20 +455,23 @@ describe('${mainClass}', () => {
   private static getMainExport(packageName: string): string {
     const mainExports: Record<string, string> = {
       'domain-services': 'BaseDomainService',
-      'acl': 'BaseACL',
-      'policies': 'PolicyBuilder',
-      'resilience': 'ResiliencePolicy',
-      'messaging': 'MessageBus',
-      'events': 'UnifiedEventBus',
-      'cqrs': 'CommandBus',
-      'projections': 'ProjectionEngine',
-      'validation': 'ValidationFacade',
-      'aggregates': 'AggregateRoot',
-      'repositories': 'BaseRepository',
-      'di': 'VytchesDDD'
+      acl: 'BaseACL',
+      policies: 'PolicyBuilder',
+      resilience: 'ResiliencePolicy',
+      messaging: 'MessageBus',
+      events: 'UnifiedEventBus',
+      cqrs: 'CommandBus',
+      projections: 'ProjectionEngine',
+      validation: 'ValidationFacade',
+      aggregates: 'AggregateRoot',
+      repositories: 'BaseRepository',
+      di: 'VytchesDDD',
     };
 
-    return mainExports[packageName] || `Base${  packageName.charAt(0).toUpperCase()  }${packageName.slice(1)}`;
+    return (
+      mainExports[packageName] ||
+      `Base${packageName.charAt(0).toUpperCase()}${packageName.slice(1)}`
+    );
   }
 
   private static generateHeroSection(packageName: string): string {
@@ -448,22 +484,25 @@ Build complex business operations that span multiple aggregates with confidence.
 🎯 **Best used when**: Operations don't naturally fit within a single aggregate
 ⚡ **Key benefit**: Clean separation of orchestration logic from domain entities`,
 
-      'di': `**Enterprise Dependency Injection** 🔧
+      di: `**Enterprise Dependency Injection** 🔧
 
 Unify your application's dependency management with auto-discovery, framework adapters, and enterprise-grade service location. Built specifically for Domain-Driven Design applications.
 
 ✨ **Perfect for**: Large-scale applications, framework integration, bounded context isolation
 🎯 **Best used when**: Managing complex service dependencies across multiple domains
-⚡ **Key benefit**: Single source of truth for all service resolution`
+⚡ **Key benefit**: Single source of truth for all service resolution`,
     };
 
-    return heroContent[packageName] || `**${packageName.charAt(0).toUpperCase() + packageName.slice(1)}** 🚀
+    return (
+      heroContent[packageName] ||
+      `**${packageName.charAt(0).toUpperCase() + packageName.slice(1)}** 🚀
 
 Enterprise-grade ${packageName} implementation for Domain-Driven Design applications.
 
 ✨ **Perfect for**: Production applications requiring robust ${packageName} patterns
 🎯 **Best used when**: Building scalable, maintainable domain-driven systems
-⚡ **Key benefit**: Battle-tested patterns that scale with your business`;
+⚡ **Key benefit**: Battle-tested patterns that scale with your business`
+    );
   }
 
   private static generateWhenToUse(packageName: string): string {
@@ -493,7 +532,7 @@ Enterprise-grade ${packageName} implementation for Domain-Driven Design applicat
 - If the operation requires external service calls → Use Domain Service
 - If the operation involves complex business rules → Consider Domain Service`,
 
-      'di': `## When to Use Dependency Injection
+      di: `## When to Use Dependency Injection
 
 ### ✅ Perfect Scenarios:
 
@@ -516,10 +555,12 @@ Enterprise-grade ${packageName} implementation for Domain-Driven Design applicat
 - If you have > 5 services → Use DI for better organization
 - If you're using frameworks → Use DI for integration
 - If you need testing flexibility → Use DI for easy mocking
-- If you have bounded contexts → Use DI for isolation`
+- If you have bounded contexts → Use DI for isolation`,
     };
 
-    return whenToUseContent[packageName] || `## When to Use ${packageName}
+    return (
+      whenToUseContent[packageName] ||
+      `## When to Use ${packageName}
 
 Use ${packageName} when you need enterprise-grade ${packageName} patterns in your Domain-Driven Design application.
 
@@ -531,7 +572,8 @@ Use ${packageName} when you need enterprise-grade ${packageName} patterns in you
 ### 🎯 Specific Use Cases:
 - Large-scale applications with complex ${packageName} requirements
 - Multi-team projects needing consistent ${packageName} patterns
-- Systems requiring high reliability and maintainability`;
+- Systems requiring high reliability and maintainability`
+    );
   }
 
   private static generateWhenNotToUse(packageName: string): string {
@@ -562,7 +604,7 @@ Use ${packageName} when you need enterprise-grade ${packageName} patterns in you
 - **Specifications**: Use specifications for complex business rules
 - **Policies**: Use policies for conditional business logic`,
 
-      'di': `## When NOT to Use Dependency Injection
+      di: `## When NOT to Use Dependency Injection
 
 ### ❌ Avoid in These Scenarios:
 
@@ -586,10 +628,12 @@ Use ${packageName} when you need enterprise-grade ${packageName} patterns in you
 - **Factory Pattern**: Custom factories for complex object creation
 - **Builder Pattern**: For objects with many optional parameters
 - **Module Pattern**: For organizing related services
-- **Composition Root**: Manual composition at application entry point`
+- **Composition Root**: Manual composition at application entry point`,
     };
 
-    return whenNotToUseContent[packageName] || `## When NOT to Use ${packageName}
+    return (
+      whenNotToUseContent[packageName] ||
+      `## When NOT to Use ${packageName}
 
 ### ❌ Avoid in These Scenarios:
 - Simple applications that don't need complex ${packageName} patterns
@@ -604,7 +648,8 @@ Use ${packageName} when you need enterprise-grade ${packageName} patterns in you
 ### 💡 Alternative Approaches:
 - Use standard patterns for simple cases
 - Consider lighter alternatives for prototypes
-- Evaluate if the complexity is justified`;
+- Evaluate if the complexity is justified`
+    );
   }
 
   private static generateCommonPitfalls(packageName: string): string {
@@ -661,7 +706,7 @@ class OrderProcessingService {
 
 **Solution**: Use dependency injection and interfaces to maintain clean boundaries.`,
 
-      'di': `## Common Pitfalls
+      di: `## Common Pitfalls
 
 ### 🕳️ Pitfall 1: Service Locator Anti-Pattern
 
@@ -700,10 +745,12 @@ class SomeService {
 
 **Problem**: Making domain logic dependent on DI framework.
 
-**Solution**: Use interfaces and keep domain logic DI-agnostic.`
+**Solution**: Use interfaces and keep domain logic DI-agnostic.`,
     };
 
-    return pitfallsContent[packageName] || `## Common Pitfalls
+    return (
+      pitfallsContent[packageName] ||
+      `## Common Pitfalls
 
 ### 🕳️ Pitfall 1: Over-Complexity
 **Problem**: Adding unnecessary complexity for simple use cases.
@@ -715,7 +762,8 @@ class SomeService {
 
 ### 🕳️ Pitfall 3: Poor Error Handling
 **Problem**: Not handling errors properly in ${packageName} operations.
-**Solution**: Always use Result pattern or proper error handling strategies.`;
+**Solution**: Always use Result pattern or proper error handling strategies.`
+    );
   }
 
   private static generateTroubleshooting(packageName: string): string {
@@ -758,7 +806,7 @@ class SomeService {
 2. Implement caching where appropriate
 3. Consider async operations for non-critical paths`,
 
-      'di': `## Troubleshooting
+      di: `## Troubleshooting
 
 ### 🔍 Problem: Service Not Found
 
@@ -794,10 +842,12 @@ class SomeService {
 **Solutions**:
 1. Use singleton lifetime for expensive services
 2. Avoid recursive service resolution
-3. Profile container performance`
+3. Profile container performance`,
     };
 
-    return troubleshootingContent[packageName] || `## Troubleshooting
+    return (
+      troubleshootingContent[packageName] ||
+      `## Troubleshooting
 
 ### 🔍 Common Issues
 
@@ -827,7 +877,8 @@ class SomeService {
 1. Check package compatibility
 2. Review integration documentation
 3. Verify configuration settings
-4. Consider using adapter patterns`;
+4. Consider using adapter patterns`
+    );
   }
 
   private static generatePerformanceSection(packageName: string): string {
@@ -876,7 +927,7 @@ Process multiple items in batches to reduce overhead.
 - **Memory Usage**: Monitor for memory leaks in long-running services
 - **External Calls**: Implement timeouts and circuit breakers`,
 
-      'di': `## Performance Considerations
+      di: `## Performance Considerations
 
 ### ⚡ Optimization Strategies
 
@@ -915,10 +966,12 @@ Properly dispose of services when no longer needed.
 - **Service Resolution**: < 0.1ms per service lookup
 - **Memory Usage**: Monitor singleton service memory
 - **Container Size**: Keep container lean
-- **Registration Time**: Optimize startup performance`
+- **Registration Time**: Optimize startup performance`,
     };
 
-    return performanceContent[packageName] || `## Performance Considerations
+    return (
+      performanceContent[packageName] ||
+      `## Performance Considerations
 
 ### ⚡ Optimization Strategies
 
@@ -939,7 +992,8 @@ Properly dispose of services when no longer needed.
 - Profile before optimizing
 - Focus on actual bottlenecks
 - Consider trade-offs between performance and maintainability
-- Document performance characteristics and limitations`;
+- Document performance characteristics and limitations`
+    );
   }
 
   private static getDefaultContent(packageName: string, requestedPath: string): string {

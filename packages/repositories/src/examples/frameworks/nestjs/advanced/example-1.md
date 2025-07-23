@@ -1,28 +1,30 @@
 # Advanced Repository - NestJS Manual Setup
 
-**Focus**: Enterprise-scale distributed repository patterns in NestJS with manual setup
-**Base Example**: [Distributed Event-Sourced Repository](../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories, @vytches-ddd/events
+**Focus**: Enterprise-scale distributed repository patterns in NestJS with
+manual setup **Base Example**:
+[Distributed Event-Sourced Repository](../../advanced/example-1.md)
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories,
+@vytches-ddd/events
 
 ## Service Implementation
 
 ```typescript
 // global-trading.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
+import {
   DistributedEventSourcedRepository,
   GlobalConsistencyManager,
   CrossRegionReplicator,
-  AIEnhancedRepository
+  AIEnhancedRepository,
 } from '@vytches-ddd/repositories';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { 
-  GlobalTradingAccount, 
-  TradingEvent, 
+import {
+  GlobalTradingAccount,
+  TradingEvent,
   RegionalEventStore,
   GlobalTradeRequest,
-  AIModelConfig 
+  AIModelConfig,
 } from './types'; // From your app
 
 @Injectable()
@@ -34,12 +36,12 @@ export class GlobalTradingService {
 
   constructor(@InjectConnection() private connection: Connection) {
     // ⭐ FOCUS: Manual setup of enterprise-scale distributed repositories
-    
+
     // Initialize regional event stores
     const regionalEventStores = new Map([
       ['us-east', new RegionalEventStore('us-east', this.connection)],
       ['eu-west', new RegionalEventStore('eu-west', this.connection)],
-      ['asia-pacific', new RegionalEventStore('asia-pacific', this.connection)]
+      ['asia-pacific', new RegionalEventStore('asia-pacific', this.connection)],
     ]);
 
     // Global consistency manager
@@ -47,7 +49,7 @@ export class GlobalTradingService {
       regions: ['us-east', 'eu-west', 'asia-pacific'],
       consistencyLevel: 'linearizable',
       consensusAlgorithm: 'raft',
-      enableByzantineFaultTolerance: true
+      enableByzantineFaultTolerance: true,
     });
 
     // Cross-region replicator
@@ -55,21 +57,22 @@ export class GlobalTradingService {
       replicationStrategy: 'multi-master-conflict-resolution',
       enableCompression: true,
       enableEncryption: true,
-      maxRetries: 3
+      maxRetries: 3,
     });
 
     // Distributed event-sourced repository
-    this.globalAccountRepository = new DistributedEventSourcedRepository<GlobalTradingAccount>(
-      'global-trading-accounts', 
-      {
-        consistencyManager: this.consistencyManager,
-        crossRegionReplicator: this.crossRegionReplicator,
-        regionalEventStores,
-        enableGlobalOrdering: true,
-        enableCrossRegionConsistencyChecks: true,
-        partitionStrategy: 'account-based-sharding'
-      }
-    );
+    this.globalAccountRepository =
+      new DistributedEventSourcedRepository<GlobalTradingAccount>(
+        'global-trading-accounts',
+        {
+          consistencyManager: this.consistencyManager,
+          crossRegionReplicator: this.crossRegionReplicator,
+          regionalEventStores,
+          enableGlobalOrdering: true,
+          enableCrossRegionConsistencyChecks: true,
+          partitionStrategy: 'account-based-sharding',
+        }
+      );
 
     // AI-enhanced repository for intelligent features
     const aiConfig: AIModelConfig = {
@@ -77,7 +80,7 @@ export class GlobalTradingService {
       enablePredictiveCaching: true,
       enableIntelligentQuerying: true,
       trainingDataRetention: 30,
-      retrainingThreshold: 0.05
+      retrainingThreshold: 0.05,
     };
 
     this.aiRepository = new AIEnhancedRepository<GlobalTradingAccount>(
@@ -87,7 +90,9 @@ export class GlobalTradingService {
   }
 
   // ✅ FOCUS: Global trading operations with distributed consistency
-  async executeGlobalTrade(request: GlobalTradeRequest): Promise<GlobalTradeResult> {
+  async executeGlobalTrade(
+    request: GlobalTradeRequest
+  ): Promise<GlobalTradeResult> {
     try {
       // Step 1: AI risk assessment
       const riskAnalysis = await this.aiRepository.analyzeRisk(request);
@@ -95,13 +100,13 @@ export class GlobalTradingService {
         return {
           success: false,
           error: 'Trade rejected due to high risk assessment',
-          riskScore: riskAnalysis.score
+          riskScore: riskAnalysis.score,
         };
       }
 
       // Step 2: Get account with strong consistency
       const account = await this.globalAccountRepository.getGlobalAccount(
-        request.accountId, 
+        request.accountId,
         'linearizable'
       );
 
@@ -125,11 +130,11 @@ export class GlobalTradingService {
             symbol: request.symbol,
             quantity: request.quantity,
             price: request.price,
-            side: request.side
+            side: request.side,
           },
           timestamp: new Date(),
           globalSequenceNumber: 0, // Will be assigned
-          globalTimestamp: new Date()
+          globalTimestamp: new Date(),
         },
         {
           eventId: generateEventId(),
@@ -137,29 +142,30 @@ export class GlobalTradingService {
           aggregateId: account.id,
           eventData: {
             symbol: request.symbol,
-            newPosition: account.positions[request.symbol] + (
-              request.side === 'BUY' ? request.quantity : -request.quantity
-            ),
-            previousPosition: account.positions[request.symbol] || 0
+            newPosition:
+              account.positions[request.symbol] +
+              (request.side === 'BUY' ? request.quantity : -request.quantity),
+            previousPosition: account.positions[request.symbol] || 0,
           },
           timestamp: new Date(),
           globalSequenceNumber: 0,
-          globalTimestamp: new Date()
-        }
+          globalTimestamp: new Date(),
+        },
       ];
 
       // Step 5: Execute distributed transaction
       const regionalContext = {
         region: this.determineOptimalRegion(request),
-        lastKnownSequences: new Map()
+        lastKnownSequences: new Map(),
       };
 
-      const globalResult = await this.globalAccountRepository.saveEventsGlobally(
-        account.id,
-        tradingEvents,
-        account.version,
-        regionalContext
-      );
+      const globalResult =
+        await this.globalAccountRepository.saveEventsGlobally(
+          account.id,
+          tradingEvents,
+          account.version,
+          regionalContext
+        );
 
       if (!globalResult.success) {
         throw new Error('Failed to persist trading events globally');
@@ -175,9 +181,8 @@ export class GlobalTradingService {
         globalSequenceNumbers: globalResult.globalSequenceNumbers,
         marketImpactPrediction: marketImpact,
         replicationStatus: globalResult.replicationStatus,
-        executionRegion: regionalContext.region
+        executionRegion: regionalContext.region,
       };
-
     } catch (error) {
       // Enhanced error handling with global coordination
       await this.handleGlobalTradeError(request, error);
@@ -186,10 +191,12 @@ export class GlobalTradingService {
   }
 
   // ✅ FOCUS: AI-powered portfolio optimization
-  async optimizePortfolioWithAI(accountId: string): Promise<PortfolioOptimizationResult> {
+  async optimizePortfolioWithAI(
+    accountId: string
+  ): Promise<PortfolioOptimizationResult> {
     // Get current account state
     const account = await this.globalAccountRepository.getGlobalAccount(
-      accountId, 
+      accountId,
       'strong'
     );
 
@@ -202,37 +209,41 @@ export class GlobalTradingService {
       account,
       marketData: await this.getMarketData(),
       timeHorizon: '3M',
-      riskTolerance: account.riskProfile
+      riskTolerance: account.riskProfile,
     });
 
     // Generate optimization recommendations
-    const optimizationRecommendations = await this.aiRepository.generateOptimizationRecommendations({
-      currentPortfolio: account.positions,
-      analysis: portfolioAnalysis,
-      constraints: {
-        maxRiskLevel: account.maxRiskLevel,
-        liquidityRequirements: account.liquidityRequirements,
-        regulatoryConstraints: await this.getRegulatoryConstraints(accountId)
-      }
-    });
+    const optimizationRecommendations =
+      await this.aiRepository.generateOptimizationRecommendations({
+        currentPortfolio: account.positions,
+        analysis: portfolioAnalysis,
+        constraints: {
+          maxRiskLevel: account.maxRiskLevel,
+          liquidityRequirements: account.liquidityRequirements,
+          regulatoryConstraints: await this.getRegulatoryConstraints(accountId),
+        },
+      });
 
     return {
       currentPerformance: portfolioAnalysis.performance,
       optimizationSuggestions: optimizationRecommendations,
       expectedImprovement: optimizationRecommendations.expectedReturn,
       riskReduction: optimizationRecommendations.riskReduction,
-      confidence: optimizationRecommendations.confidence
+      confidence: optimizationRecommendations.confidence,
     };
   }
 
   // ✅ FOCUS: Global synchronization and consistency management
-  async synchronizeGlobalState(accountId: string): Promise<SynchronizationResult> {
+  async synchronizeGlobalState(
+    accountId: string
+  ): Promise<SynchronizationResult> {
     try {
       // Force global synchronization across all regions
-      const syncResult = await this.globalAccountRepository.synchronizeGlobalState(
-        accountId, 
-        true // Force full sync
-      );
+      const syncResult =
+        await this.globalAccountRepository.synchronizeGlobalState(
+          accountId,
+          true // Force full sync
+        );
 
       if (!syncResult.success) {
         throw new Error(`Global synchronization failed: ${syncResult.error}`);
@@ -247,14 +258,13 @@ export class GlobalTradingService {
         regionsInvolved: syncResult.regionsInvolved || [],
         driftCorrected: syncResult.driftCorrected || 0,
         consistencyAchieved: consistencyCheck.isConsistent,
-        totalDurationMs: Date.now() - syncResult.startTime?.getTime() || 0
+        totalDurationMs: Date.now() - syncResult.startTime?.getTime() || 0,
       };
-
     } catch (error) {
       return {
         success: false,
         error: error.message,
-        requiresManualIntervention: true
+        requiresManualIntervention: true,
       };
     }
   }
@@ -266,15 +276,16 @@ export class GlobalTradingService {
   ): Promise<FailoverResult> {
     try {
       // Initiate emergency failover
-      const failoverResult = await this.globalAccountRepository.initiateRegionalFailover(
-        failedRegion,
-        targetRegion,
-        {
-          scope: 'all_accounts',
-          enableEmergencyMode: true,
-          maxFailoverTime: 30000 // 30 seconds max
-        }
-      );
+      const failoverResult =
+        await this.globalAccountRepository.initiateRegionalFailover(
+          failedRegion,
+          targetRegion,
+          {
+            scope: 'all_accounts',
+            enableEmergencyMode: true,
+            maxFailoverTime: 30000, // 30 seconds max
+          }
+        );
 
       if (!failoverResult.success) {
         throw new Error('Regional failover failed');
@@ -284,7 +295,7 @@ export class GlobalTradingService {
       await this.aiRepository.adaptToRegionalFailover({
         failedRegion,
         targetRegion,
-        affectedAccounts: failoverResult.affectedAccounts || []
+        affectedAccounts: failoverResult.affectedAccounts || [],
       });
 
       // Notify monitoring systems
@@ -295,9 +306,8 @@ export class GlobalTradingService {
         failoverTime: failoverResult.failoverTime,
         affectedAccounts: failoverResult.affectedAccounts || [],
         targetRegion: failoverResult.targetRegion!,
-        estimatedRecoveryTime: failoverResult.estimatedRecoveryTime
+        estimatedRecoveryTime: failoverResult.estimatedRecoveryTime,
       };
-
     } catch (error) {
       await this.handleFailoverFailure(failedRegion, targetRegion, error);
       throw error;
@@ -307,16 +317,19 @@ export class GlobalTradingService {
   // ✅ FOCUS: Enterprise monitoring and analytics
   async getEnterpriseMetrics(timeRange: TimeRange): Promise<EnterpriseMetrics> {
     // Global repository metrics
-    const repositoryMetrics = await this.globalAccountRepository.getGlobalRepositoryMetrics(
-      timeRange,
-      'comprehensive'
-    );
+    const repositoryMetrics =
+      await this.globalAccountRepository.getGlobalRepositoryMetrics(
+        timeRange,
+        'comprehensive'
+      );
 
     // AI repository metrics
-    const aiMetrics = await this.aiRepository.getAIPerformanceMetrics(timeRange);
+    const aiMetrics =
+      await this.aiRepository.getAIPerformanceMetrics(timeRange);
 
     // Consistency metrics
-    const consistencyMetrics = await this.consistencyManager.getConsistencyMetrics(timeRange);
+    const consistencyMetrics =
+      await this.consistencyManager.getConsistencyMetrics(timeRange);
 
     return {
       timeRange,
@@ -325,36 +338,41 @@ export class GlobalTradingService {
       aiPerformance: {
         modelAccuracy: aiMetrics.averageAccuracy,
         predictionLatency: aiMetrics.averagePredictionTime,
-        cacheHitRate: aiMetrics.cacheHitRate
+        cacheHitRate: aiMetrics.cacheHitRate,
       },
       consistency: {
         averageConsistencyLatency: consistencyMetrics.averageLatency,
         consistencyViolations: consistencyMetrics.violations,
-        conflictResolutionRate: consistencyMetrics.conflictResolutionRate
+        conflictResolutionRate: consistencyMetrics.conflictResolutionRate,
       },
       system: {
         uptimePercentage: this.calculateUptime(timeRange),
         errorRate: this.calculateErrorRate(timeRange),
-        averageResponseTime: this.calculateAverageResponseTime(timeRange)
-      }
+        averageResponseTime: this.calculateAverageResponseTime(timeRange),
+      },
     };
   }
 
   // Private helper methods
-  private validateTradeRequest(request: GlobalTradeRequest, account: GlobalTradingAccount): boolean {
+  private validateTradeRequest(
+    request: GlobalTradeRequest,
+    account: GlobalTradingAccount
+  ): boolean {
     // Comprehensive trade validation logic
     if (request.quantity <= 0) return false;
     if (request.price <= 0) return false;
     if (!account.isActive) return false;
-    
+
     // Check position limits
     const currentPosition = account.positions[request.symbol] || 0;
-    const newPosition = currentPosition + (request.side === 'BUY' ? request.quantity : -request.quantity);
-    
+    const newPosition =
+      currentPosition +
+      (request.side === 'BUY' ? request.quantity : -request.quantity);
+
     if (Math.abs(newPosition) > account.positionLimits[request.symbol]) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -364,10 +382,10 @@ export class GlobalTradingService {
     // - Network latency
     // - Regional regulations
     // - Load balancing
-    
+
     const marketHours = this.getMarketHours(request.symbol);
     const currentTime = new Date();
-    
+
     if (this.isMarketOpen('us-east', currentTime, marketHours)) {
       return 'us-east';
     } else if (this.isMarketOpen('eu-west', currentTime, marketHours)) {
@@ -377,12 +395,17 @@ export class GlobalTradingService {
     }
   }
 
-  private async verifyGlobalConsistency(accountId: string): Promise<{ isConsistent: boolean; issues?: string[] }> {
+  private async verifyGlobalConsistency(
+    accountId: string
+  ): Promise<{ isConsistent: boolean; issues?: string[] }> {
     // Implement global consistency verification logic
     return { isConsistent: true };
   }
 
-  private async handleGlobalTradeError(request: GlobalTradeRequest, error: Error): Promise<void> {
+  private async handleGlobalTradeError(
+    request: GlobalTradeRequest,
+    error: Error
+  ): Promise<void> {
     // Enhanced error handling with global coordination
     console.error(`Global trade error for ${request.tradeId}:`, error.message);
   }
@@ -413,7 +436,7 @@ export class GlobalTradingService {
   }
 
   private calculateErrorRate(timeRange: TimeRange): number {
-    // Mock implementation  
+    // Mock implementation
     return 0.01;
   }
 
@@ -426,7 +449,11 @@ export class GlobalTradingService {
     // Implementation for notifying monitoring systems
   }
 
-  private async handleFailoverFailure(failedRegion: string, targetRegion: string, error: Error): Promise<void> {
+  private async handleFailoverFailure(
+    failedRegion: string,
+    targetRegion: string,
+    error: Error
+  ): Promise<void> {
     // Implementation for handling failover failures
   }
 }
@@ -440,10 +467,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GlobalTradingService } from './global-trading.service';
 import { GlobalTradingController } from './global-trading.controller';
-import { 
-  TradingAccountEntity, 
-  TradingEventEntity, 
-  RegionalEventStoreEntity 
+import {
+  TradingAccountEntity,
+  TradingEventEntity,
+  RegionalEventStoreEntity,
 } from './entities';
 
 @Module({
@@ -451,12 +478,12 @@ import {
     TypeOrmModule.forFeature([
       TradingAccountEntity,
       TradingEventEntity,
-      RegionalEventStoreEntity
-    ])
+      RegionalEventStoreEntity,
+    ]),
   ],
   providers: [GlobalTradingService],
   controllers: [GlobalTradingController],
-  exports: [GlobalTradingService]
+  exports: [GlobalTradingService],
 })
 export class GlobalTradingModule {}
 ```
@@ -490,9 +517,19 @@ export class GlobalTradingController {
 
   @Post('failover')
   async handleFailover(
-    @Body() { failedRegion, targetRegion }: { failedRegion: string; targetRegion: string }
+    @Body()
+    {
+      failedRegion,
+      targetRegion,
+    }: {
+      failedRegion: string;
+      targetRegion: string;
+    }
   ) {
-    return await this.globalTradingService.handleRegionalFailover(failedRegion, targetRegion);
+    return await this.globalTradingService.handleRegionalFailover(
+      failedRegion,
+      targetRegion
+    );
   }
 
   @Get('metrics')
@@ -505,7 +542,7 @@ export class GlobalTradingController {
 ## Key Points
 
 - Manual setup showcasing enterprise-scale distributed repositories
-- Global consistency management across multiple regions  
+- Global consistency management across multiple regions
 - AI integration for intelligent trading and risk analysis
 - Cross-region failover capabilities with automatic recovery
 - Comprehensive monitoring and analytics

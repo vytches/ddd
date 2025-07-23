@@ -1,34 +1,36 @@
 # Actor Pattern Implementation - Intermediate Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-primitives
-**Complexity**: intermediate
-**Domain**: Actor Management
-**Patterns**: Actor Pattern, Context Propagation, Identity Management
-**Dependencies**: IActor, ActorError, DefaultActorType
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+intermediate **Domain**: Actor Management **Patterns**: Actor Pattern, Context
+Propagation, Identity Management **Dependencies**: IActor, ActorError,
+DefaultActorType
 
 ## Description
 
-Demonstrates comprehensive actor pattern implementation with context propagation, identity management, and sophisticated actor hierarchies for multi-tenant enterprise applications with role-based access control.
+Demonstrates comprehensive actor pattern implementation with context
+propagation, identity management, and sophisticated actor hierarchies for
+multi-tenant enterprise applications with role-based access control.
 
 ## Business Context
 
-Enterprise multi-tenant SaaS platform requiring sophisticated actor management with hierarchical permissions, context switching, delegation patterns, and comprehensive audit trails for regulatory compliance and security monitoring.
+Enterprise multi-tenant SaaS platform requiring sophisticated actor management
+with hierarchical permissions, context switching, delegation patterns, and
+comprehensive audit trails for regulatory compliance and security monitoring.
 
 ## Code Example
 
 ```typescript
 // actor-hierarchy.ts
-import { 
-  IActor, 
-  ActorError, 
-  DefaultActorType 
+import {
+  IActor,
+  ActorError,
+  DefaultActorType,
 } from '@vytches-ddd/domain-primitives';
-import { 
-  TenantContext, 
-  OrganizationContext, 
-  RolePermissions, 
-  ActorCapabilities 
+import {
+  TenantContext,
+  OrganizationContext,
+  RolePermissions,
+  ActorCapabilities,
 } from './types'; // From your app
 
 /**
@@ -58,9 +60,19 @@ export interface IEnterpriseActor extends IActor {
   canImpersonate(targetActor: IEnterpriseActor): boolean;
 
   // Delegation management
-  delegatePermission(targetActor: IEnterpriseActor, permission: string, duration?: number): Promise<void>;
-  revokeDelegation(targetActor: IEnterpriseActor, permission: string): Promise<void>;
-  impersonate(targetActor: IEnterpriseActor, reason: string): Promise<IEnterpriseActor>;
+  delegatePermission(
+    targetActor: IEnterpriseActor,
+    permission: string,
+    duration?: number
+  ): Promise<void>;
+  revokeDelegation(
+    targetActor: IEnterpriseActor,
+    permission: string
+  ): Promise<void>;
+  impersonate(
+    targetActor: IEnterpriseActor,
+    reason: string
+  ): Promise<IEnterpriseActor>;
   stopImpersonation(): Promise<void>;
 
   // Audit and compliance
@@ -84,7 +96,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
   public readonly delegatedActors: IEnterpriseActor[] = [];
   public readonly contextStack: ActorContext[] = [];
   public readonly sessionMetadata: SessionMetadata;
-  
+
   private auditTrail: AuditTrailEntry[] = [];
   private currentContext: ActorContext;
   private impersonationContext?: ImpersonationContext;
@@ -107,12 +119,13 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
     this.organizationId = options.organizationId;
     this.roles = roles;
     this.parentActor = options.parentActor;
-    this.sessionMetadata = options.sessionMetadata || this.createDefaultSessionMetadata();
-    
+    this.sessionMetadata =
+      options.sessionMetadata || this.createDefaultSessionMetadata();
+
     // Calculate permissions from roles
     this.permissions = this.calculatePermissions(roles);
     this.capabilities = this.calculateCapabilities(roles, this.permissions);
-    
+
     // Set initial context
     this.currentContext = options.initialContext || this.createDefaultContext();
     this.contextStack.push(this.currentContext);
@@ -125,8 +138,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         actorId: this.id,
         actorType: this.type,
         tenantId: this.tenantId,
-        roles: this.roles.map(r => r.name)
-      }
+        roles: this.roles.map(r => r.name),
+      },
     });
   }
 
@@ -145,7 +158,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       }
 
       const previousContext = this.currentContext;
-      
+
       // Update context stack
       this.contextStack.pop();
       this.contextStack.push(newContext);
@@ -157,21 +170,20 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         details: {
           previousContext: previousContext.name,
           newContext: newContext.name,
-          reason: newContext.switchReason
-        }
+          reason: newContext.switchReason,
+        },
       });
 
       // Return new actor instance with updated context
       return this.createContextualizedActor(newContext);
-
     } catch (error) {
       await this.recordActivity({
         type: 'CONTEXT_SWITCH_FAILED',
         timestamp: new Date(),
         details: {
           targetContext: newContext.name,
-          error: error.message
-        }
+          error: error.message,
+        },
       });
       throw error;
     }
@@ -197,8 +209,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       timestamp: new Date(),
       details: {
         contextName: context.name,
-        stackDepth: this.contextStack.length
-      }
+        stackDepth: this.contextStack.length,
+      },
     });
   }
 
@@ -219,8 +231,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       details: {
         poppedContext: poppedContext.name,
         currentContext: this.currentContext.name,
-        stackDepth: this.contextStack.length
-      }
+        stackDepth: this.contextStack.length,
+      },
     });
 
     return poppedContext;
@@ -238,9 +250,12 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
    */
   hasPermission(permission: string, resource?: string): boolean {
     // Check direct permissions
-    const hasDirectPermission = this.permissions.some(p => 
-      p.name === permission && 
-      (!resource || p.resources.includes(resource) || p.resources.includes('*'))
+    const hasDirectPermission = this.permissions.some(
+      p =>
+        p.name === permission &&
+        (!resource ||
+          p.resources.includes(resource) ||
+          p.resources.includes('*'))
     );
 
     if (hasDirectPermission) {
@@ -249,9 +264,12 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
 
     // Check context-specific permissions
     const contextPermissions = this.currentContext.additionalPermissions || [];
-    const hasContextPermission = contextPermissions.some(p => 
-      p.name === permission && 
-      (!resource || p.resources.includes(resource) || p.resources.includes('*'))
+    const hasContextPermission = contextPermissions.some(
+      p =>
+        p.name === permission &&
+        (!resource ||
+          p.resources.includes(resource) ||
+          p.resources.includes('*'))
     );
 
     if (hasContextPermission) {
@@ -266,8 +284,13 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
    * Check if actor has specific role
    */
   hasRole(roleName: string): boolean {
-    return this.roles.some(role => role.name === roleName) ||
-           this.currentContext.temporaryRoles?.some(role => role.name === roleName) || false;
+    return (
+      this.roles.some(role => role.name === roleName) ||
+      this.currentContext.temporaryRoles?.some(
+        role => role.name === roleName
+      ) ||
+      false
+    );
   }
 
   /**
@@ -298,8 +321,11 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
     }
 
     // Check organization boundaries
-    if (this.organizationId && targetActor.organizationId && 
-        this.organizationId !== targetActor.organizationId) {
+    if (
+      this.organizationId &&
+      targetActor.organizationId &&
+      this.organizationId !== targetActor.organizationId
+    ) {
       return this.hasPermission('CROSS_ORGANIZATION_IMPERSONATE');
     }
 
@@ -310,8 +336,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
    * Delegate permission to target actor
    */
   async delegatePermission(
-    targetActor: IEnterpriseActor, 
-    permission: string, 
+    targetActor: IEnterpriseActor,
+    permission: string,
     duration?: number
   ): Promise<void> {
     if (!this.canDelegate(permission)) {
@@ -337,7 +363,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       permission,
       grantedAt: new Date(),
       expiresAt: duration ? new Date(Date.now() + duration) : undefined,
-      tenantId: this.tenantId
+      tenantId: this.tenantId,
     };
 
     // Add to target actor's delegated permissions
@@ -350,8 +376,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         targetActor: targetActor.id,
         permission,
         delegationId: delegation.id,
-        duration
-      }
+        duration,
+      },
     });
 
     await targetActor.recordActivity({
@@ -360,17 +386,22 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       details: {
         sourceActor: this.id,
         permission,
-        delegationId: delegation.id
-      }
+        delegationId: delegation.id,
+      },
     });
   }
 
   /**
    * Revoke delegated permission
    */
-  async revokeDelegation(targetActor: IEnterpriseActor, permission: string): Promise<void> {
-    const delegationIndex = targetActor.delegatedActors.findIndex(actor => actor.id === this.id);
-    
+  async revokeDelegation(
+    targetActor: IEnterpriseActor,
+    permission: string
+  ): Promise<void> {
+    const delegationIndex = targetActor.delegatedActors.findIndex(
+      actor => actor.id === this.id
+    );
+
     if (delegationIndex === -1) {
       throw new ActorError(
         `No delegation found from ${this.id} to ${targetActor.id} for permission: ${permission}`,
@@ -387,8 +418,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       timestamp: new Date(),
       details: {
         targetActor: targetActor.id,
-        permission
-      }
+        permission,
+      },
     });
 
     await targetActor.recordActivity({
@@ -396,15 +427,18 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       timestamp: new Date(),
       details: {
         sourceActor: this.id,
-        permission
-      }
+        permission,
+      },
     });
   }
 
   /**
    * Start impersonating target actor
    */
-  async impersonate(targetActor: IEnterpriseActor, reason: string): Promise<IEnterpriseActor> {
+  async impersonate(
+    targetActor: IEnterpriseActor,
+    reason: string
+  ): Promise<IEnterpriseActor> {
     if (!this.canImpersonate(targetActor)) {
       throw new ActorError(
         `Actor ${this.id} cannot impersonate ${targetActor.id}`,
@@ -417,7 +451,10 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       throw new ActorError(
         `Actor ${this.id} is already impersonating another actor`,
         'ALREADY_IMPERSONATING',
-        { actorId: this.id, currentTarget: this.impersonationContext.targetActorId }
+        {
+          actorId: this.id,
+          currentTarget: this.impersonationContext.targetActorId,
+        }
       );
     }
 
@@ -426,7 +463,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       targetActorId: targetActor.id,
       startTime: new Date(),
       reason,
-      sessionId: `IMP-${Date.now()}-${this.id}-${targetActor.id}`
+      sessionId: `IMP-${Date.now()}-${this.id}-${targetActor.id}`,
     };
 
     await this.recordActivity({
@@ -435,8 +472,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       details: {
         targetActor: targetActor.id,
         reason,
-        sessionId: this.impersonationContext.sessionId
-      }
+        sessionId: this.impersonationContext.sessionId,
+      },
     });
 
     await targetActor.recordActivity({
@@ -445,8 +482,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       details: {
         sourceActor: this.id,
         reason,
-        sessionId: this.impersonationContext.sessionId
-      }
+        sessionId: this.impersonationContext.sessionId,
+      },
     });
 
     // Return impersonated actor instance
@@ -474,8 +511,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       details: {
         targetActor: impersonationContext.targetActorId,
         duration: Date.now() - impersonationContext.startTime.getTime(),
-        sessionId: impersonationContext.sessionId
-      }
+        sessionId: impersonationContext.sessionId,
+      },
     });
   }
 
@@ -483,7 +520,9 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
    * Get complete audit trail for this actor
    */
   getAuditTrail(): AuditTrailEntry[] {
-    return [...this.auditTrail].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return [...this.auditTrail].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
   }
 
   /**
@@ -502,7 +541,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       sessionId: this.sessionMetadata.sessionId,
       ipAddress: this.sessionMetadata.ipAddress,
       userAgent: this.sessionMetadata.userAgent,
-      impersonationContext: this.impersonationContext
+      impersonationContext: this.impersonationContext,
     };
 
     this.auditTrail.push(auditEntry);
@@ -522,20 +561,20 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       reportGeneratedAt: new Date(),
       reportingPeriod: {
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        end: new Date()
+        end: new Date(),
       },
       actorSummary: {
         type: this.type,
         roles: this.roles.map(r => r.name),
         permissions: this.permissions.map(p => p.name),
-        capabilities: this.capabilities
+        capabilities: this.capabilities,
       },
       activitySummary: this.generateActivitySummary(),
       securityEvents: this.getSecurityEvents(),
       impersonationSummary: this.getImpersonationSummary(),
       delegationSummary: this.getDelegationSummary(),
       complianceViolations: await this.detectComplianceViolations(),
-      recommendations: this.generateSecurityRecommendations()
+      recommendations: this.generateSecurityRecommendations(),
     };
 
     return report;
@@ -553,7 +592,9 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
   /**
    * Create impersonated actor instance
    */
-  protected createImpersonatedActor(targetActor: IEnterpriseActor): IEnterpriseActor {
+  protected createImpersonatedActor(
+    targetActor: IEnterpriseActor
+  ): IEnterpriseActor {
     // Implementation would create an actor instance that combines
     // the original actor's identity with the target actor's permissions
     return targetActor;
@@ -561,12 +602,17 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
 
   private canSwitchToContext(context: ActorContext): boolean {
     // Check if actor has permission to switch to the target context
-    return this.hasPermission('CONTEXT_SWITCH', context.name) ||
-           context.allowedActorTypes.includes(this.type);
+    return (
+      this.hasPermission('CONTEXT_SWITCH', context.name) ||
+      context.allowedActorTypes.includes(this.type)
+    );
   }
 
-  private hasDelegatedPermission(permission: string, resource?: string): boolean {
-    return this.delegatedActors.some(actor => 
+  private hasDelegatedPermission(
+    permission: string,
+    resource?: string
+  ): boolean {
+    return this.delegatedActors.some(actor =>
       actor.hasPermission(permission, resource)
     );
   }
@@ -584,15 +630,25 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
     }, [] as Permission[]);
   }
 
-  private calculateCapabilities(roles: EnterpriseRole[], permissions: Permission[]): ActorCapabilities {
+  private calculateCapabilities(
+    roles: EnterpriseRole[],
+    permissions: Permission[]
+  ): ActorCapabilities {
     return {
       canImpersonate: roles.some(r => r.capabilities.includes('IMPERSONATE')),
       canDelegate: roles.some(r => r.capabilities.includes('DELEGATE')),
-      canCreateActors: roles.some(r => r.capabilities.includes('CREATE_ACTORS')),
+      canCreateActors: roles.some(r =>
+        r.capabilities.includes('CREATE_ACTORS')
+      ),
       canModifyRoles: roles.some(r => r.capabilities.includes('MODIFY_ROLES')),
-      canViewAuditLogs: roles.some(r => r.capabilities.includes('VIEW_AUDIT_LOGS')),
+      canViewAuditLogs: roles.some(r =>
+        r.capabilities.includes('VIEW_AUDIT_LOGS')
+      ),
       maxDelegationDepth: Math.max(...roles.map(r => r.maxDelegationDepth), 0),
-      maxImpersonationDuration: Math.max(...roles.map(r => r.maxImpersonationDuration), 3600000) // 1 hour default
+      maxImpersonationDuration: Math.max(
+        ...roles.map(r => r.maxImpersonationDuration),
+        3600000
+      ), // 1 hour default
     };
   }
 
@@ -603,7 +659,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       tenantId: this.tenantId,
       organizationId: this.organizationId,
       allowedActorTypes: [this.type],
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -612,7 +668,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
       sessionId: `SESSION-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       ipAddress: 'unknown',
-      userAgent: 'unknown'
+      userAgent: 'unknown',
     };
   }
 
@@ -624,11 +680,18 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
     const activities = this.auditTrail;
     return {
       totalActivities: activities.length,
-      loginCount: activities.filter(a => a.activityType === 'ACTOR_LOGIN').length,
-      permissionChanges: activities.filter(a => a.activityType.includes('PERMISSION')).length,
-      contextSwitches: activities.filter(a => a.activityType.includes('CONTEXT')).length,
-      impersonationCount: activities.filter(a => a.activityType.includes('IMPERSONATION')).length,
-      lastActivity: activities.length > 0 ? activities[0].timestamp : null
+      loginCount: activities.filter(a => a.activityType === 'ACTOR_LOGIN')
+        .length,
+      permissionChanges: activities.filter(a =>
+        a.activityType.includes('PERMISSION')
+      ).length,
+      contextSwitches: activities.filter(a =>
+        a.activityType.includes('CONTEXT')
+      ).length,
+      impersonationCount: activities.filter(a =>
+        a.activityType.includes('IMPERSONATION')
+      ).length,
+      lastActivity: activities.length > 0 ? activities[0].timestamp : null,
     };
   }
 
@@ -640,31 +703,43 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         type: entry.activityType,
         timestamp: entry.timestamp,
         severity: this.getSecurityEventSeverity(entry.activityType),
-        details: entry.details
+        details: entry.details,
       }));
   }
 
   private getImpersonationSummary(): ImpersonationSummary {
-    const impersonationEvents = this.auditTrail.filter(a => 
-      a.activityType === 'IMPERSONATION_STARTED' || a.activityType === 'IMPERSONATION_RECEIVED'
+    const impersonationEvents = this.auditTrail.filter(
+      a =>
+        a.activityType === 'IMPERSONATION_STARTED' ||
+        a.activityType === 'IMPERSONATION_RECEIVED'
     );
 
     return {
-      totalImpersonations: impersonationEvents.filter(a => a.activityType === 'IMPERSONATION_STARTED').length,
-      totalImpersonatedBy: impersonationEvents.filter(a => a.activityType === 'IMPERSONATION_RECEIVED').length,
-      recentImpersonations: impersonationEvents.slice(0, 10)
+      totalImpersonations: impersonationEvents.filter(
+        a => a.activityType === 'IMPERSONATION_STARTED'
+      ).length,
+      totalImpersonatedBy: impersonationEvents.filter(
+        a => a.activityType === 'IMPERSONATION_RECEIVED'
+      ).length,
+      recentImpersonations: impersonationEvents.slice(0, 10),
     };
   }
 
   private getDelegationSummary(): DelegationSummary {
-    const delegationEvents = this.auditTrail.filter(a => 
-      a.activityType === 'PERMISSION_DELEGATED' || a.activityType === 'PERMISSION_RECEIVED'
+    const delegationEvents = this.auditTrail.filter(
+      a =>
+        a.activityType === 'PERMISSION_DELEGATED' ||
+        a.activityType === 'PERMISSION_RECEIVED'
     );
 
     return {
-      totalDelegatedOut: delegationEvents.filter(a => a.activityType === 'PERMISSION_DELEGATED').length,
-      totalDelegatedIn: delegationEvents.filter(a => a.activityType === 'PERMISSION_RECEIVED').length,
-      activeDelegations: this.delegatedActors.length
+      totalDelegatedOut: delegationEvents.filter(
+        a => a.activityType === 'PERMISSION_DELEGATED'
+      ).length,
+      totalDelegatedIn: delegationEvents.filter(
+        a => a.activityType === 'PERMISSION_RECEIVED'
+      ).length,
+      activeDelegations: this.delegatedActors.length,
     };
   }
 
@@ -672,8 +747,8 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
     const violations: ComplianceViolation[] = [];
 
     // Check for excessive privilege escalations
-    const escalationCount = this.auditTrail.filter(a => 
-      a.activityType === 'PERMISSION_RECEIVED'
+    const escalationCount = this.auditTrail.filter(
+      a => a.activityType === 'PERMISSION_RECEIVED'
     ).length;
 
     if (escalationCount > 10) {
@@ -681,13 +756,13 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         type: 'EXCESSIVE_PRIVILEGE_ESCALATION',
         severity: 'HIGH',
         description: `Actor has received ${escalationCount} privilege delegations`,
-        detectedAt: new Date()
+        detectedAt: new Date(),
       });
     }
 
     // Check for unusual access patterns
-    const contextSwitchCount = this.auditTrail.filter(a => 
-      a.activityType === 'CONTEXT_SWITCHED'
+    const contextSwitchCount = this.auditTrail.filter(
+      a => a.activityType === 'CONTEXT_SWITCHED'
     ).length;
 
     if (contextSwitchCount > 50) {
@@ -695,7 +770,7 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
         type: 'UNUSUAL_ACCESS_PATTERN',
         severity: 'MEDIUM',
         description: `Actor has switched contexts ${contextSwitchCount} times`,
-        detectedAt: new Date()
+        detectedAt: new Date(),
       });
     }
 
@@ -704,9 +779,9 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
 
   private generateSecurityRecommendations(): string[] {
     const recommendations: string[] = [];
-    
-    const recentActivities = this.auditTrail.filter(a => 
-      Date.now() - a.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000 // 7 days
+
+    const recentActivities = this.auditTrail.filter(
+      a => Date.now() - a.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000 // 7 days
     );
 
     if (recentActivities.length === 0) {
@@ -721,11 +796,18 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
   }
 
   private isSecurityEvent(activityType: string): boolean {
-    return ['IMPERSONATION_STARTED', 'PERMISSION_DELEGATED', 'CONTEXT_SWITCHED', 
-            'ACCESS_DENIED', 'SECURITY_VIOLATION'].includes(activityType);
+    return [
+      'IMPERSONATION_STARTED',
+      'PERMISSION_DELEGATED',
+      'CONTEXT_SWITCHED',
+      'ACCESS_DENIED',
+      'SECURITY_VIOLATION',
+    ].includes(activityType);
   }
 
-  private getSecurityEventSeverity(activityType: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  private getSecurityEventSeverity(
+    activityType: string
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     switch (activityType) {
       case 'IMPERSONATION_STARTED':
         return 'HIGH';
@@ -747,12 +829,12 @@ export abstract class BaseEnterpriseActor implements IEnterpriseActor {
 ```typescript
 // concrete-actors.ts
 import { BaseEnterpriseActor } from './actor-hierarchy';
-import { 
-  SystemAdministrator, 
-  TenantAdministrator, 
-  OrganizationManager, 
+import {
+  SystemAdministrator,
+  TenantAdministrator,
+  OrganizationManager,
   RegularUser,
-  ServiceAccount 
+  ServiceAccount,
 } from './types'; // From your app
 
 /**
@@ -767,22 +849,34 @@ export class SystemAdministratorActor extends BaseEnterpriseActor {
       initialContext?: ActorContext;
     } = {}
   ) {
-    super(id, 'SYSTEM_ADMIN', tenantId, [
-      {
-        name: 'SYSTEM_ADMINISTRATOR',
-        level: 100,
-        permissions: [
-          { name: 'SYSTEM_MANAGE', resources: ['*'], delegatable: false },
-          { name: 'TENANT_MANAGE', resources: ['*'], delegatable: true },
-          { name: 'USER_MANAGE', resources: ['*'], delegatable: true },
-          { name: 'SECURITY_MANAGE', resources: ['*'], delegatable: false },
-          { name: 'AUDIT_VIEW', resources: ['*'], delegatable: false }
-        ],
-        capabilities: ['IMPERSONATE', 'DELEGATE', 'CREATE_ACTORS', 'MODIFY_ROLES', 'VIEW_AUDIT_LOGS'],
-        maxDelegationDepth: 3,
-        maxImpersonationDuration: 7200000 // 2 hours
-      }
-    ], options);
+    super(
+      id,
+      'SYSTEM_ADMIN',
+      tenantId,
+      [
+        {
+          name: 'SYSTEM_ADMINISTRATOR',
+          level: 100,
+          permissions: [
+            { name: 'SYSTEM_MANAGE', resources: ['*'], delegatable: false },
+            { name: 'TENANT_MANAGE', resources: ['*'], delegatable: true },
+            { name: 'USER_MANAGE', resources: ['*'], delegatable: true },
+            { name: 'SECURITY_MANAGE', resources: ['*'], delegatable: false },
+            { name: 'AUDIT_VIEW', resources: ['*'], delegatable: false },
+          ],
+          capabilities: [
+            'IMPERSONATE',
+            'DELEGATE',
+            'CREATE_ACTORS',
+            'MODIFY_ROLES',
+            'VIEW_AUDIT_LOGS',
+          ],
+          maxDelegationDepth: 3,
+          maxImpersonationDuration: 7200000, // 2 hours
+        },
+      ],
+      options
+    );
   }
 
   /**
@@ -805,8 +899,8 @@ export class SystemAdministratorActor extends BaseEnterpriseActor {
       details: {
         tenantId,
         tenantName: tenantData.name,
-        createdBy: this.id
-      }
+        createdBy: this.id,
+      },
     });
 
     return tenantId;
@@ -816,8 +910,8 @@ export class SystemAdministratorActor extends BaseEnterpriseActor {
    * Emergency access override for critical situations
    */
   async emergencyAccessOverride(
-    targetResource: string, 
-    reason: string, 
+    targetResource: string,
+    reason: string,
     duration: number
   ): Promise<EmergencyAccessToken> {
     const token: EmergencyAccessToken = {
@@ -828,7 +922,7 @@ export class SystemAdministratorActor extends BaseEnterpriseActor {
       grantedAt: new Date(),
       expiresAt: new Date(Date.now() + duration),
       usageCount: 0,
-      maxUsage: 1
+      maxUsage: 1,
     };
 
     await this.recordActivity({
@@ -838,8 +932,8 @@ export class SystemAdministratorActor extends BaseEnterpriseActor {
         tokenId: token.id,
         resource: targetResource,
         reason,
-        duration
-      }
+        duration,
+      },
     });
 
     return token;
@@ -859,22 +953,42 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
       initialContext?: ActorContext;
     } = {}
   ) {
-    super(id, 'TENANT_ADMIN', tenantId, [
-      {
-        name: 'TENANT_ADMINISTRATOR',
-        level: 80,
-        permissions: [
-          { name: 'ORGANIZATION_MANAGE', resources: [tenantId], delegatable: true },
-          { name: 'USER_MANAGE', resources: [tenantId], delegatable: true },
-          { name: 'ROLE_MANAGE', resources: [tenantId], delegatable: true },
-          { name: 'BILLING_MANAGE', resources: [tenantId], delegatable: false },
-          { name: 'AUDIT_VIEW', resources: [tenantId], delegatable: false }
-        ],
-        capabilities: ['IMPERSONATE', 'DELEGATE', 'CREATE_ACTORS', 'MODIFY_ROLES', 'VIEW_AUDIT_LOGS'],
-        maxDelegationDepth: 2,
-        maxImpersonationDuration: 3600000 // 1 hour
-      }
-    ], { ...options, organizationId });
+    super(
+      id,
+      'TENANT_ADMIN',
+      tenantId,
+      [
+        {
+          name: 'TENANT_ADMINISTRATOR',
+          level: 80,
+          permissions: [
+            {
+              name: 'ORGANIZATION_MANAGE',
+              resources: [tenantId],
+              delegatable: true,
+            },
+            { name: 'USER_MANAGE', resources: [tenantId], delegatable: true },
+            { name: 'ROLE_MANAGE', resources: [tenantId], delegatable: true },
+            {
+              name: 'BILLING_MANAGE',
+              resources: [tenantId],
+              delegatable: false,
+            },
+            { name: 'AUDIT_VIEW', resources: [tenantId], delegatable: false },
+          ],
+          capabilities: [
+            'IMPERSONATE',
+            'DELEGATE',
+            'CREATE_ACTORS',
+            'MODIFY_ROLES',
+            'VIEW_AUDIT_LOGS',
+          ],
+          maxDelegationDepth: 2,
+          maxImpersonationDuration: 3600000, // 1 hour
+        },
+      ],
+      { ...options, organizationId }
+    );
   }
 
   /**
@@ -898,8 +1012,8 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
         organizationId: orgId,
         organizationName: orgData.name,
         tenantId: this.tenantId,
-        createdBy: this.id
-      }
+        createdBy: this.id,
+      },
     });
 
     return orgId;
@@ -916,7 +1030,7 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
     const results: BulkOperationResult = {
       successful: [],
       failed: [],
-      totalProcessed: userIds.length
+      totalProcessed: userIds.length,
     };
 
     for (const userId of userIds) {
@@ -936,8 +1050,8 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
         totalUsers: userIds.length,
         successful: results.successful.length,
         failed: results.failed.length,
-        reason
-      }
+        reason,
+      },
     });
 
     return results;
@@ -952,7 +1066,7 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
     await this.recordActivity({
       type: `USER_${operation}`,
       timestamp: new Date(),
-      details: { userId, reason }
+      details: { userId, reason },
     });
   }
 }
@@ -963,7 +1077,7 @@ export class TenantAdministratorActor extends BaseEnterpriseActor {
 export class ServiceAccountActor extends BaseEnterpriseActor {
   public readonly serviceName: string;
   public readonly serviceType: 'API' | 'BATCH' | 'INTEGRATION' | 'MONITORING';
-  
+
   constructor(
     id: string,
     tenantId: string,
@@ -975,16 +1089,22 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
       sessionMetadata?: SessionMetadata;
     } = {}
   ) {
-    super(id, 'SERVICE_ACCOUNT', tenantId, [
-      {
-        name: 'SERVICE_ACCOUNT',
-        level: 10,
-        permissions,
-        capabilities: ['DELEGATE'], // Service accounts can delegate but not impersonate
-        maxDelegationDepth: 1,
-        maxImpersonationDuration: 0
-      }
-    ], options);
+    super(
+      id,
+      'SERVICE_ACCOUNT',
+      tenantId,
+      [
+        {
+          name: 'SERVICE_ACCOUNT',
+          level: 10,
+          permissions,
+          capabilities: ['DELEGATE'], // Service accounts can delegate but not impersonate
+          maxDelegationDepth: 1,
+          maxImpersonationDuration: 0,
+        },
+      ],
+      options
+    );
 
     this.serviceName = serviceName;
     this.serviceType = serviceType;
@@ -993,7 +1113,10 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
   /**
    * Service accounts cannot impersonate (override)
    */
-  async impersonate(targetActor: IEnterpriseActor, reason: string): Promise<IEnterpriseActor> {
+  async impersonate(
+    targetActor: IEnterpriseActor,
+    reason: string
+  ): Promise<IEnterpriseActor> {
     throw new ActorError(
       'Service accounts cannot impersonate other actors',
       'IMPERSONATION_NOT_ALLOWED',
@@ -1026,13 +1149,16 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
         processName,
         executionId,
         serviceName: this.serviceName,
-        serviceType: this.serviceType
-      }
+        serviceType: this.serviceType,
+      },
     });
 
     try {
       // Execute the actual process (implementation specific)
-      const result = await this.performProcessExecution(processName, processData);
+      const result = await this.performProcessExecution(
+        processName,
+        processData
+      );
 
       await this.recordActivity({
         type: 'AUTOMATED_PROCESS_COMPLETED',
@@ -1041,12 +1167,11 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
           processName,
           executionId,
           result: result.summary,
-          duration: result.duration
-        }
+          duration: result.duration,
+        },
       });
 
       return result;
-
     } catch (error) {
       await this.recordActivity({
         type: 'AUTOMATED_PROCESS_FAILED',
@@ -1054,14 +1179,17 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
         details: {
           processName,
           executionId,
-          error: error.message
-        }
+          error: error.message,
+        },
       });
       throw error;
     }
   }
 
-  private async performProcessExecution(processName: string, processData: any): Promise<AutomatedProcessResult> {
+  private async performProcessExecution(
+    processName: string,
+    processData: any
+  ): Promise<AutomatedProcessResult> {
     // Implementation specific to the automated process
     return {
       executionId: `PROC-${Date.now()}-${this.id}`,
@@ -1069,7 +1197,7 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
       summary: `Process ${processName} completed successfully`,
       duration: 1000,
       processedItems: 1,
-      errors: []
+      errors: [],
     };
   }
 }
@@ -1077,11 +1205,11 @@ export class ServiceAccountActor extends BaseEnterpriseActor {
 
 ```typescript
 // actor-management-service.ts
-import { 
+import {
   BaseEnterpriseActor,
   SystemAdministratorActor,
   TenantAdministratorActor,
-  ServiceAccountActor
+  ServiceAccountActor,
 } from './concrete-actors';
 import { IEnterpriseActor } from './actor-hierarchy';
 import { ActorRepository, PermissionService, AuditService } from './types'; // From your app
@@ -1109,7 +1237,12 @@ export class ActorManagementService {
    * Create new enterprise actor
    */
   async createActor(
-    actorType: 'SYSTEM_ADMIN' | 'TENANT_ADMIN' | 'ORG_MANAGER' | 'REGULAR_USER' | 'SERVICE_ACCOUNT',
+    actorType:
+      | 'SYSTEM_ADMIN'
+      | 'TENANT_ADMIN'
+      | 'ORG_MANAGER'
+      | 'REGULAR_USER'
+      | 'SERVICE_ACCOUNT',
     tenantId: string,
     actorData: ActorCreationData,
     createdBy: IEnterpriseActor
@@ -1129,14 +1262,19 @@ export class ActorManagementService {
     switch (actorType) {
       case 'SYSTEM_ADMIN':
         newActor = new SystemAdministratorActor(actorId, tenantId, {
-          sessionMetadata: actorData.sessionMetadata
+          sessionMetadata: actorData.sessionMetadata,
         });
         break;
 
       case 'TENANT_ADMIN':
-        newActor = new TenantAdministratorActor(actorId, tenantId, actorData.organizationId, {
-          sessionMetadata: actorData.sessionMetadata
-        });
+        newActor = new TenantAdministratorActor(
+          actorId,
+          tenantId,
+          actorData.organizationId,
+          {
+            sessionMetadata: actorData.sessionMetadata,
+          }
+        );
         break;
 
       case 'SERVICE_ACCOUNT':
@@ -1147,7 +1285,7 @@ export class ActorManagementService {
             { actorType }
           );
         }
-        
+
         newActor = new ServiceAccountActor(
           actorId,
           tenantId,
@@ -1156,7 +1294,7 @@ export class ActorManagementService {
           actorData.permissions || [],
           {
             organizationId: actorData.organizationId,
-            sessionMetadata: actorData.sessionMetadata
+            sessionMetadata: actorData.sessionMetadata,
           }
         );
         break;
@@ -1171,7 +1309,7 @@ export class ActorManagementService {
 
     // Store in repository
     await this.actorRepository.save(newActor);
-    
+
     // Add to active actors
     this.activeActors.set(actorId, newActor);
 
@@ -1182,8 +1320,8 @@ export class ActorManagementService {
       details: {
         createdActorId: actorId,
         createdActorType: actorType,
-        tenantId
-      }
+        tenantId,
+      },
     });
 
     return newActor;
@@ -1192,7 +1330,10 @@ export class ActorManagementService {
   /**
    * Get actor by ID with context loading
    */
-  async getActor(actorId: string, loadFullContext: boolean = true): Promise<IEnterpriseActor | null> {
+  async getActor(
+    actorId: string,
+    loadFullContext: boolean = true
+  ): Promise<IEnterpriseActor | null> {
     // Check active actors first
     if (this.activeActors.has(actorId)) {
       return this.activeActors.get(actorId)!;
@@ -1200,7 +1341,7 @@ export class ActorManagementService {
 
     // Load from repository
     const actor = await this.actorRepository.findById(actorId);
-    
+
     if (actor && loadFullContext) {
       // Load additional context data
       await this.loadActorContext(actor);
@@ -1234,7 +1375,7 @@ export class ActorManagementService {
     const delegationResults: DelegationResult = {
       successful: [],
       failed: [],
-      delegationId: `DEL-${Date.now()}-${sourceActorId}-${targetActorId}`
+      delegationId: `DEL-${Date.now()}-${sourceActorId}-${targetActorId}`,
     };
 
     for (const permission of permissions) {
@@ -1244,7 +1385,7 @@ export class ActorManagementService {
       } catch (error) {
         delegationResults.failed.push({
           permission,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -1260,8 +1401,8 @@ export class ActorManagementService {
           targetActor: targetActorId,
           permissions,
           successful: delegationResults.successful,
-          failed: delegationResults.failed
-        }
+          failed: delegationResults.failed,
+        },
       });
     }
 
@@ -1276,7 +1417,7 @@ export class ActorManagementService {
     timeframe: { start: Date; end: Date }
   ): Promise<ActorAnalytics> {
     const actors = await this.actorRepository.findByTenant(tenantId);
-    
+
     const analytics: ActorAnalytics = {
       tenantId,
       timeframe,
@@ -1284,10 +1425,16 @@ export class ActorManagementService {
       actorTypeBreakdown: this.calculateActorTypeBreakdown(actors),
       activitySummary: await this.calculateActivitySummary(actors, timeframe),
       securityMetrics: await this.calculateSecurityMetrics(actors, timeframe),
-      delegationMetrics: await this.calculateDelegationMetrics(actors, timeframe),
-      impersonationMetrics: await this.calculateImpersonationMetrics(actors, timeframe),
+      delegationMetrics: await this.calculateDelegationMetrics(
+        actors,
+        timeframe
+      ),
+      impersonationMetrics: await this.calculateImpersonationMetrics(
+        actors,
+        timeframe
+      ),
       complianceStatus: await this.assessComplianceStatus(actors),
-      recommendations: this.generateActorRecommendations(actors)
+      recommendations: this.generateActorRecommendations(actors),
     };
 
     return analytics;
@@ -1298,10 +1445,14 @@ export class ActorManagementService {
    */
   async performSecurityAudit(
     tenantId: string,
-    auditScope: 'FULL' | 'PERMISSIONS' | 'DELEGATIONS' | 'IMPERSONATIONS' = 'FULL'
+    auditScope:
+      | 'FULL'
+      | 'PERMISSIONS'
+      | 'DELEGATIONS'
+      | 'IMPERSONATIONS' = 'FULL'
   ): Promise<SecurityAuditReport> {
     const actors = await this.actorRepository.findByTenant(tenantId);
-    
+
     const auditReport: SecurityAuditReport = {
       auditId: `AUDIT-${Date.now()}-${tenantId}`,
       tenantId,
@@ -1311,17 +1462,22 @@ export class ActorManagementService {
       securityFindings: [],
       complianceViolations: [],
       recommendations: [],
-      riskScore: 0
+      riskScore: 0,
     };
 
     for (const actor of actors) {
       const actorFindings = await this.auditActor(actor, auditScope);
       auditReport.securityFindings.push(...actorFindings.securityFindings);
-      auditReport.complianceViolations.push(...actorFindings.complianceViolations);
+      auditReport.complianceViolations.push(
+        ...actorFindings.complianceViolations
+      );
     }
 
-    auditReport.riskScore = this.calculateRiskScore(auditReport.securityFindings);
-    auditReport.recommendations = this.generateSecurityRecommendations(auditReport);
+    auditReport.riskScore = this.calculateRiskScore(
+      auditReport.securityFindings
+    );
+    auditReport.recommendations =
+      this.generateSecurityRecommendations(auditReport);
 
     return auditReport;
   }
@@ -1331,25 +1487,34 @@ export class ActorManagementService {
     // Implementation specific
   }
 
-  private calculateActorTypeBreakdown(actors: IEnterpriseActor[]): Record<string, number> {
-    return actors.reduce((acc, actor) => {
-      acc[actor.type] = (acc[actor.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  private calculateActorTypeBreakdown(
+    actors: IEnterpriseActor[]
+  ): Record<string, number> {
+    return actors.reduce(
+      (acc, actor) => {
+        acc[actor.type] = (acc[actor.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 
   private async calculateActivitySummary(
-    actors: IEnterpriseActor[], 
+    actors: IEnterpriseActor[],
     timeframe: { start: Date; end: Date }
   ): Promise<ActivitySummary> {
     let totalActivities = 0;
     let activeActorsCount = 0;
 
     for (const actor of actors) {
-      const actorActivities = actor.getAuditTrail().filter(entry =>
-        entry.timestamp >= timeframe.start && entry.timestamp <= timeframe.end
-      );
-      
+      const actorActivities = actor
+        .getAuditTrail()
+        .filter(
+          entry =>
+            entry.timestamp >= timeframe.start &&
+            entry.timestamp <= timeframe.end
+        );
+
       totalActivities += actorActivities.length;
       if (actorActivities.length > 0) {
         activeActorsCount++;
@@ -1360,12 +1525,12 @@ export class ActorManagementService {
       totalActivities,
       activeActorsCount,
       averageActivitiesPerActor: totalActivities / actors.length,
-      lastActivity: new Date() // Implementation specific
+      lastActivity: new Date(), // Implementation specific
     };
   }
 
   private async calculateSecurityMetrics(
-    actors: IEnterpriseActor[], 
+    actors: IEnterpriseActor[],
     timeframe: { start: Date; end: Date }
   ): Promise<SecurityMetrics> {
     // Implementation for security metrics calculation
@@ -1373,12 +1538,12 @@ export class ActorManagementService {
       totalSecurityEvents: 0,
       highRiskEvents: 0,
       failedAccessAttempts: 0,
-      suspiciousActivity: 0
+      suspiciousActivity: 0,
     };
   }
 
   private async calculateDelegationMetrics(
-    actors: IEnterpriseActor[], 
+    actors: IEnterpriseActor[],
     timeframe: { start: Date; end: Date }
   ): Promise<DelegationMetrics> {
     // Implementation for delegation metrics calculation
@@ -1386,12 +1551,12 @@ export class ActorManagementService {
       totalDelegations: 0,
       activeDelegations: 0,
       averageDelegationDuration: 0,
-      mostDelegatedPermissions: []
+      mostDelegatedPermissions: [],
     };
   }
 
   private async calculateImpersonationMetrics(
-    actors: IEnterpriseActor[], 
+    actors: IEnterpriseActor[],
     timeframe: { start: Date; end: Date }
   ): Promise<ImpersonationMetrics> {
     // Implementation for impersonation metrics calculation
@@ -1399,16 +1564,18 @@ export class ActorManagementService {
       totalImpersonations: 0,
       activeImpersonations: 0,
       averageImpersonationDuration: 0,
-      mostImpersonatedActors: []
+      mostImpersonatedActors: [],
     };
   }
 
-  private async assessComplianceStatus(actors: IEnterpriseActor[]): Promise<ComplianceStatus> {
+  private async assessComplianceStatus(
+    actors: IEnterpriseActor[]
+  ): Promise<ComplianceStatus> {
     // Implementation for compliance assessment
     return {
       overallScore: 85,
       violations: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -1416,9 +1583,11 @@ export class ActorManagementService {
     const recommendations: string[] = [];
 
     // Analyze actor patterns and generate recommendations
-    const inactiveActors = actors.filter(actor => 
-      actor.getAuditTrail().length === 0 || 
-      actor.getAuditTrail()[0].timestamp < new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    const inactiveActors = actors.filter(
+      actor =>
+        actor.getAuditTrail().length === 0 ||
+        actor.getAuditTrail()[0].timestamp <
+          new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     );
 
     if (inactiveActors.length > actors.length * 0.2) {
@@ -1429,29 +1598,36 @@ export class ActorManagementService {
   }
 
   private async auditActor(
-    actor: IEnterpriseActor, 
+    actor: IEnterpriseActor,
     auditScope: 'FULL' | 'PERMISSIONS' | 'DELEGATIONS' | 'IMPERSONATIONS'
   ): Promise<ActorAuditResult> {
     return {
       actorId: actor.id,
       securityFindings: [],
-      complianceViolations: []
+      complianceViolations: [],
     };
   }
 
   private calculateRiskScore(findings: SecurityFinding[]): number {
     return findings.reduce((score, finding) => {
       switch (finding.severity) {
-        case 'CRITICAL': return score + 10;
-        case 'HIGH': return score + 5;
-        case 'MEDIUM': return score + 2;
-        case 'LOW': return score + 1;
-        default: return score;
+        case 'CRITICAL':
+          return score + 10;
+        case 'HIGH':
+          return score + 5;
+        case 'MEDIUM':
+          return score + 2;
+        case 'LOW':
+          return score + 1;
+        default:
+          return score;
       }
     }, 0);
   }
 
-  private generateSecurityRecommendations(auditReport: SecurityAuditReport): string[] {
+  private generateSecurityRecommendations(
+    auditReport: SecurityAuditReport
+  ): string[] {
     const recommendations: string[] = [];
 
     if (auditReport.riskScore > 50) {
@@ -1467,11 +1643,11 @@ export class ActorManagementService {
 
 ```typescript
 // actor-pattern-demo.ts
-import { 
+import {
   SystemAdministratorActor,
   TenantAdministratorActor,
   ServiceAccountActor,
-  ActorManagementService
+  ActorManagementService,
 } from './actor-implementation';
 import { ActorError } from '@vytches-ddd/domain-primitives';
 
@@ -1490,17 +1666,20 @@ export class ActorPatternDemo {
           sessionId: 'SESSION-DEMO-001',
           createdAt: new Date(),
           ipAddress: '10.0.0.1',
-          userAgent: 'Demo/1.0'
-        }
+          userAgent: 'Demo/1.0',
+        },
       });
 
       console.log('System Admin created:', sysAdmin.id);
-      console.log('System Admin permissions:', sysAdmin.permissions.map(p => p.name));
+      console.log(
+        'System Admin permissions:',
+        sysAdmin.permissions.map(p => p.name)
+      );
 
       // Create tenant using system admin
       const tenantId = await sysAdmin.createTenant({
         name: 'Acme Corporation',
-        plan: 'enterprise'
+        plan: 'enterprise',
       });
 
       console.log('Tenant created:', tenantId);
@@ -1516,8 +1695,8 @@ export class ActorPatternDemo {
             sessionId: 'SESSION-DEMO-002',
             createdAt: new Date(),
             ipAddress: '10.0.0.2',
-            userAgent: 'WebApp/2.0'
-          }
+            userAgent: 'WebApp/2.0',
+          },
         },
         sysAdmin
       );
@@ -1532,12 +1711,15 @@ export class ActorPatternDemo {
         allowedActorTypes: ['TENANT_ADMIN'],
         createdAt: new Date(),
         additionalPermissions: [
-          { name: 'BILLING_VIEW', resources: ['*'], delegatable: false }
-        ]
+          { name: 'BILLING_VIEW', resources: ['*'], delegatable: false },
+        ],
       };
 
       const contextualizedAdmin = await tenantAdmin.switchContext(newContext);
-      console.log('Context switched to:', contextualizedAdmin.getCurrentContext().name);
+      console.log(
+        'Context switched to:',
+        contextualizedAdmin.getCurrentContext().name
+      );
 
       // Demonstrate permission delegation
       const serviceAccount = await this.actorManagementService.createActor(
@@ -1546,18 +1728,22 @@ export class ActorPatternDemo {
         {
           serviceName: 'Billing Processor',
           serviceType: 'BATCH',
-          permissions: []
+          permissions: [],
         },
         tenantAdmin
       );
 
-      await tenantAdmin.delegatePermission(serviceAccount, 'BILLING_VIEW', 3600000); // 1 hour
+      await tenantAdmin.delegatePermission(
+        serviceAccount,
+        'BILLING_VIEW',
+        3600000
+      ); // 1 hour
       console.log('Permission delegated to service account');
 
       // Demonstrate impersonation
       if (tenantAdmin.canImpersonate(serviceAccount)) {
         const impersonatedActor = await tenantAdmin.impersonate(
-          serviceAccount, 
+          serviceAccount,
           'Debugging billing issue #12345'
         );
         console.log('Impersonation started');
@@ -1569,15 +1755,24 @@ export class ActorPatternDemo {
 
       // Generate audit trails
       console.log('\n=== System Admin Audit Trail ===');
-      sysAdmin.getAuditTrail().slice(0, 5).forEach(entry => {
-        console.log(`${entry.timestamp.toISOString()}: ${entry.activityType}`);
-      });
+      sysAdmin
+        .getAuditTrail()
+        .slice(0, 5)
+        .forEach(entry => {
+          console.log(
+            `${entry.timestamp.toISOString()}: ${entry.activityType}`
+          );
+        });
 
       console.log('\n=== Tenant Admin Audit Trail ===');
-      tenantAdmin.getAuditTrail().slice(0, 5).forEach(entry => {
-        console.log(`${entry.timestamp.toISOString()}: ${entry.activityType}`);
-      });
-
+      tenantAdmin
+        .getAuditTrail()
+        .slice(0, 5)
+        .forEach(entry => {
+          console.log(
+            `${entry.timestamp.toISOString()}: ${entry.activityType}`
+          );
+        });
     } catch (error) {
       if (error instanceof ActorError) {
         console.error('Actor Error:', error.message);
@@ -1598,16 +1793,24 @@ export class ActorPatternDemo {
         'Billing Automation Service',
         'BATCH',
         [
-          { name: 'BILLING_PROCESS', resources: ['invoices', 'payments'], delegatable: false },
-          { name: 'NOTIFICATION_SEND', resources: ['email', 'sms'], delegatable: false }
+          {
+            name: 'BILLING_PROCESS',
+            resources: ['invoices', 'payments'],
+            delegatable: false,
+          },
+          {
+            name: 'NOTIFICATION_SEND',
+            resources: ['email', 'sms'],
+            delegatable: false,
+          },
         ],
         {
           sessionMetadata: {
             sessionId: 'SESSION-SVC-001',
             createdAt: new Date(),
             ipAddress: '10.0.1.100',
-            userAgent: 'ServiceAccount/1.0'
-          }
+            userAgent: 'ServiceAccount/1.0',
+          },
         }
       );
 
@@ -1618,7 +1821,7 @@ export class ActorPatternDemo {
         'Monthly Invoice Generation',
         {
           billingPeriod: '2024-01',
-          customerCount: 150
+          customerCount: 150,
         },
         'BILLING_PROCESS'
       );
@@ -1631,7 +1834,6 @@ export class ActorPatternDemo {
       console.log('\n=== Service Account Compliance Report ===');
       console.log('Activity Summary:', complianceReport.activitySummary);
       console.log('Security Events:', complianceReport.securityEvents.length);
-
     } catch (error) {
       if (error instanceof ActorError) {
         console.error('Service Account Error:', error.message);
@@ -1648,7 +1850,7 @@ export class ActorPatternDemo {
         'TENANT-ACME',
         {
           start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-          end: new Date()
+          end: new Date(),
         }
       );
 
@@ -1660,18 +1862,21 @@ export class ActorPatternDemo {
       console.log('Recommendations:', analytics.recommendations);
 
       // Perform security audit
-      const securityAudit = await this.actorManagementService.performSecurityAudit(
-        'TENANT-ACME',
-        'FULL'
-      );
+      const securityAudit =
+        await this.actorManagementService.performSecurityAudit(
+          'TENANT-ACME',
+          'FULL'
+        );
 
       console.log('\n=== Security Audit Report ===');
       console.log('Audit ID:', securityAudit.auditId);
       console.log('Risk Score:', securityAudit.riskScore);
       console.log('Security Findings:', securityAudit.securityFindings.length);
-      console.log('Compliance Violations:', securityAudit.complianceViolations.length);
+      console.log(
+        'Compliance Violations:',
+        securityAudit.complianceViolations.length
+      );
       console.log('Recommendations:', securityAudit.recommendations);
-
     } catch (error) {
       console.error('Analytics error:', error);
     }
@@ -1681,27 +1886,40 @@ export class ActorPatternDemo {
 
 ## Key Features
 
-- **Actor Hierarchies**: Sophisticated actor types with inheritance and role-based capabilities
-- **Context Management**: Dynamic context switching with stack-based context management
-- **Permission System**: Granular permissions with resource-based access control and delegation
+- **Actor Hierarchies**: Sophisticated actor types with inheritance and
+  role-based capabilities
+- **Context Management**: Dynamic context switching with stack-based context
+  management
+- **Permission System**: Granular permissions with resource-based access control
+  and delegation
 - **Impersonation**: Secure impersonation with audit trails and time limits
-- **Delegation**: Permission delegation with configurable duration and revocation
+- **Delegation**: Permission delegation with configurable duration and
+  revocation
 - **Audit Trails**: Comprehensive activity tracking with compliance reporting
-- **Service Accounts**: Specialized actors for automated processes with restricted capabilities
+- **Service Accounts**: Specialized actors for automated processes with
+  restricted capabilities
 - **Analytics**: Actor behavior analysis and security metrics
 - **Compliance**: Built-in compliance reporting and violation detection
 
 ## Common Pitfalls
 
-- **Context Stack Management**: Ensure proper context stack cleanup to prevent memory leaks
-- **Permission Explosion**: Avoid creating too many granular permissions; group logically
-- **Impersonation Security**: Implement proper checks and time limits for impersonation
+- **Context Stack Management**: Ensure proper context stack cleanup to prevent
+  memory leaks
+- **Permission Explosion**: Avoid creating too many granular permissions; group
+  logically
+- **Impersonation Security**: Implement proper checks and time limits for
+  impersonation
 - **Audit Volume**: Monitor audit trail growth and implement retention policies
-- **Delegation Chains**: Prevent excessive delegation chains that could create security risks
+- **Delegation Chains**: Prevent excessive delegation chains that could create
+  security risks
 
 ## Related Examples
 
-- [Basic Actor Implementation](../basic/example-2.md) - Foundation actor concepts and simple patterns  
-- [Advanced Actor Orchestration](../advanced/example-1.md) - Complex actor workflows and enterprise patterns
-- [Domain Error Management](../intermediate/example-2.md) - Error handling in actor contexts
-- [NestJS Actor Integration](../frameworks/nestjs/intermediate/example-1.md) - Framework-specific actor patterns
+- [Basic Actor Implementation](../basic/example-2.md) - Foundation actor
+  concepts and simple patterns
+- [Advanced Actor Orchestration](../advanced/example-1.md) - Complex actor
+  workflows and enterprise patterns
+- [Domain Error Management](../intermediate/example-2.md) - Error handling in
+  actor contexts
+- [NestJS Actor Integration](../frameworks/nestjs/intermediate/example-1.md) -
+  Framework-specific actor patterns

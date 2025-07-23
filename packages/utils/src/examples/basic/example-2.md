@@ -1,32 +1,39 @@
 # Safe Execution with safeRun
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: basic
-**Domain**: Infrastructure
-**Patterns**: Safe execution, testing utilities, error containment
-**Dependencies**: None
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Domain**: Infrastructure **Patterns**: Safe execution, testing utilities,
+error containment **Dependencies**: None
 
 ## Description
 
-The `safeRun` function provides a safe way to execute functions that might throw exceptions, returning a tuple of `[error, result]` instead of throwing. This is primarily designed for testing scenarios where you want to test error conditions without using try/catch blocks.
+The `safeRun` function provides a safe way to execute functions that might throw
+exceptions, returning a tuple of `[error, result]` instead of throwing. This is
+primarily designed for testing scenarios where you want to test error conditions
+without using try/catch blocks.
 
 ## Business Context
 
 In testing scenarios, you often need to:
+
 - Test that functions throw specific errors
 - Verify error conditions without crashing tests
 - Handle both synchronous and asynchronous operations safely
 - Maintain clean test code without nested try/catch blocks
 
-The `safeRun` function simplifies this by providing a consistent interface for safe execution.
+The `safeRun` function simplifies this by providing a consistent interface for
+safe execution.
 
 ## Code Example
 
 ```typescript
 // safe-execution.ts
 import { safeRun } from '@vytches-ddd/utils';
-import { UserData, ValidationError, TestScenario, ExecutionContext } from '../types';
+import {
+  UserData,
+  ValidationError,
+  TestScenario,
+  ExecutionContext,
+} from '../types';
 
 // ✅ FOCUS: Safe execution patterns for testing
 export class SafeExecutionExample {
@@ -89,10 +96,10 @@ export class SafeExecutionExample {
   // Testing asynchronous operations with safeRun
   async testAsyncOperations(): Promise<void> {
     // Test successful async execution
-    const [noError, userData] = await safeRun(async () => 
-      await this.fetchUserData('123')
+    const [noError, userData] = await safeRun(
+      async () => await this.fetchUserData('123')
     );
-    
+
     if (noError) {
       console.error('Expected success but got error:', noError);
     } else {
@@ -100,15 +107,15 @@ export class SafeExecutionExample {
     }
 
     // Test async error conditions
-    const [emptyIdError] = await safeRun(async () => 
-      await this.fetchUserData('')
+    const [emptyIdError] = await safeRun(
+      async () => await this.fetchUserData('')
     );
     if (emptyIdError) {
       console.log('Empty ID error:', emptyIdError.message);
     }
 
-    const [notFoundError] = await safeRun(async () => 
-      await this.fetchUserData('invalid')
+    const [notFoundError] = await safeRun(
+      async () => await this.fetchUserData('invalid')
     );
     if (notFoundError) {
       console.log('Not found error:', notFoundError.message);
@@ -119,7 +126,7 @@ export class SafeExecutionExample {
   runTestScenarios<T>(scenarios: TestScenario<T>[]): void {
     scenarios.forEach(scenario => {
       console.log(`Running scenario: ${scenario.name}`);
-      
+
       const [error, result] = safeRun(() => {
         // Simulate some operation based on input
         if (scenario.shouldFail) {
@@ -147,21 +154,21 @@ export class SafeExecutionExample {
   // Complex execution context testing
   async executeWithContext(context: ExecutionContext): Promise<void> {
     const startTime = Date.now();
-    
+
     const [error, result] = await safeRun(async () => {
       // Simulate operation that might timeout
       const delay = context.timeout || 1000;
       await new Promise(resolve => setTimeout(resolve, delay / 2));
-      
+
       if (context.testName.includes('fail')) {
         throw new Error(`Test failure in ${context.testName}`);
       }
-      
+
       return `Test ${context.testName} completed successfully`;
     });
 
     const executionTime = Date.now() - startTime;
-    
+
     if (error) {
       console.log(`Test failed after ${executionTime}ms:`, error.message);
     } else {
@@ -193,8 +200,8 @@ if (error) {
 }
 
 // Asynchronous safe execution
-const [asyncError, user] = await safeRun(async () => 
-  await example.fetchUserData('user123')
+const [asyncError, user] = await safeRun(
+  async () => await example.fetchUserData('user123')
 );
 
 if (asyncError) {
@@ -224,10 +231,13 @@ example.runTestScenarios(scenarios);
 
 ## Common Pitfalls
 
-- **Using in production code**: `safeRun` is designed for testing, use Result pattern for production
+- **Using in production code**: `safeRun` is designed for testing, use Result
+  pattern for production
 - **Ignoring errors**: Always check if the first element (error) is defined
-- **Wrong tuple destructuring**: Remember it's `[error, result]`, not `[result, error]`
-- **Not awaiting async calls**: Remember to await when using with async functions
+- **Wrong tuple destructuring**: Remember it's `[error, result]`, not
+  `[result, error]`
+- **Not awaiting async calls**: Remember to await when using with async
+  functions
 
 ## Related Examples
 

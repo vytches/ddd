@@ -1,8 +1,10 @@
 # Advanced Repository - NestJS DI Integration
 
-**Focus**: Enterprise-scale distributed repositories with @vytches-ddd/di integration
-**Base Example**: [Distributed Event-Sourced Repository](../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/repositories, @vytches-ddd/di, @vytches-ddd/events
+**Focus**: Enterprise-scale distributed repositories with @vytches-ddd/di
+integration **Base Example**:
+[Distributed Event-Sourced Repository](../../advanced/example-1.md)
+**Dependencies**: @nestjs/common, @vytches-ddd/repositories, @vytches-ddd/di,
+@vytches-ddd/events
 
 ## Service Implementation
 
@@ -10,15 +12,15 @@
 // global-trading.service.ts
 import { Injectable } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   DistributedEventSourcedRepository,
   AIEnhancedRepository,
-  GlobalConsistencyManager 
+  GlobalConsistencyManager
 } from '@vytches-ddd/repositories';
-import { 
-  GlobalTradingAccount, 
+import {
+  GlobalTradingAccount,
   GlobalTradeRequest,
-  PortfolioOptimizationRequest 
+  PortfolioOptimizationRequest
 } from './types'; // From your app
 
 @Injectable()
@@ -101,7 +103,7 @@ export class GlobalTradingService {
       );
 
       const tradingEvents = await this.createTradingEvents(request, account, optimizedTrade);
-      
+
       const persistenceResult = await this.globalAccountRepository.saveEventsGlobally(
         account.id,
         tradingEvents,
@@ -137,7 +139,7 @@ export class GlobalTradingService {
   async executeEnterprisePortfolioOptimization(
     request: PortfolioOptimizationRequest
   ): Promise<EnterprisePortfolioResult> {
-    
+
     // Get AI-powered portfolio analyzer from DI
     const portfolioAnalyzer = VytchesDDD.resolve<AIPortfolioAnalyzer>('aiPortfolioAnalyzer');
     const optimizationEngine = VytchesDDD.resolve<PortfolioOptimizationEngine>('portfolioOptimizationEngine');
@@ -180,7 +182,7 @@ export class GlobalTradingService {
         complianceIssues: complianceResult.issues,
         maxCompromiseThreshold: 0.15 // 15% max performance compromise for compliance
       });
-      
+
       return {
         success: true,
         optimizationResult: adjustedOptimization,
@@ -253,7 +255,7 @@ export class GlobalTradingService {
   async generateEnterpriseAnalytics(
     analyticsRequest: EnterpriseAnalyticsRequest
   ): Promise<EnterpriseAnalytics> {
-    
+
     const analyticsEngine = VytchesDDD.resolve<EnterpriseAnalyticsEngine>('enterpriseAnalyticsEngine');
     const dataLake = VytchesDDD.resolve<EnterpriseDataLake>('enterpriseDataLake');
     const mlPipeline = VytchesDDD.resolve<MLAnalyticsPipeline>('mlAnalyticsPipeline');
@@ -271,7 +273,7 @@ export class GlobalTradingService {
       data: enterpriseData,
       analyticsTypes: [
         'performance_analysis',
-        'risk_analysis', 
+        'risk_analysis',
         'compliance_analysis',
         'operational_efficiency',
         'predictive_insights'
@@ -369,8 +371,8 @@ export class GlobalTradingService {
 
   // Private helper methods
   private async createTradingEvents(
-    request: GlobalTradeRequest, 
-    account: GlobalTradingAccount, 
+    request: GlobalTradeRequest,
+    account: GlobalTradingAccount,
     optimizedTrade: any
   ): Promise<any[]> {
     // Implementation would create appropriate trading events
@@ -443,10 +445,10 @@ export class GlobalTradingService {
 ```typescript
 // enterprise-di.config.ts
 import { VytchesDDD, DomainService } from '@vytches-ddd/di';
-import { 
+import {
   DistributedEventSourcedRepository,
   AIEnhancedRepository,
-  GlobalConsistencyManager 
+  GlobalConsistencyManager
 } from '@vytches-ddd/repositories';
 
 // Global distributed repository
@@ -465,13 +467,13 @@ export class GlobalAccountRepositoryConfig {
 }
 
 // AI-enhanced repository
-@DomainService('aiEnhancedTradingRepository')  
+@DomainService('aiEnhancedTradingRepository')
 export class AITradingRepositoryConfig {
   static create(): AIEnhancedRepository<GlobalTradingAccount> {
     return new AIEnhancedRepository('ai-trading-accounts', {
       models: [
         'risk_analyzer_v2',
-        'portfolio_optimizer_v3', 
+        'portfolio_optimizer_v3',
         'market_predictor_v4',
         'fraud_detector_v2'
       ],
@@ -529,7 +531,7 @@ export class GlobalRiskManagerConfig {
   }
 }
 
-// Enterprise metrics collector  
+// Enterprise metrics collector
 @DomainService('enterpriseMetricsCollector')
 export class EnterpriseMetricsConfig {
   static create(): EnterpriseMetricsCollector {
@@ -556,7 +558,7 @@ import { GlobalTradingController } from './global-trading.controller';
 @Module({
   providers: [GlobalTradingService],
   controllers: [GlobalTradingController],
-  exports: [GlobalTradingService]
+  exports: [GlobalTradingService],
 })
 export class GlobalTradingModule implements OnModuleInit {
   async onModuleInit() {
@@ -565,7 +567,7 @@ export class GlobalTradingModule implements OnModuleInit {
       enableAutoDiscovery: true,
       enableContextIsolation: true,
       enableMetrics: true,
-      enableHealthChecks: true
+      enableHealthChecks: true,
     });
   }
 }
@@ -577,7 +579,7 @@ export class GlobalTradingModule implements OnModuleInit {
 - AI-powered components managed through service locator pattern
 - Distributed consistency and global coordination through DI
 - Intelligent auto-scaling and optimization via DI-managed services
-- Enterprise analytics and monitoring with comprehensive DI orchestration  
+- Enterprise analytics and monitoring with comprehensive DI orchestration
 - No NestJS native DI for advanced scenarios - pure VytchesDDD approach
 - Sophisticated component coordination through service locator
 - Maximum flexibility and enterprise-grade capability management

@@ -1,19 +1,25 @@
 # High-Performance Event Store
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-store
-**Complexity**: advanced
-**Domain**: Infrastructure
-**Patterns**: high-performance, optimization, caching, partitioning, concurrent-processing
-**Dependencies**: @vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+advanced **Domain**: Infrastructure **Patterns**: high-performance,
+optimization, caching, partitioning, concurrent-processing **Dependencies**:
+@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils,
+@vytches-ddd/logging
 
 ## Description
 
-Enterprise-grade high-performance event store implementation with advanced optimization techniques including intelligent caching, stream partitioning, concurrent processing, and sophisticated performance monitoring for extreme throughput scenarios.
+Enterprise-grade high-performance event store implementation with advanced
+optimization techniques including intelligent caching, stream partitioning,
+concurrent processing, and sophisticated performance monitoring for extreme
+throughput scenarios.
 
 ## Business Context
 
-High-traffic enterprise systems require event stores that can handle millions of events per second while maintaining low latency and high availability. This implementation demonstrates advanced performance optimization techniques essential for financial trading platforms, IoT data ingestion, and real-time analytics systems.
+High-traffic enterprise systems require event stores that can handle millions of
+events per second while maintaining low latency and high availability. This
+implementation demonstrates advanced performance optimization techniques
+essential for financial trading platforms, IoT data ingestion, and real-time
+analytics systems.
 
 ## Code Example
 
@@ -23,12 +29,12 @@ import { InMemoryEventStore, IEventSerializer } from '@vytches-ddd/event-store';
 import { DomainEvent, EntityId } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
-import { 
-  PerformanceOptimizer, 
-  CacheManager, 
+import {
+  PerformanceOptimizer,
+  CacheManager,
   StreamPartitioner,
   ConcurrencyManager,
-  MetricsCollector 
+  MetricsCollector,
 } from './types'; // From your app
 
 // ⭐ FOCUS: High-performance event store with advanced optimizations
@@ -51,17 +57,20 @@ export class HighPerformanceEventStore {
     partitionSize: 10000,
     compressionThreshold: 1024,
     warmupEnabled: true,
-    preloadStrategies: ['recent', 'frequent', 'predictive']
+    preloadStrategies: ['recent', 'frequent', 'predictive'],
   };
 
   constructor() {
     this.eventStore = new InMemoryEventStore({
       serializer: new HighPerformanceSerializer(),
       enableSnapshots: true,
-      snapshotFrequency: 100
+      snapshotFrequency: 100,
     });
 
-    this.cacheManager = new AdvancedCacheManager(this.config.cacheSize, this.config.cacheTTL);
+    this.cacheManager = new AdvancedCacheManager(
+      this.config.cacheSize,
+      this.config.cacheTTL
+    );
     this.streamPartitioner = new StreamPartitioner(this.config.partitionSize);
     this.concurrencyManager = new ConcurrencyManager(
       this.config.maxConcurrentReads,
@@ -99,7 +108,7 @@ export class HighPerformanceEventStore {
         operationId,
         streamId,
         eventCount: events.length,
-        expectedVersion
+        expectedVersion,
       });
 
       // 1. Acquire write semaphore for concurrency control
@@ -135,7 +144,12 @@ export class HighPerformanceEventStore {
         const totalDuration = performance.now() - startTime;
         const throughput = events.length / (totalDuration / 1000);
 
-        this.metricsCollector.recordAppend(streamId, events.length, totalDuration, throughput);
+        this.metricsCollector.recordAppend(
+          streamId,
+          events.length,
+          totalDuration,
+          throughput
+        );
 
         const result: AppendResult = {
           operationId,
@@ -144,7 +158,7 @@ export class HighPerformanceEventStore {
           batchesProcessed: batches.length,
           duration: totalDuration,
           throughput,
-          newVersion: expectedVersion + events.length
+          newVersion: expectedVersion + events.length,
         };
 
         this.logger.info('High-performance append completed', {
@@ -152,28 +166,33 @@ export class HighPerformanceEventStore {
           streamId,
           eventsAppended: events.length,
           throughput: Math.round(throughput),
-          duration: Math.round(totalDuration)
+          duration: Math.round(totalDuration),
         });
 
         return Result.ok(result);
-
       } finally {
         this.concurrencyManager.releaseWrite();
       }
-
     } catch (error) {
       const duration = performance.now() - startTime;
-      this.metricsCollector.recordAppendError(streamId, events.length, duration, error.message);
-      
+      this.metricsCollector.recordAppendError(
+        streamId,
+        events.length,
+        duration,
+        error.message
+      );
+
       this.logger.error('High-performance append failed', {
         operationId,
         streamId,
         eventCount: events.length,
         error: error.message,
-        duration
+        duration,
       });
 
-      return Result.fail(new Error(`High-performance append failed: ${error.message}`));
+      return Result.fail(
+        new Error(`High-performance append failed: ${error.message}`)
+      );
     }
   }
 
@@ -189,7 +208,7 @@ export class HighPerformanceEventStore {
       this.logger.debug('High-performance read started', {
         operationId,
         streamId,
-        options
+        options,
       });
 
       // 1. Check cache first with intelligent cache strategy
@@ -197,14 +216,14 @@ export class HighPerformanceEventStore {
       if (cacheResult.isSuccess()) {
         const duration = performance.now() - startTime;
         this.metricsCollector.recordCacheHit(streamId, duration);
-        
+
         return Result.ok({
           operationId,
           streamId,
           events: cacheResult.value,
           source: 'cache',
           duration,
-          fromCache: true
+          fromCache: true,
         });
       }
 
@@ -213,8 +232,11 @@ export class HighPerformanceEventStore {
 
       try {
         // 3. Partitioned read for large streams
-        const partitionedResult = await this.readFromPartitions(streamId, options);
-        
+        const partitionedResult = await this.readFromPartitions(
+          streamId,
+          options
+        );
+
         if (partitionedResult.isFailure()) {
           return Result.fail(partitionedResult.error);
         }
@@ -223,10 +245,17 @@ export class HighPerformanceEventStore {
 
         // 4. Apply filters and transformations
         const filteredEvents = this.applyFiltersOptimized(events, options);
-        const paginatedResult = this.applyPaginationOptimized(filteredEvents, options);
+        const paginatedResult = this.applyPaginationOptimized(
+          filteredEvents,
+          options
+        );
 
         // 5. Update cache with read results
-        await this.updateCacheAfterRead(streamId, paginatedResult.events, options);
+        await this.updateCacheAfterRead(
+          streamId,
+          paginatedResult.events,
+          options
+        );
 
         // 6. Trigger predictive prefetching
         this.triggerPredictivePrefetch(streamId, options);
@@ -234,7 +263,12 @@ export class HighPerformanceEventStore {
         const duration = performance.now() - startTime;
         const throughput = paginatedResult.events.length / (duration / 1000);
 
-        this.metricsCollector.recordRead(streamId, paginatedResult.events.length, duration, throughput);
+        this.metricsCollector.recordRead(
+          streamId,
+          paginatedResult.events.length,
+          duration,
+          throughput
+        );
 
         const result: ReadResult = {
           operationId,
@@ -245,7 +279,7 @@ export class HighPerformanceEventStore {
           throughput,
           hasMore: paginatedResult.hasMore,
           nextToken: paginatedResult.nextToken,
-          fromCache: false
+          fromCache: false,
         };
 
         this.logger.debug('High-performance read completed', {
@@ -253,15 +287,13 @@ export class HighPerformanceEventStore {
           streamId,
           eventsRead: result.events.length,
           throughput: Math.round(throughput),
-          duration: Math.round(duration)
+          duration: Math.round(duration),
         });
 
         return Result.ok(result);
-
       } finally {
         this.concurrencyManager.releaseRead();
       }
-
     } catch (error) {
       const duration = performance.now() - startTime;
       this.metricsCollector.recordReadError(streamId, duration, error.message);
@@ -270,20 +302,25 @@ export class HighPerformanceEventStore {
         operationId,
         streamId,
         error: error.message,
-        duration
+        duration,
       });
 
-      return Result.fail(new Error(`High-performance read failed: ${error.message}`));
+      return Result.fail(
+        new Error(`High-performance read failed: ${error.message}`)
+      );
     }
   }
 
-  private createEventBatches(events: DomainEvent[], batchSize: number): DomainEvent[][] {
+  private createEventBatches(
+    events: DomainEvent[],
+    batchSize: number
+  ): DomainEvent[][] {
     const batches: DomainEvent[][] = [];
-    
+
     for (let i = 0; i < events.length; i += batchSize) {
       batches.push(events.slice(i, i + batchSize));
     }
-    
+
     return batches;
   }
 
@@ -295,7 +332,10 @@ export class HighPerformanceEventStore {
     try {
       // ⭐ FOCUS: Optimized batch append with compression
       const compressedEvents = await this.compressEventsIfNeeded(events);
-      const partitionId = this.streamPartitioner.getPartition(streamId, expectedVersion);
+      const partitionId = this.streamPartitioner.getPartition(
+        streamId,
+        expectedVersion
+      );
 
       const appendResult = await this.eventStore.appendEvents(
         `${streamId}:${partitionId}`,
@@ -311,22 +351,23 @@ export class HighPerformanceEventStore {
         partitionId,
         eventsAppended: events.length,
         compressed: compressedEvents.length !== events.length,
-        newVersion: expectedVersion + events.length
+        newVersion: expectedVersion + events.length,
       });
-
     } catch (error) {
       return Result.fail(new Error(`Batch append failed: ${error.message}`));
     }
   }
 
-  private async compressEventsIfNeeded(events: DomainEvent[]): Promise<DomainEvent[]> {
+  private async compressEventsIfNeeded(
+    events: DomainEvent[]
+  ): Promise<DomainEvent[]> {
     // ⭐ FOCUS: Intelligent event compression
     const serializedSize = this.calculateSerializedSize(events);
-    
+
     if (serializedSize > this.config.compressionThreshold) {
       return await this.compressEvents(events);
     }
-    
+
     return events;
   }
 
@@ -341,7 +382,7 @@ export class HighPerformanceEventStore {
     // ⭐ FOCUS: Advanced event compression
     try {
       const compressedPayload = await this.compress(JSON.stringify(events));
-      
+
       const compressedEvent = {
         eventId: EntityId.createUuid().value,
         eventType: 'CompressedEventBatch',
@@ -351,16 +392,17 @@ export class HighPerformanceEventStore {
         payload: compressedPayload,
         metadata: {
           originalCount: events.length,
-          compressionRatio: compressedPayload.length / JSON.stringify(events).length,
-          compressed: true
-        }
+          compressionRatio:
+            compressedPayload.length / JSON.stringify(events).length,
+          compressed: true,
+        },
       } as DomainEvent;
 
       return [compressedEvent];
     } catch (error) {
       this.logger.warn('Event compression failed, using uncompressed events', {
         eventCount: events.length,
-        error: error.message
+        error: error.message,
       });
       return events;
     }
@@ -384,17 +426,17 @@ export class HighPerformanceEventStore {
       // ⭐ FOCUS: Intelligent cache lookup with options matching
       const cacheKey = this.generateCacheKey(streamId, options);
       const cachedResult = await this.cacheManager.get<DomainEvent[]>(cacheKey);
-      
+
       if (cachedResult) {
         this.logger.debug('Cache hit for stream read', {
           streamId,
           cacheKey,
-          eventCount: cachedResult.length
+          eventCount: cachedResult.length,
         });
-        
+
         return Result.ok(cachedResult);
       }
-      
+
       return Result.fail(new Error('Cache miss'));
     } catch (error) {
       return Result.fail(new Error(`Cache read failed: ${error.message}`));
@@ -407,11 +449,12 @@ export class HighPerformanceEventStore {
   ): Promise<Result<DomainEvent[], Error>> {
     try {
       // ⭐ FOCUS: Parallel partition reading
-      const partitions = this.streamPartitioner.getPartitionsForStream(streamId);
-      const readPromises = partitions.map(async (partitionId) => {
+      const partitions =
+        this.streamPartitioner.getPartitionsForStream(streamId);
+      const readPromises = partitions.map(async partitionId => {
         const partitionStreamId = `${streamId}:${partitionId}`;
         const readResult = await this.eventStore.readStream(partitionStreamId);
-        
+
         return readResult.isSuccess() ? readResult.value.events : [];
       });
 
@@ -426,23 +469,32 @@ export class HighPerformanceEventStore {
 
       return Result.ok(decompressedEvents);
     } catch (error) {
-      return Result.fail(new Error(`Partitioned read failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Partitioned read failed: ${error.message}`)
+      );
     }
   }
 
-  private async decompressEventsIfNeeded(events: DomainEvent[]): Promise<DomainEvent[]> {
+  private async decompressEventsIfNeeded(
+    events: DomainEvent[]
+  ): Promise<DomainEvent[]> {
     const decompressedEvents: DomainEvent[] = [];
-    
+
     for (const event of events) {
-      if (event.eventType === 'CompressedEventBatch' && event.metadata?.compressed) {
+      if (
+        event.eventType === 'CompressedEventBatch' &&
+        event.metadata?.compressed
+      ) {
         try {
-          const decompressedData = await this.decompress(event.payload as string);
+          const decompressedData = await this.decompress(
+            event.payload as string
+          );
           const originalEvents = JSON.parse(decompressedData) as DomainEvent[];
           decompressedEvents.push(...originalEvents);
         } catch (error) {
           this.logger.warn('Event decompression failed', {
             eventId: event.eventId,
-            error: error.message
+            error: error.message,
           });
           decompressedEvents.push(event);
         }
@@ -450,7 +502,7 @@ export class HighPerformanceEventStore {
         decompressedEvents.push(event);
       }
     }
-    
+
     return decompressedEvents;
   }
 
@@ -467,15 +519,21 @@ export class HighPerformanceEventStore {
     }
 
     if (options.fromTimestamp) {
-      filtered = filtered.filter(event => event.timestamp >= options.fromTimestamp!);
+      filtered = filtered.filter(
+        event => event.timestamp >= options.fromTimestamp!
+      );
     }
 
     if (options.toTimestamp) {
-      filtered = filtered.filter(event => event.timestamp <= options.toTimestamp!);
+      filtered = filtered.filter(
+        event => event.timestamp <= options.toTimestamp!
+      );
     }
 
     if (options.correlationId) {
-      filtered = filtered.filter(event => event.correlationId === options.correlationId);
+      filtered = filtered.filter(
+        event => event.correlationId === options.correlationId
+      );
     }
 
     return filtered;
@@ -490,18 +548,20 @@ export class HighPerformanceEventStore {
 
     const paginatedEvents = events.slice(startIndex, startIndex + pageSize);
     const hasMore = events.length > startIndex + pageSize;
-    
+
     let nextToken: string | undefined;
     if (hasMore) {
-      nextToken = Buffer.from(JSON.stringify({ 
-        startIndex: startIndex + pageSize 
-      })).toString('base64');
+      nextToken = Buffer.from(
+        JSON.stringify({
+          startIndex: startIndex + pageSize,
+        })
+      ).toString('base64');
     }
 
     return {
       events: paginatedEvents,
       hasMore,
-      nextToken
+      nextToken,
     };
   }
 
@@ -512,15 +572,18 @@ export class HighPerformanceEventStore {
     try {
       // ⭐ FOCUS: Intelligent cache invalidation and update
       await this.cacheManager.invalidatePattern(`stream:${streamId}:*`);
-      
+
       // Cache most recent events for quick access
       const cacheKey = this.generateCacheKey(streamId, { recent: true });
-      await this.cacheManager.set(cacheKey, events.slice(-100), this.config.cacheTTL);
-      
+      await this.cacheManager.set(
+        cacheKey,
+        events.slice(-100),
+        this.config.cacheTTL
+      );
     } catch (error) {
       this.logger.warn('Cache update after append failed', {
         streamId,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -533,19 +596,18 @@ export class HighPerformanceEventStore {
     try {
       // ⭐ FOCUS: Strategic caching based on read patterns
       const cacheKey = this.generateCacheKey(streamId, options);
-      
+
       // Only cache if result set is reasonably sized
       if (events.length <= 1000) {
         await this.cacheManager.set(cacheKey, events, this.config.cacheTTL);
       }
-      
+
       // Update access patterns for optimization
       this.metricsCollector.recordCachePattern(streamId, options);
-      
     } catch (error) {
       this.logger.warn('Cache update after read failed', {
         streamId,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -562,7 +624,7 @@ export class HighPerformanceEventStore {
       options.toTimestamp ? `to:${options.toTimestamp.getTime()}` : '',
       options.correlationId ? `corr:${options.correlationId}` : '',
       options.pageSize ? `size:${options.pageSize}` : '',
-      options.startIndex ? `idx:${options.startIndex}` : ''
+      options.startIndex ? `idx:${options.startIndex}` : '',
     ].filter(Boolean);
 
     return keyComponents.join(':');
@@ -579,23 +641,26 @@ export class HighPerformanceEventStore {
         // Implementation would depend on specific rollback strategy
         this.logger.warn('Batch rollback required', {
           streamId: partitionStreamId,
-          batchVersion: batch.newVersion
+          batchVersion: batch.newVersion,
         });
       } catch (error) {
         this.logger.error('Batch rollback failed', {
           streamId,
           partitionId: batch.partitionId,
-          error: error.message
+          error: error.message,
         });
       }
     }
   }
 
-  private triggerAsyncOptimizations(streamId: string, eventCount: number): void {
+  private triggerAsyncOptimizations(
+    streamId: string,
+    eventCount: number
+  ): void {
     // ⭐ FOCUS: Background optimization triggers
     setImmediate(() => {
       this.performanceOptimizer.analyzeStreamPattern(streamId, eventCount);
-      
+
       if (eventCount > 1000) {
         this.performanceOptimizer.considerPartitionSplit(streamId);
       }
@@ -608,8 +673,11 @@ export class HighPerformanceEventStore {
   ): void {
     // ⭐ FOCUS: Predictive prefetching based on access patterns
     setImmediate(() => {
-      const predictedStreams = this.performanceOptimizer.predictNextStreams(streamId, options);
-      
+      const predictedStreams = this.performanceOptimizer.predictNextStreams(
+        streamId,
+        options
+      );
+
       for (const predictedStream of predictedStreams) {
         this.prefetchStream(predictedStream);
       }
@@ -619,21 +687,21 @@ export class HighPerformanceEventStore {
   private async prefetchStream(streamId: string): Promise<void> {
     try {
       // ⭐ FOCUS: Background prefetching
-      const readResult = await this.readEvents(streamId, { 
-        pageSize: 100, 
-        prefetch: true 
+      const readResult = await this.readEvents(streamId, {
+        pageSize: 100,
+        prefetch: true,
       });
-      
+
       if (readResult.isSuccess()) {
         this.logger.debug('Stream prefetched successfully', {
           streamId,
-          eventCount: readResult.value.events.length
+          eventCount: readResult.value.events.length,
         });
       }
     } catch (error) {
       this.logger.debug('Stream prefetch failed', {
         streamId,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -641,24 +709,22 @@ export class HighPerformanceEventStore {
   private async warmupCache(): Promise<void> {
     try {
       this.logger.info('Starting cache warmup process');
-      
+
       // ⭐ FOCUS: Strategic cache warmup
       const frequentStreams = await this.identifyFrequentStreams();
       const recentStreams = await this.identifyRecentStreams();
       const criticalStreams = await this.identifyCriticalStreams();
-      
-      const streamsToWarmup = [...new Set([
-        ...frequentStreams,
-        ...recentStreams,
-        ...criticalStreams
-      ])];
+
+      const streamsToWarmup = [
+        ...new Set([...frequentStreams, ...recentStreams, ...criticalStreams]),
+      ];
 
       for (const streamId of streamsToWarmup) {
         await this.prefetchStream(streamId);
       }
-      
+
       this.logger.info('Cache warmup completed', {
-        streamsWarmed: streamsToWarmup.length
+        streamsWarmed: streamsToWarmup.length,
       });
     } catch (error) {
       this.logger.warn('Cache warmup failed', { error: error.message });
@@ -669,14 +735,18 @@ export class HighPerformanceEventStore {
     try {
       // ⭐ FOCUS: Partition optimization based on access patterns
       const partitionMetrics = await this.streamPartitioner.analyzePartitions();
-      const optimizations = this.performanceOptimizer.suggestPartitionOptimizations(partitionMetrics);
-      
+      const optimizations =
+        this.performanceOptimizer.suggestPartitionOptimizations(
+          partitionMetrics
+        );
+
       for (const optimization of optimizations) {
         await this.applyPartitionOptimization(optimization);
       }
-      
     } catch (error) {
-      this.logger.warn('Partition optimization failed', { error: error.message });
+      this.logger.warn('Partition optimization failed', {
+        error: error.message,
+      });
     }
   }
 
@@ -685,7 +755,7 @@ export class HighPerformanceEventStore {
       // ⭐ FOCUS: Preload based on historical access patterns
       for (const strategy of this.config.preloadStrategies) {
         const streams = await this.identifyStreamsForStrategy(strategy);
-        
+
         for (const streamId of streams) {
           await this.prefetchStream(streamId);
         }
@@ -706,24 +776,24 @@ export class HighPerformanceEventStore {
 
   private collectPerformanceMetrics(): void {
     const metrics = this.metricsCollector.getSnapshot();
-    
+
     this.logger.debug('Performance metrics collected', {
       appendThroughput: metrics.averageAppendThroughput,
       readThroughput: metrics.averageReadThroughput,
       cacheHitRate: metrics.cacheHitRate,
-      errorRate: metrics.errorRate
+      errorRate: metrics.errorRate,
     });
   }
 
   private adjustPerformanceParameters(): void {
     // ⭐ FOCUS: Dynamic performance tuning
     const metrics = this.metricsCollector.getSnapshot();
-    
+
     if (metrics.cacheHitRate < 0.8) {
       // Increase cache size if hit rate is low
       this.cacheManager.expandCache(Math.floor(this.config.cacheSize * 1.2));
     }
-    
+
     if (metrics.averageAppendLatency > 1000) {
       // Increase batch size if append latency is high
       this.config.batchSize = Math.min(this.config.batchSize * 1.1, 2000);
@@ -732,7 +802,7 @@ export class HighPerformanceEventStore {
 
   private reportPerformanceStatus(): void {
     const status = this.getPerformanceStatus();
-    
+
     if (status.overall !== 'optimal') {
       this.logger.warn('Performance degradation detected', status);
     }
@@ -740,7 +810,7 @@ export class HighPerformanceEventStore {
 
   getPerformanceStatus(): PerformanceStatus {
     const metrics = this.metricsCollector.getSnapshot();
-    
+
     return {
       overall: this.determineOverallPerformance(metrics),
       appendThroughput: metrics.averageAppendThroughput,
@@ -749,32 +819,42 @@ export class HighPerformanceEventStore {
       errorRate: metrics.errorRate,
       concurrencyUtilization: this.concurrencyManager.getUtilization(),
       partitionEfficiency: this.streamPartitioner.getEfficiency(),
-      recommendations: this.generatePerformanceRecommendations(metrics)
+      recommendations: this.generatePerformanceRecommendations(metrics),
     };
   }
 
-  private determineOverallPerformance(metrics: any): 'optimal' | 'good' | 'degraded' | 'poor' {
+  private determineOverallPerformance(
+    metrics: any
+  ): 'optimal' | 'good' | 'degraded' | 'poor' {
     if (metrics.errorRate > 0.05) return 'poor';
-    if (metrics.cacheHitRate < 0.6 || metrics.averageAppendLatency > 2000) return 'degraded';
-    if (metrics.cacheHitRate < 0.8 || metrics.averageAppendLatency > 1000) return 'good';
+    if (metrics.cacheHitRate < 0.6 || metrics.averageAppendLatency > 2000)
+      return 'degraded';
+    if (metrics.cacheHitRate < 0.8 || metrics.averageAppendLatency > 1000)
+      return 'good';
     return 'optimal';
   }
 
   private generatePerformanceRecommendations(metrics: any): string[] {
     const recommendations: string[] = [];
-    
+
     if (metrics.cacheHitRate < 0.8) {
-      recommendations.push('Consider increasing cache size or adjusting cache strategies');
+      recommendations.push(
+        'Consider increasing cache size or adjusting cache strategies'
+      );
     }
-    
+
     if (metrics.averageAppendLatency > 1000) {
-      recommendations.push('Consider optimizing batch size or reducing serialization overhead');
+      recommendations.push(
+        'Consider optimizing batch size or reducing serialization overhead'
+      );
     }
-    
+
     if (metrics.errorRate > 0.01) {
-      recommendations.push('Investigate error patterns and implement additional resilience measures');
+      recommendations.push(
+        'Investigate error patterns and implement additional resilience measures'
+      );
     }
-    
+
     return recommendations;
   }
 
@@ -791,7 +871,9 @@ export class HighPerformanceEventStore {
     return this.metricsCollector.getCriticalStreams();
   }
 
-  private async identifyStreamsForStrategy(strategy: string): Promise<string[]> {
+  private async identifyStreamsForStrategy(
+    strategy: string
+  ): Promise<string[]> {
     switch (strategy) {
       case 'recent':
         return this.identifyRecentStreams();
@@ -813,20 +895,22 @@ export class HighPerformanceEventStore {
 // ⭐ FOCUS: High-performance serializer
 export class HighPerformanceSerializer implements IEventSerializer {
   private readonly compressionThreshold = 1024;
-  
+
   serialize(event: DomainEvent): string {
     try {
       // ⭐ FOCUS: Optimized serialization with selective compression
       const baseData = this.createOptimizedEventData(event);
       const serialized = JSON.stringify(baseData);
-      
+
       if (serialized.length > this.compressionThreshold) {
         return this.compressIfBeneficial(serialized);
       }
-      
+
       return serialized;
     } catch (error) {
-      throw new Error(`High-performance serialization failed: ${error.message}`);
+      throw new Error(
+        `High-performance serialization failed: ${error.message}`
+      );
     }
   }
 
@@ -835,10 +919,12 @@ export class HighPerformanceSerializer implements IEventSerializer {
       // ⭐ FOCUS: Fast deserialization with decompression support
       const decompressedData = this.decompressIfNeeded(data);
       const parsed = JSON.parse(decompressedData);
-      
+
       return this.reconstructOptimizedEvent(parsed);
     } catch (error) {
-      throw new Error(`High-performance deserialization failed: ${error.message}`);
+      throw new Error(
+        `High-performance deserialization failed: ${error.message}`
+      );
     }
   }
 
@@ -853,14 +939,14 @@ export class HighPerformanceSerializer implements IEventSerializer {
       data: this.optimizePayload(event),
       meta: event.metadata,
       corr: event.correlationId,
-      caus: event.causationId
+      caus: event.causationId,
     };
   }
 
   private optimizePayload(event: DomainEvent): any {
     // ⭐ FOCUS: Extract and optimize event payload
     const payload = { ...event };
-    
+
     // Remove standard properties that are stored separately
     delete payload.eventId;
     delete payload.eventType;
@@ -870,7 +956,7 @@ export class HighPerformanceSerializer implements IEventSerializer {
     delete payload.metadata;
     delete payload.correlationId;
     delete payload.causationId;
-    
+
     return payload;
   }
 
@@ -885,7 +971,7 @@ export class HighPerformanceSerializer implements IEventSerializer {
       metadata: data.meta,
       correlationId: data.corr,
       causationId: data.caus,
-      ...data.data // Spread the payload data
+      ...data.data, // Spread the payload data
     } as DomainEvent;
   }
 
@@ -907,7 +993,7 @@ export class HighPerformanceSerializer implements IEventSerializer {
 export class AdvancedCacheManager implements CacheManager {
   private readonly cache = new Map<string, CacheEntry>();
   private readonly accessPatterns = new Map<string, AccessPattern>();
-  
+
   constructor(
     private maxSize: number,
     private defaultTTL: number
@@ -915,17 +1001,17 @@ export class AdvancedCacheManager implements CacheManager {
 
   async get<T>(key: string): Promise<T | null> {
     const entry = this.cache.get(key);
-    
+
     if (!entry || this.isExpired(entry)) {
       if (entry) {
         this.cache.delete(key);
       }
       return null;
     }
-    
+
     // Update access pattern
     this.updateAccessPattern(key);
-    
+
     return entry.value as T;
   }
 
@@ -934,22 +1020,22 @@ export class AdvancedCacheManager implements CacheManager {
     if (this.cache.size >= this.maxSize) {
       await this.evictLeastUseful();
     }
-    
+
     const entry: CacheEntry = {
       value,
       timestamp: Date.now(),
       ttl: ttl || this.defaultTTL,
       accessCount: 1,
-      lastAccess: Date.now()
+      lastAccess: Date.now(),
     };
-    
+
     this.cache.set(key, entry);
     this.initAccessPattern(key);
   }
 
   async invalidatePattern(pattern: string): Promise<void> {
     const regex = new RegExp(pattern.replace('*', '.*'));
-    
+
     for (const key of this.cache.keys()) {
       if (regex.test(key)) {
         this.cache.delete(key);
@@ -978,7 +1064,7 @@ export class AdvancedCacheManager implements CacheManager {
     this.accessPatterns.set(key, {
       accessCount: 1,
       lastAccess: Date.now(),
-      created: Date.now()
+      created: Date.now(),
     });
   }
 
@@ -986,22 +1072,22 @@ export class AdvancedCacheManager implements CacheManager {
     // ⭐ FOCUS: Smart eviction based on access patterns and value
     let leastUsefulKey: string | null = null;
     let lowestScore = Infinity;
-    
+
     for (const [key, entry] of this.cache.entries()) {
       const pattern = this.accessPatterns.get(key);
       if (!pattern) continue;
-      
+
       // Calculate usefulness score
       const age = Date.now() - pattern.created;
       const timeSinceAccess = Date.now() - pattern.lastAccess;
       const score = (pattern.accessCount * 1000) / (age + timeSinceAccess);
-      
+
       if (score < lowestScore) {
         lowestScore = score;
         leastUsefulKey = key;
       }
     }
-    
+
     if (leastUsefulKey) {
       this.cache.delete(leastUsefulKey);
       this.accessPatterns.delete(leastUsefulKey);
@@ -1090,85 +1176,99 @@ import { HighPerformanceEventStore } from './high-performance-event-store';
 
 async function demonstrateHighPerformanceEventStore() {
   const eventStore = new HighPerformanceEventStore();
-  
+
   console.log('--- High-Performance Event Store Demo ---\n');
 
   // ⭐ FOCUS: 1. High-throughput event append
   console.log('1. High-Throughput Event Append:');
-  
+
   const events = [];
   for (let i = 0; i < 10000; i++) {
-    events.push(new HighVolumeEvent(
-      EntityId.createUuid(),
-      `event-${i}`,
-      { index: i, timestamp: new Date() }
-    ));
+    events.push(
+      new HighVolumeEvent(EntityId.createUuid(), `event-${i}`, {
+        index: i,
+        timestamp: new Date(),
+      })
+    );
   }
 
   const appendStart = performance.now();
-  const appendResult = await eventStore.appendEvents('high-volume-stream', events);
+  const appendResult = await eventStore.appendEvents(
+    'high-volume-stream',
+    events
+  );
   const appendDuration = performance.now() - appendStart;
 
   if (appendResult.isSuccess()) {
     const result = appendResult.value;
-    console.log(`  Appended ${result.eventsAppended} events in ${Math.round(appendDuration)}ms`);
+    console.log(
+      `  Appended ${result.eventsAppended} events in ${Math.round(appendDuration)}ms`
+    );
     console.log(`  Throughput: ${Math.round(result.throughput)} events/second`);
     console.log(`  Batches processed: ${result.batchesProcessed}`);
   }
 
   // ⭐ FOCUS: 2. Optimized read with caching
   console.log('\n2. Optimized Read Performance:');
-  
+
   // First read (cache miss)
   const firstReadStart = performance.now();
   const firstRead = await eventStore.readEvents('high-volume-stream', {
-    pageSize: 1000
+    pageSize: 1000,
   });
   const firstReadDuration = performance.now() - firstReadStart;
 
   if (firstRead.isSuccess()) {
-    console.log(`  First read: ${firstRead.value.events.length} events in ${Math.round(firstReadDuration)}ms (${firstRead.value.fromCache ? 'cache' : 'store'})`);
+    console.log(
+      `  First read: ${firstRead.value.events.length} events in ${Math.round(firstReadDuration)}ms (${firstRead.value.fromCache ? 'cache' : 'store'})`
+    );
   }
 
   // Second read (cache hit)
   const secondReadStart = performance.now();
   const secondRead = await eventStore.readEvents('high-volume-stream', {
-    pageSize: 1000
+    pageSize: 1000,
   });
   const secondReadDuration = performance.now() - secondReadStart;
 
   if (secondRead.isSuccess()) {
-    console.log(`  Second read: ${secondRead.value.events.length} events in ${Math.round(secondReadDuration)}ms (${secondRead.value.fromCache ? 'cache' : 'store'})`);
-    console.log(`  Cache performance improvement: ${Math.round((firstReadDuration / secondReadDuration) * 100)}%`);
+    console.log(
+      `  Second read: ${secondRead.value.events.length} events in ${Math.round(secondReadDuration)}ms (${secondRead.value.fromCache ? 'cache' : 'store'})`
+    );
+    console.log(
+      `  Cache performance improvement: ${Math.round((firstReadDuration / secondReadDuration) * 100)}%`
+    );
   }
 
   // ⭐ FOCUS: 3. Concurrent operations
   console.log('\n3. Concurrent Operations Test:');
-  
+
   const concurrentReads = [];
   const concurrentWrites = [];
-  
+
   // Create concurrent read operations
   for (let i = 0; i < 20; i++) {
     concurrentReads.push(
       eventStore.readEvents(`stream-${i}`, {
         eventTypes: ['HighVolumeEvent'],
-        pageSize: 500
+        pageSize: 500,
       })
     );
   }
-  
+
   // Create concurrent write operations
   for (let i = 0; i < 10; i++) {
     const batchEvents = [];
     for (let j = 0; j < 100; j++) {
-      batchEvents.push(new HighVolumeEvent(
-        EntityId.createUuid(),
-        `concurrent-event-${i}-${j}`,
-        { batchId: i, index: j }
-      ));
+      batchEvents.push(
+        new HighVolumeEvent(
+          EntityId.createUuid(),
+          `concurrent-event-${i}-${j}`,
+          { batchId: i, index: j }
+        )
+      );
     }
-    
+
     concurrentWrites.push(
       eventStore.appendEvents(`concurrent-stream-${i}`, batchEvents)
     );
@@ -1176,26 +1276,40 @@ async function demonstrateHighPerformanceEventStore() {
 
   const [readResults, writeResults] = await Promise.all([
     Promise.allSettled(concurrentReads),
-    Promise.allSettled(concurrentWrites)
+    Promise.allSettled(concurrentWrites),
   ]);
 
-  const successfulReads = readResults.filter(r => r.status === 'fulfilled').length;
-  const successfulWrites = writeResults.filter(r => r.status === 'fulfilled').length;
+  const successfulReads = readResults.filter(
+    r => r.status === 'fulfilled'
+  ).length;
+  const successfulWrites = writeResults.filter(
+    r => r.status === 'fulfilled'
+  ).length;
 
   console.log(`  Concurrent reads: ${successfulReads}/20 successful`);
   console.log(`  Concurrent writes: ${successfulWrites}/10 successful`);
 
   // ⭐ FOCUS: 4. Performance status monitoring
   console.log('\n4. Performance Status:');
-  
+
   const performanceStatus = eventStore.getPerformanceStatus();
-  
+
   console.log(`  Overall Performance: ${performanceStatus.overall}`);
-  console.log(`  Append Throughput: ${Math.round(performanceStatus.appendThroughput)} events/sec`);
-  console.log(`  Read Throughput: ${Math.round(performanceStatus.readThroughput)} events/sec`);
-  console.log(`  Cache Hit Rate: ${(performanceStatus.cacheHitRate * 100).toFixed(1)}%`);
-  console.log(`  Error Rate: ${(performanceStatus.errorRate * 100).toFixed(2)}%`);
-  console.log(`  Concurrency Utilization: ${(performanceStatus.concurrencyUtilization * 100).toFixed(1)}%`);
+  console.log(
+    `  Append Throughput: ${Math.round(performanceStatus.appendThroughput)} events/sec`
+  );
+  console.log(
+    `  Read Throughput: ${Math.round(performanceStatus.readThroughput)} events/sec`
+  );
+  console.log(
+    `  Cache Hit Rate: ${(performanceStatus.cacheHitRate * 100).toFixed(1)}%`
+  );
+  console.log(
+    `  Error Rate: ${(performanceStatus.errorRate * 100).toFixed(2)}%`
+  );
+  console.log(
+    `  Concurrency Utilization: ${(performanceStatus.concurrencyUtilization * 100).toFixed(1)}%`
+  );
 
   if (performanceStatus.recommendations.length > 0) {
     console.log('  Recommendations:');
@@ -1206,24 +1320,28 @@ async function demonstrateHighPerformanceEventStore() {
 
   // ⭐ FOCUS: 5. Advanced filtering and search
   console.log('\n5. Advanced Filtering:');
-  
+
   // Time-based filtering
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const timeFilterResult = await eventStore.readEvents('high-volume-stream', {
     fromTimestamp: oneHourAgo,
     eventTypes: ['HighVolumeEvent'],
-    pageSize: 500
+    pageSize: 500,
   });
 
   if (timeFilterResult.isSuccess()) {
-    console.log(`  Events from last hour: ${timeFilterResult.value.events.length}`);
-    console.log(`  Query duration: ${Math.round(timeFilterResult.value.duration)}ms`);
+    console.log(
+      `  Events from last hour: ${timeFilterResult.value.events.length}`
+    );
+    console.log(
+      `  Query duration: ${Math.round(timeFilterResult.value.duration)}ms`
+    );
   }
 
   // Correlation-based filtering
   const correlationId = 'batch-operation-123';
   const correlationEvents = [];
-  
+
   for (let i = 0; i < 100; i++) {
     const event = new HighVolumeEvent(
       EntityId.createUuid(),
@@ -1235,27 +1353,39 @@ async function demonstrateHighPerformanceEventStore() {
   }
 
   await eventStore.appendEvents('correlation-stream', correlationEvents);
-  
+
   const correlationResult = await eventStore.readEvents('correlation-stream', {
     correlationId,
-    pageSize: 1000
+    pageSize: 1000,
   });
 
   if (correlationResult.isSuccess()) {
-    console.log(`  Correlated events found: ${correlationResult.value.events.length}`);
+    console.log(
+      `  Correlated events found: ${correlationResult.value.events.length}`
+    );
   }
 
   // ⭐ FOCUS: 6. Memory and resource utilization
   console.log('\n6. Resource Utilization:');
-  console.log(`  Process memory usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
+  console.log(
+    `  Process memory usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
+  );
   console.log(`  Process uptime: ${Math.round(process.uptime())}s`);
 
   // ⭐ FOCUS: 7. Performance benchmark summary
   console.log('\n7. Performance Benchmark Summary:');
-  console.log(`  Total events processed: ${events.length + correlationEvents.length}`);
-  console.log(`  Average append latency: ${Math.round(appendDuration / events.length)}ms per event`);
-  console.log(`  Peak throughput achieved: ${Math.round(appendResult.isSuccess() ? appendResult.value.throughput : 0)} events/sec`);
-  console.log(`  Cache efficiency: ${performanceStatus.cacheHitRate > 0.8 ? 'Excellent' : performanceStatus.cacheHitRate > 0.6 ? 'Good' : 'Needs optimization'}`);
+  console.log(
+    `  Total events processed: ${events.length + correlationEvents.length}`
+  );
+  console.log(
+    `  Average append latency: ${Math.round(appendDuration / events.length)}ms per event`
+  );
+  console.log(
+    `  Peak throughput achieved: ${Math.round(appendResult.isSuccess() ? appendResult.value.throughput : 0)} events/sec`
+  );
+  console.log(
+    `  Cache efficiency: ${performanceStatus.cacheHitRate > 0.8 ? 'Excellent' : performanceStatus.cacheHitRate > 0.6 ? 'Good' : 'Needs optimization'}`
+  );
 }
 
 // Sample high-volume event
@@ -1277,7 +1407,7 @@ demonstrateHighPerformanceEventStore().catch(console.error);
 
 - **Intelligent Caching**: Multi-level caching with access pattern optimization
 - **Stream Partitioning**: Automatic partitioning for large streams
-- **Concurrent Processing**: Controlled concurrency with semaphores  
+- **Concurrent Processing**: Controlled concurrency with semaphores
 - **Batch Operations**: Optimized batch processing for high throughput
 - **Compression**: Dynamic compression for large events
 - **Performance Monitoring**: Real-time performance metrics and tuning

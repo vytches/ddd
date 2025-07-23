@@ -1,51 +1,53 @@
 # Saga-Orchestrated Domain Service - Advanced Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: advanced
-**Domain**: order-management
-**Patterns**: domain-service, saga, long-running-processes
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/messaging
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+advanced **Domain**: order-management **Patterns**: domain-service, saga,
+long-running-processes **Dependencies**: @vytches-ddd/core,
+@vytches-ddd/messaging
 
 ## Description
 
-This example demonstrates a domain service that orchestrates long-running business processes using the Saga pattern. It shows compensation logic, state management, and complex workflow coordination.
+This example demonstrates a domain service that orchestrates long-running
+business processes using the Saga pattern. It shows compensation logic, state
+management, and complex workflow coordination.
 
 ## Business Context
 
-Complex business processes like order fulfillment involve multiple steps that may take time and can fail at any point. Sagas provide a way to manage these long-running processes with proper compensation and rollback capabilities.
+Complex business processes like order fulfillment involve multiple steps that
+may take time and can fail at any point. Sagas provide a way to manage these
+long-running processes with proper compensation and rollback capabilities.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-saga.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { 
-  BaseSaga, 
-  SagaOrchestrator, 
-  ISagaDefinition, 
+import {
+  BaseSaga,
+  SagaOrchestrator,
+  ISagaDefinition,
   ISagaExecutionContext,
-  ISagaActionResult
+  ISagaActionResult,
 } from '@vytches-ddd/messaging';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  OrderCreatedEvent, 
-  PaymentProcessedEvent, 
+import {
+  Order,
+  OrderCreatedEvent,
+  PaymentProcessedEvent,
   InventoryReservedEvent,
   OrderProcessingResult,
-  IOrderRepository
+  IOrderRepository,
 } from '../types';
 
 /**
  * @llm-summary Advanced domain service using Saga pattern for long-running processes
  * @llm-domain order-management
  * @llm-complexity Complex
- * 
+ *
  * @description
  * Orchestrates complex order fulfillment processes using Saga pattern.
  * Manages compensation logic and handles distributed transaction scenarios.
- * 
+ *
  * @example
  * ```typescript
  * const service = new OrderSagaService(orchestrator, orderRepo);
@@ -63,11 +65,13 @@ export class OrderSagaService extends BaseDomainService {
 
   /**
    * Starts order fulfillment saga
-   * 
+   *
    * @param orderId - Order identifier
    * @returns Result containing saga execution result or error
    */
-  async startOrderFulfillmentSaga(orderId: string): Promise<Result<OrderProcessingResult, Error>> {
+  async startOrderFulfillmentSaga(
+    orderId: string
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       const order = await this.orderRepository.findById(orderId);
       if (!order) {
@@ -81,7 +85,7 @@ export class OrderSagaService extends BaseDomainService {
         userId: order.userId,
         items: order.items,
         totalAmount: order.totalAmount,
-        createdAt: order.createdAt
+        createdAt: order.createdAt,
       };
 
       // Start saga execution
@@ -90,27 +94,33 @@ export class OrderSagaService extends BaseDomainService {
         userId: order.userId,
         metadata: {
           orderId: order.id,
-          startTime: new Date().toISOString()
-        }
+          startTime: new Date().toISOString(),
+        },
       };
 
-      const sagaResults = await this.sagaOrchestrator.processEvent(startEvent, context);
-      
+      const sagaResults = await this.sagaOrchestrator.processEvent(
+        startEvent,
+        context
+      );
+
       if (sagaResults.length === 0) {
-        return Result.failure(new Error('No saga found to handle order creation'));
+        return Result.failure(
+          new Error('No saga found to handle order creation')
+        );
       }
 
       const result: OrderProcessingResult = {
         orderId: order.id,
         status: order.status,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
 
       return Result.success(result);
-
     } catch (error) {
-      return Result.failure(new Error(`Saga initiation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Saga initiation failed: ${error.message}`)
+      );
     }
   }
 
@@ -131,33 +141,34 @@ export class OrderSagaService extends BaseDomainService {
           description: 'Process payment for order',
           timeout: 30000,
           maxRetries: 3,
-          compensationStep: 'RefundPayment'
+          compensationStep: 'RefundPayment',
         },
         {
           stepName: 'ReserveInventory',
           description: 'Reserve inventory for order items',
           timeout: 60000,
           maxRetries: 2,
-          compensationStep: 'ReleaseInventory'
+          compensationStep: 'ReleaseInventory',
         },
         {
           stepName: 'ArrangeShipping',
           description: 'Arrange shipping for order',
           timeout: 120000,
           maxRetries: 1,
-          compensationStep: 'CancelShipping'
+          compensationStep: 'CancelShipping',
         },
         {
           stepName: 'SendNotification',
           description: 'Send order confirmation',
           timeout: 10000,
           maxRetries: 3,
-          compensationStep: null // No compensation needed
-        }
+          compensationStep: null, // No compensation needed
+        },
       ],
-      createInstance: async (event, context) => new OrderFulfillmentSagaInstance(),
+      createInstance: async (event, context) =>
+        new OrderFulfillmentSagaInstance(),
       getCorrelationData: event => ({ orderId: event.orderId }),
-      validate: () => []
+      validate: () => [],
     };
 
     this.sagaOrchestrator.registerSagaDefinition(orderFulfillmentSaga);
@@ -199,7 +210,7 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       default:
         return {
           success: false,
-          error: { message: 'Unhandled event type', code: 'UNHANDLED_EVENT' }
+          error: { message: 'Unhandled event type', code: 'UNHANDLED_EVENT' },
         };
     }
   }
@@ -216,7 +227,7 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       'InventoryReservationFailed',
       'ShippingArranged',
       'ShippingFailed',
-      'NotificationSent'
+      'NotificationSent',
     ].includes(event.eventType);
   }
 
@@ -232,8 +243,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       stepData: {
         orderId: event.payload.orderId,
         totalAmount: event.payload.totalAmount,
-        items: event.payload.items
-      }
+        items: event.payload.items,
+      },
     });
 
     return {
@@ -244,10 +255,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
           payload: {
             orderId: event.payload.orderId,
             amount: event.payload.totalAmount,
-            method: 'credit_card'
-          }
-        }
-      ]
+            method: 'credit_card',
+          },
+        },
+      ],
     };
   }
 
@@ -262,8 +273,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'ReserveInventory',
       stepData: {
         ...this.state.stepData,
-        paymentId: event.payload.paymentId
-      }
+        paymentId: event.payload.paymentId,
+      },
     });
 
     const items = this.state.stepData.items || [];
@@ -272,13 +283,13 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       payload: {
         productId: item.productId,
         quantity: item.quantity,
-        orderId: this.state.stepData.orderId
-      }
+        orderId: this.state.stepData.orderId,
+      },
     }));
 
     return {
       success: true,
-      commands: inventoryCommands
+      commands: inventoryCommands,
     };
   }
 
@@ -297,8 +308,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'ArrangeShipping',
       stepData: {
         ...this.state.stepData,
-        reservedItems
-      }
+        reservedItems,
+      },
     });
 
     // Check if all items are reserved
@@ -311,10 +322,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
             type: 'ArrangeShipping',
             payload: {
               orderId: this.state.stepData.orderId,
-              items: reservedItems
-            }
-          }
-        ]
+              items: reservedItems,
+            },
+          },
+        ],
       };
     }
 
@@ -332,8 +343,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'SendNotification',
       stepData: {
         ...this.state.stepData,
-        shippingId: event.payload.shippingId
-      }
+        shippingId: event.payload.shippingId,
+      },
     });
 
     return {
@@ -344,10 +355,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
           payload: {
             orderId: this.state.stepData.orderId,
             userId: context.userId,
-            type: 'order_confirmation'
-          }
-        }
-      ]
+            type: 'order_confirmation',
+          },
+        },
+      ],
     };
   }
 
@@ -362,8 +373,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'Completed',
       stepData: {
         ...this.state.stepData,
-        notificationId: event.payload.notificationId
-      }
+        notificationId: event.payload.notificationId,
+      },
     });
 
     return {
@@ -373,10 +384,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
           eventType: 'OrderFulfillmentCompleted',
           payload: {
             orderId: this.state.stepData.orderId,
-            completedAt: new Date().toISOString()
-          }
-        }
-      ]
+            completedAt: new Date().toISOString(),
+          },
+        },
+      ],
     };
   }
 
@@ -391,15 +402,15 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'Failed',
       stepData: {
         ...this.state.stepData,
-        failureReason: event.payload.error
-      }
+        failureReason: event.payload.error,
+      },
     });
 
     return {
       success: false,
       error: {
         message: 'Payment processing failed',
-        code: 'PAYMENT_FAILED'
+        code: 'PAYMENT_FAILED',
       },
       events: [
         {
@@ -407,10 +418,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
           payload: {
             orderId: this.state.stepData.orderId,
             reason: event.payload.error,
-            failedAt: new Date().toISOString()
-          }
-        }
-      ]
+            failedAt: new Date().toISOString(),
+          },
+        },
+      ],
     };
   }
 
@@ -428,16 +439,16 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'Failed',
       stepData: {
         ...this.state.stepData,
-        failureReason: event.payload.error
-      }
+        failureReason: event.payload.error,
+      },
     });
 
     return {
       success: false,
       error: {
         message: 'Inventory reservation failed',
-        code: 'INVENTORY_FAILED'
-      }
+        code: 'INVENTORY_FAILED',
+      },
     };
   }
 
@@ -456,16 +467,16 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
       currentStep: 'Failed',
       stepData: {
         ...this.state.stepData,
-        failureReason: event.payload.error
-      }
+        failureReason: event.payload.error,
+      },
     });
 
     return {
       success: false,
       error: {
         message: 'Shipping arrangement failed',
-        code: 'SHIPPING_FAILED'
-      }
+        code: 'SHIPPING_FAILED',
+      },
     };
   }
 
@@ -491,9 +502,11 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
   /**
    * Refund payment compensation
    */
-  private async refundPayment(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async refundPayment(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     const paymentId = this.state.stepData.paymentId;
-    
+
     if (paymentId) {
       return {
         success: true,
@@ -503,10 +516,10 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
             payload: {
               paymentId,
               orderId: this.state.stepData.orderId,
-              amount: this.state.stepData.totalAmount
-            }
-          }
-        ]
+              amount: this.state.stepData.totalAmount,
+            },
+          },
+        ],
       };
     }
 
@@ -516,30 +529,34 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
   /**
    * Release inventory compensation
    */
-  private async releaseInventory(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async releaseInventory(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     const reservedItems = this.state.stepData.reservedItems || [];
-    
+
     const releaseCommands = reservedItems.map(item => ({
       type: 'ReleaseInventory',
       payload: {
         productId: item.productId,
         quantity: item.quantity,
-        orderId: this.state.stepData.orderId
-      }
+        orderId: this.state.stepData.orderId,
+      },
     }));
 
     return {
       success: true,
-      commands: releaseCommands
+      commands: releaseCommands,
     };
   }
 
   /**
    * Cancel shipping compensation
    */
-  private async cancelShipping(context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  private async cancelShipping(
+    context: ISagaExecutionContext
+  ): Promise<ISagaActionResult> {
     const shippingId = this.state.stepData.shippingId;
-    
+
     if (shippingId) {
       return {
         success: true,
@@ -548,17 +565,17 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
             type: 'CancelShipping',
             payload: {
               shippingId,
-              orderId: this.state.stepData.orderId
-            }
-          }
-        ]
+              orderId: this.state.stepData.orderId,
+            },
+          },
+        ],
       };
     }
 
     return { success: true };
   }
 }
-```
+````
 
 ## Key Features
 
@@ -579,6 +596,8 @@ class OrderFulfillmentSagaInstance extends BaseSaga {
 
 ## Related Examples
 
-- [Cross-Aggregate Domain Service](../intermediate/example-3.md) - Aggregate coordination
+- [Cross-Aggregate Domain Service](../intermediate/example-3.md) - Aggregate
+  coordination
 - [Resilient Domain Service](./example-2.md) - Resilience patterns
-- [Saga Framework examples](../../messaging/examples/) - Saga implementation patterns
+- [Saga Framework examples](../../messaging/examples/) - Saga implementation
+  patterns

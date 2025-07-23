@@ -1,19 +1,25 @@
 # Enterprise Error Recovery Orchestration - Advanced Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-primitives
-**Complexity**: advanced
-**Domain**: Error Recovery Orchestration
-**Patterns**: Error Recovery Strategies, Distributed System Resilience, Self-Healing Architecture, Cascading Failure Prevention
-**Dependencies**: BaseError, IDomainError, IActor, ActorError, Error Enums
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+advanced **Domain**: Error Recovery Orchestration **Patterns**: Error Recovery
+Strategies, Distributed System Resilience, Self-Healing Architecture, Cascading
+Failure Prevention **Dependencies**: BaseError, IDomainError, IActor,
+ActorError, Error Enums
 
 ## Description
 
-Demonstrates sophisticated enterprise error recovery orchestration using domain primitives as the foundation for distributed system resilience, self-healing architectures, cascading failure prevention, and advanced recovery coordination across multiple domains and infrastructure layers.
+Demonstrates sophisticated enterprise error recovery orchestration using domain
+primitives as the foundation for distributed system resilience, self-healing
+architectures, cascading failure prevention, and advanced recovery coordination
+across multiple domains and infrastructure layers.
 
 ## Business Context
 
-Mission-critical enterprise platform serving high-availability requirements (99.99% uptime) across global regions, requiring sophisticated error recovery, fault tolerance, disaster recovery, circuit breakers, bulkheads, and comprehensive failure analysis with automated remediation and business continuity planning.
+Mission-critical enterprise platform serving high-availability requirements
+(99.99% uptime) across global regions, requiring sophisticated error recovery,
+fault tolerance, disaster recovery, circuit breakers, bulkheads, and
+comprehensive failure analysis with automated remediation and business
+continuity planning.
 
 ## Code Example
 
@@ -25,20 +31,23 @@ import {
   IActor,
   ActorError,
   DomainErrorCode,
-  type DomainErrorOptions
+  type DomainErrorOptions,
 } from '@vytches-ddd/domain-primitives';
 import {
   RecoveryStrategy,
   SystemHealth,
   FailurePattern,
   ResiliencePolicy,
-  RecoveryContext
+  RecoveryContext,
 } from './types'; // From your app
 
 /**
  * Enterprise error recovery orchestration error hierarchy
  */
-export abstract class ErrorRecoveryOrchestrationError extends BaseError implements IDomainError {
+export abstract class ErrorRecoveryOrchestrationError
+  extends BaseError
+  implements IDomainError
+{
   public readonly domain = 'ErrorRecoveryOrchestration';
   public readonly systemId: string;
   public readonly recoveryPhase: RecoveryPhase;
@@ -83,7 +92,7 @@ export abstract class ErrorRecoveryOrchestrationError extends BaseError implemen
       timestamp: new Date(),
       errorCode: this.code,
       requiresEmergencyResponse: this.requiresEmergencyResponse(),
-      estimatedRecoveryTime: this.estimateRecoveryTime()
+      estimatedRecoveryTime: this.estimateRecoveryTime(),
     };
   }
 
@@ -106,9 +115,11 @@ export abstract class ErrorRecoveryOrchestrationError extends BaseError implemen
    * Check if error indicates systemic failure
    */
   isSystemicFailure(): boolean {
-    return this.cascadingFailure || 
-           this.affectedSystems.length > 3 ||
-           this.businessImpact.severity === 'CRITICAL';
+    return (
+      this.cascadingFailure ||
+      this.affectedSystems.length > 3 ||
+      this.businessImpact.severity === 'CRITICAL'
+    );
   }
 
   /**
@@ -144,13 +155,13 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
         severity: 'CRITICAL',
         customerImpact: impactRadius.customerImpact,
         revenueImpact: impactRadius.estimatedRevenueLoss,
-        slaViolation: true
+        slaViolation: true,
       },
       {
         cascadingFailure: true,
         affectedSystems: failureChain.map(link => link.systemId),
         recoveryComplexity: 'CRITICAL',
-        ...options
+        ...options,
       }
     );
 
@@ -161,9 +172,11 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
   }
 
   requiresEmergencyResponse(): boolean {
-    return this.impactRadius.criticalSystemsAffected > 0 ||
-           this.impactRadius.customerImpact === 'CRITICAL' ||
-           this.impactRadius.estimatedRevenueLoss > 1000000; // $1M+
+    return (
+      this.impactRadius.criticalSystemsAffected > 0 ||
+      this.impactRadius.customerImpact === 'CRITICAL' ||
+      this.impactRadius.estimatedRevenueLoss > 1000000
+    ); // $1M+
   }
 
   getRecoveryStrategy(): RecoveryStrategy {
@@ -179,7 +192,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       resourceRequirements: this.calculateResourceRequirements(),
       timelineEstimate: this.estimateRecoveryTime(),
       riskMitigation: this.generateRiskMitigation(),
-      postRecoveryValidation: this.defineValidationCriteria()
+      postRecoveryValidation: this.defineValidationCriteria(),
     };
   }
 
@@ -189,12 +202,18 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
     const parallelismReduction = this.canPerformParallelRecovery() ? 0.6 : 1.0;
 
     return {
-      optimisticMinutes: Math.round(baseTime * complexityMultiplier * parallelismReduction * 0.7),
-      realisticMinutes: Math.round(baseTime * complexityMultiplier * parallelismReduction),
-      pessimisticMinutes: Math.round(baseTime * complexityMultiplier * parallelismReduction * 1.5),
+      optimisticMinutes: Math.round(
+        baseTime * complexityMultiplier * parallelismReduction * 0.7
+      ),
+      realisticMinutes: Math.round(
+        baseTime * complexityMultiplier * parallelismReduction
+      ),
+      pessimisticMinutes: Math.round(
+        baseTime * complexityMultiplier * parallelismReduction * 1.5
+      ),
       confidence: this.assessTimeEstimateConfidence(),
       assumptions: this.getRecoveryAssumptions(),
-      riskFactors: this.identifyTimeRiskFactors()
+      riskFactors: this.identifyTimeRiskFactors(),
     };
   }
 
@@ -207,7 +226,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       communicationBlacklist: this.getCommunicationBlacklist(),
       resourceQuarantine: this.getResourceQuarantine(),
       monitoringEscalation: this.getMonitoringEscalation(),
-      emergencyContacts: this.getEmergencyContacts()
+      emergencyContacts: this.getEmergencyContacts(),
     };
   }
 
@@ -228,7 +247,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       recoveryComplexity: this.assessRecoveryComplexity(),
       businessContinuityImpact: this.assessBusinessContinuityImpact(),
       lessonsCaptured: this.captureLessonsLearned(),
-      recommendedImprovements: this.generateSystemImprovements()
+      recommendedImprovements: this.generateSystemImprovements(),
     };
   }
 
@@ -249,7 +268,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       vendorCoordination: this.coordinateVendorSupport(),
       recoveryCheckpoints: this.defineRecoveryCheckpoints(),
       rollbackProcedures: this.defineRollbackProcedures(),
-      successCriteria: this.defineRecoverySuccessCriteria()
+      successCriteria: this.defineRecoverySuccessCriteria(),
     };
   }
 
@@ -262,7 +281,10 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
   private calculateOptimalRecoveryOrder(): RecoveryStep[] {
     // Calculate optimal recovery order based on dependencies and criticality
     return this.failureChain
-      .sort((a, b) => (b.criticality - a.criticality) || (a.dependencyLevel - b.dependencyLevel))
+      .sort(
+        (a, b) =>
+          b.criticality - a.criticality || a.dependencyLevel - b.dependencyLevel
+      )
       .map((link, index) => ({
         stepId: `RECOVERY-STEP-${index + 1}`,
         systemId: link.systemId,
@@ -270,7 +292,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
         dependencies: link.dependencies,
         estimatedDuration: link.recoveryTime,
         parallelizable: link.parallelizable,
-        priority: link.criticality > 8 ? 'CRITICAL' : 'HIGH'
+        priority: link.criticality > 8 ? 'CRITICAL' : 'HIGH',
       }));
   }
 
@@ -281,22 +303,22 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
         type: 'SYSTEM_ISOLATION',
         target: this.identifyCriticalSystems(),
         priority: 'IMMEDIATE',
-        estimatedTime: 5
+        estimatedTime: 5,
       },
       {
         actionId: 'CIRCUIT_BREAKER_ACTIVATION',
         type: 'CIRCUIT_BREAKER',
         target: this.identifyCircuitBreakerTargets(),
         priority: 'IMMEDIATE',
-        estimatedTime: 2
+        estimatedTime: 2,
       },
       {
         actionId: 'BULKHEAD_ISOLATION',
         type: 'BULKHEAD_ACTIVATION',
         target: this.identifyBulkheadTargets(),
         priority: 'HIGH',
-        estimatedTime: 10
-      }
+        estimatedTime: 10,
+      },
     ];
   }
 
@@ -307,7 +329,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       dataConsistencyChecks: this.defineDataConsistencyChecks(),
       rollbackTimeLimit: this.calculateRollbackTimeLimit(),
       partialRollbackSupport: true,
-      rollbackValidation: this.defineRollbackValidation()
+      rollbackValidation: this.defineRollbackValidation(),
     };
   }
 
@@ -318,7 +340,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       fallbackCapacity: 0.7, // 70% capacity
       switchoverTime: 15, // 15 minutes
       dataSync: 'EVENTUAL_CONSISTENCY',
-      healthChecks: [`health-${systemId}`]
+      healthChecks: [`health-${systemId}`],
     }));
   }
 
@@ -329,7 +351,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       customerCommunication: this.createCustomerCommunicationPlan(),
       partnerNotification: this.createPartnerNotificationPlan(),
       publicRelations: this.createPublicRelationsPlan(),
-      regulatoryReporting: this.createRegulatoryReportingPlan()
+      regulatoryReporting: this.createRegulatoryReportingPlan(),
     };
   }
 
@@ -339,7 +361,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       infrastructureResources: this.calculateInfrastructureNeeds(),
       thirdPartySupport: this.identifyThirdPartySupport(),
       budgetaryImpact: this.calculateBudgetaryImpact(),
-      timelineImpact: this.calculateTimelineImpact()
+      timelineImpact: this.calculateTimelineImpact(),
     };
   }
 
@@ -348,7 +370,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       identifiedRisks: this.identifyRecoveryRisks(),
       mitigationStrategies: this.developMitigationStrategies(),
       contingencyPlans: this.createContingencyPlans(),
-      monitoringPoints: this.defineRiskMonitoringPoints()
+      monitoringPoints: this.defineRiskMonitoringPoints(),
     };
   }
 
@@ -359,33 +381,44 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
         description: 'All critical systems operational',
         validationType: 'AUTOMATED',
         threshold: 95, // 95% health score
-        timeout: 300 // 5 minutes
+        timeout: 300, // 5 minutes
       },
       {
         criteriaId: 'DATA_CONSISTENCY',
         description: 'Data consistency across all systems',
         validationType: 'AUTOMATED_WITH_MANUAL_VERIFICATION',
         threshold: 100, // 100% consistency
-        timeout: 1800 // 30 minutes
-      }
+        timeout: 1800, // 30 minutes
+      },
     ];
   }
 
   private getComplexityMultiplier(): number {
     switch (this.recoveryComplexity) {
-      case 'LOW': return 1.0;
-      case 'MEDIUM': return 1.5;
-      case 'HIGH': return 2.0;
-      case 'CRITICAL': return 3.0;
-      default: return 1.5;
+      case 'LOW':
+        return 1.0;
+      case 'MEDIUM':
+        return 1.5;
+      case 'HIGH':
+        return 2.0;
+      case 'CRITICAL':
+        return 3.0;
+      default:
+        return 1.5;
     }
   }
 
   private assessTimeEstimateConfidence(): 'LOW' | 'MEDIUM' | 'HIGH' {
-    if (this.failurePattern === 'NOVEL_FAILURE' || this.recoveryComplexity === 'CRITICAL') {
+    if (
+      this.failurePattern === 'NOVEL_FAILURE' ||
+      this.recoveryComplexity === 'CRITICAL'
+    ) {
       return 'LOW';
     }
-    if (this.failureChain.length > 5 || this.impactRadius.unknownDependencies > 0) {
+    if (
+      this.failureChain.length > 5 ||
+      this.impactRadius.unknownDependencies > 0
+    ) {
       return 'MEDIUM';
     }
     return 'HIGH';
@@ -397,7 +430,7 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       'No additional cascading failures during recovery',
       'Third-party services operational',
       'Network infrastructure stable',
-      'Data integrity maintained'
+      'Data integrity maintained',
     ];
   }
 
@@ -407,58 +440,152 @@ export class CascadingSystemFailureError extends ErrorRecoveryOrchestrationError
       'Third-party dependency failures',
       'Resource availability constraints',
       'Data corruption requiring extended recovery',
-      'Network instability during recovery'
+      'Network instability during recovery',
     ];
   }
 
   // Additional helper methods with simplified implementations
-  private requiresTrafficRerouting(): boolean { return true; }
-  private getDataProtectionMeasures(): DataProtectionMeasure[] { return []; }
-  private getCommunicationBlacklist(): string[] { return []; }
-  private getResourceQuarantine(): ResourceQuarantine[] { return []; }
-  private getMonitoringEscalation(): MonitoringEscalation { return {} as MonitoringEscalation; }
-  private getEmergencyContacts(): EmergencyContact[] { return []; }
-  private analyzeCascadingEffects(): CascadingEffect[] { return []; }
-  private identifyPreventionOpportunities(): PreventionOpportunity[] { return []; }
-  private identifySystemicWeaknesses(): SystemicWeakness[] { return []; }
-  private assessRecoveryComplexity(): ComplexityAssessment { return {} as ComplexityAssessment; }
-  private assessBusinessContinuityImpact(): BusinessContinuityImpact { return {} as BusinessContinuityImpact; }
-  private captureLessonsLearned(): LessonLearned[] { return []; }
-  private generateSystemImprovements(): SystemImprovement[] { return []; }
-  private identifyCriticalRecoveryPath(): CriticalPath { return {} as CriticalPath; }
-  private allocateRecoveryResources(): ResourceAllocation { return {} as ResourceAllocation; }
-  private createEmergencyCommunicationTree(): CommunicationTree { return {} as CommunicationTree; }
-  private activateBusinessContinuityMeasures(): BusinessContinuityMeasure[] { return []; }
-  private prepareCustomerCommunication(): CustomerCommunication { return {} as CustomerCommunication; }
-  private prepareRegulatoryNotifications(): RegulatoryNotification[] { return []; }
-  private coordinateVendorSupport(): VendorCoordination { return {} as VendorCoordination; }
-  private defineRecoveryCheckpoints(): RecoveryCheckpoint[] { return []; }
-  private defineRollbackProcedures(): RollbackProcedure[] { return []; }
-  private defineRecoverySuccessCriteria(): SuccessCriteria[] { return []; }
-  private analyzeDependencies(): DependencyAnalysis { return { parallelizableGroups: [[]] }; }
-  private identifyCriticalSystems(): string[] { return this.affectedSystems.filter((_, i) => i < 2); }
-  private identifyCircuitBreakerTargets(): string[] { return this.affectedSystems; }
-  private identifyBulkheadTargets(): string[] { return this.affectedSystems; }
-  private defineRollbackTriggers(): RollbackTrigger[] { return []; }
-  private calculateRollbackOrder(): string[] { return [...this.affectedSystems].reverse(); }
-  private defineDataConsistencyChecks(): DataConsistencyCheck[] { return []; }
-  private calculateRollbackTimeLimit(): number { return 3600; } // 1 hour
-  private defineRollbackValidation(): RollbackValidation[] { return []; }
-  private createInternalEscalationPlan(): InternalEscalationPlan { return {} as InternalEscalationPlan; }
-  private createExecutiveNotificationPlan(): ExecutiveNotificationPlan { return {} as ExecutiveNotificationPlan; }
-  private createCustomerCommunicationPlan(): CustomerCommunicationPlan { return {} as CustomerCommunicationPlan; }
-  private createPartnerNotificationPlan(): PartnerNotificationPlan { return {} as PartnerNotificationPlan; }
-  private createPublicRelationsPlan(): PublicRelationsPlan { return {} as PublicRelationsPlan; }
-  private createRegulatoryReportingPlan(): RegulatoryReportingPlan { return {} as RegulatoryReportingPlan; }
-  private calculateEngineeeringTeamNeeds(): EngineeringTeamNeeds { return {} as EngineeringTeamNeeds; }
-  private calculateInfrastructureNeeds(): InfrastructureNeeds { return {} as InfrastructureNeeds; }
-  private identifyThirdPartySupport(): ThirdPartySupport[] { return []; }
-  private calculateBudgetaryImpact(): BudgetaryImpact { return {} as BudgetaryImpact; }
-  private calculateTimelineImpact(): TimelineImpact { return {} as TimelineImpact; }
-  private identifyRecoveryRisks(): RecoveryRisk[] { return []; }
-  private developMitigationStrategies(): MitigationStrategy[] { return []; }
-  private createContingencyPlans(): ContingencyPlan[] { return []; }
-  private defineRiskMonitoringPoints(): RiskMonitoringPoint[] { return []; }
+  private requiresTrafficRerouting(): boolean {
+    return true;
+  }
+  private getDataProtectionMeasures(): DataProtectionMeasure[] {
+    return [];
+  }
+  private getCommunicationBlacklist(): string[] {
+    return [];
+  }
+  private getResourceQuarantine(): ResourceQuarantine[] {
+    return [];
+  }
+  private getMonitoringEscalation(): MonitoringEscalation {
+    return {} as MonitoringEscalation;
+  }
+  private getEmergencyContacts(): EmergencyContact[] {
+    return [];
+  }
+  private analyzeCascadingEffects(): CascadingEffect[] {
+    return [];
+  }
+  private identifyPreventionOpportunities(): PreventionOpportunity[] {
+    return [];
+  }
+  private identifySystemicWeaknesses(): SystemicWeakness[] {
+    return [];
+  }
+  private assessRecoveryComplexity(): ComplexityAssessment {
+    return {} as ComplexityAssessment;
+  }
+  private assessBusinessContinuityImpact(): BusinessContinuityImpact {
+    return {} as BusinessContinuityImpact;
+  }
+  private captureLessonsLearned(): LessonLearned[] {
+    return [];
+  }
+  private generateSystemImprovements(): SystemImprovement[] {
+    return [];
+  }
+  private identifyCriticalRecoveryPath(): CriticalPath {
+    return {} as CriticalPath;
+  }
+  private allocateRecoveryResources(): ResourceAllocation {
+    return {} as ResourceAllocation;
+  }
+  private createEmergencyCommunicationTree(): CommunicationTree {
+    return {} as CommunicationTree;
+  }
+  private activateBusinessContinuityMeasures(): BusinessContinuityMeasure[] {
+    return [];
+  }
+  private prepareCustomerCommunication(): CustomerCommunication {
+    return {} as CustomerCommunication;
+  }
+  private prepareRegulatoryNotifications(): RegulatoryNotification[] {
+    return [];
+  }
+  private coordinateVendorSupport(): VendorCoordination {
+    return {} as VendorCoordination;
+  }
+  private defineRecoveryCheckpoints(): RecoveryCheckpoint[] {
+    return [];
+  }
+  private defineRollbackProcedures(): RollbackProcedure[] {
+    return [];
+  }
+  private defineRecoverySuccessCriteria(): SuccessCriteria[] {
+    return [];
+  }
+  private analyzeDependencies(): DependencyAnalysis {
+    return { parallelizableGroups: [[]] };
+  }
+  private identifyCriticalSystems(): string[] {
+    return this.affectedSystems.filter((_, i) => i < 2);
+  }
+  private identifyCircuitBreakerTargets(): string[] {
+    return this.affectedSystems;
+  }
+  private identifyBulkheadTargets(): string[] {
+    return this.affectedSystems;
+  }
+  private defineRollbackTriggers(): RollbackTrigger[] {
+    return [];
+  }
+  private calculateRollbackOrder(): string[] {
+    return [...this.affectedSystems].reverse();
+  }
+  private defineDataConsistencyChecks(): DataConsistencyCheck[] {
+    return [];
+  }
+  private calculateRollbackTimeLimit(): number {
+    return 3600;
+  } // 1 hour
+  private defineRollbackValidation(): RollbackValidation[] {
+    return [];
+  }
+  private createInternalEscalationPlan(): InternalEscalationPlan {
+    return {} as InternalEscalationPlan;
+  }
+  private createExecutiveNotificationPlan(): ExecutiveNotificationPlan {
+    return {} as ExecutiveNotificationPlan;
+  }
+  private createCustomerCommunicationPlan(): CustomerCommunicationPlan {
+    return {} as CustomerCommunicationPlan;
+  }
+  private createPartnerNotificationPlan(): PartnerNotificationPlan {
+    return {} as PartnerNotificationPlan;
+  }
+  private createPublicRelationsPlan(): PublicRelationsPlan {
+    return {} as PublicRelationsPlan;
+  }
+  private createRegulatoryReportingPlan(): RegulatoryReportingPlan {
+    return {} as RegulatoryReportingPlan;
+  }
+  private calculateEngineeeringTeamNeeds(): EngineeringTeamNeeds {
+    return {} as EngineeringTeamNeeds;
+  }
+  private calculateInfrastructureNeeds(): InfrastructureNeeds {
+    return {} as InfrastructureNeeds;
+  }
+  private identifyThirdPartySupport(): ThirdPartySupport[] {
+    return [];
+  }
+  private calculateBudgetaryImpact(): BudgetaryImpact {
+    return {} as BudgetaryImpact;
+  }
+  private calculateTimelineImpact(): TimelineImpact {
+    return {} as TimelineImpact;
+  }
+  private identifyRecoveryRisks(): RecoveryRisk[] {
+    return [];
+  }
+  private developMitigationStrategies(): MitigationStrategy[] {
+    return [];
+  }
+  private createContingencyPlans(): ContingencyPlan[] {
+    return [];
+  }
+  private defineRiskMonitoringPoints(): RiskMonitoringPoint[] {
+    return [];
+  }
 }
 
 /**
@@ -488,12 +615,13 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
         severity: dataIntegrityRisk.level as BusinessImpactSeverity,
         customerImpact: dataIntegrityRisk.customerDataImpact,
         revenueImpact: dataIntegrityRisk.estimatedBusinessLoss,
-        slaViolation: dataIntegrityRisk.level === 'CRITICAL'
+        slaViolation: dataIntegrityRisk.level === 'CRITICAL',
       },
       {
         affectedSystems: affectedDatasets.map(ds => ds.systemId),
-        recoveryComplexity: dataIntegrityRisk.level === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
-        ...options
+        recoveryComplexity:
+          dataIntegrityRisk.level === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
+        ...options,
       }
     );
 
@@ -504,15 +632,20 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
   }
 
   requiresEmergencyResponse(): boolean {
-    return this.dataIntegrityRisk.level === 'CRITICAL' ||
-           this.consistencyViolationType === 'FINANCIAL_INCONSISTENCY' ||
-           this.affectedDatasets.some(ds => ds.dataClassification === 'HIGHLY_SENSITIVE');
+    return (
+      this.dataIntegrityRisk.level === 'CRITICAL' ||
+      this.consistencyViolationType === 'FINANCIAL_INCONSISTENCY' ||
+      this.affectedDatasets.some(
+        ds => ds.dataClassification === 'HIGHLY_SENSITIVE'
+      )
+    );
   }
 
   getRecoveryStrategy(): RecoveryStrategy {
     return {
       strategyType: 'DATA_CONSISTENCY_RECOVERY',
-      priority: this.dataIntegrityRisk.level === 'CRITICAL' ? 'EMERGENCY' : 'HIGH',
+      priority:
+        this.dataIntegrityRisk.level === 'CRITICAL' ? 'EMERGENCY' : 'HIGH',
       parallelRecovery: this.canParallelizeDataRecovery(),
       recoveryOrder: this.calculateDataRecoveryOrder(),
       containmentActions: this.getDataContainmentActions(),
@@ -522,7 +655,7 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       resourceRequirements: this.calculateDataRecoveryResources(),
       timelineEstimate: this.estimateRecoveryTime(),
       riskMitigation: this.generateDataRiskMitigation(),
-      postRecoveryValidation: this.defineDataValidationCriteria()
+      postRecoveryValidation: this.defineDataValidationCriteria(),
     };
   }
 
@@ -533,12 +666,29 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
     const parallelismFactor = this.canParallelizeDataRecovery() ? 0.5 : 1.0;
 
     return {
-      optimisticMinutes: Math.round(baseTimePerDataset * totalDatasets * complexityFactor * parallelismFactor * 0.6),
-      realisticMinutes: Math.round(baseTimePerDataset * totalDatasets * complexityFactor * parallelismFactor),
-      pessimisticMinutes: Math.round(baseTimePerDataset * totalDatasets * complexityFactor * parallelismFactor * 2.0),
+      optimisticMinutes: Math.round(
+        baseTimePerDataset *
+          totalDatasets *
+          complexityFactor *
+          parallelismFactor *
+          0.6
+      ),
+      realisticMinutes: Math.round(
+        baseTimePerDataset *
+          totalDatasets *
+          complexityFactor *
+          parallelismFactor
+      ),
+      pessimisticMinutes: Math.round(
+        baseTimePerDataset *
+          totalDatasets *
+          complexityFactor *
+          parallelismFactor *
+          2.0
+      ),
       confidence: this.assessDataRecoveryConfidence(),
       assumptions: this.getDataRecoveryAssumptions(),
-      riskFactors: this.identifyDataRecoveryRisks()
+      riskFactors: this.identifyDataRecoveryRisks(),
     };
   }
 
@@ -551,7 +701,7 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       communicationBlacklist: this.getDataAccessBlacklist(),
       resourceQuarantine: this.getDataResourceQuarantine(),
       monitoringEscalation: this.getDataMonitoringEscalation(),
-      emergencyContacts: this.getDataEmergencyContacts()
+      emergencyContacts: this.getDataEmergencyContacts(),
     };
   }
 
@@ -571,18 +721,20 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       businessImpactMitigation: this.generateBusinessImpactMitigation(),
       communicationPlan: this.createDataRecoveryCommunicationPlan(),
       rollbackProcedures: this.generateDataRollbackProcedures(),
-      preventionMeasures: this.generateDataPreventionMeasures()
+      preventionMeasures: this.generateDataPreventionMeasures(),
     };
   }
 
   private canParallelizeDataRecovery(): boolean {
-    return this.affectedDatasets.length > 1 && 
-           this.analyzeCrossDatasetDependencies().independentGroups > 1;
+    return (
+      this.affectedDatasets.length > 1 &&
+      this.analyzeCrossDatasetDependencies().independentGroups > 1
+    );
   }
 
   private calculateDataRecoveryOrder(): RecoveryStep[] {
     return this.affectedDatasets
-      .sort((a, b) => (b.criticalityScore - a.criticalityScore))
+      .sort((a, b) => b.criticalityScore - a.criticalityScore)
       .map((dataset, index) => ({
         stepId: `DATA-RECOVERY-${index + 1}`,
         systemId: dataset.systemId,
@@ -590,7 +742,7 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
         dependencies: dataset.dependencies,
         estimatedDuration: this.calculateDatasetRecoveryTime(dataset),
         parallelizable: dataset.independentRecovery,
-        priority: dataset.criticalityScore > 8 ? 'CRITICAL' : 'HIGH'
+        priority: dataset.criticalityScore > 8 ? 'CRITICAL' : 'HIGH',
       }));
   }
 
@@ -601,15 +753,15 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
         type: 'DATA_ISOLATION',
         target: this.affectedDatasets.map(ds => ds.datasetId),
         priority: 'IMMEDIATE',
-        estimatedTime: 15
+        estimatedTime: 15,
       },
       {
         actionId: 'CONSISTENCY_MONITORING',
         type: 'MONITORING_ESCALATION',
         target: ['data-consistency-monitor'],
         priority: 'HIGH',
-        estimatedTime: 5
-      }
+        estimatedTime: 5,
+      },
     ];
   }
 
@@ -620,32 +772,42 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       dataConsistencyChecks: this.defineDataConsistencyChecks(),
       rollbackTimeLimit: 7200, // 2 hours for data rollback
       partialRollbackSupport: true,
-      rollbackValidation: this.defineDataRollbackValidation()
+      rollbackValidation: this.defineDataRollbackValidation(),
     };
   }
 
   private getDataComplexityFactor(): number {
     let complexity = 1.0;
-    
+
     // Add complexity for data relationships
-    complexity += this.affectedDatasets.filter(ds => ds.hasComplexRelationships).length * 0.3;
-    
+    complexity +=
+      this.affectedDatasets.filter(ds => ds.hasComplexRelationships).length *
+      0.3;
+
     // Add complexity for distributed datasets
-    complexity += this.affectedDatasets.filter(ds => ds.distributedAcrossRegions).length * 0.2;
-    
+    complexity +=
+      this.affectedDatasets.filter(ds => ds.distributedAcrossRegions).length *
+      0.2;
+
     // Add complexity for real-time datasets
-    complexity += this.affectedDatasets.filter(ds => ds.requiresRealTimeSync).length * 0.4;
+    complexity +=
+      this.affectedDatasets.filter(ds => ds.requiresRealTimeSync).length * 0.4;
 
     return Math.min(complexity, 3.0); // Cap at 3x complexity
   }
 
   private assessDataRecoveryConfidence(): 'LOW' | 'MEDIUM' | 'HIGH' {
-    if (this.consistencyViolationType === 'UNKNOWN_INCONSISTENCY' || 
-        this.dataIntegrityRisk.level === 'CRITICAL') {
+    if (
+      this.consistencyViolationType === 'UNKNOWN_INCONSISTENCY' ||
+      this.dataIntegrityRisk.level === 'CRITICAL'
+    ) {
       return 'LOW';
     }
-    if (this.affectedDatasets.length > 10 || 
-        this.consistencyWindow.durationMinutes > 1440) { // 24 hours
+    if (
+      this.affectedDatasets.length > 10 ||
+      this.consistencyWindow.durationMinutes > 1440
+    ) {
+      // 24 hours
       return 'MEDIUM';
     }
     return 'HIGH';
@@ -657,7 +819,7 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       'No additional data corruption during recovery',
       'Database systems operational',
       'Network connectivity stable',
-      'Recovery team with data expertise available'
+      'Recovery team with data expertise available',
     ];
   }
 
@@ -667,35 +829,83 @@ export class DataConsistencyFailureError extends ErrorRecoveryOrchestrationError
       'Extended downtime during reconciliation',
       'Partial data loss in edge cases',
       'Performance degradation during recovery',
-      'Cascading consistency failures'
+      'Cascading consistency failures',
     ];
   }
 
   // Additional data-specific helper methods (simplified implementations)
-  private getDataSpecificProtectionMeasures(): DataProtectionMeasure[] { return []; }
-  private getDataAccessBlacklist(): string[] { return []; }
-  private getDataResourceQuarantine(): ResourceQuarantine[] { return []; }
-  private getDataMonitoringEscalation(): MonitoringEscalation { return {} as MonitoringEscalation; }
-  private getDataEmergencyContacts(): EmergencyContact[] { return []; }
-  private performDataIntegrityAssessment(): DataIntegrityAssessment { return {} as DataIntegrityAssessment; }
-  private generateReconciliationStrategy(): ReconciliationStrategy { return {} as ReconciliationStrategy; }
-  private generateBackupRestoreStrategy(): BackupRestoreStrategy { return {} as BackupRestoreStrategy; }
-  private generateDataValidationPlan(): DataValidationPlan { return {} as DataValidationPlan; }
-  private generateBusinessImpactMitigation(): BusinessImpactMitigation { return {} as BusinessImpactMitigation; }
-  private createDataRecoveryCommunicationPlan(): DataRecoveryCommunicationPlan { return {} as DataRecoveryCommunicationPlan; }
-  private generateDataRollbackProcedures(): DataRollbackProcedure[] { return []; }
-  private generateDataPreventionMeasures(): DataPreventionMeasure[] { return []; }
-  private analyzeCrossDatasetDependencies(): CrossDatasetDependencyAnalysis { return { independentGroups: 2 }; }
-  private calculateDatasetRecoveryTime(dataset: AffectedDataset): number { return 60; }
-  private defineDataRollbackTriggers(): RollbackTrigger[] { return []; }
-  private calculateDataRollbackOrder(): string[] { return this.affectedDatasets.map(ds => ds.datasetId); }
-  private defineDataConsistencyChecks(): DataConsistencyCheck[] { return []; }
-  private defineDataRollbackValidation(): RollbackValidation[] { return []; }
-  private identifyDataFallbackSystems(): FallbackSystem[] { return []; }
-  private createDataIncidentCommunicationPlan(): CommunicationPlan { return {} as CommunicationPlan; }
-  private calculateDataRecoveryResources(): ResourceRequirements { return {} as ResourceRequirements; }
-  private generateDataRiskMitigation(): RiskMitigationPlan { return {} as RiskMitigationPlan; }
-  private defineDataValidationCriteria(): ValidationCriteria[] { return []; }
+  private getDataSpecificProtectionMeasures(): DataProtectionMeasure[] {
+    return [];
+  }
+  private getDataAccessBlacklist(): string[] {
+    return [];
+  }
+  private getDataResourceQuarantine(): ResourceQuarantine[] {
+    return [];
+  }
+  private getDataMonitoringEscalation(): MonitoringEscalation {
+    return {} as MonitoringEscalation;
+  }
+  private getDataEmergencyContacts(): EmergencyContact[] {
+    return [];
+  }
+  private performDataIntegrityAssessment(): DataIntegrityAssessment {
+    return {} as DataIntegrityAssessment;
+  }
+  private generateReconciliationStrategy(): ReconciliationStrategy {
+    return {} as ReconciliationStrategy;
+  }
+  private generateBackupRestoreStrategy(): BackupRestoreStrategy {
+    return {} as BackupRestoreStrategy;
+  }
+  private generateDataValidationPlan(): DataValidationPlan {
+    return {} as DataValidationPlan;
+  }
+  private generateBusinessImpactMitigation(): BusinessImpactMitigation {
+    return {} as BusinessImpactMitigation;
+  }
+  private createDataRecoveryCommunicationPlan(): DataRecoveryCommunicationPlan {
+    return {} as DataRecoveryCommunicationPlan;
+  }
+  private generateDataRollbackProcedures(): DataRollbackProcedure[] {
+    return [];
+  }
+  private generateDataPreventionMeasures(): DataPreventionMeasure[] {
+    return [];
+  }
+  private analyzeCrossDatasetDependencies(): CrossDatasetDependencyAnalysis {
+    return { independentGroups: 2 };
+  }
+  private calculateDatasetRecoveryTime(dataset: AffectedDataset): number {
+    return 60;
+  }
+  private defineDataRollbackTriggers(): RollbackTrigger[] {
+    return [];
+  }
+  private calculateDataRollbackOrder(): string[] {
+    return this.affectedDatasets.map(ds => ds.datasetId);
+  }
+  private defineDataConsistencyChecks(): DataConsistencyCheck[] {
+    return [];
+  }
+  private defineDataRollbackValidation(): RollbackValidation[] {
+    return [];
+  }
+  private identifyDataFallbackSystems(): FallbackSystem[] {
+    return [];
+  }
+  private createDataIncidentCommunicationPlan(): CommunicationPlan {
+    return {} as CommunicationPlan;
+  }
+  private calculateDataRecoveryResources(): ResourceRequirements {
+    return {} as ResourceRequirements;
+  }
+  private generateDataRiskMitigation(): RiskMitigationPlan {
+    return {} as RiskMitigationPlan;
+  }
+  private defineDataValidationCriteria(): ValidationCriteria[] {
+    return [];
+  }
 }
 
 /**
@@ -747,7 +957,7 @@ export class EnterpriseErrorRecoveryOrchestrator {
     recoveryOptions: RecoveryOptions = {}
   ): Promise<RecoveryOrchestrationResult> {
     const recoveryId = `RECOVERY-${Date.now()}-${error.systemId}`;
-    
+
     try {
       // Create recovery context
       const recoveryContext: RecoveryContext = {
@@ -757,11 +967,14 @@ export class EnterpriseErrorRecoveryOrchestrator {
         startedAt: new Date(),
         options: recoveryOptions,
         systemHealth: await this.assessSystemHealth(error.affectedSystems),
-        environmentContext: await this.gatherEnvironmentContext(error.systemId)
+        environmentContext: await this.gatherEnvironmentContext(error.systemId),
       };
 
       // Get recovery strategy
-      const recoveryStrategy = await this.determineOptimalRecoveryStrategy(error, recoveryContext);
+      const recoveryStrategy = await this.determineOptimalRecoveryStrategy(
+        error,
+        recoveryContext
+      );
 
       // Create active recovery tracking
       const activeRecovery: ActiveRecovery = {
@@ -772,7 +985,7 @@ export class EnterpriseErrorRecoveryOrchestrator {
         progress: 0,
         checkpoints: [],
         resourcesAllocated: [],
-        communicationsLog: []
+        communicationsLog: [],
       };
 
       this.activeRecoveries.set(recoveryId, activeRecovery);
@@ -784,9 +997,13 @@ export class EnterpriseErrorRecoveryOrchestrator {
       await this.updateRecoveryMetrics(result);
 
       return result;
-
     } catch (recoveryError) {
-      await this.handleRecoveryFailure(recoveryId, error, recoveryError, initiatingActor);
+      await this.handleRecoveryFailure(
+        recoveryId,
+        error,
+        recoveryError,
+        initiatingActor
+      );
       throw recoveryError;
     }
   }
@@ -799,20 +1016,22 @@ export class EnterpriseErrorRecoveryOrchestrator {
 
     try {
       // Get system health across all monitored systems
-      const systemsHealth = await this.systemHealthMonitor.getGlobalSystemHealth();
+      const systemsHealth =
+        await this.systemHealthMonitor.getGlobalSystemHealth();
 
       // Predict potential failures
-      const predictions = await this.failurePredictor.predictPotentialFailures(systemsHealth);
+      const predictions =
+        await this.failurePredictor.predictPotentialFailures(systemsHealth);
 
       for (const prediction of predictions) {
-        if (prediction.confidence > 0.8 && prediction.timeToFailure < 3600) { // High confidence, < 1 hour
+        if (prediction.confidence > 0.8 && prediction.timeToFailure < 3600) {
+          // High confidence, < 1 hour
           const preventionResult = await this.executePrevention(prediction);
           results.push(preventionResult);
         }
       }
 
       return results;
-
     } catch (error) {
       await this.auditLogger.logPreventionFailure(error);
       throw error;
@@ -826,8 +1045,11 @@ export class EnterpriseErrorRecoveryOrchestrator {
     timeframe: { start: Date; end: Date },
     systemFilter?: string[]
   ): Promise<RecoveryAnalyticsReport> {
-    const completedRecoveries = await this.getCompletedRecoveries(timeframe, systemFilter);
-    
+    const completedRecoveries = await this.getCompletedRecoveries(
+      timeframe,
+      systemFilter
+    );
+
     const report: RecoveryAnalyticsReport = {
       reportId: `RECOVERY-ANALYTICS-${Date.now()}`,
       timeframe,
@@ -835,16 +1057,22 @@ export class EnterpriseErrorRecoveryOrchestrator {
       generatedAt: new Date(),
       totalRecoveries: completedRecoveries.length,
       recoverySuccessRate: this.calculateSuccessRate(completedRecoveries),
-      averageRecoveryTime: this.calculateAverageRecoveryTime(completedRecoveries),
-      recoveryTypeBreakdown: this.calculateRecoveryTypeBreakdown(completedRecoveries),
+      averageRecoveryTime:
+        this.calculateAverageRecoveryTime(completedRecoveries),
+      recoveryTypeBreakdown:
+        this.calculateRecoveryTypeBreakdown(completedRecoveries),
       systemImpactAnalysis: this.analyzeSystemImpacts(completedRecoveries),
-      cascadingFailureAnalysis: this.analyzeCascadingFailures(completedRecoveries),
-      preventionEffectiveness: await this.analyzePreventionEffectiveness(timeframe),
+      cascadingFailureAnalysis:
+        this.analyzeCascadingFailures(completedRecoveries),
+      preventionEffectiveness:
+        await this.analyzePreventionEffectiveness(timeframe),
       resourceUtilization: this.analyzeResourceUtilization(completedRecoveries),
       businessImpactAnalysis: this.analyzeBusinessImpact(completedRecoveries),
-      recommendations: this.generateRecoveryRecommendations(completedRecoveries),
+      recommendations:
+        this.generateRecoveryRecommendations(completedRecoveries),
       trendsAndPatterns: this.analyzeTrendsAndPatterns(completedRecoveries),
-      improvementOpportunities: this.identifyImprovementOpportunities(completedRecoveries)
+      improvementOpportunities:
+        this.identifyImprovementOpportunities(completedRecoveries),
     };
 
     return report;
@@ -858,7 +1086,7 @@ export class EnterpriseErrorRecoveryOrchestrator {
     participants: IActor[]
   ): Promise<DisasterRecoverySimulationResult> {
     const simulationId = `DR-SIM-${Date.now()}`;
-    
+
     try {
       const simulation: DisasterRecoverySimulation = {
         simulationId,
@@ -867,40 +1095,48 @@ export class EnterpriseErrorRecoveryOrchestrator {
         startedAt: new Date(),
         status: 'RUNNING',
         objectives: simulationScenario.testObjectives,
-        metrics: this.initializeSimulationMetrics()
+        metrics: this.initializeSimulationMetrics(),
       };
 
       // Execute simulation phases
       const simulationResult = await this.executeSimulationPhases(simulation);
-      
+
       // Analyze results and generate report
-      const analysisReport = await this.analyzeSimulationResults(simulationResult);
-      
+      const analysisReport =
+        await this.analyzeSimulationResults(simulationResult);
+
       // Generate lessons learned and improvements
       const lessonsLearned = await this.captureLessonsLearned(simulationResult);
-      
+
       const finalResult: DisasterRecoverySimulationResult = {
         ...simulationResult,
         analysisReport,
         lessonsLearned,
-        recommendedImprovements: this.generateSimulationBasedImprovements(analysisReport),
-        nextSimulationRecommendations: this.recommendNextSimulations(simulationResult)
+        recommendedImprovements:
+          this.generateSimulationBasedImprovements(analysisReport),
+        nextSimulationRecommendations:
+          this.recommendNextSimulations(simulationResult),
       };
 
       await this.auditLogger.logSimulationCompletion(finalResult);
 
       return finalResult;
-
     } catch (error) {
-      await this.auditLogger.logSimulationFailure(simulationId, simulationScenario, error);
+      await this.auditLogger.logSimulationFailure(
+        simulationId,
+        simulationScenario,
+        error
+      );
       throw error;
     }
   }
 
   // Private implementation methods
-  private async assessSystemHealth(systemIds: string[]): Promise<Map<string, SystemHealth>> {
+  private async assessSystemHealth(
+    systemIds: string[]
+  ): Promise<Map<string, SystemHealth>> {
     const healthMap = new Map<string, SystemHealth>();
-    
+
     for (const systemId of systemIds) {
       const health = await this.systemHealthMonitor.getSystemHealth(systemId);
       healthMap.set(systemId, health);
@@ -910,12 +1146,17 @@ export class EnterpriseErrorRecoveryOrchestrator {
     return healthMap;
   }
 
-  private async gatherEnvironmentContext(systemId: string): Promise<EnvironmentContext> {
+  private async gatherEnvironmentContext(
+    systemId: string
+  ): Promise<EnvironmentContext> {
     return {
       currentLoad: await this.systemHealthMonitor.getCurrentLoad(systemId),
-      resourceAvailability: await this.systemHealthMonitor.getResourceAvailability(systemId),
-      dependencyStatus: await this.systemHealthMonitor.getDependencyStatus(systemId),
-      networkConditions: await this.systemHealthMonitor.getNetworkConditions(systemId)
+      resourceAvailability:
+        await this.systemHealthMonitor.getResourceAvailability(systemId),
+      dependencyStatus:
+        await this.systemHealthMonitor.getDependencyStatus(systemId),
+      networkConditions:
+        await this.systemHealthMonitor.getNetworkConditions(systemId),
     };
   }
 
@@ -925,16 +1166,19 @@ export class EnterpriseErrorRecoveryOrchestrator {
   ): Promise<RecoveryStrategy> {
     // Use recovery strategy engine to determine optimal approach
     const baseStrategy = error.getRecoveryStrategy();
-    const optimizedStrategy = await this.recoveryStrategyEngine.optimizeStrategy(baseStrategy, context);
-    
+    const optimizedStrategy =
+      await this.recoveryStrategyEngine.optimizeStrategy(baseStrategy, context);
+
     return optimizedStrategy;
   }
 
-  private async executeRecoveryOrchestration(activeRecovery: ActiveRecovery): Promise<RecoveryOrchestrationResult> {
+  private async executeRecoveryOrchestration(
+    activeRecovery: ActiveRecovery
+  ): Promise<RecoveryOrchestrationResult> {
     const { recoveryId, recoveryStrategy } = activeRecovery;
-    
+
     activeRecovery.status = 'EXECUTING';
-    
+
     const result: RecoveryOrchestrationResult = {
       recoveryId,
       success: false,
@@ -945,28 +1189,34 @@ export class EnterpriseErrorRecoveryOrchestrator {
       resourcesUsed: [],
       businessImpactMitigation: {},
       lessonsLearned: [],
-      metrics: this.initializeRecoveryMetrics()
+      metrics: this.initializeRecoveryMetrics(),
     };
 
     try {
       // Execute containment actions
       if (recoveryStrategy.containmentActions.length > 0) {
-        await this.executeContainmentActions(recoveryStrategy.containmentActions, activeRecovery);
+        await this.executeContainmentActions(
+          recoveryStrategy.containmentActions,
+          activeRecovery
+        );
       }
 
       // Execute recovery steps
       for (const step of recoveryStrategy.recoveryOrder) {
         const stepResult = await this.executeRecoveryStep(step, activeRecovery);
         result.stepsExecuted.push(stepResult);
-        
+
         if (!stepResult.success && step.priority === 'CRITICAL') {
           throw new Error(`Critical recovery step failed: ${step.stepId}`);
         }
       }
 
       // Validate recovery
-      const validationResults = await this.validateRecovery(recoveryStrategy.postRecoveryValidation, activeRecovery);
-      
+      const validationResults = await this.validateRecovery(
+        recoveryStrategy.postRecoveryValidation,
+        activeRecovery
+      );
+
       if (validationResults.every(v => v.success)) {
         result.success = true;
         activeRecovery.status = 'COMPLETED';
@@ -979,16 +1229,18 @@ export class EnterpriseErrorRecoveryOrchestrator {
       result.metrics = this.calculateRecoveryMetrics(activeRecovery);
 
       return result;
-
     } catch (error) {
       activeRecovery.status = 'FAILED';
       result.success = false;
       result.completedAt = new Date();
       result.error = error.message;
-      
+
       // Attempt rollback if configured
       if (recoveryStrategy.rollbackStrategy) {
-        await this.attemptRollback(recoveryStrategy.rollbackStrategy, activeRecovery);
+        await this.attemptRollback(
+          recoveryStrategy.rollbackStrategy,
+          activeRecovery
+        );
       }
 
       throw error;
@@ -1001,27 +1253,43 @@ export class EnterpriseErrorRecoveryOrchestrator {
     recoveryError: Error,
     initiatingActor: IActor
   ): Promise<void> {
-    await this.auditLogger.logRecoveryFailure(recoveryId, originalError, recoveryError, initiatingActor);
-    await this.alertingService.sendRecoveryFailureAlert(recoveryId, originalError, recoveryError);
-    
+    await this.auditLogger.logRecoveryFailure(
+      recoveryId,
+      originalError,
+      recoveryError,
+      initiatingActor
+    );
+    await this.alertingService.sendRecoveryFailureAlert(
+      recoveryId,
+      originalError,
+      recoveryError
+    );
+
     // Escalate to emergency procedures if critical
     if (originalError.requiresEmergencyResponse()) {
-      await this.initiateEmergencyProcedures(originalError, recoveryError, initiatingActor);
+      await this.initiateEmergencyProcedures(
+        originalError,
+        recoveryError,
+        initiatingActor
+      );
     }
   }
 
-  private async executePrevention(prediction: FailurePrediction): Promise<PreventionResult> {
+  private async executePrevention(
+    prediction: FailurePrediction
+  ): Promise<PreventionResult> {
     const preventionId = `PREVENTION-${Date.now()}-${prediction.systemId}`;
-    
+
     try {
-      const preventionActions = await this.generatePreventionActions(prediction);
-      
+      const preventionActions =
+        await this.generatePreventionActions(prediction);
+
       const result: PreventionResult = {
         preventionId,
         prediction,
         actionsExecuted: [],
         success: false,
-        executedAt: new Date()
+        executedAt: new Date(),
       };
 
       for (const action of preventionActions) {
@@ -1030,11 +1298,10 @@ export class EnterpriseErrorRecoveryOrchestrator {
       }
 
       result.success = result.actionsExecuted.every(a => a.success);
-      
-      await this.auditLogger.logPreventionExecution(result);
-      
-      return result;
 
+      await this.auditLogger.logPreventionExecution(result);
+
+      return result;
     } catch (error) {
       await this.auditLogger.logPreventionFailure(error);
       throw error;
@@ -1052,16 +1319,18 @@ export class EnterpriseErrorRecoveryOrchestrator {
       successfulRecoveries: 0,
       failedRecoveries: 0,
       averageRecoveryTime: 0,
-      preventedFailures: 0
+      preventedFailures: 0,
     };
   }
 
-  private async updateRecoveryMetrics(result: RecoveryOrchestrationResult): Promise<void> {
+  private async updateRecoveryMetrics(
+    result: RecoveryOrchestrationResult
+  ): Promise<void> {
     // Update recovery metrics based on result
   }
 
   private async getCompletedRecoveries(
-    timeframe: { start: Date; end: Date }, 
+    timeframe: { start: Date; end: Date },
     systemFilter?: string[]
   ): Promise<CompletedRecovery[]> {
     return []; // Implementation specific
@@ -1073,37 +1342,132 @@ export class EnterpriseErrorRecoveryOrchestrator {
     return (successful / recoveries.length) * 100;
   }
 
-  private calculateAverageRecoveryTime(recoveries: CompletedRecovery[]): number {
+  private calculateAverageRecoveryTime(
+    recoveries: CompletedRecovery[]
+  ): number {
     if (recoveries.length === 0) return 0;
     const totalTime = recoveries.reduce((sum, r) => sum + r.durationMinutes, 0);
     return totalTime / recoveries.length;
   }
 
   // Additional analysis methods (simplified signatures)
-  private calculateRecoveryTypeBreakdown(recoveries: CompletedRecovery[]): Record<string, number> { return {}; }
-  private analyzeSystemImpacts(recoveries: CompletedRecovery[]): SystemImpactAnalysis { return {} as SystemImpactAnalysis; }
-  private analyzeCascadingFailures(recoveries: CompletedRecovery[]): CascadingFailureAnalysis { return {} as CascadingFailureAnalysis; }
-  private async analyzePreventionEffectiveness(timeframe: { start: Date; end: Date }): Promise<PreventionEffectivenessAnalysis> { return {} as PreventionEffectivenessAnalysis; }
-  private analyzeResourceUtilization(recoveries: CompletedRecovery[]): ResourceUtilizationAnalysis { return {} as ResourceUtilizationAnalysis; }
-  private analyzeBusinessImpact(recoveries: CompletedRecovery[]): BusinessImpactAnalysis { return {} as BusinessImpactAnalysis; }
-  private generateRecoveryRecommendations(recoveries: CompletedRecovery[]): RecoveryRecommendation[] { return []; }
-  private analyzeTrendsAndPatterns(recoveries: CompletedRecovery[]): TrendsAndPatterns { return {} as TrendsAndPatterns; }
-  private identifyImprovementOpportunities(recoveries: CompletedRecovery[]): ImprovementOpportunity[] { return []; }
-  private async executeSimulationPhases(simulation: DisasterRecoverySimulation): Promise<DisasterRecoverySimulationResult> { return {} as DisasterRecoverySimulationResult; }
-  private async analyzeSimulationResults(result: DisasterRecoverySimulationResult): Promise<SimulationAnalysisReport> { return {} as SimulationAnalysisReport; }
-  private async captureLessonsLearned(result: DisasterRecoverySimulationResult): Promise<LessonLearned[]> { return []; }
-  private generateSimulationBasedImprovements(report: SimulationAnalysisReport): SystemImprovement[] { return []; }
-  private recommendNextSimulations(result: DisasterRecoverySimulationResult): SimulationRecommendation[] { return []; }
-  private async executeContainmentActions(actions: ContainmentAction[], activeRecovery: ActiveRecovery): Promise<void> { }
-  private async executeRecoveryStep(step: RecoveryStep, activeRecovery: ActiveRecovery): Promise<RecoveryStepResult> { return {} as RecoveryStepResult; }
-  private async validateRecovery(validationCriteria: ValidationCriteria[], activeRecovery: ActiveRecovery): Promise<ValidationResult[]> { return []; }
-  private calculateRecoveryMetrics(activeRecovery: ActiveRecovery): RecoveryMetrics { return this.initializeMetrics(); }
-  private async attemptRollback(rollbackStrategy: RollbackStrategy, activeRecovery: ActiveRecovery): Promise<void> { }
-  private async initiateEmergencyProcedures(originalError: ErrorRecoveryOrchestrationError, recoveryError: Error, actor: IActor): Promise<void> { }
-  private async generatePreventionActions(prediction: FailurePrediction): Promise<PreventionAction[]> { return []; }
-  private async executePreventionAction(action: PreventionAction): Promise<PreventionActionResult> { return {} as PreventionActionResult; }
-  private initializeSimulationMetrics(): SimulationMetrics { return {} as SimulationMetrics; }
-  private initializeRecoveryMetrics(): RecoveryMetrics { return this.initializeMetrics(); }
+  private calculateRecoveryTypeBreakdown(
+    recoveries: CompletedRecovery[]
+  ): Record<string, number> {
+    return {};
+  }
+  private analyzeSystemImpacts(
+    recoveries: CompletedRecovery[]
+  ): SystemImpactAnalysis {
+    return {} as SystemImpactAnalysis;
+  }
+  private analyzeCascadingFailures(
+    recoveries: CompletedRecovery[]
+  ): CascadingFailureAnalysis {
+    return {} as CascadingFailureAnalysis;
+  }
+  private async analyzePreventionEffectiveness(timeframe: {
+    start: Date;
+    end: Date;
+  }): Promise<PreventionEffectivenessAnalysis> {
+    return {} as PreventionEffectivenessAnalysis;
+  }
+  private analyzeResourceUtilization(
+    recoveries: CompletedRecovery[]
+  ): ResourceUtilizationAnalysis {
+    return {} as ResourceUtilizationAnalysis;
+  }
+  private analyzeBusinessImpact(
+    recoveries: CompletedRecovery[]
+  ): BusinessImpactAnalysis {
+    return {} as BusinessImpactAnalysis;
+  }
+  private generateRecoveryRecommendations(
+    recoveries: CompletedRecovery[]
+  ): RecoveryRecommendation[] {
+    return [];
+  }
+  private analyzeTrendsAndPatterns(
+    recoveries: CompletedRecovery[]
+  ): TrendsAndPatterns {
+    return {} as TrendsAndPatterns;
+  }
+  private identifyImprovementOpportunities(
+    recoveries: CompletedRecovery[]
+  ): ImprovementOpportunity[] {
+    return [];
+  }
+  private async executeSimulationPhases(
+    simulation: DisasterRecoverySimulation
+  ): Promise<DisasterRecoverySimulationResult> {
+    return {} as DisasterRecoverySimulationResult;
+  }
+  private async analyzeSimulationResults(
+    result: DisasterRecoverySimulationResult
+  ): Promise<SimulationAnalysisReport> {
+    return {} as SimulationAnalysisReport;
+  }
+  private async captureLessonsLearned(
+    result: DisasterRecoverySimulationResult
+  ): Promise<LessonLearned[]> {
+    return [];
+  }
+  private generateSimulationBasedImprovements(
+    report: SimulationAnalysisReport
+  ): SystemImprovement[] {
+    return [];
+  }
+  private recommendNextSimulations(
+    result: DisasterRecoverySimulationResult
+  ): SimulationRecommendation[] {
+    return [];
+  }
+  private async executeContainmentActions(
+    actions: ContainmentAction[],
+    activeRecovery: ActiveRecovery
+  ): Promise<void> {}
+  private async executeRecoveryStep(
+    step: RecoveryStep,
+    activeRecovery: ActiveRecovery
+  ): Promise<RecoveryStepResult> {
+    return {} as RecoveryStepResult;
+  }
+  private async validateRecovery(
+    validationCriteria: ValidationCriteria[],
+    activeRecovery: ActiveRecovery
+  ): Promise<ValidationResult[]> {
+    return [];
+  }
+  private calculateRecoveryMetrics(
+    activeRecovery: ActiveRecovery
+  ): RecoveryMetrics {
+    return this.initializeMetrics();
+  }
+  private async attemptRollback(
+    rollbackStrategy: RollbackStrategy,
+    activeRecovery: ActiveRecovery
+  ): Promise<void> {}
+  private async initiateEmergencyProcedures(
+    originalError: ErrorRecoveryOrchestrationError,
+    recoveryError: Error,
+    actor: IActor
+  ): Promise<void> {}
+  private async generatePreventionActions(
+    prediction: FailurePrediction
+  ): Promise<PreventionAction[]> {
+    return [];
+  }
+  private async executePreventionAction(
+    action: PreventionAction
+  ): Promise<PreventionActionResult> {
+    return {} as PreventionActionResult;
+  }
+  private initializeSimulationMetrics(): SimulationMetrics {
+    return {} as SimulationMetrics;
+  }
+  private initializeRecoveryMetrics(): RecoveryMetrics {
+    return this.initializeMetrics();
+  }
 }
 ```
 
@@ -1114,7 +1478,7 @@ export class EnterpriseErrorRecoveryOrchestrator {
 import {
   EnterpriseErrorRecoveryOrchestrator,
   CascadingSystemFailureError,
-  DataConsistencyFailureError
+  DataConsistencyFailureError,
 } from './error-recovery-orchestration';
 import { SystemAdministratorActor } from '../intermediate/example-3'; // Reference to actor example
 
@@ -1128,14 +1492,18 @@ export class EnterpriseErrorRecoveryDemo {
   async demonstrateCascadingFailureRecovery(): Promise<void> {
     try {
       // Create system admin for recovery operations
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-RECOVERY-001', 'ENTERPRISE', {
-        sessionMetadata: {
-          sessionId: 'RECOVERY-SESSION-001',
-          createdAt: new Date(),
-          ipAddress: '10.0.0.1',
-          userAgent: 'RecoveryDemo/1.0'
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-RECOVERY-001',
+        'ENTERPRISE',
+        {
+          sessionMetadata: {
+            sessionId: 'RECOVERY-SESSION-001',
+            createdAt: new Date(),
+            ipAddress: '10.0.0.1',
+            userAgent: 'RecoveryDemo/1.0',
+          },
         }
-      });
+      );
 
       // Simulate cascading system failure
       const cascadingFailure = new CascadingSystemFailureError(
@@ -1151,7 +1519,7 @@ export class EnterpriseErrorRecoveryDemo {
             recoveryTime: 45,
             parallelizable: false,
             dependencies: [],
-            cascadingTo: ['APPLICATION-SERVICES', 'MESSAGE-QUEUE']
+            cascadingTo: ['APPLICATION-SERVICES', 'MESSAGE-QUEUE'],
           },
           {
             systemId: 'APPLICATION-SERVICES',
@@ -1162,7 +1530,7 @@ export class EnterpriseErrorRecoveryDemo {
             recoveryTime: 20,
             parallelizable: true,
             dependencies: ['DATABASE-CLUSTER-01'],
-            cascadingTo: ['LOAD-BALANCER', 'CDN']
+            cascadingTo: ['LOAD-BALANCER', 'CDN'],
           },
           {
             systemId: 'MESSAGE-QUEUE',
@@ -1173,7 +1541,7 @@ export class EnterpriseErrorRecoveryDemo {
             recoveryTime: 15,
             parallelizable: true,
             dependencies: ['DATABASE-CLUSTER-01'],
-            cascadingTo: ['NOTIFICATION-SERVICE']
+            cascadingTo: ['NOTIFICATION-SERVICE'],
           },
           {
             systemId: 'NOTIFICATION-SERVICE',
@@ -1184,14 +1552,18 @@ export class EnterpriseErrorRecoveryDemo {
             recoveryTime: 10,
             parallelizable: true,
             dependencies: ['MESSAGE-QUEUE'],
-            cascadingTo: []
-          }
+            cascadingTo: [],
+          },
         ],
         {
           category: 'INFRASTRUCTURE_FAILURE',
           pattern: 'DATABASE_CASCADE',
           confidence: 0.95,
-          contributingFactors: ['HIGH_LOAD', 'MEMORY_LEAK', 'INSUFFICIENT_FAILOVER']
+          contributingFactors: [
+            'HIGH_LOAD',
+            'MEMORY_LEAK',
+            'INSUFFICIENT_FAILOVER',
+          ],
         },
         'DATABASE_CASCADE',
         {
@@ -1200,7 +1572,7 @@ export class EnterpriseErrorRecoveryDemo {
           customerImpact: 'CRITICAL',
           estimatedRevenueLoss: 2500000, // $2.5M
           unknownDependencies: 0,
-          geographicSpread: ['US-EAST', 'EU-WEST']
+          geographicSpread: ['US-EAST', 'EU-WEST'],
         }
       );
 
@@ -1211,14 +1583,16 @@ export class EnterpriseErrorRecoveryDemo {
         rootCause: failureAnalysis.rootCause,
         failurePattern: failureAnalysis.failurePattern,
         cascadingEffects: failureAnalysis.cascadingEffects.length,
-        recoveryComplexity: failureAnalysis.recoveryComplexity
+        recoveryComplexity: failureAnalysis.recoveryComplexity,
       });
 
       console.log('Recovery Strategy:', {
         strategyType: cascadingFailure.getRecoveryStrategy().strategyType,
         priority: cascadingFailure.getRecoveryStrategy().priority,
-        parallelRecovery: cascadingFailure.getRecoveryStrategy().parallelRecovery,
-        recoverySteps: cascadingFailure.getRecoveryStrategy().recoveryOrder.length
+        parallelRecovery:
+          cascadingFailure.getRecoveryStrategy().parallelRecovery,
+        recoverySteps:
+          cascadingFailure.getRecoveryStrategy().recoveryOrder.length,
       });
 
       const recoveryTimeEstimate = cascadingFailure.estimateRecoveryTime();
@@ -1226,30 +1600,30 @@ export class EnterpriseErrorRecoveryDemo {
         optimistic: `${recoveryTimeEstimate.optimisticMinutes} minutes`,
         realistic: `${recoveryTimeEstimate.realisticMinutes} minutes`,
         pessimistic: `${recoveryTimeEstimate.pessimisticMinutes} minutes`,
-        confidence: recoveryTimeEstimate.confidence
+        confidence: recoveryTimeEstimate.confidence,
       });
 
       // Execute recovery orchestration
-      const recoveryResult = await this.recoveryOrchestrator.orchestrateErrorRecovery(
-        cascadingFailure,
-        sysAdmin,
-        {
-          prioritizeBusinessContinuity: true,
-          allowPartialRecovery: false,
-          maxRecoveryTime: 120, // 2 hours
-          resourceAllocationLimit: 'UNLIMITED',
-          stakeholderNotifications: true
-        }
-      );
+      const recoveryResult =
+        await this.recoveryOrchestrator.orchestrateErrorRecovery(
+          cascadingFailure,
+          sysAdmin,
+          {
+            prioritizeBusinessContinuity: true,
+            allowPartialRecovery: false,
+            maxRecoveryTime: 120, // 2 hours
+            resourceAllocationLimit: 'UNLIMITED',
+            stakeholderNotifications: true,
+          }
+        );
 
       console.log('\nRecovery Orchestration Result:', {
         recoveryId: recoveryResult.recoveryId,
         success: recoveryResult.success,
         duration: `${Math.round((recoveryResult.completedAt.getTime() - recoveryResult.startedAt.getTime()) / 60000)} minutes`,
         stepsExecuted: recoveryResult.stepsExecuted.length,
-        resourcesUsed: recoveryResult.resourcesUsed.length
+        resourcesUsed: recoveryResult.resourcesUsed.length,
       });
-
     } catch (error) {
       console.error('Cascading failure recovery error:', error);
     }
@@ -1257,7 +1631,10 @@ export class EnterpriseErrorRecoveryDemo {
 
   async demonstrateDataConsistencyRecovery(): Promise<void> {
     try {
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-DATA-001', 'ENTERPRISE');
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-DATA-001',
+        'ENTERPRISE'
+      );
 
       // Simulate data consistency failure
       const dataConsistencyFailure = new DataConsistencyFailureError(
@@ -1275,7 +1652,7 @@ export class EnterpriseErrorRecoveryDemo {
             distributedAcrossRegions: true,
             requiresRealTimeSync: true,
             independentRecovery: false,
-            dependencies: ['TRANSACTION_LOG', 'AUDIT_TRAIL']
+            dependencies: ['TRANSACTION_LOG', 'AUDIT_TRAIL'],
           },
           {
             datasetId: 'TRANSACTION_LOG',
@@ -1287,7 +1664,7 @@ export class EnterpriseErrorRecoveryDemo {
             distributedAcrossRegions: false,
             requiresRealTimeSync: true,
             independentRecovery: true,
-            dependencies: []
+            dependencies: [],
           },
           {
             datasetId: 'CUSTOMER_ACCOUNTS',
@@ -1299,8 +1676,8 @@ export class EnterpriseErrorRecoveryDemo {
             distributedAcrossRegions: false,
             requiresRealTimeSync: false,
             independentRecovery: false,
-            dependencies: ['ACCOUNT_BALANCES']
-          }
+            dependencies: ['ACCOUNT_BALANCES'],
+          },
         ],
         {
           startedAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
@@ -1308,14 +1685,14 @@ export class EnterpriseErrorRecoveryDemo {
           durationMinutes: 30,
           affectedTransactions: 25000,
           maxInconsistencyValue: 150000, // $150K max inconsistency
-          recoveryWindowMinutes: 240 // 4 hours to fix
+          recoveryWindowMinutes: 240, // 4 hours to fix
         },
         {
           level: 'CRITICAL',
           customerDataImpact: 'HIGH',
           estimatedBusinessLoss: 500000, // $500K
           regulatoryImpact: true,
-          auditingRequired: true
+          auditingRequired: true,
         }
       );
 
@@ -1324,37 +1701,47 @@ export class EnterpriseErrorRecoveryDemo {
         violationType: dataConsistencyFailure.consistencyViolationType,
         affectedDatasets: dataConsistencyFailure.affectedDatasets.length,
         dataIntegrityRisk: dataConsistencyFailure.dataIntegrityRisk.level,
-        requiresEmergencyResponse: dataConsistencyFailure.requiresEmergencyResponse()
+        requiresEmergencyResponse:
+          dataConsistencyFailure.requiresEmergencyResponse(),
       });
 
-      const dataRecoveryPlan = dataConsistencyFailure.generateDataConsistencyRecoveryPlan();
+      const dataRecoveryPlan =
+        dataConsistencyFailure.generateDataConsistencyRecoveryPlan();
       console.log('Data Recovery Plan:', {
         recoveryPlanId: dataRecoveryPlan.recoveryPlanId,
-        reconciliationStrategy: dataRecoveryPlan.reconciliationStrategy ? 'Defined' : 'None',
-        backupRestoreStrategy: dataRecoveryPlan.backupRestoreStrategy ? 'Available' : 'None',
-        dataValidationPlan: dataRecoveryPlan.dataValidationPlan ? 'Comprehensive' : 'Basic'
+        reconciliationStrategy: dataRecoveryPlan.reconciliationStrategy
+          ? 'Defined'
+          : 'None',
+        backupRestoreStrategy: dataRecoveryPlan.backupRestoreStrategy
+          ? 'Available'
+          : 'None',
+        dataValidationPlan: dataRecoveryPlan.dataValidationPlan
+          ? 'Comprehensive'
+          : 'Basic',
       });
 
       // Execute data recovery orchestration
-      const dataRecoveryResult = await this.recoveryOrchestrator.orchestrateErrorRecovery(
-        dataConsistencyFailure,
-        sysAdmin,
-        {
-          prioritizeDataIntegrity: true,
-          allowPartialRecovery: true,
-          maxRecoveryTime: 240, // 4 hours
-          resourceAllocationLimit: 'HIGH',
-          regulatoryNotifications: true
-        }
-      );
+      const dataRecoveryResult =
+        await this.recoveryOrchestrator.orchestrateErrorRecovery(
+          dataConsistencyFailure,
+          sysAdmin,
+          {
+            prioritizeDataIntegrity: true,
+            allowPartialRecovery: true,
+            maxRecoveryTime: 240, // 4 hours
+            resourceAllocationLimit: 'HIGH',
+            regulatoryNotifications: true,
+          }
+        );
 
       console.log('\nData Recovery Result:', {
         success: dataRecoveryResult.success,
         stepsExecuted: dataRecoveryResult.stepsExecuted.length,
-        businessImpactMitigation: Object.keys(dataRecoveryResult.businessImpactMitigation).length,
-        lessonsLearned: dataRecoveryResult.lessonsLearned.length
+        businessImpactMitigation: Object.keys(
+          dataRecoveryResult.businessImpactMitigation
+        ).length,
+        lessonsLearned: dataRecoveryResult.lessonsLearned.length,
       });
-
     } catch (error) {
       console.error('Data consistency recovery error:', error);
     }
@@ -1363,27 +1750,28 @@ export class EnterpriseErrorRecoveryDemo {
   async demonstrateProactiveFailurePrevention(): Promise<void> {
     try {
       console.log('\n=== Proactive Failure Prevention ===');
-      
+
       // Execute proactive failure prevention
-      const preventionResults = await this.recoveryOrchestrator.performProactiveFailurePrevention();
+      const preventionResults =
+        await this.recoveryOrchestrator.performProactiveFailurePrevention();
 
       console.log('Prevention Results:', {
         totalPreventions: preventionResults.length,
         successfulPreventions: preventionResults.filter(r => r.success).length,
-        failedPreventions: preventionResults.filter(r => !r.success).length
+        failedPreventions: preventionResults.filter(r => !r.success).length,
       });
 
-      for (const result of preventionResults.slice(0, 3)) { // Show first 3
+      for (const result of preventionResults.slice(0, 3)) {
+        // Show first 3
         console.log(`Prevention ${result.preventionId}:`, {
           systemId: result.prediction.systemId,
           predictedFailure: result.prediction.failureType,
           confidence: result.prediction.confidence,
           timeToFailure: result.prediction.timeToFailure,
           actionsExecuted: result.actionsExecuted.length,
-          success: result.success
+          success: result.success,
         });
       }
-
     } catch (error) {
       console.error('Proactive prevention error:', error);
     }
@@ -1392,28 +1780,34 @@ export class EnterpriseErrorRecoveryDemo {
   async demonstrateRecoveryAnalyticsReport(): Promise<void> {
     try {
       console.log('\n=== Recovery Analytics Report ===');
-      
+
       // Generate comprehensive recovery analytics report
-      const analyticsReport = await this.recoveryOrchestrator.generateRecoveryAnalyticsReport(
-        {
-          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-          end: new Date()
-        },
-        ['DATABASE-CLUSTER-01', 'APPLICATION-SERVICES', 'MESSAGE-QUEUE']
-      );
+      const analyticsReport =
+        await this.recoveryOrchestrator.generateRecoveryAnalyticsReport(
+          {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+            end: new Date(),
+          },
+          ['DATABASE-CLUSTER-01', 'APPLICATION-SERVICES', 'MESSAGE-QUEUE']
+        );
 
       console.log('Analytics Report:', {
         reportId: analyticsReport.reportId,
         totalRecoveries: analyticsReport.totalRecoveries,
         successRate: `${analyticsReport.recoverySuccessRate.toFixed(2)}%`,
         averageRecoveryTime: `${analyticsReport.averageRecoveryTime.toFixed(1)} minutes`,
-        systemsAnalyzed: analyticsReport.systemFilter?.length || 'All'
+        systemsAnalyzed: analyticsReport.systemFilter?.length || 'All',
       });
 
-      console.log('Recovery Type Breakdown:', analyticsReport.recoveryTypeBreakdown);
+      console.log(
+        'Recovery Type Breakdown:',
+        analyticsReport.recoveryTypeBreakdown
+      );
       console.log('Business Impact:', analyticsReport.businessImpactAnalysis);
-      console.log('Recommendations:', analyticsReport.recommendations.slice(0, 3));
-
+      console.log(
+        'Recommendations:',
+        analyticsReport.recommendations.slice(0, 3)
+      );
     } catch (error) {
       console.error('Analytics report error:', error);
     }
@@ -1422,59 +1816,70 @@ export class EnterpriseErrorRecoveryDemo {
   async demonstrateDisasterRecoverySimulation(): Promise<void> {
     try {
       console.log('\n=== Disaster Recovery Simulation ===');
-      
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-SIM-001', 'ENTERPRISE');
-      
-      // Execute disaster recovery simulation
-      const simulationResult = await this.recoveryOrchestrator.executeDisasterRecoverySimulation(
-        {
-          scenarioId: 'DR-SIM-DATACENTER-OUTAGE',
-          scenarioName: 'Primary Datacenter Total Outage',
-          scenarioType: 'INFRASTRUCTURE_DISASTER',
-          testObjectives: [
-            'Validate RTO of 4 hours',
-            'Validate RPO of 15 minutes',
-            'Test communication protocols',
-            'Validate backup systems activation',
-            'Test customer notification procedures'
-          ],
-          affectedSystems: [
-            'DATABASE-CLUSTER-01',
-            'APPLICATION-SERVICES',
-            'MESSAGE-QUEUE',
-            'LOAD-BALANCER',
-            'CDN'
-          ],
-          disasterScope: 'REGIONAL',
-          estimatedDuration: 480, // 8 hours
-          participants: ['OPERATIONS_TEAM', 'ENGINEERING_TEAM', 'COMMUNICATIONS_TEAM'],
-          successCriteria: [
-            { metric: 'RTO', target: 240, unit: 'minutes' },
-            { metric: 'RPO', target: 15, unit: 'minutes' },
-            { metric: 'DATA_LOSS', target: 0, unit: 'percentage' }
-          ]
-        },
-        [sysAdmin]
+
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-SIM-001',
+        'ENTERPRISE'
       );
+
+      // Execute disaster recovery simulation
+      const simulationResult =
+        await this.recoveryOrchestrator.executeDisasterRecoverySimulation(
+          {
+            scenarioId: 'DR-SIM-DATACENTER-OUTAGE',
+            scenarioName: 'Primary Datacenter Total Outage',
+            scenarioType: 'INFRASTRUCTURE_DISASTER',
+            testObjectives: [
+              'Validate RTO of 4 hours',
+              'Validate RPO of 15 minutes',
+              'Test communication protocols',
+              'Validate backup systems activation',
+              'Test customer notification procedures',
+            ],
+            affectedSystems: [
+              'DATABASE-CLUSTER-01',
+              'APPLICATION-SERVICES',
+              'MESSAGE-QUEUE',
+              'LOAD-BALANCER',
+              'CDN',
+            ],
+            disasterScope: 'REGIONAL',
+            estimatedDuration: 480, // 8 hours
+            participants: [
+              'OPERATIONS_TEAM',
+              'ENGINEERING_TEAM',
+              'COMMUNICATIONS_TEAM',
+            ],
+            successCriteria: [
+              { metric: 'RTO', target: 240, unit: 'minutes' },
+              { metric: 'RPO', target: 15, unit: 'minutes' },
+              { metric: 'DATA_LOSS', target: 0, unit: 'percentage' },
+            ],
+          },
+          [sysAdmin]
+        );
 
       console.log('Simulation Result:', {
         simulationId: simulationResult.simulationId,
         success: simulationResult.success,
         duration: `${simulationResult.actualDuration} minutes`,
-        objectivesMet: simulationResult.objectiveResults?.filter(r => r.achieved).length,
+        objectivesMet: simulationResult.objectiveResults?.filter(
+          r => r.achieved
+        ).length,
         totalObjectives: simulationResult.objectiveResults?.length,
         lessonsLearned: simulationResult.lessonsLearned.length,
-        recommendedImprovements: simulationResult.recommendedImprovements.length
+        recommendedImprovements:
+          simulationResult.recommendedImprovements.length,
       });
 
       if (simulationResult.analysisReport) {
         console.log('Analysis Report:', {
           strengths: simulationResult.analysisReport.strengths?.slice(0, 2),
           weaknesses: simulationResult.analysisReport.weaknesses?.slice(0, 2),
-          recommendations: simulationResult.analysisReport.recommendations?.slice(0, 3)
+          recommendations:
+            simulationResult.analysisReport.recommendations?.slice(0, 3),
         });
       }
-
     } catch (error) {
       console.error('DR simulation error:', error);
     }
@@ -1484,27 +1889,46 @@ export class EnterpriseErrorRecoveryDemo {
 
 ## Key Features
 
-- **Enterprise Error Recovery Orchestration**: Sophisticated coordination of recovery across multiple systems and domains
-- **Cascading Failure Management**: Advanced detection and recovery from cascading system failures
-- **Data Consistency Recovery**: Specialized recovery patterns for data consistency violations and financial reconciliation
-- **Proactive Failure Prevention**: Predictive failure detection with automated prevention measures
-- **Self-Healing Architecture**: Automated recovery with minimal human intervention
-- **Disaster Recovery Orchestration**: Complete disaster recovery planning and execution
-- **Recovery Analytics**: Comprehensive analytics and reporting for recovery operations
-- **Simulation Framework**: Disaster recovery simulation for testing and validation
-- **Business Continuity Integration**: Recovery strategies aligned with business continuity requirements
+- **Enterprise Error Recovery Orchestration**: Sophisticated coordination of
+  recovery across multiple systems and domains
+- **Cascading Failure Management**: Advanced detection and recovery from
+  cascading system failures
+- **Data Consistency Recovery**: Specialized recovery patterns for data
+  consistency violations and financial reconciliation
+- **Proactive Failure Prevention**: Predictive failure detection with automated
+  prevention measures
+- **Self-Healing Architecture**: Automated recovery with minimal human
+  intervention
+- **Disaster Recovery Orchestration**: Complete disaster recovery planning and
+  execution
+- **Recovery Analytics**: Comprehensive analytics and reporting for recovery
+  operations
+- **Simulation Framework**: Disaster recovery simulation for testing and
+  validation
+- **Business Continuity Integration**: Recovery strategies aligned with business
+  continuity requirements
 
 ## Common Pitfalls
 
-- **Recovery Time Overestimation**: Account for dependencies and parallelization opportunities in time estimates
-- **Resource Contention**: Ensure adequate resource allocation during concurrent recovery operations
-- **Incomplete Validation**: Implement thorough post-recovery validation to prevent recurring issues
-- **Communication Delays**: Establish clear communication channels and notification procedures
-- **Over-Automation**: Balance automation with human oversight for critical recovery decisions
+- **Recovery Time Overestimation**: Account for dependencies and parallelization
+  opportunities in time estimates
+- **Resource Contention**: Ensure adequate resource allocation during concurrent
+  recovery operations
+- **Incomplete Validation**: Implement thorough post-recovery validation to
+  prevent recurring issues
+- **Communication Delays**: Establish clear communication channels and
+  notification procedures
+- **Over-Automation**: Balance automation with human oversight for critical
+  recovery decisions
 
 ## Related Examples
 
-- **Multi-Tenant Domain Security** (../advanced/example-2.md) - Security-focused recovery patterns
-- **Enterprise Domain Orchestration** (../advanced/example-1.md) - Cross-domain coordination for recovery
-- **Domain Error Hierarchies** (../intermediate/example-2.md) - Foundation error patterns for recovery
-- **NestJS Enterprise Integration** (../frameworks/nestjs/advanced/example-1.md) - Framework-specific recovery implementations
+- **Multi-Tenant Domain Security** (../advanced/example-2.md) - Security-focused
+  recovery patterns
+- **Enterprise Domain Orchestration** (../advanced/example-1.md) - Cross-domain
+  coordination for recovery
+- **Domain Error Hierarchies** (../intermediate/example-2.md) - Foundation error
+  patterns for recovery
+- **NestJS Enterprise Integration**
+  (../frameworks/nestjs/advanced/example-1.md) - Framework-specific recovery
+  implementations

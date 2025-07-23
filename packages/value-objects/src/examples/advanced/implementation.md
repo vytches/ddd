@@ -1,19 +1,22 @@
 # Advanced Value Objects - Implementation Overview
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced
-**Focus**: Advanced implementation patterns and architectural considerations
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Advanced **Focus**: Advanced implementation patterns and
+architectural considerations
 
 ## Overview
 
-This document provides comprehensive guidance for implementing advanced value objects that handle complex business logic, performance optimization, and sophisticated domain modeling. It covers patterns for time management, design systems, geospatial calculations, and other advanced scenarios.
+This document provides comprehensive guidance for implementing advanced value
+objects that handle complex business logic, performance optimization, and
+sophisticated domain modeling. It covers patterns for time management, design
+systems, geospatial calculations, and other advanced scenarios.
 
 ## Advanced Implementation Principles
 
 ### **1. Single Responsibility with Rich Behavior**
 
-Advanced value objects should maintain single responsibility while providing rich, domain-specific behavior:
+Advanced value objects should maintain single responsibility while providing
+rich, domain-specific behavior:
 
 ```typescript
 import { ValueObject } from '@vytches-ddd/value-objects';
@@ -43,7 +46,7 @@ export class AdvancedValueObject extends ValueObject<AdvancedData> {
     return {
       score: this.calculateScore(),
       insights: this.generateInsights(),
-      recommendations: this.getRecommendations()
+      recommendations: this.getRecommendations(),
     };
   }
 
@@ -74,19 +77,19 @@ export class PerformanceOptimizedValueObject extends ValueObject<ComplexData> {
   // ✅ Memoization for parameterized operations
   getParameterizedResult(params: ParameterSet): any {
     const cacheKey = this.generateCacheKey(params);
-    
+
     if (this._computationCache.has(cacheKey)) {
       return this._computationCache.get(cacheKey);
     }
 
     const result = this.computeWithParameters(params);
-    
+
     // Prevent memory leaks with cache size limit
     if (this._computationCache.size >= 100) {
       const firstKey = this._computationCache.keys().next().value;
       this._computationCache.delete(firstKey);
     }
-    
+
     this._computationCache.set(cacheKey, result);
     return result;
   }
@@ -98,19 +101,19 @@ export class PerformanceOptimizedValueObject extends ValueObject<ComplexData> {
     batchSize: number = 100
   ): PerformanceOptimizedValueObject[] {
     const results: PerformanceOptimizedValueObject[] = [];
-    
+
     for (let i = 0; i < items.length; i += batchSize) {
       const batch = items.slice(i, i + batchSize);
       const batchResults = batch.map(processor);
       results.push(...batchResults);
-      
+
       // Optional: yield control between batches for UI responsiveness
       if (i % (batchSize * 10) === 0) {
         // In browser environment, yield control
         // await new Promise(resolve => setTimeout(resolve, 0));
       }
     }
-    
+
     return results;
   }
 
@@ -138,21 +141,25 @@ For complex calculations and scientific applications:
 ```typescript
 export class ScientificValueObject extends ValueObject<ScientificData> {
   private static readonly PRECISION_THRESHOLD = 1e-10;
-  
+
   private constructor(data: ScientificData) {
     super(data);
   }
 
   // ✅ Factory with precision handling
-  static create(value: number, unit: string, precision?: number): ScientificValueObject {
-    const normalizedValue = precision 
+  static create(
+    value: number,
+    unit: string,
+    precision?: number
+  ): ScientificValueObject {
+    const normalizedValue = precision
       ? parseFloat(value.toFixed(precision))
       : value;
 
     const data: ScientificData = {
       value: normalizedValue,
       unit,
-      precision: precision || this.detectPrecision(value)
+      precision: precision || this.detectPrecision(value),
     };
 
     return new ScientificValueObject(data);
@@ -161,27 +168,42 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
   // ✅ Mathematical operations with precision preservation
   add(other: ScientificValueObject): ScientificValueObject {
     this.validateUnits(other, 'addition');
-    
+
     const resultPrecision = Math.max(this.data.precision, other.data.precision);
     const resultValue = this.data.value + other.data.value;
-    
-    return ScientificValueObject.create(resultValue, this.data.unit, resultPrecision);
+
+    return ScientificValueObject.create(
+      resultValue,
+      this.data.unit,
+      resultPrecision
+    );
   }
 
   multiply(scalar: number): ScientificValueObject {
     const resultValue = this.data.value * scalar;
-    return ScientificValueObject.create(resultValue, this.data.unit, this.data.precision);
+    return ScientificValueObject.create(
+      resultValue,
+      this.data.unit,
+      this.data.precision
+    );
   }
 
   // ✅ Unit conversion with validation
   convertTo(targetUnit: string): ScientificValueObject {
-    const conversionFactor = this.getConversionFactor(this.data.unit, targetUnit);
+    const conversionFactor = this.getConversionFactor(
+      this.data.unit,
+      targetUnit
+    );
     if (!conversionFactor) {
       throw new Error(`Cannot convert from ${this.data.unit} to ${targetUnit}`);
     }
 
     const convertedValue = this.data.value * conversionFactor;
-    return ScientificValueObject.create(convertedValue, targetUnit, this.data.precision);
+    return ScientificValueObject.create(
+      convertedValue,
+      targetUnit,
+      this.data.precision
+    );
   }
 
   // ✅ Comparison with precision awareness
@@ -200,7 +222,9 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
   }
 
   // ✅ Statistical operations
-  static calculateStatistics(values: ScientificValueObject[]): StatisticalSummary {
+  static calculateStatistics(
+    values: ScientificValueObject[]
+  ): StatisticalSummary {
     if (values.length === 0) {
       throw new Error('Cannot calculate statistics for empty array');
     }
@@ -208,11 +232,13 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
     // Ensure all values have the same unit
     const baseUnit = values[0].data.unit;
     if (!values.every(v => v.data.unit === baseUnit)) {
-      throw new Error('All values must have the same unit for statistical calculations');
+      throw new Error(
+        'All values must have the same unit for statistical calculations'
+      );
     }
 
     const numericalValues = values.map(v => v.data.value);
-    
+
     return {
       count: values.length,
       sum: numericalValues.reduce((a, b) => a + b, 0),
@@ -220,7 +246,7 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
       min: Math.min(...numericalValues),
       max: Math.max(...numericalValues),
       standardDeviation: this.calculateStandardDeviation(numericalValues),
-      unit: baseUnit
+      unit: baseUnit,
     };
   }
 
@@ -232,15 +258,17 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
 
   private validateUnits(other: ScientificValueObject, operation: string): void {
     if (this.data.unit !== other.data.unit) {
-      throw new Error(`Cannot perform ${operation} on different units: ${this.data.unit} and ${other.data.unit}`);
+      throw new Error(
+        `Cannot perform ${operation} on different units: ${this.data.unit} and ${other.data.unit}`
+      );
     }
   }
 
   private getConversionFactor(fromUnit: string, toUnit: string): number | null {
     // Simple conversion table - in production, use comprehensive unit library
     const conversions: Record<string, Record<string, number>> = {
-      'm': { 'km': 0.001, 'cm': 100, 'mm': 1000 },
-      'kg': { 'g': 1000, 't': 0.001, 'lb': 2.20462 },
+      m: { km: 0.001, cm: 100, mm: 1000 },
+      kg: { g: 1000, t: 0.001, lb: 2.20462 },
       // Add more conversions as needed
     };
 
@@ -250,7 +278,8 @@ export class ScientificValueObject extends ValueObject<ScientificData> {
   private static calculateStandardDeviation(values: number[]): number {
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
     const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
-    const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
+    const avgSquaredDiff =
+      squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
     return Math.sqrt(avgSquaredDiff);
   }
 }
@@ -285,32 +314,43 @@ interface CalculationStrategy<T> {
 }
 
 export class FlexibleValueObject extends ValueObject<FlexibleData> {
-  private static strategies = new Map<string, CalculationStrategy<FlexibleData>>();
+  private static strategies = new Map<
+    string,
+    CalculationStrategy<FlexibleData>
+  >();
 
   private constructor(data: FlexibleData) {
     super(data);
   }
 
-  static registerStrategy(name: string, strategy: CalculationStrategy<FlexibleData>): void {
+  static registerStrategy(
+    name: string,
+    strategy: CalculationStrategy<FlexibleData>
+  ): void {
     this.strategies.set(name, strategy);
   }
 
-  static create(data: FlexibleData, strategyName?: string): FlexibleValueObject {
+  static create(
+    data: FlexibleData,
+    strategyName?: string
+  ): FlexibleValueObject {
     const strategy = strategyName ? this.strategies.get(strategyName) : null;
-    
+
     if (strategy && !strategy.validate(data)) {
       throw new Error(`Data validation failed for strategy: ${strategyName}`);
     }
 
     return new FlexibleValueObject({
       ...data,
-      calculationStrategy: strategyName || 'default'
+      calculationStrategy: strategyName || 'default',
     });
   }
 
   calculate(): CalculationResult {
-    const strategy = FlexibleValueObject.strategies.get(this.data.calculationStrategy);
-    
+    const strategy = FlexibleValueObject.strategies.get(
+      this.data.calculationStrategy
+    );
+
     if (!strategy) {
       throw new Error(`Strategy not found: ${this.data.calculationStrategy}`);
     }
@@ -320,18 +360,20 @@ export class FlexibleValueObject extends ValueObject<FlexibleData> {
 
   withStrategy(strategyName: string): FlexibleValueObject {
     const strategy = FlexibleValueObject.strategies.get(strategyName);
-    
+
     if (!strategy) {
       throw new Error(`Strategy not found: ${strategyName}`);
     }
 
     if (!strategy.validate(this.data)) {
-      throw new Error(`Current data is not compatible with strategy: ${strategyName}`);
+      throw new Error(
+        `Current data is not compatible with strategy: ${strategyName}`
+      );
     }
 
     return new FlexibleValueObject({
       ...this.data,
-      calculationStrategy: strategyName
+      calculationStrategy: strategyName,
     });
   }
 }
@@ -366,8 +408,14 @@ class PremiumCalculationStrategy implements CalculationStrategy<FlexibleData> {
 }
 
 // Register strategies
-FlexibleValueObject.registerStrategy('standard', new StandardCalculationStrategy());
-FlexibleValueObject.registerStrategy('premium', new PremiumCalculationStrategy());
+FlexibleValueObject.registerStrategy(
+  'standard',
+  new StandardCalculationStrategy()
+);
+FlexibleValueObject.registerStrategy(
+  'premium',
+  new PremiumCalculationStrategy()
+);
 ```
 
 ### **5. Integration Patterns**
@@ -388,10 +436,12 @@ export class IntegratedValueObject extends ValueObject<IntegratedData> {
     try {
       const externalData = await service.fetch(identifier);
       const normalizedData = this.normalizeExternalData(externalData);
-      
+
       return new IntegratedValueObject(normalizedData);
     } catch (error) {
-      throw new Error(`Failed to create from external service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create from external service: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -404,23 +454,27 @@ export class IntegratedValueObject extends ValueObject<IntegratedData> {
       return {
         isValid,
         errors: isValid ? [] : ['External validation failed'],
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       return {
         isValid: false,
-        errors: [`Validation service error: ${error instanceof Error ? error.message : 'Unknown error'}`],
-        timestamp: new Date()
+        errors: [
+          `Validation service error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ],
+        timestamp: new Date(),
       };
     }
   }
 
   // ✅ Synchronization with external state
-  async syncWithExternal(syncService: SyncService): Promise<IntegratedValueObject> {
+  async syncWithExternal(
+    syncService: SyncService
+  ): Promise<IntegratedValueObject> {
     try {
       const latestData = await syncService.getLatest(this.data.id);
       const mergedData = this.mergeWithExternal(latestData);
-      
+
       return new IntegratedValueObject(mergedData);
     } catch (error) {
       // Return current instance if sync fails (graceful degradation)
@@ -442,8 +496,8 @@ export class IntegratedValueObject extends ValueObject<IntegratedData> {
       metadata: {
         source: 'external',
         lastUpdated: new Date(),
-        version: externalData.version || '1.0'
-      }
+        version: externalData.version || '1.0',
+      },
     };
   }
 
@@ -455,8 +509,8 @@ export class IntegratedValueObject extends ValueObject<IntegratedData> {
       metadata: {
         ...this.data.metadata,
         lastUpdated: new Date(),
-        version: externalData.version
-      }
+        version: externalData.version,
+      },
     };
   }
 }
@@ -548,7 +602,7 @@ export class ResilientValueObject extends ValueObject<ResilientData> {
         return await operation();
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         if (attempt === retries) {
           throw new RetryExhaustedError(
             `Operation failed after ${retries} attempts`,
@@ -580,7 +634,7 @@ export class ResilientValueObject extends ValueObject<ResilientData> {
         errors.push({
           index,
           item,
-          error: error instanceof Error ? error : new Error(String(error))
+          error: error instanceof Error ? error : new Error(String(error)),
         });
       }
     });
@@ -590,7 +644,7 @@ export class ResilientValueObject extends ValueObject<ResilientData> {
       errors,
       successCount: results.length,
       failureCount: errors.length,
-      successRate: results.length / items.length
+      successRate: results.length / items.length,
     };
   }
 
@@ -603,7 +657,7 @@ export class ResilientValueObject extends ValueObject<ResilientData> {
     return {
       value: rawData.value || 0,
       metadata: rawData.metadata || {},
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -625,7 +679,10 @@ class ValueObjectCreationError extends Error {
 }
 
 class RetryExhaustedError extends Error {
-  constructor(message: string, public readonly lastError: Error) {
+  constructor(
+    message: string,
+    public readonly lastError: Error
+  ) {
     super(message);
     this.name = 'RetryExhaustedError';
   }
@@ -658,14 +715,14 @@ describe('AdvancedValueObject - Property-Based Tests', () => {
   // ✅ Property-based testing for mathematical operations
   it('should maintain mathematical properties', () => {
     const testValues = generateTestValues(100);
-    
+
     testValues.forEach(value => {
       const vo1 = AdvancedValueObject.create(value);
       const vo2 = AdvancedValueObject.create(value);
-      
+
       // Reflexivity
       expect(vo1.equals(vo2)).toBe(true);
-      
+
       // Symmetry
       const vo3 = AdvancedValueObject.create(value * 2);
       expect(vo1.equals(vo3)).toBe(vo3.equals(vo1));
@@ -675,11 +732,11 @@ describe('AdvancedValueObject - Property-Based Tests', () => {
   // ✅ Invariant testing
   it('should maintain invariants across operations', () => {
     const testCases = generateInvariantTestCases();
-    
+
     testCases.forEach(testCase => {
       const vo = AdvancedValueObject.create(testCase.input);
       const result = vo.performOperation(testCase.operation);
-      
+
       // Check that invariants are maintained
       expect(result.isValid()).toBe(true);
       expect(result.satisfiesInvariant()).toBe(true);
@@ -708,11 +765,14 @@ describe('AdvancedValueObject - Integration Tests', () => {
   it('should integrate correctly with external services', async () => {
     const mockService = {
       fetch: jest.fn().mockResolvedValue({ data: 'test' }),
-      validate: jest.fn().mockResolvedValue(true)
+      validate: jest.fn().mockResolvedValue(true),
     };
 
     const [error, result] = await safeRun(async () => {
-      return await IntegratedValueObject.createFromExternalService('test-id', mockService);
+      return await IntegratedValueObject.createFromExternalService(
+        'test-id',
+        mockService
+      );
     });
 
     expect(error).toBeNull();
@@ -723,11 +783,11 @@ describe('AdvancedValueObject - Integration Tests', () => {
   // ✅ Performance testing
   it('should perform efficiently with large datasets', () => {
     const largeDataset = Array.from({ length: 10000 }, (_, i) => i);
-    
+
     const startTime = Date.now();
     const results = PerformanceOptimizedValueObject.processBatch(
       largeDataset,
-      (item) => PerformanceOptimizedValueObject.create(item)
+      item => PerformanceOptimizedValueObject.create(item)
     );
     const duration = Date.now() - startTime;
 
@@ -741,13 +801,19 @@ describe('AdvancedValueObject - Integration Tests', () => {
 
 Advanced value object implementations should focus on:
 
-1. **Rich Domain Behavior**: Provide sophisticated operations while maintaining single responsibility
-2. **Performance Optimization**: Use caching, memoization, and batch processing for scalability
+1. **Rich Domain Behavior**: Provide sophisticated operations while maintaining
+   single responsibility
+2. **Performance Optimization**: Use caching, memoization, and batch processing
+   for scalability
 3. **Strategy Patterns**: Allow flexible behavior through pluggable strategies
-4. **External Integration**: Handle external services with resilience and error handling
+4. **External Integration**: Handle external services with resilience and error
+   handling
 5. **Mathematical Precision**: Maintain accuracy in calculations and conversions
 6. **Comprehensive Testing**: Use property-based testing and integration testing
 7. **Error Resilience**: Implement robust error handling and recovery strategies
-8. **Documentation**: Provide clear documentation for complex behavior and business rules
+8. **Documentation**: Provide clear documentation for complex behavior and
+   business rules
 
-These patterns enable the creation of sophisticated value objects that can handle complex enterprise requirements while maintaining the core principles of immutability, equality, and encapsulation.
+These patterns enable the creation of sophisticated value objects that can
+handle complex enterprise requirements while maintaining the core principles of
+immutability, equality, and encapsulation.

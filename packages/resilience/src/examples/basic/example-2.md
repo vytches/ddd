@@ -1,29 +1,35 @@
 # Retry Pattern with Exponential Backoff
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/resilience
-**Complexity**: Basic
-**Domain**: Order Processing
-**Patterns**: Retry Pattern, Exponential Backoff, Jitter Strategy
-**Dependencies**: @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Domain**: Order Processing **Patterns**: Retry Pattern, Exponential Backoff,
+Jitter Strategy **Dependencies**: @vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates the retry pattern with exponential backoff for handling transient failures in order processing. When external services experience temporary issues, the retry pattern automatically attempts the operation multiple times with increasing delays to avoid overwhelming the failing service.
+This example demonstrates the retry pattern with exponential backoff for
+handling transient failures in order processing. When external services
+experience temporary issues, the retry pattern automatically attempts the
+operation multiple times with increasing delays to avoid overwhelming the
+failing service.
 
 ## Business Context
 
-An e-commerce order processing system needs to call inventory and shipping services to fulfill orders. These external services occasionally experience transient failures due to network issues, temporary overload, or brief maintenance windows. The retry pattern ensures orders are processed successfully despite these temporary issues while avoiding aggressive retries that could worsen the situation.
+An e-commerce order processing system needs to call inventory and shipping
+services to fulfill orders. These external services occasionally experience
+transient failures due to network issues, temporary overload, or brief
+maintenance windows. The retry pattern ensures orders are processed successfully
+despite these temporary issues while avoiding aggressive retries that could
+worsen the situation.
 
 ## Code Example
 
 ```typescript
 // order-processing-service.ts
-import { 
+import {
   RetryStrategy,
   ResiliencePolicyBuilder,
   ResilienceContext,
-  RetryResult 
+  RetryResult,
 } from '@vytches-ddd/resilience';
 import { Order, InventoryItem, NotificationRequest } from './types'; // From your application
 
@@ -32,44 +38,41 @@ export class OrderProcessingService {
   private inventoryRetryStrategy: RetryStrategy;
   private shippingRetryStrategy: RetryStrategy;
   private notificationRetryStrategy: RetryStrategy;
-  
+
   constructor() {
     // Configure retry for inventory service (critical path)
-    this.inventoryRetryStrategy = ResiliencePolicyBuilder
-      .create()
+    this.inventoryRetryStrategy = ResiliencePolicyBuilder.create()
       .withRetry({
         maxAttempts: 5,
-        baseDelay: 1000,        // Start with 1 second
-        maxDelay: 30000,        // Cap at 30 seconds
+        baseDelay: 1000, // Start with 1 second
+        maxDelay: 30000, // Cap at 30 seconds
         backoff: 'exponential', // 1s, 2s, 4s, 8s, 16s
-        jitter: true,           // Add randomization
-        retryCondition: (error) => this.isRetryableError(error)
+        jitter: true, // Add randomization
+        retryCondition: error => this.isRetryableError(error),
       })
       .build();
 
     // Configure retry for shipping service (less critical)
-    this.shippingRetryStrategy = ResiliencePolicyBuilder
-      .create()
+    this.shippingRetryStrategy = ResiliencePolicyBuilder.create()
       .withRetry({
         maxAttempts: 3,
-        baseDelay: 2000,        // Start with 2 seconds
-        maxDelay: 10000,        // Cap at 10 seconds
-        backoff: 'linear',      // 2s, 4s, 6s
+        baseDelay: 2000, // Start with 2 seconds
+        maxDelay: 10000, // Cap at 10 seconds
+        backoff: 'linear', // 2s, 4s, 6s
         jitter: false,
-        retryCondition: (error) => this.isTemporaryShippingError(error)
+        retryCondition: error => this.isTemporaryShippingError(error),
       })
       .build();
 
     // Configure retry for notifications (non-critical)
-    this.notificationRetryStrategy = ResiliencePolicyBuilder
-      .create()
+    this.notificationRetryStrategy = ResiliencePolicyBuilder.create()
       .withRetry({
         maxAttempts: 2,
-        baseDelay: 5000,        // Start with 5 seconds
-        maxDelay: 15000,        // Cap at 15 seconds
-        backoff: 'fixed',       // Always 5s between attempts
+        baseDelay: 5000, // Start with 5 seconds
+        maxDelay: 15000, // Cap at 15 seconds
+        backoff: 'fixed', // Always 5s between attempts
         jitter: true,
-        retryCondition: (error) => error.message.includes('timeout')
+        retryCondition: error => error.message.includes('timeout'),
       })
       .build();
   }
@@ -81,45 +84,54 @@ export class OrderProcessingService {
       correlationId: order.id,
       startTime: new Date(),
       attempt: 1,
-      previousAttempts: []
+      previousAttempts: [],
     };
 
     try {
       // Step 1: Reserve inventory with retry
       console.log(`Processing order ${order.id} - reserving inventory`);
-      const inventoryResult = await this.reserveInventoryWithRetry(order, context);
-      
+      const inventoryResult = await this.reserveInventoryWithRetry(
+        order,
+        context
+      );
+
       if (!inventoryResult.success) {
         return {
           orderId: order.id,
           success: false,
           error: 'Failed to reserve inventory',
           details: inventoryResult.error,
-          processingTime: Date.now() - startTime
+          processingTime: Date.now() - startTime,
         };
       }
 
       // Step 2: Create shipping label with retry
       console.log(`Processing order ${order.id} - creating shipping label`);
-      const shippingResult = await this.createShippingLabelWithRetry(order, context);
-      
+      const shippingResult = await this.createShippingLabelWithRetry(
+        order,
+        context
+      );
+
       if (!shippingResult.success) {
         // Rollback inventory reservation
         await this.rollbackInventoryReservation(order.id);
-        
+
         return {
           orderId: order.id,
           success: false,
           error: 'Failed to create shipping label',
           details: shippingResult.error,
-          processingTime: Date.now() - startTime
+          processingTime: Date.now() - startTime,
         };
       }
 
       // Step 3: Send confirmation notification (non-blocking)
       console.log(`Processing order ${order.id} - sending notification`);
       this.sendNotificationWithRetry(order, context).catch(error => {
-        console.warn(`Failed to send notification for order ${order.id}:`, error);
+        console.warn(
+          `Failed to send notification for order ${order.id}:`,
+          error
+        );
       });
 
       return {
@@ -127,9 +139,8 @@ export class OrderProcessingService {
         success: true,
         inventoryReservationId: inventoryResult.data.reservationId,
         shippingTrackingNumber: shippingResult.data.trackingNumber,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
-
     } catch (error) {
       console.error(`Order processing failed for ${order.id}:`, error);
       return {
@@ -137,97 +148,99 @@ export class OrderProcessingService {
         success: false,
         error: 'Unexpected processing error',
         details: error.message,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
     }
   }
 
   private async reserveInventoryWithRetry(
-    order: Order, 
+    order: Order,
     context: ResilienceContext
   ): Promise<RetryResult<InventoryReservation>> {
-    return await this.inventoryRetryStrategy.execute(
-      async () => {
-        console.log(`Attempting inventory reservation for order ${order.id} (attempt ${context.attempt})`);
-        
-        const reservationRequest = {
-          orderId: order.id,
-          items: order.items.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity
-          }))
-        };
+    return await this.inventoryRetryStrategy.execute(async () => {
+      console.log(
+        `Attempting inventory reservation for order ${order.id} (attempt ${context.attempt})`
+      );
 
-        const response = await fetch('https://inventory-service.api/reserve', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Correlation-ID': context.correlationId
-          },
-          body: JSON.stringify(reservationRequest),
-          signal: AbortSignal.timeout(10000) // 10 second timeout
-        });
+      const reservationRequest = {
+        orderId: order.id,
+        items: order.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      };
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`Inventory service error: ${response.status} - ${errorData.message || response.statusText}`);
-        }
+      const response = await fetch('https://inventory-service.api/reserve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Correlation-ID': context.correlationId,
+        },
+        body: JSON.stringify(reservationRequest),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      });
 
-        const reservationData = await response.json();
-        return {
-          reservationId: reservationData.reservationId,
-          expiresAt: new Date(reservationData.expiresAt),
-          items: reservationData.items
-        };
-      },
-      context
-    );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Inventory service error: ${response.status} - ${errorData.message || response.statusText}`
+        );
+      }
+
+      const reservationData = await response.json();
+      return {
+        reservationId: reservationData.reservationId,
+        expiresAt: new Date(reservationData.expiresAt),
+        items: reservationData.items,
+      };
+    }, context);
   }
 
   private async createShippingLabelWithRetry(
-    order: Order, 
+    order: Order,
     context: ResilienceContext
   ): Promise<RetryResult<ShippingLabel>> {
-    return await this.shippingRetryStrategy.execute(
-      async () => {
-        console.log(`Attempting shipping label creation for order ${order.id} (attempt ${context.attempt})`);
-        
-        const shippingRequest = {
-          orderId: order.id,
-          recipientAddress: order.shippingAddress,
-          packages: this.calculatePackages(order.items),
-          shippingMethod: order.shippingMethod || 'standard'
-        };
+    return await this.shippingRetryStrategy.execute(async () => {
+      console.log(
+        `Attempting shipping label creation for order ${order.id} (attempt ${context.attempt})`
+      );
 
-        const response = await fetch('https://shipping-service.api/labels', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer shipping-api-key',
-            'X-Correlation-ID': context.correlationId
-          },
-          body: JSON.stringify(shippingRequest),
-          signal: AbortSignal.timeout(15000) // 15 second timeout
-        });
+      const shippingRequest = {
+        orderId: order.id,
+        recipientAddress: order.shippingAddress,
+        packages: this.calculatePackages(order.items),
+        shippingMethod: order.shippingMethod || 'standard',
+      };
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`Shipping service error: ${response.status} - ${errorData.message || response.statusText}`);
-        }
+      const response = await fetch('https://shipping-service.api/labels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer shipping-api-key',
+          'X-Correlation-ID': context.correlationId,
+        },
+        body: JSON.stringify(shippingRequest),
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+      });
 
-        const labelData = await response.json();
-        return {
-          trackingNumber: labelData.trackingNumber,
-          labelUrl: labelData.labelUrl,
-          estimatedDelivery: new Date(labelData.estimatedDelivery)
-        };
-      },
-      context
-    );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Shipping service error: ${response.status} - ${errorData.message || response.statusText}`
+        );
+      }
+
+      const labelData = await response.json();
+      return {
+        trackingNumber: labelData.trackingNumber,
+        labelUrl: labelData.labelUrl,
+        estimatedDelivery: new Date(labelData.estimatedDelivery),
+      };
+    }, context);
   }
 
   private async sendNotificationWithRetry(
-    order: Order, 
+    order: Order,
     context: ResilienceContext
   ): Promise<RetryResult<NotificationResponse>> {
     const notificationRequest: NotificationRequest = {
@@ -237,73 +250,81 @@ export class OrderProcessingService {
       channel: 'email',
       subject: 'Order Confirmation',
       content: `Your order ${order.id} has been processed successfully.`,
-      priority: 'normal'
+      priority: 'normal',
     };
 
-    return await this.notificationRetryStrategy.execute(
-      async () => {
-        console.log(`Attempting notification send for order ${order.id} (attempt ${context.attempt})`);
-        
-        const response = await fetch('https://notification-service.api/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Correlation-ID': context.correlationId
-          },
-          body: JSON.stringify(notificationRequest),
-          signal: AbortSignal.timeout(5000) // 5 second timeout
-        });
+    return await this.notificationRetryStrategy.execute(async () => {
+      console.log(
+        `Attempting notification send for order ${order.id} (attempt ${context.attempt})`
+      );
 
-        if (!response.ok) {
-          throw new Error(`Notification service error: ${response.status}`);
-        }
+      const response = await fetch('https://notification-service.api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Correlation-ID': context.correlationId,
+        },
+        body: JSON.stringify(notificationRequest),
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      });
 
-        const result = await response.json();
-        return {
-          notificationId: result.notificationId,
-          status: result.status,
-          deliveredAt: new Date(result.deliveredAt)
-        };
-      },
-      context
-    );
+      if (!response.ok) {
+        throw new Error(`Notification service error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        notificationId: result.notificationId,
+        status: result.status,
+        deliveredAt: new Date(result.deliveredAt),
+      };
+    }, context);
   }
 
   private isRetryableError(error: Error): boolean {
     // Retry on network errors, timeouts, and 5xx server errors
-    return error.message.includes('timeout') ||
-           error.message.includes('network') ||
-           error.message.includes('ECONNRESET') ||
-           error.message.includes('500') ||
-           error.message.includes('502') ||
-           error.message.includes('503') ||
-           error.message.includes('504');
+    return (
+      error.message.includes('timeout') ||
+      error.message.includes('network') ||
+      error.message.includes('ECONNRESET') ||
+      error.message.includes('500') ||
+      error.message.includes('502') ||
+      error.message.includes('503') ||
+      error.message.includes('504')
+    );
   }
 
   private isTemporaryShippingError(error: Error): boolean {
     // Only retry specific shipping service errors
-    return error.message.includes('rate_limited') ||
-           error.message.includes('temporarily_unavailable') ||
-           error.message.includes('503');
+    return (
+      error.message.includes('rate_limited') ||
+      error.message.includes('temporarily_unavailable') ||
+      error.message.includes('503')
+    );
   }
 
   private calculatePackages(items: any[]): Package[] {
     // Simple packaging logic
-    return [{
-      weight: items.reduce((total, item) => total + (item.weight || 1), 0),
-      dimensions: { length: 12, width: 12, height: 6 },
-      items: items.length
-    }];
+    return [
+      {
+        weight: items.reduce((total, item) => total + (item.weight || 1), 0),
+        dimensions: { length: 12, width: 12, height: 6 },
+        items: items.length,
+      },
+    ];
   }
 
   private async rollbackInventoryReservation(orderId: string): Promise<void> {
     try {
       await fetch(`https://inventory-service.api/reservations/${orderId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
       console.log(`Inventory reservation rolled back for order ${orderId}`);
     } catch (error) {
-      console.error(`Failed to rollback inventory for order ${orderId}:`, error);
+      console.error(
+        `Failed to rollback inventory for order ${orderId}:`,
+        error
+      );
     }
   }
 
@@ -312,7 +333,7 @@ export class OrderProcessingService {
     return {
       inventory: this.inventoryRetryStrategy.getStatistics(),
       shipping: this.shippingRetryStrategy.getStatistics(),
-      notification: this.notificationRetryStrategy.getStatistics()
+      notification: this.notificationRetryStrategy.getStatistics(),
     };
   }
 }
@@ -371,8 +392,8 @@ const sampleOrder: Order = {
       quantity: 1,
       unitPrice: 99.99,
       totalPrice: 99.99,
-      sku: 'WH-001'
-    }
+      sku: 'WH-001',
+    },
   ],
   totalAmount: 99.99,
   currency: 'USD',
@@ -382,28 +403,29 @@ const sampleOrder: Order = {
     city: 'New York',
     state: 'NY',
     postalCode: '10001',
-    country: 'USA'
+    country: 'USA',
   },
   billingAddress: {
     street: '123 Main St',
     city: 'New York',
     state: 'NY',
     postalCode: '10001',
-    country: 'USA'
+    country: 'USA',
   },
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 // Process order with automatic retries
-orderProcessor.processOrder(sampleOrder)
+orderProcessor
+  .processOrder(sampleOrder)
   .then(result => {
     if (result.success) {
       console.log('Order processed successfully:', result);
     } else {
       console.log('Order processing failed:', result.error);
     }
-    
+
     // Check retry statistics
     const stats = orderProcessor.getRetryStatistics();
     console.log('Retry statistics:', stats);

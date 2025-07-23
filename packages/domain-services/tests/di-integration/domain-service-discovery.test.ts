@@ -89,7 +89,6 @@ describe('Domain Service DI Integration', () => {
       //   context: 'Registry',
       // })
       // class RegistryService extends TestDomainService {}
-
       // const registeredService = DIDomainServiceMetadataRegistry.getService('registryService');
       // expect(registeredService).toBeDefined();
       // expect(registeredService?.serviceType).toBe(RegistryService);
@@ -121,9 +120,7 @@ describe('Domain Service DI Integration', () => {
       //   autoRegister: true,
       // })
       // class DiscoverableService extends TestDomainService {}
-
       // const handlers = await plugin.discoverHandlers();
-
       // expect(handlers).toHaveLength(1);
       // const handler = handlers[0];
       // expect(handler?.type).toBe('domain-service');
@@ -141,18 +138,14 @@ describe('Domain Service DI Integration', () => {
       //   autoRegister: false,
       // })
       // class _NonAutoService extends TestDomainService {}
-
       // const handlers = await plugin.discoverHandlers();
-
       // expect(handlers).toHaveLength(0);
     });
 
     it('should not discover legacy services without DI integration', async () => {
       // @DomainService('legacyService')
       // class _LegacyService extends TestDomainService {}
-
       // const handlers = await plugin.discoverHandlers();
-
       // expect(handlers).toHaveLength(0);
     });
   });
@@ -169,7 +162,6 @@ describe('Domain Service DI Integration', () => {
       //   lifetime: ServiceLifetime.Transient,
       // })
       // class StorageService extends TestDomainService {}
-
       // const retrieved = DIDomainServiceMetadataRegistry.getService('storageService');
       // expect(retrieved).toBeDefined();
       // expect(retrieved?.serviceType).toBe(StorageService);
@@ -181,13 +173,11 @@ describe('Domain Service DI Integration', () => {
       //   context: 'ContextA',
       // })
       // class _ContextServiceA extends TestDomainService {}
-
       // @DomainService({
       //   serviceId: 'contextService2',
       //   context: 'ContextB',
       // })
       // class _ContextServiceB extends TestDomainService {}
-
       // const contextAServices = DIDomainServiceMetadataRegistry.getServicesByContext('ContextA');
       // expect(contextAServices).toHaveLength(1);
       // expect(contextAServices[0]?.serviceId).toBe('contextService1');
@@ -199,16 +189,13 @@ describe('Domain Service DI Integration', () => {
       //   tags: ['order', 'business'],
       // })
       // class _TaggedService1 extends TestDomainService {}
-
       // @DomainService({
       //   serviceId: 'taggedService2',
       //   tags: ['user', 'business'],
       // })
       // class _TaggedService2 extends TestDomainService {}
-
       // const businessServices = DIDomainServiceMetadataRegistry.getServicesByTag('business');
       // expect(businessServices).toHaveLength(2);
-
       // const orderServices = DIDomainServiceMetadataRegistry.getServicesByTag('order');
       // expect(orderServices).toHaveLength(1);
       // expect(orderServices[0]?.serviceId).toBe('taggedService1');

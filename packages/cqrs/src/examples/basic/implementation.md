@@ -4,15 +4,20 @@
 **Package**: @vytches-ddd/cqrs  
 **Complexity**: beginner  
 **Domain**: User Management  
-**Patterns**: command-query-responsibility-segregation, mediator-pattern, automatic-registration
+**Patterns**: command-query-responsibility-segregation, mediator-pattern,
+automatic-registration
 
 ## Overview
 
-This implementation overview demonstrates the foundational patterns of the CQRS package. The package implements Command Query Responsibility Segregation with automatic handler registration, middleware pipeline, and performance optimization for scalable applications.
+This implementation overview demonstrates the foundational patterns of the CQRS
+package. The package implements Command Query Responsibility Segregation with
+automatic handler registration, middleware pipeline, and performance
+optimization for scalable applications.
 
 ## Core Implementation Pattern
 
-The CQRS package follows the **MediatR-inspired architecture** where commands and queries are routed to appropriate handlers automatically:
+The CQRS package follows the **MediatR-inspired architecture** where commands
+and queries are routed to appropriate handlers automatically:
 
 ```typescript
 // Commands modify state
@@ -40,7 +45,11 @@ class CreateUserCommand {
   validate(): ValidationError[] {
     const errors = [];
     if (!this.email.includes('@')) {
-      errors.push({ field: 'email', message: 'Invalid email', code: 'INVALID_EMAIL' });
+      errors.push({
+        field: 'email',
+        message: 'Invalid email',
+        code: 'INVALID_EMAIL',
+      });
     }
     return errors;
   }
@@ -57,7 +66,7 @@ class CreateUserCommandHandler {
       const user = await this.userRepository.create({
         email: command.email,
         name: command.name,
-        role: command.role
+        role: command.role,
       });
 
       return { success: true, result: user };
@@ -108,18 +117,18 @@ class GetUserByIdQueryHandler {
       // Check cache first
       const cacheKey = query.getCacheKey();
       const cachedUser = await this.cacheService.get(cacheKey);
-      
+
       if (cachedUser) {
-        return { 
-          success: true, 
+        return {
+          success: true,
           data: cachedUser,
-          metadata: { cacheHit: true }
+          metadata: { cacheHit: true },
         };
       }
 
       // Load from repository
       const user = await this.userRepository.findById(query.userId);
-      
+
       if (!user) {
         return { success: false, error: 'User not found' };
       }
@@ -127,10 +136,10 @@ class GetUserByIdQueryHandler {
       // Cache result
       await this.cacheService.set(cacheKey, user, query.getCacheTTL());
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         data: user,
-        metadata: { cacheHit: false }
+        metadata: { cacheHit: false },
       };
     } catch (error) {
       return { success: false, error: error.message };
@@ -147,16 +156,20 @@ const result = await queryBus.execute(query);
 ## Middleware Pipeline
 
 ```typescript
-import { ValidationMiddleware, LoggingMiddleware, PerformanceMiddleware } from '@vytches-ddd/cqrs';
+import {
+  ValidationMiddleware,
+  LoggingMiddleware,
+  PerformanceMiddleware,
+} from '@vytches-ddd/cqrs';
 
 // Setup middleware pipeline
 const commandBus = new CommandBus();
 const queryBus = new QueryBus();
 
 // Add middleware in order (outer to inner)
-commandBus.use(new LoggingMiddleware());      // 1. Log request/response
-commandBus.use(new ValidationMiddleware());   // 2. Validate command
-commandBus.use(new PerformanceMiddleware());  // 3. Monitor performance
+commandBus.use(new LoggingMiddleware()); // 1. Log request/response
+commandBus.use(new ValidationMiddleware()); // 2. Validate command
+commandBus.use(new PerformanceMiddleware()); // 3. Monitor performance
 
 queryBus.use(new LoggingMiddleware());
 queryBus.use(new ValidationMiddleware());
@@ -174,23 +187,23 @@ import { VytchesDDD } from '@vytches-ddd/di';
 
 // Handlers registered automatically through decorators
 @CommandHandler(CreateUserCommand, { autoRegister: true })
-class CreateUserCommandHandler { }
+class CreateUserCommandHandler {}
 
-@QueryHandler(GetUserByIdQuery, { autoRegister: true })  
-class GetUserByIdQueryHandler { }
+@QueryHandler(GetUserByIdQuery, { autoRegister: true })
+class GetUserByIdQueryHandler {}
 
 // Setup automatic discovery
 async function setupCQRS(): Promise<void> {
   const commandBus = new CommandBus();
   const queryBus = new QueryBus();
-  
+
   // Register buses with DI container
   VytchesDDD.registerInstance('commandBus', commandBus);
   VytchesDDD.registerInstance('queryBus', queryBus);
-  
+
   // Auto-discover and register handlers
   await VytchesDDD.configure();
-  
+
   console.log('✅ CQRS system initialized with automatic handler registration');
 }
 ```
@@ -212,9 +225,9 @@ class UserService {
       userData.name,
       userData.role
     );
-    
+
     const commandResult = await this.commandBus.execute(command);
-    
+
     if (!commandResult.success) {
       throw new Error(commandResult.error);
     }
@@ -222,14 +235,14 @@ class UserService {
     // Query for complete user data
     const query = new GetUserByIdQuery(commandResult.result.id);
     const queryResult = await this.queryBus.execute(query);
-    
+
     return queryResult.data!;
   }
 
   async getUserById(userId: string): Promise<User | null> {
     const query = new GetUserByIdQuery(userId);
     const result = await this.queryBus.execute(query);
-    
+
     return result.success ? result.data! : null;
   }
 }
@@ -237,28 +250,43 @@ class UserService {
 
 ## Key Implementation Features
 
-- **🎯 Automatic Registration**: Handlers discovered and registered through decorators
-- **🔗 Middleware Pipeline**: Cross-cutting concerns applied consistently through configurable pipeline
-- **⚡ Performance Optimization**: Built-in caching, metrics, and performance monitoring
-- **📊 Rich Metadata**: Commands and queries include execution metadata and correlation tracking
-- **🛡️ Validation Support**: Commands can include validation logic executed by middleware
-- **🏗️ Type Safety**: Full TypeScript support with compile-time handler validation
+- **🎯 Automatic Registration**: Handlers discovered and registered through
+  decorators
+- **🔗 Middleware Pipeline**: Cross-cutting concerns applied consistently
+  through configurable pipeline
+- **⚡ Performance Optimization**: Built-in caching, metrics, and performance
+  monitoring
+- **📊 Rich Metadata**: Commands and queries include execution metadata and
+  correlation tracking
+- **🛡️ Validation Support**: Commands can include validation logic executed by
+  middleware
+- **🏗️ Type Safety**: Full TypeScript support with compile-time handler
+  validation
 
 ## Architecture Benefits
 
-1. **Clear Separation**: Commands change state, queries retrieve data - never both
-2. **Independent Optimization**: Different strategies for read vs write operations
+1. **Clear Separation**: Commands change state, queries retrieve data - never
+   both
+2. **Independent Optimization**: Different strategies for read vs write
+   operations
 3. **Scalable Design**: Read and write operations can scale independently
-4. **Testable Architecture**: Commands and queries can be unit tested in isolation
+4. **Testable Architecture**: Commands and queries can be unit tested in
+   isolation
 5. **Maintainable Code**: Business logic concentrated in focused handlers
 
 ## Implementation Examples
 
 For detailed implementation examples, see:
 
-- **[Example 1: Command Handlers](./example-1.md)** - Comprehensive command handling with validation
-- **[Example 2: Query Handlers](./example-2.md)** - Optimized query handling with caching
-- **[Example 3: Middleware Pipeline](./example-3.md)** - Cross-cutting concerns with middleware
-- **[Use Cases](./use-case.md)** - Real-world business scenarios and implementations
+- **[Example 1: Command Handlers](./example-1.md)** - Comprehensive command
+  handling with validation
+- **[Example 2: Query Handlers](./example-2.md)** - Optimized query handling
+  with caching
+- **[Example 3: Middleware Pipeline](./example-3.md)** - Cross-cutting concerns
+  with middleware
+- **[Use Cases](./use-case.md)** - Real-world business scenarios and
+  implementations
 
-This foundational pattern enables building scalable, maintainable applications with clear separation between read and write operations, comprehensive middleware support, and excellent performance characteristics.
+This foundational pattern enables building scalable, maintainable applications
+with clear separation between read and write operations, comprehensive
+middleware support, and excellent performance characteristics.

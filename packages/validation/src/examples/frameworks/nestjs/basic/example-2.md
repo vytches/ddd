@@ -7,19 +7,21 @@
 
 ## Overview
 
-This example demonstrates manual integration of product validation using configurable business rules and field-level validation in NestJS. Shows practical business validation scenarios with clear separation of concerns.
+This example demonstrates manual integration of product validation using
+configurable business rules and field-level validation in NestJS. Shows
+practical business validation scenarios with clear separation of concerns.
 
 ## Implementation
 
 ```typescript
 // product-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
+import {
   IValidator,
   ValidationResult,
   FieldValidator,
   BusinessRule,
-  DataQualityValidator 
+  DataQualityValidator,
 } from '@vytches-ddd/validation';
 import { Product, ValidationContext } from './types'; // From your application
 
@@ -34,7 +36,10 @@ export class ProductValidationService implements IValidator<Product> {
     this.initializeQualityValidator();
   }
 
-  async validate(product: Product, context?: ValidationContext): Promise<ValidationResult> {
+  async validate(
+    product: Product,
+    context?: ValidationContext
+  ): Promise<ValidationResult> {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
@@ -44,7 +49,10 @@ export class ProductValidationService implements IValidator<Product> {
     warnings.push(...fieldResults.warnings);
 
     // Data quality assessment
-    const qualityResult = await this.qualityValidator.validate(product, context);
+    const qualityResult = await this.qualityValidator.validate(
+      product,
+      context
+    );
     errors.push(...qualityResult.errors);
     warnings.push(...qualityResult.warnings);
 
@@ -63,22 +71,22 @@ export class ProductValidationService implements IValidator<Product> {
         rulesApplied: [
           'product-field-validation',
           'data-quality-assessment',
-          'business-logic-validation'
+          'business-logic-validation',
         ],
         skippedRules: [],
         validatorVersion: '1.0.0',
         context: context || {
           operationType: 'create',
           environment: 'production',
-          validationLevel: 'standard'
+          validationLevel: 'standard',
         },
-        qualityScore: qualityResult.metadata.qualityMetrics?.overallScore || 0
-      }
+        qualityScore: qualityResult.metadata.qualityMetrics?.overallScore || 0,
+      },
     };
   }
 
   private async validateProductFields(
-    product: Product, 
+    product: Product,
     context?: ValidationContext
   ): Promise<{ errors: ValidationError[]; warnings: ValidationWarning[] }> {
     const results = await Promise.all([
@@ -86,7 +94,7 @@ export class ProductValidationService implements IValidator<Product> {
       this.fieldValidator.validateField(product, 'price', product.price),
       this.fieldValidator.validateField(product, 'category', product.category),
       this.fieldValidator.validateField(product, 'sku', product.sku),
-      this.fieldValidator.validateField(product, 'weight', product.weight)
+      this.fieldValidator.validateField(product, 'weight', product.weight),
     ]);
 
     const allErrors: ValidationError[] = [];
@@ -113,7 +121,7 @@ export class ProductValidationService implements IValidator<Product> {
         field: 'price',
         code: 'PRICE_CATEGORY_MISMATCH',
         message: `Price ${product.price} may be unusual for category ${product.category}`,
-        suggestion: 'Review pricing for this category'
+        suggestion: 'Review pricing for this category',
       });
     }
 
@@ -123,7 +131,7 @@ export class ProductValidationService implements IValidator<Product> {
         field: 'sku',
         code: 'INVALID_SKU_FORMAT',
         message: 'SKU must follow company format: 3 letters + 4-6 digits',
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -133,30 +141,34 @@ export class ProductValidationService implements IValidator<Product> {
         field: 'availability.quantity',
         code: 'NEGATIVE_INVENTORY',
         message: 'Product quantity cannot be negative',
-        severity: 'error'
+        severity: 'error',
       });
     }
 
     // Weight reasonableness
-    if (product.weight > 1000) { // kg
+    if (product.weight > 1000) {
+      // kg
       warnings.push({
         field: 'weight',
         code: 'HEAVY_PRODUCT',
         message: 'Product weight exceeds 1000kg - verify shipping costs',
-        suggestion: 'Review shipping and handling requirements'
+        suggestion: 'Review shipping and handling requirements',
       });
     }
 
     return { errors, warnings };
   }
 
-  private isPriceReasonableForCategory(price: number, category: string): boolean {
+  private isPriceReasonableForCategory(
+    price: number,
+    category: string
+  ): boolean {
     const categoryRanges: Record<string, { min: number; max: number }> = {
-      'electronics': { min: 10, max: 10000 },
-      'clothing': { min: 5, max: 1000 },
-      'books': { min: 1, max: 200 },
-      'home': { min: 10, max: 5000 },
-      'sports': { min: 10, max: 2000 }
+      electronics: { min: 10, max: 10000 },
+      clothing: { min: 5, max: 1000 },
+      books: { min: 1, max: 200 },
+      home: { min: 10, max: 5000 },
+      sports: { min: 10, max: 2000 },
     };
 
     const range = categoryRanges[category?.toLowerCase()];
@@ -167,7 +179,7 @@ export class ProductValidationService implements IValidator<Product> {
 
   private isValidSKUFormat(sku: string): boolean {
     if (!sku) return false;
-    
+
     // Company format: 3 letters followed by 4-6 digits
     const skuRegex = /^[A-Z]{3}\d{4,6}$/;
     return skuRegex.test(sku.toUpperCase());
@@ -184,9 +196,9 @@ export class ProductValidationService implements IValidator<Product> {
         isActive: true,
         conditions: [
           { field: 'name', operator: 'greater_than', value: 2 },
-          { field: 'name', operator: 'less_than', value: 101 }
+          { field: 'name', operator: 'less_than', value: 101 },
         ],
-        actions: [{ type: 'validate', parameters: {} }]
+        actions: [{ type: 'validate', parameters: {} }],
       },
       {
         id: 'product-price-positive',
@@ -195,10 +207,8 @@ export class ProductValidationService implements IValidator<Product> {
         category: 'product',
         priority: 1,
         isActive: true,
-        conditions: [
-          { field: 'price', operator: 'greater_than', value: 0 }
-        ],
-        actions: [{ type: 'validate', parameters: {} }]
+        conditions: [{ field: 'price', operator: 'greater_than', value: 0 }],
+        actions: [{ type: 'validate', parameters: {} }],
       },
       {
         id: 'product-category-valid',
@@ -208,13 +218,13 @@ export class ProductValidationService implements IValidator<Product> {
         priority: 1,
         isActive: true,
         conditions: [
-          { 
-            field: 'category', 
-            operator: 'in', 
-            value: ['electronics', 'clothing', 'books', 'home', 'sports']
-          }
+          {
+            field: 'category',
+            operator: 'in',
+            value: ['electronics', 'clothing', 'books', 'home', 'sports'],
+          },
         ],
-        actions: [{ type: 'validate', parameters: {} }]
+        actions: [{ type: 'validate', parameters: {} }],
       },
       {
         id: 'sku-required',
@@ -225,10 +235,10 @@ export class ProductValidationService implements IValidator<Product> {
         isActive: true,
         conditions: [
           { field: 'sku', operator: 'not_equals', value: '' },
-          { field: 'sku', operator: 'not_equals', value: null }
+          { field: 'sku', operator: 'not_equals', value: null },
         ],
-        actions: [{ type: 'validate', parameters: {} }]
-      }
+        actions: [{ type: 'validate', parameters: {} }],
+      },
     ];
 
     this.fieldValidator = new FieldValidator(productRules);
@@ -236,25 +246,25 @@ export class ProductValidationService implements IValidator<Product> {
 
   private initializeQualityValidator(): void {
     this.qualityValidator = new DataQualityValidator<Product>({
-      completeness: 0.90,
+      completeness: 0.9,
       accuracy: 0.95,
       validity: 0.98,
-      consistency: 0.90
+      consistency: 0.9,
     });
   }
 }
 
 // product.controller.ts
-import { 
-  Controller, 
-  Post, 
+import {
+  Controller,
+  Post,
   Put,
-  Body, 
+  Body,
   Param,
   BadRequestException,
   HttpStatus,
   HttpCode,
-  Query
+  Query,
 } from '@nestjs/common';
 import { ProductValidationService } from './product-validation.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
@@ -276,7 +286,7 @@ export class ProductController {
           operationType: 'create',
           environment: 'production',
           validationLevel: 'standard',
-          businessRules: { enforceUniqueSkus: true }
+          businessRules: { enforceUniqueSkus: true },
         }
       );
 
@@ -285,7 +295,7 @@ export class ProductController {
           message: 'Product validation failed',
           errors: validationResult.errors,
           warnings: validationResult.warnings,
-          qualityScore: validationResult.metadata.qualityScore
+          qualityScore: validationResult.metadata.qualityScore,
         });
       }
 
@@ -294,13 +304,15 @@ export class ProductController {
         success: true,
         message: 'Product validated and ready for creation',
         qualityScore: validationResult.metadata.qualityScore,
-        warnings: validationResult.warnings.length > 0 ? validationResult.warnings : undefined
+        warnings:
+          validationResult.warnings.length > 0
+            ? validationResult.warnings
+            : undefined,
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Product creation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -317,7 +329,7 @@ export class ProductController {
         {
           operationType: 'update',
           environment: 'production',
-          validationLevel: 'standard'
+          validationLevel: 'standard',
         }
       );
 
@@ -325,7 +337,7 @@ export class ProductController {
         throw new BadRequestException({
           message: 'Product update validation failed',
           errors: validationResult.errors,
-          warnings: validationResult.warnings
+          warnings: validationResult.warnings,
         });
       }
 
@@ -333,13 +345,12 @@ export class ProductController {
         success: true,
         message: 'Product update validation passed',
         productId: id,
-        qualityScore: validationResult.metadata.qualityScore
+        qualityScore: validationResult.metadata.qualityScore,
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Product update failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -352,13 +363,14 @@ export class ProductController {
   ) {
     try {
       const validationPromises = products.map((product, index) =>
-        this.productValidationService.validate(product as Product)
+        this.productValidationService
+          .validate(product as Product)
           .then(result => ({ index, result }))
           .catch(error => ({ index, error: error.message, result: null }))
       );
 
       const results = await Promise.all(validationPromises);
-      
+
       const summary = results.reduce(
         (acc, item) => {
           if (item.result?.isValid) {
@@ -377,7 +389,7 @@ export class ProductController {
           total: products.length,
           valid: summary.valid,
           invalid: summary.invalid,
-          successRate: summary.valid / products.length
+          successRate: summary.valid / products.length,
         },
         results: results.map(item => ({
           index: item.index,
@@ -385,14 +397,13 @@ export class ProductController {
           errors: item.result?.errors || [],
           warnings: item.result?.warnings || [],
           qualityScore: item.result?.metadata.qualityScore || 0,
-          error: item.error
-        }))
+          error: item.error,
+        })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Bulk validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -406,7 +417,7 @@ export class ProductController {
         {
           operationType: 'quality_check',
           environment: 'production',
-          validationLevel: 'strict'
+          validationLevel: 'strict',
         }
       );
 
@@ -415,18 +426,19 @@ export class ProductController {
         qualityScore: validationResult.metadata.qualityScore,
         qualityBreakdown: validationResult.metadata.qualityMetrics,
         isValid: validationResult.isValid,
-        recommendations: validationResult.warnings.map(w => w.suggestion).filter(Boolean),
+        recommendations: validationResult.warnings
+          .map(w => w.suggestion)
+          .filter(Boolean),
         issues: validationResult.errors.map(e => ({
           field: e.field,
           issue: e.message,
-          severity: e.severity
-        }))
+          severity: e.severity,
+        })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Quality check failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -440,16 +452,18 @@ import { ProductValidationService } from './product-validation.service';
 @Module({
   controllers: [ProductController],
   providers: [ProductValidationService],
-  exports: [ProductValidationService]
+  exports: [ProductValidationService],
 })
 export class ProductModule {}
 ```
 
 ## Key Points
 
-- **Business Rules Integration**: Configurable business rules for flexible validation
+- **Business Rules Integration**: Configurable business rules for flexible
+  validation
 - **Data Quality Assessment**: Built-in data quality scoring and metrics
-- **Multiple Validation Layers**: Field validation, business logic, and quality assessment
+- **Multiple Validation Layers**: Field validation, business logic, and quality
+  assessment
 - **Practical Business Logic**: Real-world product validation scenarios
 - **Comprehensive Error Handling**: Detailed error responses with quality scores
 

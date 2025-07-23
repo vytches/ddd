@@ -1,15 +1,16 @@
 ## Intermediate Use Case: E-commerce Order Processing
 
-This example demonstrates a domain service orchestrating a complete order processing workflow:
+This example demonstrates a domain service orchestrating a complete order
+processing workflow:
 
 ```typescript
 // order-processing-example.ts
 import { OrderProcessingService } from './services/order-processing.service';
-import { 
+import {
   CreateOrderCommand,
   OrderRepository,
   InventoryService,
-  PricingService 
+  PricingService,
 } from './domain';
 
 async function processCustomerOrder(customerId: string, cartItems: CartItem[]) {
@@ -17,47 +18,47 @@ async function processCustomerOrder(customerId: string, cartItems: CartItem[]) {
   const orderRepo = new OrderRepository();
   const inventoryService = new InventoryService();
   const pricingService = new PricingService();
-  
+
   // Create service instance
   const orderService = new OrderProcessingService(
     orderRepo,
     inventoryService,
     pricingService
   );
-  
+
   // Prepare command
   const command: CreateOrderCommand = {
     customerId,
     items: cartItems.map(item => ({
       productId: item.productId,
       quantity: item.quantity,
-      unitPrice: item.price
+      unitPrice: item.price,
     })),
     shippingAddress: await getCustomerAddress(customerId),
-    paymentMethodId: await getDefaultPaymentMethod(customerId)
+    paymentMethodId: await getDefaultPaymentMethod(customerId),
   };
-  
+
   // Process order
   const result = await orderService.createOrder(command);
-  
+
   if (result.isSuccess()) {
     const order = result.value;
     console.log(`Order ${order.id} created successfully`);
     console.log(`Total amount: $${order.totalAmount}`);
-    
+
     // Trigger additional workflows
     await notifyCustomer(order);
     await initializeShipping(order);
-    
+
     return { success: true, orderId: order.id };
   } else {
     console.error('Order processing failed:', result.error.message);
-    
+
     // Handle specific failures
     if (result.error.message.includes('inventory')) {
       await notifyOutOfStock(command.items);
     }
-    
+
     return { success: false, error: result.error.message };
   }
 }
@@ -72,16 +73,16 @@ import { EventBus } from '@vytches-ddd/events';
 const eventBus = new EventBus();
 
 // Subscribe to order events
-eventBus.subscribe('OrderCreated', async (event) => {
+eventBus.subscribe('OrderCreated', async event => {
   console.log('New order created:', event.payload.orderId);
-  
+
   // Trigger downstream processes
   await updateAnalytics(event.payload);
   await sendOrderConfirmation(event.payload);
   await notifyWarehouse(event.payload);
 });
 
-eventBus.subscribe('InventoryReserved', async (event) => {
+eventBus.subscribe('InventoryReserved', async event => {
   console.log('Inventory reserved for order:', event.payload.orderId);
   await updateInventoryDashboard(event.payload);
 });
@@ -95,27 +96,27 @@ async function processBulkOrders(orders: CreateOrderCommand[]) {
   const orderService = createOrderService(); // Helper to create service
   const results = {
     successful: [] as string[],
-    failed: [] as { orderId: string; reason: string }[]
+    failed: [] as { orderId: string; reason: string }[],
   };
-  
+
   for (const orderCommand of orders) {
     const result = await orderService.createOrder(orderCommand);
-    
+
     if (result.isSuccess()) {
       results.successful.push(result.value.id);
     } else {
       results.failed.push({
         orderId: orderCommand.tempId || 'unknown',
-        reason: result.error.message
+        reason: result.error.message,
       });
     }
   }
-  
+
   // Report results
   console.log(`Processed ${orders.length} orders:`);
   console.log(`✓ Successful: ${results.successful.length}`);
   console.log(`✗ Failed: ${results.failed.length}`);
-  
+
   return results;
 }
 
@@ -126,25 +127,25 @@ async function processOrderWithRetry(
 ): Promise<Result<Order, Error>> {
   const orderService = createOrderService();
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const result = await orderService.createOrder(command);
-    
+
     if (result.isSuccess()) {
       return result;
     }
-    
+
     lastError = result.error;
-    
+
     // Only retry on specific errors
     if (!isRetryableError(lastError)) {
       return result;
     }
-    
+
     console.log(`Attempt ${attempt} failed, retrying...`);
     await sleep(attempt * 1000); // Exponential backoff
   }
-  
+
   return Result.failure(lastError!);
 }
 ```

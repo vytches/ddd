@@ -2,7 +2,8 @@
 
 **Focus**: Advanced Event Store usage with distributed systems integration
 **Base Example**: [Distributed Event Sourcing](../../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/event-store, @vytches-ddd/di, @vytches-ddd/messaging
+**Dependencies**: @nestjs/common, @vytches-ddd/event-store, @vytches-ddd/di,
+@vytches-ddd/messaging
 
 ## Distributed Event Store Service
 
@@ -15,11 +16,11 @@ import { HighPerformanceEventStore } from '../../../advanced/example-2';
 import { ClusteredEventStore } from '../../../advanced/example-3';
 import { DomainEvent } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  OrderFulfillmentData, 
-  ProcessResult, 
+import {
+  OrderFulfillmentData,
+  ProcessResult,
   ClusterAppendResult,
-  DistributedEventQuery
+  DistributedEventQuery,
 } from './types'; // From your app
 
 @Injectable()
@@ -30,15 +31,15 @@ export class DistributedEventStoreService implements OnModuleInit {
 
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration with distributed systems
-    this.distributedCoordinator = VytchesDDD.resolve<DistributedEventSourcingCoordinator>(
-      'distributedCoordinator'
-    );
+    this.distributedCoordinator =
+      VytchesDDD.resolve<DistributedEventSourcingCoordinator>(
+        'distributedCoordinator'
+      );
     this.highPerformanceStore = VytchesDDD.resolve<HighPerformanceEventStore>(
       'highPerformanceStore'
     );
-    this.clusteredStore = VytchesDDD.resolve<ClusteredEventStore>(
-      'clusteredStore'
-    );
+    this.clusteredStore =
+      VytchesDDD.resolve<ClusteredEventStore>('clusteredStore');
   }
 
   async onModuleInit() {
@@ -51,7 +52,9 @@ export class DistributedEventStoreService implements OnModuleInit {
     orderData: OrderFulfillmentData
   ): Promise<Result<ProcessResult, Error>> {
     try {
-      return await this.distributedCoordinator.processOrderFulfillment(orderData);
+      return await this.distributedCoordinator.processOrderFulfillment(
+        orderData
+      );
     } catch (error) {
       throw new Error(`Distributed order fulfillment failed: ${error.message}`);
     }
@@ -130,10 +133,10 @@ export class DistributedEventStoreService implements OnModuleInit {
 // distributed-order-management.service.ts
 import { Injectable } from '@nestjs/common';
 import { DistributedEventStoreService } from './distributed-event-store.service';
-import { 
-  ComplexOrderData, 
+import {
+  ComplexOrderData,
   OrderProcessingStrategy,
-  CrossServiceOrderEvent
+  CrossServiceOrderEvent,
 } from './types'; // From your app
 
 @Injectable()
@@ -166,7 +169,8 @@ export class DistributedOrderManagementService {
   }
 
   async getOrderProcessingAnalytics(): Promise<OrderProcessingAnalytics> {
-    const performanceMetrics = await this.distributedEventStore.getPerformanceMetrics();
+    const performanceMetrics =
+      await this.distributedEventStore.getPerformanceMetrics();
     const clusterStatus = await this.distributedEventStore.getClusterStatus();
 
     return {
@@ -175,31 +179,36 @@ export class DistributedOrderManagementService {
       clusterHealth: clusterStatus.isHealthy,
       activeNodes: clusterStatus.activeNodes,
       distributedProcessingRate: performanceMetrics.distributedProcessingRate,
-      consensusPerformance: clusterStatus.consensusMetrics
+      consensusPerformance: clusterStatus.consensusMetrics,
     };
   }
 
-  async handleCrossServiceOrderEvent(event: CrossServiceOrderEvent): Promise<void> {
+  async handleCrossServiceOrderEvent(
+    event: CrossServiceOrderEvent
+  ): Promise<void> {
     // ⭐ FOCUS: Handle events that span multiple microservices
     const query = {
       correlationId: event.correlationId,
       services: ['order-management', 'inventory-service', 'payment-service'],
       eventTypes: ['OrderCreated', 'InventoryReserved', 'PaymentProcessed'],
-      timeRange: { 
+      timeRange: {
         start: new Date(Date.now() - 3600000), // Last hour
-        end: new Date() 
-      }
+        end: new Date(),
+      },
     };
 
-    const relatedEventsResult = await this.distributedEventStore.queryEventsAcrossServices(query);
-    
+    const relatedEventsResult =
+      await this.distributedEventStore.queryEventsAcrossServices(query);
+
     if (relatedEventsResult.isSuccess()) {
       // Process related events across services
       await this.coordinateAcrossServices(relatedEventsResult.value, event);
     }
   }
 
-  private async processWithHighPerformance(orderData: ComplexOrderData): Promise<void> {
+  private async processWithHighPerformance(
+    orderData: ComplexOrderData
+  ): Promise<void> {
     const events = this.createOrderEvents(orderData);
     const partitionKey = this.calculatePartitionKey(orderData);
 
@@ -210,23 +219,32 @@ export class DistributedOrderManagementService {
     );
 
     if (result.isFailure()) {
-      throw new Error(`High-performance processing failed: ${result.error.message}`);
+      throw new Error(
+        `High-performance processing failed: ${result.error.message}`
+      );
     }
   }
 
-  private async processWithDistributedCoordination(orderData: ComplexOrderData): Promise<void> {
+  private async processWithDistributedCoordination(
+    orderData: ComplexOrderData
+  ): Promise<void> {
     const fulfillmentData = this.convertToFulfillmentData(orderData);
 
-    const result = await this.distributedEventStore.processDistributedOrderFulfillment(
-      fulfillmentData
-    );
+    const result =
+      await this.distributedEventStore.processDistributedOrderFulfillment(
+        fulfillmentData
+      );
 
     if (result.isFailure()) {
-      throw new Error(`Distributed coordination failed: ${result.error.message}`);
+      throw new Error(
+        `Distributed coordination failed: ${result.error.message}`
+      );
     }
   }
 
-  private async processWithClusteredConsensus(orderData: ComplexOrderData): Promise<void> {
+  private async processWithClusteredConsensus(
+    orderData: ComplexOrderData
+  ): Promise<void> {
     const events = this.createOrderEvents(orderData);
 
     const result = await this.distributedEventStore.appendEventsWithConsensus(
@@ -257,7 +275,9 @@ export class DistributedOrderManagementService {
     return `customer-${orderData.customerId}`;
   }
 
-  private convertToFulfillmentData(orderData: ComplexOrderData): OrderFulfillmentData {
+  private convertToFulfillmentData(
+    orderData: ComplexOrderData
+  ): OrderFulfillmentData {
     // Convert to fulfillment data structure
     return {} as OrderFulfillmentData;
   }
@@ -272,57 +292,51 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
 import { DistributedEventStoreService } from './distributed-event-store.service';
 import { DistributedOrderManagementService } from './distributed-order-management.service';
-import { 
+import {
   DistributedEventSourcingCoordinator,
   HighPerformanceEventStore,
-  ClusteredEventStore
+  ClusteredEventStore,
 } from '../../../advanced/';
 
 @Module({
-  providers: [
-    DistributedEventStoreService,
-    DistributedOrderManagementService
-  ],
-  exports: [
-    DistributedEventStoreService,
-    DistributedOrderManagementService
-  ]
+  providers: [DistributedEventStoreService, DistributedOrderManagementService],
+  exports: [DistributedEventStoreService, DistributedOrderManagementService],
 })
 export class DistributedEventStoreModule implements OnModuleInit {
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD BEFORE framework DI
     const container = new SimpleContainer();
-    
+
     // Register distributed system components
     container.registerInstance(
-      'distributedCoordinator', 
+      'distributedCoordinator',
       new DistributedEventSourcingCoordinator({
         services: ['order-management', 'inventory-service', 'payment-service'],
         coordinationStrategy: 'saga-orchestration',
-        timeoutMs: 30000
+        timeoutMs: 30000,
       })
     );
-    
+
     container.registerInstance(
       'highPerformanceStore',
       new HighPerformanceEventStore({
         maxConcurrentOperations: 100,
         batchSize: 1000,
         compressionEnabled: true,
-        partitioningStrategy: 'customer-based'
+        partitioningStrategy: 'customer-based',
       })
     );
-    
+
     container.registerInstance(
       'clusteredStore',
       new ClusteredEventStore({
         nodes: ['node1', 'node2', 'node3'],
         consensusAlgorithm: 'raft',
         replicationFactor: 3,
-        electionTimeout: 5000
+        electionTimeout: 5000,
       })
     );
-    
+
     await VytchesDDD.configure(container);
   }
 }
@@ -367,19 +381,21 @@ export class DistributedMonitoringController {
     const query = {
       correlationId,
       services: services.split(','),
-      timeRange: JSON.parse(timeRange)
+      timeRange: JSON.parse(timeRange),
     };
-    
-    const result = await this.distributedEventStore.queryEventsAcrossServices(query);
+
+    const result =
+      await this.distributedEventStore.queryEventsAcrossServices(query);
     return result.isSuccess() ? result.value : { error: result.error.message };
   }
 }
 ```
 
 **Key Points:**
+
 - Enterprise distributed event sourcing integration
 - High-performance partitioned event storage
-- Clustered consensus-based event storage  
+- Clustered consensus-based event storage
 - Cross-service event coordination and querying
 - Advanced monitoring and analytics
 - Saga orchestration patterns

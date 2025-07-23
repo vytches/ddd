@@ -4,25 +4,30 @@
 **Package**: @vytches-ddd/messaging  
 **Framework**: NestJS  
 **Complexity**: Advanced  
-**Focus**: Enterprise event mesh architecture with VytchesDDD DI and global coordination
+**Focus**: Enterprise event mesh architecture with VytchesDDD DI and global
+coordination
 
 ## Description
 
-This example demonstrates building an enterprise-scale event mesh in NestJS with global coordination, multi-region saga orchestration, and advanced VytchesDDD DI integration for complex distributed systems.
+This example demonstrates building an enterprise-scale event mesh in NestJS with
+global coordination, multi-region saga orchestration, and advanced VytchesDDD DI
+integration for complex distributed systems.
 
 ## Business Context
 
-A global financial trading platform requires ultra-low latency event mesh spanning multiple regions, coordinating trades, risk management, and regulatory compliance across different markets with enterprise-grade service management.
+A global financial trading platform requires ultra-low latency event mesh
+spanning multiple regions, coordinating trades, risk management, and regulatory
+compliance across different markets with enterprise-grade service management.
 
 ## Code Example
 
 ```typescript
 // global-event-mesh.service.ts - VytchesDDD DI managed service
 import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
-import { 
-  EventMesh, 
-  GlobalSagaCoordinator, 
-  StreamProcessor 
+import {
+  EventMesh,
+  GlobalSagaCoordinator,
+  StreamProcessor,
 } from '@vytches-ddd/messaging';
 import { Resilience } from '@vytches-ddd/resilience';
 import { TradeRequest, RiskMetrics } from './types'; // From your application
@@ -32,7 +37,7 @@ import { TradeRequest, RiskMetrics } from './types'; // From your application
   lifetime: ServiceLifetime.Singleton,
   context: 'TradingPlatform',
   dependencies: ['riskEngine', 'complianceService'],
-  timeout: 30000
+  timeout: 30000,
 })
 export class GlobalEventMeshService {
   private eventMesh: EventMesh;
@@ -42,9 +47,9 @@ export class GlobalEventMeshService {
     this.initializeEventMesh();
   }
 
-  @Resilience({ 
+  @Resilience({
     circuitBreaker: { failureThreshold: 5 },
-    retry: { maxAttempts: 3 }
+    retry: { maxAttempts: 3 },
   })
   async initializeEventMesh(): Promise<void> {
     this.eventMesh = new EventMesh({
@@ -52,20 +57,20 @@ export class GlobalEventMeshService {
       regions: [
         { id: 'us-east', location: 'NYSE' },
         { id: 'eu-west', location: 'LSE' },
-        { id: 'asia-pac', location: 'TSE' }
-      ]
+        { id: 'asia-pac', location: 'TSE' },
+      ],
     });
 
     this.sagaCoordinator = new GlobalSagaCoordinator({
       regions: ['us-east', 'eu-west', 'asia-pac'],
-      serviceLocator: VytchesDDD.resolve.bind(VytchesDDD)
+      serviceLocator: VytchesDDD.resolve.bind(VytchesDDD),
     });
   }
 
   async executeGlobalTrade(request: TradeRequest): Promise<TradeResult> {
     const saga = new CrossBorderTradeSaga({
       id: `trade-${request.id}`,
-      regions: this.determineAffectedRegions(request)
+      regions: this.determineAffectedRegions(request),
     });
 
     return await this.sagaCoordinator.executeSaga(saga);
@@ -83,10 +88,13 @@ export class TradeCoordinationService {
 
   constructor() {
     // ⭐ Bridge Pattern: Get VytchesDDD managed instance
-    this.globalMesh = VytchesDDD.resolve<GlobalEventMeshService>('globalEventMesh');
+    this.globalMesh =
+      VytchesDDD.resolve<GlobalEventMeshService>('globalEventMesh');
   }
 
-  async executeGlobalTrade(request: TradeExecutionRequest): Promise<TradeResult> {
+  async executeGlobalTrade(
+    request: TradeExecutionRequest
+  ): Promise<TradeResult> {
     return await this.globalMesh.executeGlobalTrade(request);
   }
 }
@@ -98,9 +106,7 @@ import { ExecuteTradeDto } from './dto'; // From your application
 
 @Controller('trading')
 export class TradingController {
-  constructor(
-    private readonly tradeCoordination: TradeCoordinationService
-  ) {}
+  constructor(private readonly tradeCoordination: TradeCoordinationService) {}
 
   @Post('execute-global')
   async executeGlobalTrade(@Body() dto: ExecuteTradeDto) {
@@ -121,14 +127,14 @@ import { TradeCoordinationService } from './trade-coordination.service';
 
 @Module({
   controllers: [TradingController],
-  providers: [TradeCoordinationService]
+  providers: [TradeCoordinationService],
 })
 export class TradingModule implements OnModuleInit {
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD with global coordination
     await VytchesDDD.configure({
       enableGlobalCoordination: true,
-      regions: ['us-east', 'eu-west', 'asia-pac']
+      regions: ['us-east', 'eu-west', 'asia-pac'],
     });
   }
 }
@@ -137,7 +143,8 @@ export class TradingModule implements OnModuleInit {
 ## Key Features
 
 - **Global Event Mesh**: Multi-region event coordination
-- **Enterprise DI Integration**: VytchesDDD service locator with cross-cutting concerns
+- **Enterprise DI Integration**: VytchesDDD service locator with cross-cutting
+  concerns
 - **Distributed Sagas**: Cross-region saga coordination
 - **Bridge Pattern**: Clean separation between NestJS and business logic
 

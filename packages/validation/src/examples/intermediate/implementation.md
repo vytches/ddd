@@ -1,13 +1,17 @@
 # Composite Validation with Integration Implementation
 
-**Focus**: Advanced composite validation patterns integrated with policies and events  
+**Focus**: Advanced composite validation patterns integrated with policies and
+events  
 **Domain**: Financial Services KYC (Know Your Customer)  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies, @vytches-ddd/events, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies,
+@vytches-ddd/events, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates advanced composite validation for a financial services KYC system that requires:
+This example demonstrates advanced composite validation for a financial services
+KYC system that requires:
+
 - Complex business rule validation with policy integration
 - Event-driven validation workflows with audit trails
 - Composite validation patterns for regulatory compliance
@@ -18,15 +22,15 @@ This example demonstrates advanced composite validation for a financial services
 
 ```typescript
 // kyc-specifications.ts
-import { 
-  ISpecification, 
+import {
+  ISpecification,
   IAsyncSpecification,
-  CompositeSpecification 
+  CompositeSpecification,
 } from '@vytches-ddd/validation';
-import { 
-  PolicyBuilder, 
-  PolicyContext, 
-  ISpecification as IPolicySpecification 
+import {
+  PolicyBuilder,
+  PolicyContext,
+  ISpecification as IPolicySpecification,
 } from '@vytches-ddd/policies';
 import { DomainEvent } from '@vytches-ddd/events';
 import { Customer, KYCDocument, RiskProfile, ComplianceCheck } from '../types'; // ALWAYS import from app
@@ -41,7 +45,7 @@ export class KYCValidationStartedEvent extends DomainEvent {
     super('KYCValidationStarted', {
       customerId,
       validationType,
-      startedAt
+      startedAt,
     });
   }
 }
@@ -59,7 +63,7 @@ export class KYCValidationCompletedEvent extends DomainEvent {
       validationType,
       isValid,
       errors,
-      completedAt
+      completedAt,
     });
   }
 }
@@ -75,7 +79,7 @@ export class KYCValidationFailedEvent extends DomainEvent {
       customerId,
       validationType,
       errors,
-      failedAt
+      failedAt,
     });
   }
 }
@@ -86,16 +90,19 @@ export class CustomerAgeSpecification implements ISpecification<Customer> {
 
   isSatisfiedBy(customer: Customer): boolean {
     if (!customer.dateOfBirth) return false;
-    
+
     const today = new Date();
     const birthDate = new Date(customer.dateOfBirth);
     const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       return age - 1 >= this.minAge;
     }
-    
+
     return age >= this.minAge;
   }
 
@@ -143,13 +150,15 @@ export class CustomerAddressSpecification implements ISpecification<Customer> {
 }
 
 // Document validation specifications
-export class DocumentValiditySpecification implements ISpecification<KYCDocument> {
+export class DocumentValiditySpecification
+  implements ISpecification<KYCDocument>
+{
   isSatisfiedBy(document: KYCDocument): boolean {
     if (!document.expiryDate) return true; // Some documents don't expire
-    
+
     const today = new Date();
     const expiryDate = new Date(document.expiryDate);
-    
+
     return expiryDate > today;
   }
 
@@ -159,7 +168,13 @@ export class DocumentValiditySpecification implements ISpecification<KYCDocument
 }
 
 export class DocumentTypeSpecification implements ISpecification<KYCDocument> {
-  private validTypes = ['passport', 'driver-license', 'national-id', 'utility-bill', 'bank-statement'];
+  private validTypes = [
+    'passport',
+    'driver-license',
+    'national-id',
+    'utility-bill',
+    'bank-statement',
+  ];
 
   isSatisfiedBy(document: KYCDocument): boolean {
     return this.validTypes.includes(document.type);
@@ -170,7 +185,9 @@ export class DocumentTypeSpecification implements ISpecification<KYCDocument> {
   }
 }
 
-export class DocumentCompletenessSpecification implements ISpecification<KYCDocument> {
+export class DocumentCompletenessSpecification
+  implements ISpecification<KYCDocument>
+{
   isSatisfiedBy(document: KYCDocument): boolean {
     return !!(
       document.id &&
@@ -193,7 +210,9 @@ export class DocumentCompletenessSpecification implements ISpecification<KYCDocu
 }
 
 // Async validation specifications
-export class SanctionsCheckSpecification implements IAsyncSpecification<Customer> {
+export class SanctionsCheckSpecification
+  implements IAsyncSpecification<Customer>
+{
   constructor(private sanctionsService: SanctionsService) {}
 
   async isSatisfiedByAsync(customer: Customer): Promise<boolean> {
@@ -203,7 +222,7 @@ export class SanctionsCheckSpecification implements IAsyncSpecification<Customer
         lastName: customer.lastName,
         dateOfBirth: customer.dateOfBirth,
         nationalId: customer.nationalId,
-        country: customer.address?.country
+        country: customer.address?.country,
       });
 
       return !sanctionsResult.isMatch;
@@ -227,7 +246,7 @@ export class PEPCheckSpecification implements IAsyncSpecification<Customer> {
         firstName: customer.firstName,
         lastName: customer.lastName,
         dateOfBirth: customer.dateOfBirth,
-        country: customer.address?.country
+        country: customer.address?.country,
       });
 
       // PEP status doesn't disqualify, but requires enhanced due diligence
@@ -243,18 +262,23 @@ export class PEPCheckSpecification implements IAsyncSpecification<Customer> {
   }
 }
 
-export class DocumentVerificationSpecification implements IAsyncSpecification<KYCDocument> {
-  constructor(private documentVerificationService: DocumentVerificationService) {}
+export class DocumentVerificationSpecification
+  implements IAsyncSpecification<KYCDocument>
+{
+  constructor(
+    private documentVerificationService: DocumentVerificationService
+  ) {}
 
   async isSatisfiedByAsync(document: KYCDocument): Promise<boolean> {
     try {
-      const verificationResult = await this.documentVerificationService.verifyDocument({
-        documentId: document.id,
-        documentType: document.type,
-        documentNumber: document.number,
-        issuingAuthority: document.issuingAuthority,
-        customerName: document.customerName
-      });
+      const verificationResult =
+        await this.documentVerificationService.verifyDocument({
+          documentId: document.id,
+          documentType: document.type,
+          documentNumber: document.number,
+          issuingAuthority: document.issuingAuthority,
+          customerName: document.customerName,
+        });
 
       return verificationResult.isValid && verificationResult.isAuthentic;
     } catch (error) {
@@ -269,10 +293,10 @@ export class DocumentVerificationSpecification implements IAsyncSpecification<KY
 }
 
 // composite-kyc-validator.ts
-import { 
+import {
   CompositeSpecification,
   BusinessRuleValidator,
-  ValidationFacade 
+  ValidationFacade,
 } from '@vytches-ddd/validation';
 import { UnifiedEventBus } from '@vytches-ddd/events';
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
@@ -282,7 +306,7 @@ import { Result } from '@vytches-ddd/utils';
 // ⭐ Composite KYC Validator with Policy Integration
 @DomainService('compositeKYCValidator', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'KYCValidation'
+  context: 'KYCValidation',
 })
 export class CompositeKYCValidator {
   private logger = Logger.forContext('CompositeKYCValidator');
@@ -306,12 +330,12 @@ export class CompositeKYCValidator {
       'customer-age',
       new CustomerAgeSpecification(18)
     );
-    
+
     this.businessRuleValidator.registerRule(
       'customer-identity',
       new CustomerIdentitySpecification()
     );
-    
+
     this.businessRuleValidator.registerRule(
       'customer-address',
       new CustomerAddressSpecification()
@@ -322,12 +346,12 @@ export class CompositeKYCValidator {
       'document-validity',
       new DocumentValiditySpecification()
     );
-    
+
     this.businessRuleValidator.registerRule(
       'document-type',
       new DocumentTypeSpecification()
     );
-    
+
     this.businessRuleValidator.registerRule(
       'document-completeness',
       new DocumentCompletenessSpecification()
@@ -338,12 +362,12 @@ export class CompositeKYCValidator {
       'sanctions-check',
       new SanctionsCheckSpecification(this.sanctionsService)
     );
-    
+
     this.businessRuleValidator.registerAsyncRule(
       'pep-check',
       new PEPCheckSpecification(this.pepService)
     );
-    
+
     this.businessRuleValidator.registerAsyncRule(
       'document-verification',
       new DocumentVerificationSpecification(this.documentVerificationService)
@@ -351,19 +375,19 @@ export class CompositeKYCValidator {
   }
 
   // Basic KYC validation using composite specifications
-  async validateBasicKYC(customer: Customer): Promise<Result<void, ValidationError[]>> {
+  async validateBasicKYC(
+    customer: Customer
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       this.logger.info('Starting basic KYC validation', {
         customerId: customer.id,
-        customerName: `${customer.firstName} ${customer.lastName}`
+        customerName: `${customer.firstName} ${customer.lastName}`,
       });
 
       // Publish validation started event
-      await this.eventBus.publish(new KYCValidationStartedEvent(
-        customer.id,
-        'basic-kyc',
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationStartedEvent(customer.id, 'basic-kyc', new Date())
+      );
 
       const validationResults = [];
 
@@ -371,7 +395,7 @@ export class CompositeKYCValidator {
       const basicKYCSpec = CompositeSpecification.and([
         new CustomerAgeSpecification(18),
         new CustomerIdentitySpecification(),
-        new CustomerAddressSpecification()
+        new CustomerAddressSpecification(),
       ]);
 
       // Apply composite specification
@@ -384,63 +408,69 @@ export class CompositeKYCValidator {
       const isValid = validationResults.length === 0;
 
       // Publish validation completed event
-      await this.eventBus.publish(new KYCValidationCompletedEvent(
-        customer.id,
-        'basic-kyc',
-        isValid,
-        validationResults,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationCompletedEvent(
+          customer.id,
+          'basic-kyc',
+          isValid,
+          validationResults,
+          new Date()
+        )
+      );
 
       if (!isValid) {
         this.logger.warn('Basic KYC validation failed', {
           customerId: customer.id,
-          errors: validationResults
+          errors: validationResults,
         });
 
         return Result.failure(validationResults);
       }
 
       this.logger.info('Basic KYC validation completed successfully', {
-        customerId: customer.id
+        customerId: customer.id,
       });
 
       return Result.success(undefined);
     } catch (error) {
       this.logger.error('Basic KYC validation error', {
         customerId: customer.id,
-        error: error.message
+        error: error.message,
       });
 
-      await this.eventBus.publish(new KYCValidationFailedEvent(
-        customer.id,
-        'basic-kyc',
-        [{ message: error.message, code: 'VALIDATION_ERROR' }],
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationFailedEvent(
+          customer.id,
+          'basic-kyc',
+          [{ message: error.message, code: 'VALIDATION_ERROR' }],
+          new Date()
+        )
+      );
 
-      return Result.failure([{
-        field: 'general',
-        message: `Basic KYC validation failed: ${error.message}`,
-        code: 'BASIC_KYC_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Basic KYC validation failed: ${error.message}`,
+          code: 'BASIC_KYC_ERROR',
+        },
+      ]);
     }
   }
 
   // Enhanced KYC validation with sanctions and PEP checks
-  async validateEnhancedKYC(customer: Customer): Promise<Result<void, ValidationError[]>> {
+  async validateEnhancedKYC(
+    customer: Customer
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       this.logger.info('Starting enhanced KYC validation', {
         customerId: customer.id,
-        customerName: `${customer.firstName} ${customer.lastName}`
+        customerName: `${customer.firstName} ${customer.lastName}`,
       });
 
       // Publish validation started event
-      await this.eventBus.publish(new KYCValidationStartedEvent(
-        customer.id,
-        'enhanced-kyc',
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationStartedEvent(customer.id, 'enhanced-kyc', new Date())
+      );
 
       const validationResults = [];
 
@@ -451,12 +481,19 @@ export class CompositeKYCValidator {
       }
 
       // Enhanced checks (async)
-      const sanctionsValidation = await this.businessRuleValidator.validateAsync('sanctions-check', customer);
+      const sanctionsValidation =
+        await this.businessRuleValidator.validateAsync(
+          'sanctions-check',
+          customer
+        );
       if (sanctionsValidation.isFailure()) {
         validationResults.push(...sanctionsValidation.error);
       }
 
-      const pepValidation = await this.businessRuleValidator.validateAsync('pep-check', customer);
+      const pepValidation = await this.businessRuleValidator.validateAsync(
+        'pep-check',
+        customer
+      );
       if (pepValidation.isFailure()) {
         validationResults.push(...pepValidation.error);
       }
@@ -465,63 +502,74 @@ export class CompositeKYCValidator {
       const isValid = validationResults.length === 0;
 
       // Publish validation completed event
-      await this.eventBus.publish(new KYCValidationCompletedEvent(
-        customer.id,
-        'enhanced-kyc',
-        isValid,
-        validationResults,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationCompletedEvent(
+          customer.id,
+          'enhanced-kyc',
+          isValid,
+          validationResults,
+          new Date()
+        )
+      );
 
       if (!isValid) {
         this.logger.warn('Enhanced KYC validation failed', {
           customerId: customer.id,
-          errors: validationResults
+          errors: validationResults,
         });
 
         return Result.failure(validationResults);
       }
 
       this.logger.info('Enhanced KYC validation completed successfully', {
-        customerId: customer.id
+        customerId: customer.id,
       });
 
       return Result.success(undefined);
     } catch (error) {
       this.logger.error('Enhanced KYC validation error', {
         customerId: customer.id,
-        error: error.message
+        error: error.message,
       });
 
-      await this.eventBus.publish(new KYCValidationFailedEvent(
-        customer.id,
-        'enhanced-kyc',
-        [{ message: error.message, code: 'VALIDATION_ERROR' }],
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationFailedEvent(
+          customer.id,
+          'enhanced-kyc',
+          [{ message: error.message, code: 'VALIDATION_ERROR' }],
+          new Date()
+        )
+      );
 
-      return Result.failure([{
-        field: 'general',
-        message: `Enhanced KYC validation failed: ${error.message}`,
-        code: 'ENHANCED_KYC_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Enhanced KYC validation failed: ${error.message}`,
+          code: 'ENHANCED_KYC_ERROR',
+        },
+      ]);
     }
   }
 
   // Document validation with verification
-  async validateDocuments(customerId: string, documents: KYCDocument[]): Promise<Result<void, ValidationError[]>> {
+  async validateDocuments(
+    customerId: string,
+    documents: KYCDocument[]
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       this.logger.info('Starting document validation', {
         customerId,
-        documentCount: documents.length
+        documentCount: documents.length,
       });
 
       // Publish validation started event
-      await this.eventBus.publish(new KYCValidationStartedEvent(
-        customerId,
-        'document-validation',
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationStartedEvent(
+          customerId,
+          'document-validation',
+          new Date()
+        )
+      );
 
       const validationResults = [];
 
@@ -529,43 +577,56 @@ export class CompositeKYCValidator {
         const document = documents[i];
 
         // Basic document validation
-        const completenessValidation = this.businessRuleValidator.validate('document-completeness', document);
+        const completenessValidation = this.businessRuleValidator.validate(
+          'document-completeness',
+          document
+        );
         if (completenessValidation.isFailure()) {
           const documentErrors = completenessValidation.error.map(error => ({
             ...error,
             field: `documents[${i}].${error.field}`,
-            message: `Document ${i}: ${error.message}`
+            message: `Document ${i}: ${error.message}`,
           }));
           validationResults.push(...documentErrors);
         }
 
-        const typeValidation = this.businessRuleValidator.validate('document-type', document);
+        const typeValidation = this.businessRuleValidator.validate(
+          'document-type',
+          document
+        );
         if (typeValidation.isFailure()) {
           const documentErrors = typeValidation.error.map(error => ({
             ...error,
             field: `documents[${i}].${error.field}`,
-            message: `Document ${i}: ${error.message}`
+            message: `Document ${i}: ${error.message}`,
           }));
           validationResults.push(...documentErrors);
         }
 
-        const validityValidation = this.businessRuleValidator.validate('document-validity', document);
+        const validityValidation = this.businessRuleValidator.validate(
+          'document-validity',
+          document
+        );
         if (validityValidation.isFailure()) {
           const documentErrors = validityValidation.error.map(error => ({
             ...error,
             field: `documents[${i}].${error.field}`,
-            message: `Document ${i}: ${error.message}`
+            message: `Document ${i}: ${error.message}`,
           }));
           validationResults.push(...documentErrors);
         }
 
         // Document verification (async)
-        const verificationValidation = await this.businessRuleValidator.validateAsync('document-verification', document);
+        const verificationValidation =
+          await this.businessRuleValidator.validateAsync(
+            'document-verification',
+            document
+          );
         if (verificationValidation.isFailure()) {
           const documentErrors = verificationValidation.error.map(error => ({
             ...error,
             field: `documents[${i}].${error.field}`,
-            message: `Document ${i}: ${error.message}`
+            message: `Document ${i}: ${error.message}`,
           }));
           validationResults.push(...documentErrors);
         }
@@ -575,18 +636,20 @@ export class CompositeKYCValidator {
       const isValid = validationResults.length === 0;
 
       // Publish validation completed event
-      await this.eventBus.publish(new KYCValidationCompletedEvent(
-        customerId,
-        'document-validation',
-        isValid,
-        validationResults,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationCompletedEvent(
+          customerId,
+          'document-validation',
+          isValid,
+          validationResults,
+          new Date()
+        )
+      );
 
       if (!isValid) {
         this.logger.warn('Document validation failed', {
           customerId,
-          errors: validationResults
+          errors: validationResults,
         });
 
         return Result.failure(validationResults);
@@ -594,46 +657,51 @@ export class CompositeKYCValidator {
 
       this.logger.info('Document validation completed successfully', {
         customerId,
-        documentCount: documents.length
+        documentCount: documents.length,
       });
 
       return Result.success(undefined);
     } catch (error) {
       this.logger.error('Document validation error', {
         customerId,
-        error: error.message
+        error: error.message,
       });
 
-      await this.eventBus.publish(new KYCValidationFailedEvent(
-        customerId,
-        'document-validation',
-        [{ message: error.message, code: 'VALIDATION_ERROR' }],
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationFailedEvent(
+          customerId,
+          'document-validation',
+          [{ message: error.message, code: 'VALIDATION_ERROR' }],
+          new Date()
+        )
+      );
 
-      return Result.failure([{
-        field: 'general',
-        message: `Document validation failed: ${error.message}`,
-        code: 'DOCUMENT_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Document validation failed: ${error.message}`,
+          code: 'DOCUMENT_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
   // Comprehensive KYC validation combining all checks
-  async validateCompleteKYC(customer: Customer, documents: KYCDocument[]): Promise<Result<ComplianceCheck, ValidationError[]>> {
+  async validateCompleteKYC(
+    customer: Customer,
+    documents: KYCDocument[]
+  ): Promise<Result<ComplianceCheck, ValidationError[]>> {
     try {
       this.logger.info('Starting complete KYC validation', {
         customerId: customer.id,
         customerName: `${customer.firstName} ${customer.lastName}`,
-        documentCount: documents.length
+        documentCount: documents.length,
       });
 
       // Publish validation started event
-      await this.eventBus.publish(new KYCValidationStartedEvent(
-        customer.id,
-        'complete-kyc',
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationStartedEvent(customer.id, 'complete-kyc', new Date())
+      );
 
       const allValidationResults = [];
 
@@ -644,7 +712,10 @@ export class CompositeKYCValidator {
       }
 
       // Document validation
-      const documentValidation = await this.validateDocuments(customer.id, documents);
+      const documentValidation = await this.validateDocuments(
+        customer.id,
+        documents
+      );
       if (documentValidation.isFailure()) {
         allValidationResults.push(...documentValidation.error);
       }
@@ -657,23 +728,25 @@ export class CompositeKYCValidator {
         validationErrors: allValidationResults,
         completedAt: new Date(),
         riskLevel: this.calculateRiskLevel(allValidationResults),
-        requiresManualReview: this.requiresManualReview(allValidationResults)
+        requiresManualReview: this.requiresManualReview(allValidationResults),
       };
 
       // Publish validation completed event
-      await this.eventBus.publish(new KYCValidationCompletedEvent(
-        customer.id,
-        'complete-kyc',
-        complianceCheck.isCompliant,
-        allValidationResults,
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationCompletedEvent(
+          customer.id,
+          'complete-kyc',
+          complianceCheck.isCompliant,
+          allValidationResults,
+          new Date()
+        )
+      );
 
       if (!complianceCheck.isCompliant) {
         this.logger.warn('Complete KYC validation failed', {
           customerId: customer.id,
           errors: allValidationResults,
-          riskLevel: complianceCheck.riskLevel
+          riskLevel: complianceCheck.riskLevel,
         });
 
         return Result.failure(allValidationResults);
@@ -681,36 +754,45 @@ export class CompositeKYCValidator {
 
       this.logger.info('Complete KYC validation completed successfully', {
         customerId: customer.id,
-        riskLevel: complianceCheck.riskLevel
+        riskLevel: complianceCheck.riskLevel,
       });
 
       return Result.success(complianceCheck);
     } catch (error) {
       this.logger.error('Complete KYC validation error', {
         customerId: customer.id,
-        error: error.message
+        error: error.message,
       });
 
-      await this.eventBus.publish(new KYCValidationFailedEvent(
-        customer.id,
-        'complete-kyc',
-        [{ message: error.message, code: 'VALIDATION_ERROR' }],
-        new Date()
-      ));
+      await this.eventBus.publish(
+        new KYCValidationFailedEvent(
+          customer.id,
+          'complete-kyc',
+          [{ message: error.message, code: 'VALIDATION_ERROR' }],
+          new Date()
+        )
+      );
 
-      return Result.failure([{
-        field: 'general',
-        message: `Complete KYC validation failed: ${error.message}`,
-        code: 'COMPLETE_KYC_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Complete KYC validation failed: ${error.message}`,
+          code: 'COMPLETE_KYC_ERROR',
+        },
+      ]);
     }
   }
 
   // Batch KYC validation
-  async validateBatchKYC(customersWithDocuments: Array<{ customer: Customer; documents: KYCDocument[] }>): Promise<Result<ComplianceCheck[], ValidationError[]>> {
+  async validateBatchKYC(
+    customersWithDocuments: Array<{
+      customer: Customer;
+      documents: KYCDocument[];
+    }>
+  ): Promise<Result<ComplianceCheck[], ValidationError[]>> {
     try {
       this.logger.info('Starting batch KYC validation', {
-        customerCount: customersWithDocuments.length
+        customerCount: customersWithDocuments.length,
       });
 
       const validComplianceChecks: ComplianceCheck[] = [];
@@ -718,9 +800,12 @@ export class CompositeKYCValidator {
 
       for (let i = 0; i < customersWithDocuments.length; i++) {
         const { customer, documents } = customersWithDocuments[i];
-        
-        const kycValidation = await this.validateCompleteKYC(customer, documents);
-        
+
+        const kycValidation = await this.validateCompleteKYC(
+          customer,
+          documents
+        );
+
         if (kycValidation.isSuccess()) {
           validComplianceChecks.push(kycValidation.value);
         } else {
@@ -728,7 +813,7 @@ export class CompositeKYCValidator {
           const customerErrors = kycValidation.error.map(error => ({
             ...error,
             field: `customers[${i}].${error.field}`,
-            message: `Customer ${i}: ${error.message}`
+            message: `Customer ${i}: ${error.message}`,
           }));
           allValidationErrors.push(...customerErrors);
         }
@@ -741,34 +826,46 @@ export class CompositeKYCValidator {
       return Result.success(validComplianceChecks);
     } catch (error) {
       this.logger.error('Batch KYC validation error', {
-        error: error.message
+        error: error.message,
       });
 
-      return Result.failure([{
-        field: 'general',
-        message: `Batch KYC validation failed: ${error.message}`,
-        code: 'BATCH_KYC_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Batch KYC validation failed: ${error.message}`,
+          code: 'BATCH_KYC_ERROR',
+        },
+      ]);
     }
   }
 
-  private calculateRiskLevel(validationErrors: ValidationError[]): 'low' | 'medium' | 'high' {
+  private calculateRiskLevel(
+    validationErrors: ValidationError[]
+  ): 'low' | 'medium' | 'high' {
     if (validationErrors.length === 0) return 'low';
-    
-    const highRiskCodes = ['SANCTIONS_MATCH', 'PEP_HIGH_RISK', 'DOCUMENT_VERIFICATION_FAILED'];
-    const hasHighRiskError = validationErrors.some(error => 
+
+    const highRiskCodes = [
+      'SANCTIONS_MATCH',
+      'PEP_HIGH_RISK',
+      'DOCUMENT_VERIFICATION_FAILED',
+    ];
+    const hasHighRiskError = validationErrors.some(error =>
       highRiskCodes.includes(error.code)
     );
-    
+
     if (hasHighRiskError) return 'high';
     if (validationErrors.length > 3) return 'medium';
-    
+
     return 'low';
   }
 
   private requiresManualReview(validationErrors: ValidationError[]): boolean {
-    const manualReviewCodes = ['SANCTIONS_MATCH', 'PEP_HIGH_RISK', 'DOCUMENT_VERIFICATION_FAILED'];
-    return validationErrors.some(error => 
+    const manualReviewCodes = [
+      'SANCTIONS_MATCH',
+      'PEP_HIGH_RISK',
+      'DOCUMENT_VERIFICATION_FAILED',
+    ];
+    return validationErrors.some(error =>
       manualReviewCodes.includes(error.code)
     );
   }
@@ -785,23 +882,25 @@ export class CompositeKYCValidator {
       totalValidations: 0,
       successfulValidations: 0,
       failedValidations: 0,
-      averageValidationTime: 0
+      averageValidationTime: 0,
     };
   }
 }
 
 // Mock external services
 export class MockSanctionsService implements SanctionsService {
-  async checkSanctions(data: any): Promise<{ isMatch: boolean; matchDetails?: any }> {
+  async checkSanctions(
+    data: any
+  ): Promise<{ isMatch: boolean; matchDetails?: any }> {
     // Simulate sanctions check
     await this.delay(500);
-    
+
     // Simulate 5% sanctions match rate
     const isMatch = Math.random() < 0.05;
-    
+
     return {
       isMatch,
-      matchDetails: isMatch ? { reason: 'Name match found' } : undefined
+      matchDetails: isMatch ? { reason: 'Name match found' } : undefined,
     };
   }
 
@@ -814,13 +913,13 @@ export class MockPEPService implements PEPService {
   async checkPEP(data: any): Promise<{ isHighRisk: boolean; details?: any }> {
     // Simulate PEP check
     await this.delay(300);
-    
+
     // Simulate 10% PEP match rate
     const isHighRisk = Math.random() < 0.1;
-    
+
     return {
       isHighRisk,
-      details: isHighRisk ? { reason: 'PEP match found' } : undefined
+      details: isHighRisk ? { reason: 'PEP match found' } : undefined,
     };
   }
 
@@ -829,22 +928,26 @@ export class MockPEPService implements PEPService {
   }
 }
 
-export class MockDocumentVerificationService implements DocumentVerificationService {
-  async verifyDocument(data: any): Promise<{ isValid: boolean; isAuthentic: boolean; details?: any }> {
+export class MockDocumentVerificationService
+  implements DocumentVerificationService
+{
+  async verifyDocument(
+    data: any
+  ): Promise<{ isValid: boolean; isAuthentic: boolean; details?: any }> {
     // Simulate document verification
     await this.delay(1000);
-    
+
     // Simulate 95% success rate
     const isValid = Math.random() < 0.95;
     const isAuthentic = isValid ? Math.random() < 0.98 : false;
-    
+
     return {
       isValid,
       isAuthentic,
       details: {
         verificationMethod: 'automated',
-        confidence: isValid ? 0.95 : 0.3
-      }
+        confidence: isValid ? 0.95 : 0.3,
+      },
     };
   }
 
@@ -856,13 +959,18 @@ export class MockDocumentVerificationService implements DocumentVerificationServ
 
 ## Key Features
 
-- **Composite Validation**: Complex validation patterns using specification combinations
+- **Composite Validation**: Complex validation patterns using specification
+  combinations
 - **Event-Driven Workflow**: Comprehensive audit trail with domain events
 - **Policy Integration**: Business rules driving validation behavior
-- **Async External Services**: Integration with sanctions, PEP, and document verification services
-- **Risk Assessment**: Dynamic risk level calculation based on validation results
-- **Batch Processing**: Efficient validation of multiple customers simultaneously
-- **Comprehensive Error Handling**: Detailed error reporting with context and codes
+- **Async External Services**: Integration with sanctions, PEP, and document
+  verification services
+- **Risk Assessment**: Dynamic risk level calculation based on validation
+  results
+- **Batch Processing**: Efficient validation of multiple customers
+  simultaneously
+- **Comprehensive Error Handling**: Detailed error reporting with context and
+  codes
 
 ## Usage Example
 
@@ -880,13 +988,18 @@ export class KYCController {
   ): Promise<Result<ComplianceCheck, ValidationError[]>> {
     try {
       // Subscribe to KYC events for monitoring
-      this.eventBus.subscribe('KYCValidationCompleted', (event) => {
-        console.log(`KYC validation completed for customer ${event.customerId}: ${event.isValid}`);
+      this.eventBus.subscribe('KYCValidationCompleted', event => {
+        console.log(
+          `KYC validation completed for customer ${event.customerId}: ${event.isValid}`
+        );
       });
 
       // Perform complete KYC validation
-      const result = await this.kycValidator.validateCompleteKYC(customer, documents);
-      
+      const result = await this.kycValidator.validateCompleteKYC(
+        customer,
+        documents
+      );
+
       if (result.isFailure()) {
         console.log('KYC validation failed:', result.error);
         return Result.failure(result.error);
@@ -896,38 +1009,49 @@ export class KYCController {
       console.log('KYC validation successful:', {
         customerId: customer.id,
         riskLevel: complianceCheck.riskLevel,
-        requiresManualReview: complianceCheck.requiresManualReview
+        requiresManualReview: complianceCheck.requiresManualReview,
       });
 
       return Result.success(complianceCheck);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `KYC processing failed: ${error.message}`,
-        code: 'KYC_PROCESSING_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `KYC processing failed: ${error.message}`,
+          code: 'KYC_PROCESSING_ERROR',
+        },
+      ]);
     }
   }
 
   async processBatchKYC(
-    customersWithDocuments: Array<{ customer: Customer; documents: KYCDocument[] }>
+    customersWithDocuments: Array<{
+      customer: Customer;
+      documents: KYCDocument[];
+    }>
   ): Promise<Result<ComplianceCheck[], ValidationError[]>> {
     try {
-      const result = await this.kycValidator.validateBatchKYC(customersWithDocuments);
-      
+      const result = await this.kycValidator.validateBatchKYC(
+        customersWithDocuments
+      );
+
       if (result.isFailure()) {
         console.log('Batch KYC validation failed:', result.error);
         return Result.failure(result.error);
       }
 
-      console.log(`Batch KYC validation successful: ${result.value.length} customers processed`);
+      console.log(
+        `Batch KYC validation successful: ${result.value.length} customers processed`
+      );
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Batch KYC processing failed: ${error.message}`,
-        code: 'BATCH_KYC_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Batch KYC processing failed: ${error.message}`,
+          code: 'BATCH_KYC_ERROR',
+        },
+      ]);
     }
   }
 
@@ -940,8 +1064,13 @@ export class KYCController {
 ## Common Pitfalls
 
 - **Event Ordering**: Consider event ordering for complex validation workflows
-- **External Service Timeouts**: Implement proper timeout handling for external services
-- **Validation State**: Maintain validation state consistently across async operations
-- **Error Aggregation**: Properly aggregate errors from multiple validation sources
-- **Performance**: Monitor performance impact of comprehensive validation workflows
-- **Risk Calculation**: Ensure risk level calculations align with business requirements
+- **External Service Timeouts**: Implement proper timeout handling for external
+  services
+- **Validation State**: Maintain validation state consistently across async
+  operations
+- **Error Aggregation**: Properly aggregate errors from multiple validation
+  sources
+- **Performance**: Monitor performance impact of comprehensive validation
+  workflows
+- **Risk Calculation**: Ensure risk level calculations align with business
+  requirements

@@ -1,27 +1,32 @@
 # Circuit Breaker Pattern - NestJS Basic Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/resilience
-**Framework**: NestJS
-**Complexity**: Basic
-**Domain**: Payment Processing Service
-**Patterns**: Circuit Breaker, Manual Setup
-**Dependencies**: @nestjs/common, @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Complexity**: Basic **Domain**: Payment Processing Service **Patterns**:
+Circuit Breaker, Manual Setup **Dependencies**: @nestjs/common,
+@vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates basic NestJS integration with circuit breaker pattern using manual instantiation. The service protects against payment gateway failures while maintaining a simple, clear integration approach suitable for beginners.
+This example demonstrates basic NestJS integration with circuit breaker pattern
+using manual instantiation. The service protects against payment gateway
+failures while maintaining a simple, clear integration approach suitable for
+beginners.
 
 ## Business Context
 
-A payment processing service needs to protect against third-party payment gateway failures. When the gateway becomes unresponsive, the circuit breaker prevents cascading failures and provides graceful degradation.
+A payment processing service needs to protect against third-party payment
+gateway failures. When the gateway becomes unresponsive, the circuit breaker
+prevents cascading failures and provides graceful degradation.
 
 ## Code Example
 
 ```typescript
 // payment.service.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { ResiliencePolicyBuilder, CircuitBreakerStrategy } from '@vytches-ddd/resilience';
+import {
+  ResiliencePolicyBuilder,
+  CircuitBreakerStrategy,
+} from '@vytches-ddd/resilience';
 import { PaymentRequest, PaymentResult, PaymentGatewayError } from './types'; // From your application
 
 @Injectable()
@@ -30,13 +35,12 @@ export class PaymentService {
 
   constructor() {
     // ⭐ FOCUS: Manual circuit breaker setup (beginner-friendly)
-    this.paymentCircuitBreaker = ResiliencePolicyBuilder
-      .create()
+    this.paymentCircuitBreaker = ResiliencePolicyBuilder.create()
       .withCircuitBreaker({
-        failureThreshold: 5,        // Open after 5 consecutive failures
-        resetTimeout: 30000,        // Try recovery every 30 seconds
-        halfOpenMaxCalls: 3,        // Test with 3 calls during recovery
-        monitoringWindow: 120000    // 2-minute monitoring window
+        failureThreshold: 5, // Open after 5 consecutive failures
+        resetTimeout: 30000, // Try recovery every 30 seconds
+        halfOpenMaxCalls: 3, // Test with 3 calls during recovery
+        monitoringWindow: 120000, // 2-minute monitoring window
       })
       .build();
   }
@@ -51,7 +55,7 @@ export class PaymentService {
           correlationId: paymentRequest.transactionId,
           startTime: new Date(),
           attempt: 1,
-          previousAttempts: []
+          previousAttempts: [],
         }
       );
 
@@ -60,9 +64,8 @@ export class PaymentService {
         status: 'success',
         amount: paymentRequest.amount,
         gatewayResponse: result,
-        processedAt: new Date()
+        processedAt: new Date(),
       };
-
     } catch (error) {
       if (error.message.includes('CIRCUIT_BREAKER_OPEN')) {
         throw new HttpException(
@@ -70,7 +73,7 @@ export class PaymentService {
           HttpStatus.SERVICE_UNAVAILABLE
         );
       }
-      
+
       throw new HttpException(
         'Payment processing failed',
         HttpStatus.BAD_REQUEST
@@ -78,22 +81,28 @@ export class PaymentService {
     }
   }
 
-  async getPaymentStatus(): Promise<{ circuitBreakerState: string; isHealthy: boolean }> {
+  async getPaymentStatus(): Promise<{
+    circuitBreakerState: string;
+    isHealthy: boolean;
+  }> {
     const state = this.paymentCircuitBreaker.getState();
-    
+
     return {
       circuitBreakerState: state,
-      isHealthy: state === 'CLOSED'
+      isHealthy: state === 'CLOSED',
     };
   }
 
   private async callPaymentGateway(request: PaymentRequest): Promise<any> {
     // Simulate payment gateway call
-    const response = await fetch('https://payment-gateway.example.com/process', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request)
-    });
+    const response = await fetch(
+      'https://payment-gateway.example.com/process',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+      }
+    );
 
     if (!response.ok) {
       throw new PaymentGatewayError(`Gateway error: ${response.status}`);
@@ -104,7 +113,14 @@ export class PaymentService {
 }
 
 // payment.controller.ts
-import { Controller, Post, Get, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentRequest } from './types'; // From your application
 
@@ -132,7 +148,7 @@ import { PaymentService } from './payment.service';
 @Module({
   controllers: [PaymentController],
   providers: [PaymentService],
-  exports: [PaymentService]
+  exports: [PaymentService],
 })
 export class PaymentModule {}
 ```
@@ -141,7 +157,8 @@ export class PaymentModule {}
 
 - **Simple Integration**: Manual circuit breaker instantiation in constructor
 - **NestJS Patterns**: Uses standard NestJS decorators and dependency injection
-- **Error Handling**: Converts circuit breaker errors to appropriate HTTP responses
+- **Error Handling**: Converts circuit breaker errors to appropriate HTTP
+  responses
 - **Health Monitoring**: Provides endpoint to check circuit breaker status
 - **Type Safety**: Full TypeScript integration with imported application types
 
@@ -160,14 +177,14 @@ const paymentRequest = {
   transactionId: 'txn-12345',
   amount: 99.99,
   currency: 'USD',
-  customerId: 'customer-789'
+  customerId: 'customer-789',
 };
 
 // Process payment with circuit breaker protection
 const result = await fetch('/payments/process', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(paymentRequest)
+  body: JSON.stringify(paymentRequest),
 });
 
 // Check payment service health
@@ -180,7 +197,8 @@ console.log(await health.json()); // { circuitBreakerState: "CLOSED", isHealthy:
 - **Static Configuration**: Circuit breaker settings not adjustable at runtime
 - **Single Gateway**: No fallback payment gateway integration
 - **Limited Monitoring**: Basic health check without detailed metrics
-- **Error Mapping**: Simple error handling without detailed failure classification
+- **Error Mapping**: Simple error handling without detailed failure
+  classification
 
 ## Related Examples
 

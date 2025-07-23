@@ -4,7 +4,8 @@ export const diExampleConfig: PackageExampleConfig = {
   packageName: 'di',
   displayName: 'Dependency Injection',
   version: '1.0.0',
-  description: 'Enterprise-grade dependency injection system with auto-discovery, context isolation, and framework integration capabilities.',
+  description:
+    'Enterprise-grade dependency injection system with auto-discovery, context isolation, and framework integration capabilities.',
   domain: 'Infrastructure',
   patterns: ['dependency-injection', 'service-locator', 'auto-discovery', 'context-isolation'],
 
@@ -15,20 +16,20 @@ export const diExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic dependency injection patterns and service registration'
+      description: 'Basic dependency injection patterns and service registration',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: true,
-      description: 'Advanced DI patterns with auto-discovery and context isolation'
+      description: 'Advanced DI patterns with auto-discovery and context isolation',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise DI patterns with framework integration and production features'
-    }
+      description: 'Enterprise DI patterns with framework integration and production features',
+    },
   },
 
   frameworks: [
@@ -38,8 +39,8 @@ export const diExampleConfig: PackageExampleConfig = {
       description: 'NestJS integration with bridge pattern to avoid double instances',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
       dependencies: ['@nestjs/core', '@nestjs/common'],
-      minimumVersion: '8.0.0'
-    }
+      minimumVersion: '8.0.0',
+    },
   ],
 
   examples: [
@@ -52,7 +53,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Simple service registration and resolution patterns',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'service-lifetimes',
@@ -63,7 +64,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Understanding and configuring service lifetimes',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'global-service-locator',
@@ -74,7 +75,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Using the global service locator pattern',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'auto-discovery-system',
@@ -85,7 +86,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Automatic service discovery with decorators',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'context-isolation',
@@ -96,7 +97,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Bounded context isolation for DDD scenarios',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'cqrs-handler-registration',
@@ -107,7 +108,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'medium',
       description: 'Automatic registration of CQRS handlers',
       dependencies: ['@vytches-ddd/di', '@vytches-ddd/cqrs'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'framework-integration-patterns',
@@ -118,7 +119,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Advanced framework integration with bridge pattern',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'custom-container-implementation',
@@ -129,7 +130,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'medium',
       description: 'Building custom container implementations',
       dependencies: ['@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'enterprise-production-patterns',
@@ -140,7 +141,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Production-ready DI patterns with monitoring',
       dependencies: ['@vytches-ddd/di', '@vytches-ddd/logging'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-basic-integration',
@@ -152,7 +153,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Basic NestJS integration with manual setup',
       dependencies: ['@nestjs/core', '@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-module-configuration',
@@ -164,7 +165,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'medium',
       description: 'Configuring NestJS modules with VytchesDDD',
       dependencies: ['@nestjs/core', '@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-bridge-pattern',
@@ -176,7 +177,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Bridge pattern to avoid double instance risk',
       dependencies: ['@nestjs/core', '@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-provider-factory',
@@ -188,7 +189,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'medium',
       description: 'Custom provider factory for complex scenarios',
       dependencies: ['@nestjs/core', '@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-multi-context',
@@ -200,7 +201,7 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'high',
       description: 'Multi-context architecture for large applications',
       dependencies: ['@nestjs/core', '@vytches-ddd/di'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-production-monitoring',
@@ -212,15 +213,15 @@ export const diExampleConfig: PackageExampleConfig = {
       priority: 'medium',
       description: 'Production monitoring and diagnostics',
       dependencies: ['@nestjs/core', '@vytches-ddd/di', '@vytches-ddd/logging'],
-      validation: { fileExists: true }
-    }
+      validation: { fileExists: true },
+    },
   ],
 
   tags: {
     core: ['di:core', 'di:basic', 'di:service-locator'],
     integrations: ['di:auto-discovery', 'di:decorators', 'di:context', 'di:cqrs'],
     frameworks: ['di:nestjs', 'di:bridge', 'di:factory'],
-    patterns: ['di:framework', 'di:integration', 'di:container', 'di:enterprise', 'di:production']
+    patterns: ['di:framework', 'di:integration', 'di:container', 'di:enterprise', 'di:production'],
   },
 
   contentConfig: {
@@ -230,7 +231,7 @@ export const diExampleConfig: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -238,26 +239,37 @@ export const diExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
-  sections: ['hero', 'description', 'whenToUse', 'whenNotToUse', 'examples', 'useCases', 'frameworkIntegration', 'commonPitfalls', 'troubleshooting', 'performance'],
+  sections: [
+    'hero',
+    'description',
+    'whenToUse',
+    'whenNotToUse',
+    'examples',
+    'useCases',
+    'frameworkIntegration',
+    'commonPitfalls',
+    'troubleshooting',
+    'performance',
+  ],
 
   relatedPackages: {
-    'core': {
+    core: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['basic-service-registration', 'global-service-locator']
+      integrationExamples: ['basic-service-registration', 'global-service-locator'],
     },
-    'cqrs': {
+    cqrs: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['cqrs-handler-registration']
+      integrationExamples: ['cqrs-handler-registration'],
     },
-    'logging': {
+    logging: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['enterprise-production-patterns']
-    }
-  }
+      integrationExamples: ['enterprise-production-patterns'],
+    },
+  },
 };

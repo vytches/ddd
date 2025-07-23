@@ -1,31 +1,36 @@
 # Advanced Data Quality Validation with Metrics
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/validation
-**Complexity**: Intermediate
-**Domain**: Data Management
-**Patterns**: Data Quality Assessment, Metrics Collection, Batch Validation, Quality Scoring
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/core, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**:
+Intermediate **Domain**: Data Management **Patterns**: Data Quality Assessment,
+Metrics Collection, Batch Validation, Quality Scoring **Dependencies**:
+@vytches-ddd/validation, @vytches-ddd/core, @vytches-ddd/utils
 
 ## Description
 
-This example demonstrates advanced data quality validation with comprehensive metrics collection and quality scoring. It shows how to assess data quality across multiple dimensions, generate actionable reports, and implement automated data quality improvement suggestions.
+This example demonstrates advanced data quality validation with comprehensive
+metrics collection and quality scoring. It shows how to assess data quality
+across multiple dimensions, generate actionable reports, and implement automated
+data quality improvement suggestions.
 
 ## Business Context
 
-Enterprise data platforms need to ensure high data quality across multiple systems and sources. Poor data quality costs organizations an average of $15M annually through operational inefficiencies, wrong decisions, and customer dissatisfaction. This example shows how to implement comprehensive data quality assessment with metrics and automated improvement recommendations.
+Enterprise data platforms need to ensure high data quality across multiple
+systems and sources. Poor data quality costs organizations an average of $15M
+annually through operational inefficiencies, wrong decisions, and customer
+dissatisfaction. This example shows how to implement comprehensive data quality
+assessment with metrics and automated improvement recommendations.
 
 ## Code Example
 
 ```typescript
 // data-quality-validator.ts
-import { 
+import {
   IValidator,
   ValidationResult,
   DataQualityMetrics,
   DataQualityReport,
   DataQualityIssue,
-  BatchValidationResult
+  BatchValidationResult,
 } from '@vytches-ddd/validation';
 import { Result } from '@vytches-ddd/utils';
 import { User, Product, Order } from './types'; // From your application
@@ -55,26 +60,36 @@ export class DataQualityValidator<T> implements IValidator<T> {
       consistency: 0.95,
       validity: 0.99,
       uniqueness: 0.98,
-      timeliness: 0.90,
-      ...qualityThresholds
+      timeliness: 0.9,
+      ...qualityThresholds,
     };
-    
+
     this.validationRules = customRules || new Map();
   }
 
-  async validate(entity: T, context?: ValidationContext): Promise<ValidationResult> {
+  async validate(
+    entity: T,
+    context?: ValidationContext
+  ): Promise<ValidationResult> {
     const startTime = Date.now();
     const entityType = (entity as any).constructor.name;
-    
+
     // Calculate data quality metrics
-    const qualityMetrics = await this.calculateQualityMetrics(entity, entityType);
-    
+    const qualityMetrics = await this.calculateQualityMetrics(
+      entity,
+      entityType
+    );
+
     // Generate quality report
-    const qualityReport = await this.generateQualityReport(entity, entityType, qualityMetrics);
-    
+    const qualityReport = await this.generateQualityReport(
+      entity,
+      entityType,
+      qualityMetrics
+    );
+
     // Determine if entity meets quality standards
     const meetsStandards = this.assessQualityStandards(qualityMetrics);
-    
+
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
@@ -85,10 +100,10 @@ export class DataQualityValidator<T> implements IValidator<T> {
         code: 'DATA_INCOMPLETE',
         message: `Data completeness ${(qualityMetrics.completeness * 100).toFixed(1)}% below threshold ${(this.qualityThresholds.completeness * 100).toFixed(1)}%`,
         severity: 'error',
-        details: { 
+        details: {
           current: qualityMetrics.completeness,
-          threshold: this.qualityThresholds.completeness
-        }
+          threshold: this.qualityThresholds.completeness,
+        },
       });
     }
 
@@ -100,8 +115,8 @@ export class DataQualityValidator<T> implements IValidator<T> {
         severity: 'error',
         details: {
           current: qualityMetrics.accuracy,
-          threshold: this.qualityThresholds.accuracy
-        }
+          threshold: this.qualityThresholds.accuracy,
+        },
       });
     }
 
@@ -110,7 +125,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
         field: 'timeliness',
         code: 'DATA_OUTDATED',
         message: `Data may be outdated - timeliness score: ${(qualityMetrics.timeliness * 100).toFixed(1)}%`,
-        suggestion: 'Consider refreshing data from source systems'
+        suggestion: 'Consider refreshing data from source systems',
       });
     }
 
@@ -122,14 +137,14 @@ export class DataQualityValidator<T> implements IValidator<T> {
           code: issue.issueType.toUpperCase().replace(' ', '_'),
           message: issue.description,
           severity: issue.severity === 'critical' ? 'critical' : 'error',
-          details: { suggestedFix: issue.suggestedFix }
+          details: { suggestedFix: issue.suggestedFix },
         });
       } else {
         warnings.push({
           field: issue.field,
           code: issue.issueType.toUpperCase().replace(' ', '_'),
           message: issue.description,
-          suggestion: issue.suggestedFix
+          suggestion: issue.suggestedFix,
         });
       }
     });
@@ -147,30 +162,33 @@ export class DataQualityValidator<T> implements IValidator<T> {
         context: context || {
           operationType: 'quality-assessment',
           environment: 'production',
-          validationLevel: 'enterprise'
+          validationLevel: 'enterprise',
         },
         qualityMetrics,
         qualityReport,
-        overallQualityScore: qualityMetrics.overallScore
-      }
+        overallQualityScore: qualityMetrics.overallScore,
+      },
     };
   }
 
-  private async calculateQualityMetrics(entity: T, entityType: string): Promise<DataQualityMetrics> {
+  private async calculateQualityMetrics(
+    entity: T,
+    entityType: string
+  ): Promise<DataQualityMetrics> {
     const [
       completeness,
       accuracy,
       consistency,
       validity,
       uniqueness,
-      timeliness
+      timeliness,
     ] = await Promise.all([
       this.assessCompleteness(entity),
       this.assessAccuracy(entity, entityType),
       this.assessConsistency(entity, entityType),
       this.assessValidity(entity),
       this.assessUniqueness(entity, entityType),
-      this.assessTimeliness(entity)
+      this.assessTimeliness(entity),
     ]);
 
     const overallScore = this.calculateOverallScore({
@@ -179,7 +197,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
       consistency,
       validity,
       uniqueness,
-      timeliness
+      timeliness,
     });
 
     return {
@@ -189,7 +207,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
       validity,
       uniqueness,
       timeliness,
-      overallScore
+      overallScore,
     };
   }
 
@@ -215,7 +233,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
     // Check specific field accuracy based on entity type
     if (entityType === 'User') {
       const user = entity as User;
-      
+
       // Email format accuracy
       if (user.email) {
         totalCheckedFields++;
@@ -233,7 +251,8 @@ export class DataQualityValidator<T> implements IValidator<T> {
       // Age vs date of birth consistency
       if (user.age && user.dateOfBirth) {
         totalCheckedFields++;
-        const calculatedAge = new Date().getFullYear() - user.dateOfBirth.getFullYear();
+        const calculatedAge =
+          new Date().getFullYear() - user.dateOfBirth.getFullYear();
         if (Math.abs(calculatedAge - user.age) <= 1) accurateFields++;
       }
     }
@@ -241,7 +260,10 @@ export class DataQualityValidator<T> implements IValidator<T> {
     return totalCheckedFields > 0 ? accurateFields / totalCheckedFields : 1;
   }
 
-  private async assessConsistency(entity: T, entityType: string): Promise<number> {
+  private async assessConsistency(
+    entity: T,
+    entityType: string
+  ): Promise<number> {
     const entityObj = entity as Record<string, any>;
     let consistentChecks = 0;
     let totalConsistencyChecks = 0;
@@ -249,12 +271,16 @@ export class DataQualityValidator<T> implements IValidator<T> {
     // Cross-field consistency checks
     if (entityType === 'Order') {
       const order = entity as Order;
-      
+
       // Total amount consistency
       if (order.items && order.totalAmount !== undefined) {
         totalConsistencyChecks++;
-        const calculatedTotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
-        const variance = Math.abs(calculatedTotal - order.totalAmount) / order.totalAmount;
+        const calculatedTotal = order.items.reduce(
+          (sum, item) => sum + item.totalPrice,
+          0
+        );
+        const variance =
+          Math.abs(calculatedTotal - order.totalAmount) / order.totalAmount;
         if (variance < 0.01) consistentChecks++; // Allow 1% variance for rounding
       }
 
@@ -268,7 +294,9 @@ export class DataQualityValidator<T> implements IValidator<T> {
       }
     }
 
-    return totalConsistencyChecks > 0 ? consistentChecks / totalConsistencyChecks : 1;
+    return totalConsistencyChecks > 0
+      ? consistentChecks / totalConsistencyChecks
+      : 1;
   }
 
   private async assessValidity(entity: T): Promise<number> {
@@ -278,7 +306,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
 
     Object.entries(entityObj).forEach(([key, value]) => {
       if (value === null || value === undefined) return;
-      
+
       totalValidatedFields++;
 
       // Basic validity checks
@@ -297,15 +325,20 @@ export class DataQualityValidator<T> implements IValidator<T> {
     return totalValidatedFields > 0 ? validFields / totalValidatedFields : 1;
   }
 
-  private async assessUniqueness(entity: T, entityType: string): Promise<number> {
+  private async assessUniqueness(
+    entity: T,
+    entityType: string
+  ): Promise<number> {
     // In a real implementation, this would check against a database
     // For this example, we'll return a high score assuming uniqueness
     const entityObj = entity as Record<string, any>;
-    
+
     // Check for duplicate field values within the entity
-    const fieldValues = Object.values(entityObj).filter(v => v !== null && v !== undefined);
+    const fieldValues = Object.values(entityObj).filter(
+      v => v !== null && v !== undefined
+    );
     const uniqueValues = new Set(fieldValues);
-    
+
     return fieldValues.length > 0 ? uniqueValues.size / fieldValues.length : 1;
   }
 
@@ -316,12 +349,18 @@ export class DataQualityValidator<T> implements IValidator<T> {
 
     // Check for timestamp fields
     Object.entries(entityObj).forEach(([key, value]) => {
-      if ((key.includes('date') || key.includes('time')) && value instanceof Date) {
-        const ageDays = (now.getTime() - value.getTime()) / (1000 * 60 * 60 * 24);
-        
+      if (
+        (key.includes('date') || key.includes('time')) &&
+        value instanceof Date
+      ) {
+        const ageDays =
+          (now.getTime() - value.getTime()) / (1000 * 60 * 60 * 24);
+
         // Reduce timeliness score based on age
-        if (ageDays > 365) timeliness *= 0.5; // Very old data
-        else if (ageDays > 180) timeliness *= 0.7; // Old data
+        if (ageDays > 365)
+          timeliness *= 0.5; // Very old data
+        else if (ageDays > 180)
+          timeliness *= 0.7; // Old data
         else if (ageDays > 30) timeliness *= 0.9; // Somewhat old data
       }
     });
@@ -329,15 +368,17 @@ export class DataQualityValidator<T> implements IValidator<T> {
     return Math.max(0, timeliness);
   }
 
-  private calculateOverallScore(metrics: Omit<DataQualityMetrics, 'overallScore'>): number {
+  private calculateOverallScore(
+    metrics: Omit<DataQualityMetrics, 'overallScore'>
+  ): number {
     // Weighted average based on business importance
     const weights = {
-      completeness: 0.20,
+      completeness: 0.2,
       accuracy: 0.25,
-      consistency: 0.20,
-      validity: 0.20,
-      uniqueness: 0.10,
-      timeliness: 0.05
+      consistency: 0.2,
+      validity: 0.2,
+      uniqueness: 0.1,
+      timeliness: 0.05,
     };
 
     return (
@@ -366,9 +407,12 @@ export class DataQualityValidator<T> implements IValidator<T> {
         issueType: 'missing',
         severity: 'high',
         description: `${((1 - metrics.completeness) * 100).toFixed(1)}% of fields are missing or empty`,
-        suggestedFix: 'Fill in missing required fields and review data collection processes'
+        suggestedFix:
+          'Fill in missing required fields and review data collection processes',
       });
-      recommendations.push('Implement mandatory field validation at data entry points');
+      recommendations.push(
+        'Implement mandatory field validation at data entry points'
+      );
     }
 
     if (metrics.accuracy < 0.95) {
@@ -377,29 +421,37 @@ export class DataQualityValidator<T> implements IValidator<T> {
         issueType: 'invalid',
         severity: 'high',
         description: `${((1 - metrics.accuracy) * 100).toFixed(1)}% of fields contain inaccurate data`,
-        suggestedFix: 'Review and correct field formats and validation rules'
+        suggestedFix: 'Review and correct field formats and validation rules',
       });
-      recommendations.push('Enhance field-level validation and implement data quality checks');
+      recommendations.push(
+        'Enhance field-level validation and implement data quality checks'
+      );
     }
 
-    if (metrics.consistency < 0.90) {
+    if (metrics.consistency < 0.9) {
       issues.push({
         field: 'general',
         issueType: 'inconsistent',
         severity: 'medium',
         description: 'Cross-field data inconsistencies detected',
-        suggestedFix: 'Review business rules and implement consistency checks'
+        suggestedFix: 'Review business rules and implement consistency checks',
       });
       recommendations.push('Implement cross-field validation rules');
     }
 
     // Add entity-specific recommendations
     if (metrics.overallScore >= 0.95) {
-      recommendations.push('Data quality is excellent - maintain current standards');
+      recommendations.push(
+        'Data quality is excellent - maintain current standards'
+      );
     } else if (metrics.overallScore >= 0.85) {
-      recommendations.push('Good data quality - focus on addressing specific issues identified');
+      recommendations.push(
+        'Good data quality - focus on addressing specific issues identified'
+      );
     } else {
-      recommendations.push('Data quality needs significant improvement - implement comprehensive data quality program');
+      recommendations.push(
+        'Data quality needs significant improvement - implement comprehensive data quality program'
+      );
     }
 
     return {
@@ -408,7 +460,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
       metrics,
       issues,
       recommendations,
-      assessedAt: new Date()
+      assessedAt: new Date(),
     };
   }
 
@@ -427,32 +479,36 @@ export class DataQualityValidator<T> implements IValidator<T> {
   async validateBatch<T>(
     entities: T[],
     context?: ValidationContext
-  ): Promise<BatchValidationResult<T> & { aggregatedQualityMetrics: DataQualityMetrics }> {
+  ): Promise<
+    BatchValidationResult<T> & { aggregatedQualityMetrics: DataQualityMetrics }
+  > {
     const startTime = Date.now();
     const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const validationPromises = entities.map(entity => this.validate(entity, context));
+
+    const validationPromises = entities.map(entity =>
+      this.validate(entity, context)
+    );
     const results = await Promise.allSettled(validationPromises);
-    
+
     const validEntities: T[] = [];
     const invalidEntities: Array<{ entity: T; errors: ValidationError[] }> = [];
     const allQualityMetrics: DataQualityMetrics[] = [];
-    
+
     results.forEach((result, index) => {
       const entity = entities[index];
-      
+
       if (result.status === 'fulfilled') {
         const validationResult = result.value;
-        
+
         if (validationResult.isValid) {
           validEntities.push(entity);
         } else {
           invalidEntities.push({
             entity,
-            errors: validationResult.errors
+            errors: validationResult.errors,
           });
         }
-        
+
         // Collect quality metrics
         if (validationResult.metadata.qualityMetrics) {
           allQualityMetrics.push(validationResult.metadata.qualityMetrics);
@@ -460,21 +516,24 @@ export class DataQualityValidator<T> implements IValidator<T> {
       } else {
         invalidEntities.push({
           entity,
-          errors: [{
-            field: 'system',
-            code: 'VALIDATION_ERROR',
-            message: 'Validation failed with error',
-            severity: 'critical'
-          }]
+          errors: [
+            {
+              field: 'system',
+              code: 'VALIDATION_ERROR',
+              message: 'Validation failed with error',
+              severity: 'critical',
+            },
+          ],
         });
       }
     });
-    
+
     // Calculate aggregated quality metrics
-    const aggregatedQualityMetrics = this.aggregateQualityMetrics(allQualityMetrics);
-    
+    const aggregatedQualityMetrics =
+      this.aggregateQualityMetrics(allQualityMetrics);
+
     const endTime = Date.now();
-    
+
     return {
       totalProcessed: entities.length,
       validEntities,
@@ -486,13 +545,15 @@ export class DataQualityValidator<T> implements IValidator<T> {
         endTime: new Date(endTime),
         batchSize: entities.length,
         successRate: validEntities.length / entities.length,
-        averageValidationTime: (endTime - startTime) / entities.length
+        averageValidationTime: (endTime - startTime) / entities.length,
       },
-      aggregatedQualityMetrics
+      aggregatedQualityMetrics,
     };
   }
 
-  private aggregateQualityMetrics(metrics: DataQualityMetrics[]): DataQualityMetrics {
+  private aggregateQualityMetrics(
+    metrics: DataQualityMetrics[]
+  ): DataQualityMetrics {
     if (metrics.length === 0) {
       return {
         completeness: 0,
@@ -501,7 +562,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
         validity: 0,
         uniqueness: 0,
         timeliness: 0,
-        overallScore: 0
+        overallScore: 0,
       };
     }
 
@@ -513,7 +574,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
         validity: acc.validity + metric.validity,
         uniqueness: acc.uniqueness + metric.uniqueness,
         timeliness: acc.timeliness + metric.timeliness,
-        overallScore: acc.overallScore + metric.overallScore
+        overallScore: acc.overallScore + metric.overallScore,
       }),
       {
         completeness: 0,
@@ -522,7 +583,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
         validity: 0,
         uniqueness: 0,
         timeliness: 0,
-        overallScore: 0
+        overallScore: 0,
       }
     );
 
@@ -534,7 +595,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
       validity: averages.validity / count,
       uniqueness: averages.uniqueness / count,
       timeliness: averages.timeliness / count,
-      overallScore: averages.overallScore / count
+      overallScore: averages.overallScore / count,
     };
   }
 }
@@ -543,7 +604,7 @@ export class DataQualityValidator<T> implements IValidator<T> {
 const dataQualityValidator = new DataQualityValidator<User>({
   completeness: 0.98,
   accuracy: 0.99,
-  consistency: 0.95
+  consistency: 0.95,
 });
 
 const userData: User = {
@@ -561,7 +622,7 @@ const userData: User = {
     state: 'CA',
     postalCode: '12345',
     country: 'USA',
-    isDefault: true
+    isDefault: true,
   },
   preferences: {
     language: 'en',
@@ -569,11 +630,11 @@ const userData: User = {
     currency: 'USD',
     emailNotifications: true,
     smsNotifications: false,
-    marketingConsent: true
+    marketingConsent: true,
   },
   accountStatus: 'active',
   registrationDate: new Date('2023-01-15'),
-  lastLoginDate: new Date('2023-12-01')
+  lastLoginDate: new Date('2023-12-01'),
 };
 
 // Validate single entity with quality metrics
@@ -587,23 +648,35 @@ const users: User[] = [userData /* ... more users */];
 const batchResult = await dataQualityValidator.validateBatch(users);
 console.log('Batch validation results:');
 console.log('Success rate:', batchResult.batchMetadata.successRate);
-console.log('Aggregated quality metrics:', batchResult.aggregatedQualityMetrics);
+console.log(
+  'Aggregated quality metrics:',
+  batchResult.aggregatedQualityMetrics
+);
 ```
 
 ## Key Features
 
-- **Multi-Dimensional Quality Assessment**: Evaluate data across completeness, accuracy, consistency, validity, uniqueness, and timeliness
-- **Configurable Quality Thresholds**: Set custom quality standards for different use cases
-- **Comprehensive Quality Reports**: Generate detailed reports with specific issues and recommendations
-- **Batch Processing**: Efficiently validate large datasets with aggregated quality metrics
-- **Weighted Quality Scoring**: Calculate overall quality scores with business-relevant weights
-- **Actionable Recommendations**: Provide specific suggestions for improving data quality
+- **Multi-Dimensional Quality Assessment**: Evaluate data across completeness,
+  accuracy, consistency, validity, uniqueness, and timeliness
+- **Configurable Quality Thresholds**: Set custom quality standards for
+  different use cases
+- **Comprehensive Quality Reports**: Generate detailed reports with specific
+  issues and recommendations
+- **Batch Processing**: Efficiently validate large datasets with aggregated
+  quality metrics
+- **Weighted Quality Scoring**: Calculate overall quality scores with
+  business-relevant weights
+- **Actionable Recommendations**: Provide specific suggestions for improving
+  data quality
 
 ## Common Pitfalls
 
-- **Over-Engineering Metrics**: Don't calculate unnecessary quality dimensions that don't provide business value
-- **Performance Impact**: Be mindful of calculation complexity when validating large datasets
-- **Threshold Sensitivity**: Set realistic quality thresholds based on actual business requirements
+- **Over-Engineering Metrics**: Don't calculate unnecessary quality dimensions
+  that don't provide business value
+- **Performance Impact**: Be mindful of calculation complexity when validating
+  large datasets
+- **Threshold Sensitivity**: Set realistic quality thresholds based on actual
+  business requirements
 - **False Positives**: Tune validation rules to minimize false quality issues
 
 ## Related Examples

@@ -1,31 +1,36 @@
 # Distributed Event Scheduling - Multi-Node Coordination
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: distributed-scheduling, leader-election, partition-management, node-coordination
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+intermediate **Domain**: Infrastructure **Patterns**: distributed-scheduling,
+leader-election, partition-management, node-coordination
 
 ## Description
 
-Intermediate implementation of distributed event scheduling across multiple nodes with leader election, partition management, and automatic failover for high availability scenarios.
+Intermediate implementation of distributed event scheduling across multiple
+nodes with leader election, partition management, and automatic failover for
+high availability scenarios.
 
 ## Business Context
 
-E-commerce platform operating across multiple data centers needs to ensure scheduled events (order processing, inventory updates, customer notifications) are executed reliably even when individual nodes fail.
+E-commerce platform operating across multiple data centers needs to ensure
+scheduled events (order processing, inventory updates, customer notifications)
+are executed reliably even when individual nodes fail.
 
 ## Code Example
 
 ```typescript
 // distributed-scheduling.ts
-import { InMemorySchedulerAdapter, ScheduledEvent } from '@vytches-ddd/event-scheduling';
+import {
+  InMemorySchedulerAdapter,
+  ScheduledEvent,
+} from '@vytches-ddd/event-scheduling';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  ClusterNode, 
-  SchedulingPartition, 
+import {
+  ClusterNode,
+  SchedulingPartition,
   DistributedSchedulerConfig,
-  GlobalSchedulingMetrics 
+  GlobalSchedulingMetrics,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Distributed scheduled event with partition awareness
@@ -42,9 +47,9 @@ export class DistributedScheduledEvent<T = any> extends ScheduledEvent<T> {
   ) {
     super(aggregateId, scheduleAt, payload, {
       maxRetries: 3,
-      backoff: 'exponential'
+      backoff: 'exponential',
     });
-    
+
     this.partitionKey = partitionKey;
     this.replicationFactor = replicationFactor;
   }
@@ -60,7 +65,7 @@ export class DistributedScheduledEvent<T = any> extends ScheduledEvent<T> {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -85,17 +90,17 @@ export class ClusterCoordinator {
   async start(): Promise<void> {
     // Register this node
     this.registerNode();
-    
+
     // Start heartbeat mechanism
     this.startHeartbeat();
-    
+
     // Attempt leader election
     await this.attemptLeaderElection();
-    
+
     this.logger.info('Cluster coordinator started', {
       nodeId: this.nodeId,
       totalPartitions: this.partitions.size,
-      isLeader: this.isLeader()
+      isLeader: this.isLeader(),
     });
   }
 
@@ -103,10 +108,10 @@ export class ClusterCoordinator {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
-    
+
     // Deregister node
     this.nodes.delete(this.nodeId);
-    
+
     this.logger.info('Cluster coordinator stopped', { nodeId: this.nodeId });
   }
 
@@ -121,7 +126,7 @@ export class ClusterCoordinator {
     }
 
     const shouldBeLeader = healthyNodes[0].id === this.nodeId;
-    
+
     if (shouldBeLeader && !this.isLeader()) {
       await this.becomeLeader();
       return true;
@@ -136,18 +141,19 @@ export class ClusterCoordinator {
   assignPartition(event: DistributedScheduledEvent): string {
     const targetPartition = event.getTargetPartition(this.partitions.size);
     const partition = this.partitions.get(targetPartition);
-    
+
     if (!partition || !this.isNodeHealthy(partition.assignedNode)) {
       // Reassign to healthy node
       const healthyNodes = this.getHealthyNodes();
       if (healthyNodes.length > 0) {
-        const newNode = healthyNodes[Math.floor(Math.random() * healthyNodes.length)];
+        const newNode =
+          healthyNodes[Math.floor(Math.random() * healthyNodes.length)];
         if (partition) {
           partition.assignedNode = newNode.id;
           this.logger.info('Partition reassigned', {
             partition: targetPartition,
             newNode: newNode.id,
-            reason: 'unhealthy_node'
+            reason: 'unhealthy_node',
           });
         }
       }
@@ -167,7 +173,7 @@ export class ClusterCoordinator {
   getClusterMetrics(): GlobalSchedulingMetrics {
     const healthyNodes = this.getHealthyNodes();
     const totalPartitions = this.partitions.size;
-    
+
     return {
       totalNodes: this.nodes.size,
       healthyNodes: healthyNodes.length,
@@ -175,7 +181,7 @@ export class ClusterCoordinator {
       leaderNode: this.currentLeader || 'none',
       eventThroughput: this.calculateThroughput(),
       averageLatency: this.calculateAverageLatency(),
-      replicationLag: this.calculateReplicationLag()
+      replicationLag: this.calculateReplicationLag(),
     };
   }
 
@@ -186,9 +192,9 @@ export class ClusterCoordinator {
       isLeader: false,
       isHealthy: true,
       lastHeartbeat: new Date(),
-      assignedPartitions: []
+      assignedPartitions: [],
     };
-    
+
     this.nodes.set(this.nodeId, node);
   }
 
@@ -217,15 +223,15 @@ export class ClusterCoordinator {
     for (const [nodeId, node] of this.nodes) {
       const timeSinceHeartbeat = now.getTime() - node.lastHeartbeat.getTime();
       const wasHealthy = node.isHealthy;
-      
+
       node.isHealthy = timeSinceHeartbeat <= healthTimeout;
-      
+
       if (wasHealthy && !node.isHealthy) {
-        this.logger.warn('Node marked unhealthy', { 
-          nodeId, 
-          timeSinceHeartbeat 
+        this.logger.warn('Node marked unhealthy', {
+          nodeId,
+          timeSinceHeartbeat,
         });
-        
+
         // Trigger leader election if leader became unhealthy
         if (node.isLeader) {
           await this.attemptLeaderElection();
@@ -240,10 +246,10 @@ export class ClusterCoordinator {
     if (node) {
       node.isLeader = true;
     }
-    
+
     // Rebalance partitions
     await this.rebalancePartitions();
-    
+
     this.logger.info('Node became leader', { nodeId: this.nodeId });
   }
 
@@ -252,23 +258,23 @@ export class ClusterCoordinator {
     if (node) {
       node.isLeader = false;
     }
-    
+
     this.currentLeader = null;
-    
+
     this.logger.info('Node stepped down as leader', { nodeId: this.nodeId });
   }
 
   private initializePartitions(): void {
     const partitionCount = this.config.partitionCount || 16;
-    
+
     for (let i = 0; i < partitionCount; i++) {
       const partition: SchedulingPartition = {
         id: `partition-${i}`,
         assignedNode: this.nodeId, // Initially assign to self
         eventCount: 0,
-        healthStatus: 'healthy'
+        healthStatus: 'healthy',
       };
-      
+
       this.partitions.set(partition.id, partition);
     }
   }
@@ -278,27 +284,32 @@ export class ClusterCoordinator {
 
     const healthyNodes = this.getHealthyNodes();
     const partitions = Array.from(this.partitions.values());
-    
+
     if (healthyNodes.length === 0) return;
 
     // Distribute partitions evenly among healthy nodes
-    const partitionsPerNode = Math.floor(partitions.length / healthyNodes.length);
+    const partitionsPerNode = Math.floor(
+      partitions.length / healthyNodes.length
+    );
     let nodeIndex = 0;
-    
+
     for (let i = 0; i < partitions.length; i++) {
       const partition = partitions[i];
       const targetNode = healthyNodes[nodeIndex];
-      
+
       if (partition.assignedNode !== targetNode.id) {
         partition.assignedNode = targetNode.id;
-        
+
         this.logger.info('Partition rebalanced', {
           partition: partition.id,
-          newNode: targetNode.id
+          newNode: targetNode.id,
         });
       }
-      
-      if ((i + 1) % partitionsPerNode === 0 && nodeIndex < healthyNodes.length - 1) {
+
+      if (
+        (i + 1) % partitionsPerNode === 0 &&
+        nodeIndex < healthyNodes.length - 1
+      ) {
         nodeIndex++;
       }
     }
@@ -311,8 +322,10 @@ export class ClusterCoordinator {
 
   private calculateThroughput(): number {
     // Simulate throughput calculation
-    return Array.from(this.partitions.values())
-      .reduce((total, partition) => total + partition.eventCount, 0);
+    return Array.from(this.partitions.values()).reduce(
+      (total, partition) => total + partition.eventCount,
+      0
+    );
   }
 
   private calculateAverageLatency(): number {
@@ -332,17 +345,14 @@ export class DistributedSchedulerService {
   private coordinator: ClusterCoordinator;
   private readonly logger = Logger.forContext('DistributedSchedulerService');
 
-  constructor(
-    nodeId: string,
-    config: DistributedSchedulerConfig
-  ) {
+  constructor(nodeId: string, config: DistributedSchedulerConfig) {
     this.coordinator = new ClusterCoordinator(nodeId, config);
     this.initializeSchedulers();
   }
 
   async start(): Promise<void> {
     await this.coordinator.start();
-    
+
     // Start schedulers for assigned partitions
     for (const [partitionId, scheduler] of this.schedulers) {
       await scheduler.start();
@@ -356,7 +366,7 @@ export class DistributedSchedulerService {
       await scheduler.stop();
       this.logger.info('Scheduler stopped for partition', { partitionId });
     }
-    
+
     await this.coordinator.stop();
   }
 
@@ -368,25 +378,29 @@ export class DistributedSchedulerService {
       // Assign to appropriate partition
       const partitionId = this.coordinator.assignPartition(event);
       const scheduler = this.schedulers.get(partitionId);
-      
+
       if (!scheduler) {
-        return Result.fail(new Error(`No scheduler found for partition: ${partitionId}`));
+        return Result.fail(
+          new Error(`No scheduler found for partition: ${partitionId}`)
+        );
       }
-      
+
       // Schedule the event
       const jobId = await scheduler.schedule(event);
-      
+
       this.logger.info('Distributed event scheduled', {
         jobId,
         partitionId,
         eventType: event.constructor.name,
         partitionKey: event.partitionKey,
-        scheduledAt: event.scheduleAt
+        scheduledAt: event.scheduleAt,
       });
-      
+
       return Result.ok(jobId);
     } catch (error) {
-      return Result.fail(new Error(`Failed to schedule distributed event: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to schedule distributed event: ${error.message}`)
+      );
     }
   }
 
@@ -397,7 +411,7 @@ export class DistributedSchedulerService {
     delayMinutes: number = 0
   ): Promise<Result<string, Error>> {
     const scheduleAt = new Date(Date.now() + delayMinutes * 60 * 1000);
-    
+
     const event = new DistributedScheduledEvent(
       orderId,
       scheduleAt,
@@ -405,7 +419,7 @@ export class DistributedSchedulerService {
       `customer-${orderData.customerId}`, // Partition by customer
       2 // Replication factor
     );
-    
+
     return await this.scheduleDistributedEvent(event);
   }
 
@@ -416,7 +430,7 @@ export class DistributedSchedulerService {
     delayMinutes: number = 5
   ): Promise<Result<string, Error>> {
     const scheduleAt = new Date(Date.now() + delayMinutes * 60 * 1000);
-    
+
     const event = new DistributedScheduledEvent(
       productId,
       scheduleAt,
@@ -424,7 +438,7 @@ export class DistributedSchedulerService {
       `product-${productId}`, // Partition by product
       3 // Higher replication for inventory
     );
-    
+
     return await this.scheduleDistributedEvent(event);
   }
 
@@ -432,7 +446,7 @@ export class DistributedSchedulerService {
   getClusterStatus(): ClusterStatus {
     const metrics = this.coordinator.getClusterMetrics();
     const healthyNodes = this.coordinator.getHealthyNodes();
-    
+
     return {
       isHealthy: metrics.healthyNodes > 0,
       totalNodes: metrics.totalNodes,
@@ -443,8 +457,8 @@ export class DistributedSchedulerService {
         id: node.id,
         isLeader: node.isLeader,
         isHealthy: node.isHealthy,
-        assignedPartitions: node.assignedPartitions.length
-      }))
+        assignedPartitions: node.assignedPartitions.length,
+      })),
     };
   }
 
@@ -452,7 +466,7 @@ export class DistributedSchedulerService {
   async getDistributedMetrics(): Promise<DistributedMetrics> {
     const clusterMetrics = this.coordinator.getClusterMetrics();
     const schedulerStats = await this.getAggregatedSchedulerStats();
-    
+
     return {
       cluster: clusterMetrics,
       scheduling: schedulerStats,
@@ -460,9 +474,9 @@ export class DistributedSchedulerService {
         id: partitionId,
         isHealthy: true,
         eventCount: 0, // Would be populated from actual scheduler stats
-        avgLatency: 25
+        avgLatency: 25,
       })),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -474,9 +488,9 @@ export class DistributedSchedulerService {
       const scheduler = new InMemorySchedulerAdapter({
         defaultMaxRetries: 3,
         defaultTimeout: 30000,
-        enableLogging: true
+        enableLogging: true,
       });
-      
+
       this.schedulers.set(partitionId, scheduler);
     }
   }
@@ -495,7 +509,10 @@ export class DistributedSchedulerService {
         totalFailed += stats.failed;
         totalRunning += stats.running;
       } catch (error) {
-        this.logger.warn('Failed to get stats for partition', { partitionId, error: error.message });
+        this.logger.warn('Failed to get stats for partition', {
+          partitionId,
+          error: error.message,
+        });
       }
     }
 
@@ -504,8 +521,10 @@ export class DistributedSchedulerService {
       totalCompleted,
       totalFailed,
       totalRunning,
-      successRate: totalCompleted + totalFailed > 0 ? 
-        totalCompleted / (totalCompleted + totalFailed) : 0
+      successRate:
+        totalCompleted + totalFailed > 0
+          ? totalCompleted / (totalCompleted + totalFailed)
+          : 0,
     };
   }
 }
@@ -526,24 +545,24 @@ export class DistributedEventHandlers {
 
   async handleOrderProcessing(event: DistributedScheduledEvent): Promise<void> {
     const orderData = event.payload;
-    
+
     this.logger.info('Processing distributed order event', {
       orderId: event.aggregateId,
       partitionKey: event.partitionKey,
-      customerId: orderData.customerId
+      customerId: orderData.customerId,
     });
 
     try {
       // Simulate order processing
       await this.processOrder(orderData);
-      
+
       this.logger.info('Order processed successfully', {
-        orderId: event.aggregateId
+        orderId: event.aggregateId,
       });
     } catch (error) {
       this.logger.error('Failed to process order', {
         orderId: event.aggregateId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -551,24 +570,24 @@ export class DistributedEventHandlers {
 
   async handleInventoryUpdate(event: DistributedScheduledEvent): Promise<void> {
     const updateData = event.payload;
-    
+
     this.logger.info('Processing inventory update event', {
       productId: event.aggregateId,
       partitionKey: event.partitionKey,
-      operation: updateData.operation
+      operation: updateData.operation,
     });
 
     try {
       // Simulate inventory update
       await this.updateInventory(updateData);
-      
+
       this.logger.info('Inventory updated successfully', {
-        productId: event.aggregateId
+        productId: event.aggregateId,
       });
     } catch (error) {
       this.logger.error('Failed to update inventory', {
         productId: event.aggregateId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -590,10 +609,10 @@ export class DistributedEventHandlers {
 
 ```typescript
 // usage-example.ts
-import { 
+import {
   DistributedSchedulerService,
   DistributedEventHandlers,
-  DistributedScheduledEvent
+  DistributedScheduledEvent,
 } from './distributed-scheduling';
 
 async function demonstrateDistributedScheduling() {
@@ -602,78 +621,97 @@ async function demonstrateDistributedScheduling() {
     nodes: ['node-1', 'node-2', 'node-3'],
     partitionCount: 16,
     replicationFactor: 2,
-    leaderElectionTimeout: 10000
+    leaderElectionTimeout: 10000,
   };
-  
+
   const scheduler = new DistributedSchedulerService('node-1', config);
   const handlers = new DistributedEventHandlers(scheduler);
-  
+
   await scheduler.start();
-  
+
   try {
     // Schedule order processing events across different customers
     const orderResults = await Promise.all([
-      scheduler.scheduleOrderProcessing('ORDER-001', {
-        customerId: 'CUSTOMER-A',
-        amount: 199.99,
-        items: ['product-1', 'product-2']
-      }, 5), // 5 minutes delay
-      
-      scheduler.scheduleOrderProcessing('ORDER-002', {
-        customerId: 'CUSTOMER-B', 
-        amount: 299.99,
-        items: ['product-3']
-      }, 10), // 10 minutes delay
-      
-      scheduler.scheduleOrderProcessing('ORDER-003', {
-        customerId: 'CUSTOMER-A', // Same partition as ORDER-001
-        amount: 99.99,
-        items: ['product-4']
-      }, 15) // 15 minutes delay
+      scheduler.scheduleOrderProcessing(
+        'ORDER-001',
+        {
+          customerId: 'CUSTOMER-A',
+          amount: 199.99,
+          items: ['product-1', 'product-2'],
+        },
+        5
+      ), // 5 minutes delay
+
+      scheduler.scheduleOrderProcessing(
+        'ORDER-002',
+        {
+          customerId: 'CUSTOMER-B',
+          amount: 299.99,
+          items: ['product-3'],
+        },
+        10
+      ), // 10 minutes delay
+
+      scheduler.scheduleOrderProcessing(
+        'ORDER-003',
+        {
+          customerId: 'CUSTOMER-A', // Same partition as ORDER-001
+          amount: 99.99,
+          items: ['product-4'],
+        },
+        15
+      ), // 15 minutes delay
     ]);
-    
+
     console.log('Order processing events scheduled:', orderResults);
-    
+
     // Schedule inventory updates for different products
     const inventoryResults = await Promise.all([
-      scheduler.scheduleInventoryUpdate('PRODUCT-1', {
-        operation: 'reserve',
-        quantity: 10,
-        reason: 'order-fulfillment'
-      }, 2), // 2 minutes delay
-      
-      scheduler.scheduleInventoryUpdate('PRODUCT-2', {
-        operation: 'release',
-        quantity: 5,
-        reason: 'order-cancellation'
-      }, 7) // 7 minutes delay
+      scheduler.scheduleInventoryUpdate(
+        'PRODUCT-1',
+        {
+          operation: 'reserve',
+          quantity: 10,
+          reason: 'order-fulfillment',
+        },
+        2
+      ), // 2 minutes delay
+
+      scheduler.scheduleInventoryUpdate(
+        'PRODUCT-2',
+        {
+          operation: 'release',
+          quantity: 5,
+          reason: 'order-cancellation',
+        },
+        7
+      ), // 7 minutes delay
     ]);
-    
+
     console.log('Inventory update events scheduled:', inventoryResults);
-    
+
     // Monitor cluster status
     const monitorCluster = async () => {
       const clusterStatus = scheduler.getClusterStatus();
       console.log('🔗 Cluster Status:', clusterStatus);
-      
+
       const distributedMetrics = await scheduler.getDistributedMetrics();
       console.log('📊 Distributed Metrics:', distributedMetrics);
     };
-    
+
     // Monitor every 15 seconds
     const monitorInterval = setInterval(monitorCluster, 15000);
-    
+
     // Initial monitoring
     await monitorCluster();
-    
+
     // Run for 2 minutes to observe distributed coordination
     await new Promise(resolve => setTimeout(resolve, 120000));
-    
+
     clearInterval(monitorInterval);
-    
+
     // Final status check
     await monitorCluster();
-    
   } finally {
     await scheduler.stop();
   }
@@ -685,7 +723,8 @@ demonstrateDistributedScheduling().catch(console.error);
 ## Key Features
 
 - **Leader Election**: Automatic leader selection using deterministic ordering
-- **Partition Management**: Event distribution across multiple partitions for scalability
+- **Partition Management**: Event distribution across multiple partitions for
+  scalability
 - **Node Coordination**: Heartbeat mechanism for health monitoring and failover
 - **Automatic Rebalancing**: Dynamic partition reassignment when nodes fail
 - **Consistent Hashing**: Partition assignment based on configurable keys
@@ -695,15 +734,22 @@ demonstrateDistributedScheduling().catch(console.error);
 
 ## Common Pitfalls
 
-- **Split-Brain Scenarios**: Implement proper consensus mechanisms for leader election
-- **Network Partitions**: Handle network splits gracefully with appropriate timeouts
-- **Clock Synchronization**: Ensure all nodes have synchronized clocks for accurate scheduling
-- **Partition Hot-Spotting**: Monitor partition load and implement rebalancing strategies
+- **Split-Brain Scenarios**: Implement proper consensus mechanisms for leader
+  election
+- **Network Partitions**: Handle network splits gracefully with appropriate
+  timeouts
+- **Clock Synchronization**: Ensure all nodes have synchronized clocks for
+  accurate scheduling
+- **Partition Hot-Spotting**: Monitor partition load and implement rebalancing
+  strategies
 - **Resource Leaks**: Properly clean up resources when nodes leave the cluster
 
 ## Related Examples
 
-- [Basic Event Scheduling](../basic/example-1.md) - Simple single-node scheduling
+- [Basic Event Scheduling](../basic/example-1.md) - Simple single-node
+  scheduling
 - [Priority Queuing](../basic/example-3.md) - Priority-based scheduling concepts
-- [High Availability Scheduling](../advanced/example-2.md) - Enterprise clustering patterns
-- [NestJS Distributed Integration](../frameworks/nestjs/advanced/example-1.md) - Framework integration
+- [High Availability Scheduling](../advanced/example-2.md) - Enterprise
+  clustering patterns
+- [NestJS Distributed Integration](../frameworks/nestjs/advanced/example-1.md) -
+  Framework integration

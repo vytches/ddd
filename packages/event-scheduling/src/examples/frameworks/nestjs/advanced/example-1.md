@@ -1,40 +1,49 @@
 # NestJS Enterprise Scheduling Platform - Distributed Scheduling and Monitoring
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Framework**: NestJS
-**Complexity**: advanced
-**Integration**: Complete enterprise platform with distributed scheduling, monitoring, and observability
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Framework**:
+NestJS **Complexity**: advanced **Integration**: Complete enterprise platform
+with distributed scheduling, monitoring, and observability
 
 ## Description
 
-Complete enterprise-grade NestJS platform integration featuring distributed scheduling, comprehensive monitoring, health checks, observability, metrics collection, and integration with enterprise infrastructure for mission-critical applications.
+Complete enterprise-grade NestJS platform integration featuring distributed
+scheduling, comprehensive monitoring, health checks, observability, metrics
+collection, and integration with enterprise infrastructure for mission-critical
+applications.
 
 ## Business Context
 
-Large enterprise requiring a complete scheduling infrastructure with multi-region coordination, comprehensive monitoring, observability, compliance reporting, disaster recovery, and integration with existing enterprise systems for financial services, healthcare, or other regulated industries.
+Large enterprise requiring a complete scheduling infrastructure with
+multi-region coordination, comprehensive monitoring, observability, compliance
+reporting, disaster recovery, and integration with existing enterprise systems
+for financial services, healthcare, or other regulated industries.
 
 ## Code Example
 
 ```typescript
 // enterprise-platform.service.ts
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { 
+import {
   EnterpriseSchedulingService,
   UltraHighPerformanceScheduler,
   HASchedulingService,
-  GlobalCoordinationManager
+  GlobalCoordinationManager,
 } from '@vytches-ddd/event-scheduling';
 import { Result } from '@vytches-ddd/utils';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { 
+import {
   EnterprisePlatformConfig,
   GlobalSchedulingMetrics,
   ComplianceReport,
   DisasterRecoveryStatus,
   ObservabilityMetrics,
-  AlertConfiguration
+  AlertConfiguration,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Enterprise platform service with comprehensive capabilities
@@ -47,17 +56,19 @@ import {
     'performanceScheduler',
     'complianceManager',
     'observabilityService',
-    'alertingService'
-  ]
+    'alertingService',
+  ],
 })
-export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy {
+export class EnterprisePlatformService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(EnterprisePlatformService.name);
-  
+
   private globalCoordinator: GlobalCoordinationManager;
   private haScheduler: HASchedulingService;
   private performanceScheduler: UltraHighPerformanceScheduler;
   private enterpriseScheduler: EnterpriseSchedulingService;
-  
+
   private isInitialized = false;
   private platformMetrics: Map<string, any> = new Map();
   private alertThresholds: AlertConfiguration;
@@ -71,11 +82,15 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       await this.initializeEnterprisePlatform();
       await this.startMonitoring();
       await this.initializeDisasterRecovery();
-      
+
       this.isInitialized = true;
-      this.logger.log('🏢 Enterprise scheduling platform initialized successfully');
+      this.logger.log(
+        '🏢 Enterprise scheduling platform initialized successfully'
+      );
     } catch (error) {
-      this.logger.error(`Failed to initialize enterprise platform: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize enterprise platform: ${error.message}`
+      );
       throw error;
     }
   }
@@ -103,19 +118,21 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       // For emergency events, use maximum coordination and monitoring
       if (criticality === 'emergency') {
-        return await this.scheduleEmergencyEvent(eventId, eventData, scheduleAt);
+        return await this.scheduleEmergencyEvent(
+          eventId,
+          eventData,
+          scheduleAt
+        );
       }
 
       // For critical events, use HA scheduling with global coordination
-      const globalResult = await this.enterpriseScheduler.scheduleEnterpriseOrder(
-        eventId,
-        {
+      const globalResult =
+        await this.enterpriseScheduler.scheduleEnterpriseOrder(eventId, {
           ...eventData,
           criticality,
           enterpriseCoordination: true,
-          globalReplication: true
-        }
-      );
+          globalReplication: true,
+        });
 
       if (globalResult.isFailure()) {
         return Result.fail(globalResult.error);
@@ -132,21 +149,26 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         complianceTracking: true,
         disasterRecoveryEnabled: true,
         estimatedExecutionTime: scheduleAt,
-        platformMetrics: await this.capturePlatformMetrics()
+        platformMetrics: await this.capturePlatformMetrics(),
       };
 
       // Set up comprehensive monitoring for this event
       await this.setupEventMonitoring(eventId, criticality);
-      
+
       // Emit platform event for observability
       await this.emitPlatformEvent('MissionCriticalEventScheduled', result);
 
-      this.logger.log(`Mission-critical event scheduled: ${eventId} (${criticality})`);
+      this.logger.log(
+        `Mission-critical event scheduled: ${eventId} (${criticality})`
+      );
       return Result.ok(result);
-
     } catch (error) {
-      this.logger.error(`Failed to schedule mission-critical event: ${error.message}`);
-      return Result.fail(new Error(`Mission-critical scheduling failed: ${error.message}`));
+      this.logger.error(
+        `Failed to schedule mission-critical event: ${error.message}`
+      );
+      return Result.fail(
+        new Error(`Mission-critical scheduling failed: ${error.message}`)
+      );
     }
   }
 
@@ -165,26 +187,31 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       // Schedule across all required jurisdictions with global coordination
       const jurisdictionResults = await Promise.all(
-        jurisdictions.map(async (jurisdiction) => {
-          const result = await this.enterpriseScheduler.scheduleComplianceReporting(
-            `${regulationType}-${jurisdiction}`,
-            {
-              ...complianceData,
-              jurisdiction,
-              regulationType,
-              auditTrail: true,
-              encryptionRequired: true,
-              crossJurisdictionCoordination: jurisdictions.length > 1
-            },
-            deadline
-          );
+        jurisdictions.map(async jurisdiction => {
+          const result =
+            await this.enterpriseScheduler.scheduleComplianceReporting(
+              `${regulationType}-${jurisdiction}`,
+              {
+                ...complianceData,
+                jurisdiction,
+                regulationType,
+                auditTrail: true,
+                encryptionRequired: true,
+                crossJurisdictionCoordination: jurisdictions.length > 1,
+              },
+              deadline
+            );
 
           return { jurisdiction, result };
         })
       );
 
-      const successfulSchedules = jurisdictionResults.filter(jr => jr.result.isSuccess());
-      const failedSchedules = jurisdictionResults.filter(jr => jr.result.isFailure());
+      const successfulSchedules = jurisdictionResults.filter(jr =>
+        jr.result.isSuccess()
+      );
+      const failedSchedules = jurisdictionResults.filter(jr =>
+        jr.result.isFailure()
+      );
 
       if (failedSchedules.length > 0) {
         this.logger.error(`Some compliance schedules failed:`, failedSchedules);
@@ -197,20 +224,30 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         successfulJurisdictions: successfulSchedules.map(js => js.jurisdiction),
         failedJurisdictions: failedSchedules.map(js => js.jurisdiction),
         globalComplianceId: `COMPLIANCE-${Date.now()}`,
-        auditTrailId: await complianceManager.createAuditTrail(regulationType, jurisdictions),
+        auditTrailId: await complianceManager.createAuditTrail(
+          regulationType,
+          jurisdictions
+        ),
         crossJurisdictionCoordination: jurisdictions.length > 1,
-        estimatedCompletionTime: new Date(deadline.getTime() - 2 * 60 * 60 * 1000) // 2 hours before deadline
+        estimatedCompletionTime: new Date(
+          deadline.getTime() - 2 * 60 * 60 * 1000
+        ), // 2 hours before deadline
       };
 
       // Set up compliance monitoring
       await this.setupComplianceMonitoring(complianceResult);
 
-      this.logger.log(`Regulatory compliance scheduled: ${regulationType} across ${jurisdictions.length} jurisdictions`);
+      this.logger.log(
+        `Regulatory compliance scheduled: ${regulationType} across ${jurisdictions.length} jurisdictions`
+      );
       return Result.ok(complianceResult);
-
     } catch (error) {
-      this.logger.error(`Failed to schedule regulatory compliance: ${error.message}`);
-      return Result.fail(new Error(`Compliance scheduling failed: ${error.message}`));
+      this.logger.error(
+        `Failed to schedule regulatory compliance: ${error.message}`
+      );
+      return Result.fail(
+        new Error(`Compliance scheduling failed: ${error.message}`)
+      );
     }
   }
 
@@ -223,19 +260,20 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
           totalEvents: 0,
           successRate: 0,
           averageLatency: 0,
-          platformHealth: await this.calculatePlatformHealth()
+          platformHealth: await this.calculatePlatformHealth(),
         },
         scheduling: {},
         compliance: {},
         performance: {},
         infrastructure: {},
         observability: {},
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Collect metrics from all scheduling services
       if (this.enterpriseScheduler) {
-        metrics.scheduling = await this.enterpriseScheduler.getEnterpriseMetrics();
+        metrics.scheduling =
+          await this.enterpriseScheduler.getEnterpriseMetrics();
       }
 
       if (this.haScheduler) {
@@ -243,7 +281,8 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       }
 
       if (this.performanceScheduler) {
-        const perfMetrics = await this.performanceScheduler.getPerformanceMetrics();
+        const perfMetrics =
+          await this.performanceScheduler.getPerformanceMetrics();
         metrics.performance = { ...metrics.performance, ...perfMetrics };
       }
 
@@ -257,7 +296,9 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       metrics.infrastructure = await this.getInfrastructureMetrics();
 
       // Get observability metrics
-      const observabilityService = VytchesDDD.resolve<any>('observabilityService');
+      const observabilityService = VytchesDDD.resolve<any>(
+        'observabilityService'
+      );
       if (observabilityService) {
         metrics.observability = await observabilityService.getMetrics();
       }
@@ -268,7 +309,6 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       metrics.platform.averageLatency = this.calculateAverageLatency(metrics);
 
       return metrics;
-
     } catch (error) {
       this.logger.error(`Failed to get platform metrics: ${error.message}`);
       return {
@@ -278,9 +318,9 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
           successRate: 0,
           averageLatency: 0,
           platformHealth: 'degraded',
-          error: error.message
+          error: error.message,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -296,7 +336,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         performance: {},
         alerts: [],
         recommendations: [],
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Check all scheduling components
@@ -304,7 +344,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         { name: 'enterpriseScheduler', service: this.enterpriseScheduler },
         { name: 'haScheduler', service: this.haScheduler },
         { name: 'performanceScheduler', service: this.performanceScheduler },
-        { name: 'globalCoordinator', service: this.globalCoordinator }
+        { name: 'globalCoordinator', service: this.globalCoordinator },
       ];
 
       for (const { name, service } of componentChecks) {
@@ -312,21 +352,21 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
           if (service) {
             const componentHealth = await this.checkComponentHealth(service);
             healthStatus.components[name] = componentHealth;
-            
+
             if (componentHealth.status !== 'healthy') {
               healthStatus.overall = 'degraded';
             }
           } else {
             healthStatus.components[name] = {
               status: 'unavailable',
-              message: 'Service not initialized'
+              message: 'Service not initialized',
             };
             healthStatus.overall = 'degraded';
           }
         } catch (error) {
           healthStatus.components[name] = {
             status: 'unhealthy',
-            error: error.message
+            error: error.message,
           };
           healthStatus.overall = 'unhealthy';
         }
@@ -334,7 +374,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       // Check infrastructure health
       healthStatus.infrastructure = await this.checkInfrastructureHealth();
-      
+
       // Check compliance status
       const complianceManager = VytchesDDD.resolve<any>('complianceManager');
       if (complianceManager) {
@@ -346,12 +386,12 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       // Generate alerts based on health status
       healthStatus.alerts = await this.generateHealthAlerts(healthStatus);
-      
+
       // Generate recommendations
-      healthStatus.recommendations = this.generateHealthRecommendations(healthStatus);
+      healthStatus.recommendations =
+        this.generateHealthRecommendations(healthStatus);
 
       return healthStatus;
-
     } catch (error) {
       this.logger.error(`Comprehensive health check failed: ${error.message}`);
       return {
@@ -360,9 +400,14 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         infrastructure: {},
         compliance: {},
         performance: {},
-        alerts: [{ severity: 'critical', message: `Health check failed: ${error.message}` }],
+        alerts: [
+          {
+            severity: 'critical',
+            message: `Health check failed: ${error.message}`,
+          },
+        ],
         recommendations: ['Investigate health check system failure'],
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -377,21 +422,20 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       const metrics = await this.getPlatformMetrics();
       const healthStatus = await this.performComprehensiveHealthCheck();
-      
+
       // Store metrics for trend analysis
       this.platformMetrics.set(new Date().toISOString(), metrics);
-      
+
       // Keep only last 24 hours of metrics
       this.cleanupOldMetrics();
-      
+
       // Check alert conditions
       await this.checkAlertConditions(metrics, healthStatus);
-      
+
       // Update observability systems
       await this.updateObservability(metrics, healthStatus);
-      
-      this.logger.debug('Automated monitoring cycle completed');
 
+      this.logger.debug('Automated monitoring cycle completed');
     } catch (error) {
       this.logger.error(`Automated monitoring failed: ${error.message}`);
     }
@@ -404,7 +448,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     try {
       const endTime = new Date();
       const startTime = this.calculateReportStartTime(endTime, period);
-      
+
       const report: PlatformReport = {
         period,
         timeRange: { start: startTime, end: endTime },
@@ -413,8 +457,11 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         compliance: await this.generateComplianceSummary(startTime, endTime),
         performance: await this.generatePerformanceSummary(startTime, endTime),
         incidents: await this.getIncidents(startTime, endTime),
-        recommendations: await this.generateReportRecommendations(startTime, endTime),
-        timestamp: new Date()
+        recommendations: await this.generateReportRecommendations(
+          startTime,
+          endTime
+        ),
+        timestamp: new Date(),
       };
 
       // Store report for audit purposes
@@ -422,7 +469,6 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
       this.logger.log(`Platform report generated for ${period} period`);
       return report;
-
     } catch (error) {
       this.logger.error(`Failed to generate platform report: ${error.message}`);
       throw error;
@@ -431,22 +477,29 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
   private async initializeEnterprisePlatform(): Promise<void> {
     // Initialize all enterprise services through VytchesDDD container
-    this.globalCoordinator = VytchesDDD.resolve<GlobalCoordinationManager>('globalCoordinationManager');
-    this.haScheduler = VytchesDDD.resolve<HASchedulingService>('haSchedulingService');
-    this.performanceScheduler = VytchesDDD.resolve<UltraHighPerformanceScheduler>('performanceScheduler');
-    this.enterpriseScheduler = VytchesDDD.resolve<EnterpriseSchedulingService>('enterpriseSchedulingService');
+    this.globalCoordinator = VytchesDDD.resolve<GlobalCoordinationManager>(
+      'globalCoordinationManager'
+    );
+    this.haScheduler = VytchesDDD.resolve<HASchedulingService>(
+      'haSchedulingService'
+    );
+    this.performanceScheduler =
+      VytchesDDD.resolve<UltraHighPerformanceScheduler>('performanceScheduler');
+    this.enterpriseScheduler = VytchesDDD.resolve<EnterpriseSchedulingService>(
+      'enterpriseSchedulingService'
+    );
 
     // Start all services
     const initPromises = [];
-    
+
     if (this.globalCoordinator) {
       initPromises.push(this.globalCoordinator.start());
     }
-    
+
     if (this.haScheduler) {
       initPromises.push(this.haScheduler.start());
     }
-    
+
     if (this.performanceScheduler) {
       initPromises.push(this.performanceScheduler.start());
     }
@@ -465,7 +518,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       const haResult = await this.haScheduler.scheduleEmergencyEvent({
         aggregateId: eventId,
         scheduleAt,
-        payload: eventData
+        payload: eventData,
       } as any);
 
       if (haResult.isFailure()) {
@@ -483,16 +536,17 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         disasterRecoveryEnabled: true,
         estimatedExecutionTime: scheduleAt,
         emergencyProtocols: true,
-        platformMetrics: await this.capturePlatformMetrics()
+        platformMetrics: await this.capturePlatformMetrics(),
       };
 
       // Immediate high-priority monitoring for emergency events
       await this.setupEmergencyMonitoring(eventId);
-      
-      return Result.ok(result);
 
+      return Result.ok(result);
     } catch (error) {
-      return Result.fail(new Error(`Emergency event scheduling failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Emergency event scheduling failed: ${error.message}`)
+      );
     }
   }
 
@@ -508,15 +562,15 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
   private async shutdownPlatform(): Promise<void> {
     const shutdownPromises = [];
-    
+
     if (this.globalCoordinator) {
       shutdownPromises.push(this.globalCoordinator.stop());
     }
-    
+
     if (this.haScheduler) {
       shutdownPromises.push(this.haScheduler.stop());
     }
-    
+
     if (this.performanceScheduler) {
       shutdownPromises.push(this.performanceScheduler.stop());
     }
@@ -528,7 +582,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     return {
       timestamp: new Date(),
       platformHealth: await this.calculatePlatformHealth(),
-      activeServices: this.countActiveServices()
+      activeServices: this.countActiveServices(),
     };
   }
 
@@ -538,7 +592,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         this.globalCoordinator !== null,
         this.haScheduler !== null,
         this.performanceScheduler !== null,
-        this.enterpriseScheduler !== null
+        this.enterpriseScheduler !== null,
       ];
 
       const healthyServices = healthChecks.filter(Boolean).length;
@@ -548,7 +602,6 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       if (healthRatio >= 0.9) return 'healthy';
       if (healthRatio >= 0.7) return 'degraded';
       return 'unhealthy';
-
     } catch (error) {
       return 'unknown';
     }
@@ -563,7 +616,10 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     return count;
   }
 
-  private async setupEventMonitoring(eventId: string, criticality: string): Promise<void> {
+  private async setupEventMonitoring(
+    eventId: string,
+    criticality: string
+  ): Promise<void> {
     // Set up comprehensive monitoring for the specific event
     this.logger.debug(`Event monitoring setup for ${eventId} (${criticality})`);
   }
@@ -573,7 +629,9 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     this.logger.warn(`Emergency monitoring activated for ${eventId}`);
   }
 
-  private async setupComplianceMonitoring(result: ComplianceSchedulingResult): Promise<void> {
+  private async setupComplianceMonitoring(
+    result: ComplianceSchedulingResult
+  ): Promise<void> {
     // Set up compliance-specific monitoring
     this.logger.log(`Compliance monitoring setup for ${result.regulationType}`);
   }
@@ -585,7 +643,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         await eventBus.publish({
           type: eventType,
           payload: data,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     } catch (error) {
@@ -593,25 +651,27 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     }
   }
 
-  private async checkComponentHealth(service: any): Promise<ComponentHealthStatus> {
+  private async checkComponentHealth(
+    service: any
+  ): Promise<ComponentHealthStatus> {
     try {
       // Generic health check for any service
       if (typeof service.getStats === 'function') {
         const stats = await service.getStats();
         return {
           status: 'healthy',
-          details: stats
+          details: stats,
         };
       }
-      
+
       return {
         status: 'healthy',
-        message: 'Service operational'
+        message: 'Service operational',
       };
     } catch (error) {
       return {
         status: 'unhealthy',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -621,50 +681,54 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       cpu: this.getCpuUsage(),
       memory: this.getMemoryUsage(),
       network: await this.getNetworkHealth(),
-      storage: await this.getStorageHealth()
+      storage: await this.getStorageHealth(),
     };
   }
 
   private async checkPerformanceHealth(): Promise<any> {
     const metrics = await this.getPlatformMetrics();
-    
+
     return {
       latency: metrics.platform?.averageLatency || 0,
       throughput: metrics.platform?.totalEvents || 0,
       successRate: metrics.platform?.successRate || 0,
-      alertsGenerated: this.checkPerformanceThresholds(metrics)
+      alertsGenerated: this.checkPerformanceThresholds(metrics),
     };
   }
 
-  private async generateHealthAlerts(healthStatus: PlatformHealthStatus): Promise<Alert[]> {
+  private async generateHealthAlerts(
+    healthStatus: PlatformHealthStatus
+  ): Promise<Alert[]> {
     const alerts: Alert[] = [];
-    
+
     if (healthStatus.overall === 'unhealthy') {
       alerts.push({
         severity: 'critical',
         message: 'Platform overall health is unhealthy',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
-    
+
     // Add more specific alerts based on component health
     return alerts;
   }
 
-  private generateHealthRecommendations(healthStatus: PlatformHealthStatus): string[] {
+  private generateHealthRecommendations(
+    healthStatus: PlatformHealthStatus
+  ): string[] {
     const recommendations: string[] = [];
-    
+
     if (healthStatus.overall !== 'healthy') {
       recommendations.push('Investigate component health issues');
       recommendations.push('Review system resources and capacity');
     }
-    
+
     return recommendations;
   }
 
   private cleanupOldMetrics(): void {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
+
     for (const [timestamp] of this.platformMetrics) {
       if (new Date(timestamp) < oneDayAgo) {
         this.platformMetrics.delete(timestamp);
@@ -672,18 +736,30 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     }
   }
 
-  private async checkAlertConditions(metrics: any, healthStatus: any): Promise<void> {
+  private async checkAlertConditions(
+    metrics: any,
+    healthStatus: any
+  ): Promise<void> {
     // Check various alert conditions and send notifications
     const alertingService = VytchesDDD.resolve<any>('alertingService');
-    
+
     if (alertingService) {
-      await alertingService.checkConditions(metrics, healthStatus, this.alertThresholds);
+      await alertingService.checkConditions(
+        metrics,
+        healthStatus,
+        this.alertThresholds
+      );
     }
   }
 
-  private async updateObservability(metrics: any, healthStatus: any): Promise<void> {
-    const observabilityService = VytchesDDD.resolve<any>('observabilityService');
-    
+  private async updateObservability(
+    metrics: any,
+    healthStatus: any
+  ): Promise<void> {
+    const observabilityService = VytchesDDD.resolve<any>(
+      'observabilityService'
+    );
+
     if (observabilityService) {
       await observabilityService.recordMetrics(metrics);
       await observabilityService.recordHealth(healthStatus);
@@ -692,7 +768,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
   private calculateReportStartTime(endTime: Date, period: string): Date {
     const start = new Date(endTime);
-    
+
     switch (period) {
       case 'hourly':
         start.setHours(start.getHours() - 1);
@@ -707,44 +783,56 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         start.setMonth(start.getMonth() - 1);
         break;
     }
-    
+
     return start;
   }
 
-  private async generateExecutiveSummary(startTime: Date, endTime: Date): Promise<any> {
+  private async generateExecutiveSummary(
+    startTime: Date,
+    endTime: Date
+  ): Promise<any> {
     return {
       totalEvents: 1000000, // Mock data
       successRate: 99.95,
       uptime: 99.99,
       criticalIssues: 0,
-      complianceStatus: 'compliant'
+      complianceStatus: 'compliant',
     };
   }
 
-  private async generateOperationalSummary(startTime: Date, endTime: Date): Promise<any> {
+  private async generateOperationalSummary(
+    startTime: Date,
+    endTime: Date
+  ): Promise<any> {
     return {
       schedulingOperations: 500000,
       averageLatency: 45,
       peakThroughput: 10000,
-      resourceUtilization: 75
+      resourceUtilization: 75,
     };
   }
 
-  private async generateComplianceSummary(startTime: Date, endTime: Date): Promise<any> {
+  private async generateComplianceSummary(
+    startTime: Date,
+    endTime: Date
+  ): Promise<any> {
     return {
       complianceReports: 50,
       regulatoryDeadlinesMet: 100,
       auditTrails: 1000,
-      encryptedEvents: 25000
+      encryptedEvents: 25000,
     };
   }
 
-  private async generatePerformanceSummary(startTime: Date, endTime: Date): Promise<any> {
+  private async generatePerformanceSummary(
+    startTime: Date,
+    endTime: Date
+  ): Promise<any> {
     return {
       averageResponseTime: 25,
       throughputAchieved: 95,
       errorRate: 0.01,
-      capacityUtilization: 70
+      capacityUtilization: 70,
     };
   }
 
@@ -754,16 +842,19 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
         id: 'INC-001',
         severity: 'low',
         description: 'Temporary latency spike in us-east-1',
-        resolvedAt: new Date()
-      }
+        resolvedAt: new Date(),
+      },
     ];
   }
 
-  private async generateReportRecommendations(startTime: Date, endTime: Date): Promise<string[]> {
+  private async generateReportRecommendations(
+    startTime: Date,
+    endTime: Date
+  ): Promise<string[]> {
     return [
       'Consider scaling up during peak hours',
       'Review performance optimization opportunities',
-      'Update disaster recovery procedures'
+      'Update disaster recovery procedures',
     ];
   }
 
@@ -789,7 +880,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
       cpu: this.getCpuUsage(),
       memory: this.getMemoryUsage(),
       network: 'healthy',
-      storage: 'healthy'
+      storage: 'healthy',
     };
   }
 
@@ -798,7 +889,7 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
     return {
       user: usage.user,
       system: usage.system,
-      percentage: Math.random() * 100 // Mock percentage
+      percentage: Math.random() * 100, // Mock percentage
     };
   }
 
@@ -816,15 +907,15 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
   private checkPerformanceThresholds(metrics: any): string[] {
     const alerts: string[] = [];
-    
+
     if (metrics.platform?.averageLatency > 1000) {
       alerts.push('High latency detected');
     }
-    
+
     if (metrics.platform?.successRate < 99) {
       alerts.push('Success rate below threshold');
     }
-    
+
     return alerts;
   }
 }
@@ -832,14 +923,27 @@ export class EnterprisePlatformService implements OnModuleInit, OnModuleDestroy 
 
 ```typescript
 // enterprise-platform.controller.ts
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EnterprisePlatformService } from './enterprise-platform.service';
-import { 
+import {
   ScheduleMissionCriticalEventDto,
   ScheduleRegulatoryComplianceDto,
-  PlatformReportDto 
+  PlatformReportDto,
 } from './dto'; // From your app
 
 @ApiTags('enterprise-platform')
@@ -848,13 +952,20 @@ import {
 export class EnterprisePlatformController {
   // ⭐ FOCUS: Service resolution through VytchesDDD container
   private get platformService(): EnterprisePlatformService {
-    return VytchesDDD.resolve<EnterprisePlatformService>('enterprisePlatformService');
+    return VytchesDDD.resolve<EnterprisePlatformService>(
+      'enterprisePlatformService'
+    );
   }
 
   @Post('mission-critical-event')
   @ApiOperation({ summary: 'Schedule mission-critical enterprise event' })
-  @ApiResponse({ status: 201, description: 'Mission-critical event scheduled successfully' })
-  async scheduleMissionCriticalEvent(@Body() dto: ScheduleMissionCriticalEventDto) {
+  @ApiResponse({
+    status: 201,
+    description: 'Mission-critical event scheduled successfully',
+  })
+  async scheduleMissionCriticalEvent(
+    @Body() dto: ScheduleMissionCriticalEventDto
+  ) {
     const service = this.platformService;
     if (!service) {
       throw new Error('Enterprise platform service not available');
@@ -874,14 +985,21 @@ export class EnterprisePlatformController {
     return {
       success: true,
       result: result.value,
-      message: `Mission-critical event scheduled with ${result.value.criticality} priority`
+      message: `Mission-critical event scheduled with ${result.value.criticality} priority`,
     };
   }
 
   @Post('regulatory-compliance')
-  @ApiOperation({ summary: 'Schedule regulatory compliance across jurisdictions' })
-  @ApiResponse({ status: 201, description: 'Regulatory compliance scheduled successfully' })
-  async scheduleRegulatoryCompliance(@Body() dto: ScheduleRegulatoryComplianceDto) {
+  @ApiOperation({
+    summary: 'Schedule regulatory compliance across jurisdictions',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Regulatory compliance scheduled successfully',
+  })
+  async scheduleRegulatoryCompliance(
+    @Body() dto: ScheduleRegulatoryComplianceDto
+  ) {
     const service = this.platformService;
     if (!service) {
       throw new Error('Enterprise platform service not available');
@@ -901,7 +1019,7 @@ export class EnterprisePlatformController {
     return {
       success: true,
       result: result.value,
-      message: `Regulatory compliance scheduled across ${dto.jurisdictions.length} jurisdictions`
+      message: `Regulatory compliance scheduled across ${dto.jurisdictions.length} jurisdictions`,
     };
   }
 
@@ -926,7 +1044,7 @@ export class EnterprisePlatformController {
       return {
         overall: 'unhealthy',
         reason: 'Enterprise platform service not available',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -945,7 +1063,7 @@ export class EnterprisePlatformController {
     }
 
     const report = await service.generatePlatformReport(period);
-    
+
     return {
       period: report.period,
       timeRange: report.timeRange,
@@ -955,7 +1073,7 @@ export class EnterprisePlatformController {
       performance: report.performance,
       incidents: report.incidents,
       recommendations: report.recommendations,
-      timestamp: report.timestamp
+      timestamp: report.timestamp,
     };
   }
 
@@ -970,14 +1088,14 @@ export class EnterprisePlatformController {
 
     const [metrics, health] = await Promise.all([
       service.getPlatformMetrics(),
-      service.performComprehensiveHealthCheck()
+      service.performComprehensiveHealthCheck(),
     ]);
 
     return {
       metrics,
       health,
       realTime: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -991,26 +1109,26 @@ import { ModuleRef } from '@nestjs/core';
 import { VytchesDDD, NestJSContainerAdapter } from '@vytches-ddd/di';
 import { EnterprisePlatformService } from './enterprise-platform.service';
 import { EnterprisePlatformController } from './enterprise-platform.controller';
-import { 
+import {
   GlobalCoordinationManagerProvider,
   HASchedulingServiceProvider,
   UltraHighPerformanceSchedulerProvider,
-  EnterpriseSchedulingServiceProvider
+  EnterpriseSchedulingServiceProvider,
 } from './providers'; // From your app
 
 @Module({
   imports: [
-    ScheduleModule.forRoot() // Enable cron jobs
+    ScheduleModule.forRoot(), // Enable cron jobs
   ],
   providers: [
     EnterprisePlatformService,
     GlobalCoordinationManagerProvider,
     HASchedulingServiceProvider,
     UltraHighPerformanceSchedulerProvider,
-    EnterpriseSchedulingServiceProvider
+    EnterpriseSchedulingServiceProvider,
   ],
   controllers: [EnterprisePlatformController],
-  exports: [EnterprisePlatformService]
+  exports: [EnterprisePlatformService],
 })
 export class EnterprisePlatformModule implements OnModuleInit {
   constructor(private moduleRef: ModuleRef) {}
@@ -1020,29 +1138,35 @@ export class EnterprisePlatformModule implements OnModuleInit {
       // ⭐ FOCUS: Initialize VytchesDDD with comprehensive enterprise services
       const adapter = new NestJSContainerAdapter(this.moduleRef);
       await VytchesDDD.configure(adapter);
-      
+
       // Register enterprise platform services
       await this.registerEnterprisePlatformServices();
-      
+
       console.log('🌐 Enterprise scheduling platform fully initialized');
-      
     } catch (error) {
-      console.error('❌ Failed to initialize enterprise platform:', error.message);
+      console.error(
+        '❌ Failed to initialize enterprise platform:',
+        error.message
+      );
       throw error;
     }
   }
 
   private async registerEnterprisePlatformServices(): Promise<void> {
     // Register additional enterprise services that may not be automatically discovered
-    const enterprisePlatformService = this.moduleRef.get(EnterprisePlatformService);
-    
+    const enterprisePlatformService = this.moduleRef.get(
+      EnterprisePlatformService
+    );
+
     // Register the platform service in VytchesDDD container
     VytchesDDD.container?.registerInstance(
-      'enterprisePlatformService', 
+      'enterprisePlatformService',
       enterprisePlatformService
     );
-    
-    console.log('🏢 Enterprise platform services registered in VytchesDDD container');
+
+    console.log(
+      '🏢 Enterprise platform services registered in VytchesDDD container'
+    );
   }
 }
 ```
@@ -1050,7 +1174,14 @@ export class EnterprisePlatformModule implements OnModuleInit {
 ```typescript
 // dto/enterprise-platform.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsDateString, IsArray, IsIn, IsOptional, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsDateString,
+  IsArray,
+  IsIn,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ScheduleMissionCriticalEventDto {
@@ -1149,7 +1280,9 @@ async function bootstrap() {
   // Configure comprehensive API documentation
   const config = new DocumentBuilder()
     .setTitle('Enterprise Scheduling Platform API')
-    .setDescription('Complete enterprise-grade scheduling platform with distributed coordination')
+    .setDescription(
+      'Complete enterprise-grade scheduling platform with distributed coordination'
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('enterprise-platform', 'Enterprise Platform Operations')
@@ -1159,7 +1292,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(3000);
-  console.log('🚀 Enterprise Scheduling Platform running on http://localhost:3000');
+  console.log(
+    '🚀 Enterprise Scheduling Platform running on http://localhost:3000'
+  );
 }
 
 bootstrap();
@@ -1167,27 +1302,45 @@ bootstrap();
 
 ## Key Features
 
-- **Complete Enterprise Platform**: Full-featured platform with all scheduling capabilities integrated
-- **Distributed Architecture**: Multi-region coordination with automatic failover and disaster recovery
-- **Comprehensive Monitoring**: Real-time monitoring, alerting, and automated health checks
-- **Regulatory Compliance**: Built-in compliance management with multi-jurisdiction support
-- **Mission-Critical Support**: Emergency event handling with maximum coordination and monitoring
-- **Advanced Observability**: Detailed metrics, health checks, and comprehensive reporting
-- **Automated Operations**: Cron-based monitoring, alerting, and maintenance tasks
-- **Enterprise Integration**: Full VytchesDDD ecosystem integration with container management
+- **Complete Enterprise Platform**: Full-featured platform with all scheduling
+  capabilities integrated
+- **Distributed Architecture**: Multi-region coordination with automatic
+  failover and disaster recovery
+- **Comprehensive Monitoring**: Real-time monitoring, alerting, and automated
+  health checks
+- **Regulatory Compliance**: Built-in compliance management with
+  multi-jurisdiction support
+- **Mission-Critical Support**: Emergency event handling with maximum
+  coordination and monitoring
+- **Advanced Observability**: Detailed metrics, health checks, and comprehensive
+  reporting
+- **Automated Operations**: Cron-based monitoring, alerting, and maintenance
+  tasks
+- **Enterprise Integration**: Full VytchesDDD ecosystem integration with
+  container management
 
 ## Common Pitfalls
 
-- **Resource Management**: Monitor and manage resources across all distributed components
-- **Service Dependencies**: Ensure proper startup order and dependency resolution
-- **Configuration Management**: Maintain consistent configuration across all environments
-- **Monitoring Overhead**: Balance comprehensive monitoring with system performance
-- **Alert Fatigue**: Configure appropriate alert thresholds to avoid excessive notifications
-- **Compliance Updates**: Keep compliance rules and reporting updated with regulatory changes
+- **Resource Management**: Monitor and manage resources across all distributed
+  components
+- **Service Dependencies**: Ensure proper startup order and dependency
+  resolution
+- **Configuration Management**: Maintain consistent configuration across all
+  environments
+- **Monitoring Overhead**: Balance comprehensive monitoring with system
+  performance
+- **Alert Fatigue**: Configure appropriate alert thresholds to avoid excessive
+  notifications
+- **Compliance Updates**: Keep compliance rules and reporting updated with
+  regulatory changes
 
 ## Related Examples
 
-- [Basic NestJS Integration](../basic/example-1.md) - Simple setup and basic concepts
-- [NestJS DI Integration](../intermediate/example-1.md) - Advanced dependency injection patterns
-- [Enterprise Scheduling Platform](../../../advanced/example-1.md) - Global coordination concepts
-- [High Availability Scheduling](../../../advanced/example-2.md) - HA and clustering patterns
+- [Basic NestJS Integration](../basic/example-1.md) - Simple setup and basic
+  concepts
+- [NestJS DI Integration](../intermediate/example-1.md) - Advanced dependency
+  injection patterns
+- [Enterprise Scheduling Platform](../../../advanced/example-1.md) - Global
+  coordination concepts
+- [High Availability Scheduling](../../../advanced/example-2.md) - HA and
+  clustering patterns

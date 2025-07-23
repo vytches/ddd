@@ -1,19 +1,22 @@
 # Projection Rebuilding System
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections
-**Complexity**: intermediate
-**Domain**: Event Sourcing
-**Patterns**: Projection rebuilding, snapshots, optimization
-**Dependencies**: @vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/event-store
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+intermediate **Domain**: Event Sourcing **Patterns**: Projection rebuilding,
+snapshots, optimization **Dependencies**: @vytches-ddd/projections,
+@vytches-ddd/events, @vytches-ddd/event-store
 
 ## Description
 
-Advanced projection rebuilding system with snapshot optimization and incremental reconstruction. This example demonstrates how to implement projection rebuilding mechanisms that can efficiently reconstruct read models from event streams, including snapshot-based optimizations and incremental updates for minimal downtime.
+Advanced projection rebuilding system with snapshot optimization and incremental
+reconstruction. This example demonstrates how to implement projection rebuilding
+mechanisms that can efficiently reconstruct read models from event streams,
+including snapshot-based optimizations and incremental updates for minimal
+downtime.
 
 ## Business Context
 
 Production systems require projection rebuilding capabilities:
+
 - Schema migrations requiring projection reconstruction
 - Data corruption recovery from known good states
 - Performance optimization through snapshot-based rebuilding
@@ -21,22 +24,23 @@ Production systems require projection rebuilding capabilities:
 - A/B testing with different projection implementations
 - Disaster recovery and business continuity
 
-This system enables zero-downtime rebuilding with minimal impact on read operations.
+This system enables zero-downtime rebuilding with minimal impact on read
+operations.
 
 ## Code Example
 
 ```typescript
 // projection-rebuilding-system.ts
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   ProjectionEngine,
   ProjectionSnapshot,
   ProjectionRebuilder,
   SnapshotCapability,
-  CheckpointCapability
+  CheckpointCapability,
 } from '@vytches-ddd/projections';
 import { IDomainEvent, IEventStore } from '@vytches-ddd/events';
-import { 
+import {
   UserData,
   OrderData,
   ProductData,
@@ -44,7 +48,7 @@ import {
   ProjectionRebuilderConfig,
   SnapshotMetadata,
   RebuildProgress,
-  ServiceResponse 
+  ServiceResponse,
 } from '../types';
 
 // Enhanced User Profile Projection with Snapshot Support
@@ -55,7 +59,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
 
   constructor() {
     super('RebuildableUserProjection', 'v2.0');
-    
+
     // Initialize state with versioning info
     this.setState({
       users: new Map<string, UserData>(),
@@ -65,10 +69,10 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       activeUsers: 0,
       userGrowthStats: {
         dailyRegistrations: new Map<string, number>(),
-        monthlyGrowth: new Map<string, number>()
+        monthlyGrowth: new Map<string, number>(),
       },
       lastUpdated: new Date(),
-      version: this.snapshotVersion
+      version: this.snapshotVersion,
     });
 
     this.setupCapabilities();
@@ -82,7 +86,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       timeInterval: 60 * 60 * 1000, // Every hour
       compressionEnabled: true,
       maxSnapshots: 10, // Keep last 10 snapshots
-      storage: 'persistent' // Use persistent storage
+      storage: 'persistent', // Use persistent storage
     });
 
     // Checkpoint capability for progress tracking
@@ -90,7 +94,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       projectionName: this.projectionName,
       checkpointInterval: 1000,
       timeInterval: 5 * 60 * 1000, // 5 minutes
-      storage: 'persistent'
+      storage: 'persistent',
     });
 
     this.setupCapabilityEventHandlers();
@@ -98,23 +102,27 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
 
   private setupCapabilityEventHandlers(): void {
     this.snapshotCapability.on('snapshotCreated', (snapshot: SnapshotType) => {
-      console.log(`Snapshot created for ${this.projectionName} at position ${snapshot.position}`);
+      console.log(
+        `Snapshot created for ${this.projectionName} at position ${snapshot.position}`
+      );
     });
 
     this.snapshotCapability.on('snapshotRestored', (snapshot: SnapshotType) => {
-      console.log(`Snapshot restored for ${this.projectionName} from position ${snapshot.position}`);
+      console.log(
+        `Snapshot restored for ${this.projectionName} from position ${snapshot.position}`
+      );
     });
   }
 
   async handle(event: IDomainEvent): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
       await this.processEventInternal(event);
-      
+
       // Update checkpoint
       await this.checkpointCapability.updatePosition(
-        event.aggregateId, 
+        event.aggregateId,
         this.getCurrentEventPosition(event)
       );
 
@@ -123,7 +131,6 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
         this.getCurrentEventPosition(event),
         this.getState()
       );
-
     } catch (error) {
       console.error(`Error processing event ${event.eventId}:`, error);
       throw error;
@@ -157,39 +164,46 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
   private async handleUserRegistered(event: IDomainEvent): Promise<void> {
     const userData = event.payload;
     const currentState = this.getState();
-    
+
     const user: UserData = {
       id: userData.userId,
       email: userData.email,
       name: userData.name,
       role: userData.role || 'user',
       createdAt: new Date(event.timestamp),
-      preferences: userData.preferences || {}
+      preferences: userData.preferences || {},
     };
 
     // Add to main user map
     currentState.users.set(user.id, user);
-    
+
     // Update role-based index
     const roleUsers = currentState.usersByRole.get(user.role) || new Set();
     roleUsers.add(user.id);
     currentState.usersByRole.set(user.role, roleUsers);
-    
+
     // Update date-based index
     const registrationDate = user.createdAt.toISOString().split('T')[0];
-    const dateUsers = currentState.usersByRegistrationDate.get(registrationDate) || new Set();
+    const dateUsers =
+      currentState.usersByRegistrationDate.get(registrationDate) || new Set();
     dateUsers.add(user.id);
     currentState.usersByRegistrationDate.set(registrationDate, dateUsers);
-    
+
     // Update growth statistics
-    const dailyCount = currentState.userGrowthStats.dailyRegistrations.get(registrationDate) || 0;
-    currentState.userGrowthStats.dailyRegistrations.set(registrationDate, dailyCount + 1);
-    
+    const dailyCount =
+      currentState.userGrowthStats.dailyRegistrations.get(registrationDate) ||
+      0;
+    currentState.userGrowthStats.dailyRegistrations.set(
+      registrationDate,
+      dailyCount + 1
+    );
+
     // Update totals
     currentState.totalUsers = currentState.users.size;
-    currentState.activeUsers = Array.from(currentState.users.values())
-      .filter(u => u.role !== 'deactivated').length;
-    
+    currentState.activeUsers = Array.from(currentState.users.values()).filter(
+      u => u.role !== 'deactivated'
+    ).length;
+
     this.setState(currentState);
     console.log(`User registered: ${user.name} (${user.id})`);
   }
@@ -198,7 +212,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
     const roleData = event.payload;
     const currentState = this.getState();
     const user = currentState.users.get(roleData.userId);
-    
+
     if (!user) {
       console.warn(`User ${roleData.userId} not found for role change`);
       return;
@@ -206,15 +220,15 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
 
     const oldRole = user.role;
     const newRole = roleData.newRole;
-    
+
     // Update user
     const updatedUser: UserData = {
       ...user,
-      role: newRole
+      role: newRole,
     };
-    
+
     currentState.users.set(updatedUser.id, updatedUser);
-    
+
     // Update role indexes
     const oldRoleUsers = currentState.usersByRole.get(oldRole);
     if (oldRoleUsers) {
@@ -225,17 +239,20 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
         currentState.usersByRole.set(oldRole, oldRoleUsers);
       }
     }
-    
+
     const newRoleUsers = currentState.usersByRole.get(newRole) || new Set();
     newRoleUsers.add(user.id);
     currentState.usersByRole.set(newRole, newRoleUsers);
-    
+
     // Update active users count
-    currentState.activeUsers = Array.from(currentState.users.values())
-      .filter(u => u.role !== 'deactivated').length;
-    
+    currentState.activeUsers = Array.from(currentState.users.values()).filter(
+      u => u.role !== 'deactivated'
+    ).length;
+
     this.setState(currentState);
-    console.log(`User role changed: ${user.name} from ${oldRole} to ${newRole}`);
+    console.log(
+      `User role changed: ${user.name} from ${oldRole} to ${newRole}`
+    );
   }
 
   // Enhanced query methods with optimized indexes
@@ -252,7 +269,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
 
   getUsersByDateRange(startDate: string, endDate: string): UserData[] {
     const users: UserData[] = [];
-    
+
     for (const [date, userIds] of this.getState().usersByRegistrationDate) {
       if (date >= startDate && date <= endDate) {
         for (const userId of userIds) {
@@ -263,21 +280,25 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
         }
       }
     }
-    
+
     return users;
   }
 
   getGrowthStatistics(): any {
     const state = this.getState();
-    const last30Days = Array.from(state.userGrowthStats.dailyRegistrations.entries())
-      .filter(([date]) => {
-        const registrationDate = new Date(date);
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return registrationDate >= thirtyDaysAgo;
-      });
+    const last30Days = Array.from(
+      state.userGrowthStats.dailyRegistrations.entries()
+    ).filter(([date]) => {
+      const registrationDate = new Date(date);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return registrationDate >= thirtyDaysAgo;
+    });
 
-    const totalLast30Days = last30Days.reduce((sum, [, count]) => sum + count, 0);
+    const totalLast30Days = last30Days.reduce(
+      (sum, [, count]) => sum + count,
+      0
+    );
     const averagePerDay = totalLast30Days / Math.max(last30Days.length, 1);
 
     return {
@@ -285,28 +306,32 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       activeUsers: state.activeUsers,
       last30DaysRegistrations: totalLast30Days,
       averageRegistrationsPerDay: Math.round(averagePerDay * 100) / 100,
-      growthTrend: this.calculateGrowthTrend()
+      growthTrend: this.calculateGrowthTrend(),
     };
   }
 
   // Snapshot management methods
   async createSnapshot(): Promise<SnapshotType> {
-    const snapshot = await this.snapshotCapability.createSnapshot(this.getState());
+    const snapshot = await this.snapshotCapability.createSnapshot(
+      this.getState()
+    );
     console.log(`Manual snapshot created for ${this.projectionName}`);
     return snapshot;
   }
 
   async restoreFromSnapshot(snapshotId?: string): Promise<boolean> {
-    const snapshot = snapshotId 
+    const snapshot = snapshotId
       ? await this.snapshotCapability.getSnapshot(snapshotId)
       : await this.snapshotCapability.getLatestSnapshot();
-    
+
     if (!snapshot) {
       return false;
     }
 
     this.setState(snapshot.data);
-    console.log(`Restored ${this.projectionName} from snapshot at position ${snapshot.position}`);
+    console.log(
+      `Restored ${this.projectionName} from snapshot at position ${snapshot.position}`
+    );
     return true;
   }
 
@@ -316,7 +341,9 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
 
   private calculateGrowthTrend(): 'increasing' | 'stable' | 'decreasing' {
     const state = this.getState();
-    const last7Days = Array.from(state.userGrowthStats.dailyRegistrations.entries())
+    const last7Days = Array.from(
+      state.userGrowthStats.dailyRegistrations.entries()
+    )
       .filter(([date]) => {
         const registrationDate = new Date(date);
         const sevenDaysAgo = new Date();
@@ -330,8 +357,10 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
     const firstHalf = last7Days.slice(0, Math.floor(last7Days.length / 2));
     const secondHalf = last7Days.slice(Math.floor(last7Days.length / 2));
 
-    const firstHalfAvg = firstHalf.reduce((sum, [, count]) => sum + count, 0) / firstHalf.length;
-    const secondHalfAvg = secondHalf.reduce((sum, [, count]) => sum + count, 0) / secondHalf.length;
+    const firstHalfAvg =
+      firstHalf.reduce((sum, [, count]) => sum + count, 0) / firstHalf.length;
+    const secondHalfAvg =
+      secondHalf.reduce((sum, [, count]) => sum + count, 0) / secondHalf.length;
 
     if (secondHalfAvg > firstHalfAvg * 1.1) return 'increasing';
     if (secondHalfAvg < firstHalfAvg * 0.9) return 'decreasing';
@@ -347,7 +376,7 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
     const updateData = event.payload;
     const currentState = this.getState();
     const existingUser = currentState.users.get(updateData.userId);
-    
+
     if (!existingUser) {
       console.warn(`User ${updateData.userId} not found for profile update`);
       return;
@@ -357,7 +386,10 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       ...existingUser,
       name: updateData.name || existingUser.name,
       email: updateData.email || existingUser.email,
-      preferences: { ...existingUser.preferences, ...(updateData.preferences || {}) }
+      preferences: {
+        ...existingUser.preferences,
+        ...(updateData.preferences || {}),
+      },
     };
 
     currentState.users.set(updatedUser.id, updatedUser);
@@ -369,9 +401,11 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
     const deactivationData = event.payload;
     const currentState = this.getState();
     const existingUser = currentState.users.get(deactivationData.userId);
-    
+
     if (!existingUser) {
-      console.warn(`User ${deactivationData.userId} not found for deactivation`);
+      console.warn(
+        `User ${deactivationData.userId} not found for deactivation`
+      );
       return;
     }
 
@@ -380,8 +414,8 @@ export class RebuildableUserProjection extends ProjectionBase<any> {
       payload: {
         userId: deactivationData.userId,
         newRole: 'deactivated',
-        reason: deactivationData.reason
-      }
+        reason: deactivationData.reason,
+      },
     });
   }
 }
@@ -401,7 +435,7 @@ export class ProjectionRebuilder {
       processedEvents: 0,
       startTime: new Date(),
       estimatedCompletion: null,
-      currentPhase: 'preparing'
+      currentPhase: 'preparing',
     };
   }
 
@@ -420,13 +454,13 @@ export class ProjectionRebuilder {
         success: false,
         error: {
           code: 'REBUILD_IN_PROGRESS',
-          message: 'Projection rebuild is already in progress'
+          message: 'Projection rebuild is already in progress',
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'rebuild-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
 
@@ -436,10 +470,14 @@ export class ProjectionRebuilder {
 
     try {
       console.log(`Starting rebuild of ${projection.projectionName}`);
-      
+
       // Phase 1: Prepare for rebuild
-      const startPosition = await this.determineStartPosition(projection, options);
-      const endPosition = options.toPosition || await this.getLatestEventPosition();
+      const startPosition = await this.determineStartPosition(
+        projection,
+        options
+      );
+      const endPosition =
+        options.toPosition || (await this.getLatestEventPosition());
       const estimatedEvents = endPosition - startPosition;
 
       this.rebuildProgress.totalEvents = estimatedEvents;
@@ -459,7 +497,10 @@ export class ProjectionRebuilder {
         console.log(`Restored from snapshot: ${options.fromSnapshot}`);
       } else {
         // Reset projection state for full rebuild
-        if ('reset' in targetProjection && typeof targetProjection.reset === 'function') {
+        if (
+          'reset' in targetProjection &&
+          typeof targetProjection.reset === 'function'
+        ) {
           targetProjection.reset();
         }
       }
@@ -479,41 +520,44 @@ export class ProjectionRebuilder {
       }
 
       // Phase 6: Create final snapshot
-      if ('createSnapshot' in targetProjection && typeof targetProjection.createSnapshot === 'function') {
+      if (
+        'createSnapshot' in targetProjection &&
+        typeof targetProjection.createSnapshot === 'function'
+      ) {
         await targetProjection.createSnapshot();
         console.log('Created post-rebuild snapshot');
       }
 
       this.rebuildProgress.currentPhase = 'completed';
-      console.log(`Rebuild of ${projection.projectionName} completed successfully`);
+      console.log(
+        `Rebuild of ${projection.projectionName} completed successfully`
+      );
 
       return {
         success: true,
         metadata: {
           timestamp: new Date(),
           requestId: 'rebuild-' + Date.now(),
-          duration: Date.now() - this.rebuildProgress.startTime.getTime()
-        }
+          duration: Date.now() - this.rebuildProgress.startTime.getTime(),
+        },
       };
-
     } catch (error) {
       this.rebuildProgress.currentPhase = 'failed';
       console.error(`Rebuild failed for ${projection.projectionName}:`, error);
-      
+
       return {
         success: false,
         error: {
           code: 'REBUILD_FAILED',
           message: 'Projection rebuild failed',
-          details: { error: (error as Error).message }
+          details: { error: (error as Error).message },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'rebuild-' + Date.now(),
-          duration: Date.now() - this.rebuildProgress.startTime.getTime()
-        }
+          duration: Date.now() - this.rebuildProgress.startTime.getTime(),
+        },
       };
-
     } finally {
       this.isRebuilding = false;
     }
@@ -530,7 +574,10 @@ export class ProjectionRebuilder {
 
     // Check for snapshot-based start
     if (options.fromSnapshot) {
-      const snapshot = await this.getSnapshotPosition(projection, options.fromSnapshot);
+      const snapshot = await this.getSnapshotPosition(
+        projection,
+        options.fromSnapshot
+      );
       if (snapshot) {
         return snapshot.position;
       }
@@ -554,7 +601,9 @@ export class ProjectionRebuilder {
     return { position: 0 }; // Simplified for example
   }
 
-  private createTemporaryProjection(original: ProjectionBase<any>): ProjectionBase<any> {
+  private createTemporaryProjection(
+    original: ProjectionBase<any>
+  ): ProjectionBase<any> {
     // Create a copy of the projection with a temporary name
     const tempProjection = Object.create(Object.getPrototypeOf(original));
     Object.assign(tempProjection, original);
@@ -566,7 +615,10 @@ export class ProjectionRebuilder {
     projection: ProjectionBase<any>,
     snapshotId: string
   ): Promise<void> {
-    if ('restoreFromSnapshot' in projection && typeof projection.restoreFromSnapshot === 'function') {
+    if (
+      'restoreFromSnapshot' in projection &&
+      typeof projection.restoreFromSnapshot === 'function'
+    ) {
       await projection.restoreFromSnapshot(snapshotId);
     }
   }
@@ -581,12 +633,12 @@ export class ProjectionRebuilder {
 
     while (currentPosition < endPosition) {
       const batchEnd = Math.min(currentPosition + batchSize, endPosition);
-      
+
       // Get batch of events from event store
       const events = await this.eventStore.getEvents({
         fromPosition: currentPosition,
         toPosition: batchEnd,
-        limit: batchSize
+        limit: batchSize,
       });
 
       // Process batch
@@ -595,12 +647,14 @@ export class ProjectionRebuilder {
           if (projection.canHandle(event.eventType)) {
             await projection.handle(event);
           }
-          
+
           this.rebuildProgress.processedEvents++;
           this.updateProgressEstimate();
-          
         } catch (error) {
-          console.error(`Error processing event ${event.eventId} during rebuild:`, error);
+          console.error(
+            `Error processing event ${event.eventId} during rebuild:`,
+            error
+          );
           if (this.config.stopOnError) {
             throw error;
           }
@@ -608,11 +662,16 @@ export class ProjectionRebuilder {
       }
 
       currentPosition = batchEnd;
-      
+
       // Progress logging
       if (this.rebuildProgress.processedEvents % 10000 === 0) {
-        const progressPercent = (this.rebuildProgress.processedEvents / this.rebuildProgress.totalEvents) * 100;
-        console.log(`Rebuild progress: ${progressPercent.toFixed(1)}% (${this.rebuildProgress.processedEvents}/${this.rebuildProgress.totalEvents})`);
+        const progressPercent =
+          (this.rebuildProgress.processedEvents /
+            this.rebuildProgress.totalEvents) *
+          100;
+        console.log(
+          `Rebuild progress: ${progressPercent.toFixed(1)}% (${this.rebuildProgress.processedEvents}/${this.rebuildProgress.totalEvents})`
+        );
       }
 
       // Allow other operations to process
@@ -628,19 +687,24 @@ export class ProjectionRebuilder {
     // This might involve updating registry entries, database connections, etc.
     const originalState = original.getState();
     const temporaryState = temporary.getState();
-    
+
     original.setState(temporaryState);
-    console.log(`Swapped state from temporary projection to ${original.projectionName}`);
+    console.log(
+      `Swapped state from temporary projection to ${original.projectionName}`
+    );
   }
 
   private updateProgressEstimate(): void {
     const now = new Date();
     const elapsed = now.getTime() - this.rebuildProgress.startTime.getTime();
     const eventsPerMs = this.rebuildProgress.processedEvents / elapsed;
-    const remainingEvents = this.rebuildProgress.totalEvents - this.rebuildProgress.processedEvents;
+    const remainingEvents =
+      this.rebuildProgress.totalEvents - this.rebuildProgress.processedEvents;
     const estimatedRemainingMs = remainingEvents / eventsPerMs;
-    
-    this.rebuildProgress.estimatedCompletion = new Date(now.getTime() + estimatedRemainingMs);
+
+    this.rebuildProgress.estimatedCompletion = new Date(
+      now.getTime() + estimatedRemainingMs
+    );
   }
 
   getRebuildProgress(): RebuildProgress {
@@ -663,7 +727,7 @@ export class ProjectionRebuilderFactory {
       stopOnError: false,
       enableProgressLogging: true,
       snapshotAfterRebuild: true,
-      maxConcurrentRebuilds: 1
+      maxConcurrentRebuilds: 1,
     };
 
     return new ProjectionRebuilder(eventStore, { ...defaultConfig, ...config });
@@ -679,14 +743,14 @@ export class ProjectionRebuilderFactory {
     } = {}
   ): Promise<ServiceResponse<void>[]> {
     const rebuilder = ProjectionRebuilderFactory.create(eventStore, {
-      defaultBatchSize: options.batchSize || 1000
+      defaultBatchSize: options.batchSize || 1000,
     });
 
-    const rebuildPromises = projections.map(projection => 
+    const rebuildPromises = projections.map(projection =>
       rebuilder.rebuildProjection(projection, {
         fromSnapshot: options.useLatestSnapshots ? 'latest' : undefined,
         useTemporaryProjection: true,
-        batchSize: options.batchSize
+        batchSize: options.batchSize,
       })
     );
 
@@ -705,12 +769,15 @@ export class ProjectionRebuilderFactory {
 
 ## Key Features
 
-- **Snapshot-Based Rebuilding**: Efficient rebuilding from snapshots to minimize processing time
-- **Zero-Downtime Rebuilds**: Temporary projection swapping for continuous availability
+- **Snapshot-Based Rebuilding**: Efficient rebuilding from snapshots to minimize
+  processing time
+- **Zero-Downtime Rebuilds**: Temporary projection swapping for continuous
+  availability
 - **Batch Processing**: Configurable batch sizes for optimal performance
 - **Progress Tracking**: Real-time rebuild progress monitoring and estimation
 - **Error Handling**: Configurable error handling with stop-on-error options
-- **Index Optimization**: Enhanced data structures for fast queries during rebuilds
+- **Index Optimization**: Enhanced data structures for fast queries during
+  rebuilds
 
 ## Usage Examples
 
@@ -720,7 +787,7 @@ const eventStore = new InMemoryEventStore(); // Your event store implementation
 const rebuilder = ProjectionRebuilderFactory.create(eventStore, {
   defaultBatchSize: 5000,
   stopOnError: false,
-  enableProgressLogging: true
+  enableProgressLogging: true,
 });
 
 // Create projection
@@ -730,19 +797,18 @@ const userProjection = new RebuildableUserProjection();
 const rebuildResult = await rebuilder.rebuildProjection(userProjection, {
   fromSnapshot: 'latest',
   useTemporaryProjection: true,
-  batchSize: 1000
+  batchSize: 1000,
 });
 
 if (rebuildResult.success) {
   console.log('Projection rebuilt successfully');
-  
+
   // Check final state
   const stats = userProjection.getGrowthStatistics();
   console.log('Post-rebuild statistics:', stats);
-  
+
   // Create new snapshot
   await userProjection.createSnapshot();
-  
 } else {
   console.error('Rebuild failed:', rebuildResult.error);
 }
@@ -751,10 +817,14 @@ if (rebuildResult.success) {
 const progressMonitor = setInterval(() => {
   if (rebuilder.isCurrentlyRebuilding()) {
     const progress = rebuilder.getRebuildProgress();
-    console.log(`Rebuild Progress: ${progress.currentPhase} - ${progress.processedEvents}/${progress.totalEvents}`);
-    
+    console.log(
+      `Rebuild Progress: ${progress.currentPhase} - ${progress.processedEvents}/${progress.totalEvents}`
+    );
+
     if (progress.estimatedCompletion) {
-      console.log(`Estimated completion: ${progress.estimatedCompletion.toISOString()}`);
+      console.log(
+        `Estimated completion: ${progress.estimatedCompletion.toISOString()}`
+      );
     }
   } else {
     clearInterval(progressMonitor);
@@ -771,13 +841,15 @@ const batchResults = await ProjectionRebuilderFactory.rebuildWithSnapshots(
   {
     useLatestSnapshots: true,
     batchSize: 2000,
-    parallel: false // Rebuild sequentially to avoid resource contention
+    parallel: false, // Rebuild sequentially to avoid resource contention
   }
 );
 
 // Check results
 batchResults.forEach((result, index) => {
-  const projectionName = [userProjection, orderProjection, productProjection][index].projectionName;
+  const projectionName = [userProjection, orderProjection, productProjection][
+    index
+  ].projectionName;
   if (result.success) {
     console.log(`${projectionName}: Rebuild successful`);
   } else {
@@ -789,73 +861,84 @@ batchResults.forEach((result, index) => {
 ## Rebuilding Strategies
 
 ### **Full Rebuild**
+
 Complete reconstruction from the beginning of the event stream.
+
 ```typescript
 await rebuilder.rebuildProjection(projection, {
   fromPosition: 0,
-  useTemporaryProjection: true
+  useTemporaryProjection: true,
 });
 ```
 
 ### **Snapshot-Based Rebuild**
+
 Start from the most recent snapshot for faster rebuilding.
+
 ```typescript
 await rebuilder.rebuildProjection(projection, {
   fromSnapshot: 'latest',
-  useTemporaryProjection: true
+  useTemporaryProjection: true,
 });
 ```
 
 ### **Incremental Rebuild**
+
 Rebuild only from a specific position forward.
+
 ```typescript
 await rebuilder.rebuildProjection(projection, {
   fromPosition: lastKnownPosition,
-  toPosition: currentPosition
+  toPosition: currentPosition,
 });
 ```
 
 ### **Schema Migration Rebuild**
+
 Rebuild with a new projection version for schema changes.
+
 ```typescript
 const newVersionProjection = new RebuildableUserProjectionV2();
 await rebuilder.rebuildProjection(newVersionProjection, {
   fromSnapshot: 'latest',
-  useTemporaryProjection: true
+  useTemporaryProjection: true,
 });
 ```
 
 ## Performance Optimization
 
 ### **Batch Size Tuning**
+
 - Small batches (100-1000): Better progress tracking, more checkpointing
 - Large batches (5000-10000): Better throughput, less overhead
 - Very large batches (50000+): Risk of memory issues, poor progress visibility
 
 ### **Memory Management**
+
 ```typescript
 // Example of memory-conscious rebuilding
 const rebuilder = ProjectionRebuilderFactory.create(eventStore, {
   defaultBatchSize: 1000, // Smaller batches for memory efficiency
-  enableProgressLogging: true
+  enableProgressLogging: true,
 });
 
 // Process with garbage collection hints
 await rebuilder.rebuildProjection(projection, {
   batchSize: 1000,
-  useTemporaryProjection: true
+  useTemporaryProjection: true,
 });
 ```
 
 ### **Concurrent Rebuilds**
+
 ```typescript
 // Rebuild multiple projections in parallel
 const results = await ProjectionRebuilderFactory.rebuildWithSnapshots(
   eventStore,
   [proj1, proj2, proj3],
-  { 
-    parallel: true, 
-    batchSize: 2000 
+  {
+    parallel: true,
+    batchSize: 2000,
   }
 );
 ```
@@ -874,7 +957,8 @@ const results = await ProjectionRebuilderFactory.rebuildWithSnapshots(
 - **Memory Leaks**: Large batch sizes can cause memory issues
 - **Blocking Operations**: Synchronous rebuilds can block other operations
 - **Snapshot Corruption**: Always validate snapshot integrity before use
-- **Event Ordering**: Ensure events are processed in correct order during rebuild
+- **Event Ordering**: Ensure events are processed in correct order during
+  rebuild
 - **Resource Contention**: Multiple concurrent rebuilds can overwhelm the system
 
 ## Related Examples

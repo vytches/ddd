@@ -7,15 +7,17 @@
 
 ## Overview
 
-The Actor pattern in DDD provides a way to track who performed actions in your system. It's essential for audit trails, security, and understanding system behavior.
+The Actor pattern in DDD provides a way to track who performed actions in your
+system. It's essential for audit trails, security, and understanding system
+behavior.
 
 ## Basic Actor Implementation
 
 ```typescript
-import { 
-  IActor, 
+import {
+  IActor,
   DefaultActorType,
-  ActorError 
+  ActorError,
 } from '@vytches-ddd/domain-primitives';
 import { AuditEntry, ActionContext, UserData } from '../types';
 
@@ -46,7 +48,7 @@ export class UserActor implements IActor {
     this.metadata = {
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
   }
 }
@@ -63,7 +65,7 @@ export class GuestActor implements IActor {
     this.id = sessionId;
     this.metadata = {
       ipAddress,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -76,21 +78,18 @@ export class ActorFactory {
     }
 
     if (context.sessionId) {
-      return new GuestActor(
-        context.sessionId, 
-        context.ipAddress || 'unknown'
-      );
+      return new GuestActor(context.sessionId, context.ipAddress || 'unknown');
     }
 
     return new SystemActor('automated-process', {
-      requestId: context.requestId
+      requestId: context.requestId,
     });
   }
 
   static createSystemActor(processName: string): IActor {
     return new SystemActor(processName, {
       timestamp: new Date(),
-      version: process.env.APP_VERSION || '1.0.0'
+      version: process.env.APP_VERSION || '1.0.0',
     });
   }
 }
@@ -120,17 +119,17 @@ export class AuditService {
         type: actor.type,
         id: actor.id || 'anonymous',
         source: actor.source,
-        metadata: actor.metadata
+        metadata: actor.metadata,
       },
       action,
       resource,
       timestamp: new Date(),
       changes,
-      result: 'success'
+      result: 'success',
     };
 
     this.auditLog.push(entry);
-    
+
     // In real applications, persist to database
     await this.persistAuditEntry(entry);
 
@@ -149,16 +148,16 @@ export class AuditService {
         type: actor.type,
         id: actor.id || 'anonymous',
         source: actor.source,
-        metadata: actor.metadata
+        metadata: actor.metadata,
       },
       action,
       resource,
       timestamp: new Date(),
       changes: {
         error: error.message,
-        errorType: error.name
+        errorType: error.name,
       },
-      result: 'failure'
+      result: 'failure',
     };
 
     this.auditLog.push(entry);
@@ -215,9 +214,7 @@ import { CreateUserDto, SuccessResponse } from '../types';
 
 // ✅ Domain service with actor tracking
 export class UserManagementService {
-  constructor(
-    private auditService: AuditService
-  ) {}
+  constructor(private auditService: AuditService) {}
 
   async createUser(
     dto: CreateUserDto,
@@ -229,7 +226,7 @@ export class UserManagementService {
         id: this.generateUserId(),
         email: dto.email,
         name: dto.name,
-        role: 'user'
+        role: 'user',
       };
 
       // Record successful action
@@ -240,13 +237,13 @@ export class UserManagementService {
         {
           email: user.email,
           name: user.name,
-          role: user.role
+          role: user.role,
         }
       );
 
       return {
         success: true,
-        data: user
+        data: user,
       };
     } catch (error) {
       // Record failed action
@@ -283,7 +280,7 @@ export class UserManagementService {
       id: userId,
       email: 'user@example.com',
       name: 'Updated User',
-      role: newRole
+      role: newRole,
     };
 
     // Record the change
@@ -294,13 +291,13 @@ export class UserManagementService {
       {
         oldRole: 'user',
         newRole: newRole,
-        updatedBy: actor.id
+        updatedBy: actor.id,
       }
     );
 
     return {
       success: true,
-      data: user
+      data: user,
     };
   }
 
@@ -327,13 +324,13 @@ export class UserManagementService {
       `user:${userId}`,
       {
         deletedAt: new Date(),
-        deletedBy: actor.id
+        deletedBy: actor.id,
       }
     );
 
     return {
       success: true,
-      data: undefined
+      data: undefined,
     };
   }
 

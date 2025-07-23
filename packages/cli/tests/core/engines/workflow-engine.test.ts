@@ -22,8 +22,12 @@ describe('WorkflowEngine', () => {
     workflow = new WorkflowEngine();
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Setup default mocks
     vi.mocked(Colors.bold).mockImplementation(text => text);
@@ -34,7 +38,9 @@ describe('WorkflowEngine', () => {
     vi.mocked(Colors.dim).mockImplementation(text => text);
     vi.mocked(Performance.now).mockReturnValue(1000);
     vi.mocked(Performance.since).mockReturnValue(50);
-    vi.mocked(Prompts.close).mockImplementation(() => { return });
+    vi.mocked(Prompts.close).mockImplementation(() => {
+      return;
+    });
 
     // Mock spinner
     const mockSpinner = {
@@ -139,9 +145,7 @@ describe('WorkflowEngine', () => {
       });
       workflow.registerStep(completionStep);
 
-      const [error, result] = await safeRun(async () =>
-        await workflow.start('test-step')
-      );
+      const [error, result] = await safeRun(async () => await workflow.start('test-step'));
 
       expect(error).toBeUndefined();
       expect(result).toBeDefined();
@@ -149,9 +153,7 @@ describe('WorkflowEngine', () => {
     });
 
     it('should throw error for non-existent start step', async () => {
-      const [error] = await safeRun(async () =>
-        await workflow.start('non-existent')
-      );
+      const [error] = await safeRun(async () => await workflow.start('non-existent'));
 
       expect(error).toBeInstanceOf(CLIError);
       expect(error?.message).toContain('Workflow step not found: non-existent');
@@ -167,9 +169,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerStep(failingStep);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('failing-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('failing-step'));
 
       expect(error).toBeInstanceOf(CLIError);
       expect(error?.message).toContain('Failed to execute step');
@@ -205,9 +205,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([promptStep, completionStep]);
 
-      const [error, result] = await safeRun(async () =>
-        await workflow.start('input-step')
-      );
+      const [error, result] = await safeRun(async () => await workflow.start('input-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.ask).toHaveBeenCalledWith({
@@ -237,9 +235,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([promptStep, completionStep]);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('select-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('select-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.select).toHaveBeenCalledWith({
@@ -276,9 +272,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([promptStep, completionStep]);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('multiselect-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('multiselect-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.multiSelect).toHaveBeenCalled();
@@ -305,9 +299,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([promptStep, completionStep]);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('confirm-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('confirm-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.confirm).toHaveBeenCalledWith({
@@ -336,9 +328,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([promptStep, completionStep]);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('password-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('password-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.password).toHaveBeenCalledWith({
@@ -349,7 +339,6 @@ describe('WorkflowEngine', () => {
 
   describe('action steps', () => {
     it('should execute action step with spinner', async () => {
-
       const actionStep: WorkflowStep = {
         id: 'action-step',
         title: 'Action Step',
@@ -366,9 +355,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerSteps([actionStep, completionStep]);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('action-step')
-      );
+      const [error] = await safeRun(async () => await workflow.start('action-step'));
 
       expect(error).toBeUndefined();
       expect(Prompts.spinner).toHaveBeenCalled();
@@ -376,7 +363,6 @@ describe('WorkflowEngine', () => {
     });
 
     it('should handle action step errors', async () => {
-
       const actionStep: WorkflowStep = {
         id: 'failing-action',
         title: 'Failing Action',
@@ -386,9 +372,7 @@ describe('WorkflowEngine', () => {
 
       workflow.registerStep(actionStep);
 
-      const [error] = await safeRun(async () =>
-        await workflow.start('failing-action')
-      );
+      const [error] = await safeRun(async () => await workflow.start('failing-action'));
 
       expect(error).toBeInstanceOf(CLIError);
     });

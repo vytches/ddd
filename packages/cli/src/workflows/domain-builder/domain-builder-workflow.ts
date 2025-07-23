@@ -82,8 +82,8 @@ export class DomainBuilderWorkflow {
         context: this.context,
         generatedFiles: this.options.dryRun ? [] : result.files,
         plannedFiles: this.options.dryRun ? result.files : [],
-        boundedContexts: this.context.data.boundedContexts as string[] || [],
-        patterns: this.context.data.patterns as string[] || [],
+        boundedContexts: (this.context.data.boundedContexts as string[]) || [],
+        patterns: (this.context.data.patterns as string[]) || [],
         hasDatabase: this.hasFeature('database'),
         hasMonitoring: this.options.monitoring,
       };
@@ -110,14 +110,15 @@ export class DomainBuilderWorkflow {
     this.updateProgress('Domain Discovery');
 
     if (!this.options.domainName && this.options.guided) {
-      console.log(Colors.info('🎯 Let\'s discover your domain...'));
+      console.log(Colors.info("🎯 Let's discover your domain..."));
       console.log('');
 
-      const domainName = await Prompts.ask({
+      const domainName = (await Prompts.ask({
         message: 'What is your domain name?',
         default: 'e.g., E-commerce Platform, Banking System, Healthcare Management',
-        validate: (value: string) => value.length >= 3 || 'Domain name must be at least 3 characters',
-      }) as string;
+        validate: (value: string) =>
+          value.length >= 3 || 'Domain name must be at least 3 characters',
+      })) as string;
 
       this.context.data.domainName = domainName;
       this.context.domainName = domainName;
@@ -140,11 +141,31 @@ export class DomainBuilderWorkflow {
       const structure = await Prompts.select({
         message: 'Choose your architecture style:',
         choices: [
-          { value: 'clean-architecture', name: '🔷 Clean Architecture (Recommended)', description: 'Enterprise-ready with clear separation' },
-          { value: 'hexagonal', name: '⬢ Hexagonal Architecture', description: 'Ports and adapters pattern' },
-          { value: 'onion', name: '🧅 Onion Architecture', description: 'Dependency inversion focused' },
-          { value: 'modular-monolith', name: '🏗️  Modular Monolith', description: 'Monolith with modular boundaries' },
-          { value: 'microservices', name: '⚡ Microservices', description: 'Distributed architecture' },
+          {
+            value: 'clean-architecture',
+            name: '🔷 Clean Architecture (Recommended)',
+            description: 'Enterprise-ready with clear separation',
+          },
+          {
+            value: 'hexagonal',
+            name: '⬢ Hexagonal Architecture',
+            description: 'Ports and adapters pattern',
+          },
+          {
+            value: 'onion',
+            name: '🧅 Onion Architecture',
+            description: 'Dependency inversion focused',
+          },
+          {
+            value: 'modular-monolith',
+            name: '🏗️  Modular Monolith',
+            description: 'Monolith with modular boundaries',
+          },
+          {
+            value: 'microservices',
+            name: '⚡ Microservices',
+            description: 'Distributed architecture',
+          },
         ],
         default: 0,
       });
@@ -167,7 +188,7 @@ export class DomainBuilderWorkflow {
     if (this.options.boundedContexts.length > 0) {
       this.context.data.boundedContexts = this.options.boundedContexts;
     } else if (this.options.guided) {
-      console.log(Colors.info('🗺️  Let\'s map your bounded contexts...'));
+      console.log(Colors.info("🗺️  Let's map your bounded contexts..."));
 
       const contexts = await Prompts.ask({
         message: 'Enter bounded contexts (comma-separated):',
@@ -201,11 +222,27 @@ export class DomainBuilderWorkflow {
       const patterns = await Prompts.multiSelect({
         message: 'Select patterns to include:',
         choices: [
-          { value: 'cqrs', name: '📋 CQRS', description: 'Command Query Responsibility Segregation' },
-          { value: 'event-sourcing', name: '📜 Event Sourcing', description: 'Event-driven state management' },
+          {
+            value: 'cqrs',
+            name: '📋 CQRS',
+            description: 'Command Query Responsibility Segregation',
+          },
+          {
+            value: 'event-sourcing',
+            name: '📜 Event Sourcing',
+            description: 'Event-driven state management',
+          },
           { value: 'saga', name: '🔄 Saga Pattern', description: 'Long-running transactions' },
-          { value: 'repository', name: '🗄️  Repository Pattern', description: 'Data access abstraction' },
-          { value: 'specification', name: '📐 Specification Pattern', description: 'Business rule encapsulation' },
+          {
+            value: 'repository',
+            name: '🗄️  Repository Pattern',
+            description: 'Data access abstraction',
+          },
+          {
+            value: 'specification',
+            name: '📐 Specification Pattern',
+            description: 'Business rule encapsulation',
+          },
           { value: 'domain-events', name: '📡 Domain Events', description: 'Domain-driven events' },
         ],
       });
@@ -348,10 +385,7 @@ export class DomainBuilderWorkflow {
         );
         break;
       case 'event-sourcing':
-        files.push(
-          'src/shared/events/event-store.ts',
-          'src/shared/events/projections/index.ts'
-        );
+        files.push('src/shared/events/event-store.ts', 'src/shared/events/projections/index.ts');
         break;
       case 'repository':
         files.push('src/shared/repositories/base-repository.ts');
@@ -375,17 +409,10 @@ export class DomainBuilderWorkflow {
 
     switch (this.options.framework) {
       case 'nestjs':
-        files.push(
-          'src/app.module.ts',
-          'src/app.controller.ts',
-          'src/app.service.ts'
-        );
+        files.push('src/app.module.ts', 'src/app.controller.ts', 'src/app.service.ts');
         break;
       case 'express':
-        files.push(
-          'src/server.ts',
-          'src/routes/index.ts'
-        );
+        files.push('src/server.ts', 'src/routes/index.ts');
         break;
     }
 

@@ -1,6 +1,8 @@
 # Contributing to VytchesDDD
 
-Thank you for your interest in contributing to VytchesDDD! This guide will help you get started with contributing to our enterprise-grade Domain-Driven Design library.
+Thank you for your interest in contributing to VytchesDDD! This guide will help
+you get started with contributing to our enterprise-grade Domain-Driven Design
+library.
 
 ## 🎯 How to Contribute
 
@@ -94,7 +96,8 @@ export function createUser(data: any) {
 ### Naming Conventions
 
 - **Classes**: PascalCase (`UserService`, `OrderAggregate`)
-- **Interfaces**: PascalCase with `I` prefix (`IUserRepository`, `IEventHandler`)
+- **Interfaces**: PascalCase with `I` prefix (`IUserRepository`,
+  `IEventHandler`)
 - **Functions/Methods**: camelCase (`createUser`, `handleCommand`)
 - **Constants**: SCREAMING_SNAKE_CASE (`MAX_RETRY_ATTEMPTS`)
 - **Files**: kebab-case (`user-service.ts`, `order-aggregate.ts`)
@@ -114,12 +117,17 @@ export class OrderAggregate extends AggregateRoot {
     super(id);
   }
 
-  static create(customerId: EntityId<string>, items: OrderItem[]): OrderAggregate {
+  static create(
+    customerId: EntityId<string>,
+    items: OrderItem[]
+  ): OrderAggregate {
     const id = EntityId.createWithRandomUUID();
     const order = new OrderAggregate(id, customerId, items);
-    
-    order.addDomainEvent(new OrderCreatedEvent(id.getValue(), customerId.getValue()));
-    
+
+    order.addDomainEvent(
+      new OrderCreatedEvent(id.getValue(), customerId.getValue())
+    );
+
     return order;
   }
 }
@@ -189,7 +197,7 @@ describe('UserService', () => {
 
 All public APIs must have comprehensive JSDoc documentation:
 
-```typescript
+````typescript
 /**
  * @llm-summary Creates a new user with validation and domain events
  * @llm-domain Core
@@ -231,7 +239,7 @@ All public APIs must have comprehensive JSDoc documentation:
 export function createUser(userData: CreateUserData): User {
   // Implementation
 }
-```
+````
 
 ### README Updates
 
@@ -244,7 +252,8 @@ When adding new features:
 
 ## 🔄 Commit Message Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) specification:
+We use [Conventional Commits](https://www.conventionalcommits.org/)
+specification:
 
 ### Format
 
@@ -289,12 +298,14 @@ BREAKING CHANGE: EventBus.publish() now returns Promise<void> instead of void
 ### Before Creating PR
 
 1. **Sync with upstream**:
+
    ```bash
    git fetch upstream
    git rebase upstream/main
    ```
 
 2. **Run quality checks**:
+
    ```bash
    pnpm lint:fix
    pnpm type-check
@@ -310,24 +321,29 @@ Use this template for your PR description:
 
 ```markdown
 ## Summary
+
 Brief description of changes
 
 ## Changes
+
 - [ ] Feature: Description
 - [ ] Fix: Description
 - [ ] Documentation: Description
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Manual testing performed
 - [ ] All tests pass
 
 ## Documentation
+
 - [ ] README updated
 - [ ] JSDoc comments added
 - [ ] Examples updated
 
 ## Breaking Changes
+
 - [ ] No breaking changes
 - [ ] Breaking changes documented in commit message
 ```
@@ -380,28 +396,26 @@ packages/your-package/
 ### Bug Report Template
 
 ```markdown
-**Bug Description**
-Clear description of the bug
+**Bug Description** Clear description of the bug
 
 **Steps to Reproduce**
+
 1. Step one
 2. Step two
 3. Step three
 
-**Expected Behavior**
-What should happen
+**Expected Behavior** What should happen
 
-**Actual Behavior**
-What actually happens
+**Actual Behavior** What actually happens
 
 **Environment**
-- VytchesDDD version: 
-- Node.js version: 
-- TypeScript version: 
-- OS: 
 
-**Code Sample**
-Minimal code that reproduces the issue
+- VytchesDDD version:
+- Node.js version:
+- TypeScript version:
+- OS:
+
+**Code Sample** Minimal code that reproduces the issue
 ```
 
 ## 💡 Feature Requests
@@ -409,20 +423,15 @@ Minimal code that reproduces the issue
 ### Feature Request Template
 
 ```markdown
-**Feature Description**
-Clear description of the proposed feature
+**Feature Description** Clear description of the proposed feature
 
-**Use Case**
-Why is this feature needed? What problem does it solve?
+**Use Case** Why is this feature needed? What problem does it solve?
 
-**Proposed API**
-Example of how the feature would be used
+**Proposed API** Example of how the feature would be used
 
-**Alternatives Considered**
-Other solutions you've considered
+**Alternatives Considered** Other solutions you've considered
 
-**Additional Context**
-Any other relevant information
+**Additional Context** Any other relevant information
 ```
 
 ## ❓ Getting Help
@@ -449,4 +458,5 @@ Contributors are recognized in:
 
 ## 📄 License
 
-By contributing to VytchesDDD, you agree that your contributions will be licensed under the MIT License.
+By contributing to VytchesDDD, you agree that your contributions will be
+licensed under the MIT License.

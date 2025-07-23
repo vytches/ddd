@@ -1,42 +1,46 @@
 # Advanced Projection Engine - NestJS DI Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections + @vytches-ddd/di + NestJS
-**Complexity**: intermediate
-**Framework**: NestJS
-**Integration**: VytchesDDD DI integration
-**Dependencies**: @nestjs/common, @vytches-ddd/projections, @vytches-ddd/di, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections + @vytches-ddd/di +
+NestJS **Complexity**: intermediate **Framework**: NestJS **Integration**:
+VytchesDDD DI integration **Dependencies**: @nestjs/common,
+@vytches-ddd/projections, @vytches-ddd/di, @vytches-ddd/events
 
 ## Description
 
-Advanced NestJS service implementing projection engine with @vytches-ddd/di integration, automatic service discovery, and enterprise-grade projection management. This example shows the bridge pattern between NestJS and VytchesDDD dependency injection systems.
+Advanced NestJS service implementing projection engine with @vytches-ddd/di
+integration, automatic service discovery, and enterprise-grade projection
+management. This example shows the bridge pattern between NestJS and VytchesDDD
+dependency injection systems.
 
 ## Business Context
 
-Enterprise applications require sophisticated projection management with automatic discovery, lifecycle management, performance monitoring, and seamless integration with existing NestJS infrastructure while leveraging VytchesDDD's advanced capabilities.
+Enterprise applications require sophisticated projection management with
+automatic discovery, lifecycle management, performance monitoring, and seamless
+integration with existing NestJS infrastructure while leveraging VytchesDDD's
+advanced capabilities.
 
 ## Domain Service with VytchesDDD DI
 
 ```typescript
 // projection-engine.domain-service.ts
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { 
+import {
   ProjectionEngine,
   ProjectionBase,
   ProjectionRegistry,
   ProjectionCapability,
   CheckpointCapability,
   CircuitBreakerCapability,
-  DeadLetterCapability
+  DeadLetterCapability,
 } from '@vytches-ddd/projections';
 import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
-import { 
+import {
   ProjectionEngineConfig,
   ProjectionMetrics,
   ServiceResponse,
   UserData,
   OrderData,
-  ProjectionData
+  ProjectionData,
 } from '../types'; // From your application
 
 // ⭐ FOCUS: VytchesDDD Domain Service with enterprise capabilities
@@ -45,7 +49,7 @@ import {
   lifetime: ServiceLifetime.Singleton,
   context: 'ProjectionManagement',
   dependencies: ['eventBus', 'metricsService'],
-  autoRegister: true
+  autoRegister: true,
 })
 export class ProjectionEngineDomainService extends ProjectionEngine {
   private registry: ProjectionRegistry;
@@ -55,7 +59,7 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
 
   constructor(config: ProjectionEngineConfig) {
     super('EnterpriseProjectionEngine', 'v2.0');
-    
+
     this.setupProjectionEngine(config);
     this.initializeRegistry();
   }
@@ -66,38 +70,50 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
       enableHealthChecks: true,
       enableMetricsCollection: true,
       checkpointInterval: config.checkpointInterval || 60000,
-      maxConcurrentProjections: config.maxConcurrentProjections || 50
+      maxConcurrentProjections: config.maxConcurrentProjections || 50,
     });
 
     // Initialize with enterprise capabilities
-    this.addCapability(new CheckpointCapability({
-      storage: 'memory', // In production, use persistent storage
-      interval: 30000,
-      batchSize: 100
-    }));
+    this.addCapability(
+      new CheckpointCapability({
+        storage: 'memory', // In production, use persistent storage
+        interval: 30000,
+        batchSize: 100,
+      })
+    );
 
-    this.addCapability(new CircuitBreakerCapability({
-      failureThreshold: 5,
-      resetTimeout: 60000,
-      halfOpenMaxCalls: 3
-    }));
+    this.addCapability(
+      new CircuitBreakerCapability({
+        failureThreshold: 5,
+        resetTimeout: 60000,
+        halfOpenMaxCalls: 3,
+      })
+    );
 
-    this.addCapability(new DeadLetterCapability({
-      maxRetries: 3,
-      retryDelay: 5000,
-      deadLetterStorage: 'memory'
-    }));
+    this.addCapability(
+      new DeadLetterCapability({
+        maxRetries: 3,
+        retryDelay: 5000,
+        deadLetterStorage: 'memory',
+      })
+    );
   }
 
   private initializeRegistry(): void {
     // Setup projection discovery
-    this.registry.on('projectionDiscovered', (projection: ProjectionBase<any>) => {
-      this.handleProjectionDiscovered(projection);
-    });
+    this.registry.on(
+      'projectionDiscovered',
+      (projection: ProjectionBase<any>) => {
+        this.handleProjectionDiscovered(projection);
+      }
+    );
 
-    this.registry.on('projectionFailed', (projectionId: string, error: Error) => {
-      this.handleProjectionFailure(projectionId, error);
-    });
+    this.registry.on(
+      'projectionFailed',
+      (projectionId: string, error: Error) => {
+        this.handleProjectionFailure(projectionId, error);
+      }
+    );
 
     this.registry.on('projectionRecovered', (projectionId: string) => {
       this.handleProjectionRecovery(projectionId);
@@ -105,65 +121,79 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
   }
 
   // ✅ FOCUS: Enterprise projection registration with capabilities
-  async registerProjection(projection: ProjectionBase<any>): Promise<ServiceResponse<void>> {
+  async registerProjection(
+    projection: ProjectionBase<any>
+  ): Promise<ServiceResponse<void>> {
     try {
       // Enhanced projection setup
       const enhancedProjection = this.enhanceProjection(projection);
-      
+
       // Register with registry
       await this.registry.register(enhancedProjection);
       this.activeProjections.set(projection.projectionName, enhancedProjection);
-      
+
       // Initialize metrics tracking
       this.initializeProjectionMetrics(projection.projectionName);
-      
-      console.log(`Projection registered with enterprise capabilities: ${projection.projectionName}`);
-      
+
+      console.log(
+        `Projection registered with enterprise capabilities: ${projection.projectionName}`
+      );
+
       return {
         success: true,
         metadata: {
           timestamp: new Date(),
           requestId: 'register-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-      
     } catch (error) {
       return {
         success: false,
         error: {
           code: 'REGISTRATION_FAILED',
           message: 'Failed to register projection',
-          details: { error: (error as Error).message, projectionName: projection.projectionName }
+          details: {
+            error: (error as Error).message,
+            projectionName: projection.projectionName,
+          },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'register-' + Date.now(),
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
 
-  private enhanceProjection(projection: ProjectionBase<any>): ProjectionBase<any> {
+  private enhanceProjection(
+    projection: ProjectionBase<any>
+  ): ProjectionBase<any> {
     // Add enterprise capabilities to projection
-    projection.addCapability(new CheckpointCapability({
-      projectionName: projection.projectionName,
-      interval: 30000,
-      batchSize: 100
-    }));
+    projection.addCapability(
+      new CheckpointCapability({
+        projectionName: projection.projectionName,
+        interval: 30000,
+        batchSize: 100,
+      })
+    );
 
-    projection.addCapability(new CircuitBreakerCapability({
-      projectionName: projection.projectionName,
-      failureThreshold: 5,
-      resetTimeout: 60000
-    }));
+    projection.addCapability(
+      new CircuitBreakerCapability({
+        projectionName: projection.projectionName,
+        failureThreshold: 5,
+        resetTimeout: 60000,
+      })
+    );
 
-    projection.addCapability(new DeadLetterCapability({
-      projectionName: projection.projectionName,
-      maxRetries: 3,
-      retryDelay: 5000
-    }));
+    projection.addCapability(
+      new DeadLetterCapability({
+        projectionName: projection.projectionName,
+        maxRetries: 3,
+        retryDelay: 5000,
+      })
+    );
 
     // Override handle method to add metrics collection
     const originalHandle = projection.handle.bind(projection);
@@ -171,9 +201,17 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
       const startTime = Date.now();
       try {
         await originalHandle(event);
-        this.recordProjectionMetrics(projection.projectionName, 'success', Date.now() - startTime);
+        this.recordProjectionMetrics(
+          projection.projectionName,
+          'success',
+          Date.now() - startTime
+        );
       } catch (error) {
-        this.recordProjectionMetrics(projection.projectionName, 'error', Date.now() - startTime);
+        this.recordProjectionMetrics(
+          projection.projectionName,
+          'error',
+          Date.now() - startTime
+        );
         throw error;
       }
     };
@@ -183,18 +221,29 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
 
   // ✅ FOCUS: Enterprise event processing with monitoring
   async processEvent(event: IDomainEvent): Promise<ServiceResponse<void>> {
-    const processingResults: Array<{ projection: string; success: boolean; error?: Error }> = [];
-    
+    const processingResults: Array<{
+      projection: string;
+      success: boolean;
+      error?: Error;
+    }> = [];
+
     try {
       const relevantProjections = await this.findRelevantProjections(event);
-      
-      const processingPromises = relevantProjections.map(async (projection) => {
+
+      const processingPromises = relevantProjections.map(async projection => {
         try {
           await projection.handle(event);
           return { projection: projection.projectionName, success: true };
         } catch (error) {
-          console.error(`Projection ${projection.projectionName} failed to process event ${event.eventId}:`, error);
-          return { projection: projection.projectionName, success: false, error: error as Error };
+          console.error(
+            `Projection ${projection.projectionName} failed to process event ${event.eventId}:`,
+            error
+          );
+          return {
+            projection: projection.projectionName,
+            success: false,
+            error: error as Error,
+          };
         }
       });
 
@@ -206,7 +255,7 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
           processingResults.push({
             projection: relevantProjections[index].projectionName,
             success: false,
-            error: result.reason
+            error: result.reason,
           });
         }
       });
@@ -220,35 +269,36 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
           processedProjections: processingResults.length,
           successfulProjections: successCount,
           failedProjections: failureCount,
-          results: processingResults
+          results: processingResults,
         } as any,
         metadata: {
           timestamp: new Date(),
           requestId: 'process-' + event.eventId,
-          duration: 0
-        }
+          duration: 0,
+        },
       };
-      
     } catch (error) {
       return {
         success: false,
         error: {
           code: 'EVENT_PROCESSING_FAILED',
           message: 'Failed to process event across projections',
-          details: { error: (error as Error).message, eventId: event.eventId }
+          details: { error: (error as Error).message, eventId: event.eventId },
         },
         metadata: {
           timestamp: new Date(),
           requestId: 'process-' + event.eventId,
-          duration: 0
-        }
+          duration: 0,
+        },
       };
     }
   }
 
-  private async findRelevantProjections(event: IDomainEvent): Promise<ProjectionBase<any>[]> {
+  private async findRelevantProjections(
+    event: IDomainEvent
+  ): Promise<ProjectionBase<any>[]> {
     const relevantProjections: ProjectionBase<any>[] = [];
-    
+
     for (const projection of this.activeProjections.values()) {
       if (projection.canHandle && projection.canHandle(event)) {
         relevantProjections.push(projection);
@@ -257,25 +307,31 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
         relevantProjections.push(projection);
       }
     }
-    
+
     return relevantProjections;
   }
 
   // ✅ FOCUS: Enterprise metrics and monitoring
-  getProjectionMetrics(projectionName?: string): ProjectionMetrics | Map<string, ProjectionMetrics> {
+  getProjectionMetrics(
+    projectionName?: string
+  ): ProjectionMetrics | Map<string, ProjectionMetrics> {
     if (projectionName) {
-      return this.projectionMetrics.get(projectionName) || this.createEmptyMetrics(projectionName);
+      return (
+        this.projectionMetrics.get(projectionName) ||
+        this.createEmptyMetrics(projectionName)
+      );
     }
     return this.projectionMetrics;
   }
 
   getEngineHealthStatus(): any {
     const totalProjections = this.activeProjections.size;
-    const healthyProjections = Array.from(this.activeProjections.values())
-      .filter(p => this.isProjectionHealthy(p)).length;
-    
+    const healthyProjections = Array.from(
+      this.activeProjections.values()
+    ).filter(p => this.isProjectionHealthy(p)).length;
+
     const overallMetrics = this.calculateOverallMetrics();
-    
+
     return {
       status: healthyProjections === totalProjections ? 'healthy' : 'degraded',
       totalProjections,
@@ -284,77 +340,98 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
       averageLatency: overallMetrics.averageLatency,
       totalEventsProcessed: overallMetrics.totalEventsProcessed,
       errorRate: overallMetrics.errorRate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
   // ✅ FOCUS: Advanced projection lifecycle management
   async startAllProjections(): Promise<ServiceResponse<void>> {
     const startResults: Array<{ projection: string; success: boolean }> = [];
-    
+
     for (const projection of this.activeProjections.values()) {
       try {
         // Start projection (if it has a start method)
         if ('start' in projection && typeof projection.start === 'function') {
           await projection.start();
         }
-        startResults.push({ projection: projection.projectionName, success: true });
+        startResults.push({
+          projection: projection.projectionName,
+          success: true,
+        });
         console.log(`Started projection: ${projection.projectionName}`);
       } catch (error) {
-        startResults.push({ projection: projection.projectionName, success: false });
-        console.error(`Failed to start projection ${projection.projectionName}:`, error);
+        startResults.push({
+          projection: projection.projectionName,
+          success: false,
+        });
+        console.error(
+          `Failed to start projection ${projection.projectionName}:`,
+          error
+        );
       }
     }
-    
+
     const successCount = startResults.filter(r => r.success).length;
-    
+
     return {
       success: successCount === startResults.length,
       data: {
         totalProjections: startResults.length,
         successfulStarts: successCount,
         failedStarts: startResults.length - successCount,
-        results: startResults
+        results: startResults,
       } as any,
       metadata: {
         timestamp: new Date(),
         requestId: 'start-all-' + Date.now(),
-        duration: 0
-      }
+        duration: 0,
+      },
     };
   }
 
   async stopAllProjections(): Promise<ServiceResponse<void>> {
     const stopResults: Array<{ projection: string; success: boolean }> = [];
-    
+
     for (const projection of this.activeProjections.values()) {
       try {
         // Stop projection (if it has a stop method)
         if ('stop' in projection && typeof projection.stop === 'function') {
           await projection.stop();
         }
-        stopResults.push({ projection: projection.projectionName, success: true });
+        stopResults.push({
+          projection: projection.projectionName,
+          success: true,
+        });
         console.log(`Stopped projection: ${projection.projectionName}`);
       } catch (error) {
-        stopResults.push({ projection: projection.projectionName, success: false });
-        console.error(`Failed to stop projection ${projection.projectionName}:`, error);
+        stopResults.push({
+          projection: projection.projectionName,
+          success: false,
+        });
+        console.error(
+          `Failed to stop projection ${projection.projectionName}:`,
+          error
+        );
       }
     }
-    
+
     return {
       success: true, // We don't fail the entire operation if some projections fail to stop
       data: stopResults as any,
       metadata: {
         timestamp: new Date(),
         requestId: 'stop-all-' + Date.now(),
-        duration: 0
-      }
+        duration: 0,
+      },
     };
   }
 
   // Private helper methods
   private initializeProjectionMetrics(projectionName: string): void {
-    this.projectionMetrics.set(projectionName, this.createEmptyMetrics(projectionName));
+    this.projectionMetrics.set(
+      projectionName,
+      this.createEmptyMetrics(projectionName)
+    );
   }
 
   private createEmptyMetrics(projectionName: string): ProjectionMetrics {
@@ -366,11 +443,15 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
       averageLatency: 0,
       lastEventTime: null,
       errorRate: 0,
-      isHealthy: true
+      isHealthy: true,
     };
   }
 
-  private recordProjectionMetrics(projectionName: string, status: 'success' | 'error', latency: number): void {
+  private recordProjectionMetrics(
+    projectionName: string,
+    status: 'success' | 'error',
+    latency: number
+  ): void {
     let metrics = this.projectionMetrics.get(projectionName);
     if (!metrics) {
       metrics = this.createEmptyMetrics(projectionName);
@@ -383,9 +464,11 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
     } else {
       metrics.failedEvents++;
     }
-    
+
     // Calculate rolling average latency
-    metrics.averageLatency = (metrics.averageLatency * (metrics.totalEventsProcessed - 1) + latency) / metrics.totalEventsProcessed;
+    metrics.averageLatency =
+      (metrics.averageLatency * (metrics.totalEventsProcessed - 1) + latency) /
+      metrics.totalEventsProcessed;
     metrics.errorRate = metrics.failedEvents / metrics.totalEventsProcessed;
     metrics.lastEventTime = new Date();
     metrics.isHealthy = metrics.errorRate < 0.1; // 10% error threshold
@@ -398,19 +481,24 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
 
   private calculateOverallMetrics(): any {
     const allMetrics = Array.from(this.projectionMetrics.values());
-    
+
     if (allMetrics.length === 0) {
       return { averageLatency: 0, totalEventsProcessed: 0, errorRate: 0 };
     }
-    
-    const totalEvents = allMetrics.reduce((sum, m) => sum + m.totalEventsProcessed, 0);
+
+    const totalEvents = allMetrics.reduce(
+      (sum, m) => sum + m.totalEventsProcessed,
+      0
+    );
     const totalErrors = allMetrics.reduce((sum, m) => sum + m.failedEvents, 0);
-    const averageLatency = allMetrics.reduce((sum, m) => sum + m.averageLatency, 0) / allMetrics.length;
-    
+    const averageLatency =
+      allMetrics.reduce((sum, m) => sum + m.averageLatency, 0) /
+      allMetrics.length;
+
     return {
       averageLatency,
       totalEventsProcessed: totalEvents,
-      errorRate: totalEvents > 0 ? totalErrors / totalEvents : 0
+      errorRate: totalEvents > 0 ? totalErrors / totalEvents : 0,
     };
   }
 
@@ -448,29 +536,30 @@ export class ProjectionEngineService implements OnModuleInit, OnModuleDestroy {
 
   constructor() {
     // ⭐ FOCUS: Bridge Pattern - Get existing instance from VytchesDDD
-    this.projectionEngine = VytchesDDD.resolve<ProjectionEngineDomainService>('projectionEngine');
+    this.projectionEngine =
+      VytchesDDD.resolve<ProjectionEngineDomainService>('projectionEngine');
   }
 
   async onModuleInit(): Promise<void> {
     console.log('ProjectionEngineService: Initializing projection engine');
-    
+
     // Start all registered projections
     const startResult = await this.projectionEngine.startAllProjections();
     if (!startResult.success) {
       console.error('Failed to start some projections:', startResult.data);
     }
-    
+
     console.log('ProjectionEngineService: Projection engine initialized');
   }
 
   async onModuleDestroy(): Promise<void> {
     console.log('ProjectionEngineService: Stopping projection engine');
-    
+
     const stopResult = await this.projectionEngine.stopAllProjections();
     if (!stopResult.success) {
       console.error('Failed to stop some projections:', stopResult.data);
     }
-    
+
     console.log('ProjectionEngineService: Projection engine stopped');
   }
 
@@ -503,10 +592,7 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Controller('api/projections')
 export class ProjectionManagementController {
-
-  constructor(
-    private readonly projectionEngine: ProjectionEngineService
-  ) {}
+  constructor(private readonly projectionEngine: ProjectionEngineService) {}
 
   @Get('health')
   getHealthStatus() {
@@ -547,23 +633,22 @@ import { ProjectionManagementController } from './projection-management.controll
 @Module({
   providers: [ProjectionEngineService],
   controllers: [ProjectionManagementController],
-  exports: [ProjectionEngineService]
+  exports: [ProjectionEngineService],
 })
 export class ProjectionManagementModule implements OnModuleInit {
-
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD BEFORE framework DI
     const container = new SimpleContainer();
-    
+
     // Register projection engine configuration
     container.registerInstance('projectionEngineConfig', {
       checkpointInterval: 60000,
-      maxConcurrentProjections: 50
+      maxConcurrentProjections: 50,
     });
-    
+
     // Configure VytchesDDD with auto-discovery
     await VytchesDDD.configure(container);
-    
+
     console.log('VytchesDDD configured for projection management');
   }
 }
@@ -579,10 +664,7 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
 export class AppService {
-
-  constructor(
-    private readonly projectionEngine: ProjectionEngineService
-  ) {}
+  constructor(private readonly projectionEngine: ProjectionEngineService) {}
 
   async handleBusinessEvent(eventData: any): Promise<void> {
     const event: IDomainEvent = {
@@ -591,13 +673,15 @@ export class AppService {
       aggregateId: eventData.aggregateId,
       payload: eventData.payload,
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     const result = await this.projectionEngine.processEvent(event);
-    
+
     if (result.success) {
-      console.log(`Event processed across ${result.data.processedProjections} projections`);
+      console.log(
+        `Event processed across ${result.data.processedProjections} projections`
+      );
     } else {
       console.error('Event processing failed:', result.error);
       throw new Error(`Event processing failed: ${result.error?.message}`);
@@ -607,7 +691,7 @@ export class AppService {
   async getSystemHealth(): Promise<any> {
     return {
       projectionEngine: this.projectionEngine.getHealthStatus(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -616,7 +700,8 @@ export class AppService {
 ## Key Features
 
 - **Bridge Pattern**: Seamless integration between NestJS and VytchesDDD DI
-- **Enterprise Capabilities**: Automatic checkpoints, circuit breakers, dead letter queues
+- **Enterprise Capabilities**: Automatic checkpoints, circuit breakers, dead
+  letter queues
 - **Metrics & Monitoring**: Comprehensive projection performance tracking
 - **Lifecycle Management**: Proper initialization and cleanup in NestJS context
 - **Health Monitoring**: Real-time projection health status
@@ -635,7 +720,8 @@ export class AppService {
 ## Common Pitfalls
 
 - **Initialization Order**: VytchesDDD must be configured before NestJS DI
-- **Double Instance**: Never create both `@Injectable` and `@DomainService` on same class
+- **Double Instance**: Never create both `@Injectable` and `@DomainService` on
+  same class
 - **Metrics Overflow**: Implement metric rotation for long-running systems
 - **Memory Leaks**: Properly clean up projection instances and event handlers
 

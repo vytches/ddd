@@ -14,20 +14,20 @@ export const packageExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic value object patterns'
+      description: 'Basic value object patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced patterns with optional DI'
+      description: 'Advanced patterns with optional DI',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise patterns requiring DI'
-    }
+      description: 'Enterprise patterns requiring DI',
+    },
   },
 
   frameworks: [
@@ -36,8 +36,8 @@ export const packageExampleConfig: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS framework integration',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common']
-    }
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+    },
   ],
 
   examples: [
@@ -49,7 +49,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'basic/example-1.md',
       tags: ['money', 'currency', 'arithmetic', 'validation'],
       complexity: 'basic',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'email-value-object',
@@ -58,7 +58,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'basic/example-2.md',
       tags: ['email', 'validation', 'communication', 'normalization'],
       complexity: 'basic',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'address-value-object',
@@ -67,7 +67,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'basic/example-3.md',
       tags: ['address', 'geography', 'validation', 'structured-data'],
       complexity: 'basic',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'basic-implementation',
@@ -76,7 +76,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'basic/implementation.md',
       tags: ['implementation', 'patterns', 'best-practices'],
       complexity: 'basic',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'basic-use-case',
@@ -85,7 +85,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'basic/use-case.md',
       tags: ['use-cases', 'domain-modeling', 'examples'],
       complexity: 'basic',
-      priority: 'medium'
+      priority: 'medium',
     },
 
     // Intermediate Examples
@@ -96,7 +96,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'intermediate/example-1.md',
       tags: ['range', 'time', 'numeric', 'overlap-detection'],
       complexity: 'intermediate',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'composite-value-object',
@@ -105,7 +105,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'intermediate/example-2.md',
       tags: ['composite', 'complex-types', 'composition'],
       complexity: 'intermediate',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'validated-value-object',
@@ -114,7 +114,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'intermediate/example-3.md',
       tags: ['validation', 'business-rules', 'enforcement'],
       complexity: 'intermediate',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'intermediate-implementation',
@@ -123,7 +123,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'intermediate/implementation.md',
       tags: ['implementation', 'advanced-patterns', 'techniques'],
       complexity: 'intermediate',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'intermediate-use-case',
@@ -132,7 +132,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'intermediate/use-case.md',
       tags: ['use-cases', 'complex-scenarios', 'business-logic'],
       complexity: 'intermediate',
-      priority: 'medium'
+      priority: 'medium',
     },
 
     // Advanced Examples
@@ -143,7 +143,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'advanced/example-1.md',
       tags: ['specification-pattern', 'business-rules', 'embedded-logic'],
       complexity: 'advanced',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'serializable-value-object',
@@ -152,7 +152,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'advanced/example-2.md',
       tags: ['serialization', 'persistence', 'marshalling'],
       complexity: 'advanced',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'performance-optimized-value-object',
@@ -161,7 +161,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'advanced/example-3.md',
       tags: ['performance', 'optimization', 'caching'],
       complexity: 'advanced',
-      priority: 'low'
+      priority: 'low',
     },
     {
       id: 'advanced-implementation',
@@ -170,7 +170,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'advanced/implementation.md',
       tags: ['implementation', 'enterprise', 'advanced-patterns'],
       complexity: 'advanced',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'advanced-use-case',
@@ -179,7 +179,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       file: 'advanced/use-case.md',
       tags: ['use-cases', 'enterprise-scale', 'applications'],
       complexity: 'advanced',
-      priority: 'low'
+      priority: 'low',
     },
 
     // Framework Examples - NestJS
@@ -191,7 +191,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'money', 'validation', 'serialization'],
       complexity: 'basic',
       framework: 'nestjs',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'nestjs-email-value-object',
@@ -201,7 +201,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'email', 'dto', 'integration'],
       complexity: 'basic',
       framework: 'nestjs',
-      priority: 'high'
+      priority: 'high',
     },
     {
       id: 'nestjs-composite-value-object',
@@ -211,7 +211,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'composite', 'dependency-injection'],
       complexity: 'intermediate',
       framework: 'nestjs',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'nestjs-validated-value-object',
@@ -221,7 +221,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'validation', 'pipes', 'interceptors'],
       complexity: 'intermediate',
       framework: 'nestjs',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'nestjs-specification-value-object',
@@ -231,7 +231,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'specification', 'enterprise-patterns'],
       complexity: 'advanced',
       framework: 'nestjs',
-      priority: 'medium'
+      priority: 'medium',
     },
     {
       id: 'nestjs-performance-value-object',
@@ -241,15 +241,15 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['nestjs', 'performance', 'caching', 'optimization'],
       complexity: 'advanced',
       framework: 'nestjs',
-      priority: 'low'
-    }
+      priority: 'low',
+    },
   ],
 
   tags: {
     core: ['value-objects:basic', 'value-objects:intermediate', 'value-objects:advanced'],
     integrations: ['nestjs:basic', 'nestjs:intermediate', 'nestjs:advanced'],
     frameworks: ['nestjs'],
-    patterns: ['value-object', 'immutability', 'factory-pattern']
+    patterns: ['value-object', 'immutability', 'factory-pattern'],
   },
 
   contentConfig: {
@@ -259,7 +259,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -267,7 +267,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   sections: ['implementation', 'use-case', 'framework-integration'],
@@ -276,19 +276,19 @@ export const packageExampleConfig: PackageExampleConfig = {
     'domain-primitives': {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['money-value-object']
+      integrationExamples: ['money-value-object'],
     },
-    'utils': {
+    utils: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['email-value-object']
+      integrationExamples: ['email-value-object'],
     },
-    'validation': {
+    validation: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['validated-value-object']
-    }
-  }
+      integrationExamples: ['validated-value-object'],
+    },
+  },
 };
 
 export default packageExampleConfig;

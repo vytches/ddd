@@ -3,34 +3,30 @@
 **Package**: @vytches-ddd/validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
-**Focus**: AI-powered adaptive validation with machine learning enhancement and predictive analytics
+**Focus**: AI-powered adaptive validation with machine learning enhancement and
+predictive analytics
 
 ## Overview
 
-This example demonstrates advanced AI-powered adaptive validation in NestJS using VytchesDDD DI for machine learning integration, predictive validation analytics, and intelligent validation adaptation based on historical patterns and real-time data analysis.
+This example demonstrates advanced AI-powered adaptive validation in NestJS
+using VytchesDDD DI for machine learning integration, predictive validation
+analytics, and intelligent validation adaptation based on historical patterns
+and real-time data analysis.
 
 ## Implementation
 
 ```typescript
 // ai-adaptive-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  DomainService, 
-  ServiceLifetime, 
-  VytchesDDD 
-} from '@vytches-ddd/di';
-import { 
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import {
   AIEnhancedValidationSpecification,
   AdaptiveValidationEngine,
   PredictiveValidationAnalyzer,
   ValidationMetrics,
-  SpecificationResult 
+  SpecificationResult,
 } from '@vytches-ddd/validation';
-import { 
-  MLModelService,
-  PredictionRequest,
-  AdaptationRequest 
-} from './types'; // From your application
+import { MLModelService, PredictionRequest, AdaptationRequest } from './types'; // From your application
 
 // AI-powered validation service with VytchesDDD DI
 @DomainService({
@@ -42,11 +38,11 @@ import {
     'validationHistoryService',
     'adaptationEngine',
     'predictionAnalyzer',
-    'eventBus'
+    'eventBus',
   ],
   timeout: 45000,
   middleware: ['logging', 'resilience', 'aiMetrics'],
-  autoRegister: true
+  autoRegister: true,
 })
 export class AIAdaptiveValidationService {
   private aiValidator: AIEnhancedValidationSpecification<any>;
@@ -67,7 +63,7 @@ export class AIAdaptiveValidationService {
   ): Promise<AIValidationResult> {
     // Get AI-enhanced validation
     const aiResult = await this.aiValidator.isSatisfiedByAsync(entity);
-    
+
     // Apply adaptive thresholds based on historical patterns
     const adaptiveResult = await this.adaptiveEngine.applyAdaptiveValidation(
       entity,
@@ -77,25 +73,37 @@ export class AIAdaptiveValidationService {
     );
 
     // Generate predictions for future validation needs
-    const predictions = await this.predictionAnalyzer.generateValidationPredictions(
-      entity,
-      entityType,
-      aiResult
-    );
+    const predictions =
+      await this.predictionAnalyzer.generateValidationPredictions(
+        entity,
+        entityType,
+        aiResult
+      );
 
     return {
       originalResult: aiResult,
       adaptiveResult,
       predictions,
-      confidence: this.calculateOverallConfidence(aiResult, adaptiveResult, predictions),
+      confidence: this.calculateOverallConfidence(
+        aiResult,
+        adaptiveResult,
+        predictions
+      ),
       adaptations: await this.getAppliedAdaptations(entityType),
-      recommendations: await this.generateAIRecommendations(aiResult, adaptiveResult, predictions)
+      recommendations: await this.generateAIRecommendations(
+        aiResult,
+        adaptiveResult,
+        predictions
+      ),
     };
   }
 
   async trainAdaptiveModel(
     trainingData: ValidationTrainingData[],
-    modelType: 'threshold_adaptation' | 'pattern_recognition' | 'prediction' = 'pattern_recognition'
+    modelType:
+      | 'threshold_adaptation'
+      | 'pattern_recognition'
+      | 'prediction' = 'pattern_recognition'
   ): Promise<ModelTrainingResult> {
     return await this.mlModelService.trainModel({
       data: trainingData,
@@ -105,8 +113,8 @@ export class AIAdaptiveValidationService {
         epochs: 100,
         learningRate: 0.001,
         validationSplit: 0.2,
-        patience: 10
-      }
+        patience: 10,
+      },
     });
   }
 
@@ -126,22 +134,38 @@ export class AIAdaptiveValidationService {
     entityType: string,
     adaptationRequest: AdaptationRequest
   ): Promise<ThresholdAdaptationResult> {
-    return await this.adaptiveEngine.adaptThresholds(entityType, adaptationRequest);
+    return await this.adaptiveEngine.adaptThresholds(
+      entityType,
+      adaptationRequest
+    );
   }
 
   async getValidationInsights(
     timeRange?: TimeRange,
     entityTypes?: string[]
   ): Promise<AIValidationInsights> {
-    const insights = await this.validationMetrics.getAIInsights(timeRange, entityTypes);
-    const patterns = await this.predictionAnalyzer.identifyValidationPatterns(timeRange, entityTypes);
-    const adaptations = await this.adaptiveEngine.getAdaptationHistory(timeRange, entityTypes);
+    const insights = await this.validationMetrics.getAIInsights(
+      timeRange,
+      entityTypes
+    );
+    const patterns = await this.predictionAnalyzer.identifyValidationPatterns(
+      timeRange,
+      entityTypes
+    );
+    const adaptations = await this.adaptiveEngine.getAdaptationHistory(
+      timeRange,
+      entityTypes
+    );
 
     return {
       insights,
       patterns,
       adaptations,
-      recommendations: await this.generateInsightRecommendations(insights, patterns, adaptations)
+      recommendations: await this.generateInsightRecommendations(
+        insights,
+        patterns,
+        adaptations
+      ),
     };
   }
 
@@ -159,9 +183,12 @@ export class AIAdaptiveValidationService {
       VytchesDDD.resolve('aiConfigurationService')
     );
 
-    this.adaptiveEngine = VytchesDDD.resolve<AdaptiveValidationEngine>('adaptationEngine');
-    this.predictionAnalyzer = VytchesDDD.resolve<PredictiveValidationAnalyzer>('predictionAnalyzer');
-    this.validationMetrics = VytchesDDD.resolve<ValidationMetrics>('validationMetrics');
+    this.adaptiveEngine =
+      VytchesDDD.resolve<AdaptiveValidationEngine>('adaptationEngine');
+    this.predictionAnalyzer =
+      VytchesDDD.resolve<PredictiveValidationAnalyzer>('predictionAnalyzer');
+    this.validationMetrics =
+      VytchesDDD.resolve<ValidationMetrics>('validationMetrics');
   }
 
   private calculateOverallConfidence(
@@ -173,10 +200,14 @@ export class AIAdaptiveValidationService {
     const adaptiveConfidence = adaptiveResult.adaptationConfidence || 0.5;
     const predictionConfidence = predictions.confidence || 0.5;
 
-    return (aiConfidence * 0.4 + adaptiveConfidence * 0.3 + predictionConfidence * 0.3);
+    return (
+      aiConfidence * 0.4 + adaptiveConfidence * 0.3 + predictionConfidence * 0.3
+    );
   }
 
-  private async getAppliedAdaptations(entityType: string): Promise<AppliedAdaptation[]> {
+  private async getAppliedAdaptations(
+    entityType: string
+  ): Promise<AppliedAdaptation[]> {
     return await this.adaptiveEngine.getActiveAdaptations(entityType);
   }
 
@@ -192,11 +223,15 @@ export class AIAdaptiveValidationService {
     }
 
     if (adaptiveResult.thresholdAdjustment > 0.1) {
-      recommendations.push('Review adaptive threshold changes for potential bias');
+      recommendations.push(
+        'Review adaptive threshold changes for potential bias'
+      );
     }
 
     if (predictions.riskLevel === 'high') {
-      recommendations.push('Implement additional monitoring for predicted high-risk scenarios');
+      recommendations.push(
+        'Implement additional monitoring for predicted high-risk scenarios'
+      );
     }
 
     return recommendations;
@@ -218,11 +253,13 @@ export class AIAdaptiveValidationService {
       recommendations.push('Optimize for most frequent validation patterns');
     }
 
-    const recentAdaptations = adaptations.filter(a => 
-      a.timestamp > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const recentAdaptations = adaptations.filter(
+      a => a.timestamp > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     );
     if (recentAdaptations.length > 10) {
-      recommendations.push('Review adaptation frequency - may indicate unstable thresholds');
+      recommendations.push(
+        'Review adaptation frequency - may indicate unstable thresholds'
+      );
     }
 
     return recommendations;
@@ -255,14 +292,18 @@ export class AIAdaptiveValidationBridgeService {
       );
 
       // Predictive analysis
-      const prediction = await this.aiValidationService.predictValidationOutcome(
-        entity,
-        entityType,
-        options.predictionHorizon || 'short_term'
-      );
+      const prediction =
+        await this.aiValidationService.predictValidationOutcome(
+          entity,
+          entityType,
+          options.predictionHorizon || 'short_term'
+        );
 
       // Enhanced result processing
-      const processedResult = this.processAIValidationResults(aiValidation, prediction);
+      const processedResult = this.processAIValidationResults(
+        aiValidation,
+        prediction
+      );
 
       return {
         ...processedResult,
@@ -270,13 +311,13 @@ export class AIAdaptiveValidationBridgeService {
         entityType,
         processingMetadata: {
           timestamp: new Date(),
-          aiModel: aiValidation.originalResult.metadata?.modelVersion || 'unknown',
+          aiModel:
+            aiValidation.originalResult.metadata?.modelVersion || 'unknown',
           adaptationLevel: options.adaptationLevel || 'predictive',
           predictionHorizon: options.predictionHorizon || 'short_term',
-          processingTime: Date.now()
-        }
+          processingTime: Date.now(),
+        },
       };
-
     } catch (error) {
       throw new Error(`AI adaptive validation failed: ${error.message}`);
     }
@@ -300,9 +341,9 @@ export class AIAdaptiveValidationBridgeService {
         precision: trainingResult.metrics.precision,
         recall: trainingResult.metrics.recall,
         f1Score: trainingResult.metrics.f1Score,
-        confusionMatrix: trainingResult.metrics.confusionMatrix
+        confusionMatrix: trainingResult.metrics.confusionMatrix,
       },
-      recommendations: this.generateTrainingRecommendations(trainingResult)
+      recommendations: this.generateTrainingRecommendations(trainingResult),
     };
   }
 
@@ -319,7 +360,7 @@ export class AIAdaptiveValidationBridgeService {
         totalValidations: insights.insights.totalValidations,
         averageAccuracy: insights.insights.averageAccuracy,
         adaptationCount: insights.adaptations.length,
-        patternCount: insights.patterns.length
+        patternCount: insights.patterns.length,
       },
       accuracyTrends: insights.insights.accuracyTrends,
       mostCommonPatterns: insights.patterns
@@ -330,10 +371,13 @@ export class AIAdaptiveValidationBridgeService {
         .slice(0, 10),
       recommendations: insights.recommendations,
       predictiveInsights: {
-        upcomingPatterns: insights.patterns.filter(p => p.trend === 'increasing'),
+        upcomingPatterns: insights.patterns.filter(
+          p => p.trend === 'increasing'
+        ),
         riskFactors: insights.insights.riskFactors || [],
-        optimizationOpportunities: insights.insights.optimizationOpportunities || []
-      }
+        optimizationOpportunities:
+          insights.insights.optimizationOpportunities || [],
+      },
     };
   }
 
@@ -347,29 +391,34 @@ export class AIAdaptiveValidationBridgeService {
       originalAIResult: {
         satisfied: aiValidation.originalResult.isSatisfied,
         reason: aiValidation.originalResult.reason,
-        aiConfidence: aiValidation.originalResult.metadata?.prediction?.confidence || 0
+        aiConfidence:
+          aiValidation.originalResult.metadata?.prediction?.confidence || 0,
       },
       adaptiveEnhancements: {
-        thresholdAdjustments: aiValidation.adaptiveResult.thresholdAdjustments || [],
+        thresholdAdjustments:
+          aiValidation.adaptiveResult.thresholdAdjustments || [],
         appliedAdaptations: aiValidation.adaptations,
-        adaptationReason: aiValidation.adaptiveResult.adaptationReason
+        adaptationReason: aiValidation.adaptiveResult.adaptationReason,
       },
       predictiveAnalysis: {
         futureValidationLikelihood: prediction.likelihood,
         riskLevel: prediction.riskLevel,
         predictedIssues: prediction.predictedIssues || [],
-        timeToNextValidation: prediction.timeToNextValidation
+        timeToNextValidation: prediction.timeToNextValidation,
       },
       recommendations: aiValidation.recommendations,
       qualityMetrics: {
         dataQuality: aiValidation.originalResult.metadata?.dataQuality || 0,
-        modelReliability: aiValidation.originalResult.metadata?.modelReliability || 0,
-        predictionAccuracy: prediction.accuracyScore || 0
-      }
+        modelReliability:
+          aiValidation.originalResult.metadata?.modelReliability || 0,
+        predictionAccuracy: prediction.accuracyScore || 0,
+      },
     };
   }
 
-  private generateTrainingRecommendations(result: ModelTrainingResult): string[] {
+  private generateTrainingRecommendations(
+    result: ModelTrainingResult
+  ): string[] {
     const recommendations: string[] = [];
 
     if (result.metrics.accuracy < 0.9) {
@@ -378,7 +427,9 @@ export class AIAdaptiveValidationBridgeService {
     }
 
     if (result.metrics.validationAccuracy < result.metrics.accuracy - 0.05) {
-      recommendations.push('Model may be overfitting - consider regularization');
+      recommendations.push(
+        'Model may be overfitting - consider regularization'
+      );
     }
 
     if (result.metrics.precision < 0.85) {
@@ -394,15 +445,15 @@ export class AIAdaptiveValidationBridgeService {
 }
 
 // ai-validation.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Body, 
+import {
+  Controller,
+  Post,
+  Body,
   BadRequestException,
   HttpStatus,
   HttpCode,
   Query,
-  Get 
+  Get,
 } from '@nestjs/common';
 import { AIAdaptiveValidationBridgeService } from './ai-adaptive-validation-bridge.service';
 
@@ -431,22 +482,21 @@ export class AIValidationController {
           isValid: result.isValid,
           confidence: result.confidence,
           aiModelUsed: result.processingMetadata.aiModel,
-          adaptationLevel: result.processingMetadata.adaptationLevel
+          adaptationLevel: result.processingMetadata.adaptationLevel,
         },
         aiAnalysis: {
           originalPrediction: result.originalAIResult,
           adaptiveEnhancements: result.adaptiveEnhancements,
-          predictiveInsights: result.predictiveAnalysis
+          predictiveInsights: result.predictiveAnalysis,
         },
         qualityMetrics: result.qualityMetrics,
         recommendations: result.recommendations,
-        processingTime: Date.now() - result.processingMetadata.processingTime
+        processingTime: Date.now() - result.processingMetadata.processingTime,
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'AI validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -455,12 +505,13 @@ export class AIValidationController {
   @HttpCode(HttpStatus.CREATED)
   async trainModel(@Body() request: ModelTrainingRequest) {
     try {
-      const result = await this.aiValidationService.trainValidationModel(request);
+      const result =
+        await this.aiValidationService.trainValidationModel(request);
 
       if (!result.success) {
         throw new BadRequestException({
           message: 'Model training failed',
-          details: result.modelMetrics
+          details: result.modelMetrics,
         });
       }
 
@@ -471,21 +522,20 @@ export class AIValidationController {
           modelId: result.modelId,
           accuracy: result.accuracy,
           trainingTime: result.trainingTime,
-          validationAccuracy: result.validationAccuracy
+          validationAccuracy: result.validationAccuracy,
         },
         performanceMetrics: result.modelMetrics,
         recommendations: result.recommendations,
         nextSteps: [
           'Deploy model to validation pipeline',
           'Monitor model performance',
-          'Schedule retraining based on data drift'
-        ]
+          'Schedule retraining based on data drift',
+        ],
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Model training failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -496,7 +546,9 @@ export class AIValidationController {
     try {
       const result = await this.aiValidationService.getValidationInsights({
         timeRange: query.timeRange ? JSON.parse(query.timeRange) : undefined,
-        entityTypes: query.entityTypes ? query.entityTypes.split(',') : undefined
+        entityTypes: query.entityTypes
+          ? query.entityTypes.split(',')
+          : undefined,
       });
 
       return {
@@ -506,17 +558,16 @@ export class AIValidationController {
         insights: {
           accuracyTrends: result.accuracyTrends,
           topPatterns: result.mostCommonPatterns,
-          recentChanges: result.recentAdaptations.slice(0, 5)
+          recentChanges: result.recentAdaptations.slice(0, 5),
         },
         predictive: result.predictiveInsights,
         recommendations: result.recommendations,
-        actionItems: this.generateActionItems(result)
+        actionItems: this.generateActionItems(result),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Failed to retrieve validation insights',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -549,7 +600,7 @@ import { VytchesDDD } from '@vytches-ddd/di';
 @Module({
   controllers: [AIValidationController],
   providers: [AIAdaptiveValidationBridgeService],
-  exports: [AIAdaptiveValidationBridgeService]
+  exports: [AIAdaptiveValidationBridgeService],
 })
 export class AIValidationModule implements OnModuleInit {
   async onModuleInit() {
@@ -562,13 +613,13 @@ export class AIValidationModule implements OnModuleInit {
         adaptiveThresholds: true,
         predictiveAnalytics: true,
         patternRecognition: true,
-        automaticModelRetraining: true
+        automaticModelRetraining: true,
       },
       performance: {
         enableCaching: true,
         cacheTTL: 300000, // 5 minutes
-        enableParallelProcessing: true
-      }
+        enableParallelProcessing: true,
+      },
     });
   }
 }
@@ -576,9 +627,12 @@ export class AIValidationModule implements OnModuleInit {
 
 ## Key Points
 
-- **AI-Powered Validation**: Machine learning-enhanced validation with adaptive capabilities
-- **Predictive Analytics**: Forward-looking validation predictions and risk assessment
-- **Adaptive Thresholds**: Dynamic threshold adjustment based on historical patterns
+- **AI-Powered Validation**: Machine learning-enhanced validation with adaptive
+  capabilities
+- **Predictive Analytics**: Forward-looking validation predictions and risk
+  assessment
+- **Adaptive Thresholds**: Dynamic threshold adjustment based on historical
+  patterns
 - **Model Training**: Integrated model training and performance monitoring
 - **VytchesDDD DI Integration**: Advanced dependency injection for AI services
 

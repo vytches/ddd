@@ -9,14 +9,20 @@ vi.mock('../../../src/core/documentation-registry', () => ({
     query: vi.fn(),
     getAvailableFrameworks: vi.fn(),
     getPackages: vi.fn(),
-    getAllFrameworks: vi.fn()
-  }
+    getAllFrameworks: vi.fn(),
+  },
 }));
 
 // Mock console methods (set up before any imports)
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => { return });
-const mockConsoleTable = vi.spyOn(console, 'table').mockImplementation(() => { return });
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => { return });
+const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+  return;
+});
+const mockConsoleTable = vi.spyOn(console, 'table').mockImplementation(() => {
+  return;
+});
+const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+  return;
+});
 const mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
 describe('commands/examples/list', () => {
@@ -36,7 +42,9 @@ describe('commands/examples/list', () => {
     listCommand = await import('../../../src/commands/examples/list');
 
     // Get the mocked registry
-    const { globalDocumentationRegistry } = await import('../../../src/core/documentation-registry');
+    const { globalDocumentationRegistry } = await import(
+      '../../../src/core/documentation-registry'
+    );
     mockRegistry = globalDocumentationRegistry;
 
     // Setup default mock responses
@@ -60,28 +68,37 @@ describe('commands/examples/list', () => {
     it('should configure builder with all options', () => {
       const mockYargs = {
         option: vi.fn().mockReturnThis(),
-        example: vi.fn().mockReturnThis()
+        example: vi.fn().mockReturnThis(),
       };
 
       listCommand.builder(mockYargs);
 
-      expect(mockYargs.option).toHaveBeenCalledWith('package', expect.objectContaining({
-        type: 'string',
-        describe: 'Filter by package name',
-        choices: ['core', 'aggregates', 'policies', 'cqrs', 'events', 'validation']
-      }));
+      expect(mockYargs.option).toHaveBeenCalledWith(
+        'package',
+        expect.objectContaining({
+          type: 'string',
+          describe: 'Filter by package name',
+          choices: ['core', 'aggregates', 'policies', 'cqrs', 'events', 'validation'],
+        })
+      );
 
-      expect(mockYargs.option).toHaveBeenCalledWith('complexity', expect.objectContaining({
-        type: 'string',
-        describe: 'Filter by complexity level',
-        choices: ['basic', 'intermediate', 'advanced']
-      }));
+      expect(mockYargs.option).toHaveBeenCalledWith(
+        'complexity',
+        expect.objectContaining({
+          type: 'string',
+          describe: 'Filter by complexity level',
+          choices: ['basic', 'intermediate', 'advanced'],
+        })
+      );
 
-      expect(mockYargs.option).toHaveBeenCalledWith('framework', expect.objectContaining({
-        type: 'string',
-        describe: 'Filter examples with specific framework integration',
-        choices: ['nestjs', 'express', 'fastify']
-      }));
+      expect(mockYargs.option).toHaveBeenCalledWith(
+        'framework',
+        expect.objectContaining({
+          type: 'string',
+          describe: 'Filter examples with specific framework integration',
+          choices: ['nestjs', 'express', 'fastify'],
+        })
+      );
 
       expect(mockYargs.example).toHaveBeenCalledTimes(5);
     });
@@ -97,8 +114,8 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: 'test',
           patterns: ['test'],
-          description: 'Test example'
-        }
+          description: 'Test example',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -125,7 +142,7 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: 'e-commerce',
           patterns: ['aggregate-root'],
-          description: 'Basic core functionality'
+          description: 'Basic core functionality',
         },
         {
           id: 'events-intermediate-example',
@@ -134,8 +151,8 @@ describe('commands/examples/list', () => {
           complexity: 'intermediate',
           domain: null,
           patterns: ['domain-events', 'event-sourcing'],
-          description: 'Intermediate events functionality'
-        }
+          description: 'Intermediate events functionality',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -151,7 +168,7 @@ describe('commands/examples/list', () => {
       expect(error).toBeUndefined();
       expect(mockRegistry.loadAll).toHaveBeenCalled();
       expect(mockRegistry.query).toHaveBeenCalledWith({});
-      
+
       // Test passes with expected behavior - console output appears in stdout
       // This verifies the handler executes the table formatting logic
     });
@@ -165,8 +182,8 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: 'e-commerce',
           patterns: ['aggregate-root'],
-          description: 'Core functionality example'
-        }
+          description: 'Core functionality example',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -194,8 +211,8 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: null,
           patterns: null,
-          description: 'Base example without frameworks'
-        }
+          description: 'Base example without frameworks',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -224,7 +241,7 @@ describe('commands/examples/list', () => {
 
       expect(error).toBeUndefined();
       expect(mockRegistry.query).toHaveBeenCalledWith({
-        package: 'core'
+        package: 'core',
       });
     });
 
@@ -233,7 +250,7 @@ describe('commands/examples/list', () => {
         package: 'events',
         complexity: 'intermediate',
         framework: 'nestjs',
-        tags: ['domain-events', 'cqrs']
+        tags: ['domain-events', 'cqrs'],
       } as any;
 
       const result = await safeRun(async () => {
@@ -246,7 +263,7 @@ describe('commands/examples/list', () => {
         package: 'events',
         complexity: 'intermediate',
         framework: 'nestjs',
-        tags: ['domain-events', 'cqrs']
+        tags: ['domain-events', 'cqrs'],
       });
     });
 
@@ -274,8 +291,8 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: 'e-commerce',
           patterns: ['aggregate-root'],
-          description: 'Example description'
-        }
+          description: 'Example description',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -304,8 +321,8 @@ describe('commands/examples/list', () => {
           complexity: 'advanced',
           domain: 'fintech',
           patterns: ['aggregate-root', 'domain-events', 'cqrs', 'event-sourcing', 'saga'],
-          description: 'Complex example with many patterns'
-        }
+          description: 'Complex example with many patterns',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -332,8 +349,8 @@ describe('commands/examples/list', () => {
           complexity: 'basic',
           domain: 'e-commerce',
           patterns: ['aggregate-root'],
-          description: 'NestJS specific example'
-        }
+          description: 'NestJS specific example',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -378,7 +395,7 @@ describe('commands/examples/list', () => {
           complexity: 'intermediate',
           domain: 'e-commerce',
           patterns: ['aggregate-root', 'domain-events'],
-          description: 'Complete order management with events'
+          description: 'Complete order management with events',
         },
         {
           id: 'payment-processing',
@@ -387,8 +404,8 @@ describe('commands/examples/list', () => {
           complexity: 'advanced',
           domain: 'fintech',
           patterns: ['cqrs', 'event-sourcing'],
-          description: 'CQRS-based payment processing'
-        }
+          description: 'CQRS-based payment processing',
+        },
       ];
 
       mockRegistry.query.mockReturnValue(mockExamples);
@@ -400,7 +417,7 @@ describe('commands/examples/list', () => {
 
       const argv: Arguments<any> = {
         complexity: 'intermediate',
-        domain: 'e-commerce'
+        domain: 'e-commerce',
       } as any;
 
       const result = await safeRun(async () => {
@@ -412,7 +429,7 @@ describe('commands/examples/list', () => {
       expect(mockRegistry.loadAll).toHaveBeenCalled();
       expect(mockRegistry.query).toHaveBeenCalledWith({
         complexity: 'intermediate',
-        domain: 'e-commerce'
+        domain: 'e-commerce',
       });
       // Table and summary output shown correctly
     });

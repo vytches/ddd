@@ -1,17 +1,21 @@
 # Unit of Work Pattern - Transaction Management
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/repositories
-**Complexity**: intermediate
-**Domain**: financial-transactions
-**Patterns**: unit-of-work, transaction-management, multi-repository-coordination
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/domain-primitives
+**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+intermediate **Domain**: financial-transactions **Patterns**: unit-of-work,
+transaction-management, multi-repository-coordination **Dependencies**:
+@vytches-ddd/repositories, @vytches-ddd/domain-primitives
 
 ## Description
-Advanced transaction management using the Unit of Work pattern to coordinate multiple repositories within a single transaction boundary. Demonstrates cross-aggregate consistency, rollback scenarios, and transaction isolation.
+
+Advanced transaction management using the Unit of Work pattern to coordinate
+multiple repositories within a single transaction boundary. Demonstrates
+cross-aggregate consistency, rollback scenarios, and transaction isolation.
 
 ## Business Context
-Financial system requiring atomic operations across multiple entities (accounts, transactions, audit logs). Ensures data consistency when multiple repositories need to participate in a single business transaction.
+
+Financial system requiring atomic operations across multiple entities (accounts,
+transactions, audit logs). Ensures data consistency when multiple repositories
+need to participate in a single business transaction.
 
 ## Code Example
 
@@ -19,13 +23,13 @@ Financial system requiring atomic operations across multiple entities (accounts,
 // financial-unit-of-work.ts
 import { UnitOfWork, IRepository } from '@vytches-ddd/repositories';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
-  Account, 
-  Transaction, 
-  AuditLog, 
+import {
+  Account,
+  Transaction,
+  AuditLog,
   TransferRequest,
   TransactionResult,
-  TransactionContext
+  TransactionContext,
 } from './types'; // From your application
 
 // ✅ FOCUS: Unit of Work coordinating multiple repositories
@@ -36,7 +40,7 @@ export class FinancialUnitOfWork extends UnitOfWork {
     private auditRepo: IRepository<AuditLog>
   ) {
     super();
-    
+
     // Register repositories with UoW
     this.registerRepository('accounts', accountRepo);
     this.registerRepository('transactions', transactionRepo);
@@ -44,15 +48,20 @@ export class FinancialUnitOfWork extends UnitOfWork {
   }
 
   // ✅ FOCUS: Complex business transaction with multiple operations
-  async processMoneyTransfer(transferRequest: TransferRequest): Promise<TransactionResult> {
+  async processMoneyTransfer(
+    transferRequest: TransferRequest
+  ): Promise<TransactionResult> {
     // Start transaction context
     const transactionId = EntityId.generate().value;
-    const context = this.createTransactionContext(transferRequest.userId, transactionId);
-    
+    const context = this.createTransactionContext(
+      transferRequest.userId,
+      transactionId
+    );
+
     try {
       // ✅ FOCUS: Begin UoW transaction
       await this.begin();
-      
+
       // 1. Load and validate accounts
       const sourceAccount = await this.accountRepo.findById(
         EntityId.fromString(transferRequest.sourceAccountId)
@@ -60,28 +69,32 @@ export class FinancialUnitOfWork extends UnitOfWork {
       const targetAccount = await this.accountRepo.findById(
         EntityId.fromString(transferRequest.targetAccountId)
       );
-      
+
       if (!sourceAccount || !targetAccount) {
         throw new Error('One or more accounts not found');
       }
-      
+
       // 2. Validate business rules
-      await this.validateTransfer(sourceAccount, targetAccount, transferRequest);
-      
+      await this.validateTransfer(
+        sourceAccount,
+        targetAccount,
+        transferRequest
+      );
+
       // 3. Create debit transaction
       const debitTransaction = await this.createDebitTransaction(
         sourceAccount,
         transferRequest,
         context
       );
-      
+
       // 4. Create credit transaction
       const creditTransaction = await this.createCreditTransaction(
         targetAccount,
         transferRequest,
         context
       );
-      
+
       // 5. Update account balances
       const updatedSourceAccount = await this.updateAccountBalance(
         sourceAccount,
@@ -93,7 +106,7 @@ export class FinancialUnitOfWork extends UnitOfWork {
         transferRequest.amount,
         context
       );
-      
+
       // 6. Create audit logs
       await this.createTransferAuditLogs(
         transferRequest,
@@ -101,10 +114,10 @@ export class FinancialUnitOfWork extends UnitOfWork {
         creditTransaction,
         context
       );
-      
+
       // ✅ FOCUS: Commit all changes atomically
       await this.commit();
-      
+
       return {
         success: true,
         transactionId,
@@ -112,96 +125,108 @@ export class FinancialUnitOfWork extends UnitOfWork {
         creditTransactionId: creditTransaction.id,
         sourceAccountBalance: updatedSourceAccount.balance,
         targetAccountBalance: updatedTargetAccount.balance,
-        processedAt: new Date()
+        processedAt: new Date(),
       };
-      
     } catch (error) {
       // ✅ FOCUS: Rollback on any error
       await this.rollback();
-      
+
       // Create error audit log outside transaction
       await this.createErrorAuditLog(transferRequest, error.message, context);
-      
+
       return {
         success: false,
         error: error.message,
         transactionId,
-        processedAt: new Date()
+        processedAt: new Date(),
       };
     }
   }
 
   // ✅ FOCUS: Multi-account batch operations
-  async processBatchPayments(payments: TransferRequest[]): Promise<TransactionResult[]> {
+  async processBatchPayments(
+    payments: TransferRequest[]
+  ): Promise<TransactionResult[]> {
     const results: TransactionResult[] = [];
     const batchId = EntityId.generate().value;
-    
+
     try {
       await this.begin();
-      
+
       // Process each payment within the same transaction
       for (const payment of payments) {
         try {
           const result = await this.processIndividualPayment(payment, batchId);
           results.push(result);
-          
+
           // If any payment fails, rollback entire batch
           if (!result.success) {
             throw new Error(`Payment failed: ${result.error}`);
           }
-          
         } catch (error) {
-          throw new Error(`Batch processing failed at payment ${payment.id}: ${error.message}`);
+          throw new Error(
+            `Batch processing failed at payment ${payment.id}: ${error.message}`
+          );
         }
       }
-      
+
       // ✅ FOCUS: All payments successful - commit batch
       await this.commit();
-      
+
       // Log successful batch completion
       await this.createBatchAuditLog(batchId, payments.length, true);
-      
+
       return results;
-      
     } catch (error) {
       await this.rollback();
-      
+
       // Log failed batch
-      await this.createBatchAuditLog(batchId, payments.length, false, error.message);
-      
+      await this.createBatchAuditLog(
+        batchId,
+        payments.length,
+        false,
+        error.message
+      );
+
       // Return error results for all payments
       return payments.map(payment => ({
         success: false,
         error: `Batch failed: ${error.message}`,
         transactionId: payment.id,
-        processedAt: new Date()
+        processedAt: new Date(),
       }));
     }
   }
 
   // ✅ FOCUS: Account closure with cleanup operations
-  async closeAccount(accountId: string, reason: string, userId: string): Promise<boolean> {
+  async closeAccount(
+    accountId: string,
+    reason: string,
+    userId: string
+  ): Promise<boolean> {
     try {
       await this.begin();
-      
+
       // 1. Load account with pending transactions
-      const account = await this.accountRepo.findById(EntityId.fromString(accountId));
+      const account = await this.accountRepo.findById(
+        EntityId.fromString(accountId)
+      );
       if (!account) {
         throw new Error('Account not found');
       }
-      
+
       // 2. Check for pending transactions
       const pendingTransactions = await this.transactionRepo.find({
         where: [
           { field: 'accountId', operator: 'eq', value: accountId },
-          { field: 'status', operator: 'eq', value: 'pending', logical: 'AND' }
-        ]
+          { field: 'status', operator: 'eq', value: 'pending', logical: 'AND' },
+        ],
       });
-      
+
       if (pendingTransactions.length > 0) {
         throw new Error('Cannot close account with pending transactions');
       }
-      
+
       // 3. Zero out account balance if not zero
       if (account.balance !== 0) {
         const zeroingTransaction = {
@@ -213,18 +238,18 @@ export class FinancialUnitOfWork extends UnitOfWork {
           status: 'completed',
           createdAt: new Date(),
           updatedAt: new Date(),
-          version: 1
+          version: 1,
         } as Transaction;
-        
+
         await this.transactionRepo.create(zeroingTransaction);
-        
+
         // Update account balance to zero
         await this.accountRepo.update(EntityId.fromString(accountId), {
           balance: 0,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
       }
-      
+
       // 4. Mark account as closed
       await this.accountRepo.update(EntityId.fromString(accountId), {
         status: 'closed',
@@ -232,9 +257,9 @@ export class FinancialUnitOfWork extends UnitOfWork {
         closureReason: reason,
         closedBy: userId,
         isActive: false,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
-      
+
       // 5. Create closure audit log
       await this.auditRepo.create({
         id: EntityId.generate().value,
@@ -243,22 +268,31 @@ export class FinancialUnitOfWork extends UnitOfWork {
         action: 'ARCHIVE',
         userId,
         changes: [
-          { field: 'status', oldValue: account.status, newValue: 'closed', changeType: 'UPDATE' },
-          { field: 'closureReason', oldValue: null, newValue: reason, changeType: 'ADD' }
+          {
+            field: 'status',
+            oldValue: account.status,
+            newValue: 'closed',
+            changeType: 'UPDATE',
+          },
+          {
+            field: 'closureReason',
+            oldValue: null,
+            newValue: reason,
+            changeType: 'ADD',
+          },
         ],
         metadata: {
           source: 'account-closure-process',
           reason,
-          finalBalance: account.balance
+          finalBalance: account.balance,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
-      
+
       await this.commit();
       return true;
-      
     } catch (error) {
       await this.rollback();
       console.error('Account closure failed:', error.message);
@@ -270,28 +304,27 @@ export class FinancialUnitOfWork extends UnitOfWork {
   async processComplexTransaction(operations: any[]): Promise<any> {
     try {
       await this.begin();
-      
+
       const results = [];
       let savepointCount = 0;
-      
+
       for (const operation of operations) {
         const savepointName = `sp_${++savepointCount}`;
-        
+
         try {
           // ✅ FOCUS: Create savepoint for nested transaction
           await this.createSavepoint(savepointName);
-          
+
           // Process individual operation
           const result = await this.processOperation(operation);
           results.push(result);
-          
+
           // Release savepoint on success
           await this.releaseSavepoint(savepointName);
-          
         } catch (operationError) {
           // ✅ FOCUS: Rollback to savepoint on operation failure
           await this.rollbackToSavepoint(savepointName);
-          
+
           // Decide whether to continue or fail entire transaction
           if (operation.critical) {
             throw operationError;
@@ -300,10 +333,9 @@ export class FinancialUnitOfWork extends UnitOfWork {
           }
         }
       }
-      
+
       await this.commit();
       return { success: true, results };
-      
     } catch (error) {
       await this.rollback();
       return { success: false, error: error.message };
@@ -313,14 +345,14 @@ export class FinancialUnitOfWork extends UnitOfWork {
   // ✅ FOCUS: Repository coordination methods
   async getModifiedEntities(): Promise<{ [repositoryName: string]: any[] }> {
     const modifiedEntities = {};
-    
+
     for (const [name, repository] of this.repositories) {
       const modifications = await this.getRepositoryModifications(name);
       if (modifications.length > 0) {
         modifiedEntities[name] = modifications;
       }
     }
-    
+
     return modifiedEntities;
   }
 
@@ -330,7 +362,7 @@ export class FinancialUnitOfWork extends UnitOfWork {
       startTime: this.getTransactionStartTime(),
       repositoriesInvolved: Array.from(this.repositories.keys()),
       operationsCount: await this.getOperationsCount(),
-      modifiedEntitiesCount: await this.getTotalModifiedEntitiesCount()
+      modifiedEntitiesCount: await this.getTotalModifiedEntitiesCount(),
     };
   }
 
@@ -343,11 +375,11 @@ export class FinancialUnitOfWork extends UnitOfWork {
     if (sourceAccount.balance < request.amount) {
       throw new Error('Insufficient funds');
     }
-    
+
     if (!sourceAccount.isActive || !targetAccount.isActive) {
       throw new Error('One or more accounts are inactive');
     }
-    
+
     if (sourceAccount.id === targetAccount.id) {
       throw new Error('Cannot transfer to the same account');
     }
@@ -369,11 +401,11 @@ export class FinancialUnitOfWork extends UnitOfWork {
       metadata: {
         transferId: context.transactionId,
         targetAccountId: request.targetAccountId,
-        initiatedBy: context.userId
+        initiatedBy: context.userId,
       },
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     return await this.transactionRepo.create(transaction);
@@ -395,11 +427,11 @@ export class FinancialUnitOfWork extends UnitOfWork {
       metadata: {
         transferId: context.transactionId,
         sourceAccountId: request.sourceAccountId,
-        initiatedBy: context.userId
+        initiatedBy: context.userId,
       },
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     return await this.transactionRepo.create(transaction);
@@ -411,12 +443,15 @@ export class FinancialUnitOfWork extends UnitOfWork {
     context: TransactionContext
   ): Promise<Account> {
     const newBalance = account.balance + amount;
-    
-    const updated = await this.accountRepo.update(EntityId.fromString(account.id), {
-      balance: newBalance,
-      lastTransactionAt: new Date(),
-      updatedAt: new Date()
-    });
+
+    const updated = await this.accountRepo.update(
+      EntityId.fromString(account.id),
+      {
+        balance: newBalance,
+        lastTransactionAt: new Date(),
+        updatedAt: new Date(),
+      }
+    );
 
     if (!updated) {
       throw new Error(`Failed to update account balance: ${account.id}`);
@@ -425,7 +460,10 @@ export class FinancialUnitOfWork extends UnitOfWork {
     return updated;
   }
 
-  private createTransactionContext(userId?: string, transactionId?: string): TransactionContext {
+  private createTransactionContext(
+    userId?: string,
+    transactionId?: string
+  ): TransactionContext {
     return {
       transactionId: transactionId || EntityId.generate().value,
       userId,
@@ -433,8 +471,8 @@ export class FinancialUnitOfWork extends UnitOfWork {
       correlationId: `corr_${Date.now()}`,
       metadata: {
         source: 'financial-uow',
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
@@ -453,19 +491,24 @@ export class FinancialUnitOfWork extends UnitOfWork {
         action: 'UPDATE',
         userId: context.userId || 'system',
         changes: [
-          { field: 'balance', oldValue: null, newValue: 'decreased', changeType: 'UPDATE' }
+          {
+            field: 'balance',
+            oldValue: null,
+            newValue: 'decreased',
+            changeType: 'UPDATE',
+          },
         ],
         metadata: {
           transactionId: debitTx.id,
           transferId: context.transactionId,
           amount: request.amount,
-          direction: 'outbound'
+          direction: 'outbound',
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       }),
-      
+
       this.auditRepo.create({
         id: EntityId.generate().value,
         entityType: 'Account',
@@ -473,29 +516,37 @@ export class FinancialUnitOfWork extends UnitOfWork {
         action: 'UPDATE',
         userId: context.userId || 'system',
         changes: [
-          { field: 'balance', oldValue: null, newValue: 'increased', changeType: 'UPDATE' }
+          {
+            field: 'balance',
+            oldValue: null,
+            newValue: 'increased',
+            changeType: 'UPDATE',
+          },
         ],
         metadata: {
           transactionId: creditTx.id,
           transferId: context.transactionId,
           amount: request.amount,
-          direction: 'inbound'
+          direction: 'inbound',
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
-      })
+        version: 1,
+      }),
     ]);
   }
 
-  private async processIndividualPayment(payment: TransferRequest, batchId: string): Promise<TransactionResult> {
+  private async processIndividualPayment(
+    payment: TransferRequest,
+    batchId: string
+  ): Promise<TransactionResult> {
     // Implementation similar to processMoneyTransfer but optimized for batch processing
     // Returns individual payment result
     return {
       success: true,
       transactionId: payment.id,
       batchId,
-      processedAt: new Date()
+      processedAt: new Date(),
     };
   }
 
@@ -517,7 +568,7 @@ async function demonstrateUnitOfWork() {
   const accountRepo = new AccountRepository();
   const transactionRepo = new TransactionRepository();
   const auditRepo = new AuditLogRepository();
-  
+
   const uow = new FinancialUnitOfWork(accountRepo, transactionRepo, auditRepo);
 
   // Money transfer example
@@ -525,13 +576,13 @@ async function demonstrateUnitOfWork() {
     id: 'transfer-123',
     sourceAccountId: 'account-1',
     targetAccountId: 'account-2',
-    amount: 1000.00,
+    amount: 1000.0,
     description: 'Salary payment',
-    userId: 'user-123'
+    userId: 'user-123',
   };
 
   const result = await uow.processMoneyTransfer(transferRequest);
-  
+
   if (result.success) {
     console.log('Transfer completed:', result.transactionId);
     console.log('Source balance:', result.sourceAccountBalance);
@@ -542,9 +593,30 @@ async function demonstrateUnitOfWork() {
 
   // Batch payments example
   const batchPayments: TransferRequest[] = [
-    { id: '1', sourceAccountId: 'company-account', targetAccountId: 'emp-1', amount: 5000, description: 'Salary', userId: 'hr-system' },
-    { id: '2', sourceAccountId: 'company-account', targetAccountId: 'emp-2', amount: 4500, description: 'Salary', userId: 'hr-system' },
-    { id: '3', sourceAccountId: 'company-account', targetAccountId: 'emp-3', amount: 6000, description: 'Salary', userId: 'hr-system' }
+    {
+      id: '1',
+      sourceAccountId: 'company-account',
+      targetAccountId: 'emp-1',
+      amount: 5000,
+      description: 'Salary',
+      userId: 'hr-system',
+    },
+    {
+      id: '2',
+      sourceAccountId: 'company-account',
+      targetAccountId: 'emp-2',
+      amount: 4500,
+      description: 'Salary',
+      userId: 'hr-system',
+    },
+    {
+      id: '3',
+      sourceAccountId: 'company-account',
+      targetAccountId: 'emp-3',
+      amount: 6000,
+      description: 'Salary',
+      userId: 'hr-system',
+    },
   ];
 
   const batchResults = await uow.processBatchPayments(batchPayments);
@@ -553,19 +625,22 @@ async function demonstrateUnitOfWork() {
 ```
 
 ## Key Features
+
 - Atomic operations across multiple repositories and aggregates
-- Transaction savepoint management for complex nested operations  
+- Transaction savepoint management for complex nested operations
 - Comprehensive error handling with automatic rollback
 - Audit trail integration within transaction boundaries
 - Batch processing with all-or-nothing semantics
 - Repository coordination and modification tracking
 
 ## Common Pitfalls
+
 - Not properly handling partial failures in batch operations
 - Forgetting to rollback on errors, leading to inconsistent state
 - Creating too large transaction scopes (long-running transactions)
 - Not considering deadlock scenarios in concurrent environments
 
 ## Related Examples
+
 - [Specification Pattern](example-2.md) - Advanced querying with specifications
 - [Multi-Tenant Repository](example-3.md) - Tenant-aware data access patterns

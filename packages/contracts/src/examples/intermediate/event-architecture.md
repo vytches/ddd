@@ -1,19 +1,22 @@
 # Advanced Event Architecture
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Intermediate
-**Domain**: Foundation
-**Patterns**: event-persistence, event-replay, event-store-interfaces
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**:
+Intermediate **Domain**: Foundation **Patterns**: event-persistence,
+event-replay, event-store-interfaces **Dependencies**: @vytches-ddd/contracts
 
 ## Description
 
-Advanced event architecture interfaces provide the foundation for sophisticated event-driven systems including event persistence, replay capabilities, store patterns, and advanced event bus implementations. These interfaces enable event sourcing, CQRS, and complex event processing scenarios.
+Advanced event architecture interfaces provide the foundation for sophisticated
+event-driven systems including event persistence, replay capabilities, store
+patterns, and advanced event bus implementations. These interfaces enable event
+sourcing, CQRS, and complex event processing scenarios.
 
 ## Business Context
 
-Enterprise applications require persistent event storage, event replay for debugging and auditing, advanced querying capabilities, and robust event processing pipelines. These interfaces provide the contracts needed to build scalable, auditable, and recoverable event-driven systems.
+Enterprise applications require persistent event storage, event replay for
+debugging and auditing, advanced querying capabilities, and robust event
+processing pipelines. These interfaces provide the contracts needed to build
+scalable, auditable, and recoverable event-driven systems.
 
 ## Event Persistence Interfaces
 
@@ -21,13 +24,13 @@ Enterprise applications require persistent event storage, event replay for debug
 
 ```typescript
 // src/infrastructure/events/event-store-interfaces.ts
-import { 
-  IEventStore, 
-  IEventStream, 
+import {
+  IEventStore,
+  IEventStream,
   IEventStoreQuery,
   EventStoreOptions,
   StoredEvent,
-  StreamMetadata 
+  StreamMetadata,
 } from '@vytches-ddd/contracts';
 
 // Core event store implementation
@@ -45,7 +48,7 @@ export class AdvancedEventStore implements IEventStore {
     expectedVersion?: number
   ): Promise<void> {
     const stream = await this.getOrCreateStream(streamId);
-    
+
     // Optimistic concurrency control
     if (expectedVersion !== undefined && stream.version !== expectedVersion) {
       throw new ConcurrencyError(
@@ -67,21 +70,21 @@ export class AdvancedEventStore implements IEventStore {
           ...event.metadata,
           position: stream.version + i + 1,
           timestamp: event.occurredAt,
-          checksum: await this.calculateChecksum(event)
+          checksum: await this.calculateChecksum(event),
         },
-        timestamp: event.occurredAt
+        timestamp: event.occurredAt,
       };
       storedEvents.push(storedEvent);
     }
 
     // Store events atomically
     await this.storage.appendEvents(streamId, storedEvents, stream.version);
-    
+
     // Update stream metadata
     await this.updateStreamMetadata(streamId, {
       version: stream.version + events.length,
       eventCount: stream.eventCount + events.length,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -94,7 +97,7 @@ export class AdvancedEventStore implements IEventStore {
     const query: IEventStoreQuery = {
       streamId,
       fromVersion: fromVersion || 0,
-      maxCount: maxCount || this.options.defaultReadCount || 100
+      maxCount: maxCount || this.options.defaultReadCount || 100,
     };
 
     return await this.storage.readEvents(query);
@@ -107,7 +110,7 @@ export class AdvancedEventStore implements IEventStore {
   ): Promise<StoredEvent[]> {
     const query: IEventStoreQuery = {
       fromPosition: fromPosition || 0,
-      maxCount: maxCount || this.options.defaultReadCount || 100
+      maxCount: maxCount || this.options.defaultReadCount || 100,
     };
 
     return await this.storage.readAllEvents(query);
@@ -156,7 +159,7 @@ export class AdvancedEventStore implements IEventStore {
         version: metadata.version,
         eventCount: metadata.eventCount,
         created: metadata.created,
-        lastUpdated: metadata.lastUpdated
+        lastUpdated: metadata.lastUpdated,
       };
     }
 
@@ -166,7 +169,7 @@ export class AdvancedEventStore implements IEventStore {
       version: 0,
       eventCount: 0,
       created: new Date(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     await this.storage.createStream(streamId, stream);
@@ -181,9 +184,9 @@ export class AdvancedEventStore implements IEventStore {
     const data = JSON.stringify({
       eventType: event.eventType,
       aggregateId: event.aggregateId,
-      payload: event.payload
+      payload: event.payload,
     });
-    
+
     // Simple checksum (in production, use proper hashing)
     let checksum = 0;
     for (let i = 0; i < data.length; i++) {
@@ -214,7 +217,9 @@ class ConcurrencyError extends Error {
 // src/infrastructure/events/persistence-handler.ts
 import { IEventPersistenceHandler, IDomainEvent } from '@vytches-ddd/contracts';
 
-export class DatabaseEventPersistenceHandler implements IEventPersistenceHandler {
+export class DatabaseEventPersistenceHandler
+  implements IEventPersistenceHandler
+{
   constructor(
     private readonly eventStore: IEventStore,
     private readonly logger: ILogger,
@@ -235,17 +240,17 @@ export class DatabaseEventPersistenceHandler implements IEventPersistenceHandler
     for (const [streamId, streamEvents] of eventsByStream) {
       try {
         await this.persistStreamEvents(streamId, streamEvents);
-        
+
         this.logger.debug('Events persisted successfully', {
           streamId,
           eventCount: streamEvents.length,
-          eventTypes: streamEvents.map(e => e.eventType)
+          eventTypes: streamEvents.map(e => e.eventType),
         });
       } catch (error) {
         this.logger.error('Failed to persist events', {
           streamId,
           eventCount: streamEvents.length,
-          error: error.message
+          error: error.message,
         });
         throw error;
       }
@@ -291,7 +296,9 @@ export class DatabaseEventPersistenceHandler implements IEventPersistenceHandler
     return subscription;
   }
 
-  private groupEventsByStream(events: IDomainEvent[]): Map<string, IDomainEvent[]> {
+  private groupEventsByStream(
+    events: IDomainEvent[]
+  ): Map<string, IDomainEvent[]> {
     const eventsByStream = new Map<string, IDomainEvent[]>();
 
     for (const event of events) {
@@ -317,7 +324,9 @@ export class DatabaseEventPersistenceHandler implements IEventPersistenceHandler
     await this.eventStore.appendToStream(streamId, events, expectedVersion);
   }
 
-  private async deserializeEvent(storedEvent: StoredEvent): Promise<IDomainEvent> {
+  private async deserializeEvent(
+    storedEvent: StoredEvent
+  ): Promise<IDomainEvent> {
     // In a real implementation, you'd use a proper serializer
     return JSON.parse(storedEvent.data);
   }
@@ -345,7 +354,11 @@ interface EventSubscription {
 
 ```typescript
 // src/infrastructure/events/event-replay.ts
-import { IEventReplay, ReplayOptions, ReplayResult } from '@vytches-ddd/contracts';
+import {
+  IEventReplay,
+  ReplayOptions,
+  ReplayResult,
+} from '@vytches-ddd/contracts';
 
 export class EventReplayService implements IEventReplay {
   constructor(
@@ -372,15 +385,19 @@ export class EventReplayService implements IEventReplay {
         async (event: IDomainEvent) => {
           try {
             // Apply filters if specified
-            if (options.eventTypeFilter && 
-                !options.eventTypeFilter.includes(event.eventType)) {
+            if (
+              options.eventTypeFilter &&
+              !options.eventTypeFilter.includes(event.eventType)
+            ) {
               return;
             }
 
             if (options.timeRangeFilter) {
               const eventTime = event.occurredAt.getTime();
-              if (eventTime < options.timeRangeFilter.from.getTime() ||
-                  eventTime > options.timeRangeFilter.to.getTime()) {
+              if (
+                eventTime < options.timeRangeFilter.from.getTime() ||
+                eventTime > options.timeRangeFilter.to.getTime()
+              ) {
                 return;
               }
             }
@@ -389,7 +406,7 @@ export class EventReplayService implements IEventReplay {
             if (options.dryRun) {
               this.logger.debug('Would replay event', {
                 eventType: event.eventType,
-                aggregateId: event.aggregateId
+                aggregateId: event.aggregateId,
               });
             } else {
               await this.eventBus.publish(event);
@@ -401,13 +418,12 @@ export class EventReplayService implements IEventReplay {
             if (options.onProgress) {
               await options.onProgress(eventsReplayed, event);
             }
-
           } catch (error) {
             const replayError = new Error(
               `Failed to replay event ${event.eventType}: ${error.message}`
             );
             errors.push(replayError);
-            
+
             if (!options.continueOnError) {
               throw replayError;
             }
@@ -420,19 +436,18 @@ export class EventReplayService implements IEventReplay {
         eventsReplayed,
         errors,
         duration: Date.now() - startTime,
-        aggregateId
+        aggregateId,
       };
 
       this.logger.info('Aggregate replay completed', result);
       return result;
-
     } catch (error) {
       const result: ReplayResult = {
         success: false,
         eventsReplayed,
         errors: [...errors, error],
         duration: Date.now() - startTime,
-        aggregateId
+        aggregateId,
       };
 
       this.logger.error('Aggregate replay failed', result);
@@ -443,7 +458,7 @@ export class EventReplayService implements IEventReplay {
   // Replay events across all aggregates
   async replayAll(options: ReplayOptions = {}): Promise<ReplayResult[]> {
     const results: ReplayResult[] = [];
-    
+
     // This would need to be implemented based on your event store's
     // ability to list all streams/aggregates
     const aggregateIds = await this.getAllAggregateIds();
@@ -472,7 +487,10 @@ export class EventReplayService implements IEventReplay {
     let errors: Error[] = [];
 
     try {
-      this.logger.info('Starting projection replay', { projectionName, options });
+      this.logger.info('Starting projection replay', {
+        projectionName,
+        options,
+      });
 
       // Read all events in chronological order
       let fromPosition = options.fromPosition || 0;
@@ -480,7 +498,10 @@ export class EventReplayService implements IEventReplay {
       let hasMore = true;
 
       while (hasMore) {
-        const events = await this.eventStore.readAllEvents(fromPosition, batchSize);
+        const events = await this.eventStore.readAllEvents(
+          fromPosition,
+          batchSize
+        );
         hasMore = events.length === batchSize;
 
         for (const storedEvent of events) {
@@ -488,8 +509,10 @@ export class EventReplayService implements IEventReplay {
             const domainEvent = await this.deserializeEvent(storedEvent);
 
             // Apply filters
-            if (options.eventTypeFilter && 
-                !options.eventTypeFilter.includes(domainEvent.eventType)) {
+            if (
+              options.eventTypeFilter &&
+              !options.eventTypeFilter.includes(domainEvent.eventType)
+            ) {
               continue;
             }
 
@@ -505,13 +528,12 @@ export class EventReplayService implements IEventReplay {
             if (options.onProgress) {
               await options.onProgress(eventsReplayed, domainEvent);
             }
-
           } catch (error) {
             const replayError = new Error(
               `Failed to replay event for projection ${projectionName}: ${error.message}`
             );
             errors.push(replayError);
-            
+
             if (!options.continueOnError) {
               throw replayError;
             }
@@ -524,19 +546,18 @@ export class EventReplayService implements IEventReplay {
         eventsReplayed,
         errors,
         duration: Date.now() - startTime,
-        projectionName
+        projectionName,
       };
 
       this.logger.info('Projection replay completed', result);
       return result;
-
     } catch (error) {
       const result: ReplayResult = {
         success: false,
         eventsReplayed,
         errors: [...errors, error],
         duration: Date.now() - startTime,
-        projectionName
+        projectionName,
       };
 
       this.logger.error('Projection replay failed', result);
@@ -550,7 +571,9 @@ export class EventReplayService implements IEventReplay {
     return [];
   }
 
-  private async deserializeEvent(storedEvent: StoredEvent): Promise<IDomainEvent> {
+  private async deserializeEvent(
+    storedEvent: StoredEvent
+  ): Promise<IDomainEvent> {
     // In a real implementation, use proper serializer
     return JSON.parse(storedEvent.data);
   }
@@ -594,13 +617,16 @@ class EventStreamSubscription implements EventSubscription {
 
     while (this.isActive) {
       try {
-        const events = await this.eventStore.readAllEvents(currentPosition, batchSize);
-        
+        const events = await this.eventStore.readAllEvents(
+          currentPosition,
+          batchSize
+        );
+
         for (const storedEvent of events) {
           if (!this.isActive) break;
 
           const domainEvent = await this.deserializeEvent(storedEvent);
-          
+
           // Apply filter if specified
           if (this.options.filter && !this.options.filter(domainEvent)) {
             continue;
@@ -614,15 +640,18 @@ class EventStreamSubscription implements EventSubscription {
         if (events.length === 0) {
           await this.sleep(1000); // Wait 1 second
         }
-
       } catch (error) {
-        this.logger.error('Error in event subscription', { error: error.message });
+        this.logger.error('Error in event subscription', {
+          error: error.message,
+        });
         await this.sleep(5000); // Wait 5 seconds before retrying
       }
     }
   }
 
-  private async deserializeEvent(storedEvent: StoredEvent): Promise<IDomainEvent> {
+  private async deserializeEvent(
+    storedEvent: StoredEvent
+  ): Promise<IDomainEvent> {
     return JSON.parse(storedEvent.data);
   }
 
@@ -649,21 +678,20 @@ export class PersistentEventBus implements IEventBus {
     try {
       // First persist the event
       await this.persistenceHandler.persistEvent(event);
-      
+
       // Then publish to in-memory handlers
       await this.inMemoryBus.publish(event);
-      
+
       this.logger.debug('Event published and persisted', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
-        correlationId: event.metadata.correlationId
+        correlationId: event.metadata.correlationId,
       });
-
     } catch (error) {
       this.logger.error('Failed to publish event', {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -676,19 +704,18 @@ export class PersistentEventBus implements IEventBus {
     try {
       // Persist all events atomically
       await this.persistenceHandler.persistEvents(events);
-      
+
       // Publish to in-memory handlers
       await this.inMemoryBus.publishMany(events);
-      
+
       this.logger.info('Events batch published and persisted', {
         eventCount: events.length,
-        eventTypes: events.map(e => e.eventType)
+        eventTypes: events.map(e => e.eventType),
       });
-
     } catch (error) {
       this.logger.error('Failed to publish event batch', {
         eventCount: events.length,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

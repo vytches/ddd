@@ -1,34 +1,42 @@
 # CQRS Integration Logging
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging + @vytches-ddd/cqrs
-**Complexity**: basic
-**Domain**: Command/Query Logging
-**Patterns**: Decorators, middleware, execution timing
-**Dependencies**: @vytches-ddd/logging, @vytches-ddd/cqrs
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/cqrs
+**Complexity**: basic **Domain**: Command/Query Logging **Patterns**:
+Decorators, middleware, execution timing **Dependencies**: @vytches-ddd/logging,
+@vytches-ddd/cqrs
 
 ## Description
 
-Automatic command and query execution logging using decorators. This example demonstrates how to integrate @vytches-ddd/logging with CQRS patterns for comprehensive operation tracking, performance monitoring, and debugging.
+Automatic command and query execution logging using decorators. This example
+demonstrates how to integrate @vytches-ddd/logging with CQRS patterns for
+comprehensive operation tracking, performance monitoring, and debugging.
 
 ## Business Context
 
-CQRS applications need automatic logging of all commands and queries for auditing, performance monitoring, and debugging. The logging should capture execution context, timing, payloads (with sensitive data masked), and results without cluttering business logic.
+CQRS applications need automatic logging of all commands and queries for
+auditing, performance monitoring, and debugging. The logging should capture
+execution context, timing, payloads (with sensitive data masked), and results
+without cluttering business logic.
 
 ## Code Example
 
 ```typescript
 // cqrs-logging-integration.ts
-import { 
+import {
   Logger,
   LogCommands,
   LogQueries,
   LogCQRS,
-  CQRSLoggingOptions
+  CQRSLoggingOptions,
 } from '@vytches-ddd/logging';
-import { CommandHandler, QueryHandler, ICommand, IQuery } from '@vytches-ddd/cqrs';
+import {
+  CommandHandler,
+  QueryHandler,
+  ICommand,
+  IQuery,
+} from '@vytches-ddd/cqrs';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   CreateUserCommand,
   UpdateUserCommand,
   GetUserQuery,
@@ -39,7 +47,7 @@ import {
   GetOrderHistoryQuery,
   UserData,
   OrderData,
-  ServiceResponse
+  ServiceResponse,
 } from '../types'; // From your application
 
 // ✅ FOCUS: Command handler with automatic logging
@@ -47,7 +55,7 @@ import {
   includePayload: true,
   logLevel: 'info',
   measurePerformance: true,
-  maskSensitiveData: true
+  maskSensitiveData: true,
 })
 @CommandHandler(CreateUserCommand)
 export class CreateUserCommandHandler {
@@ -58,7 +66,7 @@ export class CreateUserCommandHandler {
     // - Command payload logged (with sensitive data masked)
     // - Execution time measured
     // - Success/failure automatically tracked
-    
+
     try {
       // Business logic
       const user: UserData = {
@@ -68,17 +76,16 @@ export class CreateUserCommandHandler {
         role: command.role,
         createdAt: new Date(),
         isActive: true,
-        preferences: command.initialPreferences || {}
+        preferences: command.initialPreferences || {},
       };
 
       // Additional business logging if needed
       this.logger.info('User validation passed', {
         email: user.email, // Will be masked
-        role: user.role
+        role: user.role,
       });
 
       return Result.success(user);
-
     } catch (error) {
       // Error automatically logged by decorator
       return Result.fail(error);
@@ -94,7 +101,7 @@ export class CreateUserCommandHandler {
   condition: (command: UpdateUserCommand) => {
     // Only log updates that change sensitive fields
     return !!(command.email || command.preferences);
-  }
+  },
 })
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserCommandHandler {
@@ -103,7 +110,7 @@ export class UpdateUserCommandHandler {
   async execute(command: UpdateUserCommand): Promise<Result<UserData, Error>> {
     this.logger.debug('Processing user update', {
       userId: command.userId,
-      fieldsToUpdate: Object.keys(command).filter(k => k !== 'userId')
+      fieldsToUpdate: Object.keys(command).filter(k => k !== 'userId'),
     });
 
     try {
@@ -115,11 +122,10 @@ export class UpdateUserCommandHandler {
         role: 'user',
         createdAt: new Date(),
         isActive: true,
-        preferences: command.preferences || {}
+        preferences: command.preferences || {},
       };
 
       return Result.success(updatedUser);
-
     } catch (error) {
       return Result.fail(error);
     }
@@ -131,7 +137,7 @@ export class UpdateUserCommandHandler {
   includePayload: true,
   logLevel: 'debug',
   measurePerformance: true,
-  performanceThreshold: 100 // Log warning if query takes > 100ms
+  performanceThreshold: 100, // Log warning if query takes > 100ms
 })
 @QueryHandler(GetUserQuery)
 export class GetUserQueryHandler {
@@ -139,7 +145,7 @@ export class GetUserQueryHandler {
 
   async execute(query: GetUserQuery): Promise<Result<UserData | null, Error>> {
     // ⭐ FOCUS: Query automatically logged with timing
-    
+
     try {
       // Simulate database query
       await this.simulateSlowQuery(50); // 50ms delay
@@ -156,11 +162,10 @@ export class GetUserQueryHandler {
         role: 'user',
         createdAt: new Date(),
         isActive: true,
-        preferences: query.includePreferences ? { theme: 'dark' } : undefined
+        preferences: query.includePreferences ? { theme: 'dark' } : undefined,
       };
 
       return Result.success(user);
-
     } catch (error) {
       return Result.fail(error);
     }
@@ -176,26 +181,30 @@ export class GetUserQueryHandler {
   includePayload: true,
   logLevel: 'debug',
   measurePerformance: true,
-  includeResultCount: true // Log number of results
+  includeResultCount: true, // Log number of results
 })
 @QueryHandler(GetUsersByRoleQuery)
 export class GetUsersByRoleQueryHandler {
   private logger = Logger.forContext();
 
-  async execute(query: GetUsersByRoleQuery): Promise<Result<UserData[], Error>> {
+  async execute(
+    query: GetUsersByRoleQuery
+  ): Promise<Result<UserData[], Error>> {
     try {
       // Simulate fetching users by role
-      const users: UserData[] = this.generateMockUsers(query.role, query.limit || 10);
+      const users: UserData[] = this.generateMockUsers(
+        query.role,
+        query.limit || 10
+      );
 
       // ⭐ FOCUS: Result count automatically logged
       this.logger.debug('Users fetched by role', {
         role: query.role,
         requestedLimit: query.limit,
-        actualCount: users.length
+        actualCount: users.length,
       });
 
       return Result.success(users);
-
     } catch (error) {
       return Result.fail(error);
     }
@@ -208,7 +217,7 @@ export class GetUsersByRoleQueryHandler {
       email: `user${i}@example.com`,
       role: role,
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     }));
   }
 }
@@ -224,20 +233,22 @@ export class GetUsersByRoleQueryHandler {
     itemCount: command.items.length,
     paymentMethod: command.paymentMethod,
     // Add business-specific context
-    orderType: command.items.length > 5 ? 'bulk' : 'standard'
-  })
+    orderType: command.items.length > 5 ? 'bulk' : 'standard',
+  }),
 })
 @CommandHandler(CreateOrderCommand)
 export class CreateOrderCommandHandler {
   private logger = Logger.forContext();
 
-  async execute(command: CreateOrderCommand): Promise<Result<OrderData, Error>> {
+  async execute(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderData, Error>> {
     // ⭐ FOCUS: Custom log data added to automatic logging
-    
+
     try {
       // Calculate order total
       const totalAmount = command.items.reduce(
-        (sum, item) => sum + (item.quantity * 10), // Mock price
+        (sum, item) => sum + item.quantity * 10, // Mock price
         0
       );
 
@@ -249,7 +260,7 @@ export class CreateOrderCommandHandler {
           productId: item.productId,
           name: 'Product',
           quantity: item.quantity,
-          price: 10
+          price: 10,
         })),
         totalAmount,
         status: 'pending',
@@ -258,18 +269,20 @@ export class CreateOrderCommandHandler {
         paymentInfo: {
           method: command.paymentMethod,
           // Sensitive data will be masked
-          cardNumber: command.paymentMethod === 'credit-card' ? '1234-5678-9012-3456' : undefined
-        }
+          cardNumber:
+            command.paymentMethod === 'credit-card'
+              ? '1234-5678-9012-3456'
+              : undefined,
+        },
       };
 
       this.logger.info('Order created successfully', {
         orderId: order.id,
         totalAmount: order.totalAmount,
-        itemCount: order.items.length
+        itemCount: order.items.length,
       });
 
       return Result.success(order);
-
     } catch (error) {
       return Result.fail(error);
     }
@@ -281,25 +294,27 @@ export class CreateOrderCommandHandler {
   commands: {
     includePayload: true,
     logLevel: 'info',
-    measurePerformance: true
+    measurePerformance: true,
   },
   queries: {
     includePayload: true,
     logLevel: 'debug',
-    measurePerformance: true
-  }
+    measurePerformance: true,
+  },
 })
 export class OrderService {
   private logger = Logger.forContext();
 
   @CommandHandler(ProcessOrderCommand)
-  async processOrder(command: ProcessOrderCommand): Promise<Result<OrderData, Error>> {
+  async processOrder(
+    command: ProcessOrderCommand
+  ): Promise<Result<OrderData, Error>> {
     // ⭐ FOCUS: Automatically logged as command
-    
+
     try {
       this.logger.info('Starting order processing', {
         orderId: command.orderId,
-        processingNotes: command.processingNotes
+        processingNotes: command.processingNotes,
       });
 
       // Simulate order processing
@@ -310,24 +325,25 @@ export class OrderService {
         totalAmount: 100,
         status: 'processing',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       return Result.success(processedOrder);
-
     } catch (error) {
       this.logger.error('Order processing failed', {
         orderId: command.orderId,
-        error: error
+        error: error,
       });
       return Result.fail(error);
     }
   }
 
   @QueryHandler(GetOrderQuery)
-  async getOrder(query: GetOrderQuery): Promise<Result<OrderData | null, Error>> {
+  async getOrder(
+    query: GetOrderQuery
+  ): Promise<Result<OrderData | null, Error>> {
     // ⭐ FOCUS: Automatically logged as query
-    
+
     try {
       if (query.orderId === 'not-found') {
         return Result.success(null);
@@ -336,21 +352,24 @@ export class OrderService {
       const order: OrderData = {
         id: query.orderId,
         customerId: 'customer-123',
-        items: query.includeItems ? [{
-          id: 'item-1',
-          productId: 'product-1',
-          name: 'Sample Product',
-          quantity: 2,
-          price: 50
-        }] : [],
+        items: query.includeItems
+          ? [
+              {
+                id: 'item-1',
+                productId: 'product-1',
+                name: 'Sample Product',
+                quantity: 2,
+                price: 50,
+              },
+            ]
+          : [],
         totalAmount: 100,
         status: 'delivered',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       return Result.success(order);
-
     } catch (error) {
       return Result.fail(error);
     }
@@ -364,28 +383,30 @@ export class OrderService {
   measurePerformance: true,
   performanceThreshold: 200,
   warnOnSlowQuery: true,
-  slowQueryThreshold: 500
+  slowQueryThreshold: 500,
 })
 @QueryHandler(GetOrderHistoryQuery)
 export class GetOrderHistoryQueryHandler {
   private logger = Logger.forContext();
 
-  async execute(query: GetOrderHistoryQuery): Promise<Result<OrderData[], Error>> {
+  async execute(
+    query: GetOrderHistoryQuery
+  ): Promise<Result<OrderData[], Error>> {
     const queryLogger = this.logger.withContext({
       queryType: 'order-history',
-      customerId: query.customerId
+      customerId: query.customerId,
     });
 
     try {
       queryLogger.debug('Fetching order history', {
         dateRange: {
           start: query.startDate,
-          end: query.endDate
+          end: query.endDate,
         },
         filters: {
           status: query.status,
-          limit: query.limit
-        }
+          limit: query.limit,
+        },
       });
 
       // Simulate complex query
@@ -399,15 +420,14 @@ export class GetOrderHistoryQueryHandler {
       // ⭐ FOCUS: Performance automatically tracked and warned if slow
       queryLogger.info('Order history fetched', {
         resultCount: orders.length,
-        dateRange: `${query.startDate?.toISOString()} - ${query.endDate?.toISOString()}`
+        dateRange: `${query.startDate?.toISOString()} - ${query.endDate?.toISOString()}`,
       });
 
       return Result.success(orders);
-
     } catch (error) {
       queryLogger.error('Order history query failed', {
         error: error,
-        queryParams: query
+        queryParams: query,
       });
       return Result.fail(error);
     }
@@ -417,15 +437,22 @@ export class GetOrderHistoryQueryHandler {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private generateMockOrderHistory(customerId: string, count: number): OrderData[] {
+  private generateMockOrderHistory(
+    customerId: string,
+    count: number
+  ): OrderData[] {
     return Array.from({ length: count }, (_, i) => ({
       id: `order-${customerId}-${i}`,
       customerId,
       items: [],
       totalAmount: Math.random() * 1000,
-      status: ['pending', 'processing', 'shipped', 'delivered'][Math.floor(Math.random() * 4)] as any,
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date()
+      status: ['pending', 'processing', 'shipped', 'delivered'][
+        Math.floor(Math.random() * 4)
+      ] as any,
+      createdAt: new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+      ),
+      updatedAt: new Date(),
     }));
   }
 }
@@ -444,7 +471,7 @@ export class CQRSLoggingConfiguration {
         customSerializer: (command: any) => {
           // Custom serialization logic
           return JSON.stringify(command, null, 2);
-        }
+        },
       },
       queries: {
         includePayload: true,
@@ -453,8 +480,8 @@ export class CQRSLoggingConfiguration {
         performanceThreshold: 500, // 500ms for queries
         includeResultCount: true,
         warnOnSlowQuery: true,
-        slowQueryThreshold: 1000
-      }
+        slowQueryThreshold: 1000,
+      },
     };
 
     // Apply global configuration
@@ -463,12 +490,12 @@ export class CQRSLoggingConfiguration {
 
   static setupPerformanceMonitoring(): void {
     // Setup performance monitoring for CQRS
-    Logger.onCQRSPerformanceThresholdExceeded((event) => {
+    Logger.onCQRSPerformanceThresholdExceeded(event => {
       console.warn('Performance threshold exceeded:', {
         type: event.type,
         name: event.name,
         duration: event.duration,
-        threshold: event.threshold
+        threshold: event.threshold,
       });
 
       // Could send to monitoring service
@@ -493,8 +520,8 @@ const createUserCommand: CreateUserCommand = {
   role: 'admin',
   initialPreferences: {
     theme: 'dark',
-    notifications: true
-  }
+    notifications: true,
+  },
 };
 
 const userResult = await createUserHandler.execute(createUserCommand);
@@ -508,7 +535,7 @@ const userResult = await createUserHandler.execute(createUserCommand);
 const getUserHandler = new GetUserQueryHandler();
 const getUserQuery: GetUserQuery = {
   userId: 'user-123',
-  includePreferences: true
+  includePreferences: true,
 };
 
 const queryResult = await getUserHandler.execute(getUserQuery);
@@ -525,7 +552,7 @@ const historyQuery: GetOrderHistoryQuery = {
   startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
   endDate: new Date(),
   status: 'delivered',
-  limit: 50
+  limit: 50,
 };
 
 const historyResult = await orderHistoryHandler.execute(historyQuery);
@@ -540,7 +567,7 @@ const orderService = new OrderService();
 
 const processCommand: ProcessOrderCommand = {
   orderId: 'order-456',
-  processingNotes: 'Express shipping requested'
+  processingNotes: 'Express shipping requested',
 };
 
 const processResult = await orderService.processOrder(processCommand);
@@ -548,7 +575,7 @@ const processResult = await orderService.processOrder(processCommand);
 
 const getOrderQuery: GetOrderQuery = {
   orderId: 'order-456',
-  includeItems: true
+  includeItems: true,
 };
 
 const orderResult = await orderService.getOrder(getOrderQuery);
@@ -633,7 +660,8 @@ const orderResult = await orderService.getOrder(getOrderQuery);
 ## Best Practices
 
 - Use `@LogCommands` for all command handlers to ensure audit trail
-- Use `@LogQueries` with appropriate log levels (debug for reads, info for complex queries)
+- Use `@LogQueries` with appropriate log levels (debug for reads, info for
+  complex queries)
 - Set performance thresholds based on your application's SLAs
 - Include custom log data for business-critical context
 - Use conditional logging to reduce noise in high-frequency operations
@@ -641,8 +669,10 @@ const orderResult = await orderService.getOrder(getOrderQuery);
 
 ## Common Pitfalls
 
-- **Over-logging Query Results**: Be careful with large result sets in debug logs
-- **Missing Performance Thresholds**: Set appropriate thresholds for your use case
+- **Over-logging Query Results**: Be careful with large result sets in debug
+  logs
+- **Missing Performance Thresholds**: Set appropriate thresholds for your use
+  case
 - **Logging Sensitive Payloads**: Ensure sensitive data masking is configured
 - **Wrong Log Levels**: Use debug for queries, info for commands
 - **Missing Context**: Add custom log data for business-specific information

@@ -1,13 +1,17 @@
 # Resilience with Events Integration Implementation
 
-**Focus**: Advanced resilience patterns integrated with events system for observability  
+**Focus**: Advanced resilience patterns integrated with events system for
+observability  
 **Domain**: E-commerce Order Processing  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/utils
+**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/events, @vytches-ddd/di,
+@vytches-ddd/utils
 
 ## Business Context
 
-This example demonstrates advanced resilience patterns integrated with the events system for a comprehensive e-commerce order processing platform:
+This example demonstrates advanced resilience patterns integrated with the
+events system for a comprehensive e-commerce order processing platform:
+
 - Resilience events for monitoring and alerting
 - Event-driven circuit breaker state changes
 - Integration with order processing workflows
@@ -37,7 +41,7 @@ export class CircuitBreakerStateChangedEvent extends DomainEvent {
       newState,
       reason,
       failureCount,
-      lastFailureTime
+      lastFailureTime,
     });
   }
 }
@@ -46,7 +50,11 @@ export class ResilienceFailureEvent extends DomainEvent {
   constructor(
     public readonly serviceName: string,
     public readonly operationName: string,
-    public readonly failureType: 'timeout' | 'circuit-breaker' | 'bulkhead' | 'retry-exhausted',
+    public readonly failureType:
+      | 'timeout'
+      | 'circuit-breaker'
+      | 'bulkhead'
+      | 'retry-exhausted',
     public readonly errorMessage: string,
     public readonly attemptNumber: number,
     public readonly totalAttempts: number,
@@ -59,7 +67,7 @@ export class ResilienceFailureEvent extends DomainEvent {
       errorMessage,
       attemptNumber,
       totalAttempts,
-      context
+      context,
     });
   }
 }
@@ -68,7 +76,10 @@ export class ResilienceRecoveryEvent extends DomainEvent {
   constructor(
     public readonly serviceName: string,
     public readonly operationName: string,
-    public readonly recoveryType: 'circuit-breaker-closed' | 'retry-success' | 'manual-recovery',
+    public readonly recoveryType:
+      | 'circuit-breaker-closed'
+      | 'retry-success'
+      | 'manual-recovery',
     public readonly downDuration: number,
     public readonly successfulAttempts: number,
     public readonly context: Record<string, any>
@@ -79,7 +90,7 @@ export class ResilienceRecoveryEvent extends DomainEvent {
       recoveryType,
       downDuration,
       successfulAttempts,
-      context
+      context,
     });
   }
 }
@@ -95,19 +106,19 @@ export class ResilienceMetricsEvent extends IntegrationEvent {
       serviceName,
       metrics,
       timeWindow,
-      timestamp
+      timestamp,
     });
   }
 }
 
 // event-aware-resilience.ts
-import { 
-  CircuitBreaker, 
-  RetryStrategy, 
+import {
+  CircuitBreaker,
+  RetryStrategy,
   TimeoutStrategy,
   BulkheadStrategy,
   ResiliencePolicyBuilder,
-  ResilienceContext
+  ResilienceContext,
 } from '@vytches-ddd/resilience';
 import { UnifiedEventBus } from '@vytches-ddd/events';
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
@@ -126,13 +137,17 @@ export class EventAwareCircuitBreaker extends CircuitBreaker {
     super(config);
   }
 
-  protected onStateChange(previousState: CircuitBreakerState, newState: CircuitBreakerState, reason: string): void {
+  protected onStateChange(
+    previousState: CircuitBreakerState,
+    newState: CircuitBreakerState,
+    reason: string
+  ): void {
     this.logger.info('Circuit breaker state changed', {
       serviceName: this.serviceName,
       circuitBreakerName: this.getName(),
       previousState,
       newState,
-      reason
+      reason,
     });
 
     // Publish state change event
@@ -153,7 +168,7 @@ export class EventAwareCircuitBreaker extends CircuitBreaker {
       serviceName: this.serviceName,
       circuitBreakerName: this.getName(),
       error: error.message,
-      failureCount: this.getFailureCount()
+      failureCount: this.getFailureCount(),
     });
 
     // Publish failure event
@@ -167,7 +182,7 @@ export class EventAwareCircuitBreaker extends CircuitBreaker {
       {
         circuitBreakerName: this.getName(),
         currentState: this.getState(),
-        failureCount: this.getFailureCount()
+        failureCount: this.getFailureCount(),
       }
     );
 
@@ -179,7 +194,7 @@ export class EventAwareCircuitBreaker extends CircuitBreaker {
     if (this.getState() === 'CLOSED' && this.getFailureCount() === 0) {
       this.logger.info('Circuit breaker recovered', {
         serviceName: this.serviceName,
-        circuitBreakerName: this.getName()
+        circuitBreakerName: this.getName(),
       });
 
       // Publish recovery event
@@ -190,7 +205,7 @@ export class EventAwareCircuitBreaker extends CircuitBreaker {
         this.getDownDuration(),
         this.getSuccessCount(),
         {
-          circuitBreakerName: this.getName()
+          circuitBreakerName: this.getName(),
         }
       );
 
@@ -216,13 +231,18 @@ export class EventAwareRetryStrategy extends RetryStrategy {
     super(config);
   }
 
-  protected onRetryAttempt(attempt: number, maxAttempts: number, error: Error, context: ResilienceContext): void {
+  protected onRetryAttempt(
+    attempt: number,
+    maxAttempts: number,
+    error: Error,
+    context: ResilienceContext
+  ): void {
     this.logger.warn('Retry attempt', {
       serviceName: this.serviceName,
       operationName: context.operationName,
       attempt,
       maxAttempts,
-      error: error.message
+      error: error.message,
     });
 
     // Publish retry failure event
@@ -235,7 +255,7 @@ export class EventAwareRetryStrategy extends RetryStrategy {
       maxAttempts,
       {
         retryDelay: this.calculateDelay(attempt),
-        nextAttemptIn: this.calculateDelay(attempt + 1)
+        nextAttemptIn: this.calculateDelay(attempt + 1),
       }
     );
 
@@ -247,7 +267,7 @@ export class EventAwareRetryStrategy extends RetryStrategy {
       serviceName: this.serviceName,
       operationName: context.operationName,
       attempt,
-      totalAttempts: attempt
+      totalAttempts: attempt,
     });
 
     // Publish recovery event
@@ -258,19 +278,23 @@ export class EventAwareRetryStrategy extends RetryStrategy {
       this.calculateDelay(attempt) * attempt, // Approximate total retry time
       1,
       {
-        totalAttempts: attempt
+        totalAttempts: attempt,
       }
     );
 
     this.eventBus.publish(event);
   }
 
-  protected onRetryExhausted(maxAttempts: number, finalError: Error, context: ResilienceContext): void {
+  protected onRetryExhausted(
+    maxAttempts: number,
+    finalError: Error,
+    context: ResilienceContext
+  ): void {
     this.logger.error('Retry exhausted', {
       serviceName: this.serviceName,
       operationName: context.operationName,
       maxAttempts,
-      finalError: finalError.message
+      finalError: finalError.message,
     });
 
     // Publish retry exhausted event
@@ -282,7 +306,7 @@ export class EventAwareRetryStrategy extends RetryStrategy {
       maxAttempts,
       maxAttempts,
       {
-        totalRetryTime: this.calculateTotalRetryTime(maxAttempts)
+        totalRetryTime: this.calculateTotalRetryTime(maxAttempts),
       }
     );
 
@@ -299,20 +323,20 @@ export class EventAwareRetryStrategy extends RetryStrategy {
 }
 
 // resilient-order-service.ts
-import { 
-  OrderService, 
-  InventoryService, 
-  PaymentService, 
+import {
+  OrderService,
+  InventoryService,
+  PaymentService,
   ShippingService,
   Order,
   OrderRequest,
-  OrderResult
+  OrderResult,
 } from '../types'; // ALWAYS import from app
 
 // ⭐ Resilient Order Service with Events Integration
 @DomainService('resilientOrderService', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'OrderProcessing'
+  context: 'OrderProcessing',
 })
 export class ResilientOrderService {
   private logger = Logger.forContext('ResilientOrderService');
@@ -340,23 +364,23 @@ export class ResilientOrderService {
         failureThreshold: 5,
         recoveryTimeout: 30000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withRetry({
         maxAttempts: 3,
         baseDelay: 1000,
         backoffMultiplier: 2,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withTimeout({
         timeout: 10000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withBulkhead({
         maxConcurrentCalls: 20,
-        maxQueueSize: 100
+        maxQueueSize: 100,
       })
       .build();
 
@@ -367,23 +391,23 @@ export class ResilientOrderService {
         failureThreshold: 3,
         recoveryTimeout: 60000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withRetry({
         maxAttempts: 5,
         baseDelay: 2000,
         backoffMultiplier: 2,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withTimeout({
         timeout: 30000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withBulkhead({
         maxConcurrentCalls: 10,
-        maxQueueSize: 50
+        maxQueueSize: 50,
       })
       .build();
 
@@ -394,33 +418,35 @@ export class ResilientOrderService {
         failureThreshold: 7,
         recoveryTimeout: 45000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withRetry({
         maxAttempts: 4,
         baseDelay: 1500,
         backoffMultiplier: 1.5,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withTimeout({
         timeout: 20000,
         eventBus: this.eventBus,
-        serviceName: 'OrderService'
+        serviceName: 'OrderService',
       })
       .withBulkhead({
         maxConcurrentCalls: 15,
-        maxQueueSize: 75
+        maxQueueSize: 75,
       })
       .build();
   }
 
-  async processOrder(orderRequest: OrderRequest): Promise<Result<OrderResult, Error>> {
+  async processOrder(
+    orderRequest: OrderRequest
+  ): Promise<Result<OrderResult, Error>> {
     try {
       this.logger.info('Processing order with resilience', {
         orderId: orderRequest.orderId,
         customerId: orderRequest.customerId,
-        itemCount: orderRequest.items.length
+        itemCount: orderRequest.items.length,
       });
 
       // Step 1: Reserve inventory with resilience
@@ -432,7 +458,11 @@ export class ResilientOrderService {
       );
 
       if (inventoryResult.isFailure()) {
-        return Result.failure(new Error(`Inventory reservation failed: ${inventoryResult.error.message}`));
+        return Result.failure(
+          new Error(
+            `Inventory reservation failed: ${inventoryResult.error.message}`
+          )
+        );
       }
 
       // Step 2: Process payment with resilience
@@ -441,7 +471,7 @@ export class ResilientOrderService {
           return await this.paymentService.processPayment({
             orderId: orderRequest.orderId,
             amount: orderRequest.totalAmount,
-            paymentMethod: orderRequest.paymentMethod
+            paymentMethod: orderRequest.paymentMethod,
           });
         },
         { operationName: 'processPayment', orderId: orderRequest.orderId }
@@ -450,7 +480,9 @@ export class ResilientOrderService {
       if (paymentResult.isFailure()) {
         // Compensate: Release inventory
         await this.compensateInventory(orderRequest.items);
-        return Result.failure(new Error(`Payment processing failed: ${paymentResult.error.message}`));
+        return Result.failure(
+          new Error(`Payment processing failed: ${paymentResult.error.message}`)
+        );
       }
 
       // Step 3: Arrange shipping with resilience
@@ -459,7 +491,7 @@ export class ResilientOrderService {
           return await this.shippingService.arrangeShipping({
             orderId: orderRequest.orderId,
             items: orderRequest.items,
-            shippingAddress: orderRequest.shippingAddress
+            shippingAddress: orderRequest.shippingAddress,
           });
         },
         { operationName: 'arrangeShipping', orderId: orderRequest.orderId }
@@ -468,8 +500,15 @@ export class ResilientOrderService {
       if (shippingResult.isFailure()) {
         // Compensate: Release inventory and refund payment
         await this.compensateInventory(orderRequest.items);
-        await this.compensatePayment(orderRequest.orderId, orderRequest.totalAmount);
-        return Result.failure(new Error(`Shipping arrangement failed: ${shippingResult.error.message}`));
+        await this.compensatePayment(
+          orderRequest.orderId,
+          orderRequest.totalAmount
+        );
+        return Result.failure(
+          new Error(
+            `Shipping arrangement failed: ${shippingResult.error.message}`
+          )
+        );
       }
 
       const orderResult: OrderResult = {
@@ -478,41 +517,52 @@ export class ResilientOrderService {
         inventoryReservation: inventoryResult.value,
         paymentConfirmation: paymentResult.value,
         shippingDetails: shippingResult.value,
-        processedAt: new Date()
+        processedAt: new Date(),
       };
 
       this.logger.info('Order processed successfully', {
         orderId: orderRequest.orderId,
-        totalAmount: orderRequest.totalAmount
+        totalAmount: orderRequest.totalAmount,
       });
 
       return Result.success(orderResult);
-
     } catch (error) {
       this.logger.error('Order processing failed', {
         orderId: orderRequest.orderId,
-        error: error.message
+        error: error.message,
       });
 
-      return Result.failure(new Error(`Order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order processing failed: ${error.message}`)
+      );
     }
   }
 
   private async compensateInventory(items: any[]): Promise<void> {
     try {
       await this.inventoryService.releaseItems(items);
-      this.logger.info('Inventory compensation completed', { itemCount: items.length });
+      this.logger.info('Inventory compensation completed', {
+        itemCount: items.length,
+      });
     } catch (error) {
-      this.logger.error('Inventory compensation failed', { error: error.message });
+      this.logger.error('Inventory compensation failed', {
+        error: error.message,
+      });
     }
   }
 
-  private async compensatePayment(orderId: string, amount: number): Promise<void> {
+  private async compensatePayment(
+    orderId: string,
+    amount: number
+  ): Promise<void> {
     try {
       await this.paymentService.refundPayment(orderId, amount);
       this.logger.info('Payment compensation completed', { orderId, amount });
     } catch (error) {
-      this.logger.error('Payment compensation failed', { orderId, error: error.message });
+      this.logger.error('Payment compensation failed', {
+        orderId,
+        error: error.message,
+      });
     }
   }
 
@@ -527,7 +577,7 @@ export class ResilientOrderService {
       inventory: this.inventoryResiliencePolicy.getStatus(),
       payment: this.paymentResiliencePolicy.getStatus(),
       shipping: this.shippingResiliencePolicy.getStatus(),
-      overall: this.calculateOverallHealth()
+      overall: this.calculateOverallHealth(),
     };
   }
 
@@ -535,12 +585,16 @@ export class ResilientOrderService {
     const statuses = [
       this.inventoryResiliencePolicy.getStatus(),
       this.paymentResiliencePolicy.getStatus(),
-      this.shippingResiliencePolicy.getStatus()
+      this.shippingResiliencePolicy.getStatus(),
     ];
 
-    const openCircuits = statuses.filter(s => s.circuitBreaker.state === 'OPEN').length;
-    const halfOpenCircuits = statuses.filter(s => s.circuitBreaker.state === 'HALF_OPEN').length;
-    
+    const openCircuits = statuses.filter(
+      s => s.circuitBreaker.state === 'OPEN'
+    ).length;
+    const halfOpenCircuits = statuses.filter(
+      s => s.circuitBreaker.state === 'HALF_OPEN'
+    ).length;
+
     let score = 100;
     score -= openCircuits * 40;
     score -= halfOpenCircuits * 20;
@@ -564,7 +618,7 @@ export class ResilientOrderService {
 
   private collectAndPublishMetrics(): void {
     const metrics = this.gatherResilienceMetrics();
-    
+
     const event = new ResilienceMetricsEvent(
       'OrderService',
       metrics,
@@ -580,14 +634,14 @@ export class ResilientOrderService {
       circuitBreakers: {
         inventory: this.inventoryResiliencePolicy.getMetrics(),
         payment: this.paymentResiliencePolicy.getMetrics(),
-        shipping: this.shippingResiliencePolicy.getMetrics()
+        shipping: this.shippingResiliencePolicy.getMetrics(),
       },
       overallHealth: this.calculateOverallHealth(),
       requestCounts: {
         total: this.metricsCollector.getTotalRequests(),
         successful: this.metricsCollector.getSuccessfulRequests(),
-        failed: this.metricsCollector.getFailedRequests()
-      }
+        failed: this.metricsCollector.getFailedRequests(),
+      },
     };
   }
 }
@@ -604,17 +658,23 @@ export class ResilienceMetricsCollector {
   }
 
   private subscribeToEvents(): void {
-    this.eventBus.subscribe('ResilienceFailure', (event: ResilienceFailureEvent) => {
-      this.failedRequests++;
-      this.totalRequests++;
-      this.logFailureMetrics(event);
-    });
+    this.eventBus.subscribe(
+      'ResilienceFailure',
+      (event: ResilienceFailureEvent) => {
+        this.failedRequests++;
+        this.totalRequests++;
+        this.logFailureMetrics(event);
+      }
+    );
 
-    this.eventBus.subscribe('ResilienceRecovery', (event: ResilienceRecoveryEvent) => {
-      this.successfulRequests++;
-      this.totalRequests++;
-      this.logRecoveryMetrics(event);
-    });
+    this.eventBus.subscribe(
+      'ResilienceRecovery',
+      (event: ResilienceRecoveryEvent) => {
+        this.successfulRequests++;
+        this.totalRequests++;
+        this.logRecoveryMetrics(event);
+      }
+    );
   }
 
   private logFailureMetrics(event: ResilienceFailureEvent): void {
@@ -623,7 +683,7 @@ export class ResilienceMetricsCollector {
       operationName: event.operationName,
       failureType: event.failureType,
       attemptNumber: event.attemptNumber,
-      totalFailures: this.failedRequests
+      totalFailures: this.failedRequests,
     });
   }
 
@@ -633,7 +693,7 @@ export class ResilienceMetricsCollector {
       operationName: event.operationName,
       recoveryType: event.recoveryType,
       downDuration: event.downDuration,
-      totalRecoveries: this.successfulRequests
+      totalRecoveries: this.successfulRequests,
     });
   }
 
@@ -650,7 +710,9 @@ export class ResilienceMetricsCollector {
   }
 
   getSuccessRate(): number {
-    return this.totalRequests > 0 ? (this.successfulRequests / this.totalRequests) * 100 : 0;
+    return this.totalRequests > 0
+      ? (this.successfulRequests / this.totalRequests) * 100
+      : 0;
   }
 
   reset(): void {
@@ -663,12 +725,17 @@ export class ResilienceMetricsCollector {
 
 ## Key Features
 
-- **Event-Driven Resilience**: Circuit breaker state changes and failures published as events
-- **Comprehensive Observability**: Detailed metrics and monitoring through events
-- **Service Integration**: Resilience patterns applied to inventory, payment, and shipping services
+- **Event-Driven Resilience**: Circuit breaker state changes and failures
+  published as events
+- **Comprehensive Observability**: Detailed metrics and monitoring through
+  events
+- **Service Integration**: Resilience patterns applied to inventory, payment,
+  and shipping services
 - **Compensation Logic**: Automatic rollback when downstream services fail
-- **Metrics Collection**: Real-time collection and publishing of resilience metrics
-- **Health Monitoring**: Overall system health calculation based on individual service states
+- **Metrics Collection**: Real-time collection and publishing of resilience
+  metrics
+- **Health Monitoring**: Overall system health calculation based on individual
+  service states
 
 ## Usage Example
 
@@ -677,22 +744,26 @@ export class ResilienceMetricsCollector {
 export class OrderController {
   constructor(private resilientOrderService: ResilientOrderService) {}
 
-  async createOrder(orderData: OrderRequest): Promise<Result<OrderResult, Error>> {
+  async createOrder(
+    orderData: OrderRequest
+  ): Promise<Result<OrderResult, Error>> {
     try {
       // Process order with full resilience
       const result = await this.resilientOrderService.processOrder(orderData);
-      
+
       if (result.isFailure()) {
         // Get resilience status for debugging
         const status = this.resilientOrderService.getResilienceStatus();
         console.log('Resilience status:', status);
-        
+
         return Result.failure(result.error);
       }
 
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure(new Error(`Order creation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order creation failed: ${error.message}`)
+      );
     }
   }
 
@@ -702,11 +773,11 @@ export class OrderController {
     timestamp: Date;
   }> {
     const resilience = this.resilientOrderService.getResilienceStatus();
-    
+
     return {
       status: resilience.overall.status,
       resilience,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -714,8 +785,11 @@ export class OrderController {
 
 ## Common Pitfalls
 
-- **Event Flooding**: Be careful not to publish too many events, especially in high-traffic scenarios
+- **Event Flooding**: Be careful not to publish too many events, especially in
+  high-traffic scenarios
 - **Metric Overhead**: Monitor the performance impact of metrics collection
 - **Compensation Complexity**: Ensure compensation logic is thoroughly tested
-- **State Consistency**: Handle eventual consistency between resilience events and business state
-- **Error Correlation**: Maintain correlation IDs across all resilience events for debugging
+- **State Consistency**: Handle eventual consistency between resilience events
+  and business state
+- **Error Correlation**: Maintain correlation IDs across all resilience events
+  for debugging

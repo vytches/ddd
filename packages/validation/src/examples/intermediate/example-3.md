@@ -1,30 +1,34 @@
 # Batch Validation with Performance Optimization
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/validation
-**Complexity**: Intermediate
-**Domain**: Data Processing
-**Patterns**: Batch Processing, Performance Optimization, Parallel Validation, Caching Strategies
+**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**:
+Intermediate **Domain**: Data Processing **Patterns**: Batch Processing,
+Performance Optimization, Parallel Validation, Caching Strategies
 **Dependencies**: @vytches-ddd/validation, @vytches-ddd/utils, @vytches-ddd/core
 
 ## Description
 
-This example demonstrates high-performance batch validation with advanced optimization techniques including parallel processing, intelligent caching, result streaming, and memory-efficient processing for large datasets.
+This example demonstrates high-performance batch validation with advanced
+optimization techniques including parallel processing, intelligent caching,
+result streaming, and memory-efficient processing for large datasets.
 
 ## Business Context
 
-Enterprise data processing systems often need to validate millions of records efficiently. A financial services company processing 10M transactions daily needs validation to complete within 30-minute processing windows. Poor validation performance can delay critical business processes, cause SLA violations, and impact customer experience.
+Enterprise data processing systems often need to validate millions of records
+efficiently. A financial services company processing 10M transactions daily
+needs validation to complete within 30-minute processing windows. Poor
+validation performance can delay critical business processes, cause SLA
+violations, and impact customer experience.
 
 ## Code Example
 
 ```typescript
 // batch-validation-optimizer.ts
-import { 
+import {
   IValidator,
   ValidationResult,
   BatchValidationRequest,
   BatchValidationResult,
-  ValidationMetrics 
+  ValidationMetrics,
 } from '@vytches-ddd/validation';
 import { Result } from '@vytches-ddd/utils';
 import { EventEmitter } from 'events';
@@ -73,7 +77,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     config?: Partial<BatchOptimizationConfig>
   ) {
     super();
-    
+
     this.config = {
       batchSize: 1000,
       maxConcurrency: 4,
@@ -83,7 +87,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
       enableStreaming: true,
       memoryThreshold: 100 * 1024 * 1024, // 100MB
       enableProgressTracking: true,
-      ...config
+      ...config,
     };
 
     this.validationCache = new Map();
@@ -101,7 +105,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
       slowestValidations: [],
       mostFailedRules: [],
       periodStart: new Date(),
-      periodEnd: new Date()
+      periodEnd: new Date(),
     };
   }
 
@@ -110,7 +114,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
   ): Promise<BatchValidationResult<TEntity>> {
     const startTime = Date.now();
     const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       // Initialize progress tracking
       if (this.config.enableProgressTracking) {
@@ -119,7 +123,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
 
       // Determine optimal processing strategy
       const strategy = this.determineProcessingStrategy(request);
-      
+
       let result: BatchValidationResult<TEntity>;
 
       switch (strategy) {
@@ -145,14 +149,15 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
       }
 
       return result;
-
     } catch (error) {
       this.emit('error', { batchId, error, timestamp: new Date() });
       throw error;
     }
   }
 
-  private determineProcessingStrategy(request: BatchValidationRequest<any>): string {
+  private determineProcessingStrategy(
+    request: BatchValidationRequest<any>
+  ): string {
     const entityCount = request.entities.length;
     const estimatedMemoryUsage = entityCount * 1024; // Rough estimate
 
@@ -176,19 +181,28 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     batchId: string
   ): Promise<BatchValidationResult<TEntity>> {
     const { entities, context, batchSize, parallelProcessing } = request;
-    const chunks = this.chunkArray(entities, batchSize || this.config.batchSize);
+    const chunks = this.chunkArray(
+      entities,
+      batchSize || this.config.batchSize
+    );
     const concurrency = parallelProcessing ? this.config.maxConcurrency : 1;
-    
+
     const results: ValidationResult[] = [];
     const validEntities: TEntity[] = [];
-    const invalidEntities: Array<{ entity: TEntity; errors: ValidationError[] }> = [];
+    const invalidEntities: Array<{
+      entity: TEntity;
+      errors: ValidationError[];
+    }> = [];
 
     // Process chunks in parallel with concurrency limit
-    const processChunk = async (chunk: TEntity[], startIndex: number): Promise<void> => {
+    const processChunk = async (
+      chunk: TEntity[],
+      startIndex: number
+    ): Promise<void> => {
       const chunkPromises = chunk.map(async (entity, index) => {
         const globalIndex = startIndex + index;
         const cacheKey = this.generateCacheKey(entity);
-        
+
         // Check cache first
         if (this.config.enableCaching) {
           const cachedResult = this.getCachedResult(cacheKey);
@@ -200,7 +214,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
 
         // Validate entity
         const result = await this.validator.validate(entity, context);
-        
+
         // Cache result
         if (this.config.enableCaching) {
           this.cacheResult(cacheKey, result);
@@ -211,12 +225,12 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
       });
 
       const chunkResults = await Promise.all(chunkPromises);
-      
+
       // Categorize results
       chunkResults.forEach((result, index) => {
         const entity = chunk[index];
         results.push(result);
-        
+
         if (result.isValid) {
           validEntities.push(entity);
         } else {
@@ -226,14 +240,14 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     };
 
     // Execute chunks with concurrency control
-    const chunksWithIndex = chunks.map((chunk, i) => ({ 
-      chunk, 
-      startIndex: i * (batchSize || this.config.batchSize) 
+    const chunksWithIndex = chunks.map((chunk, i) => ({
+      chunk,
+      startIndex: i * (batchSize || this.config.batchSize),
     }));
 
     const semaphore = new Semaphore(concurrency);
     const processingPromises = chunksWithIndex.map(({ chunk, startIndex }) =>
-      semaphore.acquire().then(async (release) => {
+      semaphore.acquire().then(async release => {
         try {
           await processChunk(chunk, startIndex);
         } finally {
@@ -259,19 +273,22 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
   ): Promise<BatchValidationResult<TEntity>> {
     const { entities, context } = request;
     const chunkSize = Math.min(this.config.batchSize, 100); // Smaller chunks for memory efficiency
-    
+
     const validEntities: TEntity[] = [];
-    const invalidEntities: Array<{ entity: TEntity; errors: ValidationError[] }> = [];
+    const invalidEntities: Array<{
+      entity: TEntity;
+      errors: ValidationError[];
+    }> = [];
     const results: ValidationResult[] = [];
 
     // Process in small chunks to minimize memory usage
     for (let i = 0; i < entities.length; i += chunkSize) {
       const chunk = entities.slice(i, i + chunkSize);
-      
+
       for (const [index, entity] of chunk.entries()) {
         const globalIndex = i + index;
         const cacheKey = this.generateCacheKey(entity);
-        
+
         // Check cache
         let result: ValidationResult;
         if (this.config.enableCaching) {
@@ -287,7 +304,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
         }
 
         results.push(result);
-        
+
         if (result.isValid) {
           validEntities.push(entity);
         } else {
@@ -317,21 +334,24 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     batchId: string
   ): Promise<BatchValidationResult<TEntity>> {
     const { entities, context } = request;
-    
+
     const validEntities: TEntity[] = [];
-    const invalidEntities: Array<{ entity: TEntity; errors: ValidationError[] }> = [];
+    const invalidEntities: Array<{
+      entity: TEntity;
+      errors: ValidationError[];
+    }> = [];
     const results: ValidationResult[] = [];
 
     // Create readable stream for entities
     const entityStream = this.createEntityStream(entities);
-    
+
     return new Promise((resolve, reject) => {
       let processed = 0;
-      
+
       entityStream.on('data', async (entity: TEntity) => {
         try {
           const cacheKey = this.generateCacheKey(entity);
-          
+
           // Check cache
           let result: ValidationResult;
           if (this.config.enableCaching) {
@@ -347,7 +367,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
           }
 
           results.push(result);
-          
+
           if (result.isValid) {
             validEntities.push(entity);
           } else {
@@ -362,9 +382,8 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
             entity,
             result,
             processed,
-            total: entities.length
+            total: entities.length,
           });
-
         } catch (error) {
           reject(error);
         }
@@ -390,10 +409,10 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     batchId: string
   ): Promise<BatchValidationResult<TEntity>> {
     const { entities, context } = request;
-    
+
     const validationPromises = entities.map(async (entity, index) => {
       const cacheKey = this.generateCacheKey(entity);
-      
+
       // Check cache
       if (this.config.enableCaching) {
         const cachedResult = this.getCachedResult(cacheKey);
@@ -405,7 +424,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
 
       // Validate entity
       const result = await this.validator.validate(entity, context);
-      
+
       // Cache result
       if (this.config.enableCaching) {
         this.cacheResult(cacheKey, result);
@@ -416,14 +435,17 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     });
 
     const validationResults = await Promise.all(validationPromises);
-    
+
     const validEntities: TEntity[] = [];
-    const invalidEntities: Array<{ entity: TEntity; errors: ValidationError[] }> = [];
+    const invalidEntities: Array<{
+      entity: TEntity;
+      errors: ValidationError[];
+    }> = [];
     const results: ValidationResult[] = [];
 
     validationResults.forEach(({ entity, result }) => {
       results.push(result);
-      
+
       if (result.isValid) {
         validEntities.push(entity);
       } else {
@@ -450,7 +472,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(36);
@@ -481,14 +503,14 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     this.validationCache.set(key, {
       result,
       timestamp: Date.now(),
-      hitCount: 1
+      hitCount: 1,
     });
   }
 
   private evictLRUEntries(): void {
     const entries = Array.from(this.validationCache.entries());
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-    
+
     const toRemove = Math.floor(this.config.cacheSize * 0.1); // Remove 10%
     for (let i = 0; i < toRemove; i++) {
       this.validationCache.delete(entries[i][0]);
@@ -512,7 +534,9 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     return chunks;
   }
 
-  private createEntityStream<TEntity>(entities: TEntity[]): NodeJS.ReadableStream {
+  private createEntityStream<TEntity>(
+    entities: TEntity[]
+  ): NodeJS.ReadableStream {
     const { Readable } = require('stream');
     let index = 0;
 
@@ -524,14 +548,14 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
         } else {
           this.push(null); // End of stream
         }
-      }
+      },
     });
   }
 
   private initializeProgressTracking(total: number): void {
     this.emit('progressStart', {
       total,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -546,7 +570,7 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
       percentage: 0, // Will be calculated by caller
       estimatedTimeRemaining: 0,
       currentBatchSize: this.config.batchSize,
-      throughput: 0
+      throughput: 0,
     };
 
     this.emit('progress', progress);
@@ -560,7 +584,9 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
     results: ValidationResult[]
   ): BatchValidationResult<TEntity> {
     const endTime = Date.now();
-    const startTime = endTime - results.reduce((sum, r) => sum + (r.metadata.validationDuration || 0), 0);
+    const startTime =
+      endTime -
+      results.reduce((sum, r) => sum + (r.metadata.validationDuration || 0), 0);
 
     return {
       totalProcessed: originalEntities.length,
@@ -573,17 +599,26 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
         endTime: new Date(endTime),
         batchSize: this.config.batchSize,
         successRate: validEntities.length / originalEntities.length,
-        averageValidationTime: results.reduce((sum, r) => sum + (r.metadata.validationDuration || 0), 0) / results.length
-      }
+        averageValidationTime:
+          results.reduce(
+            (sum, r) => sum + (r.metadata.validationDuration || 0),
+            0
+          ) / results.length,
+      },
     };
   }
 
-  private updateMetrics(result: BatchValidationResult<any>, processingTime: number): void {
+  private updateMetrics(
+    result: BatchValidationResult<any>,
+    processingTime: number
+  ): void {
     this.metrics.totalValidations += result.totalProcessed;
     this.metrics.successfulValidations += result.validEntities.length;
     this.metrics.failedValidations += result.invalidEntities.length;
-    this.metrics.averageValidationTime = 
-      (this.metrics.averageValidationTime + result.batchMetadata.averageValidationTime) / 2;
+    this.metrics.averageValidationTime =
+      (this.metrics.averageValidationTime +
+        result.batchMetadata.averageValidationTime) /
+      2;
     this.metrics.periodEnd = new Date();
   }
 
@@ -593,13 +628,15 @@ export class BatchValidationOptimizer<T> extends EventEmitter {
   }
 
   getCacheStatistics(): { size: number; hitRate: number; totalHits: number } {
-    const totalHits = Array.from(this.validationCache.values())
-      .reduce((sum, entry) => sum + entry.hitCount, 0);
-    
+    const totalHits = Array.from(this.validationCache.values()).reduce(
+      (sum, entry) => sum + entry.hitCount,
+      0
+    );
+
     return {
       size: this.validationCache.size,
       hitRate: totalHits / Math.max(this.metrics.totalValidations, 1),
-      totalHits
+      totalHits,
     };
   }
 
@@ -618,7 +655,7 @@ class Semaphore {
   }
 
   async acquire(): Promise<() => void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (this.permits > 0) {
         this.permits--;
         resolve(() => this.release());
@@ -647,16 +684,20 @@ const batchOptimizer = new BatchValidationOptimizer(validator, {
   enableCaching: true,
   cacheSize: 50000,
   enableStreaming: true,
-  enableProgressTracking: true
+  enableProgressTracking: true,
 });
 
 // Setup progress tracking
 batchOptimizer.on('progress', (progress: ValidationProgress) => {
-  console.log(`Progress: ${progress.percentage}% (${progress.processed}/${progress.total})`);
+  console.log(
+    `Progress: ${progress.percentage}% (${progress.processed}/${progress.total})`
+  );
 });
 
-batchOptimizer.on('validationComplete', (event) => {
-  console.log(`Completed validation for entity ${event.processed}/${event.total}`);
+batchOptimizer.on('validationComplete', event => {
+  console.log(
+    `Completed validation for entity ${event.processed}/${event.total}`
+  );
 });
 
 // Large dataset validation
@@ -667,11 +708,11 @@ const batchRequest: BatchValidationRequest<User> = {
   context: {
     operationType: 'bulk_import',
     environment: 'production',
-    validationLevel: 'standard'
+    validationLevel: 'standard',
   },
   batchSize: 2000,
   parallelProcessing: true,
-  continueOnError: true
+  continueOnError: true,
 };
 
 // Execute optimized batch validation
@@ -683,7 +724,9 @@ console.log(`- Valid entities: ${result.validEntities.length}`);
 console.log(`- Invalid entities: ${result.invalidEntities.length}`);
 console.log(`- Success rate: ${result.batchMetadata.successRate.toFixed(3)}`);
 console.log(`- Processing time: ${result.processingTime}ms`);
-console.log(`- Average validation time: ${result.batchMetadata.averageValidationTime.toFixed(2)}ms`);
+console.log(
+  `- Average validation time: ${result.batchMetadata.averageValidationTime.toFixed(2)}ms`
+);
 
 // Get performance metrics
 const metrics = batchOptimizer.getPerformanceMetrics();
@@ -696,20 +739,26 @@ console.log('Cache statistics:', cacheStats);
 
 ## Key Features
 
-- **Parallel Processing**: Concurrent validation with configurable concurrency limits
+- **Parallel Processing**: Concurrent validation with configurable concurrency
+  limits
 - **Intelligent Caching**: LRU cache with TTL for validation results
 - **Memory Management**: Memory-efficient processing for large datasets
-- **Streaming Support**: Process large datasets without loading everything into memory
+- **Streaming Support**: Process large datasets without loading everything into
+  memory
 - **Progress Tracking**: Real-time progress updates with throughput metrics
-- **Performance Optimization**: Automatic strategy selection based on dataset characteristics
+- **Performance Optimization**: Automatic strategy selection based on dataset
+  characteristics
 - **Comprehensive Metrics**: Detailed performance and cache statistics
 
 ## Common Pitfalls
 
 - **Memory Leaks**: Ensure proper cleanup of cache and processing queues
-- **Concurrency Limits**: Don't exceed system capabilities with too many parallel processes
-- **Cache Invalidation**: Implement proper cache invalidation for changing validation rules
-- **Error Handling**: Handle individual validation failures without stopping the entire batch
+- **Concurrency Limits**: Don't exceed system capabilities with too many
+  parallel processes
+- **Cache Invalidation**: Implement proper cache invalidation for changing
+  validation rules
+- **Error Handling**: Handle individual validation failures without stopping the
+  entire batch
 
 ## Related Examples
 

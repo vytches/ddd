@@ -5,15 +5,21 @@
 **Complexity**: intermediate  
 **Domain**: Multi-Tenant E-commerce  
 **Patterns**: Custom Provider Factory, Dynamic Provider, Tenant Isolation  
-**Dependencies**: @vytches-ddd/di, @nestjs/common  
+**Dependencies**: @vytches-ddd/di, @nestjs/common
 
 ## Description
 
-This example demonstrates how to create custom NestJS providers for VytchesDDD services with dynamic configuration, tenant isolation, and advanced factory patterns. It shows how to build reusable provider factories that can handle complex enterprise scenarios.
+This example demonstrates how to create custom NestJS providers for VytchesDDD
+services with dynamic configuration, tenant isolation, and advanced factory
+patterns. It shows how to build reusable provider factories that can handle
+complex enterprise scenarios.
 
 ## Business Context
 
-Enterprise applications often need dynamic service configuration, tenant isolation, and conditional service creation. Custom provider factories allow you to create sophisticated integration patterns while maintaining clean separation between NestJS and VytchesDDD concerns.
+Enterprise applications often need dynamic service configuration, tenant
+isolation, and conditional service creation. Custom provider factories allow you
+to create sophisticated integration patterns while maintaining clean separation
+between NestJS and VytchesDDD concerns.
 
 ## Code Example
 
@@ -28,11 +34,11 @@ import { User, CreateUserData, UpdateUserData } from '../types'; // Import from 
 @DomainService('tenantUserService')
 export class TenantUserService {
   private users: Map<string, User> = new Map();
-  
+
   constructor(private tenantId: string) {
     console.log(`TenantUserService: Initialized for tenant ${tenantId}`);
   }
-  
+
   /**
    * Creates user for specific tenant
    */
@@ -44,15 +50,17 @@ export class TenantUserService {
       name: userData.name,
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     this.users.set(user.id, user);
-    
-    console.log(`TenantUserService: Created user ${user.id} for tenant ${this.tenantId}`);
+
+    console.log(
+      `TenantUserService: Created user ${user.id} for tenant ${this.tenantId}`
+    );
     return user;
   }
-  
+
   /**
    * Updates user for tenant
    */
@@ -61,33 +69,35 @@ export class TenantUserService {
     if (!existingUser) {
       throw new Error(`User not found for tenant ${this.tenantId}: ${userId}`);
     }
-    
+
     const updatedUser = {
       ...existingUser,
       ...updateData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     this.users.set(userId, updatedUser);
-    
-    console.log(`TenantUserService: Updated user ${userId} for tenant ${this.tenantId}`);
+
+    console.log(
+      `TenantUserService: Updated user ${userId} for tenant ${this.tenantId}`
+    );
     return updatedUser;
   }
-  
+
   /**
    * Gets user by ID for tenant
    */
   async getUserById(userId: string): Promise<User | null> {
     return this.users.get(userId) || null;
   }
-  
+
   /**
    * Gets all users for tenant
    */
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
-  
+
   private generateTenantUserId(): string {
     return `${this.tenantId}_user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -105,35 +115,35 @@ import { EmailNotificationData } from '../types'; // Import from application
 @DomainService({
   serviceId: 'notificationService',
   lifetime: ServiceLifetime.Singleton,
-  autoRegister: true
+  autoRegister: true,
 })
 export class NotificationService {
   private emailQueue: EmailNotificationData[] = [];
-  
+
   /**
    * Sends email notification
    */
   async sendEmail(notificationData: EmailNotificationData): Promise<void> {
     // ⭐ FOCUS: Notification business logic
     this.emailQueue.push(notificationData);
-    
+
     console.log(`NotificationService: Queued email to ${notificationData.to}`);
-    
+
     // Simulate sending
     await this.processEmailQueue();
   }
-  
+
   /**
    * Sends bulk notifications
    */
   async sendBulkEmails(notifications: EmailNotificationData[]): Promise<void> {
     this.emailQueue.push(...notifications);
-    
+
     console.log(`NotificationService: Queued ${notifications.length} emails`);
-    
+
     await this.processEmailQueue();
   }
-  
+
   private async processEmailQueue(): Promise<void> {
     // Process queued emails
     while (this.emailQueue.length > 0) {
@@ -161,21 +171,26 @@ export class VytchesDDDProviderFactory {
   /**
    * Creates a simple provider for singleton services
    */
-  static createSimpleProvider<T>(serviceId: string, token?: string): FactoryProvider<T> {
+  static createSimpleProvider<T>(
+    serviceId: string,
+    token?: string
+  ): FactoryProvider<T> {
     return {
       provide: token || serviceId,
       useFactory: (): T => {
         // ⭐ FOCUS: Simple factory for singleton services
         const instance = VytchesDDD.resolve<T>(serviceId);
         if (!instance) {
-          throw new Error(`Service ${serviceId} not found in VytchesDDD container`);
+          throw new Error(
+            `Service ${serviceId} not found in VytchesDDD container`
+          );
         }
         return instance;
       },
       scope: Scope.DEFAULT,
     };
   }
-  
+
   /**
    * Creates a tenant-specific provider
    */
@@ -188,13 +203,15 @@ export class VytchesDDDProviderFactory {
       provide: `${serviceId}_${tenantId}`,
       useFactory: (): T => {
         // ⭐ FOCUS: Tenant-specific factory
-        console.log(`Creating tenant-specific service: ${serviceId} for tenant ${tenantId}`);
+        console.log(
+          `Creating tenant-specific service: ${serviceId} for tenant ${tenantId}`
+        );
         return new serviceClass(tenantId);
       },
       scope: Scope.DEFAULT,
     };
   }
-  
+
   /**
    * Creates a conditional provider
    */
@@ -215,13 +232,15 @@ export class VytchesDDDProviderFactory {
           console.log(`Creating fallback service: ${serviceId}`);
           return new fallbackClass();
         } else {
-          throw new Error(`Service ${serviceId} not available and no fallback provided`);
+          throw new Error(
+            `Service ${serviceId} not available and no fallback provided`
+          );
         }
       },
       scope: Scope.DEFAULT,
     };
   }
-  
+
   /**
    * Creates a scoped provider that creates new instances
    */
@@ -240,7 +259,7 @@ export class VytchesDDDProviderFactory {
       scope: Scope.REQUEST, // New instance per request
     };
   }
-  
+
   /**
    * Creates a provider with dependencies
    */
@@ -260,7 +279,7 @@ export class VytchesDDDProviderFactory {
       scope: Scope.DEFAULT,
     };
   }
-  
+
   /**
    * Creates a configuration-based provider
    */
@@ -275,9 +294,11 @@ export class VytchesDDDProviderFactory {
         // ⭐ FOCUS: Configuration-based service creation
         const serviceConfig = config[configKey];
         if (!serviceConfig) {
-          throw new Error(`Configuration not found for service ${serviceId} with key ${configKey}`);
+          throw new Error(
+            `Configuration not found for service ${serviceId} with key ${configKey}`
+          );
         }
-        
+
         console.log(`Creating configured service: ${serviceId}`);
         return new serviceClass(serviceConfig);
       },
@@ -285,7 +306,7 @@ export class VytchesDDDProviderFactory {
       scope: Scope.DEFAULT,
     };
   }
-  
+
   /**
    * Creates a lazy provider that delays instantiation
    */
@@ -298,7 +319,7 @@ export class VytchesDDDProviderFactory {
       useFactory: (): (() => T) => {
         // ⭐ FOCUS: Lazy service creation
         let instance: T | null = null;
-        
+
         return () => {
           if (!instance) {
             console.log(`Lazy instantiating service: ${serviceId}`);
@@ -325,27 +346,27 @@ export const APP_CONFIG = {
     host: 'localhost',
     port: 5432,
     username: 'app_user',
-    password: 'secret'
+    password: 'secret',
   },
   redis: {
     host: 'localhost',
-    port: 6379
+    port: 6379,
   },
   tenants: {
     'tenant-a': {
       name: 'Tenant A',
-      features: ['users', 'orders', 'payments']
+      features: ['users', 'orders', 'payments'],
     },
     'tenant-b': {
       name: 'Tenant B',
-      features: ['users', 'orders']
-    }
+      features: ['users', 'orders'],
+    },
   },
   di: {
     enableAutoDiscovery: true,
     enableContextIsolation: true,
-    timeout: 30000
-  } as DIConfig
+    timeout: 30000,
+  } as DIConfig,
 };
 ```
 
@@ -362,12 +383,14 @@ import { User, CreateUserData, UpdateUserData } from '../types'; // Import from 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
   constructor(
-    @Inject('TENANT_USER_SERVICE') private readonly tenantUserService: TenantUserService,
-    @Inject('notificationService') private readonly notificationService: NotificationService
+    @Inject('TENANT_USER_SERVICE')
+    private readonly tenantUserService: TenantUserService,
+    @Inject('notificationService')
+    private readonly notificationService: NotificationService
   ) {
     // ⭐ FOCUS: Injected services from custom providers
   }
-  
+
   /**
    * Creates user with notification
    */
@@ -375,42 +398,42 @@ export class UserService {
     try {
       // ⭐ FOCUS: Use tenant-specific service
       const user = await this.tenantUserService.createUser(userData);
-      
+
       // Send welcome email
       await this.notificationService.sendEmail({
         to: user.email,
         subject: 'Welcome!',
-        body: `Welcome ${user.name}! Your account has been created.`
+        body: `Welcome ${user.name}! Your account has been created.`,
       });
-      
+
       return user;
     } catch (error) {
       console.error('UserService: Failed to create user:', error);
       throw error;
     }
   }
-  
+
   /**
    * Updates user
    */
   async updateUser(userId: string, updateData: UpdateUserData): Promise<User> {
     try {
       const user = await this.tenantUserService.updateUser(userId, updateData);
-      
+
       // Send update notification
       await this.notificationService.sendEmail({
         to: user.email,
         subject: 'Account Updated',
-        body: `${user.name}, your account has been updated.`
+        body: `${user.name}, your account has been updated.`,
       });
-      
+
       return user;
     } catch (error) {
       console.error('UserService: Failed to update user:', error);
       throw error;
     }
   }
-  
+
   /**
    * Gets user by ID
    */
@@ -422,7 +445,7 @@ export class UserService {
       throw error;
     }
   }
-  
+
   /**
    * Gets all users
    */
@@ -447,7 +470,7 @@ import { Injectable, Scope } from '@nestjs/common';
 @Injectable({ scope: Scope.REQUEST })
 export class TenantContextService {
   private tenantId: string | null = null;
-  
+
   /**
    * Sets current tenant ID
    */
@@ -455,14 +478,14 @@ export class TenantContextService {
     this.tenantId = tenantId;
     console.log(`TenantContextService: Set tenant ID to ${tenantId}`);
   }
-  
+
   /**
    * Gets current tenant ID
    */
   getTenantId(): string | null {
     return this.tenantId;
   }
-  
+
   /**
    * Gets current tenant ID with validation
    */
@@ -504,22 +527,22 @@ export class DynamicUserModule implements OnModuleInit {
           provide: 'APP_CONFIG',
           useValue: APP_CONFIG,
         },
-        
+
         // Tenant-specific user service
         VytchesDDDProviderFactory.createTenantProvider(
           'tenantUserService',
           tenantId,
           TenantUserService
         ),
-        
+
         // Shared notification service
         VytchesDDDProviderFactory.createSimpleProvider<NotificationService>(
           'notificationService'
         ),
-        
+
         // Tenant context service
         TenantContextService,
-        
+
         // Dynamic tenant user service provider
         {
           provide: 'TENANT_USER_SERVICE',
@@ -531,7 +554,7 @@ export class DynamicUserModule implements OnModuleInit {
           inject: [TenantContextService],
           scope: Scope.REQUEST,
         },
-        
+
         // Main user service
         UserService,
       ],
@@ -539,28 +562,30 @@ export class DynamicUserModule implements OnModuleInit {
       exports: [UserService, TenantContextService],
     };
   }
-  
+
   /**
    * Creates module with multiple tenants
    */
   static forMultipleTenants(tenantIds: string[]): DynamicModule {
-    const tenantProviders = tenantIds.map(tenantId => [
-      VytchesDDDProviderFactory.createTenantProvider(
-        'tenantUserService',
-        tenantId,
-        TenantUserService
-      ),
-      {
-        provide: `TENANT_CONTEXT_${tenantId}`,
-        useFactory: () => {
-          const context = new TenantContextService();
-          context.setTenantId(tenantId);
-          return context;
+    const tenantProviders = tenantIds
+      .map(tenantId => [
+        VytchesDDDProviderFactory.createTenantProvider(
+          'tenantUserService',
+          tenantId,
+          TenantUserService
+        ),
+        {
+          provide: `TENANT_CONTEXT_${tenantId}`,
+          useFactory: () => {
+            const context = new TenantContextService();
+            context.setTenantId(tenantId);
+            return context;
+          },
+          scope: Scope.DEFAULT,
         },
-        scope: Scope.DEFAULT,
-      },
-    ]).flat();
-    
+      ])
+      .flat();
+
     return {
       module: DynamicUserModule,
       providers: [
@@ -568,27 +593,29 @@ export class DynamicUserModule implements OnModuleInit {
           provide: 'APP_CONFIG',
           useValue: APP_CONFIG,
         },
-        
+
         // Shared services
         VytchesDDDProviderFactory.createSimpleProvider<NotificationService>(
           'notificationService'
         ),
-        
+
         // Tenant-specific providers
         ...tenantProviders,
-        
+
         // Multi-tenant service resolver
         {
           provide: 'MULTI_TENANT_RESOLVER',
           useFactory: (...contexts: TenantContextService[]) => {
             return {
               getServiceForTenant: (tenantId: string) => {
-                const context = contexts.find(c => c.getTenantId() === tenantId);
+                const context = contexts.find(
+                  c => c.getTenantId() === tenantId
+                );
                 if (!context) {
                   throw new Error(`Tenant context not found: ${tenantId}`);
                 }
                 return new TenantUserService(tenantId);
-              }
+              },
             };
           },
           inject: tenantIds.map(id => `TENANT_CONTEXT_${id}`),
@@ -597,14 +624,14 @@ export class DynamicUserModule implements OnModuleInit {
       exports: tenantProviders.map(p => p.provide),
     };
   }
-  
+
   async onModuleInit() {
     // ⭐ FOCUS: Initialize VytchesDDD
     console.log('DynamicUserModule: Initializing VytchesDDD...');
-    
+
     const container = new SimpleContainer();
     await VytchesDDD.configure(container);
-    
+
     console.log('DynamicUserModule: VytchesDDD initialized');
   }
 }
@@ -612,7 +639,15 @@ export class DynamicUserModule implements OnModuleInit {
 
 ```typescript
 // nestjs/user.controller.ts
-import { Controller, Get, Post, Put, Param, Body, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Headers,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { TenantContextService } from './tenant-context.service';
 import { CreateUserData, UpdateUserData } from '../types'; // Import from application
@@ -626,7 +661,7 @@ export class UserController {
     private readonly userService: UserService,
     private readonly tenantContext: TenantContextService
   ) {}
-  
+
   /**
    * Creates a new user
    */
@@ -639,10 +674,10 @@ export class UserController {
     if (tenantId) {
       this.tenantContext.setTenantId(tenantId);
     }
-    
+
     return await this.userService.createUser(userData);
   }
-  
+
   /**
    * Updates a user
    */
@@ -655,10 +690,10 @@ export class UserController {
     if (tenantId) {
       this.tenantContext.setTenantId(tenantId);
     }
-    
+
     return await this.userService.updateUser(userId, updateData);
   }
-  
+
   /**
    * Gets user by ID
    */
@@ -670,10 +705,10 @@ export class UserController {
     if (tenantId) {
       this.tenantContext.setTenantId(tenantId);
     }
-    
+
     return await this.userService.getUserById(userId);
   }
-  
+
   /**
    * Gets all users
    */
@@ -682,7 +717,7 @@ export class UserController {
     if (tenantId) {
       this.tenantContext.setTenantId(tenantId);
     }
-    
+
     return await this.userService.getAllUsers();
   }
 }
@@ -717,53 +752,53 @@ import { CreateUserData } from '../types'; // Import from application
 describe('Custom Provider Factory', () => {
   let userService: UserService;
   let tenantContext: TenantContextService;
-  
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DynamicUserModule.forTenant('test-tenant')],
     }).compile();
-    
+
     userService = module.get<UserService>(UserService);
     tenantContext = module.get<TenantContextService>(TenantContextService);
   });
-  
+
   it('should create tenant-specific user service', async () => {
     const userData: CreateUserData = {
       email: 'test@example.com',
-      name: 'Test User'
+      name: 'Test User',
     };
-    
+
     const user = await userService.createUser(userData);
-    
+
     expect(user).toBeDefined();
     expect(user.id).toContain('test-tenant');
     expect(user.email).toBe(userData.email);
   });
-  
+
   it('should maintain tenant context', async () => {
     tenantContext.setTenantId('test-tenant');
-    
+
     const tenantId = tenantContext.getTenantId();
     expect(tenantId).toBe('test-tenant');
   });
-  
+
   it('should create multiple users for same tenant', async () => {
     const userData1: CreateUserData = {
       email: 'user1@example.com',
-      name: 'User 1'
+      name: 'User 1',
     };
-    
+
     const userData2: CreateUserData = {
       email: 'user2@example.com',
-      name: 'User 2'
+      name: 'User 2',
     };
-    
+
     const user1 = await userService.createUser(userData1);
     const user2 = await userService.createUser(userData2);
-    
+
     expect(user1.id).toContain('test-tenant');
     expect(user2.id).toContain('test-tenant');
-    
+
     const users = await userService.getAllUsers();
     expect(users).toHaveLength(2);
   });
@@ -791,5 +826,7 @@ describe('Custom Provider Factory', () => {
 ## Related Examples
 
 - [Bridge Pattern Implementation](./example-1.md) - Basic bridge patterns
-- [Multi-Context Architecture](../advanced/example-1.md) - Enterprise architecture
-- [Context Isolation](../../intermediate/example-2.md) - Bounded context patterns
+- [Multi-Context Architecture](../advanced/example-1.md) - Enterprise
+  architecture
+- [Context Isolation](../../intermediate/example-2.md) - Bounded context
+  patterns

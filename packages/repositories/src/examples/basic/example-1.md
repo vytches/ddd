@@ -1,17 +1,21 @@
 # Generic Repository Pattern - Basic CRUD Operations
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/repositories
-**Complexity**: beginner
-**Domain**: user-management
-**Patterns**: repository-pattern, crud-operations, entity-management
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/domain-primitives
+**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+beginner **Domain**: user-management **Patterns**: repository-pattern,
+crud-operations, entity-management **Dependencies**: @vytches-ddd/repositories,
+@vytches-ddd/domain-primitives
 
 ## Description
-Basic repository implementation demonstrating fundamental CRUD operations with the @vytches-ddd/repositories package. Shows entity management, simple queries, and basic persistence operations.
+
+Basic repository implementation demonstrating fundamental CRUD operations with
+the @vytches-ddd/repositories package. Shows entity management, simple queries,
+and basic persistence operations.
 
 ## Business Context
-User management system requiring standard create, read, update, and delete operations. Foundation pattern for entity persistence with proper separation between domain and data access concerns.
+
+User management system requiring standard create, read, update, and delete
+operations. Foundation pattern for entity persistence with proper separation
+between domain and data access concerns.
 
 ## Code Example
 
@@ -40,9 +44,9 @@ export class UserRepository extends BaseRepository<User> {
       roles: userData.roles || ['user'],
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     });
-    
+
     return user;
   }
 
@@ -54,7 +58,7 @@ export class UserRepository extends BaseRepository<User> {
   async getUserByEmail(email: string): Promise<User | null> {
     // Use library findOne method with query
     return await this.findOne({
-      where: [{ field: 'email', operator: 'eq', value: email }]
+      where: [{ field: 'email', operator: 'eq', value: email }],
     });
   }
 
@@ -62,9 +66,9 @@ export class UserRepository extends BaseRepository<User> {
     // Use library update method
     const updated = await this.update(EntityId.fromString(id), {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
-    
+
     return updated;
   }
 
@@ -77,13 +81,13 @@ export class UserRepository extends BaseRepository<User> {
   async getActiveUsers(): Promise<User[]> {
     return await this.find({
       where: [{ field: 'isActive', operator: 'eq', value: true }],
-      orderBy: [{ field: 'createdAt', direction: 'DESC' }]
+      orderBy: [{ field: 'createdAt', direction: 'DESC' }],
     });
   }
 
   async getUsersByRole(role: string): Promise<User[]> {
     return await this.find({
-      where: [{ field: 'roles', operator: 'in', value: [role] }]
+      where: [{ field: 'roles', operator: 'in', value: [role] }],
     });
   }
 
@@ -92,7 +96,7 @@ export class UserRepository extends BaseRepository<User> {
     return await this.find({
       limit: options.limit || 50,
       offset: options.offset || 0,
-      orderBy: options.orderBy || [{ field: 'username', direction: 'ASC' }]
+      orderBy: options.orderBy || [{ field: 'username', direction: 'ASC' }],
     });
   }
 
@@ -103,7 +107,7 @@ export class UserRepository extends BaseRepository<User> {
 
   async countActiveUsers(): Promise<number> {
     return await this.count({
-      where: [{ field: 'isActive', operator: 'eq', value: true }]
+      where: [{ field: 'isActive', operator: 'eq', value: true }],
     });
   }
 
@@ -114,7 +118,7 @@ export class UserRepository extends BaseRepository<User> {
 
   async emailExists(email: string): Promise<boolean> {
     const user = await this.findOne({
-      where: [{ field: 'email', operator: 'eq', value: email }]
+      where: [{ field: 'email', operator: 'eq', value: email }],
     });
     return user !== null;
   }
@@ -130,7 +134,7 @@ async function demonstrateBasicCrud() {
     email: 'john@example.com',
     firstName: 'John',
     lastName: 'Doe',
-    password: 'securepassword'
+    password: 'securepassword',
   });
   console.log('Created user:', newUser.id);
 
@@ -141,7 +145,7 @@ async function demonstrateBasicCrud() {
   // Update user
   const updated = await userRepo.updateUser(newUser.id, {
     firstName: 'Jonathan',
-    isActive: true
+    isActive: true,
   });
   console.log('Updated user:', updated?.firstName);
 
@@ -160,6 +164,7 @@ async function demonstrateBasicCrud() {
 ```
 
 ## Key Features
+
 - Basic CRUD operations using @vytches-ddd/repositories BaseRepository
 - Entity ID management with EntityId from domain-primitives
 - Simple query operations with where clauses and ordering
@@ -167,11 +172,13 @@ async function demonstrateBasicCrud() {
 - Proper error handling and null checking
 
 ## Common Pitfalls
+
 - Not using EntityId for type-safe ID management
 - Forgetting to update version and timestamps on modifications
 - Not validating data before persistence operations
 - Ignoring null return values from find operations
 
 ## Related Examples
+
 - [Event-Sourced Repository](example-2.md) - Repository with event sourcing
 - [Cached Repository](example-3.md) - Repository with caching layer

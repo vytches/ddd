@@ -9,16 +9,22 @@
 
 ## Description
 
-Real-world use cases demonstrating basic @vytches-ddd/policies integration with NestJS applications for common business scenarios including user validation, order processing, and content management.
+Real-world use cases demonstrating basic @vytches-ddd/policies integration with
+NestJS applications for common business scenarios including user validation,
+order processing, and content management.
 
 ## Enterprise Use Cases
 
 ### **E-Commerce Platform - User Registration Validation**
 
 #### **Challenge**: Simple User Registration Business Rules
-A growing e-commerce platform needs basic user registration validation including age verification, email format checking, and account eligibility rules with clear error messages for frontend display.
+
+A growing e-commerce platform needs basic user registration validation including
+age verification, email format checking, and account eligibility rules with
+clear error messages for frontend display.
 
 #### **Solution**: Basic Policy Integration with Manual Setup
+
 ```typescript
 // User registration with basic policy validation
 @Injectable()
@@ -46,7 +52,7 @@ export class UserRegistrationService {
   async registerUser(userData: CreateUserRequest): Promise<User> {
     const result = await this.registrationPolicy.check({
       entity: userData,
-      context: { operation: 'registration' }
+      context: { operation: 'registration' },
     });
 
     if (result.isFailure()) {
@@ -54,8 +60,8 @@ export class UserRegistrationService {
         message: 'User registration validation failed',
         errors: result.error.violations.map(v => ({
           code: v.code,
-          message: v.message
-        }))
+          message: v.message,
+        })),
       });
     }
 
@@ -66,16 +72,24 @@ export class UserRegistrationService {
 ```
 
 **Business Impact:**
-- **Improved User Experience**: Clear validation messages guide users to correct input
-- **Reduced Support Load**: Proper validation prevents common registration issues
-- **Consistent Rules**: Centralized validation logic ensures uniform business rule application
+
+- **Improved User Experience**: Clear validation messages guide users to correct
+  input
+- **Reduced Support Load**: Proper validation prevents common registration
+  issues
+- **Consistent Rules**: Centralized validation logic ensures uniform business
+  rule application
 
 ### **SaaS Application - Content Publishing Validation**
 
 #### **Challenge**: Content Quality and Compliance Validation
-A content management SaaS needs to validate published content for quality standards, compliance requirements, and business rules before making content public.
+
+A content management SaaS needs to validate published content for quality
+standards, compliance requirements, and business rules before making content
+public.
 
 #### **Solution**: Specification-Based Policy Composition
+
 ```typescript
 // Content validation with reusable specifications
 @Injectable()
@@ -93,7 +107,9 @@ export class ContentValidationService {
       .build();
 
     this.contentQualitySpec = SpecificationBuilder.create<Content>()
-      .withRule(content => !content.body.includes('spam') && content.title.length > 5)
+      .withRule(
+        content => !content.body.includes('spam') && content.title.length > 5
+      )
       .withErrorCode('CONTENT_QUALITY_ISSUE')
       .withErrorMessage('Content does not meet quality standards')
       .build();
@@ -118,17 +134,17 @@ export class ContentValidationService {
   async validateForPublishing(content: Content): Promise<ValidationResult> {
     const result = await this.publishingPolicy.check({
       entity: content,
-      context: { 
+      context: {
         operation: 'publishing',
         authorId: content.authorId,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     return {
       isValid: result.isSuccess(),
       violations: result.isFailure() ? result.error.violations : [],
-      canPublish: result.isSuccess()
+      canPublish: result.isSuccess(),
     };
   }
 
@@ -140,16 +156,22 @@ export class ContentValidationService {
 ```
 
 **Business Impact:**
+
 - **Content Quality**: Automated quality checks maintain platform standards
 - **Compliance Assurance**: Systematic compliance validation reduces legal risk
-- **Operational Efficiency**: Automated validation reduces manual content review time
+- **Operational Efficiency**: Automated validation reduces manual content review
+  time
 
 ### **FinTech Application - Basic Transaction Validation**
 
 #### **Challenge**: Financial Transaction Business Rules
-A fintech startup needs basic transaction validation for money transfers including balance checks, daily limits, and account verification with clear validation feedback.
+
+A fintech startup needs basic transaction validation for money transfers
+including balance checks, daily limits, and account verification with clear
+validation feedback.
 
 #### **Solution**: Simple Transaction Policy with Context-Aware Validation
+
 ```typescript
 // Transaction validation with business context
 @Injectable()
@@ -174,7 +196,9 @@ export class TransactionValidationService {
       .build();
   }
 
-  async validateTransfer(transferData: TransferRequest): Promise<TransferValidationResult> {
+  async validateTransfer(
+    transferData: TransferRequest
+  ): Promise<TransferValidationResult> {
     try {
       const result = await this.transferPolicy.check({
         entity: transferData,
@@ -182,8 +206,8 @@ export class TransactionValidationService {
           operation: 'transfer',
           userId: transferData.userId,
           accountId: transferData.fromAccount,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       if (result.isFailure()) {
@@ -193,17 +217,16 @@ export class TransactionValidationService {
           errors: result.error.violations.map(v => ({
             field: this.mapCodeToField(v.code),
             message: v.message,
-            code: v.code
-          }))
+            code: v.code,
+          })),
         };
       }
 
       return {
         isValid: true,
         canProceed: true,
-        errors: []
+        errors: [],
       };
-
     } catch (error) {
       throw new Error(`Transfer validation failed: ${error.message}`);
     }
@@ -211,9 +234,9 @@ export class TransactionValidationService {
 
   private mapCodeToField(code: string): string {
     const fieldMapping = {
-      'INVALID_AMOUNT': 'amount',
-      'AMOUNT_EXCEEDS_LIMIT': 'amount',
-      'SAME_ACCOUNT_TRANSFER': 'toAccount'
+      INVALID_AMOUNT: 'amount',
+      AMOUNT_EXCEEDS_LIMIT: 'amount',
+      SAME_ACCOUNT_TRANSFER: 'toAccount',
     };
     return fieldMapping[code] || 'general';
   }
@@ -221,52 +244,71 @@ export class TransactionValidationService {
 ```
 
 **Business Impact:**
+
 - **Risk Mitigation**: Basic validation prevents common transaction errors
-- **User Experience**: Clear error messages help users complete transactions successfully
-- **Compliance Foundation**: Systematic validation provides audit trail for regulatory requirements
+- **User Experience**: Clear error messages help users complete transactions
+  successfully
+- **Compliance Foundation**: Systematic validation provides audit trail for
+  regulatory requirements
 
 ## Implementation Strategy
 
 ### **Pattern Selection for Basic Use Cases**
 
 | **Use Case Characteristics** | **Manual Setup** | **Specification Pattern** |
-|------------------------------|------------------|---------------------------|
-| **Simple Validation** | ✅ Recommended | ⚠️ Overkill |
-| **Reusable Rules** | ⚠️ Limited | ✅ Recommended |
-| **Quick Implementation** | ✅ Excellent | ⚠️ More Setup |
-| **Team Familiarity** | ✅ Easy to Learn | ⚠️ Requires Understanding |
+| ---------------------------- | ---------------- | ------------------------- |
+| **Simple Validation**        | ✅ Recommended   | ⚠️ Overkill               |
+| **Reusable Rules**           | ⚠️ Limited       | ✅ Recommended            |
+| **Quick Implementation**     | ✅ Excellent     | ⚠️ More Setup             |
+| **Team Familiarity**         | ✅ Easy to Learn | ⚠️ Requires Understanding |
 
 ### **Getting Started Approach**
 
 1. **Start Simple**: Begin with manual policy setup for basic validation needs
 2. **Identify Patterns**: Look for repeated validation logic across services
-3. **Introduce Specifications**: Gradually adopt specification pattern for reusable rules
-4. **Expand Usage**: Apply policies consistently across similar business scenarios
+3. **Introduce Specifications**: Gradually adopt specification pattern for
+   reusable rules
+4. **Expand Usage**: Apply policies consistently across similar business
+   scenarios
 
 ## Success Metrics
 
 ### **E-Commerce Platform**
-- **User Registration Success Rate**: 95%+ successful registrations after validation implementation
-- **Support Ticket Reduction**: 40% reduction in registration-related support requests
-- **Development Velocity**: 30% faster feature development with consistent validation patterns
+
+- **User Registration Success Rate**: 95%+ successful registrations after
+  validation implementation
+- **Support Ticket Reduction**: 40% reduction in registration-related support
+  requests
+- **Development Velocity**: 30% faster feature development with consistent
+  validation patterns
 
 ### **Content Management SaaS**
+
 - **Content Quality Score**: 85%+ of published content meets quality standards
 - **Compliance Issues**: Zero compliance violations since policy implementation
 - **Publishing Efficiency**: 50% reduction in manual content review time
 
 ### **FinTech Application**
-- **Transaction Error Rate**: 90% reduction in failed transactions due to validation errors
+
+- **Transaction Error Rate**: 90% reduction in failed transactions due to
+  validation errors
 - **User Experience Score**: 4.8/5 rating for transaction process clarity
 - **Regulatory Readiness**: 100% audit trail coverage for transaction validation
 
 ## Getting Started
 
 ### **Implementation Steps**
-1. **Identify Validation Needs**: Document current business rules and validation requirements
-2. **Choose Integration Pattern**: Start with manual setup for simplicity
-3. **Implement Core Policies**: Begin with most critical business rule validation
-4. **Add Error Handling**: Implement comprehensive error handling and user feedback
-5. **Expand Coverage**: Gradually apply policy validation to additional business scenarios
 
-These basic use cases demonstrate how @vytches-ddd/policies can be integrated into NestJS applications with minimal complexity while providing significant business value through consistent validation and clear error handling.
+1. **Identify Validation Needs**: Document current business rules and validation
+   requirements
+2. **Choose Integration Pattern**: Start with manual setup for simplicity
+3. **Implement Core Policies**: Begin with most critical business rule
+   validation
+4. **Add Error Handling**: Implement comprehensive error handling and user
+   feedback
+5. **Expand Coverage**: Gradually apply policy validation to additional business
+   scenarios
+
+These basic use cases demonstrate how @vytches-ddd/policies can be integrated
+into NestJS applications with minimal complexity while providing significant
+business value through consistent validation and clear error handling.

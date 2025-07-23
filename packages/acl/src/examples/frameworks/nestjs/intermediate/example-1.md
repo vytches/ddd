@@ -8,11 +8,15 @@
 
 ## Description
 
-This example demonstrates advanced NestJS integration using VytchesDDD dependency injection for sophisticated ACL orchestration with caching, resilience patterns, and cross-cutting concerns.
+This example demonstrates advanced NestJS integration using VytchesDDD
+dependency injection for sophisticated ACL orchestration with caching,
+resilience patterns, and cross-cutting concerns.
 
 ## Business Context
 
-An enterprise NestJS application requires sophisticated integration with multiple external systems using advanced ACL patterns including caching, circuit breakers, and automatic service discovery through VytchesDDD DI.
+An enterprise NestJS application requires sophisticated integration with
+multiple external systems using advanced ACL patterns including caching, circuit
+breakers, and automatic service discovery through VytchesDDD DI.
 
 ## Code Example
 
@@ -29,45 +33,50 @@ import { Customer, ExternalCustomerData, CustomerSyncRequest } from '../types'; 
   lifetime: ServiceLifetime.Singleton,
   context: 'CustomerManagement',
   dependencies: ['circuitBreaker', 'cacheManager', 'metricsCollector'],
-  timeout: 30000
+  timeout: 30000,
 })
-export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCustomerData, Customer> {
+export class EnterpriseCustomerACLService extends AntiCorruptionLayer<
+  ExternalCustomerData,
+  Customer
+> {
   private circuitBreaker: CircuitBreaker;
   private retryPolicy: RetryPolicy;
   private cachedACL: CachingACLDecorator<ExternalCustomerData, Customer>;
 
   constructor() {
     super(new CustomerDataTranslator());
-    
+
     // Advanced resilience configuration
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
       resetTimeout: 60000,
-      monitoringPeriod: 30000
+      monitoringPeriod: 30000,
     });
 
     this.retryPolicy = new RetryPolicy({
       maxAttempts: 3,
       baseDelay: 1000,
       backoffStrategy: 'exponential',
-      maxDelay: 10000
+      maxDelay: 10000,
     });
 
     // Caching decorator for performance
     this.cachedACL = new CachingACLDecorator(this, {
       ttl: 300000, // 5 minutes
       maxSize: 1000,
-      keyGenerator: (method, args) => `customer_${method}_${args.join('_')}`
+      keyGenerator: (method, args) => `customer_${method}_${args.join('_')}`,
     });
 
     this.initializeMetrics();
   }
 
-  @Resilience({ 
+  @Resilience({
     circuitBreaker: { failureThreshold: 5 },
-    retry: { maxAttempts: 3 }
+    retry: { maxAttempts: 3 },
   })
-  async getCustomerWithResilience(customerId: string): Promise<Result<Customer, Error>> {
+  async getCustomerWithResilience(
+    customerId: string
+  ): Promise<Result<Customer, Error>> {
     return this.circuitBreaker.execute(async () => {
       return this.retryPolicy.execute(async () => {
         return this.cachedACL.execute('getCustomer', [customerId]);
@@ -75,18 +84,23 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
     });
   }
 
-  async bulkSyncCustomers(request: CustomerSyncRequest): Promise<Result<CustomerSyncResult, Error>> {
-    const externalAPI = VytchesDDD.resolve<ExternalCustomerAPI>('externalCustomerAPI');
-    const metricsCollector = VytchesDDD.resolve<MetricsCollector>('metricsCollector');
+  async bulkSyncCustomers(
+    request: CustomerSyncRequest
+  ): Promise<Result<CustomerSyncResult, Error>> {
+    const externalAPI = VytchesDDD.resolve<ExternalCustomerAPI>(
+      'externalCustomerAPI'
+    );
+    const metricsCollector =
+      VytchesDDD.resolve<MetricsCollector>('metricsCollector');
 
     try {
       const startTime = Date.now();
-      
+
       // Get customers from external system
       const externalCustomers = await externalAPI.getCustomersByFilter({
         lastSyncTime: request.lastSyncTime,
         customerIds: request.customerIds,
-        includeInactive: request.includeInactive || false
+        includeInactive: request.includeInactive || false,
       });
 
       const syncResult: CustomerSyncResult = {
@@ -94,7 +108,7 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
         errorCount: 0,
         errors: [],
         customers: [],
-        lastSyncTime: new Date()
+        lastSyncTime: new Date(),
       };
 
       // Process customers in batches for better performance
@@ -102,7 +116,7 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
       for (let i = 0; i < externalCustomers.length; i += batchSize) {
         const batch = externalCustomers.slice(i, i + batchSize);
         const batchResults = await this.processBatch(batch);
-        
+
         syncResult.processedCount += batchResults.succeeded.length;
         syncResult.errorCount += batchResults.failed.length;
         syncResult.customers.push(...batchResults.succeeded);
@@ -115,7 +129,7 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
         duration,
         processedCount: syncResult.processedCount,
         errorCount: syncResult.errorCount,
-        batchCount: Math.ceil(externalCustomers.length / batchSize)
+        batchCount: Math.ceil(externalCustomers.length / batchSize),
       });
 
       return Result.success(syncResult);
@@ -124,17 +138,19 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
     }
   }
 
-  private async processBatch(customers: ExternalCustomerData[]): Promise<BatchProcessingResult> {
-    const promises = customers.map(async (externalCustomer) => {
+  private async processBatch(
+    customers: ExternalCustomerData[]
+  ): Promise<BatchProcessingResult> {
+    const promises = customers.map(async externalCustomer => {
       const result = this.translateData(externalCustomer);
       return {
         id: externalCustomer.customer_id,
-        result
+        result,
       };
     });
 
     const results = await Promise.allSettled(promises);
-    
+
     const succeeded: Customer[] = [];
     const failed: Array<{ id: string; error: string }> = [];
 
@@ -147,9 +163,9 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
           failed.push({ id, error: result.error.message });
         }
       } else {
-        failed.push({ 
-          id: customers[index].customer_id, 
-          error: promiseResult.reason.message 
+        failed.push({
+          id: customers[index].customer_id,
+          error: promiseResult.reason.message,
         });
       }
     });
@@ -158,10 +174,14 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<ExternalCu
   }
 
   private async initializeMetrics(): Promise<void> {
-    const metricsCollector = VytchesDDD.resolve<MetricsCollector>('metricsCollector');
-    
+    const metricsCollector =
+      VytchesDDD.resolve<MetricsCollector>('metricsCollector');
+
     // Register custom metrics for ACL operations
-    await metricsCollector.registerMetric('acl_translation_duration', 'histogram');
+    await metricsCollector.registerMetric(
+      'acl_translation_duration',
+      'histogram'
+    );
     await metricsCollector.registerMetric('acl_cache_hit_rate', 'gauge');
     await metricsCollector.registerMetric('acl_error_rate', 'counter');
   }
@@ -179,37 +199,43 @@ export class CustomerBridgeService {
 
   constructor() {
     // ⭐ Bridge Pattern: Get VytchesDDD managed instance
-    this.customerACL = VytchesDDD.resolve<EnterpriseCustomerACLService>('enterpriseCustomerACL');
+    this.customerACL = VytchesDDD.resolve<EnterpriseCustomerACLService>(
+      'enterpriseCustomerACL'
+    );
   }
 
   async getCustomer(customerId: string): Promise<Customer> {
     const result = await this.customerACL.getCustomerWithResilience(customerId);
-    
+
     if (result.isFailure()) {
       throw new Error(`Failed to get customer: ${result.error.message}`);
     }
-    
+
     return result.value;
   }
 
-  async syncCustomers(request: CustomerSyncRequest): Promise<CustomerSyncResult> {
+  async syncCustomers(
+    request: CustomerSyncRequest
+  ): Promise<CustomerSyncResult> {
     const result = await this.customerACL.bulkSyncCustomers(request);
-    
+
     if (result.isFailure()) {
       throw new Error(`Sync failed: ${result.error.message}`);
     }
-    
+
     return result.value;
   }
 
   async getCustomerMetrics(): Promise<CustomerMetrics> {
-    const metricsCollector = VytchesDDD.resolve<MetricsCollector>('metricsCollector');
-    
+    const metricsCollector =
+      VytchesDDD.resolve<MetricsCollector>('metricsCollector');
+
     return {
       totalCustomers: await metricsCollector.getMetric('total_customers'),
       syncSuccessRate: await metricsCollector.getMetric('sync_success_rate'),
-      averageResponseTime: await metricsCollector.getMetric('avg_response_time'),
-      cacheHitRate: await metricsCollector.getMetric('acl_cache_hit_rate')
+      averageResponseTime:
+        await metricsCollector.getMetric('avg_response_time'),
+      cacheHitRate: await metricsCollector.getMetric('acl_cache_hit_rate'),
     };
   }
 }
@@ -221,9 +247,7 @@ import { CustomerSyncRequestDto, CustomerMetricsDto } from './dto'; // From your
 
 @Controller('admin/customers')
 export class CustomerAdminController {
-  constructor(
-    private readonly customerBridge: CustomerBridgeService
-  ) {}
+  constructor(private readonly customerBridge: CustomerBridgeService) {}
 
   @Get(':id')
   async getCustomer(@Param('id') customerId: string) {
@@ -239,14 +263,17 @@ export class CustomerAdminController {
   async syncCustomers(@Body() syncRequest: CustomerSyncRequestDto) {
     try {
       const result = await this.customerBridge.syncCustomers(syncRequest);
-      return { 
-        success: true, 
+      return {
+        success: true,
         data: {
           processedCount: result.processedCount,
           errorCount: result.errorCount,
-          successRate: (result.processedCount / (result.processedCount + result.errorCount)) * 100,
-          errors: result.errors.slice(0, 10) // Limit error details
-        }
+          successRate:
+            (result.processedCount /
+              (result.processedCount + result.errorCount)) *
+            100,
+          errors: result.errors.slice(0, 10), // Limit error details
+        },
       };
     } catch (error) {
       return { success: false, error: error.message };
@@ -284,7 +311,7 @@ import { CustomerBridgeService } from './customer-bridge.service';
 @Module({
   controllers: [CustomerAdminController],
   providers: [CustomerBridgeService],
-  exports: [CustomerBridgeService]
+  exports: [CustomerBridgeService],
 })
 export class CustomerEnterpriseModule implements OnModuleInit {
   async onModuleInit() {
@@ -297,8 +324,8 @@ export class CustomerEnterpriseModule implements OnModuleInit {
       resilience: {
         defaultTimeout: 30000,
         defaultRetryAttempts: 3,
-        defaultCircuitBreakerThreshold: 5
-      }
+        defaultCircuitBreakerThreshold: 5,
+      },
     });
   }
 }
@@ -307,14 +334,17 @@ export class CustomerEnterpriseModule implements OnModuleInit {
 @DomainService({
   serviceId: 'metricsCollector',
   lifetime: ServiceLifetime.Singleton,
-  context: 'Infrastructure'
+  context: 'Infrastructure',
 })
 export class MetricsCollector {
   async recordSyncOperation(metrics: SyncMetrics): Promise<void> {
     // Implementation for metrics collection
   }
 
-  async registerMetric(name: string, type: 'counter' | 'gauge' | 'histogram'): Promise<void> {
+  async registerMetric(
+    name: string,
+    type: 'counter' | 'gauge' | 'histogram'
+  ): Promise<void> {
     // Implementation for metric registration
   }
 
@@ -327,7 +357,7 @@ export class MetricsCollector {
 @DomainService({
   serviceId: 'cacheManager',
   lifetime: ServiceLifetime.Singleton,
-  context: 'Infrastructure'
+  context: 'Infrastructure',
 })
 export class CacheManager {
   async clear(pattern: string): Promise<void> {
@@ -338,10 +368,12 @@ export class CacheManager {
 @DomainService({
   serviceId: 'externalCustomerAPI',
   lifetime: ServiceLifetime.Singleton,
-  context: 'ExternalIntegration'
+  context: 'ExternalIntegration',
 })
 export class ExternalCustomerAPI {
-  async getCustomersByFilter(filter: CustomerFilter): Promise<ExternalCustomerData[]> {
+  async getCustomersByFilter(
+    filter: CustomerFilter
+  ): Promise<ExternalCustomerData[]> {
     // Implementation for external API calls
     return [];
   }
@@ -384,7 +416,8 @@ interface CustomerFilter {
 
 ## Key Features
 
-- **VytchesDDD DI Integration**: Enterprise service management with auto-discovery
+- **VytchesDDD DI Integration**: Enterprise service management with
+  auto-discovery
 - **Bridge Pattern**: Clean separation between NestJS and business logic
 - **Advanced Resilience**: Circuit breakers, retry policies, and timeouts
 - **Performance Optimization**: Caching, batch processing, and metrics
@@ -394,7 +427,8 @@ interface CustomerFilter {
 
 - **Service Resolution**: Always resolve services after VytchesDDD configuration
 - **Bridge Complexity**: Keep bridge services thin - delegate to domain services
-- **Initialization Order**: Initialize VytchesDDD before NestJS service resolution
+- **Initialization Order**: Initialize VytchesDDD before NestJS service
+  resolution
 
 ## Related Examples
 

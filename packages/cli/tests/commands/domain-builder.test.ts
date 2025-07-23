@@ -10,16 +10,18 @@ vi.mock('../../src/workflows/domain-builder/domain-builder-workflow');
 vi.mock('../../src/core/utils/performance');
 vi.mock('../../src/core/utils/colors', () => ({
   Colors: {
-    bold: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    error: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    dim: vi.fn((text) => text),
+    bold: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    error: vi.fn(text => text),
+    green: vi.fn(text => text),
+    dim: vi.fn(text => text),
   },
 }));
 
 // Mock types
-const mockDomainBuilderWorkflow = DomainBuilderWorkflow as unknown as MockedClass<typeof DomainBuilderWorkflow>;
+const mockDomainBuilderWorkflow = DomainBuilderWorkflow as unknown as MockedClass<
+  typeof DomainBuilderWorkflow
+>;
 const mockPerformance = Performance;
 
 describe('domainBuilderCommand', () => {
@@ -49,8 +51,12 @@ describe('domainBuilderCommand', () => {
     (mockDomainBuilderWorkflow as any).mockImplementation(() => mockWorkflowInstance);
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -98,7 +104,7 @@ describe('domainBuilderCommand', () => {
 
     it('should have examples', () => {
       expect(domainBuilderCommand.examples).toBeDefined();
-      expect((domainBuilderCommand.examples as any[] || []).length).toBeGreaterThan(0);
+      expect(((domainBuilderCommand.examples as any[]) || []).length).toBeGreaterThan(0);
     });
   });
 
@@ -326,9 +332,7 @@ describe('domainBuilderCommand', () => {
           dryRun: true,
         })
       );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Dry Run Summary')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Dry Run Summary'));
     });
 
     it('should show dry run statistics', async () => {
@@ -349,9 +353,7 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Would generate: 4 files')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Would generate: 4 files'));
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('Across: 3 bounded contexts')
       );
@@ -379,18 +381,10 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Next Steps')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Install dependencies')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Start development')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Run tests')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Next Steps'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Install dependencies'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Start development'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Run tests'));
     });
 
     it('should show database setup step when hasDatabase is true', async () => {
@@ -410,12 +404,8 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Setup database')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('docker-compose up -d')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Setup database'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('docker-compose up -d'));
     });
 
     it('should show monitoring step when hasMonitoring is true', async () => {
@@ -435,9 +425,7 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('View monitoring')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('View monitoring'));
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('http://localhost:3001/metrics')
       );
@@ -452,15 +440,9 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Generated: 3 files')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Bounded contexts: 2')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Patterns applied: 2')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Generated: 3 files'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Bounded contexts: 2'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Patterns applied: 2'));
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('Generation time: 1500.5ms')
       );
@@ -514,9 +496,7 @@ describe('domainBuilderCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Stack trace:')
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Stack trace:'));
       expect(console.error).toHaveBeenCalledWith(
         expect.stringContaining('Error stack trace details')
       );

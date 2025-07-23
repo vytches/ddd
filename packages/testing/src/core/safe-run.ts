@@ -5,7 +5,8 @@
  * Migrated from @vytches-ddd/utils and enhanced with testing-specific features.
  */
 
-import { IDomainError } from '@vytches-ddd/domain-primitives';
+// Removed import to avoid circular dependency
+// We'll use duck typing to check for BaseError-like objects
 
 /**
  * @llm-summary Type definition for safe run result
@@ -179,7 +180,7 @@ export function safeRunTest<T, E extends Error = Error>(
       return result
         .then(value => [undefined, value] as const)
         .catch(error => {
-          if (context && error instanceof IDomainError) {
+          if (context && error && typeof error === 'object' && 'data' in error) {
             error.data = { ...(error?.data ? error.data : {}), testContext: context };
           }
           return [error as E, undefined] as const;
@@ -188,8 +189,8 @@ export function safeRunTest<T, E extends Error = Error>(
 
     return [undefined, result] as const;
   } catch (error) {
-    if (context && error instanceof IDomainError) {
-      const domainError = error as IDomainError;
+    if (context && error && typeof error === 'object' && 'data' in error) {
+      const domainError = error as any;
       domainError.data = { ...(domainError.data || {}), testContext: context };
     }
     return [error as E, undefined] as const;

@@ -1,11 +1,9 @@
 # Basic Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Framework**: NestJS
-**Focus**: Manual value object integration with standard NestJS patterns
-**Base Example**: [Money Value Object](../../../basic/example-1.md)
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Framework**: NestJS **Focus**: Manual value object
+integration with standard NestJS patterns **Base Example**:
+[Money Value Object](../../../basic/example-1.md)
 
 ## Service Implementation
 
@@ -13,11 +11,7 @@
 // money.service.ts
 import { Injectable } from '@nestjs/common';
 import { Money } from '@vytches-ddd/value-objects';
-import { 
-  CreateMoneyDto, 
-  MoneyResponse, 
-  CurrencyConversionDto 
-} from './types'; // From your application
+import { CreateMoneyDto, MoneyResponse, CurrencyConversionDto } from './types'; // From your application
 
 @Injectable()
 export class MoneyService {
@@ -27,43 +21,47 @@ export class MoneyService {
   createMoney(dto: CreateMoneyDto): MoneyResponse {
     try {
       const money = Money.create(dto.amount, dto.currency);
-      
+
       return {
         success: true,
         data: {
           amount: money.amount,
           currency: money.currency,
-          formatted: money.toString()
-        }
+          formatted: money.toString(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create money'
+        error:
+          error instanceof Error ? error.message : 'Failed to create money',
       };
     }
   }
 
   // ✅ FOCUS: Money operations
-  addMoney(money1Dto: CreateMoneyDto, money2Dto: CreateMoneyDto): MoneyResponse {
+  addMoney(
+    money1Dto: CreateMoneyDto,
+    money2Dto: CreateMoneyDto
+  ): MoneyResponse {
     try {
       const money1 = Money.create(money1Dto.amount, money1Dto.currency);
       const money2 = Money.create(money2Dto.amount, money2Dto.currency);
-      
+
       const result = money1.add(money2);
-      
+
       return {
         success: true,
         data: {
           amount: result.amount,
           currency: result.currency,
-          formatted: result.toString()
-        }
+          formatted: result.toString(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to add money'
+        error: error instanceof Error ? error.message : 'Failed to add money',
       };
     }
   }
@@ -77,14 +75,16 @@ export class MoneyService {
   formatMoney(dto: CreateMoneyDto, locale?: string): string {
     try {
       const money = Money.create(dto.amount, dto.currency);
-      
+
       if (locale) {
         return money.toLocaleString(locale);
       }
-      
+
       return money.toString();
     } catch (error) {
-      throw new Error(`Failed to format money: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to format money: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -94,7 +94,10 @@ export class MoneyService {
   }
 
   // ✅ FOCUS: Money comparison
-  compareMoney(money1Dto: CreateMoneyDto, money2Dto: CreateMoneyDto): {
+  compareMoney(
+    money1Dto: CreateMoneyDto,
+    money2Dto: CreateMoneyDto
+  ): {
     isEqual: boolean;
     isGreater: boolean;
     isLess: boolean;
@@ -102,14 +105,16 @@ export class MoneyService {
     try {
       const money1 = Money.create(money1Dto.amount, money1Dto.currency);
       const money2 = Money.create(money2Dto.amount, money2Dto.currency);
-      
+
       return {
         isEqual: money1.equals(money2),
         isGreater: money1.isGreaterThan(money2),
-        isLess: money1.isLessThan(money2)
+        isLess: money1.isLessThan(money2),
       };
     } catch (error) {
-      throw new Error(`Failed to compare money: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to compare money: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }
@@ -138,14 +143,16 @@ export class MoneyController {
   }
 
   @Post('compare')
-  compareMoney(@Body() body: { money1: CreateMoneyDto; money2: CreateMoneyDto }) {
+  compareMoney(
+    @Body() body: { money1: CreateMoneyDto; money2: CreateMoneyDto }
+  ) {
     return this.moneyService.compareMoney(body.money1, body.money2);
   }
 
   @Get('currencies')
   getSupportedCurrencies() {
     return {
-      currencies: this.moneyService.getSupportedCurrencies()
+      currencies: this.moneyService.getSupportedCurrencies(),
     };
   }
 
@@ -156,7 +163,7 @@ export class MoneyController {
     @Query('locale') locale?: string
   ) {
     return {
-      formatted: this.moneyService.formatMoney({ amount, currency }, locale)
+      formatted: this.moneyService.formatMoney({ amount, currency }, locale),
     };
   }
 }
@@ -192,20 +199,21 @@ export class EmailService {
   createEmail(dto: CreateEmailDto): EmailResponse {
     try {
       const email = Email.create(dto.address, dto.config);
-      
+
       return {
         success: true,
         data: {
           address: email.address,
           domain: email.domain,
           localPart: email.localPart,
-          isValid: email.isValid()
-        }
+          isValid: email.isValid(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create email'
+        error:
+          error instanceof Error ? error.message : 'Failed to create email',
       };
     }
   }
@@ -226,7 +234,9 @@ export class EmailService {
       const email = Email.create(address);
       return email.normalize().toString();
     } catch (error) {
-      throw new Error(`Failed to normalize email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to normalize email: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -243,13 +253,13 @@ export class EmailService {
         return {
           address,
           isValid: true,
-          normalizedAddress: email.normalize().toString()
+          normalizedAddress: email.normalize().toString(),
         };
       } catch (error) {
         return {
           address,
           isValid: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
       }
     });
@@ -278,7 +288,7 @@ export class AddressService {
         dto.country,
         dto.coordinates
       );
-      
+
       return {
         success: true,
         data: {
@@ -287,19 +297,23 @@ export class AddressService {
           state: address.state,
           postalCode: address.postalCode,
           country: address.country,
-          formatted: address.getFormattedAddress()
-        }
+          formatted: address.getFormattedAddress(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create address'
+        error:
+          error instanceof Error ? error.message : 'Failed to create address',
       };
     }
   }
 
   // ✅ FOCUS: Address formatting
-  formatAddress(dto: CreateAddressDto, format: 'us' | 'international' = 'us'): string {
+  formatAddress(
+    dto: CreateAddressDto,
+    format: 'us' | 'international' = 'us'
+  ): string {
     try {
       const address = Address.create(
         dto.street,
@@ -308,10 +322,12 @@ export class AddressService {
         dto.postalCode,
         dto.country
       );
-      
+
       return address.getFormattedAddress(format);
     } catch (error) {
-      throw new Error(`Failed to format address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to format address: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -330,7 +346,7 @@ export class AddressService {
         address1Dto.country,
         address1Dto.coordinates
       );
-      
+
       const address2 = Address.create(
         address2Dto.street,
         address2Dto.city,
@@ -339,10 +355,12 @@ export class AddressService {
         address2Dto.country,
         address2Dto.coordinates
       );
-      
+
       return address1.distanceTo(address2, unit);
     } catch (error) {
-      throw new Error(`Failed to calculate distance: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to calculate distance: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -352,7 +370,7 @@ export class AddressService {
     errors: string[];
   } {
     const errors: string[] = [];
-    
+
     try {
       Address.create(
         dto.street,
@@ -362,10 +380,12 @@ export class AddressService {
         dto.country,
         dto.coordinates
       );
-      
+
       return { isValid: true, errors: [] };
     } catch (error) {
-      errors.push(error instanceof Error ? error.message : 'Unknown validation error');
+      errors.push(
+        error instanceof Error ? error.message : 'Unknown validation error'
+      );
       return { isValid: false, errors };
     }
   }
@@ -382,11 +402,7 @@ import { EmailModule } from './email/email.module';
 import { AddressModule } from './address/address.module';
 
 @Module({
-  imports: [
-    MoneyModule,
-    EmailModule,
-    AddressModule,
-  ],
+  imports: [MoneyModule, EmailModule, AddressModule],
 })
 export class AppModule {}
 ```
@@ -405,7 +421,9 @@ export class OrderService {
 
   async processOrder(orderDto: CreateOrderDto) {
     // Validate customer email
-    const isValidEmail = this.emailService.validateEmail(orderDto.customerEmail);
+    const isValidEmail = this.emailService.validateEmail(
+      orderDto.customerEmail
+    );
     if (!isValidEmail) {
       throw new Error('Invalid customer email');
     }
@@ -413,7 +431,7 @@ export class OrderService {
     // Create order total
     const totalResponse = this.moneyService.createMoney({
       amount: orderDto.totalAmount,
-      currency: orderDto.currency
+      currency: orderDto.currency,
     });
 
     if (!totalResponse.success) {
@@ -421,16 +439,20 @@ export class OrderService {
     }
 
     // Validate shipping address
-    const addressValidation = this.addressService.validateAddress(orderDto.shippingAddress);
+    const addressValidation = this.addressService.validateAddress(
+      orderDto.shippingAddress
+    );
     if (!addressValidation.isValid) {
-      throw new Error(`Invalid shipping address: ${addressValidation.errors.join(', ')}`);
+      throw new Error(
+        `Invalid shipping address: ${addressValidation.errors.join(', ')}`
+      );
     }
 
     return {
       orderId: 'order-123',
       total: totalResponse.data,
       customerEmail: orderDto.customerEmail,
-      shippingAddress: orderDto.shippingAddress
+      shippingAddress: orderDto.shippingAddress,
     };
   }
 }
@@ -438,16 +460,20 @@ export class OrderService {
 
 ## Key Points
 
-- **Standard NestJS Patterns**: Uses familiar NestJS decorators and dependency injection
-- **Manual Value Object Creation**: Direct instantiation of value objects in services
+- **Standard NestJS Patterns**: Uses familiar NestJS decorators and dependency
+  injection
+- **Manual Value Object Creation**: Direct instantiation of value objects in
+  services
 - **Error Handling**: Proper try/catch blocks with meaningful error messages
 - **Type Safety**: Leverages TypeScript for compile-time safety
 - **Service Layer**: Business logic encapsulated in dedicated service classes
-- **Simple Integration**: Minimal setup required, works with existing NestJS applications
+- **Simple Integration**: Minimal setup required, works with existing NestJS
+  applications
 
 ## Benefits
 
 - **Easy to Understand**: Straightforward implementation using standard patterns
 - **Quick Setup**: No additional configuration or dependencies required
-- **Full Control**: Complete control over value object lifecycle and error handling
+- **Full Control**: Complete control over value object lifecycle and error
+  handling
 - **Framework Familiarity**: Follows standard NestJS conventions developers know

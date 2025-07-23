@@ -1,38 +1,42 @@
 # Address Value Object - Basic Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Domain**: Geographic & Location
-**Patterns**: Value Object, Composite Data, Geographic Coordinates
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Domain**: Geographic & Location **Patterns**: Value
+Object, Composite Data, Geographic Coordinates **Dependencies**:
+@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating an **Address** value object that encapsulates physical addresses with validation, formatting, and geographic coordinates. Shows composite value object patterns including multi-field validation, formatted display, and coordinate integration.
+This example demonstrates creating an **Address** value object that encapsulates
+physical addresses with validation, formatting, and geographic coordinates.
+Shows composite value object patterns including multi-field validation,
+formatted display, and coordinate integration.
 
 ## Business Context
 
-Address is a fundamental value object in shipping, logistics, user profiles, and location-based services. It ensures address consistency, provides standardized formatting, and enables geographic calculations. Essential for e-commerce shipping, service delivery, and location-aware applications.
+Address is a fundamental value object in shipping, logistics, user profiles, and
+location-based services. It ensures address consistency, provides standardized
+formatting, and enables geographic calculations. Essential for e-commerce
+shipping, service delivery, and location-aware applications.
 
 ## Code Example
 
 ```typescript
 // address.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  AddressData, 
-  GeographicCoordinates, 
-  AddressValidationResult, 
-  ValueObjectValidationResult 
+import {
+  AddressData,
+  GeographicCoordinates,
+  AddressValidationResult,
+  ValueObjectValidationResult,
 } from './types';
-import { 
-  validateRequired, 
+import {
+  validateRequired,
   validateStringLength,
   formatAddress,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class Address extends ValueObject<AddressData> {
@@ -57,7 +61,7 @@ export class Address extends ValueObject<AddressData> {
       postalCode: postalCode.trim().replace(/\s+/g, '').toUpperCase(),
       country: country.trim().toUpperCase(),
       apartment: apartment?.trim(),
-      coordinates
+      coordinates,
     };
 
     const validation = Address.validate(data);
@@ -85,10 +89,18 @@ export class Address extends ValueObject<AddressData> {
       latitude,
       longitude,
       altitude,
-      accuracy
+      accuracy,
     };
 
-    return Address.create(street, city, state, postalCode, country, apartment, coordinates);
+    return Address.create(
+      street,
+      city,
+      state,
+      postalCode,
+      country,
+      apartment,
+      coordinates
+    );
   }
 
   // ✅ FOCUS: Comprehensive validation
@@ -116,11 +128,16 @@ export class Address extends ValueObject<AddressData> {
 
     // Country code validation
     if (!Address.isValidCountryCode(data.country)) {
-      results.push(createFailureResult([`Invalid country code: ${data.country}`]));
+      results.push(
+        createFailureResult([`Invalid country code: ${data.country}`])
+      );
     }
 
     // Postal code format validation
-    const postalValidation = Address.validatePostalCode(data.postalCode, data.country);
+    const postalValidation = Address.validatePostalCode(
+      data.postalCode,
+      data.country
+    );
     if (!postalValidation.isValid) {
       results.push(postalValidation);
     }
@@ -138,7 +155,7 @@ export class Address extends ValueObject<AddressData> {
   withApartment(apartment: string): Address {
     return new Address({
       ...this.data,
-      apartment: apartment.trim()
+      apartment: apartment.trim(),
     });
   }
 
@@ -150,21 +167,21 @@ export class Address extends ValueObject<AddressData> {
 
     return new Address({
       ...this.data,
-      coordinates
+      coordinates,
     });
   }
 
   withoutApartment(): Address {
     return new Address({
       ...this.data,
-      apartment: undefined
+      apartment: undefined,
     });
   }
 
   withoutCoordinates(): Address {
     return new Address({
       ...this.data,
-      coordinates: undefined
+      coordinates: undefined,
     });
   }
 
@@ -199,30 +216,34 @@ export class Address extends ValueObject<AddressData> {
 
     // Rough approximation - 1 degree ≈ 111 km
     const latOffset = radiusKm / 111;
-    const lngOffset = radiusKm / (111 * Math.cos(lat * Math.PI / 180));
+    const lngOffset = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
 
     return {
       northEast: {
         latitude: lat + latOffset,
-        longitude: lng + lngOffset
+        longitude: lng + lngOffset,
       },
       southWest: {
         latitude: lat - latOffset,
-        longitude: lng - lngOffset
-      }
+        longitude: lng - lngOffset,
+      },
     };
   }
 
   // ✅ FOCUS: Address comparison and matching
   isSameCity(other: Address): boolean {
-    return this.data.city.toLowerCase() === other.data.city.toLowerCase() &&
-           this.data.state.toLowerCase() === other.data.state.toLowerCase() &&
-           this.data.country === other.data.country;
+    return (
+      this.data.city.toLowerCase() === other.data.city.toLowerCase() &&
+      this.data.state.toLowerCase() === other.data.state.toLowerCase() &&
+      this.data.country === other.data.country
+    );
   }
 
   isSameRegion(other: Address): boolean {
-    return this.data.state.toLowerCase() === other.data.state.toLowerCase() &&
-           this.data.country === other.data.country;
+    return (
+      this.data.state.toLowerCase() === other.data.state.toLowerCase() &&
+      this.data.country === other.data.country
+    );
   }
 
   isSameCountry(other: Address): boolean {
@@ -243,36 +264,36 @@ export class Address extends ValueObject<AddressData> {
 
   toOneLine(): string {
     const parts = [this.data.street];
-    
+
     if (this.data.apartment) {
       parts[0] += `, ${this.data.apartment}`;
     }
-    
+
     parts.push(this.data.city);
     parts.push(`${this.data.state} ${this.data.postalCode}`);
-    
+
     if (this.data.country !== 'US') {
       parts.push(this.data.country);
     }
-    
+
     return parts.join(', ');
   }
 
   toShippingLabel(): string {
     const lines = [];
-    
+
     if (this.data.apartment) {
       lines.push(`${this.data.street}, ${this.data.apartment}`);
     } else {
       lines.push(this.data.street);
     }
-    
+
     lines.push(`${this.data.city}, ${this.data.state} ${this.data.postalCode}`);
-    
+
     if (this.data.country !== 'US') {
       lines.push(this.data.country);
     }
-    
+
     return lines.join('\n');
   }
 
@@ -328,19 +349,33 @@ export class Address extends ValueObject<AddressData> {
 
   // Private static validation methods
   private static isValidCountryCode(code: string): boolean {
-    const validCodes = ['US', 'CA', 'GB', 'DE', 'FR', 'AU', 'JP', 'CN', 'IN', 'BR'];
+    const validCodes = [
+      'US',
+      'CA',
+      'GB',
+      'DE',
+      'FR',
+      'AU',
+      'JP',
+      'CN',
+      'IN',
+      'BR',
+    ];
     return validCodes.includes(code);
   }
 
-  private static validatePostalCode(postalCode: string, country: string): ValueObjectValidationResult {
+  private static validatePostalCode(
+    postalCode: string,
+    country: string
+  ): ValueObjectValidationResult {
     const patterns = {
-      'US': /^\d{5}(-\d{4})?$/,
-      'CA': /^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/,
-      'GB': /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/,
-      'DE': /^\d{5}$/,
-      'FR': /^\d{5}$/,
-      'AU': /^\d{4}$/,
-      'JP': /^\d{3}-\d{4}$/
+      US: /^\d{5}(-\d{4})?$/,
+      CA: /^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/,
+      GB: /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/,
+      DE: /^\d{5}$/,
+      FR: /^\d{5}$/,
+      AU: /^\d{4}$/,
+      JP: /^\d{3}-\d{4}$/,
     };
 
     const pattern = patterns[country as keyof typeof patterns];
@@ -355,7 +390,9 @@ export class Address extends ValueObject<AddressData> {
     return createSuccessResult();
   }
 
-  private static validateCoordinates(coords: GeographicCoordinates): ValueObjectValidationResult {
+  private static validateCoordinates(
+    coords: GeographicCoordinates
+  ): ValueObjectValidationResult {
     const errors: string[] = [];
 
     if (coords.latitude < -90 || coords.latitude > 90) {
@@ -374,34 +411,41 @@ export class Address extends ValueObject<AddressData> {
       errors.push('Accuracy cannot be negative');
     }
 
-    return errors.length > 0 
+    return errors.length > 0
       ? createFailureResult(errors)
       : createSuccessResult();
   }
 
-  private static calculateDistance(coord1: GeographicCoordinates, coord2: GeographicCoordinates): number {
+  private static calculateDistance(
+    coord1: GeographicCoordinates,
+    coord2: GeographicCoordinates
+  ): number {
     const R = 6371; // Earth's radius in kilometers
-    const dLat = (coord2.latitude - coord1.latitude) * Math.PI / 180;
-    const dLon = (coord2.longitude - coord1.longitude) * Math.PI / 180;
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(coord1.latitude * Math.PI / 180) * 
-              Math.cos(coord2.latitude * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    
+    const dLat = ((coord2.latitude - coord1.latitude) * Math.PI) / 180;
+    const dLon = ((coord2.longitude - coord1.longitude) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((coord1.latitude * Math.PI) / 180) *
+        Math.cos((coord2.latitude * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
   // ✅ FOCUS: Value object equality implementation
   protected isEqualTo(other: Address): boolean {
-    return this.data.street === other.data.street &&
-           this.data.city === other.data.city &&
-           this.data.state === other.data.state &&
-           this.data.postalCode === other.data.postalCode &&
-           this.data.country === other.data.country &&
-           this.data.apartment === other.data.apartment &&
-           this.coordinatesEqual(this.data.coordinates, other.data.coordinates);
+    return (
+      this.data.street === other.data.street &&
+      this.data.city === other.data.city &&
+      this.data.state === other.data.state &&
+      this.data.postalCode === other.data.postalCode &&
+      this.data.country === other.data.country &&
+      this.data.apartment === other.data.apartment &&
+      this.coordinatesEqual(this.data.coordinates, other.data.coordinates)
+    );
   }
 
   private coordinatesEqual(
@@ -410,11 +454,13 @@ export class Address extends ValueObject<AddressData> {
   ): boolean {
     if (!coord1 && !coord2) return true;
     if (!coord1 || !coord2) return false;
-    
-    return coord1.latitude === coord2.latitude &&
-           coord1.longitude === coord2.longitude &&
-           coord1.altitude === coord2.altitude &&
-           coord1.accuracy === coord2.accuracy;
+
+    return (
+      coord1.latitude === coord2.latitude &&
+      coord1.longitude === coord2.longitude &&
+      coord1.altitude === coord2.altitude &&
+      coord1.accuracy === coord2.accuracy
+    );
   }
 }
 ```
@@ -472,7 +518,7 @@ const addressWithCoords = Address.createWithCoordinates(
   '95014',
   'US',
   37.3347, // latitude
-  -122.0090 // longitude
+  -122.009 // longitude
 );
 
 console.log(addressWithCoords.hasCoordinates()); // true
@@ -504,22 +550,22 @@ import { Address } from './address';
 // ✅ Create addresses with coordinates
 const officeA = Address.createWithCoordinates(
   '100 Tech Street',
-  'San Francisco', 
+  'San Francisco',
   'CA',
   '94105',
   'US',
-  37.7849,  // SF coordinates
+  37.7849, // SF coordinates
   -122.4094
 );
 
 const officeB = Address.createWithCoordinates(
   '200 Innovation Blvd',
   'Palo Alto',
-  'CA', 
+  'CA',
   '94301',
   'US',
-  37.4419,  // Palo Alto coordinates
-  -122.1430
+  37.4419, // Palo Alto coordinates
+  -122.143
 );
 
 // ✅ Calculate distance
@@ -534,8 +580,12 @@ console.log(`Office B is within 50km of Office A: ${isNearby}`); // true
 const searchArea = officeA.getBoundingBox(10); // 10km radius
 if (searchArea) {
   console.log('Search area:');
-  console.log(`NE: ${searchArea.northEast.latitude}, ${searchArea.northEast.longitude}`);
-  console.log(`SW: ${searchArea.southWest.latitude}, ${searchArea.southWest.longitude}`);
+  console.log(
+    `NE: ${searchArea.northEast.latitude}, ${searchArea.northEast.longitude}`
+  );
+  console.log(
+    `SW: ${searchArea.southWest.latitude}, ${searchArea.southWest.longitude}`
+  );
 }
 
 // ✅ Address comparison
@@ -543,7 +593,7 @@ const sameCity = officeA.isSameCity(officeB); // true (both in CA, US)
 const sameRegion = officeA.isSameRegion(officeB); // true (both in CA)
 const sameCountry = officeA.isSameCountry(officeB); // true (both in US)
 
-console.log(`Same city: ${sameCity}`);     // false (SF vs Palo Alto)
+console.log(`Same city: ${sameCity}`); // false (SF vs Palo Alto)
 console.log(`Same region: ${sameRegion}`); // true
 console.log(`Same country: ${sameCountry}`); // true
 ```
@@ -604,13 +654,13 @@ class DeliveryRoute {
       if (distance === null) return null; // Missing coordinates
       totalDistance += distance;
     }
-    
+
     return totalDistance;
   }
 
   getAddressesByRegion(): Map<string, Address[]> {
     const regions = new Map<string, Address[]>();
-    
+
     this.addresses.forEach(addr => {
       const region = `${addr.state}, ${addr.country}`;
       if (!regions.has(region)) {
@@ -618,7 +668,7 @@ class DeliveryRoute {
       }
       regions.get(region)!.push(addr);
     });
-    
+
     return regions;
   }
 }
@@ -649,7 +699,8 @@ regionBreakdown.forEach((addresses, region) => {
 
 ## Common Pitfalls
 
-- **Postal Code Formats**: Different countries have different postal code patterns
+- **Postal Code Formats**: Different countries have different postal code
+  patterns
 - **Coordinate Precision**: Be aware of GPS accuracy limitations
 - **Address Normalization**: Ensure consistent formatting and casing
 - **International Addresses**: Handle varying address component orders
@@ -658,4 +709,5 @@ regionBreakdown.forEach((addresses, region) => {
 ## Related Examples
 
 - [Money Value Object](./example-1.md) - Numeric value object with validation
-- [Email Value Object](./example-2.md) - String-based value object with format validation
+- [Email Value Object](./example-2.md) - String-based value object with format
+  validation

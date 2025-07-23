@@ -6,19 +6,27 @@
 
 ## Overview
 
-This document presents real-world use cases for intermediate messaging patterns in the @vytches-ddd/messaging package, focusing on saga orchestration, content-based routing, and complex integration scenarios.
+This document presents real-world use cases for intermediate messaging patterns
+in the @vytches-ddd/messaging package, focusing on saga orchestration,
+content-based routing, and complex integration scenarios.
 
 ## Use Case 1: Healthcare Appointment Scheduling
 
 ### Business Context
 
-A healthcare platform coordinates appointments across multiple providers, insurance verification, and patient notifications. The system must handle partial failures gracefully and ensure all parties are synchronized.
+A healthcare platform coordinates appointments across multiple providers,
+insurance verification, and patient notifications. The system must handle
+partial failures gracefully and ensure all parties are synchronized.
 
 ### Implementation with @vytches-ddd/messaging
 
 ```typescript
 // healthcare-appointment-saga.ts
-import { BaseSaga, SagaOrchestrator, ISagaExecutionContext } from '@vytches-ddd/messaging';
+import {
+  BaseSaga,
+  SagaOrchestrator,
+  ISagaExecutionContext,
+} from '@vytches-ddd/messaging';
 import { MessageRouter, RoutingContext } from '@vytches-ddd/messaging';
 
 export class AppointmentSchedulingSaga extends BaseSaga {
@@ -29,56 +37,56 @@ export class AppointmentSchedulingSaga extends BaseSaga {
   protected defineSteps(): void {
     this.addStep({
       name: 'CheckProviderAvailability',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const slots = await this.providerService.findAvailableSlots(
           ctx.sagaData.providerId,
           ctx.sagaData.requestedDate
         );
-        
+
         if (slots.length === 0) {
-          return { 
-            success: false, 
-            error: { message: 'No availability' }
+          return {
+            success: false,
+            error: { message: 'No availability' },
           };
         }
-        
+
         return {
           success: true,
-          updatedData: { ...ctx.sagaData, selectedSlot: slots[0] }
+          updatedData: { ...ctx.sagaData, selectedSlot: slots[0] },
         };
       },
-      timeout: 10000
+      timeout: 10000,
     });
 
     this.addStep({
       name: 'VerifyInsurance',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const verification = await this.insuranceService.verify({
           patientId: ctx.sagaData.patientId,
           providerId: ctx.sagaData.providerId,
-          procedureCode: ctx.sagaData.procedureCode
+          procedureCode: ctx.sagaData.procedureCode,
         });
 
         return {
           success: verification.approved,
-          updatedData: { 
-            ...ctx.sagaData, 
+          updatedData: {
+            ...ctx.sagaData,
             insuranceAuth: verification.authCode,
-            copayAmount: verification.copay
-          }
+            copayAmount: verification.copay,
+          },
         };
       },
-      compensator: async (ctx) => {
+      compensator: async ctx => {
         await this.insuranceService.cancelAuthorization(
           ctx.sagaData.insuranceAuth
         );
       },
-      timeout: 30000
+      timeout: 30000,
     });
 
     this.addStep({
       name: 'ReserveSlot',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const reservation = await this.providerService.reserveSlot(
           ctx.sagaData.selectedSlot,
           ctx.sagaData.patientId
@@ -86,34 +94,36 @@ export class AppointmentSchedulingSaga extends BaseSaga {
 
         return {
           success: true,
-          updatedData: { 
-            ...ctx.sagaData, 
-            reservationId: reservation.id
+          updatedData: {
+            ...ctx.sagaData,
+            reservationId: reservation.id,
           },
-          events: [{
-            eventType: 'AppointmentReserved',
-            payload: reservation
-          }]
+          events: [
+            {
+              eventType: 'AppointmentReserved',
+              payload: reservation,
+            },
+          ],
         };
       },
-      compensator: async (ctx) => {
+      compensator: async ctx => {
         await this.providerService.cancelReservation(
           ctx.sagaData.reservationId
         );
-      }
+      },
     });
 
     this.addStep({
       name: 'NotifyParticipants',
-      handler: async (ctx) => {
+      handler: async ctx => {
         await Promise.all([
           this.notifyPatient(ctx.sagaData),
           this.notifyProvider(ctx.sagaData),
-          this.updateEHR(ctx.sagaData)
+          this.updateEHR(ctx.sagaData),
         ]);
 
         return { success: true };
-      }
+      },
     });
   }
 }
@@ -124,28 +134,28 @@ export class HealthcareMessageRouter extends MessageRouter {
     // Route urgent medical messages
     this.addRoute({
       name: 'urgent-medical',
-      predicate: (msg) => 
-        msg.priority === 'urgent' || 
+      predicate: msg =>
+        msg.priority === 'urgent' ||
         msg.type === 'emergency' ||
         this.isTimeSensitive(msg),
       destination: 'urgent-medical-queue',
       priority: 'critical',
       enrichers: [
         new PatientMedicalHistoryEnricher(),
-        new ProviderNotificationEnricher()
-      ]
+        new ProviderNotificationEnricher(),
+      ],
     });
 
     // HIPAA-compliant routing
     this.addRoute({
       name: 'hipaa-compliant',
-      predicate: (msg) => this.containsPHI(msg),
-      destination: async (ctx) => {
+      predicate: msg => this.containsPHI(msg),
+      destination: async ctx => {
         const region = await this.getHIPAACompliantRegion(ctx);
         return `hipaa-${region}-queue`;
       },
       transformers: [new PHIEncryptionTransformer()],
-      enrichers: [new AuditTrailEnricher()]
+      enrichers: [new AuditTrailEnricher()],
     });
   }
 }
@@ -154,7 +164,8 @@ export class HealthcareMessageRouter extends MessageRouter {
 ### Business Impact
 
 - **Patient Satisfaction**: 95% appointment booking success rate
-- **Efficiency**: Reduced appointment scheduling time from 15 minutes to 2 minutes
+- **Efficiency**: Reduced appointment scheduling time from 15 minutes to 2
+  minutes
 - **Compliance**: 100% HIPAA compliance with automatic audit trails
 - **Cost Reduction**: 70% reduction in administrative overhead
 
@@ -162,7 +173,9 @@ export class HealthcareMessageRouter extends MessageRouter {
 
 ### Business Context
 
-A global supply chain platform coordinates orders across suppliers, warehouses, and logistics providers. Complex routing rules ensure optimal fulfillment based on inventory, location, and delivery requirements.
+A global supply chain platform coordinates orders across suppliers, warehouses,
+and logistics providers. Complex routing rules ensure optimal fulfillment based
+on inventory, location, and delivery requirements.
 
 ### Implementation with @vytches-ddd/messaging
 
@@ -188,7 +201,7 @@ export class SupplyChainRouter extends MessageRouter {
           order.items,
           order.shippingAddress
         );
-        
+
         return warehouses.length > 0;
       },
       destination: async (order: Order, ctx) => {
@@ -197,8 +210,8 @@ export class SupplyChainRouter extends MessageRouter {
       },
       enrichers: [
         new InventoryReservationEnricher(),
-        new ShippingCostCalculator()
-      ]
+        new ShippingCostCalculator(),
+      ],
     });
 
     // Cross-docking for large orders
@@ -214,20 +227,19 @@ export class SupplyChainRouter extends MessageRouter {
       destination: 'cross-docking-coordinator',
       transformers: [
         new OrderSplitTransformer(),
-        new MultiWarehouseOptimizer()
-      ]
+        new MultiWarehouseOptimizer(),
+      ],
     });
 
     // Drop-shipping route
     this.addRoute({
       name: 'drop-shipping',
-      predicate: (order: Order) => 
-        order.items.some(item => item.isDropShip),
+      predicate: (order: Order) => order.items.some(item => item.isDropShip),
       destination: 'supplier-integration-queue',
       enrichers: [
         new SupplierMappingEnricher(),
-        new DropShipInstructionEnricher()
-      ]
+        new DropShipInstructionEnricher(),
+      ],
     });
   }
 
@@ -238,15 +250,16 @@ export class SupplyChainRouter extends MessageRouter {
     // - Warehouse capacity
     // - Shipping costs
     // - Delivery time requirements
-    const candidates = await this.inventoryService.getCandidateWarehouses(order);
-    
+    const candidates =
+      await this.inventoryService.getCandidateWarehouses(order);
+
     return this.optimizationEngine.selectOptimal(candidates, {
       weights: {
         distance: 0.3,
         availability: 0.4,
         cost: 0.2,
-        speed: 0.1
-      }
+        speed: 0.1,
+      },
     });
   }
 }
@@ -255,50 +268,48 @@ export class FulfillmentSaga extends BaseSaga {
   protected defineSteps(): void {
     this.addStep({
       name: 'AllocateInventory',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const allocations = await this.inventoryService.allocate(
           ctx.sagaData.order
         );
-        
+
         return {
           success: true,
           updatedData: { ...ctx.sagaData, allocations },
           events: allocations.map(a => ({
             eventType: 'InventoryAllocated',
-            payload: a
-          }))
+            payload: a,
+          })),
         };
       },
-      compensator: async (ctx) => {
+      compensator: async ctx => {
         await this.inventoryService.releaseAllocations(
           ctx.sagaData.allocations
         );
-      }
+      },
     });
 
     this.addStep({
       name: 'ArrangeShipping',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const shipping = await this.shippingService.bookShipment({
           allocations: ctx.sagaData.allocations,
           destination: ctx.sagaData.order.shippingAddress,
-          service: ctx.sagaData.order.shippingService
+          service: ctx.sagaData.order.shippingService,
         });
 
         return {
           success: true,
-          updatedData: { 
-            ...ctx.sagaData, 
+          updatedData: {
+            ...ctx.sagaData,
             shipmentId: shipping.id,
-            trackingNumber: shipping.trackingNumber
-          }
+            trackingNumber: shipping.trackingNumber,
+          },
         };
       },
-      compensator: async (ctx) => {
-        await this.shippingService.cancelShipment(
-          ctx.sagaData.shipmentId
-        );
-      }
+      compensator: async ctx => {
+        await this.shippingService.cancelShipment(ctx.sagaData.shipmentId);
+      },
     });
   }
 }
@@ -307,7 +318,8 @@ export class FulfillmentSaga extends BaseSaga {
 ### Business Impact
 
 - **Fulfillment Speed**: 40% faster order processing through optimal routing
-- **Cost Savings**: 25% reduction in shipping costs via intelligent warehouse selection
+- **Cost Savings**: 25% reduction in shipping costs via intelligent warehouse
+  selection
 - **Inventory Efficiency**: 30% reduction in inventory holding costs
 - **Customer Satisfaction**: 98% on-time delivery rate
 
@@ -315,7 +327,10 @@ export class FulfillmentSaga extends BaseSaga {
 
 ### Business Context
 
-A lending platform processes loan applications through multiple risk assessment stages, integrating with credit bureaus, fraud detection, and regulatory compliance systems. Message routing varies based on loan amount, customer profile, and regulatory requirements.
+A lending platform processes loan applications through multiple risk assessment
+stages, integrating with credit bureaus, fraud detection, and regulatory
+compliance systems. Message routing varies based on loan amount, customer
+profile, and regulatory requirements.
 
 ### Implementation with @vytches-ddd/messaging
 
@@ -335,12 +350,12 @@ export class RiskAssessmentRouter extends MessageRouter {
       enrichers: [
         new DetailedCreditReportEnricher(),
         new AssetVerificationEnricher(),
-        new ManualReviewFlagEnricher()
+        new ManualReviewFlagEnricher(),
       ],
       transformers: [
         new RegulatoryComplianceTransformer(),
-        new RiskScoringTransformer()
-      ]
+        new RiskScoringTransformer(),
+      ],
     });
 
     // Automated approval path
@@ -348,12 +363,14 @@ export class RiskAssessmentRouter extends MessageRouter {
       name: 'automated-approval',
       predicate: async (app: LoanApplication) => {
         const riskScore = await this.riskEngine.quickScore(app);
-        return riskScore.confidence > 0.95 && 
-               riskScore.risk < 0.2 &&
-               app.amount < 50000;
+        return (
+          riskScore.confidence > 0.95 &&
+          riskScore.risk < 0.2 &&
+          app.amount < 50000
+        );
       },
       destination: 'automated-approval-queue',
-      enrichers: [new InstantDecisionEnricher()]
+      enrichers: [new InstantDecisionEnricher()],
     });
 
     // Fraud detection route
@@ -365,7 +382,7 @@ export class RiskAssessmentRouter extends MessageRouter {
       },
       destination: 'fraud-investigation-queue',
       priority: 'critical',
-      transformers: [new FraudEvidenceCollector()]
+      transformers: [new FraudEvidenceCollector()],
     });
   }
 }
@@ -373,81 +390,81 @@ export class RiskAssessmentRouter extends MessageRouter {
 export class LoanApprovalSaga extends BaseSaga {
   private circuitBreaker = new CircuitBreaker({
     failureThreshold: 5,
-    resetTimeout: 60000
+    resetTimeout: 60000,
   });
 
   protected defineSteps(): void {
     this.addStep({
       name: 'CreditCheck',
-      handler: async (ctx) => {
+      handler: async ctx => {
         return await this.circuitBreaker.execute(async () => {
           const report = await this.creditBureau.getReport(
             ctx.sagaData.applicant.ssn
           );
-          
+
           return {
             success: true,
-            updatedData: { 
-              ...ctx.sagaData, 
+            updatedData: {
+              ...ctx.sagaData,
               creditScore: report.score,
-              creditHistory: report.history
-            }
+              creditHistory: report.history,
+            },
           };
         });
       },
-      timeout: 30000
+      timeout: 30000,
     });
 
     this.addStep({
       name: 'RiskAssessment',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const assessment = await this.riskEngine.assess({
           application: ctx.sagaData,
           creditScore: ctx.sagaData.creditScore,
-          market: await this.marketDataService.getCurrentConditions()
+          market: await this.marketDataService.getCurrentConditions(),
         });
 
         if (assessment.decision === 'decline') {
           return {
             success: false,
-            error: { 
+            error: {
               message: 'Risk assessment failed',
-              reasons: assessment.reasons
-            }
+              reasons: assessment.reasons,
+            },
           };
         }
 
         return {
           success: true,
-          updatedData: { 
-            ...ctx.sagaData, 
+          updatedData: {
+            ...ctx.sagaData,
             riskAssessment: assessment,
             approvedAmount: assessment.recommendedAmount,
-            interestRate: assessment.recommendedRate
-          }
+            interestRate: assessment.recommendedRate,
+          },
         };
-      }
+      },
     });
 
     this.addStep({
       name: 'RegulatoryCompliance',
-      handler: async (ctx) => {
-        const compliance = await this.complianceService.validate(
-          ctx.sagaData
-        );
+      handler: async ctx => {
+        const compliance = await this.complianceService.validate(ctx.sagaData);
 
         return {
           success: compliance.passed,
-          events: [{
-            eventType: compliance.passed ? 'LoanApproved' : 'LoanDeclined',
-            payload: {
-              applicationId: ctx.sagaData.id,
-              decision: compliance.decision,
-              conditions: compliance.conditions
-            }
-          }]
+          events: [
+            {
+              eventType: compliance.passed ? 'LoanApproved' : 'LoanDeclined',
+              payload: {
+                applicationId: ctx.sagaData.id,
+                decision: compliance.decision,
+                conditions: compliance.conditions,
+              },
+            },
+          ],
         };
-      }
+      },
     });
   }
 }
@@ -465,7 +482,8 @@ export class LoanApprovalSaga extends BaseSaga {
 ### When to Use Intermediate Messaging Patterns
 
 1. **Saga Pattern**: For coordinating transactions across multiple services
-2. **Content-Based Routing**: When message handling depends on content or context
+2. **Content-Based Routing**: When message handling depends on content or
+   context
 3. **Message Enrichment**: To add context without coupling services
 4. **Circuit Breakers**: For resilient integration with external services
 
@@ -479,6 +497,11 @@ export class LoanApprovalSaga extends BaseSaga {
 
 ### Next Steps
 
-- Explore [Advanced Event Mesh](/packages/messaging/src/examples/advanced/example-2.md) patterns
-- Review [Enterprise Integration](/packages/acl/src/examples/advanced/example-1.md) strategies
-- Study [Complex Policy Orchestration](/packages/policies/src/examples/advanced/example-1.md)
+- Explore
+  [Advanced Event Mesh](/packages/messaging/src/examples/advanced/example-2.md)
+  patterns
+- Review
+  [Enterprise Integration](/packages/acl/src/examples/advanced/example-1.md)
+  strategies
+- Study
+  [Complex Policy Orchestration](/packages/policies/src/examples/advanced/example-1.md)

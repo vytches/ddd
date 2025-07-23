@@ -17,14 +17,14 @@ export const DI_EXAMPLE_CATEGORIES = {
   BASIC: 'basic',
   INTERMEDIATE: 'intermediate',
   ADVANCED: 'advanced',
-  FRAMEWORKS: 'frameworks'
+  FRAMEWORKS: 'frameworks',
 } as const;
 
 /**
  * Framework examples available
  */
 export const DI_FRAMEWORK_EXAMPLES = {
-  NESTJS: 'nestjs'
+  NESTJS: 'nestjs',
 } as const;
 
 /**
@@ -34,7 +34,7 @@ export const DI_COMPLEXITY_LEVELS = {
   BEGINNER: 'beginner',
   INTERMEDIATE: 'intermediate',
   ADVANCED: 'advanced',
-  EXPERT: 'expert'
+  EXPERT: 'expert',
 } as const;
 
 /**
@@ -79,7 +79,7 @@ export const DI_EXAMPLE_TAGS = {
   CONFIG: 'di:config',
   BRIDGE: 'di:bridge',
   PROVIDERS: 'di:providers',
-  FACTORY: 'di:factory'
+  FACTORY: 'di:factory',
 } as const;
 
 /**
@@ -102,28 +102,17 @@ export function getDIExampleTagsByCategory(category: string): string[] {
         DI_EXAMPLE_TAGS.LIFETIME,
         DI_EXAMPLE_TAGS.PATTERNS,
         DI_EXAMPLE_TAGS.LOCATOR,
-        DI_EXAMPLE_TAGS.GLOBAL
+        DI_EXAMPLE_TAGS.GLOBAL,
       ];
 
     case 'discovery':
-      return [
-        DI_EXAMPLE_TAGS.DISCOVERY,
-        DI_EXAMPLE_TAGS.DECORATORS,
-        DI_EXAMPLE_TAGS.AUTOMATION
-      ];
+      return [DI_EXAMPLE_TAGS.DISCOVERY, DI_EXAMPLE_TAGS.DECORATORS, DI_EXAMPLE_TAGS.AUTOMATION];
 
     case 'context':
-      return [
-        DI_EXAMPLE_TAGS.CONTEXT,
-        DI_EXAMPLE_TAGS.ISOLATION,
-        DI_EXAMPLE_TAGS.DDD
-      ];
+      return [DI_EXAMPLE_TAGS.CONTEXT, DI_EXAMPLE_TAGS.ISOLATION, DI_EXAMPLE_TAGS.DDD];
 
     case 'cqrs':
-      return [
-        DI_EXAMPLE_TAGS.CQRS,
-        DI_EXAMPLE_TAGS.HANDLERS
-      ];
+      return [DI_EXAMPLE_TAGS.CQRS, DI_EXAMPLE_TAGS.HANDLERS];
 
     case 'advanced':
       return [
@@ -132,7 +121,7 @@ export function getDIExampleTagsByCategory(category: string): string[] {
         DI_EXAMPLE_TAGS.CONTAINER,
         DI_EXAMPLE_TAGS.CUSTOM,
         DI_EXAMPLE_TAGS.PRODUCTION,
-        DI_EXAMPLE_TAGS.MONITORING
+        DI_EXAMPLE_TAGS.MONITORING,
       ];
 
     case 'frameworks':
@@ -143,7 +132,7 @@ export function getDIExampleTagsByCategory(category: string): string[] {
         DI_EXAMPLE_TAGS.CONFIG,
         DI_EXAMPLE_TAGS.BRIDGE,
         DI_EXAMPLE_TAGS.PROVIDERS,
-        DI_EXAMPLE_TAGS.FACTORY
+        DI_EXAMPLE_TAGS.FACTORY,
       ];
 
     default:

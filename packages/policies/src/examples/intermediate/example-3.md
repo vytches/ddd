@@ -5,19 +5,27 @@
 **Complexity**: intermediate  
 **Domain**: Service Integration  
 **Patterns**: external-service-integration, circuit-breaker, adapter-pattern  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/resilience, @vytches-ddd/validation
+**Dependencies**: @vytches-ddd/policies, @vytches-ddd/resilience,
+@vytches-ddd/validation
 
 ## Description
 
-Demonstrates integration of policies with external services for real-time validation, third-party data enrichment, and API-based business rules. Shows how to handle service failures, implement circuit breakers, and manage external dependencies reliably.
+Demonstrates integration of policies with external services for real-time
+validation, third-party data enrichment, and API-based business rules. Shows how
+to handle service failures, implement circuit breakers, and manage external
+dependencies reliably.
 
 ## Business Context
 
-Modern applications rely on external services for credit checks, fraud detection, compliance validation, and real-time data. Policies must integrate seamlessly with these services while handling failures gracefully, implementing proper retry logic, and maintaining performance under varying service conditions.
+Modern applications rely on external services for credit checks, fraud
+detection, compliance validation, and real-time data. Policies must integrate
+seamlessly with these services while handling failures gracefully, implementing
+proper retry logic, and maintaining performance under varying service
+conditions.
 
 ## Code Example
 
-```typescript
+````typescript
 // external-service-policies.ts
 import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
 import { IAsyncSpecification } from '@vytches-ddd/validation';
@@ -58,7 +66,7 @@ export class CreditBureauService {
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
       resetTimeout: 60000, // 1 minute
-      monitoringPeriod: 30000 // 30 seconds
+      monitoringPeriod: 30000, // 30 seconds
     });
 
     // Configure retry policy
@@ -66,7 +74,7 @@ export class CreditBureauService {
       maxAttempts: config.maxRetries,
       baseDelay: 1000,
       backoff: 'exponential',
-      maxDelay: 10000
+      maxDelay: 10000,
     });
   }
 
@@ -106,15 +114,16 @@ export class CreditBureauService {
           const response = await this.callCreditBureauAPI(applicantId, context);
           const executionTime = Date.now() - startTime;
 
-          console.log(`✅ Credit report retrieved in ${executionTime}ms - Score: ${response.score}`);
+          console.log(
+            `✅ Credit report retrieved in ${executionTime}ms - Score: ${response.score}`
+          );
 
           return {
             score: response.score,
             report: response.report,
             timestamp: new Date(),
-            bureau: 'ExampleBureau'
+            bureau: 'ExampleBureau',
           };
-
         } catch (error) {
           console.error(`❌ Credit bureau API call failed: ${error.message}`);
           throw error;
@@ -123,15 +132,26 @@ export class CreditBureauService {
     });
   }
 
-  private async callCreditBureauAPI(applicantId: string, context?: PolicyContext): Promise<any> {
+  private async callCreditBureauAPI(
+    applicantId: string,
+    context?: PolicyContext
+  ): Promise<any> {
     // Simulate external API call with potential failures
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 800));
+    await new Promise(resolve =>
+      setTimeout(resolve, 200 + Math.random() * 800)
+    );
 
     // Simulate various failure scenarios
     const failureRate = 0.1; // 10% failure rate
     if (Math.random() < failureRate) {
-      const errorTypes = ['TIMEOUT', 'SERVICE_UNAVAILABLE', 'RATE_LIMIT', 'INVALID_REQUEST'];
-      const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+      const errorTypes = [
+        'TIMEOUT',
+        'SERVICE_UNAVAILABLE',
+        'RATE_LIMIT',
+        'INVALID_REQUEST',
+      ];
+      const errorType =
+        errorTypes[Math.floor(Math.random() * errorTypes.length)];
       throw new Error(`CREDIT_BUREAU_${errorType}`);
     }
 
@@ -142,8 +162,8 @@ export class CreditBureauService {
         tradelines: Math.floor(Math.random() * 20) + 5,
         inquiries: Math.floor(Math.random() * 10),
         derogatory: Math.floor(Math.random() * 3),
-        accountAge: Math.floor(Math.random() * 20) + 5
-      }
+        accountAge: Math.floor(Math.random() * 20) + 5,
+      },
     };
   }
 }
@@ -167,7 +187,7 @@ export class FraudDetectionService {
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 3,
       resetTimeout: 30000, // 30 seconds for fraud detection
-      monitoringPeriod: 15000 // 15 seconds
+      monitoringPeriod: 15000, // 15 seconds
     });
   }
 
@@ -197,38 +217,49 @@ export class FraudDetectionService {
     deviceFingerprint: string;
     recommendation: 'approve' | 'review' | 'decline';
   }> {
-    console.log(`🛡️ Assessing fraud risk for request: ${context.correlationId}`);
+    console.log(
+      `🛡️ Assessing fraud risk for request: ${context.correlationId}`
+    );
 
     return await this.circuitBreaker.execute(async () => {
       try {
         // Simulate fraud detection API call
         const response = await this.callFraudDetectionAPI(data, context);
 
-        console.log(`🎯 Fraud assessment complete - Risk Level: ${response.riskLevel}`);
+        console.log(
+          `🎯 Fraud assessment complete - Risk Level: ${response.riskLevel}`
+        );
 
         return response;
-
       } catch (error) {
         console.error(`❌ Fraud detection service failed: ${error.message}`);
-        
+
         // Fallback to conservative risk assessment
         return {
           riskScore: 75,
           riskLevel: 'medium' as const,
-          reasons: ['External service unavailable - conservative assessment applied'],
+          reasons: [
+            'External service unavailable - conservative assessment applied',
+          ],
           deviceFingerprint: 'fallback',
-          recommendation: 'review' as const
+          recommendation: 'review' as const,
         };
       }
     });
   }
 
-  private async callFraudDetectionAPI(data: any, context: PolicyContext): Promise<any> {
+  private async callFraudDetectionAPI(
+    data: any,
+    context: PolicyContext
+  ): Promise<any> {
     // Simulate external fraud detection API
-    await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 300));
+    await new Promise(resolve =>
+      setTimeout(resolve, 150 + Math.random() * 300)
+    );
 
     // Simulate failure scenarios
-    if (Math.random() < 0.05) { // 5% failure rate
+    if (Math.random() < 0.05) {
+      // 5% failure rate
       throw new Error('FRAUD_SERVICE_TIMEOUT');
     }
 
@@ -247,11 +278,17 @@ export class FraudDetectionService {
     } else if (riskScore < 85) {
       riskLevel = 'high';
       recommendation = 'review';
-      reasons.push('High risk patterns identified', 'Manual review recommended');
+      reasons.push(
+        'High risk patterns identified',
+        'Manual review recommended'
+      );
     } else {
       riskLevel = 'critical';
       recommendation = 'decline';
-      reasons.push('Critical fraud indicators', 'Multiple risk factors present');
+      reasons.push(
+        'Critical fraud indicators',
+        'Multiple risk factors present'
+      );
     }
 
     return {
@@ -259,7 +296,7 @@ export class FraudDetectionService {
       riskLevel,
       reasons,
       deviceFingerprint: `fp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      recommendation
+      recommendation,
     };
   }
 }
@@ -280,7 +317,13 @@ export class ComplianceValidationService {
   private sanctionsCache: Map<string, any> = new Map();
   private cacheExpiry: number = 300000; // 5 minutes
 
-  constructor(private config: { sanctionsApiUrl: string; complianceApiUrl: string; apiKey: string }) {}
+  constructor(
+    private config: {
+      sanctionsApiUrl: string;
+      complianceApiUrl: string;
+      apiKey: string;
+    }
+  ) {}
 
   /**
    * @llm-summary Validate against sanctions and watch lists
@@ -297,15 +340,13 @@ export class ComplianceValidationService {
    * @since 2.0.0
    * @public
    */
-  async validateCompliance(
-    applicantData: {
-      name: string;
-      dateOfBirth: Date;
-      address: any;
-      ssn?: string;
-      passport?: string;
-    }
-  ): Promise<{
+  async validateCompliance(applicantData: {
+    name: string;
+    dateOfBirth: Date;
+    address: any;
+    ssn?: string;
+    passport?: string;
+  }): Promise<{
     isCompliant: boolean;
     sanctions: boolean;
     watchList: boolean;
@@ -319,7 +360,9 @@ export class ComplianceValidationService {
     const cacheKey = this.generateCacheKey(applicantData);
     const cached = this.sanctionsCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log(`💾 Using cached compliance result for ${applicantData.name}`);
+      console.log(
+        `💾 Using cached compliance result for ${applicantData.name}`
+      );
       return cached.result;
     }
 
@@ -328,7 +371,7 @@ export class ComplianceValidationService {
       const [sanctionsResult, watchListResult, pepResult] = await Promise.all([
         this.checkSanctionsList(applicantData),
         this.checkWatchList(applicantData),
-        this.checkPEPStatus(applicantData)
+        this.checkPEPStatus(applicantData),
       ]);
 
       const result = {
@@ -336,27 +379,32 @@ export class ComplianceValidationService {
         sanctions: sanctionsResult.match,
         watchList: watchListResult.match,
         pep: pepResult.isPep,
-        riskRating: this.calculateRiskRating(sanctionsResult, watchListResult, pepResult),
+        riskRating: this.calculateRiskRating(
+          sanctionsResult,
+          watchListResult,
+          pepResult
+        ),
         details: [
           ...sanctionsResult.details,
           ...watchListResult.details,
-          ...pepResult.details
-        ]
+          ...pepResult.details,
+        ],
       };
 
       // Cache the result
       this.sanctionsCache.set(cacheKey, {
         result,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
-      console.log(`✅ Compliance validation complete - Compliant: ${result.isCompliant}`);
+      console.log(
+        `✅ Compliance validation complete - Compliant: ${result.isCompliant}`
+      );
 
       return result;
-
     } catch (error) {
       console.error(`❌ Compliance validation failed: ${error.message}`);
-      
+
       // Conservative fallback
       return {
         isCompliant: false,
@@ -364,48 +412,58 @@ export class ComplianceValidationService {
         watchList: false,
         pep: false,
         riskRating: 'high',
-        details: ['Compliance service unavailable - manual review required']
+        details: ['Compliance service unavailable - manual review required'],
       };
     }
   }
 
   private async checkSanctionsList(applicantData: any): Promise<any> {
     // Simulate sanctions list check
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, 100 + Math.random() * 200)
+    );
+
     const match = Math.random() < 0.001; // 0.1% match rate
     return {
       match,
-      details: match ? ['Potential sanctions list match - manual review required'] : []
+      details: match
+        ? ['Potential sanctions list match - manual review required']
+        : [],
     };
   }
 
   private async checkWatchList(applicantData: any): Promise<any> {
     // Simulate watch list check
     await new Promise(resolve => setTimeout(resolve, 80 + Math.random() * 150));
-    
+
     const match = Math.random() < 0.005; // 0.5% match rate
     const highRisk = match && Math.random() < 0.3; // 30% of matches are high risk
-    
+
     return {
       match,
       highRisk,
-      details: match ? ['Watch list entry found'] : []
+      details: match ? ['Watch list entry found'] : [],
     };
   }
 
   private async checkPEPStatus(applicantData: any): Promise<any> {
     // Simulate PEP status check
-    await new Promise(resolve => setTimeout(resolve, 120 + Math.random() * 180));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, 120 + Math.random() * 180)
+    );
+
     const isPep = Math.random() < 0.002; // 0.2% PEP rate
     return {
       isPep,
-      details: isPep ? ['Politically Exposed Person status detected'] : []
+      details: isPep ? ['Politically Exposed Person status detected'] : [],
     };
   }
 
-  private calculateRiskRating(sanctionsResult: any, watchListResult: any, pepResult: any): 'low' | 'medium' | 'high' {
+  private calculateRiskRating(
+    sanctionsResult: any,
+    watchListResult: any,
+    pepResult: any
+  ): 'low' | 'medium' | 'high' {
     if (sanctionsResult.match) return 'high';
     if (watchListResult.highRisk) return 'high';
     if (pepResult.isPep || watchListResult.match) return 'medium';
@@ -416,16 +474,16 @@ export class ComplianceValidationService {
     return `compliance_${applicantData.name}_${applicantData.dateOfBirth.getTime()}`;
   }
 }
-```
+````
 
 ```typescript
 // external-service-policy-integration.ts
 import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
 import { IAsyncSpecification } from '@vytches-ddd/validation';
-import { 
-  CreditBureauService, 
-  FraudDetectionService, 
-  ComplianceValidationService 
+import {
+  CreditBureauService,
+  FraudDetectionService,
+  ComplianceValidationService,
 } from './external-service-policies';
 
 /**
@@ -440,7 +498,9 @@ import {
  * @since 2.0.0
  * @public
  */
-export class ExternalServiceValidationSpecification implements IAsyncSpecification<LoanApplication> {
+export class ExternalServiceValidationSpecification
+  implements IAsyncSpecification<LoanApplication>
+{
   constructor(
     private creditService: CreditBureauService,
     private fraudService: FraudDetectionService,
@@ -452,7 +512,9 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
     context?: PolicyContext
   ): Promise<boolean> {
     try {
-      console.log(`🌐 Starting external service validation for application: ${application.applicantId}`);
+      console.log(
+        `🌐 Starting external service validation for application: ${application.applicantId}`
+      );
 
       // Execute external service calls in parallel for performance
       const [creditResult, fraudResult, complianceResult] = await Promise.all([
@@ -462,8 +524,8 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
           name: application.applicantName,
           dateOfBirth: application.dateOfBirth,
           address: application.address,
-          ssn: application.ssn
-        })
+          ssn: application.ssn,
+        }),
       ]);
 
       // Evaluate combined results
@@ -476,8 +538,11 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
       console.log(`📊 External validation results:`, {
         credit: { score: creditResult.score, passed: creditPassed },
         fraud: { level: fraudResult.riskLevel, passed: fraudPassed },
-        compliance: { compliant: complianceResult.isCompliant, passed: compliancePassed },
-        overall: overallPassed
+        compliance: {
+          compliant: complianceResult.isCompliant,
+          passed: compliancePassed,
+        },
+        overall: overallPassed,
       });
 
       // Store results in application context for later use
@@ -488,23 +553,24 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
             creditScore: creditResult.score,
             fraudRiskLevel: fraudResult.riskLevel,
             complianceStatus: complianceResult.riskRating,
-            validationTimestamp: new Date()
-          }
+            validationTimestamp: new Date(),
+          },
         };
       }
 
       return overallPassed;
-
     } catch (error) {
       console.error(`❌ External service validation failed: ${error.message}`);
-      
+
       // Decide whether to fail open or closed based on error type
       if (this.isCriticalError(error)) {
         return false; // Fail closed for critical errors
       }
-      
+
       // Fail open for non-critical errors (e.g., service timeouts)
-      console.log(`⚠️ Failing open due to non-critical error: ${error.message}`);
+      console.log(
+        `⚠️ Failing open due to non-critical error: ${error.message}`
+      );
       return true;
     }
   }
@@ -514,7 +580,11 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
   }
 
   private isCriticalError(error: Error): boolean {
-    const criticalErrors = ['SANCTIONS_MATCH', 'FRAUD_CRITICAL_RISK', 'INVALID_CREDENTIALS'];
+    const criticalErrors = [
+      'SANCTIONS_MATCH',
+      'FRAUD_CRITICAL_RISK',
+      'INVALID_CREDENTIALS',
+    ];
     return criticalErrors.some(critical => error.message.includes(critical));
   }
 }
@@ -532,7 +602,6 @@ export class ExternalServiceValidationSpecification implements IAsyncSpecificati
  * @public
  */
 export class ExternalServicePolicyFactory {
-  
   /**
    * @llm-summary Create loan approval policy with external service validation
    * @llm-domain Financial Services
@@ -559,71 +628,85 @@ export class ExternalServicePolicyFactory {
       services.complianceService
     );
 
-    return PolicyBuilder.create<LoanApplication>()
-      .withId('loan-approval-with-external-services')
-      .withDomain('financial-services')
-      .withName('Loan Approval with External Service Integration')
-      .withDescription('Comprehensive loan approval with credit bureau, fraud detection, and compliance validation')
-      
-      // Basic application validation
-      .mustSatisfyRules(rules =>
-        rules
-          .forProperty('applicantAge', r => r.minimum(18).maximum(80))
-          .withCode('INVALID_APPLICANT_AGE')
-          .withMessage('Applicant age must be between 18 and 80 years')
-          
-          .forProperty('requestedAmount', r => r.minimum(1000).maximum(2000000))
-          .withCode('INVALID_LOAN_AMOUNT')
-          .withMessage('Loan amount must be between $1,000 and $2,000,000')
-          
-          .forProperty('annualIncome', r => r.minimum(25000))
-          .withCode('INSUFFICIENT_INCOME')
-          .withMessage('Minimum annual income of $25,000 required')
-      )
-      
-      .and()
-      
-      // External service validation
-      .mustAsync(externalValidation)
-      .withCode('EXTERNAL_VALIDATION_FAILED')
-      .withMessage('Application failed external validation checks')
-      .withSeverity('ERROR')
-      
-      .and()
-      
-      // Additional business rules based on external data
-      .when(async (app, context) => {
-        const creditScore = context?.metadata?.externalValidation?.creditScore;
-        return creditScore && creditScore < 700;
-      })
-      .then()
-      .mustSatisfyRules(rules =>
-        rules
-          .forProperty('downPaymentPercentage', r => r.minimum(20))
-          .withCode('INSUFFICIENT_DOWN_PAYMENT_LOW_CREDIT')
-          .withMessage('20% down payment required for credit scores below 700')
-          
-          .forProperty('debtToIncomeRatio', r => r.maximum(0.36))
-          .withCode('DTI_TOO_HIGH_LOW_CREDIT')
-          .withMessage('Debt-to-income ratio must not exceed 36% for credit scores below 700')
-      )
-      
-      .and()
-      
-      // Fraud risk mitigation
-      .when(async (app, context) => {
-        const fraudRisk = context?.metadata?.externalValidation?.fraudRiskLevel;
-        return fraudRisk === 'high' || fraudRisk === 'critical';
-      })
-      .then()
-      .mustSatisfyRules(rules =>
-        rules
-          .forProperty('requestedAmount', r => r.maximum(500000))
-          .withCode('AMOUNT_LIMIT_HIGH_FRAUD_RISK')
-          .withMessage('Loan amount limited to $500,000 due to high fraud risk')
-      )
-      
-      .build();
+    return (
+      PolicyBuilder.create<LoanApplication>()
+        .withId('loan-approval-with-external-services')
+        .withDomain('financial-services')
+        .withName('Loan Approval with External Service Integration')
+        .withDescription(
+          'Comprehensive loan approval with credit bureau, fraud detection, and compliance validation'
+        )
+
+        // Basic application validation
+        .mustSatisfyRules(rules =>
+          rules
+            .forProperty('applicantAge', r => r.minimum(18).maximum(80))
+            .withCode('INVALID_APPLICANT_AGE')
+            .withMessage('Applicant age must be between 18 and 80 years')
+
+            .forProperty('requestedAmount', r =>
+              r.minimum(1000).maximum(2000000)
+            )
+            .withCode('INVALID_LOAN_AMOUNT')
+            .withMessage('Loan amount must be between $1,000 and $2,000,000')
+
+            .forProperty('annualIncome', r => r.minimum(25000))
+            .withCode('INSUFFICIENT_INCOME')
+            .withMessage('Minimum annual income of $25,000 required')
+        )
+
+        .and()
+
+        // External service validation
+        .mustAsync(externalValidation)
+        .withCode('EXTERNAL_VALIDATION_FAILED')
+        .withMessage('Application failed external validation checks')
+        .withSeverity('ERROR')
+
+        .and()
+
+        // Additional business rules based on external data
+        .when(async (app, context) => {
+          const creditScore =
+            context?.metadata?.externalValidation?.creditScore;
+          return creditScore && creditScore < 700;
+        })
+        .then()
+        .mustSatisfyRules(rules =>
+          rules
+            .forProperty('downPaymentPercentage', r => r.minimum(20))
+            .withCode('INSUFFICIENT_DOWN_PAYMENT_LOW_CREDIT')
+            .withMessage(
+              '20% down payment required for credit scores below 700'
+            )
+
+            .forProperty('debtToIncomeRatio', r => r.maximum(0.36))
+            .withCode('DTI_TOO_HIGH_LOW_CREDIT')
+            .withMessage(
+              'Debt-to-income ratio must not exceed 36% for credit scores below 700'
+            )
+        )
+
+        .and()
+
+        // Fraud risk mitigation
+        .when(async (app, context) => {
+          const fraudRisk =
+            context?.metadata?.externalValidation?.fraudRiskLevel;
+          return fraudRisk === 'high' || fraudRisk === 'critical';
+        })
+        .then()
+        .mustSatisfyRules(rules =>
+          rules
+            .forProperty('requestedAmount', r => r.maximum(500000))
+            .withCode('AMOUNT_LIMIT_HIGH_FRAUD_RISK')
+            .withMessage(
+              'Loan amount limited to $500,000 due to high fraud risk'
+            )
+        )
+
+        .build()
+    );
   }
 
   /**
@@ -642,62 +725,77 @@ export class ExternalServicePolicyFactory {
    * @public
    */
   static createDegradationTolerantPolicy(services: any) {
-    return PolicyBuilder.create<LoanApplication>()
-      .withId('degradation-tolerant-loan-policy')
-      .withDomain('financial-services')
-      .withName('Degradation Tolerant Loan Policy')
-      
-      // Primary validation with external services
-      .mustAsync(async (application, context) => {
-        try {
-          const externalValidation = new ExternalServiceValidationSpecification(
-            services.creditService,
-            services.fraudService,
-            services.complianceService
-          );
-          
-          return await externalValidation.isSatisfiedByAsync(application, context);
-          
-        } catch (error) {
-          console.log(`⚠️ External services degraded, applying fallback validation`);
-          
-          // Mark for manual review due to service degradation
-          if (context) {
-            context.metadata = {
-              ...context.metadata,
-              requiresManualReview: true,
-              degradationReason: 'External services unavailable',
-              fallbackApplied: true
-            };
+    return (
+      PolicyBuilder.create<LoanApplication>()
+        .withId('degradation-tolerant-loan-policy')
+        .withDomain('financial-services')
+        .withName('Degradation Tolerant Loan Policy')
+
+        // Primary validation with external services
+        .mustAsync(async (application, context) => {
+          try {
+            const externalValidation =
+              new ExternalServiceValidationSpecification(
+                services.creditService,
+                services.fraudService,
+                services.complianceService
+              );
+
+            return await externalValidation.isSatisfiedByAsync(
+              application,
+              context
+            );
+          } catch (error) {
+            console.log(
+              `⚠️ External services degraded, applying fallback validation`
+            );
+
+            // Mark for manual review due to service degradation
+            if (context) {
+              context.metadata = {
+                ...context.metadata,
+                requiresManualReview: true,
+                degradationReason: 'External services unavailable',
+                fallbackApplied: true,
+              };
+            }
+
+            // Apply conservative fallback validation
+            return (
+              application.annualIncome >= 50000 &&
+              application.debtToIncomeRatio <= 0.28 &&
+              application.downPaymentPercentage >= 15
+            );
           }
-          
-          // Apply conservative fallback validation
-          return application.annualIncome >= 50000 && 
-                 application.debtToIncomeRatio <= 0.28 &&
-                 application.downPaymentPercentage >= 15;
-        }
-      })
-      .withCode('EXTERNAL_OR_FALLBACK_VALIDATION')
-      .withMessage('Validation completed using external services or fallback criteria')
-      .withSeverity('WARNING')
-      
-      .and()
-      
-      // Additional constraints when in fallback mode
-      .when(async (app, context) => context?.metadata?.fallbackApplied === true)
-      .then()
-      .mustSatisfyRules(rules =>
-        rules
-          .forProperty('requestedAmount', r => r.maximum(750000))
-          .withCode('AMOUNT_LIMIT_FALLBACK_MODE')
-          .withMessage('Loan amount limited during service degradation')
-          
-          .forProperty('loanPurpose', r => r.oneOf(['purchase', 'refinance']))
-          .withCode('PURPOSE_LIMIT_FALLBACK_MODE')
-          .withMessage('Only purchase and refinance loans allowed during service degradation')
-      )
-      
-      .build();
+        })
+        .withCode('EXTERNAL_OR_FALLBACK_VALIDATION')
+        .withMessage(
+          'Validation completed using external services or fallback criteria'
+        )
+        .withSeverity('WARNING')
+
+        .and()
+
+        // Additional constraints when in fallback mode
+        .when(
+          async (app, context) => context?.metadata?.fallbackApplied === true
+        )
+        .then()
+        .mustSatisfyRules(rules =>
+          rules
+            .forProperty('requestedAmount', r => r.maximum(750000))
+            .withCode('AMOUNT_LIMIT_FALLBACK_MODE')
+            .withMessage('Loan amount limited during service degradation')
+
+            .forProperty('loanPurpose', r => r.oneOf(['purchase', 'refinance']))
+            .withCode('PURPOSE_LIMIT_FALLBACK_MODE')
+            .withMessage(
+              'Only purchase and refinance loans allowed during service degradation'
+            )
+        )
+
+        .build()
+    );
   }
 }
 ```
@@ -747,7 +845,7 @@ export class ExternalServiceMonitor {
     success: boolean
   ): void {
     const timestamp = Date.now();
-    
+
     // Initialize service tracking if needed
     if (!this.performanceMetrics.has(serviceName)) {
       this.performanceMetrics.set(serviceName, []);
@@ -756,7 +854,7 @@ export class ExternalServiceMonitor {
         successRate: 1.0,
         avgResponseTime: 0,
         lastError: null,
-        consecutiveFailures: 0
+        consecutiveFailures: 0,
       });
     }
 
@@ -772,7 +870,9 @@ export class ExternalServiceMonitor {
     // Update service health
     this.updateServiceHealth(serviceName);
 
-    console.log(`📊 Service metrics recorded for ${serviceName}: ${success ? 'SUCCESS' : 'FAILURE'} (${executionTime}ms)`);
+    console.log(
+      `📊 Service metrics recorded for ${serviceName}: ${success ? 'SUCCESS' : 'FAILURE'} (${executionTime}ms)`
+    );
   }
 
   /**
@@ -802,7 +902,9 @@ export class ExternalServiceMonitor {
     // Analyze each service
     this.serviceHealth.forEach((health, serviceName) => {
       const metrics = this.performanceMetrics.get(serviceName) || [];
-      const recentMetrics = metrics.filter(m => Date.now() - m.timestamp < 300000); // Last 5 minutes
+      const recentMetrics = metrics.filter(
+        m => Date.now() - m.timestamp < 300000
+      ); // Last 5 minutes
 
       const serviceReport = {
         status: health.status,
@@ -811,7 +913,11 @@ export class ExternalServiceMonitor {
         recentOperations: recentMetrics.length,
         consecutiveFailures: health.consecutiveFailures,
         lastError: health.lastError,
-        recommendations: this.getServiceRecommendations(serviceName, health, recentMetrics)
+        recommendations: this.getServiceRecommendations(
+          serviceName,
+          health,
+          recentMetrics
+        ),
       };
 
       services[serviceName] = serviceReport;
@@ -836,10 +942,12 @@ export class ExternalServiceMonitor {
     const recommendations = this.getOverallRecommendations(overall, {
       healthy: healthyCount,
       degraded: degradedCount,
-      critical: criticalCount
+      critical: criticalCount,
     });
 
-    console.log(`🏥 Service health report: ${overall.toUpperCase()} (${healthyCount} healthy, ${degradedCount} degraded, ${criticalCount} critical)`);
+    console.log(
+      `🏥 Service health report: ${overall.toUpperCase()} (${healthyCount} healthy, ${degradedCount} degraded, ${criticalCount} critical)`
+    );
 
     return { overall, services, recommendations };
   }
@@ -871,20 +979,23 @@ export class ExternalServiceMonitor {
         activate: true,
         reason: 'Service not monitored',
         confidence: 1.0,
-        expectedDuration: 300000 // 5 minutes default
+        expectedDuration: 300000, // 5 minutes default
       };
     }
 
     const metrics = this.performanceMetrics.get(serviceName) || [];
-    const recentMetrics = metrics.filter(m => Date.now() - m.timestamp < 600000); // Last 10 minutes
+    const recentMetrics = metrics.filter(
+      m => Date.now() - m.timestamp < 600000
+    ); // Last 10 minutes
 
     // Decision criteria
     const successRate = health.successRate;
     const avgResponseTime = health.avgResponseTime;
     const consecutiveFailures = health.consecutiveFailures;
-    const recentFailureRate = recentMetrics.length > 0 
-      ? 1 - (recentMetrics.filter(m => m.success).length / recentMetrics.length)
-      : 0;
+    const recentFailureRate =
+      recentMetrics.length > 0
+        ? 1 - recentMetrics.filter(m => m.success).length / recentMetrics.length
+        : 0;
 
     let activate = false;
     let reason = '';
@@ -909,10 +1020,15 @@ export class ExternalServiceMonitor {
     }
 
     // Estimate recovery duration based on historical patterns
-    const expectedDuration = this.estimateRecoveryDuration(serviceName, metrics);
+    const expectedDuration = this.estimateRecoveryDuration(
+      serviceName,
+      metrics
+    );
 
     if (activate) {
-      console.log(`⚠️ Fallback activation recommended for ${serviceName}: ${reason}`);
+      console.log(
+        `⚠️ Fallback activation recommended for ${serviceName}: ${reason}`
+      );
     }
 
     return { activate, reason, confidence, expectedDuration };
@@ -922,16 +1038,21 @@ export class ExternalServiceMonitor {
   private updateServiceHealth(serviceName: string): void {
     const metrics = this.performanceMetrics.get(serviceName)!;
     const health = this.serviceHealth.get(serviceName)!;
-    
+
     // Calculate success rate from recent metrics
-    const recentMetrics = metrics.filter(m => Date.now() - m.timestamp < 300000); // Last 5 minutes
+    const recentMetrics = metrics.filter(
+      m => Date.now() - m.timestamp < 300000
+    ); // Last 5 minutes
     const successCount = recentMetrics.filter(m => m.success).length;
-    const successRate = recentMetrics.length > 0 ? successCount / recentMetrics.length : 1.0;
-    
+    const successRate =
+      recentMetrics.length > 0 ? successCount / recentMetrics.length : 1.0;
+
     // Calculate average response time
-    const avgResponseTime = recentMetrics.length > 0
-      ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length
-      : 0;
+    const avgResponseTime =
+      recentMetrics.length > 0
+        ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+          recentMetrics.length
+        : 0;
 
     // Update consecutive failures
     const lastMetric = metrics[metrics.length - 1];
@@ -939,14 +1060,21 @@ export class ExternalServiceMonitor {
       health.consecutiveFailures = 0;
     } else {
       health.consecutiveFailures++;
-      health.lastError = { timestamp: lastMetric.timestamp, operation: lastMetric.operation };
+      health.lastError = {
+        timestamp: lastMetric.timestamp,
+        operation: lastMetric.operation,
+      };
     }
 
     // Determine status
     let status: 'healthy' | 'degraded' | 'critical';
     if (health.consecutiveFailures >= 5 || successRate < 0.5) {
       status = 'critical';
-    } else if (health.consecutiveFailures >= 2 || successRate < 0.8 || avgResponseTime > 3000) {
+    } else if (
+      health.consecutiveFailures >= 2 ||
+      successRate < 0.8 ||
+      avgResponseTime > 3000
+    ) {
       status = 'degraded';
     } else {
       status = 'healthy';
@@ -956,11 +1084,15 @@ export class ExternalServiceMonitor {
     Object.assign(health, {
       status,
       successRate,
-      avgResponseTime
+      avgResponseTime,
     });
   }
 
-  private getServiceRecommendations(serviceName: string, health: any, recentMetrics: any[]): string[] {
+  private getServiceRecommendations(
+    serviceName: string,
+    health: any,
+    recentMetrics: any[]
+  ): string[] {
     const recommendations = [];
 
     if (health.status === 'critical') {
@@ -972,11 +1104,15 @@ export class ExternalServiceMonitor {
     }
 
     if (health.avgResponseTime > 3000) {
-      recommendations.push('Response times elevated - check service performance');
+      recommendations.push(
+        'Response times elevated - check service performance'
+      );
     }
 
     if (health.consecutiveFailures > 0) {
-      recommendations.push(`${health.consecutiveFailures} consecutive failures - investigate error patterns`);
+      recommendations.push(
+        `${health.consecutiveFailures} consecutive failures - investigate error patterns`
+      );
     }
 
     return recommendations;
@@ -986,25 +1122,38 @@ export class ExternalServiceMonitor {
     const recommendations = [];
 
     if (overall === 'critical') {
-      recommendations.push('Multiple services critical - activate comprehensive fallback strategy');
-      recommendations.push('Consider reducing external service dependencies temporarily');
+      recommendations.push(
+        'Multiple services critical - activate comprehensive fallback strategy'
+      );
+      recommendations.push(
+        'Consider reducing external service dependencies temporarily'
+      );
     } else if (overall === 'degraded') {
-      recommendations.push('Some services degraded - monitor closely and prepare fallbacks');
+      recommendations.push(
+        'Some services degraded - monitor closely and prepare fallbacks'
+      );
     }
 
     if (counts.critical + counts.degraded > counts.healthy) {
-      recommendations.push('More services unhealthy than healthy - review infrastructure');
+      recommendations.push(
+        'More services unhealthy than healthy - review infrastructure'
+      );
     }
 
     return recommendations;
   }
 
-  private estimateRecoveryDuration(serviceName: string, metrics: any[]): number {
+  private estimateRecoveryDuration(
+    serviceName: string,
+    metrics: any[]
+  ): number {
     // Simple estimation based on historical recovery patterns
     // In production, this would use more sophisticated analysis
     const baseRecovery = 300000; // 5 minutes base
-    const healthHistory = metrics.filter(m => Date.now() - m.timestamp < 3600000); // Last hour
-    
+    const healthHistory = metrics.filter(
+      m => Date.now() - m.timestamp < 3600000
+    ); // Last hour
+
     if (healthHistory.length < 10) {
       return baseRecovery;
     }
@@ -1012,7 +1161,7 @@ export class ExternalServiceMonitor {
     // Find patterns of service recovery
     const failureRecoveryTimes = [];
     let lastFailureStart = null;
-    
+
     for (const metric of healthHistory) {
       if (!metric.success && !lastFailureStart) {
         lastFailureStart = metric.timestamp;
@@ -1023,7 +1172,9 @@ export class ExternalServiceMonitor {
     }
 
     if (failureRecoveryTimes.length > 0) {
-      const avgRecoveryTime = failureRecoveryTimes.reduce((sum, time) => sum + time, 0) / failureRecoveryTimes.length;
+      const avgRecoveryTime =
+        failureRecoveryTimes.reduce((sum, time) => sum + time, 0) /
+        failureRecoveryTimes.length;
       return Math.max(baseRecovery, avgRecoveryTime);
     }
 
@@ -1034,12 +1185,18 @@ export class ExternalServiceMonitor {
 
 ## Key Features
 
-- **🌐 External Service Integration**: Seamless integration with credit bureaus, fraud detection, and compliance services
-- **🛡️ Circuit Breaker Protection**: Automatic protection against cascading failures
-- **🔄 Intelligent Retry Logic**: Exponential backoff with configurable retry policies
-- **📊 Performance Monitoring**: Real-time tracking of service health and response times
-- **⚠️ Fallback Strategies**: Graceful degradation with conservative validation when services fail
-- **💾 Intelligent Caching**: Performance optimization with appropriate cache TTL for different service types
+- **🌐 External Service Integration**: Seamless integration with credit bureaus,
+  fraud detection, and compliance services
+- **🛡️ Circuit Breaker Protection**: Automatic protection against cascading
+  failures
+- **🔄 Intelligent Retry Logic**: Exponential backoff with configurable retry
+  policies
+- **📊 Performance Monitoring**: Real-time tracking of service health and
+  response times
+- **⚠️ Fallback Strategies**: Graceful degradation with conservative validation
+  when services fail
+- **💾 Intelligent Caching**: Performance optimization with appropriate cache
+  TTL for different service types
 
 ## External Service Patterns
 
@@ -1047,34 +1204,44 @@ export class ExternalServiceMonitor {
 2. **Circuit Breaker**: Protection against service failures and cascading errors
 3. **Retry with Backoff**: Intelligent retry logic for transient failures
 4. **Parallel Execution**: Concurrent service calls for optimal performance
-5. **Fallback Strategies**: Conservative validation when external services are unavailable
+5. **Fallback Strategies**: Conservative validation when external services are
+   unavailable
 
 ## Integration Benefits
 
 ### **Reliability and Resilience**
+
 - **Fault Tolerance**: Automatic handling of external service failures
 - **Performance Protection**: Circuit breakers prevent system overload
 - **Graceful Degradation**: Continues operation even when external services fail
 
 ### **Performance Optimization**
+
 - **Parallel Processing**: Concurrent external service calls
 - **Intelligent Caching**: Reduce external API calls with smart cache strategies
 - **Response Time Monitoring**: Track and optimize service performance
 
 ### **Business Continuity**
-- **Fallback Validation**: Conservative business rules when external data unavailable
+
+- **Fallback Validation**: Conservative business rules when external data
+  unavailable
 - **Manual Review Triggers**: Automatic escalation when external services fail
 - **Service Health Monitoring**: Proactive identification of service issues
 
 ## Common Pitfalls
 
-- **❌ Synchronous Blocking**: Always use async patterns for external service calls
-- **❌ No Timeout Configuration**: Set appropriate timeouts for all external calls
-- **❌ Missing Fallback Logic**: Always provide fallback validation for critical business flows
+- **❌ Synchronous Blocking**: Always use async patterns for external service
+  calls
+- **❌ No Timeout Configuration**: Set appropriate timeouts for all external
+  calls
+- **❌ Missing Fallback Logic**: Always provide fallback validation for critical
+  business flows
 - **❌ Cache Stampeding**: Implement proper cache warming and refresh strategies
 
 ## Related Examples
 
-- [Example 1: Policy Behaviors](./example-1.md) - Cross-cutting concerns and retry patterns
+- [Example 1: Policy Behaviors](./example-1.md) - Cross-cutting concerns and
+  retry patterns
 - [Example 2: Policy Registry](./example-2.md) - Centralized policy management
-- [Advanced: Enterprise Orchestration](../advanced/example-1.md) - Large-scale service integration patterns
+- [Advanced: Enterprise Orchestration](../advanced/example-1.md) - Large-scale
+  service integration patterns

@@ -8,50 +8,73 @@
 
 ## Overview
 
-Intermediate policy patterns focus on enterprise-grade policy management including cross-cutting concerns, centralized policy registry, and external service integration. These patterns enable scalable, maintainable, and resilient policy-driven applications.
+Intermediate policy patterns focus on enterprise-grade policy management
+including cross-cutting concerns, centralized policy registry, and external
+service integration. These patterns enable scalable, maintainable, and resilient
+policy-driven applications.
 
 ## Core Implementation Concepts
 
-This section covers three major intermediate patterns demonstrated in separate examples:
+This section covers three major intermediate patterns demonstrated in separate
+examples:
 
 ### 1. Policy Behaviors (Example 1)
-Cross-cutting concerns implementation with retry logic, intelligent caching, and temporal constraints. Policy Behaviors wrap business policies with infrastructure concerns like fault tolerance, performance optimization, and time-based execution rules.
+
+Cross-cutting concerns implementation with retry logic, intelligent caching, and
+temporal constraints. Policy Behaviors wrap business policies with
+infrastructure concerns like fault tolerance, performance optimization, and
+time-based execution rules.
 
 **Key Features:**
+
 - **Retry Behaviors**: Exponential backoff for transient failures
-- **Caching Behaviors**: TTL-based performance optimization  
+- **Caching Behaviors**: TTL-based performance optimization
 - **Temporal Behaviors**: Business hours and working day constraints
-- **Behavior Composition**: Layered behavior stacking for comprehensive enterprise requirements
+- **Behavior Composition**: Layered behavior stacking for comprehensive
+  enterprise requirements
 
-### 2. Policy Registry (Example 2) 
-Centralized policy management with versioning, dynamic rule deployment, and A/B testing capabilities. The Policy Registry enables business users to update rules without code deployment and provides comprehensive policy lifecycle management.
+### 2. Policy Registry (Example 2)
+
+Centralized policy management with versioning, dynamic rule deployment, and A/B
+testing capabilities. The Policy Registry enables business users to update rules
+without code deployment and provides comprehensive policy lifecycle management.
 
 **Key Features:**
+
 - **Version Management**: Complete policy versioning with metadata tracking
-- **Dynamic Resolution**: Context-aware policy selection based on user attributes and A/B testing
+- **Dynamic Resolution**: Context-aware policy selection based on user
+  attributes and A/B testing
 - **Gradual Rollouts**: Phased deployment with monitoring and automatic rollback
 - **Analytics**: Comprehensive policy performance and usage metrics
 
 ### 3. External Service Integration (Example 3)
-Reliable integration with external APIs and services using circuit breaker patterns, intelligent fallback strategies, and resilience mechanisms. This pattern ensures policy evaluation continues even when external dependencies are unavailable.
+
+Reliable integration with external APIs and services using circuit breaker
+patterns, intelligent fallback strategies, and resilience mechanisms. This
+pattern ensures policy evaluation continues even when external dependencies are
+unavailable.
 
 **Key Features:**
-- **Circuit Breaker Protection**: Automatic failure detection and service isolation
-- **Intelligent Fallbacks**: Graceful degradation with cached data and default behaviors
+
+- **Circuit Breaker Protection**: Automatic failure detection and service
+  isolation
+- **Intelligent Fallbacks**: Graceful degradation with cached data and default
+  behaviors
 - **Resilience Patterns**: Timeout handling, retry logic, and bulkhead isolation
 - **Service Monitoring**: Health checks, performance tracking, and alerting
 
-These three patterns can be composed together to create comprehensive enterprise policy solutions that are resilient, performant, and maintainable.
+These three patterns can be composed together to create comprehensive enterprise
+policy solutions that are resilient, performant, and maintainable.
 
 ```typescript
 // comprehensive-policy-implementation.ts
-import { 
+import {
   PolicyRetryBehavior,
   PolicyCachingBehavior,
   PolicyTemporalBehavior,
   PolicyRegistry,
   BaseBusinessPolicy,
-  PolicyContext
+  PolicyContext,
 } from '@vytches-ddd/policies';
 import { CircuitBreaker } from '@vytches-ddd/resilience';
 import { ExternalCreditService, ComplianceService } from '../types';
@@ -80,9 +103,9 @@ export class ComprehensivePolicySystem {
     this.registry = new PolicyRegistry();
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
-      resetTimeout: 60000
+      resetTimeout: 60000,
     });
-    
+
     this.initializePolicySystem();
   }
 
@@ -94,13 +117,13 @@ export class ComprehensivePolicySystem {
 
     // 1. Create base policies with external service integration
     const baseCreditPolicy = this.createExternalServiceIntegratedPolicy();
-    
+
     // 2. Enhance with Policy Behaviors (retry, caching, temporal)
     const enhancedPolicy = this.applyPolicyBehaviors(baseCreditPolicy);
-    
+
     // 3. Register in Policy Registry for dynamic management
     await this.registerPoliciesWithVersioning(enhancedPolicy);
-    
+
     console.log('✅ Comprehensive Policy System initialized');
   }
 
@@ -120,46 +143,51 @@ export class ComprehensivePolicySystem {
         try {
           // Use circuit breaker for external service calls
           const creditResult = await this.circuitBreaker.execute(async () => {
-            return await this.creditService.getCreditScore(request.entity.applicantId);
+            return await this.creditService.getCreditScore(
+              request.entity.applicantId
+            );
           });
 
           if (creditResult.score < 650) {
             return this.failure({
               code: 'INSUFFICIENT_CREDIT',
               message: 'Credit score below threshold',
-              severity: 'ERROR'
+              severity: 'ERROR',
             });
           }
 
           return this.success(request.entity);
-
         } catch (error) {
           // Fallback to cached data or default behavior
           if (error.code === 'CIRCUIT_BREAKER_OPEN') {
             console.warn('🔴 Circuit breaker open - using fallback policy');
             return this.applyFallbackPolicy(request);
           }
-          
+
           throw error;
         }
       }
 
       private async applyFallbackPolicy(request: any): Promise<any> {
         // Fallback to cached credit data or conservative approval
-        const cachedScore = await this.getCachedCreditScore(request.entity.applicantId);
-        
+        const cachedScore = await this.getCachedCreditScore(
+          request.entity.applicantId
+        );
+
         if (cachedScore && cachedScore > 700) {
           return this.success(request.entity);
         }
-        
+
         return this.failure({
           code: 'SERVICE_UNAVAILABLE_FALLBACK',
           message: 'External service unavailable - manual review required',
-          severity: 'WARNING'
+          severity: 'WARNING',
         });
       }
 
-      private async getCachedCreditScore(applicantId: string): Promise<number | null> {
+      private async getCachedCreditScore(
+        applicantId: string
+      ): Promise<number | null> {
         // Simulate cached data retrieval
         return Math.random() > 0.5 ? 720 : null;
       }
@@ -175,16 +203,17 @@ export class ComprehensivePolicySystem {
       maxAttempts: 3,
       baseDelay: 1000,
       backoff: 'exponential',
-      shouldRetry: (violation) => 
-        violation.code.includes('TIMEOUT') || violation.code.includes('UNAVAILABLE')
+      shouldRetry: violation =>
+        violation.code.includes('TIMEOUT') ||
+        violation.code.includes('UNAVAILABLE'),
     });
 
     // Layer 2: Caching behavior for performance
     const cachedPolicy = PolicyCachingBehavior.create(retriedPolicy, {
       ttl: 300000, // 5 minutes
       maxSize: 1000,
-      keyGenerator: (request) => `credit_${request.entity.applicantId}`,
-      namespace: 'comprehensive-policies'
+      keyGenerator: request => `credit_${request.entity.applicantId}`,
+      namespace: 'comprehensive-policies',
     });
 
     // Layer 3: Temporal behavior for business constraints
@@ -193,7 +222,7 @@ export class ComprehensivePolicySystem {
       workingDays: [1, 2, 3, 4, 5],
       duringBusinessHours: cachedPolicy,
       duringAfterHours: retriedPolicy, // Less aggressive caching after hours
-      includeTemporalInfo: true
+      includeTemporalInfo: true,
     });
 
     return temporalPolicy;
@@ -202,7 +231,9 @@ export class ComprehensivePolicySystem {
   /**
    * Pattern 3: Policy Registry with Versioning
    */
-  private async registerPoliciesWithVersioning(enhancedPolicy: any): Promise<void> {
+  private async registerPoliciesWithVersioning(
+    enhancedPolicy: any
+  ): Promise<void> {
     // Register multiple versions for A/B testing
     await this.registry.register({
       id: 'comprehensive-credit-policy-v1',
@@ -214,15 +245,15 @@ export class ComprehensivePolicySystem {
       metadata: {
         description: 'Production credit policy with all patterns',
         registeredBy: 'policy-team',
-        environment: 'production'
-      }
+        environment: 'production',
+      },
     });
 
     // Register experimental version
     const experimentalPolicy = this.createExperimentalPolicy();
     await this.registry.register({
       id: 'comprehensive-credit-policy-v1.1-beta',
-      domain: 'financial-services', 
+      domain: 'financial-services',
       name: 'Comprehensive Credit Policy v1.1 Beta',
       policy: experimentalPolicy,
       version: 'v1.1-beta',
@@ -231,8 +262,8 @@ export class ComprehensivePolicySystem {
         description: 'Experimental version with AI enhancements',
         registeredBy: 'ai-team',
         environment: 'staging',
-        abTestGroup: 'ai-enhancement'
-      }
+        abTestGroup: 'ai-enhancement',
+      },
     });
   }
 
@@ -255,7 +286,7 @@ export class ComprehensivePolicySystem {
       const resolvedPolicy = this.registry.resolve({
         domain: 'financial-services',
         tags: ['credit', 'comprehensive'],
-        context: context.metadata
+        context: context.metadata,
       });
 
       if (!resolvedPolicy) {
@@ -275,22 +306,23 @@ export class ComprehensivePolicySystem {
           executionTime,
           cacheHit: result.metadata?.cacheHit || false,
           retryAttempts: result.metadata?.retryAttempts || 0,
-          temporalMode: result.metadata?.temporalMode || 'business-hours'
+          temporalMode: result.metadata?.temporalMode || 'business-hours',
         },
         registryInfo: {
           policyId: resolvedPolicy.id,
           version: resolvedPolicy.version,
-          dynamicSelection: true
+          dynamicSelection: true,
         },
         circuitBreakerStatus: {
           state: this.circuitBreaker.getState(),
           failureCount: this.circuitBreaker.getFailureCount(),
-          lastFailureTime: this.circuitBreaker.getLastFailureTime()
-        }
+          lastFailureTime: this.circuitBreaker.getLastFailureTime(),
+        },
       };
-
     } catch (error) {
-      console.error(`❌ Comprehensive policy execution failed: ${error.message}`);
+      console.error(
+        `❌ Comprehensive policy execution failed: ${error.message}`
+      );
       throw error;
     }
   }
@@ -300,8 +332,8 @@ export class ComprehensivePolicySystem {
     return {
       check: async () => ({
         isSuccess: () => true,
-        metadata: { experimental: true }
-      })
+        metadata: { experimental: true },
+      }),
     };
   }
 }
@@ -310,23 +342,33 @@ export class ComprehensivePolicySystem {
 ## Integration Benefits
 
 ### **Comprehensive Resilience**
-- **Circuit Breaker Protection**: Automatic isolation of failing external services
+
+- **Circuit Breaker Protection**: Automatic isolation of failing external
+  services
 - **Intelligent Retry Logic**: Exponential backoff with failure classification
 - **Graceful Degradation**: Fallback policies when services are unavailable
 
 ### **Performance Optimization**
+
 - **Multi-Layer Caching**: Policy-level and service-level caching strategies
-- **Temporal Optimization**: Different performance profiles for business vs after hours
-- **Resource Management**: Efficient use of external service calls and system resources
+- **Temporal Optimization**: Different performance profiles for business vs
+  after hours
+- **Resource Management**: Efficient use of external service calls and system
+  resources
 
 ### **Enterprise Management**
+
 - **Dynamic Policy Updates**: Business rule changes without deployment
 - **A/B Testing**: Parallel policy versions with traffic splitting
-- **Comprehensive Analytics**: Policy performance, behavior effectiveness, and business impact metrics
+- **Comprehensive Analytics**: Policy performance, behavior effectiveness, and
+  business impact metrics
 
 ## Common Pitfalls
 
-- **❌ Behavior Conflicts**: Test behavior composition thoroughly for unexpected interactions
+- **❌ Behavior Conflicts**: Test behavior composition thoroughly for unexpected
+  interactions
 - **❌ Registry Bloat**: Implement proper policy version cleanup and archiving
-- **❌ Circuit Breaker Tuning**: Adjust thresholds based on actual service characteristics
-- **❌ Cache Coherence**: Ensure cached data aligns with business rule change frequency
+- **❌ Circuit Breaker Tuning**: Adjust thresholds based on actual service
+  characteristics
+- **❌ Cache Coherence**: Ensure cached data aligns with business rule change
+  frequency

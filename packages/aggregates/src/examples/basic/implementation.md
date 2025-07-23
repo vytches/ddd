@@ -1,13 +1,14 @@
 # Basic Aggregate Implementation Overview
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
 **Domain**: Core Domain-Driven Design Patterns
 
 ## Overview
 
-This document provides implementation guidance for basic aggregate root patterns using @vytches-ddd/aggregates. These patterns form the foundation of domain-driven design and ensure proper encapsulation, consistency, and event handling.
+This document provides implementation guidance for basic aggregate root patterns
+using @vytches-ddd/aggregates. These patterns form the foundation of
+domain-driven design and ensure proper encapsulation, consistency, and event
+handling.
 
 ## Core Implementation Patterns
 
@@ -19,22 +20,22 @@ This document provides implementation guidance for basic aggregate root patterns
 // ✅ CORRECT: Factory method with validation
 static create(data: CreateUserData): UserAggregate {
   const user = new UserAggregate(EntityId.generate());
-  
+
   // Validate business rules before setting state
   user.validateEmail(data.email);
   user.validateUsername(data.username);
-  
+
   // Set initial state
   user.email = data.email.toLowerCase();
   user.username = data.username.toLowerCase();
-  
+
   // Emit domain event
   user.addDomainEvent(new UserCreatedEvent(
     user.id.value,
     user.email,
     user.username
   ));
-  
+
   return user;
 }
 
@@ -54,12 +55,12 @@ constructor(email: string, username: string) {
 // ✅ CORRECT: Validate before state changes
 updateProfile(data: UpdateUserData): void {
   this.ensureActive(); // Check preconditions
-  
+
   if (data.email && data.email !== this.email) {
     this.validateEmail(data.email); // Validate before change
     this.email = data.email.toLowerCase();
   }
-  
+
   this.updatedAt = new Date();
   this.addDomainEvent(new UserUpdatedEvent(this.id.value, data));
 }
@@ -79,7 +80,7 @@ updateEmail(email: string): void {
 confirm(): void {
   this.transitionTo('confirmed');
   this.updatedAt = new Date();
-  
+
   // Always emit domain events for state changes
   this.addDomainEvent(new OrderConfirmedEvent(
     this.id.value,
@@ -116,15 +117,15 @@ toSnapshot(): UserData {
 
 static fromSnapshot(id: EntityId, data: UserData): UserAggregate {
   const user = new UserAggregate(id);
-  
+
   // Restore state without validation (already validated)
   user.email = data.email;
   user.username = data.username;
   // ... restore all properties
-  
+
   // IMPORTANT: Mark as hydrated to prevent event emission
   user.markAsHydrated();
-  
+
   return user;
 }
 
@@ -144,14 +145,14 @@ export class OrderAggregate extends AggregateRoot {
   private customerId: string;
   private status: OrderStatus;
   private items: OrderItem[];
-  
+
   // Controlled state access through methods
   addItem(item: OrderItem): void {
     this.validateItem(item);
     this.items.push(item);
     this.recalculateTotal();
   }
-  
+
   // Read-only state access
   get orderTotal(): number {
     return this.totalAmount;
@@ -174,12 +175,12 @@ private validateEmail(email: string): void {
   if (!email) {
     throw new InvalidUserDataError('Email is required');
   }
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw new InvalidUserDataError('Invalid email format');
   }
-  
+
   if (email.length > 254) {
     throw new InvalidUserDataError('Email exceeds maximum length');
   }
@@ -203,26 +204,23 @@ class InventoryAggregate extends AggregateRoot {
     if (this.availableStock < quantity) {
       throw new InsufficientStockError(this.availableStock, quantity);
     }
-    
+
     // Update state
     this.availableStock -= quantity;
     this.reservedStock += quantity;
-    
+
     // Record reservation
     const reservation = { id: generateId(), quantity, orderId };
     this.reservations.set(reservation.id, reservation);
-    
+
     // Emit domain event
-    this.addDomainEvent(new StockReservedEvent(
-      this.id.value,
-      reservation.id,
-      quantity,
-      orderId
-    ));
-    
+    this.addDomainEvent(
+      new StockReservedEvent(this.id.value, reservation.id, quantity, orderId)
+    );
+
     // Check for additional business events
     this.checkLowStock();
-    
+
     return reservation.id;
   }
 }
@@ -238,7 +236,7 @@ class UserAggregate extends AggregateRoot {
   public email: string;
   public firstName: string;
   public isActive: boolean;
-  
+
   // Only getters and setters, no business logic
 }
 
@@ -254,13 +252,13 @@ class UserService {
 class UserAggregate extends AggregateRoot {
   private email: string;
   private isActive: boolean;
-  
+
   // Business behavior within aggregate
   deactivate(reason: string): void {
     if (!this.isActive) {
       throw new UserAlreadyDeactivatedError(this.id.value);
     }
-    
+
     this.isActive = false;
     this.addDomainEvent(new UserDeactivatedEvent(this.id.value, reason));
   }
@@ -279,12 +277,15 @@ class OrderAggregate extends AggregateRoot {
 
 // ✅ CORRECT: Enforce valid transitions
 class OrderAggregate extends AggregateRoot {
-  private static readonly VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-    'draft': ['pending', 'cancelled'],
-    'pending': ['confirmed', 'cancelled'],
-    'confirmed': ['processing', 'cancelled']
+  private static readonly VALID_TRANSITIONS: Record<
+    OrderStatus,
+    OrderStatus[]
+  > = {
+    draft: ['pending', 'cancelled'],
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['processing', 'cancelled'],
   };
-  
+
   private transitionTo(newStatus: OrderStatus): void {
     const allowedTransitions = OrderAggregate.VALID_TRANSITIONS[this.status];
     if (!allowedTransitions.includes(newStatus)) {
@@ -302,10 +303,10 @@ class OrderAggregate extends AggregateRoot {
 static fromSnapshot(id: EntityId, data: UserData): UserAggregate {
   const user = new UserAggregate(id);
   user.email = data.email;
-  
+
   // This will emit events during reconstitution!
   user.addDomainEvent(new UserRestoredEvent(user.id.value));
-  
+
   return user;
 }
 
@@ -313,10 +314,10 @@ static fromSnapshot(id: EntityId, data: UserData): UserAggregate {
 static fromSnapshot(id: EntityId, data: UserData): UserAggregate {
   const user = new UserAggregate(id);
   user.email = data.email;
-  
+
   // Mark as hydrated to prevent event emission
   user.markAsHydrated();
-  
+
   return user;
 }
 ```
@@ -333,12 +334,12 @@ import { UserAggregate } from '../src/user.aggregate';
 describe('UserAggregate', () => {
   describe('create', () => {
     it('should create user with valid data', () => {
-      const [error, user] = safeRun(() => 
+      const [error, user] = safeRun(() =>
         UserAggregate.create({
           email: 'john@example.com',
           username: 'johndoe',
           firstName: 'John',
-          lastName: 'Doe'
+          lastName: 'Doe',
         })
       );
 
@@ -353,7 +354,7 @@ describe('UserAggregate', () => {
           email: 'invalid-email',
           username: 'johndoe',
           firstName: 'John',
-          lastName: 'Doe'
+          lastName: 'Doe',
         })
       );
 
@@ -372,10 +373,10 @@ describe('UserAggregate', () => {
 // ✅ CORRECT: Limit collections to reasonable sizes
 class InventoryAggregate extends AggregateRoot {
   private movements: StockMovement[];
-  
+
   private recordMovement(movement: StockMovement): void {
     this.movements.push(movement);
-    
+
     // Keep only last 100 movements to prevent memory leaks
     if (this.movements.length > 100) {
       this.movements = this.movements.slice(-100);
@@ -386,7 +387,7 @@ class InventoryAggregate extends AggregateRoot {
 // ❌ WRONG: Unbounded collections
 class InventoryAggregate extends AggregateRoot {
   private movements: StockMovement[];
-  
+
   private recordMovement(movement: StockMovement): void {
     this.movements.push(movement); // Grows indefinitely
   }
@@ -400,10 +401,10 @@ class InventoryAggregate extends AggregateRoot {
 class OrderProcessor {
   async processOrder(orderId: string): Promise<void> {
     const order = await this.orderRepository.findById(orderId);
-    
+
     order.confirm();
     order.startProcessing();
-    
+
     // Save and commit events regularly
     await this.orderRepository.save(order);
     order.markEventsAsCommitted();
@@ -422,4 +423,6 @@ class OrderProcessor {
 7. **Business Logic**: Keep domain behavior within the aggregate
 8. **Testing**: Use safeRun for error testing, validate events and state
 
-These patterns ensure your aggregates properly encapsulate business logic, maintain consistency, and integrate well with the broader domain-driven design architecture.
+These patterns ensure your aggregates properly encapsulate business logic,
+maintain consistency, and integrate well with the broader domain-driven design
+architecture.

@@ -1,28 +1,37 @@
 # Retry Pattern with Exponential Backoff - NestJS Basic Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/resilience
-**Framework**: NestJS
-**Complexity**: Basic
-**Domain**: External API Integration
-**Patterns**: Retry with Exponential Backoff, Manual Setup
-**Dependencies**: @nestjs/common, @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Complexity**: Basic **Domain**: External API Integration **Patterns**: Retry
+with Exponential Backoff, Manual Setup **Dependencies**: @nestjs/common,
+@vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates basic NestJS integration with retry pattern using exponential backoff. The service handles transient failures when calling external APIs by automatically retrying with progressively longer delays.
+This example demonstrates basic NestJS integration with retry pattern using
+exponential backoff. The service handles transient failures when calling
+external APIs by automatically retrying with progressively longer delays.
 
 ## Business Context
 
-An e-commerce service integrates with external inventory and shipping APIs that occasionally experience transient failures. The retry pattern ensures successful operations by automatically handling temporary network issues and service unavailability.
+An e-commerce service integrates with external inventory and shipping APIs that
+occasionally experience transient failures. The retry pattern ensures successful
+operations by automatically handling temporary network issues and service
+unavailability.
 
 ## Code Example
 
 ```typescript
 // external-api.service.ts
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { ResiliencePolicyBuilder, RetryStrategy } from '@vytches-ddd/resilience';
-import { InventoryRequest, ShippingRequest, ExternalApiResponse } from './types'; // From your application
+import {
+  ResiliencePolicyBuilder,
+  RetryStrategy,
+} from '@vytches-ddd/resilience';
+import {
+  InventoryRequest,
+  ShippingRequest,
+  ExternalApiResponse,
+} from './types'; // From your application
 
 @Injectable()
 export class ExternalApiService {
@@ -32,34 +41,34 @@ export class ExternalApiService {
 
   constructor() {
     // ⭐ FOCUS: Manual retry strategy setup for inventory API
-    this.inventoryRetryStrategy = ResiliencePolicyBuilder
-      .create()
+    this.inventoryRetryStrategy = ResiliencePolicyBuilder.create()
       .withRetry({
-        maxAttempts: 3,             // Maximum 3 retry attempts
-        baseDelay: 1000,            // Start with 1-second delay
-        maxDelay: 10000,            // Cap at 10 seconds
-        backoff: 'exponential',     // Exponential backoff (1s, 2s, 4s, 8s...)
-        jitter: true,               // Add randomness to prevent thundering herd
-        retryCondition: (error) => this.isRetryableError(error)
+        maxAttempts: 3, // Maximum 3 retry attempts
+        baseDelay: 1000, // Start with 1-second delay
+        maxDelay: 10000, // Cap at 10 seconds
+        backoff: 'exponential', // Exponential backoff (1s, 2s, 4s, 8s...)
+        jitter: true, // Add randomness to prevent thundering herd
+        retryCondition: error => this.isRetryableError(error),
       })
       .build();
 
     // ⭐ FOCUS: Manual retry strategy setup for shipping API
-    this.shippingRetryStrategy = ResiliencePolicyBuilder
-      .create()
+    this.shippingRetryStrategy = ResiliencePolicyBuilder.create()
       .withRetry({
-        maxAttempts: 5,             // More retries for shipping (less critical timing)
-        baseDelay: 2000,            // Start with 2-second delay
-        maxDelay: 30000,            // Cap at 30 seconds
+        maxAttempts: 5, // More retries for shipping (less critical timing)
+        baseDelay: 2000, // Start with 2-second delay
+        maxDelay: 30000, // Cap at 30 seconds
         backoff: 'exponential',
         jitter: true,
-        retryCondition: (error) => this.isRetryableShippingError(error)
+        retryCondition: error => this.isRetryableShippingError(error),
       })
       .build();
   }
 
   // ✅ FOCUS: Thin wrapper around library functionality
-  async checkInventory(request: InventoryRequest): Promise<ExternalApiResponse> {
+  async checkInventory(
+    request: InventoryRequest
+  ): Promise<ExternalApiResponse> {
     try {
       const result = await this.inventoryRetryStrategy.execute(
         () => this.callInventoryApi(request),
@@ -68,32 +77,35 @@ export class ExternalApiService {
           correlationId: request.productId,
           startTime: new Date(),
           attempt: 1,
-          previousAttempts: []
+          previousAttempts: [],
         }
       );
 
-      this.logger.log(`Inventory check successful for product: ${request.productId}`);
+      this.logger.log(
+        `Inventory check successful for product: ${request.productId}`
+      );
       return result;
-
     } catch (error) {
-      this.logger.error(`Inventory check failed after retries for product: ${request.productId}`, error.stack);
-      
+      this.logger.error(
+        `Inventory check failed after retries for product: ${request.productId}`,
+        error.stack
+      );
+
       if (error.message.includes('RETRY_EXHAUSTED')) {
         throw new HttpException(
           'Inventory service temporarily unavailable',
           HttpStatus.SERVICE_UNAVAILABLE
         );
       }
-      
-      throw new HttpException(
-        'Inventory check failed',
-        HttpStatus.BAD_REQUEST
-      );
+
+      throw new HttpException('Inventory check failed', HttpStatus.BAD_REQUEST);
     }
   }
 
   // ✅ FOCUS: Thin wrapper around library functionality
-  async requestShipping(request: ShippingRequest): Promise<ExternalApiResponse> {
+  async requestShipping(
+    request: ShippingRequest
+  ): Promise<ExternalApiResponse> {
     try {
       const result = await this.shippingRetryStrategy.execute(
         () => this.callShippingApi(request),
@@ -102,16 +114,20 @@ export class ExternalApiService {
           correlationId: request.orderId,
           startTime: new Date(),
           attempt: 1,
-          previousAttempts: []
+          previousAttempts: [],
         }
       );
 
-      this.logger.log(`Shipping request successful for order: ${request.orderId}`);
+      this.logger.log(
+        `Shipping request successful for order: ${request.orderId}`
+      );
       return result;
-
     } catch (error) {
-      this.logger.error(`Shipping request failed after retries for order: ${request.orderId}`, error.stack);
-      
+      this.logger.error(
+        `Shipping request failed after retries for order: ${request.orderId}`,
+        error.stack
+      );
+
       throw new HttpException(
         'Shipping service failed to process request',
         HttpStatus.SERVICE_UNAVAILABLE
@@ -122,41 +138,49 @@ export class ExternalApiService {
   async getRetryMetrics(): Promise<{ inventory: any; shipping: any }> {
     return {
       inventory: this.inventoryRetryStrategy.getMetrics(),
-      shipping: this.shippingRetryStrategy.getMetrics()
+      shipping: this.shippingRetryStrategy.getMetrics(),
     };
   }
 
-  private async callInventoryApi(request: InventoryRequest): Promise<ExternalApiResponse> {
+  private async callInventoryApi(
+    request: InventoryRequest
+  ): Promise<ExternalApiResponse> {
     const response = await fetch('https://inventory-api.example.com/check', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + process.env.INVENTORY_API_KEY
+        Authorization: 'Bearer ' + process.env.INVENTORY_API_KEY,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(5000) // 5-second timeout
+      signal: AbortSignal.timeout(5000), // 5-second timeout
     });
 
     if (!response.ok) {
-      throw new Error(`Inventory API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Inventory API error: ${response.status} ${response.statusText}`
+      );
     }
 
     return await response.json();
   }
 
-  private async callShippingApi(request: ShippingRequest): Promise<ExternalApiResponse> {
+  private async callShippingApi(
+    request: ShippingRequest
+  ): Promise<ExternalApiResponse> {
     const response = await fetch('https://shipping-api.example.com/quote', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + process.env.SHIPPING_API_KEY
+        Authorization: 'Bearer ' + process.env.SHIPPING_API_KEY,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(8000) // 8-second timeout
+      signal: AbortSignal.timeout(8000), // 8-second timeout
     });
 
     if (!response.ok) {
-      throw new Error(`Shipping API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Shipping API error: ${response.status} ${response.statusText}`
+      );
     }
 
     return await response.json();
@@ -164,17 +188,17 @@ export class ExternalApiService {
 
   private isRetryableError(error: Error): boolean {
     const retryableConditions = [
-      'ECONNRESET',           // Connection reset
-      'ECONNREFUSED',         // Connection refused
-      'ETIMEDOUT',            // Connection timeout
-      'ENOTFOUND',            // DNS resolution failed
-      'socket hang up',       // Socket closed unexpectedly
-      '502',                  // Bad Gateway
-      '503',                  // Service Unavailable
-      '504'                   // Gateway Timeout
+      'ECONNRESET', // Connection reset
+      'ECONNREFUSED', // Connection refused
+      'ETIMEDOUT', // Connection timeout
+      'ENOTFOUND', // DNS resolution failed
+      'socket hang up', // Socket closed unexpectedly
+      '502', // Bad Gateway
+      '503', // Service Unavailable
+      '504', // Gateway Timeout
     ];
-    
-    return retryableConditions.some(condition => 
+
+    return retryableConditions.some(condition =>
       error.message.includes(condition)
     );
   }
@@ -182,20 +206,27 @@ export class ExternalApiService {
   private isRetryableShippingError(error: Error): boolean {
     // Shipping API has additional retryable conditions
     const shippingRetryableConditions = [
-      ...this.isRetryableError(error) ? ['general'] : [],
-      'RATE_LIMITED',         // Rate limiting
+      ...(this.isRetryableError(error) ? ['general'] : []),
+      'RATE_LIMITED', // Rate limiting
       'TEMPORARY_MAINTENANCE', // Scheduled maintenance
-      'HIGH_LOAD'             // System under high load
+      'HIGH_LOAD', // System under high load
     ];
-    
-    return shippingRetryableConditions.some(condition => 
-      error.message.includes(condition) || condition === 'general'
+
+    return shippingRetryableConditions.some(
+      condition => error.message.includes(condition) || condition === 'general'
     );
   }
 }
 
 // external-api.controller.ts
-import { Controller, Post, Get, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ExternalApiService } from './external-api.service';
 import { InventoryRequest, ShippingRequest } from './types'; // From your application
 
@@ -229,7 +260,7 @@ import { ExternalApiService } from './external-api.service';
 @Module({
   controllers: [ExternalApiController],
   providers: [ExternalApiService],
-  exports: [ExternalApiService]
+  exports: [ExternalApiService],
 })
 export class ExternalApiModule {}
 ```
@@ -246,12 +277,14 @@ export class ExternalApiModule {}
 ## Retry Configuration
 
 ### Inventory API
+
 - **Max Attempts**: 3 retries
 - **Base Delay**: 1 second
 - **Max Delay**: 10 seconds
 - **Backoff**: Exponential with jitter
 
 ### Shipping API
+
 - **Max Attempts**: 5 retries (more tolerance for non-critical timing)
 - **Base Delay**: 2 seconds
 - **Max Delay**: 30 seconds
@@ -264,7 +297,7 @@ export class ExternalApiModule {}
 const inventoryRequest = {
   productId: 'product-123',
   quantity: 5,
-  warehouseId: 'warehouse-456'
+  warehouseId: 'warehouse-456',
 };
 
 const shippingRequest = {
@@ -272,24 +305,24 @@ const shippingRequest = {
   destination: {
     address: '123 Main St',
     city: 'Anytown',
-    zipCode: '12345'
+    zipCode: '12345',
   },
   weight: 2.5,
-  dimensions: { length: 10, width: 8, height: 6 }
+  dimensions: { length: 10, width: 8, height: 6 },
 };
 
 // Check inventory with retry protection
 const inventoryResult = await fetch('/external/inventory/check', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(inventoryRequest)
+  body: JSON.stringify(inventoryRequest),
 });
 
 // Get shipping quote with retry protection
 const shippingResult = await fetch('/external/shipping/quote', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(shippingRequest)
+  body: JSON.stringify(shippingRequest),
 });
 
 // Check retry metrics

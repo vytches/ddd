@@ -1,8 +1,8 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from './types';
 
 /**
  * Contracts Package Examples Configuration
- * 
+ *
  * Foundation-focused structure:
  * - EntityId usage patterns (factory methods, validation, equality)
  * - Event interface architecture (domain events, event bus, handlers)
@@ -22,7 +22,13 @@ export const config: PackageExampleConfig = {
     core: ['contracts:interfaces', 'contracts:foundation'],
     integrations: ['contracts:cross-package', 'contracts:architecture'],
     frameworks: ['nestjs'],
-    patterns: ['entity-id', 'event-interfaces', 'specifications', 'capability-system', 'foundation-contracts']
+    patterns: [
+      'entity-id',
+      'event-interfaces',
+      'specifications',
+      'capability-system',
+      'foundation-contracts',
+    ],
   },
   dependencies: ['typescript'],
   complexityLevels: {
@@ -30,20 +36,20 @@ export const config: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic contract usage and EntityId patterns'
+      description: 'Basic contract usage and EntityId patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: false,
       diRequired: false,
-      description: 'Advanced event interfaces and capability system'
+      description: 'Advanced event interfaces and capability system',
     },
     advanced: {
       level: 'advanced',
       diSupport: false,
       diRequired: false,
-      description: 'Cross-package architecture and foundation patterns'
-    }
+      description: 'Cross-package architecture and foundation patterns',
+    },
   },
   frameworks: [
     {
@@ -51,10 +57,10 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS integration with contracts and interfaces',
       complexityLevels: ['basic', 'intermediate'],
-      dependencies: ['@nestjs/common', '@nestjs/core']
-    }
+      dependencies: ['@nestjs/common', '@nestjs/core'],
+    },
   ],
-  
+
   examples: [
     // Basic Level (3 examples)
     {
@@ -66,7 +72,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Comprehensive EntityId usage with factory methods, validation, and type safety',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'event-interfaces',
@@ -77,7 +83,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Essential event interfaces for domain events, event bus, and handlers',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'foundation-contracts',
@@ -86,9 +92,10 @@ export const config: PackageExampleConfig = {
       tags: ['contracts:foundation', 'architecture:base', 'specifications:core'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Core foundation contracts including specifications, actors, and basic interfaces',
+      description:
+        'Core foundation contracts including specifications, actors, and basic interfaces',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Intermediate Level (2 examples)
@@ -101,7 +108,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Advanced event interfaces including persistence, replay, and store patterns',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'capability-system',
@@ -110,9 +117,10 @@ export const config: PackageExampleConfig = {
       tags: ['contracts:capabilities', 'architecture:extensible', 'registry:patterns'],
       complexity: 'intermediate',
       priority: 'medium',
-      description: 'Capability registry, types, and base implementations for extensible architecture',
+      description:
+        'Capability registry, types, and base implementations for extensible architecture',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Advanced Level (1 example)
@@ -123,9 +131,10 @@ export const config: PackageExampleConfig = {
       tags: ['contracts:architecture', 'integration:cross-package', 'foundation:enterprise'],
       complexity: 'advanced',
       priority: 'medium',
-      description: 'Enterprise architecture patterns using foundation contracts across multiple packages',
+      description:
+        'Enterprise architecture patterns using foundation contracts across multiple packages',
       dependencies: ['@vytches-ddd/contracts', '@vytches-ddd/core'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // NestJS Framework Integration (2 examples)
@@ -139,7 +148,7 @@ export const config: PackageExampleConfig = {
       framework: 'nestjs',
       description: 'Basic NestJS integration with contracts, interfaces, and EntityId usage',
       dependencies: ['@vytches-ddd/contracts', '@nestjs/common'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-event-interfaces',
@@ -151,8 +160,8 @@ export const config: PackageExampleConfig = {
       framework: 'nestjs',
       description: 'Advanced NestJS integration with event interfaces and capability system',
       dependencies: ['@vytches-ddd/contracts', '@nestjs/common', '@nestjs/cqrs'],
-      validation: { fileExists: true }
-    }
+      validation: { fileExists: true },
+    },
   ],
 
   sections: [
@@ -162,7 +171,7 @@ export const config: PackageExampleConfig = {
     'specifications',
     'capabilities',
     'cross-package-integration',
-    'framework-integration'
+    'framework-integration',
   ],
 
   contentConfig: {
@@ -172,7 +181,7 @@ export const config: PackageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -180,39 +189,39 @@ export const config: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   relatedPackages: {
-    'core': {
+    core: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['cross-package-architecture']
+      integrationExamples: ['cross-package-architecture'],
     },
     'domain-primitives': {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['foundation-contracts', 'entity-id-usage']
+      integrationExamples: ['foundation-contracts', 'entity-id-usage'],
     },
-    'events': {
+    events: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['event-interfaces', 'event-architecture']
+      integrationExamples: ['event-interfaces', 'event-architecture'],
     },
-    'aggregates': {
+    aggregates: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['entity-id-usage', 'foundation-contracts']
+      integrationExamples: ['entity-id-usage', 'foundation-contracts'],
     },
-    'validation': {
+    validation: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['foundation-contracts']
+      integrationExamples: ['foundation-contracts'],
     },
-    'capabilities': {
+    capabilities: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['capability-system']
-    }
-  }
+      integrationExamples: ['capability-system'],
+    },
+  },
 };

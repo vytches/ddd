@@ -48,9 +48,7 @@ export class SmartTagFinder {
     // Filter by framework if specified
     const frameworkFiltered = options?.framework
       ? complexityFiltered.filter(example =>
-          example.frameworkIntegrations?.some(integration =>
-            integration === options.framework
-          )
+          example.frameworkIntegrations?.some(integration => integration === options.framework)
         )
       : complexityFiltered;
 
@@ -97,8 +95,9 @@ export class SmartTagFinder {
 
     const suggestions = Array.from(allTags).filter(tag => {
       // Simple similarity check - could be improved with Levenshtein distance
-      return tag.includes(tagPattern.replace(/\*/g, '')) ||
-             tagPattern.replace(/\*/g, '').includes(tag);
+      return (
+        tag.includes(tagPattern.replace(/\*/g, '')) || tagPattern.replace(/\*/g, '').includes(tag)
+      );
     });
 
     return suggestions.slice(0, 5); // Return top 5 suggestions
@@ -120,8 +119,8 @@ export class SmartTagFinder {
       example.tags.some(tag => priorityTags.includes(tag))
     );
 
-    const regular = examples.filter(example =>
-      !example.tags.some(tag => priorityTags.includes(tag))
+    const regular = examples.filter(
+      example => !example.tags.some(tag => priorityTags.includes(tag))
     );
 
     return { priority, regular };
@@ -161,7 +160,6 @@ export class SmartTagFinder {
         // Generate example definitions from package config
         const packageExamples = await this.generateExampleDefinitions(packageConfig);
         allExamples.push(...packageExamples);
-
       } catch (error) {
         console.warn(`⚠️  Failed to load examples from package: ${packageName}`);
       }
@@ -171,13 +169,13 @@ export class SmartTagFinder {
     return allExamples;
   }
 
-  private async generateExampleDefinitions(
-    packageConfig: any
-  ): Promise<ExampleDefinition[]> {
+  private async generateExampleDefinitions(packageConfig: any): Promise<ExampleDefinition[]> {
     const examples: ExampleDefinition[] = [];
 
     // Generate examples for each complexity level
-    for (const [complexityKey, complexityConfig] of Object.entries(packageConfig.complexityLevels)) {
+    for (const [complexityKey, complexityConfig] of Object.entries(
+      packageConfig.complexityLevels
+    )) {
       const complexity = complexityConfig as any;
 
       // Generate core examples
@@ -195,12 +193,13 @@ export class SmartTagFinder {
             tags: [coreTag],
             dependencies: packageConfig.dependencies || [],
             diSupport: complexity.diSupport || false,
-            frameworkIntegrations: packageConfig.frameworks?.map((framework: string) => ({
-              framework,
-              path: `frameworks/${framework}/${complexity.level}.md`,
-              components: ['service'],
-              dependencies: []
-            })) || []
+            frameworkIntegrations:
+              packageConfig.frameworks?.map((framework: string) => ({
+                framework,
+                path: `frameworks/${framework}/${complexity.level}.md`,
+                components: ['service'],
+                dependencies: [],
+              })) || [],
           });
         }
       }
@@ -222,7 +221,7 @@ export class SmartTagFinder {
             tags: [integrationTag],
             dependencies: packageConfig.dependencies || [],
             diSupport: complexity.diSupport || false,
-            frameworkIntegrations: []
+            frameworkIntegrations: [],
           });
         }
       }

@@ -1,30 +1,33 @@
 # Field-Level Validation with Business Rules
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/validation
-**Complexity**: Basic
-**Domain**: Product Management
-**Patterns**: Field Validation, Business Rules, Configuration-driven Validation
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/core
+**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Basic
+**Domain**: Product Management **Patterns**: Field Validation, Business Rules,
+Configuration-driven Validation **Dependencies**: @vytches-ddd/validation,
+@vytches-ddd/core
 
 ## Description
 
-This example demonstrates field-level validation using configurable business rules for product management. It shows how to create validation rules that can be configured externally and applied consistently across different entity types.
+This example demonstrates field-level validation using configurable business
+rules for product management. It shows how to create validation rules that can
+be configured externally and applied consistently across different entity types.
 
 ## Business Context
 
-E-commerce platforms need flexible validation rules for products that can vary by category, region, or business requirements. Field-level validation allows for granular control over data quality while maintaining performance and flexibility.
+E-commerce platforms need flexible validation rules for products that can vary
+by category, region, or business requirements. Field-level validation allows for
+granular control over data quality while maintaining performance and
+flexibility.
 
 ## Code Example
 
 ```typescript
 // field-validators.ts
-import { 
-  IFieldValidator, 
+import {
+  IFieldValidator,
   ValidationResult,
   BusinessRule,
   RuleCondition,
-  RuleAction 
+  RuleAction,
 } from '@vytches-ddd/validation';
 import { Product } from './types'; // Import from your application
 
@@ -33,8 +36,8 @@ export class FieldValidator implements IFieldValidator<Product> {
   constructor(private rules: BusinessRule[]) {}
 
   async validateField(
-    entity: Product, 
-    fieldName: keyof Product, 
+    entity: Product,
+    fieldName: keyof Product,
     value: any,
     context?: ValidationContext
   ): Promise<ValidationResult> {
@@ -44,22 +47,23 @@ export class FieldValidator implements IFieldValidator<Product> {
 
     for (const rule of applicableRules) {
       const ruleResult = await this.executeRule(rule, entity, fieldName, value);
-      
+
       if (!ruleResult.isValid) {
         if (rule.actions.some(a => a.type === 'reject')) {
           errors.push({
             field: fieldName as string,
             code: rule.id.toUpperCase(),
-            message: ruleResult.message || `Validation failed for rule: ${rule.name}`,
+            message:
+              ruleResult.message || `Validation failed for rule: ${rule.name}`,
             severity: 'error',
-            details: ruleResult.details
+            details: ruleResult.details,
           });
         } else if (rule.actions.some(a => a.type === 'warn')) {
           warnings.push({
             field: fieldName as string,
             code: rule.id.toUpperCase(),
             message: ruleResult.message || `Warning for rule: ${rule.name}`,
-            suggestion: ruleResult.suggestion
+            suggestion: ruleResult.suggestion,
           });
         }
       }
@@ -78,49 +82,61 @@ export class FieldValidator implements IFieldValidator<Product> {
         context: context || {
           operationType: 'update',
           environment: 'production',
-          validationLevel: 'standard'
-        }
-      }
+          validationLevel: 'standard',
+        },
+      },
     };
   }
 
-  private getApplicableRules(fieldName: keyof Product, context?: ValidationContext): BusinessRule[] {
-    return this.rules.filter(rule => 
-      rule.isActive && 
-      rule.conditions.some(c => c.field === fieldName) &&
-      this.isRuleApplicableInContext(rule, context)
+  private getApplicableRules(
+    fieldName: keyof Product,
+    context?: ValidationContext
+  ): BusinessRule[] {
+    return this.rules.filter(
+      rule =>
+        rule.isActive &&
+        rule.conditions.some(c => c.field === fieldName) &&
+        this.isRuleApplicableInContext(rule, context)
     );
   }
 
-  private isRuleApplicableInContext(rule: BusinessRule, context?: ValidationContext): boolean {
+  private isRuleApplicableInContext(
+    rule: BusinessRule,
+    context?: ValidationContext
+  ): boolean {
     if (!context) return true;
-    
+
     // Check if rule is effective
     if (rule.effectiveDate && new Date() < rule.effectiveDate) return false;
     if (rule.expirationDate && new Date() > rule.expirationDate) return false;
-    
+
     return true;
   }
 
   private async executeRule(
-    rule: BusinessRule, 
-    entity: Product, 
-    fieldName: keyof Product, 
+    rule: BusinessRule,
+    entity: Product,
+    fieldName: keyof Product,
     value: any
-  ): Promise<{ isValid: boolean; message?: string; suggestion?: string; details?: any }> {
+  ): Promise<{
+    isValid: boolean;
+    message?: string;
+    suggestion?: string;
+    details?: any;
+  }> {
     for (const condition of rule.conditions) {
       if (condition.field !== fieldName) continue;
-      
+
       const conditionResult = this.evaluateCondition(condition, value);
       if (!conditionResult) {
         return {
           isValid: false,
           message: this.getErrorMessage(rule, condition, value),
-          details: { rule: rule.id, condition: condition.operator, value }
+          details: { rule: rule.id, condition: condition.operator, value },
         };
       }
     }
-    
+
     return { isValid: true };
   }
 
@@ -139,15 +155,23 @@ export class FieldValidator implements IFieldValidator<Product> {
       case 'regex':
         return new RegExp(condition.value).test(String(value));
       case 'in':
-        return Array.isArray(condition.value) && condition.value.includes(value);
+        return (
+          Array.isArray(condition.value) && condition.value.includes(value)
+        );
       case 'not_in':
-        return Array.isArray(condition.value) && !condition.value.includes(value);
+        return (
+          Array.isArray(condition.value) && !condition.value.includes(value)
+        );
       default:
         return false;
     }
   }
 
-  private getErrorMessage(rule: BusinessRule, condition: RuleCondition, value: any): string {
+  private getErrorMessage(
+    rule: BusinessRule,
+    condition: RuleCondition,
+    value: any
+  ): string {
     return `${rule.description}. Expected ${condition.operator} ${condition.value}, got ${value}`;
   }
 }
@@ -168,9 +192,9 @@ export class ProductValidationService {
         isActive: true,
         conditions: [
           { field: 'name', operator: 'greater_than', value: 2 },
-          { field: 'name', operator: 'less_than', value: 101 }
+          { field: 'name', operator: 'less_than', value: 101 },
         ],
-        actions: [{ type: 'reject', parameters: {} }]
+        actions: [{ type: 'reject', parameters: {} }],
       },
       {
         id: 'product-price-positive',
@@ -179,10 +203,8 @@ export class ProductValidationService {
         category: 'product',
         priority: 1,
         isActive: true,
-        conditions: [
-          { field: 'price', operator: 'greater_than', value: 0 }
-        ],
-        actions: [{ type: 'reject', parameters: {} }]
+        conditions: [{ field: 'price', operator: 'greater_than', value: 0 }],
+        actions: [{ type: 'reject', parameters: {} }],
       },
       {
         id: 'product-weight-reasonable',
@@ -191,10 +213,8 @@ export class ProductValidationService {
         category: 'product',
         priority: 2,
         isActive: true,
-        conditions: [
-          { field: 'weight', operator: 'less_than', value: 1000 }
-        ],
-        actions: [{ type: 'warn', parameters: {} }]
+        conditions: [{ field: 'weight', operator: 'less_than', value: 1000 }],
+        actions: [{ type: 'warn', parameters: {} }],
       },
       {
         id: 'product-category-valid',
@@ -204,29 +224,52 @@ export class ProductValidationService {
         priority: 1,
         isActive: true,
         conditions: [
-          { 
-            field: 'category', 
-            operator: 'in', 
-            value: ['electronics', 'clothing', 'books', 'home', 'sports']
-          }
+          {
+            field: 'category',
+            operator: 'in',
+            value: ['electronics', 'clothing', 'books', 'home', 'sports'],
+          },
         ],
-        actions: [{ type: 'reject', parameters: {} }]
-      }
+        actions: [{ type: 'reject', parameters: {} }],
+      },
     ];
 
     this.fieldValidator = new FieldValidator(productRules);
   }
 
-  async validateProduct(product: Product, context?: ValidationContext): Promise<ValidationResult> {
+  async validateProduct(
+    product: Product,
+    context?: ValidationContext
+  ): Promise<ValidationResult> {
     const validationPromises = [
-      this.fieldValidator.validateField(product, 'name', product.name?.length, context),
-      this.fieldValidator.validateField(product, 'price', product.price, context),
-      this.fieldValidator.validateField(product, 'weight', product.weight, context),
-      this.fieldValidator.validateField(product, 'category', product.category, context)
+      this.fieldValidator.validateField(
+        product,
+        'name',
+        product.name?.length,
+        context
+      ),
+      this.fieldValidator.validateField(
+        product,
+        'price',
+        product.price,
+        context
+      ),
+      this.fieldValidator.validateField(
+        product,
+        'weight',
+        product.weight,
+        context
+      ),
+      this.fieldValidator.validateField(
+        product,
+        'category',
+        product.category,
+        context
+      ),
     ];
 
     const results = await Promise.all(validationPromises);
-    
+
     // Aggregate results
     const allErrors: ValidationError[] = [];
     const allWarnings: ValidationWarning[] = [];
@@ -251,19 +294,24 @@ export class ProductValidationService {
         context: context || {
           operationType: 'create',
           environment: 'production',
-          validationLevel: 'standard'
-        }
-      }
+          validationLevel: 'standard',
+        },
+      },
     };
   }
 
   async validateFieldOnly(
-    product: Product, 
-    fieldName: keyof Product, 
+    product: Product,
+    fieldName: keyof Product,
     context?: ValidationContext
   ): Promise<ValidationResult> {
     const fieldValue = product[fieldName];
-    return await this.fieldValidator.validateField(product, fieldName, fieldValue, context);
+    return await this.fieldValidator.validateField(
+      product,
+      fieldName,
+      fieldValue,
+      context
+    );
   }
 }
 
@@ -283,47 +331,56 @@ const newProduct: Product = {
     length: 20,
     width: 15,
     height: 8,
-    unit: 'cm'
+    unit: 'cm',
   },
   availability: {
     inStock: true,
     quantity: 100,
     minStockLevel: 10,
     maxStockLevel: 500,
-    reservedQuantity: 0
+    reservedQuantity: 0,
   },
   tags: ['wireless', 'audio', 'electronics'],
   attributes: [
     { name: 'color', value: 'black', type: 'color' },
-    { name: 'battery_life', value: '30', type: 'number' }
+    { name: 'battery_life', value: '30', type: 'number' },
   ],
   createdDate: new Date(),
-  updatedDate: new Date()
+  updatedDate: new Date(),
 };
 
 const context: ValidationContext = {
   operationType: 'create',
   environment: 'production',
   validationLevel: 'strict',
-  businessRules: { validateInventory: true }
+  businessRules: { validateInventory: true },
 };
 
 // Validate entire product
-const validationResult = await productService.validateProduct(newProduct, context);
+const validationResult = await productService.validateProduct(
+  newProduct,
+  context
+);
 console.log('Product validation:', validationResult.isValid);
 console.log('Errors:', validationResult.errors);
 console.log('Warnings:', validationResult.warnings);
 
 // Validate single field
-const priceValidation = await productService.validateFieldOnly(newProduct, 'price', context);
+const priceValidation = await productService.validateFieldOnly(
+  newProduct,
+  'price',
+  context
+);
 console.log('Price validation:', priceValidation.isValid);
 ```
 
 ## Key Features
 
-- **Configurable Rules**: Business rules can be configured externally and modified without code changes
+- **Configurable Rules**: Business rules can be configured externally and
+  modified without code changes
 - **Field-Level Granularity**: Validate individual fields or entire entities
-- **Multiple Validation Actions**: Support for rejection, warnings, and transformations
+- **Multiple Validation Actions**: Support for rejection, warnings, and
+  transformations
 - **Context-Aware**: Validation rules can be applied based on operation context
 - **Performance Optimized**: Only applicable rules are executed for each field
 
@@ -332,7 +389,8 @@ console.log('Price validation:', priceValidation.isValid);
 - **Rule Conflicts**: Ensure business rules don't contradict each other
 - **Performance Impact**: Avoid overly complex rules that slow down validation
 - **Rule Maintenance**: Keep rules organized and documented for team maintenance
-- **Context Overuse**: Don't make validation overly dependent on context parameters
+- **Context Overuse**: Don't make validation overly dependent on context
+  parameters
 
 ## Related Examples
 

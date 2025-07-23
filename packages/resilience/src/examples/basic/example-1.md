@@ -1,56 +1,61 @@
 # Circuit Breaker Pattern for Payment Processing
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/resilience
-**Complexity**: Basic
-**Domain**: Payment Processing
-**Patterns**: Circuit Breaker Pattern, Fault Tolerance, Service Protection
-**Dependencies**: @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Domain**: Payment Processing **Patterns**: Circuit Breaker Pattern, Fault
+Tolerance, Service Protection **Dependencies**: @vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates the circuit breaker pattern for protecting payment processing services from cascading failures. When a payment gateway becomes unreliable, the circuit breaker automatically opens to prevent further requests, allowing the system to fail fast and recover gracefully.
+This example demonstrates the circuit breaker pattern for protecting payment
+processing services from cascading failures. When a payment gateway becomes
+unreliable, the circuit breaker automatically opens to prevent further requests,
+allowing the system to fail fast and recover gracefully.
 
 ## Business Context
 
-An e-commerce platform processes thousands of payments daily through multiple payment gateways. When a payment gateway experiences issues (high latency, timeouts, or errors), continuing to send requests can overwhelm the already struggling service and impact the entire platform. The circuit breaker pattern protects both the calling service and the failing dependency.
+An e-commerce platform processes thousands of payments daily through multiple
+payment gateways. When a payment gateway experiences issues (high latency,
+timeouts, or errors), continuing to send requests can overwhelm the already
+struggling service and impact the entire platform. The circuit breaker pattern
+protects both the calling service and the failing dependency.
 
 ## Code Example
 
 ```typescript
 // payment-service.ts
-import { 
-  CircuitBreakerStrategy, 
+import {
+  CircuitBreakerStrategy,
   ResiliencePolicyBuilder,
-  ResilienceContext 
+  ResilienceContext,
 } from '@vytches-ddd/resilience';
 import { PaymentRequest, PaymentResponse } from './types'; // From your application
 
 // Payment service with circuit breaker protection
 export class PaymentService {
   private paymentCircuitBreaker: CircuitBreakerStrategy;
-  
+
   constructor() {
     // Configure circuit breaker for payment gateway
-    this.paymentCircuitBreaker = ResiliencePolicyBuilder
-      .create()
+    this.paymentCircuitBreaker = ResiliencePolicyBuilder.create()
       .withCircuitBreaker({
-        failureThreshold: 5,        // Open after 5 consecutive failures
-        resetTimeout: 60000,        // Try to close after 60 seconds
-        halfOpenMaxCalls: 3,        // Allow 3 calls in half-open state
-        monitoringWindow: 300000,   // 5-minute monitoring window
-        minimumThroughput: 10       // Minimum calls before opening
+        failureThreshold: 5, // Open after 5 consecutive failures
+        resetTimeout: 60000, // Try to close after 60 seconds
+        halfOpenMaxCalls: 3, // Allow 3 calls in half-open state
+        monitoringWindow: 300000, // 5-minute monitoring window
+        minimumThroughput: 10, // Minimum calls before opening
       })
       .build();
   }
 
-  async processPayment(paymentRequest: PaymentRequest): Promise<PaymentResponse> {
+  async processPayment(
+    paymentRequest: PaymentRequest
+  ): Promise<PaymentResponse> {
     const context: ResilienceContext = {
       operationId: 'process-payment',
       correlationId: paymentRequest.id,
       startTime: new Date(),
       attempt: 1,
-      previousAttempts: []
+      previousAttempts: [],
     };
 
     try {
@@ -65,9 +70,8 @@ export class PaymentService {
         status: 'success',
         transactionId: result.transactionId,
         processingTime: Date.now() - context.startTime.getTime(),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       console.error('Payment processing failed:', error);
 
@@ -79,7 +83,7 @@ export class PaymentService {
           errorCode: 'CIRCUIT_BREAKER_OPEN',
           errorMessage: 'Payment gateway is temporarily unavailable',
           processingTime: Date.now() - context.startTime.getTime(),
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
 
@@ -89,40 +93,48 @@ export class PaymentService {
         errorCode: 'PAYMENT_GATEWAY_ERROR',
         errorMessage: error.message,
         processingTime: Date.now() - context.startTime.getTime(),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
 
-  private async callPaymentGateway(paymentRequest: PaymentRequest): Promise<any> {
+  private async callPaymentGateway(
+    paymentRequest: PaymentRequest
+  ): Promise<any> {
     // Simulate payment gateway call
     const response = await fetch('https://payment-gateway.api/charge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer payment-api-key'
+        Authorization: 'Bearer payment-api-key',
       },
       body: JSON.stringify({
         amount: paymentRequest.amount,
         currency: paymentRequest.currency,
         payment_method: paymentRequest.paymentMethod,
-        customer_id: paymentRequest.customerId
-      })
+        customer_id: paymentRequest.customerId,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Payment gateway error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Payment gateway error: ${response.status} ${response.statusText}`
+      );
     }
 
     return await response.json();
   }
 
   // Get circuit breaker status for monitoring
-  getCircuitBreakerStatus(): { state: string; failureCount: number; lastFailureTime?: Date } {
+  getCircuitBreakerStatus(): {
+    state: string;
+    failureCount: number;
+    lastFailureTime?: Date;
+  } {
     return {
       state: this.paymentCircuitBreaker.getState(),
       failureCount: this.paymentCircuitBreaker.getFailureCount(),
-      lastFailureTime: this.paymentCircuitBreaker.getLastFailureTime()
+      lastFailureTime: this.paymentCircuitBreaker.getLastFailureTime(),
     };
   }
 
@@ -148,17 +160,17 @@ const paymentRequest: PaymentRequest = {
   currency: 'USD',
   merchantId: 'merchant-123',
   customerId: 'customer-456',
-  paymentMethod: 'credit_card'
+  paymentMethod: 'credit_card',
 };
 
 try {
   const result = await paymentService.processPayment(paymentRequest);
-  
+
   if (result.status === 'success') {
     console.log('Payment processed successfully:', result.transactionId);
   } else {
     console.log('Payment failed:', result.errorMessage);
-    
+
     // Check circuit breaker status
     const cbStatus = paymentService.getCircuitBreakerStatus();
     console.log('Circuit breaker state:', cbStatus.state);
@@ -171,7 +183,9 @@ try {
 // Monitor circuit breaker status
 setInterval(() => {
   const status = paymentService.getCircuitBreakerStatus();
-  console.log(`Circuit Breaker Status: ${status.state} (failures: ${status.failureCount})`);
+  console.log(
+    `Circuit Breaker Status: ${status.state} (failures: ${status.failureCount})`
+  );
 }, 30000); // Check every 30 seconds
 ```
 
@@ -195,7 +209,8 @@ setInterval(() => {
 - **Threshold Too Low**: Opening circuit too quickly for normal fluctuations
 - **Timeout Too Short**: Not allowing enough time for service recovery
 - **No Monitoring**: Not tracking circuit breaker state and metrics
-- **Missing Fallbacks**: Not providing alternative responses when circuit is open
+- **Missing Fallbacks**: Not providing alternative responses when circuit is
+  open
 
 ## Related Examples
 

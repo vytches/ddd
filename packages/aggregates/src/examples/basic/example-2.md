@@ -1,19 +1,22 @@
 # Order Aggregate with State Machine
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Basic
-**Domain**: E-commerce Order Management
-**Patterns**: Aggregate Root, State Machine, Domain Events, Business Rules
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
+**Domain**: E-commerce Order Management **Patterns**: Aggregate Root, State
+Machine, Domain Events, Business Rules **Dependencies**:
+@vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
 
 ## Description
 
-This example demonstrates an order aggregate that uses a state machine pattern to manage order lifecycle. The aggregate enforces state transitions, calculates totals, and ensures business consistency throughout the order process.
+This example demonstrates an order aggregate that uses a state machine pattern
+to manage order lifecycle. The aggregate enforces state transitions, calculates
+totals, and ensures business consistency throughout the order process.
 
 ## Business Context
 
-An e-commerce platform needs to manage orders through various states from creation to completion. Each state transition has specific rules and validations. The order aggregate ensures only valid transitions occur and maintains consistency of order data including items, totals, and addresses.
+An e-commerce platform needs to manage orders through various states from
+creation to completion. Each state transition has specific rules and
+validations. The order aggregate ensures only valid transitions occur and
+maintains consistency of order data including items, totals, and addresses.
 
 ## Code Example
 
@@ -22,12 +25,12 @@ An e-commerce platform needs to manage orders through various states from creati
 import { AggregateRoot } from '@vytches-ddd/aggregates';
 import { DomainEvent } from '@vytches-ddd/contracts';
 import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
-import { 
-  OrderData, 
-  CreateOrderData, 
-  OrderStatus, 
+import {
+  OrderData,
+  CreateOrderData,
+  OrderStatus,
   OrderItem,
-  Address 
+  Address,
 } from './types'; // From your application
 
 // Domain Events
@@ -83,7 +86,7 @@ export class OrderCancelledEvent extends DomainEvent {
 export class InvalidOrderStateTransitionError extends BaseError {
   constructor(currentState: OrderStatus, targetState: OrderStatus) {
     super(
-      'INVALID_STATE_TRANSITION', 
+      'INVALID_STATE_TRANSITION',
       `Cannot transition from ${currentState} to ${targetState}`
     );
   }
@@ -118,15 +121,18 @@ export class OrderAggregate extends AggregateRoot {
   private trackingNumber?: string;
 
   // ⭐ State transition rules
-  private static readonly STATE_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-    'draft': ['pending', 'cancelled'],
-    'pending': ['confirmed', 'cancelled'],
-    'confirmed': ['processing', 'cancelled'],
-    'processing': ['shipped', 'cancelled'],
-    'shipped': ['delivered', 'cancelled'],
-    'delivered': ['completed'],
-    'completed': [],
-    'cancelled': []
+  private static readonly STATE_TRANSITIONS: Record<
+    OrderStatus,
+    OrderStatus[]
+  > = {
+    draft: ['pending', 'cancelled'],
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['processing', 'cancelled'],
+    processing: ['shipped', 'cancelled'],
+    shipped: ['delivered', 'cancelled'],
+    delivered: ['completed'],
+    completed: [],
+    cancelled: [],
   };
 
   private constructor(id: EntityId) {
@@ -142,40 +148,38 @@ export class OrderAggregate extends AggregateRoot {
   // ⭐ Factory method for creating new orders
   static create(data: CreateOrderData): OrderAggregate {
     const order = new OrderAggregate(EntityId.generate());
-    
+
     // Validate order has items
     if (!data.items || data.items.length === 0) {
       throw new EmptyOrderError();
     }
-    
+
     // Set customer and addresses
     order.customerId = data.customerId;
     order.orderNumber = order.generateOrderNumber();
     order.shippingAddress = order.validateAddress(data.shippingAddress);
-    order.billingAddress = data.billingAddress 
+    order.billingAddress = data.billingAddress
       ? order.validateAddress(data.billingAddress)
       : order.shippingAddress;
-    
+
     // Add items and calculate total
     data.items.forEach(item => order.addItem(item));
-    
+
     // Transition to pending (ready for payment)
     order.status = 'pending';
-    
+
     // Emit creation event
-    order.addDomainEvent(new OrderCreatedEvent(
-      order.id.value,
-      order.customerId,
-      order.totalAmount
-    ));
-    
+    order.addDomainEvent(
+      new OrderCreatedEvent(order.id.value, order.customerId, order.totalAmount)
+    );
+
     return order;
   }
 
   // ⭐ Reconstitute from persistence
   static fromSnapshot(id: EntityId, data: OrderData): OrderAggregate {
     const order = new OrderAggregate(id);
-    
+
     order.customerId = data.customerId;
     order.orderNumber = data.orderNumber;
     order.status = data.status;
@@ -188,9 +192,9 @@ export class OrderAggregate extends AggregateRoot {
     order.updatedAt = data.updatedAt;
     order.completedAt = data.completedAt;
     order.cancelledAt = data.cancelledAt;
-    
+
     order.markAsHydrated();
-    
+
     return order;
   }
 
@@ -198,11 +202,8 @@ export class OrderAggregate extends AggregateRoot {
   confirm(): void {
     this.transitionTo('confirmed');
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new OrderConfirmedEvent(
-      this.id.value,
-      this.updatedAt
-    ));
+
+    this.addDomainEvent(new OrderConfirmedEvent(this.id.value, this.updatedAt));
   }
 
   startProcessing(): void {
@@ -212,28 +213,26 @@ export class OrderAggregate extends AggregateRoot {
 
   ship(trackingNumber: string): void {
     if (!trackingNumber || trackingNumber.trim().length === 0) {
-      throw new BaseError('INVALID_TRACKING_NUMBER', 'Tracking number is required');
+      throw new BaseError(
+        'INVALID_TRACKING_NUMBER',
+        'Tracking number is required'
+      );
     }
-    
+
     this.transitionTo('shipped');
     this.trackingNumber = trackingNumber;
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new OrderShippedEvent(
-      this.id.value,
-      trackingNumber,
-      this.updatedAt
-    ));
+
+    this.addDomainEvent(
+      new OrderShippedEvent(this.id.value, trackingNumber, this.updatedAt)
+    );
   }
 
   markAsDelivered(): void {
     this.transitionTo('delivered');
     this.updatedAt = new Date();
-    
-    this.addDomainEvent(new OrderDeliveredEvent(
-      this.id.value,
-      this.updatedAt
-    ));
+
+    this.addDomainEvent(new OrderDeliveredEvent(this.id.value, this.updatedAt));
   }
 
   complete(): void {
@@ -246,26 +245,24 @@ export class OrderAggregate extends AggregateRoot {
     if (!this.canCancel()) {
       throw new InvalidOrderStateTransitionError(this.status, 'cancelled');
     }
-    
+
     this.transitionTo('cancelled');
     this.cancelledAt = new Date();
     this.updatedAt = this.cancelledAt;
-    
-    this.addDomainEvent(new OrderCancelledEvent(
-      this.id.value,
-      reason,
-      this.cancelledAt
-    ));
+
+    this.addDomainEvent(
+      new OrderCancelledEvent(this.id.value, reason, this.cancelledAt)
+    );
   }
 
   // ⭐ State machine helpers
   private transitionTo(newStatus: OrderStatus): void {
     const allowedTransitions = OrderAggregate.STATE_TRANSITIONS[this.status];
-    
+
     if (!allowedTransitions.includes(newStatus)) {
       throw new InvalidOrderStateTransitionError(this.status, newStatus);
     }
-    
+
     this.status = newStatus;
   }
 
@@ -277,13 +274,13 @@ export class OrderAggregate extends AggregateRoot {
   // ⭐ Item management
   private addItem(item: Omit<OrderItem, 'discount' | 'totalPrice'>): void {
     this.validateItem(item);
-    
+
     const orderItem: OrderItem = {
       ...item,
       discount: 0,
-      totalPrice: item.quantity * item.unitPrice
+      totalPrice: item.quantity * item.unitPrice,
     };
-    
+
     this.items.push(orderItem);
     this.recalculateTotal();
   }
@@ -292,19 +289,26 @@ export class OrderAggregate extends AggregateRoot {
     if (this.status !== 'draft' && this.status !== 'pending') {
       throw new BaseError('INVALID_OPERATION', 'Cannot modify confirmed order');
     }
-    
+
     const item = this.items.find(i => i.productId === productId);
     if (!item) {
-      throw new BaseError('ITEM_NOT_FOUND', `Product ${productId} not found in order`);
+      throw new BaseError(
+        'ITEM_NOT_FOUND',
+        `Product ${productId} not found in order`
+      );
     }
-    
+
     if (discountPercentage < 0 || discountPercentage > 100) {
-      throw new BaseError('INVALID_DISCOUNT', 'Discount must be between 0 and 100');
+      throw new BaseError(
+        'INVALID_DISCOUNT',
+        'Discount must be between 0 and 100'
+      );
     }
-    
+
     item.discount = discountPercentage;
-    item.totalPrice = item.quantity * item.unitPrice * (1 - discountPercentage / 100);
-    
+    item.totalPrice =
+      item.quantity * item.unitPrice * (1 - discountPercentage / 100);
+
     this.recalculateTotal();
     this.updatedAt = new Date();
   }
@@ -314,15 +318,15 @@ export class OrderAggregate extends AggregateRoot {
     if (!item.productId || item.productId.trim().length === 0) {
       throw new InvalidOrderItemError('Product ID is required');
     }
-    
+
     if (!item.productName || item.productName.trim().length === 0) {
       throw new InvalidOrderItemError('Product name is required');
     }
-    
+
     if (item.quantity <= 0) {
       throw new InvalidOrderItemError('Quantity must be greater than zero');
     }
-    
+
     if (item.unitPrice <= 0) {
       throw new InvalidOrderItemError('Unit price must be greater than zero');
     }
@@ -330,13 +334,13 @@ export class OrderAggregate extends AggregateRoot {
 
   private validateAddress(address: Address): Address {
     const requiredFields = ['street', 'city', 'state', 'postalCode', 'country'];
-    
+
     for (const field of requiredFields) {
       if (!address[field] || address[field].trim().length === 0) {
         throw new BaseError('INVALID_ADDRESS', `Address ${field} is required`);
       }
     }
-    
+
     return address;
   }
 
@@ -347,7 +351,10 @@ export class OrderAggregate extends AggregateRoot {
   }
 
   private recalculateTotal(): void {
-    this.totalAmount = this.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    this.totalAmount = this.items.reduce(
+      (sum, item) => sum + item.totalPrice,
+      0
+    );
   }
 
   // ⭐ State accessors
@@ -361,11 +368,13 @@ export class OrderAggregate extends AggregateRoot {
       totalAmount: this.totalAmount,
       currency: this.currency,
       shippingAddress: { ...this.shippingAddress },
-      billingAddress: this.billingAddress ? { ...this.billingAddress } : undefined,
+      billingAddress: this.billingAddress
+        ? { ...this.billingAddress }
+        : undefined,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       completedAt: this.completedAt,
-      cancelledAt: this.cancelledAt
+      cancelledAt: this.cancelledAt,
     };
   }
 
@@ -396,22 +405,22 @@ export function orderLifecycleExample(): void {
         productId: 'prod-1',
         productName: 'Laptop',
         quantity: 1,
-        unitPrice: 999.99
+        unitPrice: 999.99,
       },
       {
         productId: 'prod-2',
         productName: 'Mouse',
         quantity: 2,
-        unitPrice: 29.99
-      }
+        unitPrice: 29.99,
+      },
     ],
     shippingAddress: {
       street: '123 Main St',
       city: 'New York',
       state: 'NY',
       postalCode: '10001',
-      country: 'USA'
-    }
+      country: 'USA',
+    },
   });
 
   console.log('Order created:', order.orderNumber);

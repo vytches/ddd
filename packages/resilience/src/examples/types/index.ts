@@ -347,7 +347,7 @@ export enum PaymentStatus {
   SUCCESS = 'success',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
-  REFUNDED = 'refunded'
+  REFUNDED = 'refunded',
 }
 
 export enum PaymentMethod {
@@ -355,7 +355,7 @@ export enum PaymentMethod {
   DEBIT_CARD = 'debit_card',
   BANK_TRANSFER = 'bank_transfer',
   DIGITAL_WALLET = 'digital_wallet',
-  CRYPTOCURRENCY = 'cryptocurrency'
+  CRYPTOCURRENCY = 'cryptocurrency',
 }
 
 export enum OrderStatus {
@@ -366,7 +366,7 @@ export enum OrderStatus {
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
-  REFUNDED = 'refunded'
+  REFUNDED = 'refunded',
 }
 
 export enum CustomerTier {
@@ -374,7 +374,7 @@ export enum CustomerTier {
   SILVER = 'silver',
   GOLD = 'gold',
   PLATINUM = 'platinum',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise',
 }
 
 export enum NotificationType {
@@ -382,7 +382,7 @@ export enum NotificationType {
   SMS = 'sms',
   PUSH = 'push',
   WEBHOOK = 'webhook',
-  SLACK = 'slack'
+  SLACK = 'slack',
 }
 
 export enum NotificationChannel {
@@ -390,7 +390,7 @@ export enum NotificationChannel {
   SMS = 'sms',
   PUSH_NOTIFICATION = 'push_notification',
   IN_APP = 'in_app',
-  WEBHOOK = 'webhook'
+  WEBHOOK = 'webhook',
 }
 
 export enum NotificationPriority {
@@ -398,21 +398,21 @@ export enum NotificationPriority {
   NORMAL = 'normal',
   HIGH = 'high',
   URGENT = 'urgent',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum HealthStatus {
   HEALTHY = 'healthy',
   DEGRADED = 'degraded',
   UNHEALTHY = 'unhealthy',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 export enum AlertSeverity {
   INFO = 'info',
   WARNING = 'warning',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum AlertChannel {
@@ -420,7 +420,7 @@ export enum AlertChannel {
   SMS = 'sms',
   SLACK = 'slack',
   PAGERDUTY = 'pagerduty',
-  WEBHOOK = 'webhook'
+  WEBHOOK = 'webhook',
 }
 
 // Additional types

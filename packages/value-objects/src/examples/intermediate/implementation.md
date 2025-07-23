@@ -1,19 +1,22 @@
 # Intermediate Value Objects - Implementation Overview
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate
-**Focus**: Advanced patterns and complex value object implementations
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Intermediate **Focus**: Advanced patterns and complex value
+object implementations
 
 ## Overview
 
-This document provides comprehensive guidance for implementing intermediate-level value objects using the @vytches-ddd/value-objects package. It covers advanced patterns including composite structures, range operations, complex validations, and intelligent business logic.
+This document provides comprehensive guidance for implementing
+intermediate-level value objects using the @vytches-ddd/value-objects package.
+It covers advanced patterns including composite structures, range operations,
+complex validations, and intelligent business logic.
 
 ## Advanced Implementation Patterns
 
 ### **1. Composite Value Objects**
 
-Composite value objects aggregate multiple simpler value objects with intelligent coordination:
+Composite value objects aggregate multiple simpler value objects with
+intelligent coordination:
 
 ```typescript
 import { ValueObject } from '@vytches-ddd/value-objects';
@@ -34,13 +37,15 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
     // Create nested value objects
     const emailVO = Email.create(email);
     const phoneVO = phoneNumber ? PhoneNumber.create(phoneNumber) : undefined;
-    const addressVO = address ? Address.create(
-      address.street,
-      address.city,
-      address.state,
-      address.postalCode,
-      address.country
-    ) : undefined;
+    const addressVO = address
+      ? Address.create(
+          address.street,
+          address.city,
+          address.state,
+          address.postalCode,
+          address.country
+        )
+      : undefined;
 
     const data: ContactInformationData = {
       email: emailVO,
@@ -49,13 +54,15 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
       preferences: preferences ?? {
         preferredMethod: 'email',
         allowMarketing: false,
-        timezone: 'UTC'
-      }
+        timezone: 'UTC',
+      },
     };
 
     const validation = ContactInformation.validate(data);
     if (!validation.isValid) {
-      throw new Error(`Invalid contact information: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Invalid contact information: ${validation.errors.join(', ')}`
+      );
     }
 
     return new ContactInformation(data);
@@ -80,7 +87,7 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
       errors.push('Marketing consent requires verified email');
     }
 
-    return errors.length > 0 
+    return errors.length > 0
       ? { isValid: false, errors }
       : { isValid: true, errors: [] };
   }
@@ -88,7 +95,7 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
   // ✅ Intelligent update methods
   updateEmail(newEmail: Email): ContactInformation {
     const newData = { ...this.data, email: newEmail };
-    
+
     // Re-validate with new email
     const validation = ContactInformation.validate(newData);
     if (!validation.isValid) {
@@ -104,7 +111,9 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
 
     const validation = ContactInformation.validate(newData);
     if (!validation.isValid) {
-      throw new Error(`Preferences update failed: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Preferences update failed: ${validation.errors.join(', ')}`
+      );
     }
 
     return new ContactInformation(newData);
@@ -149,7 +158,9 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
       score += 15;
       factors.push({ factor: 'timezone_set', weight: 15 });
     } else {
-      recommendations.push('Set specific timezone for better communication timing');
+      recommendations.push(
+        'Set specific timezone for better communication timing'
+      );
     }
 
     // Marketing consent (business value)
@@ -175,9 +186,9 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
         return {
           method: 'email',
           availability: this.data.email.isVerified,
-          reason: this.data.email.isVerified 
-            ? 'Email is verified and preferred' 
-            : 'Email preferred but not verified'
+          reason: this.data.email.isVerified
+            ? 'Email is verified and preferred'
+            : 'Email preferred but not verified',
         };
 
       case 'sms':
@@ -185,13 +196,13 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
           return {
             method: 'sms',
             availability: true,
-            reason: 'SMS preferred and phone number available'
+            reason: 'SMS preferred and phone number available',
           };
         } else {
           return {
             method: 'email',
             availability: this.data.email.isVerified,
-            reason: 'SMS preferred but no phone number, falling back to email'
+            reason: 'SMS preferred but no phone number, falling back to email',
           };
         }
 
@@ -200,13 +211,13 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
           return {
             method: 'phone',
             availability: true,
-            reason: 'Phone preferred and number available'
+            reason: 'Phone preferred and number available',
           };
         } else {
           return {
             method: 'email',
             availability: this.data.email.isVerified,
-            reason: 'Phone preferred but no number, falling back to email'
+            reason: 'Phone preferred but no number, falling back to email',
           };
         }
 
@@ -214,7 +225,7 @@ export class ContactInformation extends ValueObject<ContactInformationData> {
         return {
           method: 'email',
           availability: this.data.email.isVerified,
-          reason: 'Default to email communication'
+          reason: 'Default to email communication',
         };
     }
   }
@@ -252,7 +263,7 @@ export class PriceRange extends ValueObject<PriceRangeData> {
       maxPrice,
       includeMin,
       includeMax,
-      currency: minPrice.currency
+      currency: minPrice.currency,
     };
 
     return new PriceRange(data);
@@ -264,7 +275,7 @@ export class PriceRange extends ValueObject<PriceRangeData> {
       throw new Error('Cannot compare prices in different currencies');
     }
 
-    const minValid = this.data.includeMin 
+    const minValid = this.data.includeMin
       ? price.amount >= this.data.minPrice.amount
       : price.amount > this.data.minPrice.amount;
 
@@ -280,8 +291,10 @@ export class PriceRange extends ValueObject<PriceRangeData> {
       return false;
     }
 
-    return this.data.minPrice.amount <= other.data.maxPrice.amount &&
-           this.data.maxPrice.amount >= other.data.minPrice.amount;
+    return (
+      this.data.minPrice.amount <= other.data.maxPrice.amount &&
+      this.data.maxPrice.amount >= other.data.minPrice.amount
+    );
   }
 
   intersect(other: PriceRange): PriceRange | null {
@@ -289,13 +302,15 @@ export class PriceRange extends ValueObject<PriceRangeData> {
       return null;
     }
 
-    const minPrice = this.data.minPrice.amount > other.data.minPrice.amount
-      ? this.data.minPrice
-      : other.data.minPrice;
+    const minPrice =
+      this.data.minPrice.amount > other.data.minPrice.amount
+        ? this.data.minPrice
+        : other.data.minPrice;
 
-    const maxPrice = this.data.maxPrice.amount < other.data.maxPrice.amount
-      ? this.data.maxPrice
-      : other.data.maxPrice;
+    const maxPrice =
+      this.data.maxPrice.amount < other.data.maxPrice.amount
+        ? this.data.maxPrice
+        : other.data.maxPrice;
 
     return PriceRange.create(minPrice, maxPrice);
   }
@@ -318,26 +333,28 @@ export class PriceRange extends ValueObject<PriceRangeData> {
     );
 
     const discountAmount = originalPrice.subtract(midRange);
-    const discountPercentage = (discountAmount.amount / originalPrice.amount) * 100;
+    const discountPercentage =
+      (discountAmount.amount / originalPrice.amount) * 100;
 
     return {
       discountAmount,
       discountPercentage,
       priceAfterDiscount: midRange,
-      isValidDiscount: discountPercentage > 0
+      isValidDiscount: discountPercentage > 0,
     };
   }
 
   // ✅ Market analysis
   getMarketPosition(currentPrice: Money): MarketPosition {
     if (!this.contains(currentPrice)) {
-      return currentPrice.amount < this.data.minPrice.amount 
-        ? 'below_range' 
+      return currentPrice.amount < this.data.minPrice.amount
+        ? 'below_range'
         : 'above_range';
     }
 
     const rangeSize = this.data.maxPrice.amount - this.data.minPrice.amount;
-    const pricePosition = (currentPrice.amount - this.data.minPrice.amount) / rangeSize;
+    const pricePosition =
+      (currentPrice.amount - this.data.minPrice.amount) / rangeSize;
 
     if (pricePosition <= 0.25) return 'low_end';
     if (pricePosition <= 0.5) return 'mid_low';
@@ -368,7 +385,8 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
     const mean = sum / count;
 
     // Calculate variance and standard deviation
-    const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count;
+    const variance =
+      values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count;
     const standardDeviation = Math.sqrt(variance);
 
     // Calculate percentiles
@@ -388,21 +406,24 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
       max: sortedValues[count - 1],
       q1,
       q3,
-      range: sortedValues[count - 1] - sortedValues[0]
+      range: sortedValues[count - 1] - sortedValues[0],
     };
 
     return new StatisticalSummary(data);
   }
 
-  private static calculatePercentile(sortedValues: number[], percentile: number): number {
+  private static calculatePercentile(
+    sortedValues: number[],
+    percentile: number
+  ): number {
     const index = percentile * (sortedValues.length - 1);
     const lower = Math.floor(index);
     const upper = Math.ceil(index);
-    
+
     if (lower === upper) {
       return sortedValues[lower];
     }
-    
+
     const weight = index - lower;
     return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
   }
@@ -417,7 +438,9 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
         return value < lowerBound || value > upperBound;
 
       case 'zscore':
-        const zscore = Math.abs((value - this.data.mean) / this.data.standardDeviation);
+        const zscore = Math.abs(
+          (value - this.data.mean) / this.data.standardDeviation
+        );
         return zscore > 2; // 2 standard deviations
     }
   }
@@ -431,21 +454,28 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
     const meanDifference = this.data.mean - other.data.mean;
     const meanPercentChange = (meanDifference / other.data.mean) * 100;
 
-    const stdDevDifference = this.data.standardDeviation - other.data.standardDeviation;
+    const stdDevDifference =
+      this.data.standardDeviation - other.data.standardDeviation;
     const variabilityChange = stdDevDifference > 0 ? 'increased' : 'decreased';
 
     return {
       meanDifference,
       meanPercentChange,
       variabilityChange,
-      summary: this.generateComparisonSummary(meanPercentChange, variabilityChange)
+      summary: this.generateComparisonSummary(
+        meanPercentChange,
+        variabilityChange
+      ),
     };
   }
 
-  private generateComparisonSummary(percentChange: number, variabilityChange: string): string {
+  private generateComparisonSummary(
+    percentChange: number,
+    variabilityChange: string
+  ): string {
     const direction = percentChange > 0 ? 'increased' : 'decreased';
     const magnitude = Math.abs(percentChange);
-    
+
     let magnitudeDesc = 'slightly';
     if (magnitude > 20) magnitudeDesc = 'significantly';
     else if (magnitude > 10) magnitudeDesc = 'moderately';
@@ -457,11 +487,11 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
   getDistributionType(): DistributionType {
     // Skewness calculation
     const skewness = this.calculateSkewness();
-    
+
     if (Math.abs(skewness) < 0.5) return 'normal';
     if (skewness > 0.5) return 'right_skewed';
     if (skewness < -0.5) return 'left_skewed';
-    
+
     return 'unknown';
   }
 
@@ -469,11 +499,11 @@ export class StatisticalSummary extends ValueObject<StatisticalSummaryData> {
     const n = this.data.count;
     const mean = this.data.mean;
     const stdDev = this.data.standardDeviation;
-    
+
     const skewnessSum = this.data.values.reduce((sum, value) => {
       return sum + Math.pow((value - mean) / stdDev, 3);
     }, 0);
-    
+
     return (n / ((n - 1) * (n - 2))) * skewnessSum;
   }
 }
@@ -509,12 +539,18 @@ export class AdvancedValidationExample extends ValueObject<ComplexData> {
       errors.push('Identifier must be a non-empty string');
     }
 
-    if (data.numericValue !== undefined && typeof data.numericValue !== 'number') {
+    if (
+      data.numericValue !== undefined &&
+      typeof data.numericValue !== 'number'
+    ) {
       errors.push('Numeric value must be a number');
     }
 
     // Range validation
-    if (data.numericValue !== undefined && (data.numericValue < 0 || data.numericValue > 1000000)) {
+    if (
+      data.numericValue !== undefined &&
+      (data.numericValue < 0 || data.numericValue > 1000000)
+    ) {
       errors.push('Numeric value must be between 0 and 1,000,000');
     }
 
@@ -530,19 +566,29 @@ export class AdvancedValidationExample extends ValueObject<ComplexData> {
     }
 
     // Business rule: High-value transactions need approval
-    if (data.numericValue && data.numericValue > 10000 && !data.approvalRequired) {
+    if (
+      data.numericValue &&
+      data.numericValue > 10000 &&
+      !data.approvalRequired
+    ) {
       errors.push('High-value transactions require approval flag');
     }
 
     // Business rule: Active status requires valid end date
-    if (data.status === 'active' && data.endDate && data.endDate <= new Date()) {
+    if (
+      data.status === 'active' &&
+      data.endDate &&
+      data.endDate <= new Date()
+    ) {
       errors.push('Active status cannot have past end date');
     }
 
     return { isValid: errors.length === 0, errors };
   }
 
-  private static validateFieldRelationships(data: ComplexData): ValidationResult {
+  private static validateFieldRelationships(
+    data: ComplexData
+  ): ValidationResult {
     const errors: string[] = [];
 
     // Cross-field validation: start date must be before end date
@@ -562,7 +608,9 @@ export class AdvancedValidationExample extends ValueObject<ComplexData> {
     return { isValid: errors.length === 0, errors };
   }
 
-  private static async validateExternalConstraints(data: ComplexData): Promise<ValidationResult> {
+  private static async validateExternalConstraints(
+    data: ComplexData
+  ): Promise<ValidationResult> {
     const errors: string[] = [];
 
     // Example: Check external service constraints
@@ -590,7 +638,9 @@ export class AdvancedValidationExample extends ValueObject<ComplexData> {
     return true;
   }
 
-  private static async getAccountLimits(accountId: string): Promise<{ maxValue: number }> {
+  private static async getAccountLimits(
+    accountId: string
+  ): Promise<{ maxValue: number }> {
     // In real implementation, this would fetch from database/service
     return { maxValue: 50000 };
   }
@@ -618,16 +668,20 @@ class ValidationChain<T> {
       try {
         const result = await rule.validator(data);
         if (!result.isValid) {
-          allErrors.push(...result.errors.map(error => `${rule.name}: ${error}`));
+          allErrors.push(
+            ...result.errors.map(error => `${rule.name}: ${error}`)
+          );
         }
       } catch (error) {
-        allErrors.push(`${rule.name}: Validation failed - ${error instanceof Error ? error.message : 'Unknown error'}`);
+        allErrors.push(
+          `${rule.name}: Validation failed - ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
 
     return {
       isValid: allErrors.length === 0,
-      errors: allErrors
+      errors: allErrors,
     };
   }
 }
@@ -655,14 +709,14 @@ export class ComplexCalculationVO extends ValueObject<ComplexData> {
   // ✅ Memoization for parameterized calculations
   getParameterizedResult(params: CalculationParams): any {
     const cacheKey = JSON.stringify(params);
-    
+
     if (this._calculationCache.has(cacheKey)) {
       return this._calculationCache.get(cacheKey);
     }
 
     const result = this.performParameterizedCalculation(params);
     this._calculationCache.set(cacheKey, result);
-    
+
     return result;
   }
 
@@ -739,7 +793,7 @@ import { ContactInformation } from './contact-information';
 describe('ContactInformation - Intermediate Value Object', () => {
   describe('composite validation', () => {
     it('should validate cross-component business rules', () => {
-      const [error] = safeRun(() => 
+      const [error] = safeRun(() =>
         ContactInformation.create(
           'user@example.com',
           undefined, // No phone
@@ -749,7 +803,9 @@ describe('ContactInformation - Intermediate Value Object', () => {
       );
 
       expect(error).toBeInstanceOf(Error);
-      expect(error?.message).toContain('SMS preference requires a phone number');
+      expect(error?.message).toContain(
+        'SMS preference requires a phone number'
+      );
     });
   });
 
@@ -758,7 +814,13 @@ describe('ContactInformation - Intermediate Value Object', () => {
       const contact = ContactInformation.create(
         'verified@example.com',
         '5551234567',
-        { street: '123 Main St', city: 'Boston', state: 'MA', postalCode: '02101', country: 'US' }
+        {
+          street: '123 Main St',
+          city: 'Boston',
+          state: 'MA',
+          postalCode: '02101',
+          country: 'US',
+        }
       );
 
       const score = contact.getContactScore();
@@ -790,12 +852,17 @@ describe('ContactInformation - Intermediate Value Object', () => {
 
 Intermediate value object implementations focus on:
 
-1. **Composite Structures**: Aggregating multiple value objects with intelligent coordination
-2. **Complex Validation**: Multi-layered validation with business rules and cross-field constraints  
-3. **Advanced Operations**: Range operations, statistical analysis, and intelligent behavior
+1. **Composite Structures**: Aggregating multiple value objects with intelligent
+   coordination
+2. **Complex Validation**: Multi-layered validation with business rules and
+   cross-field constraints
+3. **Advanced Operations**: Range operations, statistical analysis, and
+   intelligent behavior
 4. **Performance Optimization**: Lazy loading, caching, and builder patterns
-5. **Business Intelligence**: Analysis methods, scoring systems, and recommendation engines
+5. **Business Intelligence**: Analysis methods, scoring systems, and
+   recommendation engines
 6. **Error Handling**: Comprehensive error detection with detailed reporting
 7. **Testing Strategy**: Complex scenario testing with business rule validation
 
-These patterns enable sophisticated domain modeling while maintaining value object principles of immutability, equality, and encapsulation.
+These patterns enable sophisticated domain modeling while maintaining value
+object principles of immutability, equality, and encapsulation.

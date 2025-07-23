@@ -19,7 +19,7 @@ describe('Colors', () => {
   beforeEach(() => {
     originalEnv = { ...process.env };
     originalStdout = process.stdout;
-    
+
     // Default to TTY enabled
     setTTY(true);
   });

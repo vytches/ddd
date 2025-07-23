@@ -8,28 +8,28 @@ interface ValidateArgs {
   verbose?: boolean;
 }
 
-export const validateCommand: CommandModule<Record<string,unknown>, ValidateArgs> = {
+export const validateCommand: CommandModule<Record<string, unknown>, ValidateArgs> = {
   command: 'validate',
   describe: 'Validate example configurations and content',
   builder: {
     package: {
       type: 'string',
       describe: 'Validate specific package only',
-      alias: 'p'
+      alias: 'p',
     },
     fix: {
       type: 'boolean',
       describe: 'Automatically fix issues where possible',
-      default: false
+      default: false,
     },
     verbose: {
       type: 'boolean',
       describe: 'Show detailed validation results',
       alias: 'v',
-      default: false
-    }
+      default: false,
+    },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       const validator = new ExampleValidator();
 
@@ -37,7 +37,7 @@ export const validateCommand: CommandModule<Record<string,unknown>, ValidateArgs
       const results = await validator.validateExamples(argv.package || '', {
         packageName: argv.package,
         autoFix: argv.fix,
-        verbose: argv.verbose
+        verbose: argv.verbose,
       });
 
       // Display results
@@ -84,10 +84,11 @@ export const validateCommand: CommandModule<Record<string,unknown>, ValidateArgs
       if (results.errors.length > 0) {
         process.exit(1);
       }
-
     } catch (error) {
-      logger.error(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
-  }
+  },
 };

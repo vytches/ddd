@@ -1,11 +1,9 @@
 # Basic Value Objects - NestJS DI Integration
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Framework**: NestJS
-**Focus**: @vytches-ddd/di integration with enhanced service management
-**Base Example**: [Money Value Object](../../../basic/example-1.md)
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Framework**: NestJS **Focus**: @vytches-ddd/di
+integration with enhanced service management **Base Example**:
+[Money Value Object](../../../basic/example-1.md)
 
 ## Service Implementation
 
@@ -13,11 +11,7 @@
 // money.service.ts
 import { Injectable } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
-  CreateMoneyDto, 
-  MoneyResponse, 
-  CurrencyConversionDto 
-} from './types'; // From your application
+import { CreateMoneyDto, MoneyResponse, CurrencyConversionDto } from './types'; // From your application
 
 @Injectable()
 export class MoneyService {
@@ -28,76 +22,94 @@ export class MoneyService {
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration for enhanced capabilities
     this.moneyFactory = VytchesDDD.resolve<MoneyFactory>('moneyFactory');
-    this.currencyService = VytchesDDD.resolve<CurrencyService>('currencyService');
-    this.validationService = VytchesDDD.resolve<ValidationService>('validationService');
+    this.currencyService =
+      VytchesDDD.resolve<CurrencyService>('currencyService');
+    this.validationService =
+      VytchesDDD.resolve<ValidationService>('validationService');
   }
 
   // ✅ FOCUS: Enhanced money creation with DI services
   async createMoney(dto: CreateMoneyDto): Promise<MoneyResponse> {
     try {
       // Validate currency through DI service
-      const isValidCurrency = await this.currencyService.isSupported(dto.currency);
+      const isValidCurrency = await this.currencyService.isSupported(
+        dto.currency
+      );
       if (!isValidCurrency) {
         return {
           success: false,
-          error: `Unsupported currency: ${dto.currency}`
+          error: `Unsupported currency: ${dto.currency}`,
         };
       }
 
       // Create money using factory from DI
       const money = this.moneyFactory.create(dto.amount, dto.currency);
-      
+
       return {
         success: true,
         data: {
           amount: money.amount,
           currency: money.currency,
           formatted: money.toString(),
-          exchangeRate: await this.currencyService.getExchangeRate(dto.currency, 'USD')
-        }
+          exchangeRate: await this.currencyService.getExchangeRate(
+            dto.currency,
+            'USD'
+          ),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create money'
+        error:
+          error instanceof Error ? error.message : 'Failed to create money',
       };
     }
   }
 
   // ✅ FOCUS: Advanced money operations with validation
-  async addMoney(money1Dto: CreateMoneyDto, money2Dto: CreateMoneyDto): Promise<MoneyResponse> {
+  async addMoney(
+    money1Dto: CreateMoneyDto,
+    money2Dto: CreateMoneyDto
+  ): Promise<MoneyResponse> {
     try {
       // Validate both amounts
       const validation1 = await this.validationService.validateMoney(money1Dto);
       const validation2 = await this.validationService.validateMoney(money2Dto);
-      
+
       if (!validation1.isValid || !validation2.isValid) {
         return {
           success: false,
-          error: 'Invalid money values provided'
+          error: 'Invalid money values provided',
         };
       }
 
-      const money1 = this.moneyFactory.create(money1Dto.amount, money1Dto.currency);
-      const money2 = this.moneyFactory.create(money2Dto.amount, money2Dto.currency);
-      
+      const money1 = this.moneyFactory.create(
+        money1Dto.amount,
+        money1Dto.currency
+      );
+      const money2 = this.moneyFactory.create(
+        money2Dto.amount,
+        money2Dto.currency
+      );
+
       // Use currency conversion if currencies differ
-      const result = money1.currency === money2.currency 
-        ? money1.add(money2)
-        : await this.addWithConversion(money1, money2);
-      
+      const result =
+        money1.currency === money2.currency
+          ? money1.add(money2)
+          : await this.addWithConversion(money1, money2);
+
       return {
         success: true,
         data: {
           amount: result.amount,
           currency: result.currency,
-          formatted: result.toString()
-        }
+          formatted: result.toString(),
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to add money'
+        error: error instanceof Error ? error.message : 'Failed to add money',
       };
     }
   }
@@ -110,10 +122,13 @@ export class MoneyService {
         dto.fromCurrency,
         dto.toCurrency
       );
-      
+
       const convertedAmount = money.amount * exchangeRate;
-      const convertedMoney = this.moneyFactory.create(convertedAmount, dto.toCurrency);
-      
+      const convertedMoney = this.moneyFactory.create(
+        convertedAmount,
+        dto.toCurrency
+      );
+
       return {
         success: true,
         data: {
@@ -122,13 +137,14 @@ export class MoneyService {
           formatted: convertedMoney.toString(),
           exchangeRate,
           originalAmount: money.amount,
-          originalCurrency: money.currency
-        }
+          originalCurrency: money.currency,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Currency conversion failed'
+        error:
+          error instanceof Error ? error.message : 'Currency conversion failed',
       };
     }
   }
@@ -137,15 +153,19 @@ export class MoneyService {
   async formatMoney(dto: CreateMoneyDto, locale?: string): Promise<string> {
     try {
       const money = this.moneyFactory.create(dto.amount, dto.currency);
-      const localizationService = VytchesDDD.resolve<LocalizationService>('localizationService');
-      
+      const localizationService = VytchesDDD.resolve<LocalizationService>(
+        'localizationService'
+      );
+
       if (locale) {
         return await localizationService.formatMoney(money, locale);
       }
-      
+
       return money.toString();
     } catch (error) {
-      throw new Error(`Failed to format money: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to format money: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -156,7 +176,7 @@ export class MoneyService {
 
   // ✅ FOCUS: Advanced money comparison with tolerance
   async compareMoney(
-    money1Dto: CreateMoneyDto, 
+    money1Dto: CreateMoneyDto,
     money2Dto: CreateMoneyDto,
     tolerance?: number
   ): Promise<{
@@ -166,31 +186,51 @@ export class MoneyService {
     difference?: number;
   }> {
     try {
-      const money1 = this.moneyFactory.create(money1Dto.amount, money1Dto.currency);
-      const money2 = this.moneyFactory.create(money2Dto.amount, money2Dto.currency);
-      
+      const money1 = this.moneyFactory.create(
+        money1Dto.amount,
+        money1Dto.currency
+      );
+      const money2 = this.moneyFactory.create(
+        money2Dto.amount,
+        money2Dto.currency
+      );
+
       // Convert to same currency for comparison if needed
-      const normalizedMoney2 = money1.currency === money2.currency 
-        ? money2
-        : await this.convertToBaseCurrency(money2);
-      
-      const comparisonService = VytchesDDD.resolve<ComparisonService>('comparisonService');
-      
-      return comparisonService.compareWithTolerance(money1, normalizedMoney2, tolerance);
+      const normalizedMoney2 =
+        money1.currency === money2.currency
+          ? money2
+          : await this.convertToBaseCurrency(money2);
+
+      const comparisonService =
+        VytchesDDD.resolve<ComparisonService>('comparisonService');
+
+      return comparisonService.compareWithTolerance(
+        money1,
+        normalizedMoney2,
+        tolerance
+      );
     } catch (error) {
-      throw new Error(`Failed to compare money: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to compare money: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
-  private async addWithConversion(money1: Money, money2: Money): Promise<Money> {
+  private async addWithConversion(
+    money1: Money,
+    money2: Money
+  ): Promise<Money> {
     const exchangeRate = await this.currencyService.getExchangeRate(
       money2.currency,
       money1.currency
     );
-    
+
     const convertedAmount = money2.amount * exchangeRate;
-    const convertedMoney = this.moneyFactory.create(convertedAmount, money1.currency);
-    
+    const convertedMoney = this.moneyFactory.create(
+      convertedAmount,
+      money1.currency
+    );
+
     return money1.add(convertedMoney);
   }
 
@@ -199,12 +239,12 @@ export class MoneyService {
     if (money.currency === baseCurrency) {
       return money;
     }
-    
+
     const exchangeRate = await this.currencyService.getExchangeRate(
       money.currency,
       baseCurrency
     );
-    
+
     const convertedAmount = money.amount * exchangeRate;
     return this.moneyFactory.create(convertedAmount, baseCurrency);
   }
@@ -228,27 +268,35 @@ export class EmailService {
   constructor() {
     // ⭐ FOCUS: Enhanced email capabilities through DI
     this.emailFactory = VytchesDDD.resolve<EmailFactory>('emailFactory');
-    this.emailValidationService = VytchesDDD.resolve<EmailValidationService>('emailValidationService');
-    this.spamDetectionService = VytchesDDD.resolve<SpamDetectionService>('spamDetectionService');
+    this.emailValidationService = VytchesDDD.resolve<EmailValidationService>(
+      'emailValidationService'
+    );
+    this.spamDetectionService = VytchesDDD.resolve<SpamDetectionService>(
+      'spamDetectionService'
+    );
   }
 
   // ✅ FOCUS: Advanced email creation with enhanced validation
   async createEmail(dto: CreateEmailDto): Promise<EmailResponse> {
     try {
       // Pre-validation through DI service
-      const validation = await this.emailValidationService.validateAdvanced(dto.address);
+      const validation = await this.emailValidationService.validateAdvanced(
+        dto.address
+      );
       if (!validation.isValid) {
         return {
           success: false,
-          error: `Email validation failed: ${validation.errors.join(', ')}`
+          error: `Email validation failed: ${validation.errors.join(', ')}`,
         };
       }
 
       // Spam/reputation check
-      const reputationCheck = await this.spamDetectionService.checkReputation(dto.address);
-      
+      const reputationCheck = await this.spamDetectionService.checkReputation(
+        dto.address
+      );
+
       const email = this.emailFactory.create(dto.address, dto.config);
-      
+
       return {
         success: true,
         data: {
@@ -257,43 +305,54 @@ export class EmailService {
           localPart: email.localPart,
           isValid: email.isValid(),
           reputation: reputationCheck,
-          deliverabilityScore: validation.deliverabilityScore
-        }
+          deliverabilityScore: validation.deliverabilityScore,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create email'
+        error:
+          error instanceof Error ? error.message : 'Failed to create email',
       };
     }
   }
 
   // ✅ FOCUS: Bulk email processing with DI services
-  async processBulkEmails(addresses: string[]): Promise<Array<{
-    address: string;
-    isValid: boolean;
-    normalizedAddress?: string;
-    deliverabilityScore?: number;
-    errors?: string[];
-  }>> {
-    const bulkProcessor = VytchesDDD.resolve<BulkEmailProcessor>('bulkEmailProcessor');
-    
+  async processBulkEmails(addresses: string[]): Promise<
+    Array<{
+      address: string;
+      isValid: boolean;
+      normalizedAddress?: string;
+      deliverabilityScore?: number;
+      errors?: string[];
+    }>
+  > {
+    const bulkProcessor =
+      VytchesDDD.resolve<BulkEmailProcessor>('bulkEmailProcessor');
+
     return await bulkProcessor.processEmails(addresses, {
       validateDeliverability: true,
       checkReputation: true,
-      normalizeFormat: true
+      normalizeFormat: true,
     });
   }
 
   // ✅ FOCUS: Enhanced email normalization
-  async normalizeEmail(address: string, options?: NormalizationOptions): Promise<string> {
+  async normalizeEmail(
+    address: string,
+    options?: NormalizationOptions
+  ): Promise<string> {
     try {
       const email = this.emailFactory.create(address);
-      const normalizationService = VytchesDDD.resolve<NormalizationService>('normalizationService');
-      
+      const normalizationService = VytchesDDD.resolve<NormalizationService>(
+        'normalizationService'
+      );
+
       return await normalizationService.normalize(email, options);
     } catch (error) {
-      throw new Error(`Failed to normalize email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to normalize email: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }
@@ -316,8 +375,10 @@ export class AddressService {
   constructor() {
     // ⭐ FOCUS: Enhanced address capabilities
     this.addressFactory = VytchesDDD.resolve<AddressFactory>('addressFactory');
-    this.geocodingService = VytchesDDD.resolve<GeocodingService>('geocodingService');
-    this.addressValidationService = VytchesDDD.resolve<AddressValidationService>('addressValidationService');
+    this.geocodingService =
+      VytchesDDD.resolve<GeocodingService>('geocodingService');
+    this.addressValidationService =
+      VytchesDDD.resolve<AddressValidationService>('addressValidationService');
   }
 
   // ✅ FOCUS: Address creation with geocoding
@@ -328,7 +389,7 @@ export class AddressService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: `Address validation failed: ${validation.errors.join(', ')}`
+          error: `Address validation failed: ${validation.errors.join(', ')}`,
         };
       }
 
@@ -347,7 +408,7 @@ export class AddressService {
         dto.country,
         coordinates
       );
-      
+
       return {
         success: true,
         data: {
@@ -359,13 +420,14 @@ export class AddressService {
           coordinates: address.coordinates,
           formatted: address.getFormattedAddress(),
           timezone: validation.detectedTimezone,
-          deliveryConfidence: validation.deliveryConfidence
-        }
+          deliveryConfidence: validation.deliveryConfidence,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create address'
+        error:
+          error instanceof Error ? error.message : 'Failed to create address',
       };
     }
   }
@@ -382,19 +444,34 @@ export class AddressService {
     optimizedOrder?: number[];
   }> {
     try {
-      const routingService = VytchesDDD.resolve<RoutingService>('routingService');
-      
+      const routingService =
+        VytchesDDD.resolve<RoutingService>('routingService');
+
       const startAddress = this.addressFactory.create(
-        startDto.street, startDto.city, startDto.state, startDto.postalCode, startDto.country
-      );
-      
-      const endAddress = this.addressFactory.create(
-        endDto.street, endDto.city, endDto.state, endDto.postalCode, endDto.country
+        startDto.street,
+        startDto.city,
+        startDto.state,
+        startDto.postalCode,
+        startDto.country
       );
 
-      return await routingService.calculateOptimalRoute(startAddress, endAddress, waypoints);
+      const endAddress = this.addressFactory.create(
+        endDto.street,
+        endDto.city,
+        endDto.state,
+        endDto.postalCode,
+        endDto.country
+      );
+
+      return await routingService.calculateOptimalRoute(
+        startAddress,
+        endAddress,
+        waypoints
+      );
     } catch (error) {
-      throw new Error(`Failed to calculate route: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to calculate route: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }
@@ -411,22 +488,18 @@ import { EmailModule } from './email/email.module';
 import { AddressModule } from './address/address.module';
 
 @Module({
-  imports: [
-    MoneyModule,
-    EmailModule,
-    AddressModule,
-  ],
+  imports: [MoneyModule, EmailModule, AddressModule],
 })
 export class AppModule implements OnModuleInit {
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD DI before framework DI
     const container = new SimpleContainer();
-    
+
     // Register enhanced services
     this.registerMoneyServices(container);
     this.registerEmailServices(container);
     this.registerAddressServices(container);
-    
+
     await VytchesDDD.configure(container);
   }
 
@@ -435,24 +508,39 @@ export class AppModule implements OnModuleInit {
     container.registerInstance('moneyFactory', new MoneyFactory());
     container.registerInstance('currencyService', new CurrencyService());
     container.registerInstance('validationService', new ValidationService());
-    container.registerInstance('localizationService', new LocalizationService());
+    container.registerInstance(
+      'localizationService',
+      new LocalizationService()
+    );
     container.registerInstance('comparisonService', new ComparisonService());
   }
 
   private registerEmailServices(container: SimpleContainer) {
     // Register email-related services
     container.registerInstance('emailFactory', new EmailFactory());
-    container.registerInstance('emailValidationService', new EmailValidationService());
-    container.registerInstance('spamDetectionService', new SpamDetectionService());
+    container.registerInstance(
+      'emailValidationService',
+      new EmailValidationService()
+    );
+    container.registerInstance(
+      'spamDetectionService',
+      new SpamDetectionService()
+    );
     container.registerInstance('bulkEmailProcessor', new BulkEmailProcessor());
-    container.registerInstance('normalizationService', new NormalizationService());
+    container.registerInstance(
+      'normalizationService',
+      new NormalizationService()
+    );
   }
 
   private registerAddressServices(container: SimpleContainer) {
     // Register address-related services
     container.registerInstance('addressFactory', new AddressFactory());
     container.registerInstance('geocodingService', new GeocodingService());
-    container.registerInstance('addressValidationService', new AddressValidationService());
+    container.registerInstance(
+      'addressValidationService',
+      new AddressValidationService()
+    );
     container.registerInstance('routingService', new RoutingService());
   }
 }
@@ -474,7 +562,7 @@ export class OrderService {
     // Enhanced email validation
     const emailResult = await this.emailService.createEmail({
       address: orderDto.customerEmail,
-      config: { strictValidation: true }
+      config: { strictValidation: true },
     });
 
     if (!emailResult.success || emailResult.data?.deliverabilityScore < 0.7) {
@@ -484,21 +572,26 @@ export class OrderService {
     // Currency conversion if needed
     let orderTotal = await this.moneyService.createMoney({
       amount: orderDto.totalAmount,
-      currency: orderDto.currency
+      currency: orderDto.currency,
     });
 
     if (orderDto.preferredCurrency !== orderDto.currency) {
       const convertedTotal = await this.moneyService.convertCurrency({
         amount: orderDto.totalAmount,
         fromCurrency: orderDto.currency,
-        toCurrency: orderDto.preferredCurrency
+        toCurrency: orderDto.preferredCurrency,
       });
       orderTotal = convertedTotal;
     }
 
     // Enhanced address validation with geocoding
-    const addressResult = await this.addressService.createAddress(orderDto.shippingAddress);
-    if (!addressResult.success || addressResult.data?.deliveryConfidence < 0.8) {
+    const addressResult = await this.addressService.createAddress(
+      orderDto.shippingAddress
+    );
+    if (
+      !addressResult.success ||
+      addressResult.data?.deliveryConfidence < 0.8
+    ) {
       throw new Error('Shipping address may not be deliverable');
     }
 
@@ -507,7 +600,7 @@ export class OrderService {
       total: orderTotal.data,
       customerEmail: emailResult.data,
       shippingAddress: addressResult.data,
-      estimatedDelivery: this.calculateDeliveryTime(addressResult.data)
+      estimatedDelivery: this.calculateDeliveryTime(addressResult.data),
     };
   }
 
@@ -521,7 +614,8 @@ export class OrderService {
 
 ## Key Points
 
-- **@vytches-ddd/di Integration**: Uses service locator pattern for enhanced capabilities
+- **@vytches-ddd/di Integration**: Uses service locator pattern for enhanced
+  capabilities
 - **Enterprise Services**: Advanced validation, geocoding, currency conversion
 - **Service Composition**: Rich functionality through composed DI services
 - **Enhanced Validation**: Multi-layer validation with deliverability scoring

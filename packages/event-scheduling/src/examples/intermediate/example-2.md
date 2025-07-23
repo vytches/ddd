@@ -1,32 +1,37 @@
 # Advanced Queue Management - Dead Letter Queues and Backpressure
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: dead-letter-queue, backpressure-handling, advanced-queuing, error-recovery
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+intermediate **Domain**: Infrastructure **Patterns**: dead-letter-queue,
+backpressure-handling, advanced-queuing, error-recovery
 
 ## Description
 
-Intermediate implementation of sophisticated queue management with dead letter queues, backpressure handling, circuit breakers, and advanced error recovery patterns for production-grade event scheduling.
+Intermediate implementation of sophisticated queue management with dead letter
+queues, backpressure handling, circuit breakers, and advanced error recovery
+patterns for production-grade event scheduling.
 
 ## Business Context
 
-High-volume e-commerce platform processing millions of scheduled events needs robust error handling, backpressure management, and dead letter queue processing to ensure no events are lost while maintaining system stability.
+High-volume e-commerce platform processing millions of scheduled events needs
+robust error handling, backpressure management, and dead letter queue processing
+to ensure no events are lost while maintaining system stability.
 
 ## Code Example
 
 ```typescript
 // advanced-queue-management.ts
-import { InMemorySchedulerAdapter, ScheduledEvent } from '@vytches-ddd/event-scheduling';
+import {
+  InMemorySchedulerAdapter,
+  ScheduledEvent,
+} from '@vytches-ddd/event-scheduling';
 import { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  DeadLetterQueueItem, 
-  SchedulingMetrics, 
+import {
+  DeadLetterQueueItem,
+  SchedulingMetrics,
   BackpressureConfig,
-  CircuitBreakerState 
+  CircuitBreakerState,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Advanced queue management with error handling
@@ -39,9 +44,9 @@ export class AdvancedQueueManager {
     averageExecutionTime: 0,
     queuedEvents: 0,
     failedEvents: 0,
-    retriedEvents: 0
+    retriedEvents: 0,
   };
-  
+
   private readonly logger = Logger.forContext('AdvancedQueueManager');
   private backpressureConfig: BackpressureConfig;
 
@@ -52,7 +57,7 @@ export class AdvancedQueueManager {
       lowWaterMark: 2000,
       backpressureStrategy: 'drop-oldest',
       throttleMs: 1000,
-      ...backpressureConfig
+      ...backpressureConfig,
     };
   }
 
@@ -60,10 +65,10 @@ export class AdvancedQueueManager {
   canAcceptEvents(queueName: string, currentSize: number): boolean {
     // Check backpressure conditions
     if (currentSize >= this.backpressureConfig.maxQueueSize) {
-      this.logger.warn('Queue at maximum capacity', { 
-        queueName, 
-        currentSize, 
-        maxSize: this.backpressureConfig.maxQueueSize 
+      this.logger.warn('Queue at maximum capacity', {
+        queueName,
+        currentSize,
+        maxSize: this.backpressureConfig.maxQueueSize,
       });
       return false;
     }
@@ -80,8 +85,8 @@ export class AdvancedQueueManager {
 
   // ✅ FOCUS: Handle backpressure when queue is full
   async handleBackpressure(
-    queueName: string, 
-    currentEvents: QueuedEvent[], 
+    queueName: string,
+    currentEvents: QueuedEvent[],
     newEvent: QueuedEvent
   ): Promise<BackpressureResult> {
     const { backpressureStrategy } = this.backpressureConfig;
@@ -89,30 +94,30 @@ export class AdvancedQueueManager {
     switch (backpressureStrategy) {
       case 'drop-oldest':
         return this.dropOldestEvent(currentEvents, newEvent);
-      
+
       case 'drop-lowest-priority':
         return this.dropLowestPriorityEvent(currentEvents, newEvent);
-      
+
       case 'reject-new':
-        return { 
-          accepted: false, 
-          dropped: null, 
-          reason: 'Queue full - rejecting new event' 
+        return {
+          accepted: false,
+          dropped: null,
+          reason: 'Queue full - rejecting new event',
         };
-      
+
       case 'throttle':
         await this.throttleExecution();
-        return { 
-          accepted: true, 
-          dropped: null, 
-          reason: 'Event throttled and accepted' 
+        return {
+          accepted: true,
+          dropped: null,
+          reason: 'Event throttled and accepted',
         };
-      
+
       default:
-        return { 
-          accepted: false, 
-          dropped: null, 
-          reason: 'Unknown backpressure strategy' 
+        return {
+          accepted: false,
+          dropped: null,
+          reason: 'Unknown backpressure strategy',
         };
     }
   }
@@ -131,17 +136,17 @@ export class AdvancedQueueManager {
       failureReason,
       failedAt: new Date(),
       attempts,
-      lastError
+      lastError,
     };
 
     this.deadLetterQueue.set(jobId, deadLetterItem);
-    
+
     this.logger.error('Event moved to dead letter queue', {
       jobId,
       eventType: originalEvent.constructor.name,
       failureReason,
       attempts,
-      deadLetterQueueSize: this.deadLetterQueue.size
+      deadLetterQueueSize: this.deadLetterQueue.size,
     });
 
     // Update metrics
@@ -158,29 +163,29 @@ export class AdvancedQueueManager {
     for (const [jobId, item] of this.deadLetterQueue.entries()) {
       try {
         const result = await this.analyzeDeadLetterItem(item);
-        
+
         switch (result.action) {
           case 'requeue':
             await this.requeueDeadLetterItem(item);
             requeued.push(jobId);
             this.deadLetterQueue.delete(jobId);
             break;
-            
+
           case 'discard':
             permanentFailures.push(jobId);
             this.deadLetterQueue.delete(jobId);
             break;
-            
+
           case 'keep':
             // Keep in dead letter queue for now
             break;
         }
-        
+
         processed.push(jobId);
       } catch (error) {
         this.logger.error('Failed to process dead letter item', {
           jobId,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -189,14 +194,14 @@ export class AdvancedQueueManager {
       processed: processed.length,
       requeued: requeued.length,
       permanentFailures: permanentFailures.length,
-      remaining: this.deadLetterQueue.size
+      remaining: this.deadLetterQueue.size,
     });
 
     return {
       processed,
       requeued,
       permanentFailures,
-      remaining: this.deadLetterQueue.size
+      remaining: this.deadLetterQueue.size,
     };
   }
 
@@ -208,37 +213,43 @@ export class AdvancedQueueManager {
     if (success) {
       circuitBreaker.successCount++;
       circuitBreaker.consecutiveFailures = 0;
-      
+
       // Close circuit if in half-open state and we have enough successes
-      if (circuitBreaker.state === 'HALF_OPEN' && 
-          circuitBreaker.successCount >= 5) {
+      if (
+        circuitBreaker.state === 'HALF_OPEN' &&
+        circuitBreaker.successCount >= 5
+      ) {
         circuitBreaker.state = 'CLOSED';
         circuitBreaker.lastStateChange = now;
-        
+
         this.logger.info('Circuit breaker closed', { queueName });
       }
     } else {
       circuitBreaker.failureCount++;
       circuitBreaker.consecutiveFailures++;
-      
+
       // Open circuit if failure threshold exceeded
-      if (circuitBreaker.state === 'CLOSED' && 
-          circuitBreaker.consecutiveFailures >= 10) {
+      if (
+        circuitBreaker.state === 'CLOSED' &&
+        circuitBreaker.consecutiveFailures >= 10
+      ) {
         circuitBreaker.state = 'OPEN';
         circuitBreaker.lastStateChange = now;
         circuitBreaker.nextAttemptAfter = new Date(now.getTime() + 60000); // 1 minute
-        
+
         this.logger.warn('Circuit breaker opened', { queueName });
       }
     }
 
     // Check if we should move from OPEN to HALF_OPEN
-    if (circuitBreaker.state === 'OPEN' && 
-        now > circuitBreaker.nextAttemptAfter) {
+    if (
+      circuitBreaker.state === 'OPEN' &&
+      now > circuitBreaker.nextAttemptAfter
+    ) {
       circuitBreaker.state = 'HALF_OPEN';
       circuitBreaker.lastStateChange = now;
       circuitBreaker.successCount = 0;
-      
+
       this.logger.info('Circuit breaker moved to half-open', { queueName });
     }
   }
@@ -246,7 +257,7 @@ export class AdvancedQueueManager {
   // ✅ FOCUS: Get queue metrics
   getQueueMetrics(): AdvancedQueueMetrics {
     const circuitBreakerStates = new Map<string, string>();
-    
+
     for (const [queueName, breaker] of this.circuitBreakers) {
       circuitBreakerStates.set(queueName, breaker.state);
     }
@@ -256,7 +267,7 @@ export class AdvancedQueueManager {
       deadLetterQueueSize: this.deadLetterQueue.size,
       circuitBreakerStates,
       backpressureActive: this.isBackpressureActive(),
-      queueCapacityUtilization: this.calculateCapacityUtilization()
+      queueCapacityUtilization: this.calculateCapacityUtilization(),
     };
   }
 
@@ -268,15 +279,15 @@ export class AdvancedQueueManager {
         successCount: 0,
         consecutiveFailures: 0,
         lastStateChange: new Date(),
-        nextAttemptAfter: new Date()
+        nextAttemptAfter: new Date(),
       });
     }
-    
+
     return this.circuitBreakers.get(queueName)!;
   }
 
   private dropOldestEvent(
-    currentEvents: QueuedEvent[], 
+    currentEvents: QueuedEvent[],
     newEvent: QueuedEvent
   ): BackpressureResult {
     if (currentEvents.length === 0) {
@@ -284,72 +295,87 @@ export class AdvancedQueueManager {
     }
 
     // Find oldest event (earliest schedule time)
-    const oldestEvent = currentEvents.reduce((oldest, current) => 
+    const oldestEvent = currentEvents.reduce((oldest, current) =>
       current.event.scheduleAt < oldest.event.scheduleAt ? current : oldest
     );
 
     return {
       accepted: true,
       dropped: oldestEvent,
-      reason: 'Dropped oldest event due to backpressure'
+      reason: 'Dropped oldest event due to backpressure',
     };
   }
 
   private dropLowestPriorityEvent(
-    currentEvents: QueuedEvent[], 
+    currentEvents: QueuedEvent[],
     newEvent: QueuedEvent
   ): BackpressureResult {
     // Find event with lowest priority
     const lowestPriorityEvent = currentEvents.reduce((lowest, current) => {
-      const currentPriority = (current.event as any).priority || SchedulePriority.NORMAL;
-      const lowestPriority = (lowest.event as any).priority || SchedulePriority.NORMAL;
+      const currentPriority =
+        (current.event as any).priority || SchedulePriority.NORMAL;
+      const lowestPriority =
+        (lowest.event as any).priority || SchedulePriority.NORMAL;
       return currentPriority < lowestPriority ? current : lowest;
     });
 
-    const newEventPriority = (newEvent.event as any).priority || SchedulePriority.NORMAL;
-    const lowestCurrentPriority = (lowestPriorityEvent.event as any).priority || SchedulePriority.NORMAL;
+    const newEventPriority =
+      (newEvent.event as any).priority || SchedulePriority.NORMAL;
+    const lowestCurrentPriority =
+      (lowestPriorityEvent.event as any).priority || SchedulePriority.NORMAL;
 
     // Only accept if new event has higher priority than lowest current event
     if (newEventPriority > lowestCurrentPriority) {
       return {
         accepted: true,
         dropped: lowestPriorityEvent,
-        reason: 'Dropped lowest priority event for higher priority event'
+        reason: 'Dropped lowest priority event for higher priority event',
       };
     }
 
     return {
       accepted: false,
       dropped: null,
-      reason: 'New event priority not higher than lowest queued event'
+      reason: 'New event priority not higher than lowest queued event',
     };
   }
 
   private async throttleExecution(): Promise<void> {
-    await new Promise(resolve => 
+    await new Promise(resolve =>
       setTimeout(resolve, this.backpressureConfig.throttleMs)
     );
   }
 
-  private async analyzeDeadLetterItem(item: DeadLetterQueueItem): Promise<DeadLetterAnalysis> {
+  private async analyzeDeadLetterItem(
+    item: DeadLetterQueueItem
+  ): Promise<DeadLetterAnalysis> {
     const { originalEvent, failureReason, attempts, failedAt } = item;
-    const hoursSinceFailure = (Date.now() - failedAt.getTime()) / (1000 * 60 * 60);
+    const hoursSinceFailure =
+      (Date.now() - failedAt.getTime()) / (1000 * 60 * 60);
 
     // Retry transient failures after some time
     if (this.isTransientFailure(failureReason) && hoursSinceFailure > 1) {
-      return { action: 'requeue', reason: 'Transient failure, retry after delay' };
+      return {
+        action: 'requeue',
+        reason: 'Transient failure, retry after delay',
+      };
     }
 
     // Discard permanent failures after max attempts
     if (attempts >= 10 || this.isPermanentFailure(failureReason)) {
-      return { action: 'discard', reason: 'Permanent failure or max attempts exceeded' };
+      return {
+        action: 'discard',
+        reason: 'Permanent failure or max attempts exceeded',
+      };
     }
 
     // Keep in dead letter queue for manual review
     return { action: 'keep', reason: 'Needs manual review' };
   }
 
-  private async requeueDeadLetterItem(item: DeadLetterQueueItem): Promise<void> {
+  private async requeueDeadLetterItem(
+    item: DeadLetterQueueItem
+  ): Promise<void> {
     // Create new scheduled event with adjusted timing
     const newScheduleTime = new Date(Date.now() + 300000); // 5 minutes from now
     const newEvent = item.originalEvent.reschedule(newScheduleTime);
@@ -358,7 +384,7 @@ export class AdvancedQueueManager {
       jobId: item.jobId,
       originalScheduleTime: item.originalEvent.scheduleAt,
       newScheduleTime,
-      attempts: item.attempts
+      attempts: item.attempts,
     });
 
     // Would need to integrate with actual scheduler to requeue
@@ -371,10 +397,10 @@ export class AdvancedQueueManager {
       'network',
       'connection',
       'temporary',
-      'rate limit'
+      'rate limit',
     ];
-    
-    return transientPatterns.some(pattern => 
+
+    return transientPatterns.some(pattern =>
       failureReason.toLowerCase().includes(pattern)
     );
   }
@@ -385,10 +411,10 @@ export class AdvancedQueueManager {
       'authorization',
       'not found',
       'invalid format',
-      'malformed'
+      'malformed',
     ];
-    
-    return permanentPatterns.some(pattern => 
+
+    return permanentPatterns.some(pattern =>
       failureReason.toLowerCase().includes(pattern)
     );
   }
@@ -397,7 +423,7 @@ export class AdvancedQueueManager {
     const total = this.metrics.totalEvents;
     const failed = this.metrics.failedEvents;
     const successful = total - failed;
-    
+
     this.metrics.successRate = total > 0 ? (successful / total) * 100 : 0;
   }
 
@@ -406,7 +432,9 @@ export class AdvancedQueueManager {
   }
 
   private calculateCapacityUtilization(): number {
-    return (this.metrics.queuedEvents / this.backpressureConfig.maxQueueSize) * 100;
+    return (
+      (this.metrics.queuedEvents / this.backpressureConfig.maxQueueSize) * 100
+    );
   }
 }
 
@@ -421,9 +449,9 @@ export class EnhancedSchedulerService {
     this.scheduler = new InMemorySchedulerAdapter({
       defaultMaxRetries: 5,
       defaultTimeout: 30000,
-      enableLogging: true
+      enableLogging: true,
     });
-    
+
     this.queueManager = new AdvancedQueueManager(backpressureConfig);
   }
 
@@ -431,7 +459,7 @@ export class EnhancedSchedulerService {
     await this.scheduler.start();
     this.startDeadLetterProcessing();
     this.setupEventHandlers();
-    
+
     this.logger.info('Enhanced scheduler service started');
   }
 
@@ -439,9 +467,9 @@ export class EnhancedSchedulerService {
     if (this.deadLetterProcessingInterval) {
       clearInterval(this.deadLetterProcessingInterval);
     }
-    
+
     await this.scheduler.stop();
-    
+
     this.logger.info('Enhanced scheduler service stopped');
   }
 
@@ -453,48 +481,54 @@ export class EnhancedSchedulerService {
     try {
       // Check if we can accept more events
       const currentQueueSize = await this.getCurrentQueueSize(queueName);
-      
+
       if (!this.queueManager.canAcceptEvents(queueName, currentQueueSize)) {
         // Handle backpressure
         const currentEvents = await this.getCurrentEvents(queueName);
         const newQueuedEvent = { event, jobId: `temp-${Date.now()}` };
-        
+
         const backpressureResult = await this.queueManager.handleBackpressure(
           queueName,
           currentEvents,
           newQueuedEvent
         );
-        
+
         if (!backpressureResult.accepted) {
-          return Result.fail(new Error(`Event rejected due to backpressure: ${backpressureResult.reason}`));
+          return Result.fail(
+            new Error(
+              `Event rejected due to backpressure: ${backpressureResult.reason}`
+            )
+          );
         }
-        
+
         if (backpressureResult.dropped) {
           this.logger.warn('Event dropped due to backpressure', {
             droppedJobId: backpressureResult.dropped.jobId,
-            reason: backpressureResult.reason
+            reason: backpressureResult.reason,
           });
         }
       }
 
       // Schedule the event
       const jobId = await this.scheduler.schedule(event);
-      
+
       // Update circuit breaker on success
       this.queueManager.updateCircuitBreaker(queueName, true);
-      
+
       this.logger.info('Event scheduled with queue management', {
         jobId,
         queueName,
-        eventType: event.constructor.name
+        eventType: event.constructor.name,
       });
-      
+
       return Result.ok(jobId);
     } catch (error) {
       // Update circuit breaker on failure
       this.queueManager.updateCircuitBreaker(queueName, false);
-      
-      return Result.fail(new Error(`Failed to schedule event: ${error.message}`));
+
+      return Result.fail(
+        new Error(`Failed to schedule event: ${error.message}`)
+      );
     }
   }
 
@@ -502,21 +536,21 @@ export class EnhancedSchedulerService {
   async getEnhancedMetrics(): Promise<EnhancedSchedulerMetrics> {
     const queueMetrics = this.queueManager.getQueueMetrics();
     const schedulerStats = await this.scheduler.getStats();
-    
+
     return {
       scheduler: {
         scheduled: schedulerStats.scheduled + schedulerStats.pending,
         completed: schedulerStats.completed,
         failed: schedulerStats.failed,
-        running: schedulerStats.running
+        running: schedulerStats.running,
       },
       queue: queueMetrics,
       deadLetterQueue: {
         size: queueMetrics.deadLetterQueueSize,
         oldestItem: await this.getOldestDeadLetterItem(),
-        processingEnabled: this.deadLetterProcessingInterval !== null
+        processingEnabled: this.deadLetterProcessingInterval !== null,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -543,13 +577,16 @@ export class EnhancedSchedulerService {
     this.deadLetterProcessingInterval = setInterval(async () => {
       try {
         const result = await this.queueManager.processDeadLetterQueue();
-        
+
         if (result.processed.length > 0) {
-          this.logger.info('Dead letter queue processing cycle completed', result);
+          this.logger.info(
+            'Dead letter queue processing cycle completed',
+            result
+          );
         }
       } catch (error) {
         this.logger.error('Dead letter queue processing failed', {
-          error: error.message
+          error: error.message,
         });
       }
     }, 300000); // 5 minutes
@@ -557,7 +594,7 @@ export class EnhancedSchedulerService {
 
   private setupEventHandlers(): void {
     // Handle job failures to move to dead letter queue
-    this.scheduler.onJobFailed(async (job) => {
+    this.scheduler.onJobFailed(async job => {
       if (job.attempts >= (job.event.scheduleOptions?.maxRetries || 5)) {
         await this.queueManager.addToDeadLetterQueue(
           job.event,
@@ -572,11 +609,11 @@ export class EnhancedSchedulerService {
 
   private async getOldestDeadLetterItem(): Promise<Date | null> {
     const metrics = this.queueManager.getQueueMetrics();
-    
+
     if (metrics.deadLetterQueueSize === 0) {
       return null;
     }
-    
+
     // In real implementation, would return actual oldest timestamp
     return new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
   }
@@ -587,9 +624,9 @@ export class EnhancedSchedulerService {
 
 ```typescript
 // usage-example.ts
-import { 
+import {
   EnhancedSchedulerService,
-  AdvancedQueueManager 
+  AdvancedQueueManager,
 } from './advanced-queue-management';
 
 async function demonstrateAdvancedQueueManagement() {
@@ -599,46 +636,52 @@ async function demonstrateAdvancedQueueManagement() {
     highWaterMark: 800,
     lowWaterMark: 200,
     backpressureStrategy: 'drop-lowest-priority' as const,
-    throttleMs: 2000
+    throttleMs: 2000,
   };
-  
+
   const scheduler = new EnhancedSchedulerService(backpressureConfig);
-  
+
   await scheduler.start();
-  
+
   try {
     // Simulate high-volume event scheduling
     const scheduleResults = [];
-    
+
     for (let i = 0; i < 50; i++) {
       const event = new OrderProcessingEvent(
         `ORDER-${i}`,
         {
           customerId: `CUSTOMER-${i % 10}`,
           amount: Math.random() * 1000,
-          priority: i % 4 // Varies priority
+          priority: i % 4, // Varies priority
         },
         new Date(Date.now() + i * 60000) // Spread over time
       );
-      
+
       const result = await scheduler.scheduleEventWithQueueManagement(
         event,
         'order-processing'
       );
-      
+
       scheduleResults.push(result);
-      
+
       // Small delay to simulate realistic load
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
-    console.log('Scheduled events:', scheduleResults.filter(r => r.isSuccess()).length);
-    console.log('Rejected events:', scheduleResults.filter(r => r.isFailure()).length);
-    
+
+    console.log(
+      'Scheduled events:',
+      scheduleResults.filter(r => r.isSuccess()).length
+    );
+    console.log(
+      'Rejected events:',
+      scheduleResults.filter(r => r.isFailure()).length
+    );
+
     // Monitor metrics
     const monitorMetrics = async () => {
       const metrics = await scheduler.getEnhancedMetrics();
-      
+
       console.log('📊 Enhanced Scheduler Metrics:', {
         scheduler: metrics.scheduler,
         queue: {
@@ -646,48 +689,50 @@ async function demonstrateAdvancedQueueManagement() {
           successRate: metrics.queue.successRate.toFixed(2) + '%',
           deadLetterQueueSize: metrics.queue.deadLetterQueueSize,
           backpressureActive: metrics.queue.backpressureActive,
-          capacityUtilization: metrics.queue.queueCapacityUtilization.toFixed(1) + '%'
+          capacityUtilization:
+            metrics.queue.queueCapacityUtilization.toFixed(1) + '%',
         },
         deadLetterQueue: metrics.deadLetterQueue,
-        circuitBreakers: Object.fromEntries(metrics.queue.circuitBreakerStates)
+        circuitBreakers: Object.fromEntries(metrics.queue.circuitBreakerStates),
       });
     };
-    
+
     // Monitor every 30 seconds
     const metricsInterval = setInterval(monitorMetrics, 30000);
-    
+
     // Initial metrics
     await monitorMetrics();
-    
+
     // Simulate some failing events to test dead letter queue
-    console.log('\n🔧 Simulating failing events for dead letter queue testing...');
-    
+    console.log(
+      '\n🔧 Simulating failing events for dead letter queue testing...'
+    );
+
     for (let i = 0; i < 5; i++) {
       const failingEvent = new FailingOrderEvent(
         `FAILING-ORDER-${i}`,
         { willFail: true },
         new Date(Date.now() + 5000) // 5 seconds from now
       );
-      
+
       await scheduler.scheduleEventWithQueueManagement(
         failingEvent,
         'failing-queue'
       );
     }
-    
+
     // Let it run for 2 minutes to see queue management in action
     await new Promise(resolve => setTimeout(resolve, 120000));
-    
+
     // Process dead letter queue manually
     console.log('\n🔄 Processing dead letter queue manually...');
     const deadLetterResult = await scheduler.processDeadLetterQueueManually();
     console.log('Dead letter processing result:', deadLetterResult);
-    
+
     clearInterval(metricsInterval);
-    
+
     // Final metrics
     await monitorMetrics();
-    
   } finally {
     await scheduler.stop();
   }
@@ -698,7 +743,7 @@ class OrderProcessingEvent extends ScheduledEvent {
   constructor(orderId: string, orderData: any, scheduleAt: Date) {
     super(orderId, scheduleAt, orderData, {
       maxRetries: 3,
-      backoff: 'exponential'
+      backoff: 'exponential',
     });
   }
 }
@@ -707,7 +752,7 @@ class FailingOrderEvent extends ScheduledEvent {
   constructor(orderId: string, orderData: any, scheduleAt: Date) {
     super(orderId, scheduleAt, orderData, {
       maxRetries: 2,
-      backoff: 'fixed'
+      backoff: 'fixed',
     });
   }
 }
@@ -717,26 +762,41 @@ demonstrateAdvancedQueueManagement().catch(console.error);
 
 ## Key Features
 
-- **Dead Letter Queue**: Automatic handling of permanently failed events with analysis and requeuing capabilities
-- **Backpressure Management**: Multiple strategies for handling queue overflow (drop oldest, drop lowest priority, reject new, throttle)
-- **Circuit Breakers**: Prevent cascade failures by temporarily stopping event processing when failure rates are high
-- **Advanced Metrics**: Comprehensive monitoring of queue health, success rates, and capacity utilization
-- **Error Classification**: Smart distinction between transient and permanent failures for appropriate handling
-- **Automatic Recovery**: Dead letter queue processing with configurable retry strategies
-- **Capacity Management**: Configurable queue limits with high/low watermarks for backpressure activation
-- **Priority-Aware Dropping**: Intelligent event dropping based on priority levels during backpressure
+- **Dead Letter Queue**: Automatic handling of permanently failed events with
+  analysis and requeuing capabilities
+- **Backpressure Management**: Multiple strategies for handling queue overflow
+  (drop oldest, drop lowest priority, reject new, throttle)
+- **Circuit Breakers**: Prevent cascade failures by temporarily stopping event
+  processing when failure rates are high
+- **Advanced Metrics**: Comprehensive monitoring of queue health, success rates,
+  and capacity utilization
+- **Error Classification**: Smart distinction between transient and permanent
+  failures for appropriate handling
+- **Automatic Recovery**: Dead letter queue processing with configurable retry
+  strategies
+- **Capacity Management**: Configurable queue limits with high/low watermarks
+  for backpressure activation
+- **Priority-Aware Dropping**: Intelligent event dropping based on priority
+  levels during backpressure
 
 ## Common Pitfalls
 
-- **Dead Letter Queue Buildup**: Monitor and periodically clean up dead letter queues to prevent unbounded growth
-- **Circuit Breaker Tuning**: Carefully tune circuit breaker thresholds to balance fault tolerance and responsiveness  
-- **Backpressure Strategy**: Choose appropriate backpressure strategy based on business requirements
+- **Dead Letter Queue Buildup**: Monitor and periodically clean up dead letter
+  queues to prevent unbounded growth
+- **Circuit Breaker Tuning**: Carefully tune circuit breaker thresholds to
+  balance fault tolerance and responsiveness
+- **Backpressure Strategy**: Choose appropriate backpressure strategy based on
+  business requirements
 - **Memory Leaks**: Ensure proper cleanup of failed events and metrics data
-- **Monitoring Overhead**: Balance comprehensive monitoring with system performance impact
+- **Monitoring Overhead**: Balance comprehensive monitoring with system
+  performance impact
 
 ## Related Examples
 
-- [Basic Priority Queuing](../basic/example-3.md) - Foundation priority queue concepts
+- [Basic Priority Queuing](../basic/example-3.md) - Foundation priority queue
+  concepts
 - [Distributed Scheduling](./example-1.md) - Multi-node coordination patterns
-- [Enterprise Scheduling Platform](../advanced/example-1.md) - Global queue management
-- [Performance Optimization](../advanced/example-3.md) - High-throughput queue optimization
+- [Enterprise Scheduling Platform](../advanced/example-1.md) - Global queue
+  management
+- [Performance Optimization](../advanced/example-3.md) - High-throughput queue
+  optimization

@@ -101,7 +101,8 @@ describe('Performance', () => {
       });
 
       it('should overwrite existing timer with same name', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(2000);
 
@@ -116,7 +117,8 @@ describe('Performance', () => {
 
     describe('end method', () => {
       it('should end a named timer and return elapsed time', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -137,7 +139,8 @@ describe('Performance', () => {
       });
 
       it('should remove timer after ending', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -154,7 +157,8 @@ describe('Performance', () => {
   describe('measure method', () => {
     describe('synchronous functions', () => {
       it('should measure execution time of sync function', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -170,7 +174,8 @@ describe('Performance', () => {
       });
 
       it('should handle functions that throw errors', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -189,7 +194,8 @@ describe('Performance', () => {
 
     describe('asynchronous functions', () => {
       it('should measure execution time of async function', async () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -209,7 +215,8 @@ describe('Performance', () => {
       });
 
       it('should handle async functions that throw errors', async () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -258,7 +265,8 @@ describe('Performance', () => {
 
   describe('benchmark method', () => {
     it('should benchmark multiple operations', () => {
-      const nowSpy = vi.spyOn(Performance, 'now')
+      const nowSpy = vi
+        .spyOn(Performance, 'now')
         .mockReturnValueOnce(1000)
         .mockReturnValueOnce(1100)
         .mockReturnValueOnce(1100)
@@ -280,13 +288,16 @@ describe('Performance', () => {
     });
 
     it('should handle operations that throw errors', () => {
-      const nowSpy = vi.spyOn(Performance, 'now')
+      const nowSpy = vi
+        .spyOn(Performance, 'now')
         .mockReturnValueOnce(1000)
         .mockReturnValueOnce(1100);
 
       const operations = {
         working: () => 'result',
-        throwing: () => { throw new Error('Test error'); },
+        throwing: () => {
+          throw new Error('Test error');
+        },
       };
 
       const [error] = safeRun(() => Performance.benchmark(operations));
@@ -393,7 +404,8 @@ describe('Performance', () => {
       });
 
       it('should create profiler with measure functionality', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -416,7 +428,8 @@ describe('Performance', () => {
       });
 
       it('should measure between two marks', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -432,7 +445,8 @@ describe('Performance', () => {
       });
 
       it('should store measurements in entries', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
@@ -442,15 +456,14 @@ describe('Performance', () => {
 
         const entries = profiler.getEntries();
 
-        expect(entries).toEqual([
-          { name: 'test-measure', duration: 500 },
-        ]);
+        expect(entries).toEqual([{ name: 'test-measure', duration: 500 }]);
 
         nowSpy.mockRestore();
       });
 
       it('should clear marks and measurements', () => {
-        const nowSpy = vi.spyOn(Performance, 'now')
+        const nowSpy = vi
+          .spyOn(Performance, 'now')
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 

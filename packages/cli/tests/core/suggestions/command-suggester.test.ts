@@ -20,23 +20,25 @@ describe('CommandSuggester', () => {
       hasApplicationDir: true,
       hasInfrastructureDir: true,
       hasTestsDir: true,
-      architecture: 'clean'
+      architecture: 'clean',
     },
     patterns: [],
     dependencies: [],
     frameworks: [],
-    issues: []
+    issues: [],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Setup console spy
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { return });
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
 
     // Setup mock prompt engine
     mockPromptEngine = {
-      analyzeContext: vi.fn().mockResolvedValue(mockAnalysis)
+      analyzeContext: vi.fn().mockResolvedValue(mockAnalysis),
     };
     ContextAwarePromptEngine.create = vi.fn().mockReturnValue(mockPromptEngine);
 
@@ -79,7 +81,7 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         structure: { ...mockAnalysis.structure, hasDomainDir: true },
-        patterns: []
+        patterns: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -97,15 +99,13 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         structure: { ...mockAnalysis.structure, hasDomainDir: true },
-        patterns: []
+        patterns: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
       const suggestions = await suggester.getSuggestions();
 
-      const aggregateSuggestion = suggestions.find(s =>
-        s.command.includes('generate aggregate')
-      );
+      const aggregateSuggestion = suggestions.find(s => s.command.includes('generate aggregate'));
       expect(aggregateSuggestion).toBeDefined();
       expect(aggregateSuggestion!.priority).toBe('high');
       expect(aggregateSuggestion!.category).toBe('next-step');
@@ -114,15 +114,13 @@ describe('CommandSuggester', () => {
     it('should suggest CQRS commands when aggregates exist', async () => {
       const analysis = {
         ...mockAnalysis,
-        patterns: [{ name: 'OrderAggregate', type: 'class', path: 'domain/order.ts' }]
+        patterns: [{ name: 'OrderAggregate', type: 'class', path: 'domain/order.ts' }],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
       const suggestions = await suggester.getSuggestions();
 
-      const cqrsSuggestion = suggestions.find(s =>
-        s.command.includes('generate command')
-      );
+      const cqrsSuggestion = suggestions.find(s => s.command.includes('generate command'));
       expect(cqrsSuggestion).toBeDefined();
       expect(cqrsSuggestion!.category).toBe('next-step');
     });
@@ -130,7 +128,7 @@ describe('CommandSuggester', () => {
     it('should suggest test structure when no tests directory', async () => {
       const analysis = {
         ...mockAnalysis,
-        structure: { ...mockAnalysis.structure, hasTestsDir: false }
+        structure: { ...mockAnalysis.structure, hasTestsDir: false },
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -148,15 +146,13 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         patterns: [{ name: 'OrderCreatedEvent', type: 'class', path: 'events/order.ts' }],
-        dependencies: []
+        dependencies: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
       const suggestions = await suggester.getSuggestions();
 
-      const eventBusSuggestion = suggestions.find(s =>
-        s.command.includes('@vytches-ddd/events')
-      );
+      const eventBusSuggestion = suggestions.find(s => s.command.includes('@vytches-ddd/events'));
       expect(eventBusSuggestion).toBeDefined();
       expect(eventBusSuggestion!.category).toBe('improvement');
     });
@@ -164,7 +160,7 @@ describe('CommandSuggester', () => {
     it('should suggest TypeORM repositories when TypeORM detected', async () => {
       const analysis = {
         ...mockAnalysis,
-        dependencies: [{ name: 'typeorm', version: '0.3.0' }]
+        dependencies: [{ name: 'typeorm', version: '0.3.0' }],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -184,8 +180,8 @@ describe('CommandSuggester', () => {
           ...mockAnalysis.structure,
           architecture: 'clean',
           hasApplicationDir: false,
-          hasInfrastructureDir: false
-        }
+          hasInfrastructureDir: false,
+        },
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -203,7 +199,7 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         frameworks: [{ name: 'NestJS', version: '10.0.0' }],
-        patterns: []
+        patterns: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -220,7 +216,7 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         patterns: [{ name: 'Event Sourcing', type: 'pattern', path: '' }],
-        dependencies: []
+        dependencies: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -236,7 +232,7 @@ describe('CommandSuggester', () => {
     it('should suggest workflow when few patterns detected', async () => {
       const analysis = {
         ...mockAnalysis,
-        patterns: [{ name: 'SomePattern', type: 'pattern', path: '' }]
+        patterns: [{ name: 'SomePattern', type: 'pattern', path: '' }],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -256,11 +252,11 @@ describe('CommandSuggester', () => {
         structure: {
           ...mockAnalysis.structure,
           hasTestsDir: false,
-          hasDomainDir: true
+          hasDomainDir: true,
         },
         patterns: [],
         frameworks: [{ name: 'NestJS', version: '10.0.0' }],
-        dependencies: [{ name: 'typeorm', version: '0.3.0' }]
+        dependencies: [{ name: 'typeorm', version: '0.3.0' }],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -285,9 +281,9 @@ describe('CommandSuggester', () => {
       expect(mockPromptEngine.analyzeContext).toHaveBeenCalledWith(
         expect.objectContaining({
           config: expect.objectContaining({
-            outputDir: customPath
+            outputDir: customPath,
           }),
-          outputPath: customPath
+          outputPath: customPath,
         })
       );
     });
@@ -307,7 +303,7 @@ describe('CommandSuggester', () => {
           reason: 'Test reason',
           priority: 'high' as const,
           category: 'next-step' as const,
-          confidence: 0.9
+          confidence: 0.9,
         },
         {
           command: 'test-command-2',
@@ -315,8 +311,8 @@ describe('CommandSuggester', () => {
           reason: 'Test reason',
           priority: 'medium' as const,
           category: 'fix' as const,
-          confidence: 0.8
-        }
+          confidence: 0.8,
+        },
       ];
 
       suggester.displaySuggestions(suggestions);
@@ -334,15 +330,13 @@ describe('CommandSuggester', () => {
           reason: 'Test reason',
           priority: 'medium' as const,
           category: 'improvement' as const,
-          confidence: 0.75
-        }
+          confidence: 0.75,
+        },
       ];
 
       suggester.displaySuggestions(suggestions);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Confidence: 75%')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Confidence: 75%'));
     });
 
     it('should display all categories when present', () => {
@@ -353,7 +347,7 @@ describe('CommandSuggester', () => {
           reason: 'reason',
           priority: 'high' as const,
           category: 'next-step' as const,
-          confidence: 0.9
+          confidence: 0.9,
         },
         {
           command: 'cmd2',
@@ -361,7 +355,7 @@ describe('CommandSuggester', () => {
           reason: 'reason',
           priority: 'high' as const,
           category: 'fix' as const,
-          confidence: 0.9
+          confidence: 0.9,
         },
         {
           command: 'cmd3',
@@ -369,7 +363,7 @@ describe('CommandSuggester', () => {
           reason: 'reason',
           priority: 'medium' as const,
           category: 'improvement' as const,
-          confidence: 0.9
+          confidence: 0.9,
         },
         {
           command: 'cmd4',
@@ -377,8 +371,8 @@ describe('CommandSuggester', () => {
           reason: 'reason',
           priority: 'low' as const,
           category: 'enhancement' as const,
-          confidence: 0.9
-        }
+          confidence: 0.9,
+        },
       ];
 
       suggester.displaySuggestions(suggestions);
@@ -395,7 +389,7 @@ describe('CommandSuggester', () => {
       const analysis = {
         ...mockAnalysis,
         structure: { ...mockAnalysis.structure, hasDomainDir: true },
-        patterns: []
+        patterns: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -411,11 +405,11 @@ describe('CommandSuggester', () => {
         structure: {
           ...mockAnalysis.structure,
           hasDomainDir: true,
-          hasTestsDir: true
+          hasTestsDir: true,
         },
         patterns: [{ name: 'SomeAggregate', type: 'class', path: '' }],
         dependencies: [],
-        frameworks: []
+        frameworks: [],
       };
       mockPromptEngine.analyzeContext.mockResolvedValue(analysis);
 
@@ -446,14 +440,16 @@ describe('CommandSuggester', () => {
 
     it('should return true when no vytches-ddd dependencies', async () => {
       (FileSystem.exists as any).mockReturnValue(true);
-      (FileSystem.readFile as any).mockResolvedValue(JSON.stringify({
-        dependencies: {
-          'express': '^4.0.0'
-        },
-        devDependencies: {
-          'typescript': '^5.0.0'
-        }
-      }));
+      (FileSystem.readFile as any).mockResolvedValue(
+        JSON.stringify({
+          dependencies: {
+            express: '^4.0.0',
+          },
+          devDependencies: {
+            typescript: '^5.0.0',
+          },
+        })
+      );
 
       const needsInit = await suggester.needsInitialization();
 
@@ -462,11 +458,13 @@ describe('CommandSuggester', () => {
 
     it('should return false when vytches-ddd is present', async () => {
       (FileSystem.exists as any).mockReturnValue(true);
-      (FileSystem.readFile as any).mockResolvedValue(JSON.stringify({
-        dependencies: {
-          '@vytches-ddd/core': '^1.0.0'
-        }
-      }));
+      (FileSystem.readFile as any).mockResolvedValue(
+        JSON.stringify({
+          dependencies: {
+            '@vytches-ddd/core': '^1.0.0',
+          },
+        })
+      );
 
       const needsInit = await suggester.needsInitialization();
 
@@ -485,9 +483,11 @@ describe('CommandSuggester', () => {
     it('should use custom project path when provided', async () => {
       const customPath = '/custom/path';
       (FileSystem.exists as any).mockReturnValue(true);
-      (FileSystem.readFile as any).mockResolvedValue(JSON.stringify({
-        dependencies: { '@vytches-ddd/core': '^1.0.0' }
-      }));
+      (FileSystem.readFile as any).mockResolvedValue(
+        JSON.stringify({
+          dependencies: { '@vytches-ddd/core': '^1.0.0' },
+        })
+      );
 
       await suggester.needsInitialization(customPath);
 

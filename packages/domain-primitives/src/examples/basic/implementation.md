@@ -7,26 +7,23 @@
 
 ## Overview
 
-This guide demonstrates how to implement basic domain primitives in your application. We'll cover errors, actors, and interfaces working together to create a robust domain layer.
+This guide demonstrates how to implement basic domain primitives in your
+application. We'll cover errors, actors, and interfaces working together to
+create a robust domain layer.
 
 ## Complete Implementation Example
 
 ```typescript
-import { 
+import {
   BaseError,
   IDomainError,
   DomainErrorCode,
   IActor,
   DefaultActorType,
   InvalidParameterError,
-  NotFoundError
+  NotFoundError,
 } from '@vytches-ddd/domain-primitives';
-import { 
-  DomainEntity, 
-  Repository,
-  ActionContext,
-  AuditEntry 
-} from '../types';
+import { DomainEntity, Repository, ActionContext, AuditEntry } from '../types';
 
 // ====================
 // Domain Errors
@@ -37,7 +34,7 @@ export class OrderNotFoundError extends NotFoundError {
     super(`Order ${orderId} not found`, {
       code: DomainErrorCode.NotFound,
       domain: 'OrderManagement',
-      data: { orderId }
+      data: { orderId },
     });
   }
 }
@@ -47,7 +44,7 @@ export class InsufficientStockError extends IDomainError {
     super(`Insufficient stock for product ${productId}`, {
       code: DomainErrorCode.BusinessRule,
       domain: 'Inventory',
-      data: { productId, available, requested }
+      data: { productId, available, requested },
     });
   }
 }
@@ -57,7 +54,7 @@ export class InvalidOrderStateError extends IDomainError {
     super(`Cannot ${attemptedAction} order in ${currentState} state`, {
       code: DomainErrorCode.InvalidState,
       domain: 'OrderManagement',
-      data: { orderId, currentState, attemptedAction }
+      data: { orderId, currentState, attemptedAction },
     });
   }
 }
@@ -85,7 +82,7 @@ export enum OrderStatus {
   CONFIRMED = 'confirmed',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface IOrderRepository extends Repository<Order> {
@@ -107,11 +104,7 @@ export class Order implements IOrder {
   updatedAt: Date;
   version: number;
 
-  constructor(data: {
-    id?: string;
-    customerId: string;
-    items: IOrderItem[];
-  }) {
+  constructor(data: { id?: string; customerId: string; items: IOrderItem[] }) {
     this.id = data.id || this.generateId();
     this.customerId = data.customerId;
     this.items = data.items;
@@ -129,7 +122,7 @@ export class Order implements IOrder {
       throw new InvalidParameterError('Customer ID is required', {
         code: DomainErrorCode.InvalidParameter,
         domain: 'OrderManagement',
-        data: { field: 'customerId' }
+        data: { field: 'customerId' },
       });
     }
 
@@ -137,7 +130,7 @@ export class Order implements IOrder {
       throw new InvalidParameterError('Order must have at least one item', {
         code: DomainErrorCode.InvalidParameter,
         domain: 'OrderManagement',
-        data: { field: 'items' }
+        data: { field: 'items' },
       });
     }
 
@@ -146,15 +139,16 @@ export class Order implements IOrder {
         throw new InvalidParameterError(`Invalid quantity for item ${index}`, {
           code: DomainErrorCode.InvalidParameter,
           domain: 'OrderManagement',
-          data: { field: `items[${index}].quantity`, value: item.quantity }
+          data: { field: `items[${index}].quantity`, value: item.quantity },
         });
       }
     });
   }
 
   private calculateTotal(): number {
-    return this.items.reduce((sum, item) => 
-      sum + (item.quantity * item.unitPrice), 0
+    return this.items.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice,
+      0
     );
   }
 
@@ -177,8 +171,10 @@ export class Order implements IOrder {
   }
 
   cancel(): void {
-    if (this.status === OrderStatus.SHIPPED || 
-        this.status === OrderStatus.DELIVERED) {
+    if (
+      this.status === OrderStatus.SHIPPED ||
+      this.status === OrderStatus.DELIVERED
+    ) {
       throw new InvalidOrderStateError(this.id, this.status, 'cancel');
     }
     this.status = OrderStatus.CANCELLED;
@@ -201,12 +197,15 @@ export class OrderActor implements IActor {
   id: string;
   metadata?: Record<string, unknown>;
 
-  static createCustomerActor(customerId: string, source: string = 'web'): OrderActor {
+  static createCustomerActor(
+    customerId: string,
+    source: string = 'web'
+  ): OrderActor {
     return new OrderActor({
       type: DefaultActorType.USER,
       id: customerId,
       source,
-      metadata: { role: 'customer' }
+      metadata: { role: 'customer' },
     });
   }
 
@@ -215,7 +214,7 @@ export class OrderActor implements IActor {
       type: DefaultActorType.ADMIN,
       id: adminId,
       source: 'admin-panel',
-      metadata: { department }
+      metadata: { department },
     });
   }
 
@@ -224,7 +223,7 @@ export class OrderActor implements IActor {
       type: DefaultActorType.SYSTEM,
       id: process,
       source: 'automated',
-      metadata: { timestamp: new Date() }
+      metadata: { timestamp: new Date() },
     });
   }
 
@@ -260,11 +259,13 @@ export class OrderService {
     try {
       // Check inventory
       for (const item of items) {
-        const available = await this.inventoryService.checkStock(item.productId);
+        const available = await this.inventoryService.checkStock(
+          item.productId
+        );
         if (available < item.quantity) {
           throw new InsufficientStockError(
-            item.productId, 
-            available, 
+            item.productId,
+            available,
             item.quantity
           );
         }
@@ -277,7 +278,7 @@ export class OrderService {
       await this.inventoryService.reserveItems(
         items.map(item => ({
           productId: item.productId,
-          quantity: item.quantity
+          quantity: item.quantity,
         }))
       );
 
@@ -292,7 +293,7 @@ export class OrderService {
         {
           customerId,
           itemCount: items.length,
-          total: order.total
+          total: order.total,
         }
       );
 
@@ -309,10 +310,7 @@ export class OrderService {
     }
   }
 
-  async confirmOrder(
-    orderId: string,
-    actor: IActor
-  ): Promise<Order> {
+  async confirmOrder(orderId: string, actor: IActor): Promise<Order> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
       throw new OrderNotFoundError(orderId);
@@ -354,13 +352,13 @@ export class OrderService {
     try {
       const previousStatus = order.status;
       order.cancel();
-      
+
       // Release reserved inventory if order was confirmed
       if (previousStatus === OrderStatus.CONFIRMED) {
         await this.inventoryService.releaseItems(
           order.items.map(item => ({
             productId: item.productId,
-            quantity: item.quantity
+            quantity: item.quantity,
           }))
         );
       }
@@ -398,12 +396,18 @@ export class InventoryService {
     return this.stock.get(productId) || 0;
   }
 
-  async reserveItems(items: Array<{ productId: string; quantity: number }>): Promise<void> {
+  async reserveItems(
+    items: Array<{ productId: string; quantity: number }>
+  ): Promise<void> {
     // Check all items first
     for (const item of items) {
       const available = this.stock.get(item.productId) || 0;
       if (available < item.quantity) {
-        throw new InsufficientStockError(item.productId, available, item.quantity);
+        throw new InsufficientStockError(
+          item.productId,
+          available,
+          item.quantity
+        );
       }
     }
 
@@ -414,7 +418,9 @@ export class InventoryService {
     }
   }
 
-  async releaseItems(items: Array<{ productId: string; quantity: number }>): Promise<void> {
+  async releaseItems(
+    items: Array<{ productId: string; quantity: number }>
+  ): Promise<void> {
     for (const item of items) {
       const current = this.stock.get(item.productId) || 0;
       this.stock.set(item.productId, current + item.quantity);
@@ -442,13 +448,13 @@ export class AuditService {
         type: actor.type,
         id: actor.id,
         source: actor.source,
-        metadata: actor.metadata
+        metadata: actor.metadata,
       },
       action,
       resource,
       timestamp: new Date(),
       changes,
-      result: 'success'
+      result: 'success',
     };
 
     this.auditLog.push(entry);
@@ -468,13 +474,13 @@ export class AuditService {
         type: actor.type,
         id: actor.id,
         source: actor.source,
-        metadata: actor.metadata
+        metadata: actor.metadata,
       },
       action,
       resource,
       timestamp: new Date(),
       changes: { error: error.message },
-      result: 'failure'
+      result: 'failure',
     };
 
     this.auditLog.push(entry);
@@ -496,7 +502,7 @@ async function demonstrateOrderWorkflow() {
   const orderRepository = new InMemoryOrderRepository();
   const inventoryService = new InventoryService();
   const auditService = new AuditService();
-  
+
   const orderService = new OrderService(
     orderRepository,
     inventoryService,
@@ -520,14 +526,14 @@ async function demonstrateOrderWorkflow() {
           productId: 'prod_001',
           productName: 'Widget A',
           quantity: 5,
-          unitPrice: 10.99
+          unitPrice: 10.99,
         },
         {
           productId: 'prod_002',
           productName: 'Widget B',
           quantity: 3,
-          unitPrice: 15.99
-        }
+          unitPrice: 15.99,
+        },
       ],
       customerActor
     );
@@ -546,14 +552,13 @@ async function demonstrateOrderWorkflow() {
     const stock1 = await inventoryService.checkStock('prod_001');
     const stock2 = await inventoryService.checkStock('prod_002');
     console.log('Remaining stock:', { prod_001: stock1, prod_002: stock2 });
-
   } catch (error) {
     if (error instanceof IDomainError) {
       console.error('Domain error:', {
         message: error.message,
         code: error.code,
         domain: error.domain,
-        data: error.data
+        data: error.data,
       });
     } else {
       console.error('Unexpected error:', error);
@@ -591,13 +596,15 @@ class InMemoryOrderRepository implements IOrderRepository {
   }
 
   async findByCustomerId(customerId: string): Promise<Order[]> {
-    return Array.from(this.orders.values())
-      .filter(order => order.customerId === customerId);
+    return Array.from(this.orders.values()).filter(
+      order => order.customerId === customerId
+    );
   }
 
   async findByStatus(status: OrderStatus): Promise<Order[]> {
-    return Array.from(this.orders.values())
-      .filter(order => order.status === status);
+    return Array.from(this.orders.values()).filter(
+      order => order.status === status
+    );
   }
 }
 ```

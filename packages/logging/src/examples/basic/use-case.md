@@ -1,20 +1,22 @@
 # Common Logging Use Cases
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging
-**Complexity**: basic
-**Domain**: Practical Applications
-**Patterns**: Real-world scenarios, problem solving
-**Dependencies**: @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Domain**: Practical Applications **Patterns**: Real-world scenarios, problem
+solving **Dependencies**: @vytches-ddd/logging
 
 ## Overview
 
-This guide presents common logging scenarios and practical applications found in real-world applications. Each use case demonstrates specific logging patterns, challenges, and solutions that development teams encounter when implementing structured logging.
+This guide presents common logging scenarios and practical applications found in
+real-world applications. Each use case demonstrates specific logging patterns,
+challenges, and solutions that development teams encounter when implementing
+structured logging.
 
 ## Use Case 1: User Authentication Logging
 
 ### Scenario
-Track user authentication events for security auditing, troubleshooting login issues, and monitoring suspicious activity.
+
+Track user authentication events for security auditing, troubleshooting login
+issues, and monitoring suspicious activity.
 
 ### Implementation
 
@@ -31,7 +33,7 @@ export class AuthenticationService {
       operation: 'userAuthentication',
       username: loginRequest.username,
       ipAddress: loginRequest.ipAddress,
-      userAgent: loginRequest.userAgent
+      userAgent: loginRequest.userAgent,
     });
 
     // ⭐ FOCUS: Log authentication attempt
@@ -39,24 +41,27 @@ export class AuthenticationService {
       username: loginRequest.username,
       loginMethod: loginRequest.method || 'password',
       ipAddress: loginRequest.ipAddress,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     try {
       // Validate credentials
       const user = await this.validateCredentials(loginRequest);
-      
+
       if (!user) {
         // ⭐ FOCUS: Log authentication failure
         authLogger.warn('Authentication failed - invalid credentials', {
           username: loginRequest.username,
           reason: 'invalid_credentials',
-          ipAddress: loginRequest.ipAddress
+          ipAddress: loginRequest.ipAddress,
         });
 
         // Track failed attempts for security monitoring
-        await this.trackFailedLogin(loginRequest.username, loginRequest.ipAddress);
-        
+        await this.trackFailedLogin(
+          loginRequest.username,
+          loginRequest.ipAddress
+        );
+
         return { success: false, error: 'Invalid credentials' };
       }
 
@@ -65,7 +70,7 @@ export class AuthenticationService {
         authLogger.warn('Authentication failed - account inactive', {
           userId: user.id,
           username: loginRequest.username,
-          reason: 'account_inactive'
+          reason: 'account_inactive',
         });
 
         return { success: false, error: 'Account is inactive' };
@@ -80,7 +85,7 @@ export class AuthenticationService {
         username: user.username,
         role: user.role,
         sessionId: token.sessionId,
-        expiresAt: token.expiresAt
+        expiresAt: token.expiresAt,
       });
 
       // Update last login
@@ -90,15 +95,14 @@ export class AuthenticationService {
         success: true,
         user: user,
         token: token.value,
-        expiresAt: token.expiresAt
+        expiresAt: token.expiresAt,
       };
-
     } catch (error) {
       // ⭐ FOCUS: Log authentication system errors
       authLogger.error('Authentication system error', {
         username: loginRequest.username,
         error: error,
-        ipAddress: loginRequest.ipAddress
+        ipAddress: loginRequest.ipAddress,
       });
 
       return { success: false, error: 'Authentication system unavailable' };
@@ -109,36 +113,37 @@ export class AuthenticationService {
     const logoutLogger = this.logger.withContext({
       operation: 'userLogout',
       userId,
-      sessionId
+      sessionId,
     });
 
     // ⭐ FOCUS: Log logout event
     logoutLogger.info('User logout initiated', {
       userId,
       sessionId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     try {
       await this.invalidateSession(sessionId);
-      
+
       logoutLogger.info('User logout completed', {
         userId,
-        sessionId
+        sessionId,
       });
-
     } catch (error) {
       logoutLogger.error('Logout failed', {
         userId,
         sessionId,
-        error: error
+        error: error,
       });
       throw error;
     }
   }
 
   // Helper methods...
-  private async validateCredentials(request: LoginRequest): Promise<UserData | null> {
+  private async validateCredentials(
+    request: LoginRequest
+  ): Promise<UserData | null> {
     // Mock validation
     return {
       id: 'user-123',
@@ -147,15 +152,18 @@ export class AuthenticationService {
       role: 'user',
       isActive: true,
       lastLoginAt: null,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
-  private async trackFailedLogin(username: string, ipAddress: string): Promise<void> {
+  private async trackFailedLogin(
+    username: string,
+    ipAddress: string
+  ): Promise<void> {
     this.logger.warn('Failed login tracked', {
       username,
       ipAddress,
-      tracked: true
+      tracked: true,
     });
   }
 
@@ -163,11 +171,14 @@ export class AuthenticationService {
     return {
       value: 'token-' + Date.now(),
       sessionId: 'session-' + Date.now(),
-      expiresAt: new Date(Date.now() + 3600000) // 1 hour
+      expiresAt: new Date(Date.now() + 3600000), // 1 hour
     };
   }
 
-  private async updateLastLogin(userId: string, ipAddress: string): Promise<void> {
+  private async updateLastLogin(
+    userId: string,
+    ipAddress: string
+  ): Promise<void> {
     this.logger.debug('Last login updated', { userId, ipAddress });
   }
 
@@ -180,7 +191,9 @@ export class AuthenticationService {
 ## Use Case 2: E-commerce Order Processing
 
 ### Scenario
-Track order processing workflow from creation through fulfillment, including payment processing, inventory management, and shipping.
+
+Track order processing workflow from creation through fulfillment, including
+payment processing, inventory management, and shipping.
 
 ### Implementation
 
@@ -196,7 +209,7 @@ export class OrderProcessingService {
     const orderLogger = this.logger.withContext({
       operation: 'orderProcessing',
       orderId: orderData.id,
-      customerId: orderData.customerId
+      customerId: orderData.customerId,
     });
 
     // ⭐ FOCUS: Log order processing start
@@ -205,31 +218,31 @@ export class OrderProcessingService {
       customerId: orderData.customerId,
       itemCount: orderData.items.length,
       totalAmount: orderData.totalAmount,
-      paymentMethod: orderData.paymentInfo?.method
+      paymentMethod: orderData.paymentInfo?.method,
     });
 
     try {
       // Phase 1: Order Validation
       await this.validateOrder(orderData, orderLogger);
-      
+
       // Phase 2: Inventory Check
       await this.checkInventory(orderData.items, orderLogger);
-      
+
       // Phase 3: Payment Processing
       await this.processPayment(orderData.paymentInfo!, orderLogger);
-      
+
       // Phase 4: Reserve Inventory
       await this.reserveInventory(orderData.items, orderLogger);
-      
+
       // Phase 5: Create Shipment
       const shipmentInfo = await this.createShipment(orderData, orderLogger);
-      
+
       // Phase 6: Update Order Status
       const processedOrder = {
         ...orderData,
         status: 'processing' as const,
         processedAt: new Date(),
-        shipmentInfo: shipmentInfo
+        shipmentInfo: shipmentInfo,
       };
 
       // ⭐ FOCUS: Log order processing completion
@@ -238,18 +251,17 @@ export class OrderProcessingService {
         status: processedOrder.status,
         shipmentId: shipmentInfo.shipmentId,
         estimatedDelivery: shipmentInfo.estimatedDelivery,
-        processingTime: Date.now() - orderData.createdAt.getTime()
+        processingTime: Date.now() - orderData.createdAt.getTime(),
       });
 
       return processedOrder;
-
     } catch (error) {
       // ⭐ FOCUS: Log order processing failure
       orderLogger.error('Order processing failed', {
         orderId: orderData.id,
         error: error,
         currentStatus: orderData.status,
-        phase: this.determineFailurePhase(error)
+        phase: this.determineFailurePhase(error),
       });
 
       // Update order status to failed
@@ -257,14 +269,17 @@ export class OrderProcessingService {
         ...orderData,
         status: 'failed' as const,
         failureReason: error.message,
-        failedAt: new Date()
+        failedAt: new Date(),
       };
 
       return failedOrder;
     }
   }
 
-  private async validateOrder(orderData: OrderData, logger: Logger): Promise<void> {
+  private async validateOrder(
+    orderData: OrderData,
+    logger: Logger
+  ): Promise<void> {
     logger.debug('Validating order', { phase: 'validation' });
 
     if (orderData.items.length === 0) {
@@ -278,27 +293,33 @@ export class OrderProcessingService {
     logger.debug('Order validation passed', {
       phase: 'validation',
       itemCount: orderData.items.length,
-      totalAmount: orderData.totalAmount
+      totalAmount: orderData.totalAmount,
     });
   }
 
-  private async checkInventory(items: OrderItem[], logger: Logger): Promise<void> {
+  private async checkInventory(
+    items: OrderItem[],
+    logger: Logger
+  ): Promise<void> {
     logger.debug('Checking inventory availability', {
       phase: 'inventory_check',
-      itemCount: items.length
+      itemCount: items.length,
     });
 
     const unavailableItems: string[] = [];
 
     for (const item of items) {
-      const available = await this.isItemAvailable(item.productId, item.quantity);
-      
+      const available = await this.isItemAvailable(
+        item.productId,
+        item.quantity
+      );
+
       if (!available) {
         unavailableItems.push(item.productId);
         logger.warn('Item not available', {
           productId: item.productId,
           requestedQuantity: item.quantity,
-          phase: 'inventory_check'
+          phase: 'inventory_check',
         });
       }
     }
@@ -309,17 +330,20 @@ export class OrderProcessingService {
 
     logger.info('Inventory check passed', {
       phase: 'inventory_check',
-      availableItems: items.length
+      availableItems: items.length,
     });
   }
 
-  private async processPayment(paymentInfo: PaymentInfo, logger: Logger): Promise<void> {
+  private async processPayment(
+    paymentInfo: PaymentInfo,
+    logger: Logger
+  ): Promise<void> {
     logger.info('Processing payment', {
       phase: 'payment',
       method: paymentInfo.method,
       amount: paymentInfo.amount,
       // cardNumber automatically masked
-      lastFourDigits: paymentInfo.cardNumber?.slice(-4)
+      lastFourDigits: paymentInfo.cardNumber?.slice(-4),
     });
 
     try {
@@ -330,47 +354,52 @@ export class OrderProcessingService {
         phase: 'payment',
         transactionId: paymentResult.transactionId,
         amount: paymentResult.amount,
-        status: paymentResult.status
+        status: paymentResult.status,
       });
-
     } catch (error) {
       logger.error('Payment processing failed', {
         phase: 'payment',
         method: paymentInfo.method,
         amount: paymentInfo.amount,
-        error: error
+        error: error,
       });
       throw error;
     }
   }
 
-  private async reserveInventory(items: OrderItem[], logger: Logger): Promise<void> {
+  private async reserveInventory(
+    items: OrderItem[],
+    logger: Logger
+  ): Promise<void> {
     logger.debug('Reserving inventory', {
       phase: 'inventory_reservation',
-      itemCount: items.length
+      itemCount: items.length,
     });
 
     for (const item of items) {
       await this.reserveItem(item.productId, item.quantity);
-      
+
       logger.debug('Item reserved', {
         productId: item.productId,
         quantity: item.quantity,
-        phase: 'inventory_reservation'
+        phase: 'inventory_reservation',
       });
     }
 
     logger.info('Inventory reservation completed', {
       phase: 'inventory_reservation',
-      totalItems: items.length
+      totalItems: items.length,
     });
   }
 
-  private async createShipment(orderData: OrderData, logger: Logger): Promise<ShippingInfo> {
+  private async createShipment(
+    orderData: OrderData,
+    logger: Logger
+  ): Promise<ShippingInfo> {
     logger.info('Creating shipment', {
       phase: 'shipment',
       orderId: orderData.id,
-      itemCount: orderData.items.length
+      itemCount: orderData.items.length,
     });
 
     const shipmentInfo: ShippingInfo = {
@@ -378,7 +407,7 @@ export class OrderProcessingService {
       carrier: 'UPS',
       trackingNumber: 'TRK-' + Date.now(),
       estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-      shippingAddress: orderData.shippingAddress
+      shippingAddress: orderData.shippingAddress,
     };
 
     logger.info('Shipment created successfully', {
@@ -386,30 +415,37 @@ export class OrderProcessingService {
       shipmentId: shipmentInfo.shipmentId,
       trackingNumber: shipmentInfo.trackingNumber,
       carrier: shipmentInfo.carrier,
-      estimatedDelivery: shipmentInfo.estimatedDelivery
+      estimatedDelivery: shipmentInfo.estimatedDelivery,
     });
 
     return shipmentInfo;
   }
 
   // Helper methods
-  private async isItemAvailable(productId: string, quantity: number): Promise<boolean> {
+  private async isItemAvailable(
+    productId: string,
+    quantity: number
+  ): Promise<boolean> {
     return Math.random() > 0.1; // 90% availability rate
   }
 
   private async chargePayment(paymentInfo: PaymentInfo): Promise<any> {
-    if (Math.random() > 0.95) { // 5% failure rate
+    if (Math.random() > 0.95) {
+      // 5% failure rate
       throw new Error('Payment declined by bank');
     }
 
     return {
       transactionId: 'TXN-' + Date.now(),
       amount: paymentInfo.amount,
-      status: 'completed'
+      status: 'completed',
     };
   }
 
-  private async reserveItem(productId: string, quantity: number): Promise<void> {
+  private async reserveItem(
+    productId: string,
+    quantity: number
+  ): Promise<void> {
     // Mock inventory reservation
   }
 
@@ -427,7 +463,9 @@ export class OrderProcessingService {
 ## Use Case 3: API Rate Limiting and Monitoring
 
 ### Scenario
-Monitor API usage, track rate limits, and log suspicious activity patterns for security and performance analysis.
+
+Monitor API usage, track rate limits, and log suspicious activity patterns for
+security and performance analysis.
 
 ### Implementation
 
@@ -447,7 +485,7 @@ export class ApiMonitoringService {
       endpoint: request.endpoint,
       method: request.method,
       clientId: request.clientId,
-      requestId: request.requestId
+      requestId: request.requestId,
     });
 
     // ⭐ FOCUS: Log incoming API request
@@ -458,7 +496,7 @@ export class ApiMonitoringService {
       ipAddress: request.ipAddress,
       userAgent: request.userAgent,
       requestSize: request.bodySize || 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Track request counts
@@ -467,11 +505,16 @@ export class ApiMonitoringService {
     this.requestCounts.set(key, currentCount + 1);
   }
 
-  logApiResponse(request: ApiRequest, responseTime: number, statusCode: number, responseSize: number): void {
+  logApiResponse(
+    request: ApiRequest,
+    responseTime: number,
+    statusCode: number,
+    responseSize: number
+  ): void {
     const apiLogger = this.logger.withContext({
       operation: 'apiResponse',
       endpoint: request.endpoint,
-      requestId: request.requestId
+      requestId: request.requestId,
     });
 
     const performanceCategory = this.categorizePerformance(responseTime);
@@ -489,16 +532,17 @@ export class ApiMonitoringService {
       performance: performanceCategory,
       isError: isError,
       isServerError: isServerError,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Log performance warnings
-    if (responseTime > 5000) { // Slow response
+    if (responseTime > 5000) {
+      // Slow response
       apiLogger.warn('Slow API response detected', {
         endpoint: request.endpoint,
         responseTime: responseTime,
         threshold: 5000,
-        clientId: request.clientId
+        clientId: request.clientId,
       });
     }
 
@@ -509,7 +553,7 @@ export class ApiMonitoringService {
         endpoint: request.endpoint,
         statusCode: statusCode,
         clientId: request.clientId,
-        errorCategory: this.categorizeError(statusCode)
+        errorCategory: this.categorizeError(statusCode),
       });
     }
   }
@@ -518,7 +562,7 @@ export class ApiMonitoringService {
     const rateLimitLogger = this.logger.withContext({
       operation: 'rateLimitCheck',
       clientId,
-      endpoint
+      endpoint,
     });
 
     const key = `${clientId}:${endpoint}`;
@@ -533,7 +577,7 @@ export class ApiMonitoringService {
       limit,
       remaining,
       isExceeded,
-      resetTime: new Date(Date.now() + 3600000) // 1 hour
+      resetTime: new Date(Date.now() + 3600000), // 1 hour
     };
 
     if (isExceeded) {
@@ -543,12 +587,13 @@ export class ApiMonitoringService {
         endpoint,
         currentRequests: requestCount,
         limit: limit,
-        exceedBy: requestCount - limit
+        exceedBy: requestCount - limit,
       });
 
       // Track suspicious activity
       this.trackSuspiciousActivity(clientId, endpoint);
-    } else if (remaining <= limit * 0.1) { // 90% of limit used
+    } else if (remaining <= limit * 0.1) {
+      // 90% of limit used
       // ⭐ FOCUS: Log approaching rate limit
       rateLimitLogger.info('Rate limit approaching', {
         clientId,
@@ -556,7 +601,7 @@ export class ApiMonitoringService {
         currentRequests: requestCount,
         limit: limit,
         remaining: remaining,
-        percentageUsed: Math.round((requestCount / limit) * 100)
+        percentageUsed: Math.round((requestCount / limit) * 100),
       });
     }
 
@@ -568,14 +613,15 @@ export class ApiMonitoringService {
     const count = this.suspiciousActivity.get(key) || 0;
     this.suspiciousActivity.set(key, count + 1);
 
-    if (count + 1 >= 5) { // 5 rate limit violations
+    if (count + 1 >= 5) {
+      // 5 rate limit violations
       // ⭐ FOCUS: Log potential abuse
       this.logger.error('Potential API abuse detected', {
         clientId,
         endpoint,
         violationCount: count + 1,
         severity: 'high',
-        action: 'manual_review_required'
+        action: 'manual_review_required',
       });
     }
   }
@@ -583,12 +629,14 @@ export class ApiMonitoringService {
   generateApiMetrics(timeWindow: number): ApiMetrics {
     const metricsLogger = this.logger.withContext({
       operation: 'metricsGeneration',
-      timeWindow
+      timeWindow,
     });
 
     // Calculate metrics from tracked data
-    const totalRequests = Array.from(this.requestCounts.values())
-      .reduce((sum, count) => sum + count, 0);
+    const totalRequests = Array.from(this.requestCounts.values()).reduce(
+      (sum, count) => sum + count,
+      0
+    );
 
     const uniqueClients = new Set(
       Array.from(this.requestCounts.keys()).map(key => key.split(':')[0])
@@ -604,7 +652,7 @@ export class ApiMonitoringService {
       requestsPerMinute: totalRequests / (timeWindow / 60),
       topEndpoints,
       topClients,
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
 
     // ⭐ FOCUS: Log API metrics
@@ -613,7 +661,7 @@ export class ApiMonitoringService {
       uniqueClients,
       requestsPerMinute: metrics.requestsPerMinute,
       topEndpoints: topEndpoints.slice(0, 5), // Top 5 for logging
-      timeWindow
+      timeWindow,
     });
 
     return metrics;
@@ -644,9 +692,11 @@ export class ApiMonitoringService {
     return 500;
   }
 
-  private getTopEndpoints(count: number): Array<{endpoint: string, requests: number}> {
+  private getTopEndpoints(
+    count: number
+  ): Array<{ endpoint: string; requests: number }> {
     const endpointCounts = new Map<string, number>();
-    
+
     for (const [key, requests] of this.requestCounts) {
       const endpoint = key.split(':')[1];
       const current = endpointCounts.get(endpoint) || 0;
@@ -659,9 +709,11 @@ export class ApiMonitoringService {
       .slice(0, count);
   }
 
-  private getTopClients(count: number): Array<{clientId: string, requests: number}> {
+  private getTopClients(
+    count: number
+  ): Array<{ clientId: string; requests: number }> {
     const clientCounts = new Map<string, number>();
-    
+
     for (const [key, requests] of this.requestCounts) {
       const clientId = key.split(':')[0];
       const current = clientCounts.get(clientId) || 0;
@@ -679,7 +731,9 @@ export class ApiMonitoringService {
 ## Use Case 4: Background Job Processing
 
 ### Scenario
-Monitor background job execution, track processing times, handle failures, and ensure jobs complete successfully.
+
+Monitor background job execution, track processing times, handle failures, and
+ensure jobs complete successfully.
 
 ### Implementation
 
@@ -697,7 +751,7 @@ export class JobProcessorService {
       operation: 'jobProcessing',
       jobId: job.id,
       jobType: job.type,
-      priority: job.priority
+      priority: job.priority,
     });
 
     // ⭐ FOCUS: Log job processing start
@@ -708,7 +762,7 @@ export class JobProcessorService {
       scheduledAt: job.scheduledAt,
       attempts: job.attempts || 0,
       maxRetries: job.maxRetries || 3,
-      payload: this.sanitizeJobPayload(job.payload)
+      payload: this.sanitizeJobPayload(job.payload),
     });
 
     const startTime = Date.now();
@@ -725,7 +779,7 @@ export class JobProcessorService {
         duration,
         result: this.sanitizeJobResult(result),
         performanceCategory: this.categorizePerformance(duration),
-        memoryUsage: this.getMemoryUsage()
+        memoryUsage: this.getMemoryUsage(),
       });
 
       this.activeJobs.delete(job.id);
@@ -735,13 +789,13 @@ export class JobProcessorService {
         status: 'completed',
         result: result,
         duration: duration,
-        completedAt: new Date()
+        completedAt: new Date(),
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
       const isRetryable = this.isRetryableError(error);
-      const shouldRetry = (job.attempts || 0) < (job.maxRetries || 3) && isRetryable;
+      const shouldRetry =
+        (job.attempts || 0) < (job.maxRetries || 3) && isRetryable;
 
       // ⭐ FOCUS: Log job failure
       jobLogger.error('Job processing failed', {
@@ -752,7 +806,7 @@ export class JobProcessorService {
         maxRetries: job.maxRetries || 3,
         isRetryable,
         shouldRetry,
-        errorCategory: this.categorizeError(error)
+        errorCategory: this.categorizeError(error),
       });
 
       this.activeJobs.delete(job.id);
@@ -762,7 +816,7 @@ export class JobProcessorService {
         jobLogger.warn('Job scheduled for retry', {
           jobId: job.id,
           nextAttempt: job.attempts ? job.attempts + 1 : 1,
-          retryDelay: this.calculateRetryDelay(job.attempts || 0)
+          retryDelay: this.calculateRetryDelay(job.attempts || 0),
         });
 
         return {
@@ -770,7 +824,9 @@ export class JobProcessorService {
           status: 'retry_scheduled',
           error: error.message,
           duration: duration,
-          nextRetryAt: new Date(Date.now() + this.calculateRetryDelay(job.attempts || 0))
+          nextRetryAt: new Date(
+            Date.now() + this.calculateRetryDelay(job.attempts || 0)
+          ),
         };
       } else {
         // ⭐ FOCUS: Log job permanent failure
@@ -778,7 +834,7 @@ export class JobProcessorService {
           jobId: job.id,
           finalAttempt: (job.attempts || 0) + 1,
           totalDuration: duration,
-          reason: 'max_retries_exceeded'
+          reason: 'max_retries_exceeded',
         });
 
         return {
@@ -786,7 +842,7 @@ export class JobProcessorService {
           status: 'failed',
           error: error.message,
           duration: duration,
-          failedAt: new Date()
+          failedAt: new Date(),
         };
       }
     }
@@ -795,7 +851,7 @@ export class JobProcessorService {
   async processJobBatch(jobs: Job[]): Promise<JobResult[]> {
     const batchLogger = this.logger.withContext({
       operation: 'batchJobProcessing',
-      batchSize: jobs.length
+      batchSize: jobs.length,
     });
 
     // ⭐ FOCUS: Log batch processing start
@@ -803,7 +859,7 @@ export class JobProcessorService {
       totalJobs: jobs.length,
       jobTypes: this.getJobTypeDistribution(jobs),
       priorityDistribution: this.getPriorityDistribution(jobs),
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const results: JobResult[] = [];
@@ -816,7 +872,7 @@ export class JobProcessorService {
     const concurrencyLimit = 5;
     for (let i = 0; i < jobs.length; i += concurrencyLimit) {
       const batch = jobs.slice(i, i + concurrencyLimit);
-      
+
       const batchResults = await Promise.allSettled(
         batch.map(job => this.processJob(job))
       );
@@ -842,16 +898,16 @@ export class JobProcessorService {
           const job = batch[index];
           batchLogger.error('Job batch processing error', {
             jobId: job.id,
-            error: result.reason
+            error: result.reason,
           });
-          
+
           failureCount++;
           results.push({
             jobId: job.id,
             status: 'failed',
             error: 'Batch processing error',
             duration: 0,
-            failedAt: new Date()
+            failedAt: new Date(),
           });
         }
       });
@@ -868,7 +924,7 @@ export class JobProcessorService {
       successRate: Math.round((successCount / jobs.length) * 100),
       totalDuration,
       averageDuration: Math.round(totalDuration / jobs.length),
-      throughput: Math.round((jobs.length / totalDuration) * 1000) // jobs per second
+      throughput: Math.round((jobs.length / totalDuration) * 1000), // jobs per second
     });
 
     return results;
@@ -876,14 +932,16 @@ export class JobProcessorService {
 
   getActiveJobsStatus(): any {
     const statusLogger = this.logger.withContext({
-      operation: 'activeJobsStatus'
+      operation: 'activeJobsStatus',
     });
 
-    const activeJobsInfo = Array.from(this.activeJobs.entries()).map(([jobId, startTime]) => ({
-      jobId,
-      duration: Date.now() - startTime.getTime(),
-      startedAt: startTime
-    }));
+    const activeJobsInfo = Array.from(this.activeJobs.entries()).map(
+      ([jobId, startTime]) => ({
+        jobId,
+        duration: Date.now() - startTime.getTime(),
+        startedAt: startTime,
+      })
+    );
 
     const longRunningJobs = activeJobsInfo.filter(job => job.duration > 300000); // 5 minutes
 
@@ -893,22 +951,26 @@ export class JobProcessorService {
         activeJobs: this.activeJobs.size,
         longRunningJobs: longRunningJobs.length,
         longRunningJobIds: longRunningJobs.map(job => job.jobId),
-        maxDuration: Math.max(...longRunningJobs.map(job => job.duration))
+        maxDuration: Math.max(...longRunningJobs.map(job => job.duration)),
       });
     }
 
     statusLogger.info('Active jobs status', {
       activeJobs: this.activeJobs.size,
       longRunningJobs: longRunningJobs.length,
-      averageDuration: activeJobsInfo.length > 0 
-        ? Math.round(activeJobsInfo.reduce((sum, job) => sum + job.duration, 0) / activeJobsInfo.length)
-        : 0
+      averageDuration:
+        activeJobsInfo.length > 0
+          ? Math.round(
+              activeJobsInfo.reduce((sum, job) => sum + job.duration, 0) /
+                activeJobsInfo.length
+            )
+          : 0,
     });
 
     return {
       activeJobs: this.activeJobs.size,
       activeJobDetails: activeJobsInfo,
-      longRunningJobs: longRunningJobs
+      longRunningJobs: longRunningJobs,
     };
   }
 
@@ -929,9 +991,12 @@ export class JobProcessorService {
 
   private async processEmailNotification(payload: any): Promise<any> {
     // Simulate email sending
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
-    
-    if (Math.random() > 0.95) { // 5% failure rate
+    await new Promise(resolve =>
+      setTimeout(resolve, Math.random() * 2000 + 1000)
+    );
+
+    if (Math.random() > 0.95) {
+      // 5% failure rate
       throw new Error('Email service unavailable');
     }
 
@@ -940,52 +1005,58 @@ export class JobProcessorService {
 
   private async processDataExport(payload: any): Promise<any> {
     // Simulate data export
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 2000));
-    
-    return { 
+    await new Promise(resolve =>
+      setTimeout(resolve, Math.random() * 5000 + 2000)
+    );
+
+    return {
       exportedRecords: Math.floor(Math.random() * 10000),
       fileSize: Math.floor(Math.random() * 1000000),
-      exportPath: '/exports/data-' + Date.now() + '.csv'
+      exportPath: '/exports/data-' + Date.now() + '.csv',
     };
   }
 
   private async processReportGeneration(payload: any): Promise<any> {
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 10000 + 3000));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, Math.random() * 10000 + 3000)
+    );
+
     return {
       reportId: 'report-' + Date.now(),
       pageCount: Math.floor(Math.random() * 50) + 1,
-      reportPath: '/reports/report-' + Date.now() + '.pdf'
+      reportPath: '/reports/report-' + Date.now() + '.pdf',
     };
   }
 
   private async processCleanup(payload: any): Promise<any> {
     // Simulate cleanup operation
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, Math.random() * 3000 + 1000)
+    );
+
     return {
       itemsDeleted: Math.floor(Math.random() * 1000),
-      spaceFreed: Math.floor(Math.random() * 1000000)
+      spaceFreed: Math.floor(Math.random() * 1000000),
     };
   }
 
   private sanitizeJobPayload(payload: any): any {
     // Remove or mask sensitive data from job payload for logging
     if (typeof payload !== 'object') return payload;
-    
+
     const sanitized = { ...payload };
     delete sanitized.password;
     delete sanitized.apiKey;
     delete sanitized.secret;
-    
+
     return sanitized;
   }
 
   private sanitizeJobResult(result: any): any {
     // Limit result data for logging
     if (typeof result !== 'object') return result;
-    
+
     const sanitized = { ...result };
     // Limit large arrays/objects
     Object.keys(sanitized).forEach(key => {
@@ -993,7 +1064,7 @@ export class JobProcessorService {
         sanitized[key] = `[${sanitized[key].length} items]`;
       }
     });
-    
+
     return sanitized;
   }
 
@@ -1003,10 +1074,10 @@ export class JobProcessorService {
       'timeout',
       'connection',
       'service unavailable',
-      'rate limit'
+      'rate limit',
     ];
-    
-    return retryableErrors.some(pattern => 
+
+    return retryableErrors.some(pattern =>
       error.message.toLowerCase().includes(pattern)
     );
   }
@@ -1015,9 +1086,12 @@ export class JobProcessorService {
     // Exponential backoff with jitter
     const baseDelay = 1000; // 1 second
     const maxDelay = 300000; // 5 minutes
-    const exponentialDelay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+    const exponentialDelay = Math.min(
+      baseDelay * Math.pow(2, attempt),
+      maxDelay
+    );
     const jitter = Math.random() * 0.1 * exponentialDelay;
-    
+
     return Math.floor(exponentialDelay + jitter);
   }
 
@@ -1031,9 +1105,11 @@ export class JobProcessorService {
   private categorizeError(error: Error): string {
     const message = error.message.toLowerCase();
     if (message.includes('timeout')) return 'timeout';
-    if (message.includes('network') || message.includes('connection')) return 'network';
+    if (message.includes('network') || message.includes('connection'))
+      return 'network';
     if (message.includes('memory')) return 'memory';
-    if (message.includes('permission') || message.includes('unauthorized')) return 'permission';
+    if (message.includes('permission') || message.includes('unauthorized'))
+      return 'permission';
     return 'unknown';
   }
 
@@ -1041,7 +1117,7 @@ export class JobProcessorService {
     const usage = process.memoryUsage();
     return {
       heapUsed: Math.round(usage.heapUsed / 1024 / 1024) + 'MB',
-      heapTotal: Math.round(usage.heapTotal / 1024 / 1024) + 'MB'
+      heapTotal: Math.round(usage.heapTotal / 1024 / 1024) + 'MB',
     };
   }
 
@@ -1067,21 +1143,26 @@ export class JobProcessorService {
 ## Use Case Summary
 
 ### Authentication Logging
+
 - **Focus**: Security auditing and troubleshooting
 - **Key Metrics**: Login attempts, success/failure rates, suspicious activity
 - **Business Value**: Security monitoring, compliance, user experience
 
 ### Order Processing
+
 - **Focus**: Business process tracking and error diagnosis
 - **Key Metrics**: Processing time, failure points, completion rates
-- **Business Value**: Operational visibility, customer service, process optimization
+- **Business Value**: Operational visibility, customer service, process
+  optimization
 
 ### API Monitoring
+
 - **Focus**: Performance and usage tracking
 - **Key Metrics**: Response times, error rates, rate limits
 - **Business Value**: Service reliability, capacity planning, abuse prevention
 
 ### Job Processing
+
 - **Focus**: Background task management and reliability
 - **Key Metrics**: Job success rates, processing times, retry patterns
 - **Business Value**: System reliability, resource optimization, SLA compliance
@@ -1089,33 +1170,39 @@ export class JobProcessorService {
 ## Common Patterns Across Use Cases
 
 ### 1. **Contextual Logging**
+
 - Always include relevant business context (user IDs, order IDs, request IDs)
 - Use structured data for better analysis
 - Maintain context throughout operation chains
 
 ### 2. **Performance Tracking**
+
 - Log operation start and completion times
 - Categorize performance levels for alerting
 - Track resource usage for capacity planning
 
 ### 3. **Error Classification**
+
 - Categorize errors by type and severity
 - Determine retryability and recovery actions
 - Log sufficient detail for troubleshooting
 
 ### 4. **Security Awareness**
+
 - Mask sensitive data automatically
 - Log security-relevant events (authentication, authorization)
 - Track patterns that might indicate abuse
 
 ### 5. **Operational Metrics**
+
 - Track success/failure rates
 - Monitor trends and anomalies
 - Provide data for business intelligence
 
 ## Best Practices Applied
 
-- **Consistent log levels**: Error for failures, warn for issues, info for business events, debug for details
+- **Consistent log levels**: Error for failures, warn for issues, info for
+  business events, debug for details
 - **Structured data**: Use objects instead of string concatenation
 - **Context preservation**: Maintain operation context throughout workflows
 - **Performance awareness**: Don't log expensive operations at high frequency

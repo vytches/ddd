@@ -1,19 +1,23 @@
 # Cross-Package Architecture
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Advanced
-**Domain**: Foundation
-**Patterns**: cross-package-integration, enterprise-architecture, domain-boundaries
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Advanced
+**Domain**: Foundation **Patterns**: cross-package-integration,
+enterprise-architecture, domain-boundaries **Dependencies**:
+@vytches-ddd/contracts
 
 ## Description
 
-Cross-package architecture demonstrates how foundation contracts enable seamless integration across multiple VytchesDDD packages. This example shows enterprise-grade patterns for domain boundaries, event orchestration, and architectural consistency using contracts as the integration foundation.
+Cross-package architecture demonstrates how foundation contracts enable seamless
+integration across multiple VytchesDDD packages. This example shows
+enterprise-grade patterns for domain boundaries, event orchestration, and
+architectural consistency using contracts as the integration foundation.
 
 ## Business Context
 
-Enterprise applications require clean architectural boundaries while maintaining integration capabilities. Foundation contracts provide the stable interfaces that enable packages to work together without tight coupling, supporting complex business processes that span multiple domains.
+Enterprise applications require clean architectural boundaries while maintaining
+integration capabilities. Foundation contracts provide the stable interfaces
+that enable packages to work together without tight coupling, supporting complex
+business processes that span multiple domains.
 
 ## Multi-Domain Architecture Foundation
 
@@ -21,13 +25,13 @@ Enterprise applications require clean architectural boundaries while maintaining
 
 ```typescript
 // src/architecture/domain-boundaries.ts
-import { 
-  EntityId, 
+import {
+  EntityId,
   IDomainEvent,
   ISpecification,
   IActor,
   IEventBus,
-  IEventHandler 
+  IEventHandler,
 } from '@vytches-ddd/contracts';
 
 // Cross-domain entity contracts
@@ -75,7 +79,13 @@ export interface OrderItem {
   lineTotal: number;
 }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
 
 // Payment Management Domain
 export interface PaymentDomainEntity extends DomainEntity {
@@ -88,8 +98,17 @@ export interface PaymentDomainEntity extends DomainEntity {
   transactionId?: string;
 }
 
-export type PaymentMethod = 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer';
-export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
+export type PaymentMethod =
+  | 'credit_card'
+  | 'debit_card'
+  | 'paypal'
+  | 'bank_transfer';
+export type PaymentStatus =
+  | 'pending'
+  | 'authorized'
+  | 'captured'
+  | 'failed'
+  | 'refunded';
 ```
 
 ### Cross-Domain Event Architecture
@@ -103,10 +122,12 @@ export class CrossDomainEventOrchestrator {
   ) {}
 
   // User domain events that affect other domains
-  async handleUserProfileUpdated(event: UserProfileUpdatedEvent): Promise<void> {
+  async handleUserProfileUpdated(
+    event: UserProfileUpdatedEvent
+  ): Promise<void> {
     this.logger.info('Orchestrating user profile update across domains', {
       userId: event.aggregateId,
-      correlationId: event.metadata.correlationId
+      correlationId: event.metadata.correlationId,
     });
 
     // Notify Order domain for customer data consistency
@@ -115,13 +136,13 @@ export class CrossDomainEventOrchestrator {
       {
         customerId: event.aggregateId,
         updatedFields: event.payload.changes,
-        reason: 'profile_update'
+        reason: 'profile_update',
       },
       {
         correlationId: event.metadata.correlationId,
         causationId: event.eventType,
         source: 'UserDomain',
-        destination: 'OrderDomain'
+        destination: 'OrderDomain',
       }
     );
 
@@ -132,13 +153,13 @@ export class CrossDomainEventOrchestrator {
         {
           customerId: event.aggregateId,
           newAddress: event.payload.changes.address,
-          effectiveDate: new Date()
+          effectiveDate: new Date(),
         },
         {
           correlationId: event.metadata.correlationId,
           causationId: event.eventType,
           source: 'UserDomain',
-          destination: 'PaymentDomain'
+          destination: 'PaymentDomain',
         }
       );
 
@@ -153,7 +174,7 @@ export class CrossDomainEventOrchestrator {
     this.logger.info('Orchestrating order confirmation across domains', {
       orderId: event.aggregateId,
       customerId: event.payload.customerId,
-      correlationId: event.metadata.correlationId
+      correlationId: event.metadata.correlationId,
     });
 
     // Trigger payment processing
@@ -164,13 +185,13 @@ export class CrossDomainEventOrchestrator {
         customerId: event.payload.customerId,
         amount: event.payload.totalAmount,
         currency: event.payload.currency,
-        paymentMethod: event.payload.paymentMethod
+        paymentMethod: event.payload.paymentMethod,
       },
       {
         correlationId: event.metadata.correlationId,
         causationId: event.eventType,
         source: 'OrderDomain',
-        destination: 'PaymentDomain'
+        destination: 'PaymentDomain',
       }
     );
 
@@ -182,14 +203,14 @@ export class CrossDomainEventOrchestrator {
         items: event.payload.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          reservationTimeout: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
-        }))
+          reservationTimeout: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+        })),
       },
       {
         correlationId: event.metadata.correlationId,
         causationId: event.eventType,
         source: 'OrderDomain',
-        destination: 'InventoryDomain'
+        destination: 'InventoryDomain',
       }
     );
 
@@ -204,21 +225,21 @@ export class CrossDomainEventOrchestrator {
         templateData: {
           orderNumber: event.payload.orderNumber,
           totalAmount: event.payload.totalAmount,
-          currency: event.payload.currency
-        }
+          currency: event.payload.currency,
+        },
       },
       {
         correlationId: event.metadata.correlationId,
         causationId: event.eventType,
         source: 'OrderDomain',
-        destination: 'NotificationDomain'
+        destination: 'NotificationDomain',
       }
     );
 
     await this.eventBus.publishMany([
       paymentRequestEvent,
       inventoryReservationEvent,
-      customerNotificationEvent
+      customerNotificationEvent,
     ]);
   }
 
@@ -228,7 +249,7 @@ export class CrossDomainEventOrchestrator {
       paymentId: event.aggregateId,
       orderId: event.payload.orderId,
       status: event.payload.status,
-      correlationId: event.metadata.correlationId
+      correlationId: event.metadata.correlationId,
     });
 
     if (event.payload.status === 'captured') {
@@ -240,13 +261,13 @@ export class CrossDomainEventOrchestrator {
           transactionId: event.payload.transactionId,
           amount: event.payload.amount,
           currency: event.payload.currency,
-          processedAt: event.occurredAt
+          processedAt: event.occurredAt,
         },
         {
           correlationId: event.metadata.correlationId,
           causationId: event.eventType,
           source: 'PaymentDomain',
-          destination: 'OrderDomain'
+          destination: 'OrderDomain',
         }
       );
 
@@ -257,21 +278,20 @@ export class CrossDomainEventOrchestrator {
           orderId: event.payload.orderId,
           customerId: event.payload.customerId,
           priority: 'standard',
-          expectedShipDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days
+          expectedShipDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days
         },
         {
           correlationId: event.metadata.correlationId,
           causationId: event.eventType,
           source: 'PaymentDomain',
-          destination: 'FulfillmentDomain'
+          destination: 'FulfillmentDomain',
         }
       );
 
       await this.eventBus.publishMany([
         orderPaymentConfirmedEvent,
-        fulfillmentRequestedEvent
+        fulfillmentRequestedEvent,
       ]);
-
     } else if (event.payload.status === 'failed') {
       // Handle payment failure
       const orderPaymentFailedEvent = new OrderPaymentFailedEvent(
@@ -280,13 +300,13 @@ export class CrossDomainEventOrchestrator {
           paymentId: event.aggregateId,
           failureReason: event.payload.failureReason,
           retryable: event.payload.retryable,
-          failedAt: event.occurredAt
+          failedAt: event.occurredAt,
         },
         {
           correlationId: event.metadata.correlationId,
           causationId: event.eventType,
           source: 'PaymentDomain',
-          destination: 'OrderDomain'
+          destination: 'OrderDomain',
         }
       );
 
@@ -301,23 +321,24 @@ export class CrossDomainEventOrchestrator {
 ```typescript
 // src/architecture/cross-domain-rules.ts
 export class CrossDomainBusinessRules {
-  
   // Business rule spanning User and Order domains
   static createCustomerEligibilitySpecification(
     minimumAccountAge: number = 30, // days
     minimumOrderHistory: number = 0,
     maxOrderValue: number = 10000
   ): ISpecification<{ user: UserDomainEntity; orderValue: number }> {
-    
-    return new CompositeSpecification([
-      // User domain rules
-      new CustomerAccountAgeSpecification(minimumAccountAge),
-      new CustomerAccountStatusSpecification(['active', 'premium']),
-      
-      // Order history rules (cross-domain)
-      new CustomerOrderHistorySpecification(minimumOrderHistory),
-      new OrderValueLimitSpecification(maxOrderValue)
-    ], 'AND');
+    return new CompositeSpecification(
+      [
+        // User domain rules
+        new CustomerAccountAgeSpecification(minimumAccountAge),
+        new CustomerAccountStatusSpecification(['active', 'premium']),
+
+        // Order history rules (cross-domain)
+        new CustomerOrderHistorySpecification(minimumOrderHistory),
+        new OrderValueLimitSpecification(maxOrderValue),
+      ],
+      'AND'
+    );
   }
 
   // Multi-domain fraud detection specification
@@ -327,20 +348,22 @@ export class CrossDomainBusinessRules {
     paymentMethod: PaymentMethod;
     recentActivity: RecentActivityData;
   }> {
-    
-    return new CompositeSpecification([
-      // User behavior patterns
-      new SuspiciousUserActivitySpecification(),
-      new UnusualLocationSpecification(),
-      
-      // Order patterns
-      new UnusualOrderSizeSpecification(),
-      new HighRiskProductSpecification(),
-      
-      // Payment patterns
-      new PaymentMethodRiskSpecification(),
-      new VelocityCheckSpecification()
-    ], 'OR'); // Any of these conditions triggers fraud review
+    return new CompositeSpecification(
+      [
+        // User behavior patterns
+        new SuspiciousUserActivitySpecification(),
+        new UnusualLocationSpecification(),
+
+        // Order patterns
+        new UnusualOrderSizeSpecification(),
+        new HighRiskProductSpecification(),
+
+        // Payment patterns
+        new PaymentMethodRiskSpecification(),
+        new VelocityCheckSpecification(),
+      ],
+      'OR'
+    ); // Any of these conditions triggers fraud review
   }
 
   // Cross-domain data consistency specification
@@ -349,30 +372,42 @@ export class CrossDomainBusinessRules {
     orders: OrderDomainEntity[];
     payments: PaymentDomainEntity[];
   }> {
-    
-    return new CompositeSpecification([
-      new CustomerDataConsistencySpecification(),
-      new OrderPaymentConsistencySpecification(),
-      new AuditTrailConsistencySpecification()
-    ], 'AND');
+    return new CompositeSpecification(
+      [
+        new CustomerDataConsistencySpecification(),
+        new OrderPaymentConsistencySpecification(),
+        new AuditTrailConsistencySpecification(),
+      ],
+      'AND'
+    );
   }
 }
 
 // Implementation classes for cross-domain specifications
-class CustomerAccountAgeSpecification implements ISpecification<{ user: UserDomainEntity; orderValue: number }> {
+class CustomerAccountAgeSpecification
+  implements ISpecification<{ user: UserDomainEntity; orderValue: number }>
+{
   constructor(private readonly minimumDays: number) {}
-  
-  isSatisfiedBy(candidate: { user: UserDomainEntity; orderValue: number }): boolean {
+
+  isSatisfiedBy(candidate: {
+    user: UserDomainEntity;
+    orderValue: number;
+  }): boolean {
     const accountAge = Date.now() - candidate.user.createdAt.getTime();
     const ageInDays = accountAge / (1000 * 60 * 60 * 24);
     return ageInDays >= this.minimumDays;
   }
 }
 
-class CustomerOrderHistorySpecification implements ISpecification<{ user: UserDomainEntity; orderValue: number }> {
+class CustomerOrderHistorySpecification
+  implements ISpecification<{ user: UserDomainEntity; orderValue: number }>
+{
   constructor(private readonly minimumOrders: number) {}
-  
-  isSatisfiedBy(candidate: { user: UserDomainEntity; orderValue: number }): boolean {
+
+  isSatisfiedBy(candidate: {
+    user: UserDomainEntity;
+    orderValue: number;
+  }): boolean {
     // This would typically query the order domain
     // For demo purposes, assume we have this data
     const orderHistory = (candidate.user as any).orderHistory || [];
@@ -380,10 +415,15 @@ class CustomerOrderHistorySpecification implements ISpecification<{ user: UserDo
   }
 }
 
-class OrderValueLimitSpecification implements ISpecification<{ user: UserDomainEntity; orderValue: number }> {
+class OrderValueLimitSpecification
+  implements ISpecification<{ user: UserDomainEntity; orderValue: number }>
+{
   constructor(private readonly maxValue: number) {}
-  
-  isSatisfiedBy(candidate: { user: UserDomainEntity; orderValue: number }): boolean {
+
+  isSatisfiedBy(candidate: {
+    user: UserDomainEntity;
+    orderValue: number;
+  }): boolean {
     return candidate.orderValue <= this.maxValue;
   }
 }
@@ -394,7 +434,6 @@ class OrderValueLimitSpecification implements ISpecification<{ user: UserDomainE
 ```typescript
 // src/architecture/cross-domain-security.ts
 export class CrossDomainSecurityManager {
-  
   // Multi-domain actor with cross-domain permissions
   static createSystemActor(source: string, permissions: string[]): IActor {
     return {
@@ -406,11 +445,12 @@ export class CrossDomainSecurityManager {
         permissions,
         timestamp: new Date(),
         domains: ['user', 'order', 'payment', 'inventory'],
-        capabilities: ['read', 'write', 'integrate']
+        capabilities: ['read', 'write', 'integrate'],
       },
       isSystem: () => true,
-      hasPermission: (permission: string) => permissions.includes(permission) || permissions.includes('*'),
-      getDisplayName: () => `${source} System Actor`
+      hasPermission: (permission: string) =>
+        permissions.includes(permission) || permissions.includes('*'),
+      getDisplayName: () => `${source} System Actor`,
     };
   }
 
@@ -429,15 +469,17 @@ export class CrossDomainSecurityManager {
         targetDomains,
         timestamp: new Date(),
         integrationLevel: 'cross-domain',
-        permissions: targetDomains.map(domain => `${domain}:integrate`)
+        permissions: targetDomains.map(domain => `${domain}:integrate`),
       },
       isSystem: () => false,
       hasPermission: (permission: string) => {
         const [domain, action] = permission.split(':');
-        return targetDomains.includes(domain) && 
-               ['read', 'integrate', 'notify'].includes(action);
+        return (
+          targetDomains.includes(domain) &&
+          ['read', 'integrate', 'notify'].includes(action)
+        );
       },
-      getDisplayName: () => `${serviceName} Service`
+      getDisplayName: () => `${serviceName} Service`,
     };
   }
 
@@ -447,10 +489,10 @@ export class CrossDomainSecurityManager {
     role: string,
     domainPermissions: Record<string, string[]>
   ): IActor {
-    const allPermissions = Object.entries(domainPermissions)
-      .flatMap(([domain, permissions]) => 
+    const allPermissions = Object.entries(domainPermissions).flatMap(
+      ([domain, permissions]) =>
         permissions.map(permission => `${domain}:${permission}`)
-      );
+    );
 
     return {
       id: userId,
@@ -461,11 +503,12 @@ export class CrossDomainSecurityManager {
         domainPermissions,
         allPermissions,
         timestamp: new Date(),
-        multiDomain: true
+        multiDomain: true,
       },
       isSystem: () => false,
-      hasPermission: (permission: string) => allPermissions.includes(permission),
-      getDisplayName: () => `${role} User`
+      hasPermission: (permission: string) =>
+        allPermissions.includes(permission),
+      getDisplayName: () => `${role} User`,
     };
   }
 
@@ -482,10 +525,12 @@ export class CrossDomainSecurityManager {
     // Source domain permission
     const sourcePermission = `${operation.sourceDomain}:${operation.action}`;
     const targetPermission = `${operation.targetDomain}:integrate`;
-    
+
     // Check both source and target permissions
-    return actor.hasPermission(sourcePermission) && 
-           (actor.isSystem() || actor.hasPermission(targetPermission));
+    return (
+      actor.hasPermission(sourcePermission) &&
+      (actor.isSystem() || actor.hasPermission(targetPermission))
+    );
   }
 
   // Audit cross-domain operations
@@ -507,8 +552,8 @@ export class CrossDomainSecurityManager {
       crossDomainContext: {
         sourceDomain: details.sourceDomain,
         targetDomains: domains.filter(d => d !== details.sourceDomain),
-        integrationPattern: details.integrationPattern || 'event-driven'
-      }
+        integrationPattern: details.integrationPattern || 'event-driven',
+      },
     };
   }
 }
@@ -552,7 +597,7 @@ export class EnterpriseIntegrationManager {
       startTime: new Date(),
       steps: coordinationPlan.steps,
       currentStep: 0,
-      compensation: []
+      compensation: [],
     };
 
     // Execute saga steps across domains
@@ -572,12 +617,12 @@ export class EnterpriseIntegrationManager {
     context: SagaContext
   ): Promise<void> {
     const stepEvent = this.createStepEvent(step, context);
-    
+
     // Add compensation info
     context.compensation.unshift({
       domain: step.targetDomain,
       action: step.compensationAction,
-      data: step.data
+      data: step.data,
     });
 
     await this.eventBus.publish(stepEvent);
@@ -603,19 +648,19 @@ export class EnterpriseIntegrationManager {
         operation,
         data,
         requestId: generateRequestId(),
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       {
         correlationId: generateCorrelationId(),
         source: 'InternalSystem',
         destination: systemId,
-        integrationContract: contract.contractId
+        integrationContract: contract.contractId,
       }
     );
 
     // Publish and wait for response
     await this.eventBus.publish(integrationEvent);
-    
+
     // In real implementation, this would wait for response event
     return contract.transformResponse(data);
   }
@@ -636,7 +681,7 @@ export class EnterpriseIntegrationManager {
   ): boolean {
     const sourceContract = this.contractRegistry.get(sourceDomain);
     const targetContract = this.contractRegistry.get(targetDomain);
-    
+
     if (!sourceContract || !targetContract) {
       return false;
     }
@@ -695,11 +740,11 @@ interface DomainContract {
 
 class ContractRegistry {
   private contracts = new Map<string, DomainContract>();
-  
+
   register(key: string, contract: DomainContract): void {
     this.contracts.set(key, contract);
   }
-  
+
   get(key: string): DomainContract | undefined {
     return this.contracts.get(key);
   }
@@ -719,7 +764,8 @@ class ContractRegistry {
 ## Common Pitfalls
 
 - **Contract Violations**: Ensure all packages adhere to defined contracts
-- **Circular Dependencies**: Avoid direct package dependencies through proper contracts
+- **Circular Dependencies**: Avoid direct package dependencies through proper
+  contracts
 - **Event Flooding**: Design efficient cross-domain communication patterns
 - **Security Bypass**: Don't skip actor validation in cross-domain operations
 

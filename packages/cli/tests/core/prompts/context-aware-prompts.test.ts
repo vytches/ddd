@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import { ContextAwarePromptEngine, SmartPrompts } from '../../../src/core/prompts/context-aware-prompts';
+import {
+  ContextAwarePromptEngine,
+  SmartPrompts,
+} from '../../../src/core/prompts/context-aware-prompts';
 import type {
   ProjectAnalysis,
   ProjectStructureInfo,
@@ -39,7 +42,9 @@ describe('ContextAwarePromptEngine', () => {
     mockColors.dim = vi.fn(text => text);
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
 
     mockContext = {
       workflowType: 'default',
@@ -62,7 +67,7 @@ describe('ContextAwarePromptEngine', () => {
     mockFileSystem.listDirectory = vi.fn().mockResolvedValue([]);
     mockFileSystem.readFile = vi.fn().mockResolvedValue('{}');
     mockFileSystem.getBaseName = vi.fn(path => path.split('/').pop()?.split('.')[0] || '');
-    mockFileSystem.getExtension = vi.fn(path => `.${  path.split('.').pop() || ''}`);
+    mockFileSystem.getExtension = vi.fn(path => `.${path.split('.').pop() || ''}`);
     mockFileSystem.isDirectory = vi.fn().mockReturnValue(false);
 
     // Mock process.cwd()
@@ -409,7 +414,12 @@ describe('ContextAwarePromptEngine', () => {
     });
 
     it('should detect layered architecture', async () => {
-      mockFileSystem.listDirectory.mockResolvedValue(['controllers', 'services', 'repositories', 'models']);
+      mockFileSystem.listDirectory.mockResolvedValue([
+        'controllers',
+        'services',
+        'repositories',
+        'models',
+      ]);
 
       const result4 = await safeRun(async (): Promise<ProjectAnalysis> => {
         return await engine.analyzeContext(mockContext);
@@ -699,7 +709,7 @@ describe('ContextAwarePromptEngine', () => {
       });
       mockFileSystem.getExtension.mockImplementation((path: string) => {
         const parts = path.split('.');
-        return parts.length > 1 ? `.${  parts[parts.length - 1]}` : '';
+        return parts.length > 1 ? `.${parts[parts.length - 1]}` : '';
       });
 
       vi.spyOn(freshEngine as any, 'scanAllFiles').mockResolvedValue([
@@ -1009,9 +1019,11 @@ describe('SmartPrompts', () => {
     });
 
     it('should generate suggestions from project context', async () => {
-      mockFileSystem.readFile.mockResolvedValue(JSON.stringify({
-        dependencies: { '@nestjs/core': '^9.0.0' }
-      }));
+      mockFileSystem.readFile.mockResolvedValue(
+        JSON.stringify({
+          dependencies: { '@nestjs/core': '^9.0.0' },
+        })
+      );
 
       const prompt = SmartPrompts.componentName('Aggregate');
 
@@ -1046,9 +1058,11 @@ describe('SmartPrompts', () => {
     });
 
     it('should detect existing framework as default', async () => {
-      mockFileSystem.readFile.mockResolvedValue(JSON.stringify({
-        dependencies: { '@nestjs/core': '^9.0.0' }
-      }));
+      mockFileSystem.readFile.mockResolvedValue(
+        JSON.stringify({
+          dependencies: { '@nestjs/core': '^9.0.0' },
+        })
+      );
 
       const prompt = SmartPrompts.frameworkSelection();
 

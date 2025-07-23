@@ -1,7 +1,8 @@
 # Event Store - NestJS Intermediate DI Integration
 
-**Focus**: Advanced Event Store usage with @vytches-ddd/di integration
-**Base Example**: [Event Store Intermediate Implementation](../../../intermediate/implementation.md)
+**Focus**: Advanced Event Store usage with @vytches-ddd/di integration **Base
+Example**:
+[Event Store Intermediate Implementation](../../../intermediate/implementation.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/event-store, @vytches-ddd/di
 
 ## Service Implementation
@@ -11,7 +12,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EnterpriseEventStoreService } from '../../../intermediate/implementation';
-import { ProjectionEngine, OrderSummaryProjection } from '../../../intermediate/implementation';
+import {
+  ProjectionEngine,
+  OrderSummaryProjection,
+} from '../../../intermediate/implementation';
 import { DomainEvent } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
 import { OrderData, ProjectionState } from './types'; // From your app
@@ -23,8 +27,11 @@ export class EventStoreService implements OnModuleInit {
 
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration
-    this.enterpriseEventStore = VytchesDDD.resolve<EnterpriseEventStoreService>('enterpriseEventStore');
-    this.projectionEngine = VytchesDDD.resolve<ProjectionEngine>('projectionEngine');
+    this.enterpriseEventStore = VytchesDDD.resolve<EnterpriseEventStoreService>(
+      'enterpriseEventStore'
+    );
+    this.projectionEngine =
+      VytchesDDD.resolve<ProjectionEngine>('projectionEngine');
   }
 
   async onModuleInit() {
@@ -40,12 +47,14 @@ export class EventStoreService implements OnModuleInit {
   ): Promise<Result<void, Error>> {
     try {
       return await this.enterpriseEventStore.appendEvents(
-        streamId, 
-        events, 
+        streamId,
+        events,
         expectedVersion
       );
     } catch (error) {
-      throw new Error(`Events append with projections failed: ${error.message}`);
+      throw new Error(
+        `Events append with projections failed: ${error.message}`
+      );
     }
   }
 
@@ -112,7 +121,7 @@ export class AdvancedOrderService {
         orderData.items,
         orderData.total,
         new Date()
-      )
+      ),
     ];
 
     const result = await this.eventStore.appendEventsWithProjections(
@@ -121,7 +130,9 @@ export class AdvancedOrderService {
     );
 
     if (result.isFailure()) {
-      throw new Error(`Order creation with projection failed: ${result.error.message}`);
+      throw new Error(
+        `Order creation with projection failed: ${result.error.message}`
+      );
     }
   }
 
@@ -151,7 +162,7 @@ export class AdvancedOrderService {
 
   async getOrderAnalytics(): Promise<OrderAnalytics> {
     const summaryResult = await this.eventStore.getOrderSummary();
-    
+
     if (summaryResult.isSuccess() && summaryResult.value) {
       const summary = summaryResult.value;
       return {
@@ -160,7 +171,7 @@ export class AdvancedOrderService {
         averageOrderValue: summary.averageOrderValue,
         ordersByStatus: summary.ordersByStatus,
         topCustomers: this.getTopCustomers(summary.ordersByCustomer),
-        lastUpdated: summary.lastUpdated
+        lastUpdated: summary.lastUpdated,
       };
     }
 
@@ -169,13 +180,15 @@ export class AdvancedOrderService {
 
   async rebuildAnalytics(fromDate?: Date): Promise<void> {
     const result = await this.eventStore.rebuildOrderSummary(fromDate);
-    
+
     if (result.isFailure()) {
       throw new Error(`Analytics rebuild failed: ${result.error.message}`);
     }
   }
 
-  private getTopCustomers(customerOrders: Record<string, number>): Array<{ customerId: string; orderCount: number }> {
+  private getTopCustomers(
+    customerOrders: Record<string, number>
+  ): Array<{ customerId: string; orderCount: number }> {
     return Object.entries(customerOrders)
       .map(([customerId, orderCount]) => ({ customerId, orderCount }))
       .sort((a, b) => b.orderCount - a.orderCount)
@@ -192,24 +205,27 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
 import { EventStoreService } from './event-store.service';
 import { AdvancedOrderService } from './advanced-order.service';
-import { EnterpriseEventStoreService, ProjectionEngine } from '../../../intermediate/implementation';
+import {
+  EnterpriseEventStoreService,
+  ProjectionEngine,
+} from '../../../intermediate/implementation';
 
 @Module({
-  providers: [
-    EventStoreService,
-    AdvancedOrderService
-  ],
-  exports: [EventStoreService, AdvancedOrderService]
+  providers: [EventStoreService, AdvancedOrderService],
+  exports: [EventStoreService, AdvancedOrderService],
 })
 export class EventStoreModule implements OnModuleInit {
   async onModuleInit() {
     // ⭐ CRITICAL: Initialize VytchesDDD BEFORE framework DI
     const container = new SimpleContainer();
-    
+
     // Register enterprise event store services
-    container.registerInstance('enterpriseEventStore', new EnterpriseEventStoreService());
+    container.registerInstance(
+      'enterpriseEventStore',
+      new EnterpriseEventStoreService()
+    );
     container.registerInstance('projectionEngine', new ProjectionEngine());
-    
+
     await VytchesDDD.configure(container);
   }
 }
@@ -235,6 +251,7 @@ export class HealthController {
 ```
 
 **Key Points:**
+
 - Advanced DI integration with @vytches-ddd/di
 - Service locator pattern usage
 - Enterprise-grade dependency management

@@ -10,7 +10,7 @@ import type {
   CacheKey,
   TransactionContext,
   RepositoryMetrics,
-  ExportOptions
+  ExportOptions,
 } from '../types';
 
 // Query Builder Utilities
@@ -21,7 +21,7 @@ export function buildQueryOptions(options: Partial<QueryOptions> = {}): QueryOpt
     orderBy: options.orderBy ?? [{ field: 'createdAt', direction: 'DESC' }],
     where: options.where ?? [],
     include: options.include ?? [],
-    exclude: options.exclude ?? []
+    exclude: options.exclude ?? [],
   };
 }
 
@@ -35,12 +35,12 @@ export function addWhereClause(
     field,
     operator: operator as any,
     value,
-    logical: options.where && options.where.length > 0 ? 'AND' : 'AND'
+    logical: options.where && options.where.length > 0 ? 'AND' : 'AND',
   };
 
   return {
     ...options,
-    where: [...(options.where || []), whereClause]
+    where: [...(options.where || []), whereClause],
   };
 }
 
@@ -52,7 +52,7 @@ export function addOrderBy(
   const orderByClause: OrderByClause = { field, direction };
   return {
     ...options,
-    orderBy: [...(options.orderBy || []), orderByClause]
+    orderBy: [...(options.orderBy || []), orderByClause],
   };
 }
 
@@ -69,7 +69,7 @@ export function createPaginationResult<T>(
     page,
     limit,
     hasNext: page * limit < total,
-    hasPrev: page > 1
+    hasPrev: page > 1,
   };
 }
 
@@ -77,7 +77,10 @@ export function calculateOffset(page: number, limit: number): number {
   return (page - 1) * limit;
 }
 
-export function validatePaginationParams(page: number, limit: number): { page: number; limit: number } {
+export function validatePaginationParams(
+  page: number,
+  limit: number
+): { page: number; limit: number } {
   const validPage = Math.max(1, Math.floor(page));
   const validLimit = Math.max(1, Math.min(1000, Math.floor(limit)));
   return { page: validPage, limit: validLimit };
@@ -106,7 +109,7 @@ export function createCacheKey(namespace: string, key: string, version?: string)
   return {
     namespace,
     key,
-    version: version || '1.0'
+    version: version || '1.0',
   };
 }
 
@@ -121,18 +124,20 @@ export function parseCacheKey(keyString: string): CacheKey | null {
   return {
     namespace: parts[0] || 'default',
     key: parts[1] || keyString,
-    version: parts[2] || '1.0'
+    version: parts[2] || '1.0',
   };
 }
 
 // Transaction Utilities
-export function createTransactionContext(options: Partial<TransactionContext> = {}): TransactionContext {
+export function createTransactionContext(
+  options: Partial<TransactionContext> = {}
+): TransactionContext {
   return {
     transactionId: options.transactionId || generateUniqueId(),
     userId: options.userId || 'anonymous',
     sessionId: options.sessionId || generateUniqueId(),
     correlationId: options.correlationId || generateUniqueId(),
-    metadata: options.metadata || {}
+    metadata: options.metadata || {},
   };
 }
 
@@ -179,15 +184,17 @@ export function isRetryableError(error: Error): boolean {
     'ETIMEDOUT',
     'ECONNREFUSED',
     'Connection terminated unexpectedly',
-    'Connection lost'
+    'Connection lost',
   ];
 
-  return retryableErrors.some(errorType =>
-    error.message.includes(errorType) || error.name.includes(errorType)
+  return retryableErrors.some(
+    errorType => error.message.includes(errorType) || error.name.includes(errorType)
   );
 }
 
-export function getErrorCategory(error: Error): 'CONNECTION' | 'VALIDATION' | 'PERMISSION' | 'NOT_FOUND' | 'UNKNOWN' {
+export function getErrorCategory(
+  error: Error
+): 'CONNECTION' | 'VALIDATION' | 'PERMISSION' | 'NOT_FOUND' | 'UNKNOWN' {
   const message = error.message.toLowerCase();
 
   if (message.includes('connection') || message.includes('network')) {
@@ -226,7 +233,7 @@ export function createEmptyMetrics(): RepositoryMetrics {
     slowQueries: 0,
     cacheHitRate: 0,
     errorRate: 0,
-    totalQueries: 0
+    totalQueries: 0,
   };
 }
 
@@ -242,9 +249,11 @@ export function sanitizeForExport(data: any): any {
     const sanitized: any = {};
     for (const [key, value] of Object.entries(data)) {
       // Skip sensitive fields
-      if (!key.toLowerCase().includes('password') &&
-          !key.toLowerCase().includes('secret') &&
-          !key.toLowerCase().includes('token')) {
+      if (
+        !key.toLowerCase().includes('password') &&
+        !key.toLowerCase().includes('secret') &&
+        !key.toLowerCase().includes('token')
+      ) {
         sanitized[key] = sanitizeForExport(value);
       }
     }
@@ -254,11 +263,7 @@ export function sanitizeForExport(data: any): any {
   return data;
 }
 
-export function formatExportFilename(
-  entityType: string,
-  format: string,
-  timestamp?: Date
-): string {
+export function formatExportFilename(entityType: string, format: string, timestamp?: Date): string {
   const date = timestamp || new Date();
   const dateString = date.toISOString().split('T')[0];
   return `${entityType}-export-${dateString}.${format.toLowerCase()}`;
@@ -282,13 +287,18 @@ export function generateEntityId(): string {
   return `entity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function createBaseEntity(id?: string): { id: string; createdAt: Date; updatedAt: Date; version: number } {
+export function createBaseEntity(id?: string): {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+} {
   const now = new Date();
   return {
     id: id || generateEntityId(),
     createdAt: now,
     updatedAt: now,
-    version: 1
+    version: 1,
   };
 }
 
@@ -296,7 +306,7 @@ export function updateEntityVersion(entity: any): any {
   return {
     ...entity,
     updatedAt: new Date(),
-    version: (entity.version || 1) + 1
+    version: (entity.version || 1) + 1,
   };
 }
 
@@ -306,7 +316,7 @@ export function checkDatabaseHealth(startTime: Date, endTime: Date, error?: Erro
   return {
     connected: !error,
     responseTime,
-    healthy: !error && responseTime < 1000
+    healthy: !error && responseTime < 1000,
   };
 }
 
@@ -329,7 +339,7 @@ export function createMockUser(overrides: any = {}) {
     isActive: true,
     roles: ['user'],
     ...createBaseEntity(),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -347,10 +357,10 @@ export function createMockProduct(overrides: any = {}) {
       reserved: 0,
       available: 100,
       minStock: 10,
-      locations: []
+      locations: [],
     },
     ...createBaseEntity(),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -366,10 +376,10 @@ export function createMockOrder(overrides: any = {}) {
       shipping: 0,
       discount: 0,
       total: 0,
-      currency: 'USD'
+      currency: 'USD',
     },
     ...createBaseEntity(),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -380,5 +390,5 @@ export const COMMON_QUERY_CONSTANTS = {
   SLOW_QUERY_THRESHOLD: 1000, // 1 second
   MAX_RETRY_ATTEMPTS: 3,
   CONNECTION_TIMEOUT: 30000, // 30 seconds
-  QUERY_TIMEOUT: 60000 // 1 minute
+  QUERY_TIMEOUT: 60000, // 1 minute
 } as const;

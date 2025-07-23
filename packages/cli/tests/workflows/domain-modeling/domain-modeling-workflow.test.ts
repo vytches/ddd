@@ -45,7 +45,7 @@ describe('DomainModelingWorkflow', () => {
   describe('start', () => {
     it('should start domain modeling workflow successfully', async () => {
       // Mock prompts
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('What domain are you modeling')) {
           return 'E-commerce';
         }
@@ -71,7 +71,10 @@ describe('DomainModelingWorkflow', () => {
       expect(context.data.domain).toBe('E-commerce');
       expect(context.data.description).toBe('Online shopping platform');
       expect(context.data.entities).toEqual(['User', 'Product', 'Order', 'Payment']);
-      expect(context.data.businessRules).toEqual(['Users must verify email', 'Orders must have items']);
+      expect(context.data.businessRules).toEqual([
+        'Users must verify email',
+        'Orders must have items',
+      ]);
     });
 
     it('should handle non-interactive mode', async () => {
@@ -105,7 +108,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should handle empty entity input', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('entities')) {
           return '';
         }
@@ -120,7 +123,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should handle empty business rules input', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('business rules')) {
           return '';
         }
@@ -135,7 +138,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should trim whitespace from entity names', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('entities')) {
           return 'User,  Product , Order  ,  Payment  ';
         }
@@ -150,7 +153,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should trim whitespace from business rules', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('business rules')) {
           return 'Rule 1,  Rule 2 , Rule 3  ';
         }
@@ -165,7 +168,9 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should display progress messages', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { return });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+        return;
+      });
 
       const workflow = new DomainModelingWorkflow(mockOptions);
 
@@ -174,18 +179,14 @@ describe('DomainModelingWorkflow', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('🎯 Starting Domain Modeling Workflow...')
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(1/4) Domain Discovery')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(1/4) Domain Discovery'));
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(2/4) Entity Identification')
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('(3/4) Relationship Mapping')
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(4/4) Business Rules')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(4/4) Business Rules'));
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('✅ Domain modeling completed!')
       );
@@ -250,7 +251,7 @@ describe('DomainModelingWorkflow', () => {
 
   describe('input validation', () => {
     it('should handle various input formats for entities', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('entities')) {
           return 'User,Product;Order|Payment';
         }
@@ -266,7 +267,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should filter out empty entity names', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('entities')) {
           return 'User,,Product,,Order,';
         }
@@ -281,7 +282,7 @@ describe('DomainModelingWorkflow', () => {
     });
 
     it('should filter out empty business rules', async () => {
-      vi.mocked(Prompts.ask).mockImplementation(async (options) => {
+      vi.mocked(Prompts.ask).mockImplementation(async options => {
         if (options.message.includes('business rules')) {
           return 'Rule 1,,Rule 2,,Rule 3,';
         }

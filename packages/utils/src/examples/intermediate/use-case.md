@@ -1,47 +1,48 @@
 # Intermediate Use Cases
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: Enterprise scenarios, complex workflows, system integration
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Domain**: Infrastructure **Patterns**: Enterprise scenarios, complex
+workflows, system integration **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-Real-world enterprise use cases demonstrating intermediate-level utility patterns. These examples show how to handle complex business scenarios including data migration, API integration, batch processing, and multi-system workflows using advanced Result patterns and error handling.
+Real-world enterprise use cases demonstrating intermediate-level utility
+patterns. These examples show how to handle complex business scenarios including
+data migration, API integration, batch processing, and multi-system workflows
+using advanced Result patterns and error handling.
 
 ## Business Context
 
 Enterprise applications face complex scenarios:
+
 - Data migration between systems with validation and transformation
 - Integration with multiple external APIs and services
 - Bulk processing of business data with partial failure handling
 - Complex workflows spanning multiple systems and domains
 - Error recovery and system resilience requirements
 
-These use cases demonstrate how utilities can handle enterprise complexity while maintaining reliability and observability.
+These use cases demonstrate how utilities can handle enterprise complexity while
+maintaining reliability and observability.
 
 ## Code Example
 
 ```typescript
 // intermediate-use-cases.ts
 import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
-import { 
-  UserData, 
-  ValidationError, 
+import {
+  UserData,
+  ValidationError,
   ServiceResponse,
   ApiResponse,
   AggregatedError,
-  AsyncResult 
+  AsyncResult,
 } from '../types';
 
 // ✅ FOCUS: Enterprise use case implementations
 export class IntermediateUseCases {
-
   // USE CASE 1: Customer Data Migration
   async migrateCustomerData(
-    sourceData: any[], 
+    sourceData: any[],
     options: {
       batchSize?: number;
       validateOnly?: boolean;
@@ -51,14 +52,21 @@ export class IntermediateUseCases {
   ): Promise<ServiceResponse<any>> {
     const migrationId = LibUtils.getUUID();
     const startTime = Date.now();
-    
-    console.log(`Starting migration ${migrationId} with ${sourceData.length} records`);
+
+    console.log(
+      `Starting migration ${migrationId} with ${sourceData.length} records`
+    );
 
     const results = {
       validated: [] as any[],
       transformed: [] as UserData[],
       migrated: [] as UserData[],
-      errors: [] as Array<{ index: number; stage: string; error: string; data: any }>,
+      errors: [] as Array<{
+        index: number;
+        stage: string;
+        error: string;
+        data: any;
+      }>,
       summary: {
         total: sourceData.length,
         processed: 0,
@@ -69,10 +77,12 @@ export class IntermediateUseCases {
 
     try {
       const batchSize = options.batchSize || 50;
-      
+
       for (let i = 0; i < sourceData.length; i += batchSize) {
         const batch = sourceData.slice(i, i + batchSize);
-        console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sourceData.length / batchSize)}`);
+        console.log(
+          `Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sourceData.length / batchSize)}`
+        );
 
         // Stage 1: Validation
         const validationResults = await this.validateMigrationBatch(batch, i);
@@ -82,7 +92,7 @@ export class IntermediateUseCases {
         if (!options.validateOnly) {
           // Stage 2: Data Transformation
           const transformationResults = await this.transformMigrationData(
-            validationResults.valid, 
+            validationResults.valid,
             options.transformationRules || {},
             i
           );
@@ -105,8 +115,11 @@ export class IntermediateUseCases {
         results.summary.failed = results.errors.length;
 
         // Progress reporting
-        const progress = (results.summary.processed / results.summary.total) * 100;
-        console.log(`Migration progress: ${progress.toFixed(1)}% (${results.summary.successful} successful, ${results.summary.failed} failed)`);
+        const progress =
+          (results.summary.processed / results.summary.total) * 100;
+        console.log(
+          `Migration progress: ${progress.toFixed(1)}% (${results.summary.successful} successful, ${results.summary.failed} failed)`
+        );
 
         // Respect rate limits
         if (i + batchSize < sourceData.length) {
@@ -124,15 +137,19 @@ export class IntermediateUseCases {
           results,
           validationOnly: options.validateOnly || false,
         },
-        error: hasErrors ? {
-          code: hasPartialSuccess ? 'PARTIAL_MIGRATION_SUCCESS' : 'MIGRATION_FAILED',
-          message: `Migration completed with ${results.errors.length} errors`,
-          details: {
-            sampleErrors: results.errors.slice(0, 5),
-            totalErrors: results.errors.length,
-            errorsByStage: this.categorizeErrorsByStage(results.errors),
-          },
-        } : undefined,
+        error: hasErrors
+          ? {
+              code: hasPartialSuccess
+                ? 'PARTIAL_MIGRATION_SUCCESS'
+                : 'MIGRATION_FAILED',
+              message: `Migration completed with ${results.errors.length} errors`,
+              details: {
+                sampleErrors: results.errors.slice(0, 5),
+                totalErrors: results.errors.length,
+                errorsByStage: this.categorizeErrorsByStage(results.errors),
+              },
+            }
+          : undefined,
         metadata: {
           timestamp: new Date(),
           requestId: migrationId,
@@ -141,7 +158,6 @@ export class IntermediateUseCases {
           totalBatches: Math.ceil(sourceData.length / batchSize),
         },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -159,13 +175,16 @@ export class IntermediateUseCases {
     }
   }
 
-  private async validateMigrationBatch(batch: any[], startIndex: number): Promise<any> {
+  private async validateMigrationBatch(
+    batch: any[],
+    startIndex: number
+  ): Promise<any> {
     const valid: any[] = [];
     const errors: any[] = [];
 
     const validationPromises = batch.map(async (record, batchIndex) => {
       const globalIndex = startIndex + batchIndex;
-      
+
       const [validationError, validationResult] = await safeRun(async () => {
         // Comprehensive validation
         if (!record || typeof record !== 'object') {
@@ -180,7 +199,10 @@ export class IntermediateUseCases {
           throw new Error('Invalid email format');
         }
 
-        if (LibUtils.isEmpty(record.firstName) && LibUtils.isEmpty(record.fullName)) {
+        if (
+          LibUtils.isEmpty(record.firstName) &&
+          LibUtils.isEmpty(record.fullName)
+        ) {
           throw new Error('Name is required (firstName or fullName)');
         }
 
@@ -196,11 +218,15 @@ export class IntermediateUseCases {
         };
       });
 
-      return { index: globalIndex, error: validationError, result: validationResult };
+      return {
+        index: globalIndex,
+        error: validationError,
+        result: validationResult,
+      };
     });
 
     const results = await Promise.all(validationPromises);
-    
+
     results.forEach(({ index, error, result }) => {
       if (error) {
         errors.push({
@@ -217,15 +243,20 @@ export class IntermediateUseCases {
     return { valid, errors };
   }
 
-  private async transformMigrationData(validRecords: any[], rules: any, startIndex: number): Promise<any> {
+  private async transformMigrationData(
+    validRecords: any[],
+    rules: any,
+    startIndex: number
+  ): Promise<any> {
     const transformed: UserData[] = [];
     const errors: any[] = [];
 
-    const transformationPromises = validRecords.map(async (record) => {
+    const transformationPromises = validRecords.map(async record => {
       const [transformError, transformedRecord] = await safeRun(async () => {
         // Apply transformation rules
-        const name = record.fullName || `${record.firstName} ${record.lastName}`.trim();
-        
+        const name =
+          record.fullName || `${record.firstName} ${record.lastName}`.trim();
+
         if (name.length < 2) {
           throw new Error('Transformed name is too short');
         }
@@ -253,7 +284,7 @@ export class IntermediateUseCases {
     });
 
     const results = await Promise.all(transformationPromises);
-    
+
     results.forEach(({ record, error, result }) => {
       if (error) {
         errors.push({
@@ -270,22 +301,26 @@ export class IntermediateUseCases {
     return { transformed, errors };
   }
 
-  private async persistMigratedData(transformedData: UserData[], startIndex: number): Promise<any> {
+  private async persistMigratedData(
+    transformedData: UserData[],
+    startIndex: number
+  ): Promise<any> {
     const migrated: UserData[] = [];
     const errors: any[] = [];
 
     // Simulate database persistence with potential failures
-    const persistencePromises = transformedData.map(async (userData) => {
+    const persistencePromises = transformedData.map(async userData => {
       const [persistError, persistedUser] = await safeRun(async () => {
         // Simulate database operation
         await LibUtils.sleep(Math.random() * 100 + 50);
-        
+
         // Simulate some failures
         if (userData.email.includes('fail')) {
           throw new Error('Database constraint violation');
         }
 
-        if (Math.random() < 0.02) { // 2% random failure rate
+        if (Math.random() < 0.02) {
+          // 2% random failure rate
           throw new Error('Database connection timeout');
         }
 
@@ -299,7 +334,7 @@ export class IntermediateUseCases {
     });
 
     const results = await Promise.all(persistencePromises);
-    
+
     results.forEach(({ userData, error, result }) => {
       if (error) {
         errors.push({
@@ -317,14 +352,19 @@ export class IntermediateUseCases {
   }
 
   private categorizeErrorsByStage(errors: any[]): Record<string, number> {
-    return errors.reduce((acc, error) => {
-      acc[error.stage] = (acc[error.stage] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    return errors.reduce(
+      (acc, error) => {
+        acc[error.stage] = (acc[error.stage] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 
   // USE CASE 2: Multi-API Integration with Circuit Breaker
-  async integrateCustomerProfile(customerId: string): Promise<ServiceResponse<any>> {
+  async integrateCustomerProfile(
+    customerId: string
+  ): Promise<ServiceResponse<any>> {
     const integrationId = LibUtils.getUUID();
     const startTime = Date.now();
 
@@ -343,14 +383,14 @@ export class IntermediateUseCases {
 
     try {
       // Fetch data from multiple services with different error handling strategies
-      const servicePromises = apiServices.map(async (service) => {
+      const servicePromises = apiServices.map(async service => {
         const retryCount = service.priority === 'high' ? 3 : 1;
         const timeout = service.priority === 'high' ? 5000 : 2000;
-        
+
         return await this.fetchFromServiceWithRetry(
-          service, 
-          customerId, 
-          retryCount, 
+          service,
+          customerId,
+          retryCount,
           timeout
         );
       });
@@ -360,19 +400,23 @@ export class IntermediateUseCases {
       // Process results with different strategies based on priority
       serviceResults.forEach((result, index) => {
         const service = apiServices[index];
-        
+
         if (result.status === 'fulfilled' && result.value.isSuccess) {
           results.successful.push({
             service: service.name,
             data: result.value.value,
             priority: service.priority,
           });
-          
+
           // Merge data into profile based on service type
-          this.mergeServiceDataIntoProfile(results.profile, service.name, result.value.value);
-          
+          this.mergeServiceDataIntoProfile(
+            results.profile,
+            service.name,
+            result.value.value
+          );
         } else {
-          const error = result.status === 'rejected' ? result.reason : result.value.error;
+          const error =
+            result.status === 'rejected' ? result.reason : result.value.error;
           results.failed.push({
             service: service.name,
             error: error.message,
@@ -401,7 +445,9 @@ export class IntermediateUseCases {
       // Apply fallback data for failed non-critical services
       this.applyFallbackData(results.profile, results.failed);
 
-      const hasHighPriorityFailures = results.failed.some(f => f.priority === 'high');
+      const hasHighPriorityFailures = results.failed.some(
+        f => f.priority === 'high'
+      );
       const hasData = results.successful.length > 0;
 
       return {
@@ -415,14 +461,17 @@ export class IntermediateUseCases {
             details: results.failed.length > 0 ? results.failed : undefined,
           },
         },
-        error: hasHighPriorityFailures || !hasData ? {
-          code: 'INTEGRATION_INCOMPLETE',
-          message: 'Customer profile integration incomplete',
-          details: {
-            failedServices: results.failed,
-            successfulServices: results.successful.map(s => s.service),
-          },
-        } : undefined,
+        error:
+          hasHighPriorityFailures || !hasData
+            ? {
+                code: 'INTEGRATION_INCOMPLETE',
+                message: 'Customer profile integration incomplete',
+                details: {
+                  failedServices: results.failed,
+                  successfulServices: results.successful.map(s => s.service),
+                },
+              }
+            : undefined,
         metadata: {
           timestamp: new Date(),
           requestId: integrationId,
@@ -431,7 +480,6 @@ export class IntermediateUseCases {
           servicesSuccessful: results.successful.length,
         },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -450,20 +498,27 @@ export class IntermediateUseCases {
   }
 
   private async fetchFromServiceWithRetry(
-    service: any, 
-    customerId: string, 
-    maxRetries: number, 
+    service: any,
+    customerId: string,
+    maxRetries: number,
     timeoutMs: number
   ): Promise<Result<any, Error>> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      const result = await this.fetchFromService(service, customerId, timeoutMs);
-      
+      const result = await this.fetchFromService(
+        service,
+        customerId,
+        timeoutMs
+      );
+
       if (result.isSuccess) {
         return result;
       }
 
       // Don't retry on client errors
-      if (result.error.message.includes('404') || result.error.message.includes('401')) {
+      if (
+        result.error.message.includes('404') ||
+        result.error.message.includes('401')
+      ) {
         break;
       }
 
@@ -474,10 +529,16 @@ export class IntermediateUseCases {
       }
     }
 
-    return Result.fail(new Error(`Service ${service.name} failed after ${maxRetries} attempts`));
+    return Result.fail(
+      new Error(`Service ${service.name} failed after ${maxRetries} attempts`)
+    );
   }
 
-  private async fetchFromService(service: any, customerId: string, timeoutMs: number): Promise<Result<any, Error>> {
+  private async fetchFromService(
+    service: any,
+    customerId: string,
+    timeoutMs: number
+  ): Promise<Result<any, Error>> {
     return await Result.tryAsync(async () => {
       // Simulate API call with timeout
       const apiPromise = this.simulateApiCall(service, customerId);
@@ -489,10 +550,13 @@ export class IntermediateUseCases {
     });
   }
 
-  private async simulateApiCall(service: any, customerId: string): Promise<any> {
+  private async simulateApiCall(
+    service: any,
+    customerId: string
+  ): Promise<any> {
     // Simulate network delay
     await LibUtils.sleep(Math.random() * 1000 + 200);
-    
+
     // Simulate different types of responses based on service
     switch (service.name) {
       case 'customer-service':
@@ -513,7 +577,7 @@ export class IntermediateUseCases {
         return {
           totalOrders: 15,
           lastOrderDate: new Date(),
-          orderValue: 1250.50,
+          orderValue: 1250.5,
         };
 
       case 'preference-service':
@@ -538,7 +602,11 @@ export class IntermediateUseCases {
     }
   }
 
-  private mergeServiceDataIntoProfile(profile: any, serviceName: string, data: any): void {
+  private mergeServiceDataIntoProfile(
+    profile: any,
+    serviceName: string,
+    data: any
+  ): void {
     switch (serviceName) {
       case 'customer-service':
         Object.assign(profile, data);
@@ -578,7 +646,7 @@ export class IntermediateUseCases {
 
   // USE CASE 3: Complex Report Generation with Aggregation
   async generateCustomerReport(
-    filters: any, 
+    filters: any,
     options: { format?: 'json' | 'csv' | 'excel'; includeDetails?: boolean }
   ): Promise<ServiceResponse<any>> {
     const reportId = LibUtils.getUUID();
@@ -588,7 +656,7 @@ export class IntermediateUseCases {
       // Phase 1: Data collection
       console.log(`Starting report generation ${reportId}`);
       const dataCollectionResult = await this.collectReportData(filters);
-      
+
       if (dataCollectionResult.isFailure) {
         return {
           success: false,
@@ -609,7 +677,7 @@ export class IntermediateUseCases {
 
       // Phase 2: Data processing and aggregation
       const processingResult = await this.processReportData(rawData, options);
-      
+
       if (processingResult.isFailure) {
         return {
           success: false,
@@ -629,8 +697,11 @@ export class IntermediateUseCases {
       const processedData = processingResult.value;
 
       // Phase 3: Format generation
-      const formattingResult = await this.formatReportOutput(processedData, options.format || 'json');
-      
+      const formattingResult = await this.formatReportOutput(
+        processedData,
+        options.format || 'json'
+      );
+
       if (formattingResult.isFailure) {
         return {
           success: false,
@@ -668,7 +739,6 @@ export class IntermediateUseCases {
           format: options.format || 'json',
         },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -690,35 +760,49 @@ export class IntermediateUseCases {
     return await Result.tryAsync(async () => {
       // Simulate data collection from multiple sources
       await LibUtils.sleep(500);
-      
+
       // Generate sample data based on filters
       const data = Array.from({ length: filters.limit || 100 }, (_, index) => ({
         id: LibUtils.getUUID(),
         customerId: `customer-${index + 1}`,
-        orderDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
+        orderDate: new Date(
+          Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
+        ),
         orderValue: Math.random() * 1000 + 50,
-        status: ['completed', 'pending', 'cancelled'][Math.floor(Math.random() * 3)],
-        region: ['North', 'South', 'East', 'West'][Math.floor(Math.random() * 4)],
+        status: ['completed', 'pending', 'cancelled'][
+          Math.floor(Math.random() * 3)
+        ],
+        region: ['North', 'South', 'East', 'West'][
+          Math.floor(Math.random() * 4)
+        ],
       }));
 
       return data.filter(item => {
         // Apply filters
         if (filters.status && item.status !== filters.status) return false;
         if (filters.region && item.region !== filters.region) return false;
-        if (filters.minValue && item.orderValue < filters.minValue) return false;
+        if (filters.minValue && item.orderValue < filters.minValue)
+          return false;
         return true;
       });
     });
   }
 
-  private async processReportData(rawData: any[], options: any): Promise<Result<any, Error>> {
+  private async processReportData(
+    rawData: any[],
+    options: any
+  ): Promise<Result<any, Error>> {
     return await Result.tryAsync(async () => {
       await LibUtils.sleep(200);
-      
+
       const summary = {
         totalOrders: rawData.length,
         totalValue: rawData.reduce((sum, item) => sum + item.orderValue, 0),
-        averageOrderValue: rawData.length > 0 ? rawData.reduce((sum, item) => sum + item.orderValue, 0) / rawData.length : 0,
+        averageOrderValue:
+          rawData.length > 0
+            ? rawData.reduce((sum, item) => sum + item.orderValue, 0) /
+              rawData.length
+            : 0,
         processed: rawData.length,
         byStatus: {} as Record<string, number>,
         byRegion: {} as Record<string, number>,
@@ -726,8 +810,10 @@ export class IntermediateUseCases {
 
       // Aggregate by status
       rawData.forEach(item => {
-        summary.byStatus[item.status] = (summary.byStatus[item.status] || 0) + 1;
-        summary.byRegion[item.region] = (summary.byRegion[item.region] || 0) + 1;
+        summary.byStatus[item.status] =
+          (summary.byStatus[item.status] || 0) + 1;
+        summary.byRegion[item.region] =
+          (summary.byRegion[item.region] || 0) + 1;
       });
 
       return {
@@ -736,27 +822,30 @@ export class IntermediateUseCases {
         trends: {
           dailyAverages: this.calculateDailyAverages(rawData),
           topRegions: Object.entries(summary.byRegion)
-            .sort(([,a], [,b]) => b - a)
+            .sort(([, a], [, b]) => b - a)
             .slice(0, 3),
         },
       };
     });
   }
 
-  private async formatReportOutput(processedData: any, format: string): Promise<Result<any, Error>> {
+  private async formatReportOutput(
+    processedData: any,
+    format: string
+  ): Promise<Result<any, Error>> {
     return await Result.tryAsync(async () => {
       await LibUtils.sleep(100);
-      
+
       switch (format) {
         case 'json':
           return processedData;
-        
+
         case 'csv':
           return this.convertToCsv(processedData);
-        
+
         case 'excel':
           return this.convertToExcel(processedData);
-        
+
         default:
           throw new Error(`Unsupported format: ${format}`);
       }
@@ -765,7 +854,7 @@ export class IntermediateUseCases {
 
   private calculateDailyAverages(data: any[]): any[] {
     const dailyData = new Map();
-    
+
     data.forEach(item => {
       const day = item.orderDate.toISOString().split('T')[0];
       if (!dailyData.has(day)) {
@@ -786,7 +875,7 @@ export class IntermediateUseCases {
   private convertToCsv(data: any): string {
     // Simplified CSV conversion
     const headers = ['Date', 'Average Order Value', 'Order Count'];
-    const rows = data.trends.dailyAverages.map((item: any) => 
+    const rows = data.trends.dailyAverages.map((item: any) =>
       [item.date, item.averageValue.toFixed(2), item.orderCount].join(',')
     );
     return [headers.join(','), ...rows].join('\n');
@@ -810,17 +899,23 @@ export class IntermediateUseCases {
 ## Key Use Cases
 
 ### 1. Customer Data Migration
+
 - **Challenge**: Migrate customer data between systems with validation
 - **Solution**: Batch processing with comprehensive error handling
 - **Benefits**: Data integrity, progress tracking, partial success handling
 
 ### 2. Multi-API Integration
-- **Challenge**: Aggregate data from multiple services with different reliability
+
+- **Challenge**: Aggregate data from multiple services with different
+  reliability
 - **Solution**: Prioritized service calls with circuit breaker patterns
-- **Benefits**: Graceful degradation, fallback mechanisms, critical path protection
+- **Benefits**: Graceful degradation, fallback mechanisms, critical path
+  protection
 
 ### 3. Complex Report Generation
-- **Challenge**: Generate reports from multiple data sources with different formats
+
+- **Challenge**: Generate reports from multiple data sources with different
+  formats
 - **Solution**: Multi-phase processing with format transformation
 - **Benefits**: Flexible output formats, error isolation, progress visibility
 
@@ -836,8 +931,10 @@ export class IntermediateUseCases {
 
 - **Batch Processing**: Handle large datasets in manageable chunks
 - **Error Categorization**: Group errors for actionable reporting
-- **Priority-Based Handling**: Treat critical and non-critical services differently
-- **Progressive Enhancement**: Start with basic functionality, add advanced features
+- **Priority-Based Handling**: Treat critical and non-critical services
+  differently
+- **Progressive Enhancement**: Start with basic functionality, add advanced
+  features
 - **Monitoring Integration**: Built-in observability for operations teams
 
 ## Common Scenarios

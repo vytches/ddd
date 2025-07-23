@@ -11,12 +11,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
-  User, 
-  CreateUserData, 
-  UpdateUserData, 
-  UserPreferences 
-} from './types'; // From your application
+import { User, CreateUserData, UpdateUserData, UserPreferences } from './types'; // From your application
 
 @Injectable()
 export class UserAggregateService {
@@ -27,13 +22,13 @@ export class UserAggregateService {
     try {
       // Get UserAggregate instance through VytchesDDD service locator
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      
+
       // Use library factory method
       const userAggregate = UserAggregateClass.create(userData);
-      
+
       // Get created user data
       const user = userAggregate.toSnapshot();
-      
+
       this.logger.log(`User created with ID: ${user.id}`);
       return user;
     } catch (error) {
@@ -42,26 +37,29 @@ export class UserAggregateService {
     }
   }
 
-  async updateUserProfile(userId: string, updates: UpdateUserData): Promise<User> {
+  async updateUserProfile(
+    userId: string,
+    updates: UpdateUserData
+  ): Promise<User> {
     try {
       // Resolve aggregate from container
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      
+
       // In real implementation, you'd load from repository
       // const userAggregate = await this.repository.findById(EntityId.fromString(userId));
-      
+
       // For example purposes, create and update
       const userAggregate = UserAggregateClass.fromSnapshot({
         id: userId,
-        ...updates // Merge existing data
+        ...updates, // Merge existing data
       });
-      
+
       // Use library method
       userAggregate.updateProfile(updates.username, updates.email);
-      
+
       // Return updated state
       const updatedUser = userAggregate.toSnapshot();
-      
+
       this.logger.log(`User profile updated: ${userId}`);
       return updatedUser;
     } catch (error) {
@@ -70,18 +68,24 @@ export class UserAggregateService {
     }
   }
 
-  async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User> {
+  async updateUserPreferences(
+    userId: string,
+    preferences: UserPreferences
+  ): Promise<User> {
     try {
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      
+
       // Load existing aggregate (mock implementation)
-      const userAggregate = await this.loadUserAggregate(userId, UserAggregateClass);
-      
+      const userAggregate = await this.loadUserAggregate(
+        userId,
+        UserAggregateClass
+      );
+
       // Use library method
       userAggregate.updatePreferences(preferences);
-      
+
       const updatedUser = userAggregate.toSnapshot();
-      
+
       this.logger.log(`User preferences updated: ${userId}`);
       return updatedUser;
     } catch (error) {
@@ -93,12 +97,15 @@ export class UserAggregateService {
   async deactivateUser(userId: string, reason: string): Promise<void> {
     try {
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      
-      const userAggregate = await this.loadUserAggregate(userId, UserAggregateClass);
-      
+
+      const userAggregate = await this.loadUserAggregate(
+        userId,
+        UserAggregateClass
+      );
+
       // Use library method with domain logic
       userAggregate.deactivate(reason);
-      
+
       this.logger.log(`User deactivated: ${userId}, reason: ${reason}`);
     } catch (error) {
       this.logger.error(`Failed to deactivate user: ${error.message}`);
@@ -109,9 +116,12 @@ export class UserAggregateService {
   async getUserById(userId: string): Promise<User | null> {
     try {
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      
-      const userAggregate = await this.loadUserAggregate(userId, UserAggregateClass);
-      
+
+      const userAggregate = await this.loadUserAggregate(
+        userId,
+        UserAggregateClass
+      );
+
       return userAggregate.toSnapshot();
     } catch (error) {
       this.logger.warn(`User not found: ${userId}`);
@@ -120,7 +130,10 @@ export class UserAggregateService {
   }
 
   // ✅ FOCUS: Helper method for aggregate loading
-  private async loadUserAggregate(userId: string, UserAggregateClass: any): Promise<any> {
+  private async loadUserAggregate(
+    userId: string,
+    UserAggregateClass: any
+  ): Promise<any> {
     // In a real implementation, this would load from repository/event store
     // For example purposes, we'll create a mock aggregate
     return UserAggregateClass.fromSnapshot({
@@ -129,7 +142,7 @@ export class UserAggregateService {
       email: `user${userId}@example.com`,
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -137,8 +150,11 @@ export class UserAggregateService {
   async getUserDomainEvents(userId: string): Promise<any[]> {
     try {
       const UserAggregateClass = VytchesDDD.resolve<any>('UserAggregate');
-      const userAggregate = await this.loadUserAggregate(userId, UserAggregateClass);
-      
+      const userAggregate = await this.loadUserAggregate(
+        userId,
+        UserAggregateClass
+      );
+
       // Get uncommitted events from aggregate
       return userAggregate.getUncommittedEvents();
     } catch (error) {
@@ -167,6 +183,7 @@ export class UserModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Service acts as thin wrapper around @vytches-ddd/aggregates
 - Uses VytchesDDD service locator for dependency injection
 - Maintains separation between framework and domain logic
@@ -174,6 +191,7 @@ export class UserModule implements OnModuleInit {
 - Initialize VytchesDDD container in module setup
 
 **Integration Benefits:**
+
 1. **Clean Separation**: Framework service doesn't contain business logic
 2. **Type Safety**: Full TypeScript support through proper typing
 3. **Testability**: Easy to mock VytchesDDD dependencies
@@ -181,6 +199,7 @@ export class UserModule implements OnModuleInit {
 5. **Observability**: Built-in logging for debugging and monitoring
 
 **Usage Example:**
+
 ```typescript
 // user.controller.ts
 @Controller('users')
@@ -208,6 +227,7 @@ export class UserController {
 ```
 
 **Configuration:**
+
 ```typescript
 // app.module.ts
 @Module({

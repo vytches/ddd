@@ -1,45 +1,47 @@
 # Basic Use Cases
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: basic
-**Domain**: Infrastructure
-**Patterns**: Real-world scenarios, practical applications, common use cases
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Domain**: Infrastructure **Patterns**: Real-world scenarios, practical
+applications, common use cases **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-This example demonstrates real-world use cases for the utilities package, showing how Result patterns, safe execution, and library utilities solve common development challenges in typical business applications.
+This example demonstrates real-world use cases for the utilities package,
+showing how Result patterns, safe execution, and library utilities solve common
+development challenges in typical business applications.
 
 ## Business Context
 
 Real applications face common challenges:
+
 - User input validation and processing
 - API response handling with proper error management
 - File processing operations that can fail
 - Configuration validation and setup
 - Testing error conditions reliably
 
-These use cases show how to address these challenges using the utilities package.
+These use cases show how to address these challenges using the utilities
+package.
 
 ## Code Example
 
 ```typescript
 // basic-use-cases.ts
 import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
-import { 
-  UserData, 
-  ValidationError, 
-  ApiResponse, 
+import {
+  UserData,
+  ValidationError,
+  ApiResponse,
   ServiceResponse,
-  CreateUserRequest 
+  CreateUserRequest,
 } from '../types';
 
 // ✅ FOCUS: Real-world utility usage scenarios
 export class BasicUseCases {
-  
   // USE CASE 1: User Registration Form Processing
-  async processUserRegistration(formData: CreateUserRequest): Promise<ServiceResponse<UserData>> {
+  async processUserRegistration(
+    formData: CreateUserRequest
+  ): Promise<ServiceResponse<UserData>> {
     // Step 1: Validate input data
     const validationResult = this.validateRegistrationData(formData);
     if (validationResult.isFailure) {
@@ -58,7 +60,9 @@ export class BasicUseCases {
     }
 
     // Step 2: Check if user already exists
-    const existsResult = await this.checkUserExists(validationResult.value.email);
+    const existsResult = await this.checkUserExists(
+      validationResult.value.email
+    );
     if (existsResult.isFailure) {
       return {
         success: false,
@@ -90,9 +94,9 @@ export class BasicUseCases {
 
     // Step 3: Create and save user
     const createResult = await this.createAndSaveUser(validationResult.value);
-    
+
     return createResult.match(
-      (user) => ({
+      user => ({
         success: true,
         data: user,
         metadata: {
@@ -101,7 +105,7 @@ export class BasicUseCases {
           version: '1.0.0',
         },
       }),
-      (error) => ({
+      error => ({
         success: false,
         error: {
           code: 'CREATE_ERROR',
@@ -116,7 +120,9 @@ export class BasicUseCases {
     );
   }
 
-  private validateRegistrationData(formData: CreateUserRequest): Result<CreateUserRequest, ValidationError> {
+  private validateRegistrationData(
+    formData: CreateUserRequest
+  ): Result<CreateUserRequest, ValidationError> {
     // Validate email
     if (LibUtils.isEmpty(formData.email)) {
       return Result.fail({
@@ -175,22 +181,26 @@ export class BasicUseCases {
     });
   }
 
-  private async checkUserExists(email: string): Promise<Result<boolean, Error>> {
+  private async checkUserExists(
+    email: string
+  ): Promise<Result<boolean, Error>> {
     return await Result.tryAsync(async () => {
       // Simulate database check
       await LibUtils.sleep(50);
-      
+
       // Simulate some users existing
       const existingUsers = ['admin@example.com', 'test@example.com'];
       return existingUsers.includes(email.toLowerCase());
     });
   }
 
-  private async createAndSaveUser(userData: CreateUserRequest): Promise<Result<UserData, Error>> {
+  private async createAndSaveUser(
+    userData: CreateUserRequest
+  ): Promise<Result<UserData, Error>> {
     return await Result.tryAsync(async () => {
       // Simulate user creation process
       await LibUtils.sleep(100);
-      
+
       const user: UserData = {
         id: LibUtils.getUUID(),
         email: userData.email,
@@ -213,16 +223,16 @@ export class BasicUseCases {
     return Result.try(() => {
       // Parse JSON configuration
       const config = JSON.parse(configString);
-      
+
       // Validate required fields
       if (LibUtils.isEmpty(config.appName)) {
         throw new Error('Configuration missing required field: appName');
       }
-      
+
       if (LibUtils.isEmpty(config.version)) {
         throw new Error('Configuration missing required field: version');
       }
-      
+
       // Set defaults for optional fields
       return {
         ...config,
@@ -236,7 +246,11 @@ export class BasicUseCases {
   // USE CASE 3: API Response Processing
   processApiResponse<T>(response: ApiResponse<T>): Result<T, Error> {
     if (response.status < 200 || response.status >= 300) {
-      return Result.fail(new Error(`API Error: ${response.status} - ${response.message || 'Unknown error'}`));
+      return Result.fail(
+        new Error(
+          `API Error: ${response.status} - ${response.message || 'Unknown error'}`
+        )
+      );
     }
 
     if (LibUtils.isEmpty(response.data)) {
@@ -257,7 +271,7 @@ export class BasicUseCases {
         if (LibUtils.isEmpty(userData.email)) {
           throw new Error(`User ${index + 1}: Email is required`);
         }
-        
+
         if (LibUtils.isEmpty(userData.name)) {
           throw new Error(`User ${index + 1}: Name is required`);
         }
@@ -309,7 +323,9 @@ export class BasicUseCases {
   }
 
   // USE CASE 5: Data Import Validation
-  validateImportData(importData: unknown[]): Result<UserData[], ValidationError[]> {
+  validateImportData(
+    importData: unknown[]
+  ): Result<UserData[], ValidationError[]> {
     const validUsers: UserData[] = [];
     const validationErrors: ValidationError[] = [];
 
@@ -378,7 +394,7 @@ export class BasicUseCases {
 
     for (const { name, check } of checks) {
       const [error, result] = await safeRun(async () => await check());
-      
+
       if (error) {
         errors.push(`${name}: ${error.message}`);
         healthData[name] = { status: 'error', message: error.message };
@@ -396,11 +412,14 @@ export class BasicUseCases {
         components: healthData,
         timestamp: new Date(),
       },
-      error: errors.length > 0 ? {
-        code: 'HEALTH_CHECK_FAILED',
-        message: `${errors.length} components are unhealthy`,
-        details: errors,
-      } : undefined,
+      error:
+        errors.length > 0
+          ? {
+              code: 'HEALTH_CHECK_FAILED',
+              message: `${errors.length} components are unhealthy`,
+              details: errors,
+            }
+          : undefined,
       metadata: {
         timestamp: new Date(),
         requestId: LibUtils.getUUID(),
@@ -436,31 +455,37 @@ class ValidationError extends Error {
 ## Real-World Scenarios
 
 ### 1. User Registration
+
 - Input validation with detailed error messages
 - Duplicate checking with database operations
 - Safe error handling without exceptions
 
 ### 2. Configuration Processing
+
 - JSON parsing with proper error handling
 - Required field validation
 - Default value assignment
 
 ### 3. API Integration
+
 - Response status validation
 - Data extraction with safety checks
 - Consistent error handling
 
 ### 4. Bulk Operations
+
 - Processing multiple items safely
 - Error collection without stopping entire operation
 - Detailed error reporting
 
 ### 5. Data Import
+
 - Type checking and validation
 - Row-level error tracking
 - Partial success handling
 
 ### 6. System Monitoring
+
 - Multiple service health checks
 - Graceful degradation handling
 - Comprehensive status reporting

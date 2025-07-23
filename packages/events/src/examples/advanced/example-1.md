@@ -1,19 +1,24 @@
 # Event Sourcing with Snapshots
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/events
-**Complexity**: advanced
-**Domain**: Architecture
-**Patterns**: event-sourcing, snapshots, aggregate-reconstruction, performance-optimization
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/aggregates, @vytches-ddd/event-store
+**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Domain**: Architecture **Patterns**: event-sourcing, snapshots,
+aggregate-reconstruction, performance-optimization **Dependencies**:
+@vytches-ddd/events, @vytches-ddd/aggregates, @vytches-ddd/event-store
 
 ## Description
 
-Advanced event sourcing implementation with snapshot optimization for aggregate reconstruction. This example demonstrates enterprise-grade event sourcing patterns that can handle high-volume event streams while maintaining performance through strategic snapshot management.
+Advanced event sourcing implementation with snapshot optimization for aggregate
+reconstruction. This example demonstrates enterprise-grade event sourcing
+patterns that can handle high-volume event streams while maintaining performance
+through strategic snapshot management.
 
 ## Business Context
 
-Large-scale applications with high event volumes need efficient aggregate reconstruction mechanisms. Event sourcing provides complete audit trails and temporal queries, but replaying thousands of events becomes performance-prohibitive. Snapshots allow fast aggregate reconstruction by storing aggregate state at specific intervals.
+Large-scale applications with high event volumes need efficient aggregate
+reconstruction mechanisms. Event sourcing provides complete audit trails and
+temporal queries, but replaying thousands of events becomes
+performance-prohibitive. Snapshots allow fast aggregate reconstruction by
+storing aggregate state at specific intervals.
 
 ## Code Example
 
@@ -143,7 +148,6 @@ export class BankAccount extends AggregateRoot {
 
       account.addDomainEvent(event);
       return Result.ok(account);
-
     } catch (error) {
       return Result.fail(new Error(`Failed to open account: ${error.message}`));
     }
@@ -185,9 +189,10 @@ export class BankAccount extends AggregateRoot {
 
       account.markEventsAsCommitted();
       return Result.ok(account);
-
     } catch (error) {
-      return Result.fail(new Error(`Failed to reconstruct aggregate: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to reconstruct aggregate: ${error.message}`)
+      );
     }
   }
 
@@ -269,7 +274,7 @@ export class BankAccount extends AggregateRoot {
       default:
         throw new Error(`Unknown event type: ${event.eventType}`);
     }
-    
+
     this.incrementVersion();
   }
 
@@ -286,7 +291,7 @@ export class BankAccount extends AggregateRoot {
         transactionId: EntityId.createUuid(),
         amount: event.initialBalance,
         type: 'deposit',
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
       });
     }
   }
@@ -297,7 +302,7 @@ export class BankAccount extends AggregateRoot {
       transactionId: event.transactionId,
       amount: event.amount,
       type: 'deposit',
-      timestamp: event.timestamp
+      timestamp: event.timestamp,
     });
   }
 
@@ -307,7 +312,7 @@ export class BankAccount extends AggregateRoot {
       transactionId: event.transactionId,
       amount: event.amount,
       type: 'withdrawal',
-      timestamp: event.timestamp
+      timestamp: event.timestamp,
     });
   }
 
@@ -330,8 +335,8 @@ export class BankAccount extends AggregateRoot {
         status: this._status,
         transactionHistory: [...this._transactionHistory],
         openedAt: this._openedAt,
-        closedAt: this._closedAt
-      }
+        closedAt: this._closedAt,
+      },
     };
   }
 
@@ -353,14 +358,30 @@ export class BankAccount extends AggregateRoot {
   }
 
   // Getters
-  get accountId(): EntityId { return this._accountId; }
-  get customerId(): EntityId { return this._customerId; }
-  get balance(): number { return this._balance; }
-  get accountType(): string { return this._accountType; }
-  get status(): string { return this._status; }
-  get transactionHistory(): ReadonlyArray<any> { return this._transactionHistory; }
-  get openedAt(): Date { return this._openedAt; }
-  get closedAt(): Date | undefined { return this._closedAt; }
+  get accountId(): EntityId {
+    return this._accountId;
+  }
+  get customerId(): EntityId {
+    return this._customerId;
+  }
+  get balance(): number {
+    return this._balance;
+  }
+  get accountType(): string {
+    return this._accountType;
+  }
+  get status(): string {
+    return this._status;
+  }
+  get transactionHistory(): ReadonlyArray<any> {
+    return this._transactionHistory;
+  }
+  get openedAt(): Date {
+    return this._openedAt;
+  }
+  get closedAt(): Date | undefined {
+    return this._closedAt;
+  }
 }
 
 // ⭐ FOCUS: Event-sourced repository with snapshot support
@@ -370,12 +391,15 @@ export class EventSourcedBankAccountRepository {
     private readonly snapshotStore: SnapshotStore
   ) {}
 
-  async findById(accountId: EntityId): Promise<Result<BankAccount | null, Error>> {
+  async findById(
+    accountId: EntityId
+  ): Promise<Result<BankAccount | null, Error>> {
     try {
       // ⭐ FOCUS: Try to load latest snapshot first
-      const snapshotResult = await this.snapshotStore.getLatestSnapshot<AccountSnapshot>(
-        accountId.value
-      );
+      const snapshotResult =
+        await this.snapshotStore.getLatestSnapshot<AccountSnapshot>(
+          accountId.value
+        );
 
       let snapshot: AccountSnapshot | undefined;
       if (snapshotResult.isSuccess()) {
@@ -395,7 +419,6 @@ export class EventSourcedBankAccountRepository {
 
       const account = accountResult.value;
       return Result.ok(account.version === 0 ? null : account);
-
     } catch (error) {
       return Result.fail(new Error(`Failed to find account: ${error.message}`));
     }
@@ -405,7 +428,7 @@ export class EventSourcedBankAccountRepository {
     try {
       // ⭐ FOCUS: Save uncommitted events to event store
       const uncommittedEvents = account.getUncommittedEvents();
-      
+
       if (uncommittedEvents.length > 0) {
         const saveResult = await this.eventStore.saveEvents(
           account.accountId.value,
@@ -424,15 +447,16 @@ export class EventSourcedBankAccountRepository {
       if (account.shouldCreateSnapshot()) {
         const snapshot = account.createSnapshot();
         const snapshotResult = await this.snapshotStore.saveSnapshot(snapshot);
-        
+
         if (snapshotResult.isFailure()) {
           // Log warning but don't fail the save operation
-          console.warn(`Failed to save snapshot: ${snapshotResult.error.message}`);
+          console.warn(
+            `Failed to save snapshot: ${snapshotResult.error.message}`
+          );
         }
       }
 
       return Result.ok();
-
     } catch (error) {
       return Result.fail(new Error(`Failed to save account: ${error.message}`));
     }
@@ -443,7 +467,10 @@ export class EventSourcedBankAccountRepository {
 export interface SnapshotStore {
   saveSnapshot<T>(snapshot: T): Promise<Result<void, Error>>;
   getLatestSnapshot<T>(aggregateId: string): Promise<Result<T | null, Error>>;
-  getSnapshotAtVersion<T>(aggregateId: string, version: number): Promise<Result<T | null, Error>>;
+  getSnapshotAtVersion<T>(
+    aggregateId: string,
+    version: number
+  ): Promise<Result<T | null, Error>>;
 }
 
 export class InMemorySnapshotStore implements SnapshotStore {
@@ -467,32 +494,39 @@ export class InMemorySnapshotStore implements SnapshotStore {
       }
 
       return Result.ok();
-
     } catch (error) {
-      return Result.fail(new Error(`Failed to save snapshot: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to save snapshot: ${error.message}`)
+      );
     }
   }
 
-  async getLatestSnapshot<T>(aggregateId: string): Promise<Result<T | null, Error>> {
+  async getLatestSnapshot<T>(
+    aggregateId: string
+  ): Promise<Result<T | null, Error>> {
     try {
       const snapshots = this.snapshots.get(aggregateId);
-      
+
       if (!snapshots || snapshots.length === 0) {
         return Result.ok(null);
       }
 
       const latest = snapshots[snapshots.length - 1];
       return Result.ok(latest as T);
-
     } catch (error) {
-      return Result.fail(new Error(`Failed to get latest snapshot: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to get latest snapshot: ${error.message}`)
+      );
     }
   }
 
-  async getSnapshotAtVersion<T>(aggregateId: string, version: number): Promise<Result<T | null, Error>> {
+  async getSnapshotAtVersion<T>(
+    aggregateId: string,
+    version: number
+  ): Promise<Result<T | null, Error>> {
     try {
       const snapshots = this.snapshots.get(aggregateId);
-      
+
       if (!snapshots || snapshots.length === 0) {
         return Result.ok(null);
       }
@@ -503,9 +537,10 @@ export class InMemorySnapshotStore implements SnapshotStore {
         .sort((a, b) => b.version - a.version)[0];
 
       return Result.ok(snapshot ? (snapshot as T) : null);
-
     } catch (error) {
-      return Result.fail(new Error(`Failed to get snapshot at version: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to get snapshot at version: ${error.message}`)
+      );
     }
   }
 }
@@ -521,12 +556,15 @@ import { EntityId } from '@vytches-ddd/value-objects';
 async function demonstrateEventSourcing() {
   const eventStore = new InMemoryEventStore();
   const snapshotStore = new InMemorySnapshotStore();
-  const repository = new EventSourcedBankAccountRepository(eventStore, snapshotStore);
+  const repository = new EventSourcedBankAccountRepository(
+    eventStore,
+    snapshotStore
+  );
 
   // ⭐ FOCUS: Create and save new account with events
   const customerId = EntityId.createUuid();
   const accountResult = BankAccount.openAccount(customerId, 1000, 'checking');
-  
+
   if (accountResult.isSuccess()) {
     const account = accountResult.value;
     const accountId = account.accountId;
@@ -534,7 +572,7 @@ async function demonstrateEventSourcing() {
     // Generate many transactions to trigger snapshots
     for (let i = 0; i < 250; i++) {
       const transactionId = EntityId.createUuid();
-      
+
       if (i % 2 === 0) {
         account.deposit(100, transactionId);
       } else {
@@ -547,11 +585,13 @@ async function demonstrateEventSourcing() {
 
     // ⭐ FOCUS: Load account - will use latest snapshot + remaining events
     const loadedAccountResult = await repository.findById(accountId);
-    
+
     if (loadedAccountResult.isSuccess()) {
       const loadedAccount = loadedAccountResult.value;
       console.log(`Account balance: ${loadedAccount.balance}`);
-      console.log(`Transaction count: ${loadedAccount.transactionHistory.length}`);
+      console.log(
+        `Transaction count: ${loadedAccount.transactionHistory.length}`
+      );
       console.log(`Account version: ${loadedAccount.version}`);
     }
   }
@@ -564,14 +604,17 @@ async function queryAccountHistory() {
 
   // ⭐ FOCUS: Get all events for temporal queries
   const eventsResult = await eventStore.getEventsForAggregate(accountId.value);
-  
+
   if (eventsResult.isSuccess()) {
     const events = eventsResult.value;
-    
+
     // Analyze deposit patterns
     const deposits = events.filter(e => e.eventType === 'MoneyDeposited');
-    const totalDeposited = deposits.reduce((sum, event) => sum + (event as MoneyDepositedEvent).amount, 0);
-    
+    const totalDeposited = deposits.reduce(
+      (sum, event) => sum + (event as MoneyDepositedEvent).amount,
+      0
+    );
+
     console.log(`Total deposits: ${totalDeposited}`);
     console.log(`Number of deposits: ${deposits.length}`);
   }
@@ -604,12 +647,18 @@ export class SnapshotConfig {
 
 // Performance monitoring
 export class EventSourcingMetrics {
-  static trackAggregateReconstruction(aggregateId: string, eventCount: number, hasSnapshot: boolean, reconstructionTime: number) {
+  static trackAggregateReconstruction(
+    aggregateId: string,
+    eventCount: number,
+    hasSnapshot: boolean,
+    reconstructionTime: number
+  ) {
     console.log(`Aggregate ${aggregateId} reconstructed:`, {
       eventCount,
       hasSnapshot,
       reconstructionTime,
-      performanceCategory: reconstructionTime < 100 ? 'excellent' : 'needs_optimization'
+      performanceCategory:
+        reconstructionTime < 100 ? 'excellent' : 'needs_optimization',
     });
   }
 }
@@ -617,10 +666,12 @@ export class EventSourcingMetrics {
 
 ## Common Pitfalls
 
-- **Over-snapshotting**: Creating snapshots too frequently can impact write performance
+- **Over-snapshotting**: Creating snapshots too frequently can impact write
+  performance
 - **Under-snapshotting**: Too few snapshots make reconstruction slow
 - **Schema Evolution**: Handle event schema changes carefully with versioning
-- **Memory Usage**: Large aggregates with many events can consume significant memory
+- **Memory Usage**: Large aggregates with many events can consume significant
+  memory
 - **Concurrency Conflicts**: Handle optimistic concurrency properly
 
 ## Related Examples

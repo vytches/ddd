@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
 import { UnifiedExampleParser } from '../../src/parsers/unified-parser';
 import { globalDocumentationRegistry } from '../../src/core/documentation-registry';
-import type { EnhancedExampleDefinition, FrameworkComponentType, ParsedDocumentationSet } from '../../src/types/documentation-types';
+import type {
+  EnhancedExampleDefinition,
+  FrameworkComponentType,
+  ParsedDocumentationSet,
+} from '../../src/types/documentation-types';
 import { promises as fs } from 'fs';
 
 // Mock dependencies
@@ -122,9 +126,9 @@ No migration needed.
       expect(result?.base.content.codeExample).toContain('export class TestClass');
       expect(result?.base.content.supportingTypes).toContain('interface TestInterface');
       expect(result?.base.content.usageExample).toContain('const test = new TestClass()');
-      expect(result?.base.content.testExample).toContain('describe(\'TestClass\'');
+      expect(result?.base.content.testExample).toContain("describe('TestClass'");
       expect(result?.base.content.commonPitfalls).toEqual([
-        'Don\'t forget to initialize',
+        "Don't forget to initialize",
         'Always validate inputs',
         'Handle errors properly',
       ]);
@@ -140,7 +144,7 @@ No migration needed.
       const error = resultUP2[0] as Error | undefined;
 
       expect(error).toBeInstanceOf(Error);
-      expect(error?.message).toContain('Example \'non-existent\' not found');
+      expect(error?.message).toContain("Example 'non-existent' not found");
     });
 
     it('should parse with framework integration', async () => {
@@ -214,7 +218,7 @@ Deploy with PM2 or Docker.
       const resultUP = await safeRun(async (): Promise<ParsedDocumentationSet> => {
         return await parser.parseExample({
           exampleId: 'test-example',
-          framework: 'nestjs'
+          framework: 'nestjs',
         });
       });
       const error = resultUP[0] as Error | undefined;
@@ -224,12 +228,12 @@ Deploy with PM2 or Docker.
       expect(result?.framework).toBeDefined();
       expect(result?.framework?.framework).toBe('nestjs');
       expect(result?.framework?.components.get('service')).toContain('@Injectable()');
-      expect(result?.framework?.components.get('controller')).toContain('@Controller(\'test\')');
+      expect(result?.framework?.components.get('controller')).toContain("@Controller('test')");
       expect(result?.framework?.components.get('module')).toContain('@Module({');
       expect(result?.framework?.configuration).toContain('export const config');
       expect(result?.framework?.installation).toContain('npm install @nestjs/core');
       expect(result?.framework?.errorHandling).toContain('try {');
-      expect(result?.framework?.testing).toContain('describe(\'TestService\'');
+      expect(result?.framework?.testing).toContain("describe('TestService'");
       expect(result?.framework?.deployment).toContain('Deploy with PM2');
     });
 
@@ -239,13 +243,13 @@ Deploy with PM2 or Docker.
       const resultUP2 = await safeRun(async (): Promise<ParsedDocumentationSet> => {
         return await parser.parseExample({
           exampleId: 'test-example',
-          framework: 'nestjs'
+          framework: 'nestjs',
         });
       });
       const error = resultUP2[0] as Error | undefined;
 
       expect(error).toBeInstanceOf(Error);
-      expect(error?.message).toContain('Framework \'nestjs\' not available');
+      expect(error?.message).toContain("Framework 'nestjs' not available");
       expect(error?.message).toContain('Available: express');
     });
 
@@ -282,7 +286,7 @@ export class TestService {}
       const resultUP = await safeRun(async (): Promise<ParsedDocumentationSet> => {
         return await parser.parseExample({
           exampleId: 'test-example',
-          framework: 'nestjs'
+          framework: 'nestjs',
         });
       });
       const error = resultUP[0] as Error | undefined;
@@ -319,7 +323,7 @@ export class TestService {}
       const resultUP2 = await safeRun(async (): Promise<ParsedDocumentationSet> => {
         return await parser.parseExample({
           exampleId: 'test-example',
-          framework: 'nestjs'
+          framework: 'nestjs',
         });
       });
       const error = resultUP2[0] as Error | undefined;
@@ -363,7 +367,7 @@ export class UserModule {}
 
       expect(components.size).toBe(3);
       expect(components.get('user.service.ts')).toContain('@Injectable()');
-      expect(components.get('user.controller.ts')).toContain('@Controller(\'users\')');
+      expect(components.get('user.controller.ts')).toContain("@Controller('users')");
       expect(components.get('user.module.ts')).toContain('@Module({');
     });
 
@@ -451,7 +455,7 @@ export class UserService {}
         'controller',
         'repository',
         'dto',
-        'module'
+        'module',
       ]);
     });
 
@@ -488,13 +492,13 @@ export class UserService {}
       const resultUP2 = await safeRun(async (): Promise<ParsedDocumentationSet> => {
         return await parser.parseExample({
           exampleId: 'test-example',
-          framework: 'nestjs'
+          framework: 'nestjs',
         });
       });
       const error = resultUP2[0] as Error | undefined;
 
       expect(error).toBeInstanceOf(Error);
-      expect(error?.message).toContain('Framework integration for \'nestjs\' not found');
+      expect(error?.message).toContain("Framework integration for 'nestjs' not found");
     });
   });
 

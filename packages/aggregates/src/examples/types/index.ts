@@ -61,7 +61,7 @@ export interface OrderData {
   cancelledAt?: Date;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'draft'
   | 'pending'
   | 'confirmed'
@@ -206,7 +206,7 @@ export interface LoanApplicationData {
 }
 
 export type LoanType = 'personal' | 'mortgage' | 'auto' | 'business' | 'student';
-export type LoanStatus = 
+export type LoanStatus =
   | 'draft'
   | 'submitted'
   | 'under_review'
@@ -422,8 +422,8 @@ export interface TestScenario {
   name: string;
   description: string;
   given: any; // Initial state
-  when: any;  // Command/operation
-  then: any;  // Expected outcome
+  when: any; // Command/operation
+  then: any; // Expected outcome
   events?: any[]; // Expected events
 }
 

@@ -140,8 +140,8 @@ describe('ConfigManager', () => {
     it('should throw error for YAML files', async () => {
       mockFs.existsSync.mockReturnValue(true);
 
-      const [error] = await safeRun(async () =>
-        await ConfigManager.initialize('/path/to/config.yaml')
+      const [error] = await safeRun(
+        async () => await ConfigManager.initialize('/path/to/config.yaml')
       );
 
       expect(error).toBeInstanceOf(ConfigError);
@@ -152,8 +152,8 @@ describe('ConfigManager', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue('{ invalid json }');
 
-      const [error] = await safeRun(async () =>
-        await ConfigManager.initialize('/path/to/config.json')
+      const [error] = await safeRun(
+        async () => await ConfigManager.initialize('/path/to/config.json')
       );
 
       expect(error).toBeInstanceOf(ConfigError);
@@ -253,7 +253,9 @@ describe('ConfigManager', () => {
       };
       const savePath = '/path/to/save/config.json';
 
-      mockFs.writeFileSync.mockImplementation(() => { return });
+      mockFs.writeFileSync.mockImplementation(() => {
+        return;
+      });
 
       await ConfigManager.saveConfiguration(config, savePath);
 
@@ -268,23 +270,23 @@ describe('ConfigManager', () => {
       const existingPath = '/existing/config.json';
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue('{}');
-      mockFs.writeFileSync.mockImplementation(() => { return });
+      mockFs.writeFileSync.mockImplementation(() => {
+        return;
+      });
 
       await ConfigManager.initialize(existingPath);
       const config = ConfigManager.getConfig();
 
       await ConfigManager.saveConfiguration(config);
 
-      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-        existingPath,
-        expect.any(String),
-        'utf-8'
-      );
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(existingPath, expect.any(String), 'utf-8');
     });
 
     it('should default to vytches-ddd.config.yaml in cwd', async () => {
       const config = { ...defaultConfig };
-      mockFs.writeFileSync.mockImplementation(() => { return });
+      mockFs.writeFileSync.mockImplementation(() => {
+        return;
+      });
 
       await ConfigManager.saveConfiguration(config);
 
@@ -301,9 +303,7 @@ describe('ConfigManager', () => {
         throw new Error('Write failed');
       });
 
-      const [error] = await safeRun(async () =>
-        await ConfigManager.saveConfiguration(config)
-      );
+      const [error] = await safeRun(async () => await ConfigManager.saveConfiguration(config));
 
       expect(error).toBeInstanceOf(ConfigError);
       expect(error?.message).toContain('Failed to save configuration');
@@ -415,8 +415,8 @@ describe('ConfigManager', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue('{"patterns": "not-an-array"}');
 
-      const [error] = await safeRun(async () =>
-        await ConfigManager.initialize('/path/to/config.json')
+      const [error] = await safeRun(
+        async () => await ConfigManager.initialize('/path/to/config.json')
       );
 
       expect(error).toBeInstanceOf(ConfigError);
@@ -444,10 +444,12 @@ describe('ConfigManager', () => {
   describe('mergeConfigurations', () => {
     it('should merge array fields without duplicates', async () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(JSON.stringify({
-        patterns: ['repository', 'factory'],
-        plugins: ['plugin1'],
-      }));
+      mockFs.readFileSync.mockReturnValue(
+        JSON.stringify({
+          patterns: ['repository', 'factory'],
+          plugins: ['plugin1'],
+        })
+      );
 
       process.env.VYTCHES_PATTERNS = 'factory,observer';
       process.env.VYTCHES_PLUGINS = 'plugin1,plugin2';

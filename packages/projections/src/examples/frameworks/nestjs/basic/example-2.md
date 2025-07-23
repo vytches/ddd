@@ -1,38 +1,43 @@
 # Projection with Capabilities - NestJS Manual Setup
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections + NestJS
-**Complexity**: basic
-**Framework**: NestJS
-**Integration**: Manual setup with capabilities
-**Dependencies**: @nestjs/common, @vytches-ddd/projections, @vytches-ddd/events
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Complexity**: basic **Framework**: NestJS **Integration**: Manual setup with
+capabilities **Dependencies**: @nestjs/common, @vytches-ddd/projections,
+@vytches-ddd/events
 
 ## Description
 
-NestJS service implementing projection with production-ready capabilities (checkpoints, circuit breakers, dead letter queues) using manual setup. This example demonstrates how to enhance projections with enterprise features for reliable event processing.
+NestJS service implementing projection with production-ready capabilities
+(checkpoints, circuit breakers, dead letter queues) using manual setup. This
+example demonstrates how to enhance projections with enterprise features for
+reliable event processing.
 
 ## Business Context
 
-E-commerce order management systems require robust projections that can handle failures, recover from errors, and maintain data consistency even under high load or when external services are unavailable.
+E-commerce order management systems require robust projections that can handle
+failures, recover from errors, and maintain data consistency even under high
+load or when external services are unavailable.
 
 ## Service Implementation
 
 ```typescript
 // order-summary-projection.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { 
-  ProjectionBase, 
+import {
+  ProjectionBase,
   EventHandler,
   CheckpointCapability,
   CircuitBreakerCapability,
-  DeadLetterCapability 
+  DeadLetterCapability,
 } from '@vytches-ddd/projections';
 import { IDomainEvent } from '@vytches-ddd/events';
 import { OrderData, OrderSummaryData } from '../types'; // From your application
 
 @Injectable()
-export class OrderSummaryProjectionService extends ProjectionBase<any> implements OnModuleInit, OnModuleDestroy {
-  
+export class OrderSummaryProjectionService
+  extends ProjectionBase<any>
+  implements OnModuleInit, OnModuleDestroy
+{
   private checkpointCapability: CheckpointCapability;
   private circuitBreakerCapability: CircuitBreakerCapability;
   private deadLetterCapability: DeadLetterCapability;
@@ -46,7 +51,9 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
   async onModuleInit(): Promise<void> {
     // Start capabilities when NestJS module initializes
     await this.startCapabilities();
-    console.log('Order Summary Projection Service with capabilities initialized');
+    console.log(
+      'Order Summary Projection Service with capabilities initialized'
+    );
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -65,8 +72,8 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
         totalRevenue: 0,
         averageOrderValue: 0,
         processingErrors: 0,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     });
   }
 
@@ -78,7 +85,7 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       interval: 30000, // 30 seconds
       storage: 'memory', // In production, use persistent storage
       batchSize: 100,
-      enableCompression: true
+      enableCompression: true,
     });
 
     // Circuit breaker for external service protection
@@ -87,7 +94,7 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       failureThreshold: 5,
       resetTimeout: 60000, // 1 minute
       halfOpenMaxCalls: 3,
-      enabled: true
+      enabled: true,
     });
 
     // Dead letter queue for failed events
@@ -96,7 +103,7 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       maxRetries: 3,
       retryDelay: 5000,
       deadLetterStorage: 'memory', // In production, use persistent storage
-      enableRetryScheduling: true
+      enableRetryScheduling: true,
     });
 
     // Add capabilities to projection
@@ -110,10 +117,10 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       await this.checkpointCapability.start();
       await this.circuitBreakerCapability.start();
       await this.deadLetterCapability.start();
-      
+
       // Setup capability event handlers
       this.setupCapabilityHandlers();
-      
+
       console.log('All projection capabilities started successfully');
     } catch (error) {
       console.error('Failed to start projection capabilities:', error);
@@ -124,9 +131,10 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
   private async stopCapabilities(): Promise<void> {
     try {
       if (this.checkpointCapability) await this.checkpointCapability.stop();
-      if (this.circuitBreakerCapability) await this.circuitBreakerCapability.stop();
+      if (this.circuitBreakerCapability)
+        await this.circuitBreakerCapability.stop();
       if (this.deadLetterCapability) await this.deadLetterCapability.stop();
-      
+
       console.log('All projection capabilities stopped successfully');
     } catch (error) {
       console.error('Error stopping projection capabilities:', error);
@@ -136,11 +144,15 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
   private setupCapabilityHandlers(): void {
     // Checkpoint events
     this.checkpointCapability.on('checkpointCreated', (checkpoint: any) => {
-      console.log(`Checkpoint created for ${this.projectionName}: ${checkpoint.id}`);
+      console.log(
+        `Checkpoint created for ${this.projectionName}: ${checkpoint.id}`
+      );
     });
 
     this.checkpointCapability.on('checkpointRestored', (checkpoint: any) => {
-      console.log(`Projection state restored from checkpoint: ${checkpoint.id}`);
+      console.log(
+        `Projection state restored from checkpoint: ${checkpoint.id}`
+      );
       this.handleCheckpointRestored(checkpoint);
     });
 
@@ -159,9 +171,12 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       this.handleDeadLetteredEvent(event);
     });
 
-    this.deadLetterCapability.on('eventRetried', (event: IDomainEvent, attempt: number) => {
-      console.log(`Retrying event ${event.eventId}, attempt ${attempt}`);
-    });
+    this.deadLetterCapability.on(
+      'eventRetried',
+      (event: IDomainEvent, attempt: number) => {
+        console.log(`Retrying event ${event.eventId}, attempt ${attempt}`);
+      }
+    );
   }
 
   // ✅ FOCUS: Enhanced event handlers with capabilities
@@ -184,7 +199,7 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
         itemCount: orderData.items?.length || 0,
         status: 'created',
         createdAt: new Date(event.timestamp),
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
 
       // Update order summaries
@@ -196,33 +211,41 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
         date: dateKey,
         orderCount: 0,
         totalRevenue: 0,
-        averageOrderValue: 0
+        averageOrderValue: 0,
       };
 
       dailySummary.orderCount++;
       dailySummary.totalRevenue += orderSummary.totalAmount;
-      dailySummary.averageOrderValue = dailySummary.totalRevenue / dailySummary.orderCount;
+      dailySummary.averageOrderValue =
+        dailySummary.totalRevenue / dailySummary.orderCount;
       currentState.dailySummaries.set(dateKey, dailySummary);
 
       // Update customer summary
-      const customerSummary = currentState.customerSummaries.get(orderSummary.customerId) || {
+      const customerSummary = currentState.customerSummaries.get(
+        orderSummary.customerId
+      ) || {
         customerId: orderSummary.customerId,
         orderCount: 0,
         totalSpent: 0,
         averageOrderValue: 0,
-        lastOrderDate: null
+        lastOrderDate: null,
       };
 
       customerSummary.orderCount++;
       customerSummary.totalSpent += orderSummary.totalAmount;
-      customerSummary.averageOrderValue = customerSummary.totalSpent / customerSummary.orderCount;
+      customerSummary.averageOrderValue =
+        customerSummary.totalSpent / customerSummary.orderCount;
       customerSummary.lastOrderDate = orderSummary.createdAt;
-      currentState.customerSummaries.set(orderSummary.customerId, customerSummary);
+      currentState.customerSummaries.set(
+        orderSummary.customerId,
+        customerSummary
+      );
 
       // Update global stats
       currentState.stats.totalOrders = currentState.orders.size;
       currentState.stats.totalRevenue += orderSummary.totalAmount;
-      currentState.stats.averageOrderValue = currentState.stats.totalRevenue / currentState.stats.totalOrders;
+      currentState.stats.averageOrderValue =
+        currentState.stats.totalRevenue / currentState.stats.totalOrders;
       currentState.stats.lastUpdated = new Date();
 
       this.setState(currentState);
@@ -230,19 +253,23 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       // Record successful processing with circuit breaker
       await this.circuitBreakerCapability.recordSuccess();
 
-      console.log(`Order summary created: ${orderSummary.orderId} ($${orderSummary.totalAmount})`);
-
+      console.log(
+        `Order summary created: ${orderSummary.orderId} ($${orderSummary.totalAmount})`
+      );
     } catch (error) {
       // Record failure with circuit breaker
       await this.circuitBreakerCapability.recordFailure();
-      
+
       // Update error stats
       const currentState = this.getState();
       currentState.stats.processingErrors++;
       this.setState(currentState);
 
-      console.error(`Error processing OrderCreated event ${event.eventId}:`, error);
-      
+      console.error(
+        `Error processing OrderCreated event ${event.eventId}:`,
+        error
+      );
+
       // Let the dead letter capability handle the retry logic
       throw error;
     }
@@ -269,23 +296,31 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       orderSummary.lastUpdated = new Date();
 
       // Handle cancellation revenue adjustment
-      if (statusData.newStatus === 'cancelled' && orderSummary.status !== 'cancelled') {
+      if (
+        statusData.newStatus === 'cancelled' &&
+        orderSummary.status !== 'cancelled'
+      ) {
         currentState.stats.totalRevenue -= orderSummary.totalAmount;
-        currentState.stats.averageOrderValue = currentState.stats.totalRevenue / currentState.stats.totalOrders;
-        
+        currentState.stats.averageOrderValue =
+          currentState.stats.totalRevenue / currentState.stats.totalOrders;
+
         // Update daily summary
         const dateKey = orderSummary.createdAt.toISOString().split('T')[0];
         const dailySummary = currentState.dailySummaries.get(dateKey);
         if (dailySummary) {
           dailySummary.totalRevenue -= orderSummary.totalAmount;
-          dailySummary.averageOrderValue = dailySummary.totalRevenue / dailySummary.orderCount;
+          dailySummary.averageOrderValue =
+            dailySummary.totalRevenue / dailySummary.orderCount;
         }
 
         // Update customer summary
-        const customerSummary = currentState.customerSummaries.get(orderSummary.customerId);
+        const customerSummary = currentState.customerSummaries.get(
+          orderSummary.customerId
+        );
         if (customerSummary) {
           customerSummary.totalSpent -= orderSummary.totalAmount;
-          customerSummary.averageOrderValue = customerSummary.totalSpent / customerSummary.orderCount;
+          customerSummary.averageOrderValue =
+            customerSummary.totalSpent / customerSummary.orderCount;
         }
       }
 
@@ -295,16 +330,20 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
 
       await this.circuitBreakerCapability.recordSuccess();
 
-      console.log(`Order status updated: ${orderSummary.orderId} -> ${orderSummary.status}`);
-
+      console.log(
+        `Order status updated: ${orderSummary.orderId} -> ${orderSummary.status}`
+      );
     } catch (error) {
       await this.circuitBreakerCapability.recordFailure();
-      
+
       const currentState = this.getState();
       currentState.stats.processingErrors++;
       this.setState(currentState);
 
-      console.error(`Error processing OrderStatusChanged event ${event.eventId}:`, error);
+      console.error(
+        `Error processing OrderStatusChanged event ${event.eventId}:`,
+        error
+      );
       throw error;
     }
   }
@@ -333,25 +372,25 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
         checkpoints: {
           enabled: true,
           lastCheckpoint: this.checkpointCapability.getLastCheckpointTime(),
-          checkpointCount: this.checkpointCapability.getCheckpointCount()
+          checkpointCount: this.checkpointCapability.getCheckpointCount(),
         },
         circuitBreaker: {
           state: this.circuitBreakerCapability.getState(),
           failureCount: this.circuitBreakerCapability.getFailureCount(),
-          successCount: this.circuitBreakerCapability.getSuccessCount()
+          successCount: this.circuitBreakerCapability.getSuccessCount(),
         },
         deadLetter: {
           deadLetterCount: this.deadLetterCapability.getDeadLetterCount(),
-          retryQueueSize: this.deadLetterCapability.getRetryQueueSize()
-        }
-      }
+          retryQueueSize: this.deadLetterCapability.getRetryQueueSize(),
+        },
+      },
     };
   }
 
   getAllDailySummaries(): Array<any> {
     const state = this.getState();
-    return Array.from(state.dailySummaries.values()).sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+    return Array.from(state.dailySummaries.values()).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
   }
 
@@ -394,13 +433,14 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
       isOpen: this.circuitBreakerCapability.isOpen(),
       failureCount: this.circuitBreakerCapability.getFailureCount(),
       successCount: this.circuitBreakerCapability.getSuccessCount(),
-      lastFailureTime: this.circuitBreakerCapability.getLastFailureTime()
+      lastFailureTime: this.circuitBreakerCapability.getLastFailureTime(),
     };
   }
 
   async processDeadLetterQueue(): Promise<number> {
     try {
-      const processedCount = await this.deadLetterCapability.processDeadLetterQueue();
+      const processedCount =
+        await this.deadLetterCapability.processDeadLetterQueue();
       console.log(`Processed ${processedCount} events from dead letter queue`);
       return processedCount;
     } catch (error) {
@@ -423,18 +463,22 @@ export class OrderSummaryProjectionService extends ProjectionBase<any> implement
 
   // Private capability event handlers
   private handleCheckpointRestored(checkpoint: any): void {
-    console.log(`Projection state restored from checkpoint created at: ${checkpoint.createdAt}`);
+    console.log(
+      `Projection state restored from checkpoint created at: ${checkpoint.createdAt}`
+    );
     // Additional restoration logic if needed
   }
 
   private handleDeadLetteredEvent(event: IDomainEvent): void {
-    console.error(`Event ${event.eventId} of type ${event.eventType} has been dead lettered after maximum retries`);
-    
+    console.error(
+      `Event ${event.eventId} of type ${event.eventType} has been dead lettered after maximum retries`
+    );
+
     // Update error statistics
     const currentState = this.getState();
     currentState.stats.processingErrors++;
     this.setState(currentState);
-    
+
     // In production, you might want to:
     // - Send alerts to monitoring systems
     // - Log to external error tracking
@@ -452,7 +496,6 @@ import { OrderSummaryProjectionService } from './order-summary-projection.servic
 
 @Controller('api/order-summaries')
 export class OrderSummaryController {
-
   constructor(
     private readonly orderSummaryProjection: OrderSummaryProjectionService
   ) {}
@@ -521,7 +564,8 @@ export class OrderSummaryController {
 
   @Post('dead-letter/process')
   async processDeadLetterQueue() {
-    const processedCount = await this.orderSummaryProjection.processDeadLetterQueue();
+    const processedCount =
+      await this.orderSummaryProjection.processDeadLetterQueue();
     return { processedEvents: processedCount };
   }
 }
@@ -538,7 +582,7 @@ import { OrderSummaryController } from './order-summary.controller';
 @Module({
   providers: [OrderSummaryProjectionService],
   controllers: [OrderSummaryController],
-  exports: [OrderSummaryProjectionService]
+  exports: [OrderSummaryProjectionService],
 })
 export class OrderSummaryModule {}
 ```
@@ -559,7 +603,9 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
       providers: [OrderSummaryProjectionService],
     }).compile();
 
-    service = module.get<OrderSummaryProjectionService>(OrderSummaryProjectionService);
+    service = module.get<OrderSummaryProjectionService>(
+      OrderSummaryProjectionService
+    );
     await service.onModuleInit(); // Initialize capabilities
   });
 
@@ -576,10 +622,10 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
         orderId: 'order-123',
         customerId: 'customer-456',
         totalAmount: 99.99,
-        items: [{ id: 'item-1', price: 99.99 }]
+        items: [{ id: 'item-1', price: 99.99 }],
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await service.processEvent(event);
@@ -610,11 +656,11 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
       payload: {
         orderId: 'order-checkpoint',
         customerId: 'customer-checkpoint',
-        totalAmount: 150.00,
-        items: [{ id: 'item-1', price: 150.00 }]
+        totalAmount: 150.0,
+        items: [{ id: 'item-1', price: 150.0 }],
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await service.processEvent(event);
@@ -623,7 +669,12 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
     await service.createManualCheckpoint();
 
     // Clear state (simulate restart)
-    service.setState({ orders: new Map(), dailySummaries: new Map(), customerSummaries: new Map(), stats: {} });
+    service.setState({
+      orders: new Map(),
+      dailySummaries: new Map(),
+      customerSummaries: new Map(),
+      stats: {},
+    });
 
     // Restore from checkpoint
     await service.restoreFromLatestCheckpoint();
@@ -631,14 +682,15 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
     // Verify state restored
     const orderSummary = service.getOrderSummary('order-checkpoint');
     expect(orderSummary).toBeDefined();
-    expect(orderSummary?.totalAmount).toBe(150.00);
+    expect(orderSummary?.totalAmount).toBe(150.0);
   });
 });
 ```
 
 ## Key Features
 
-- **Production-Ready Capabilities**: Checkpoints, circuit breakers, dead letter queues
+- **Production-Ready Capabilities**: Checkpoints, circuit breakers, dead letter
+  queues
 - **Automatic Recovery**: State restoration from checkpoints
 - **Failure Handling**: Circuit breaker protection and dead letter processing
 - **Comprehensive Monitoring**: Detailed capability status and metrics
@@ -658,10 +710,12 @@ describe('OrderSummaryProjectionService with Capabilities', () => {
 
 ## Common Pitfalls
 
-- **Capability Lifecycle**: Not properly starting/stopping capabilities with module lifecycle
+- **Capability Lifecycle**: Not properly starting/stopping capabilities with
+  module lifecycle
 - **Memory Usage**: Checkpoint storage can grow large without rotation
 - **Circuit Breaker Tuning**: Wrong thresholds can cause unnecessary failures
-- **Dead Letter Processing**: Not processing dead letter queues leads to data loss
+- **Dead Letter Processing**: Not processing dead letter queues leads to data
+  loss
 - **Error Handling**: Not properly handling capability failures
 
 ## Related Examples

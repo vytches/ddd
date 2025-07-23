@@ -2,7 +2,7 @@ import type { PackageExampleConfig } from '@vytches-ddd/contracts';
 
 /**
  * Logging Package Examples Configuration
- * 
+ *
  * Complete structure:
  * - Basic examples with foundation patterns
  * - Intermediate examples with framework integration
@@ -24,20 +24,20 @@ export const packageExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic logging patterns'
+      description: 'Basic logging patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced patterns with optional DI'
+      description: 'Advanced patterns with optional DI',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise observability with comprehensive distributed tracing'
-    }
+      description: 'Enterprise observability with comprehensive distributed tracing',
+    },
   },
   frameworks: [
     {
@@ -45,10 +45,10 @@ export const packageExampleConfig: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS framework integration',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common']
-    }
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+    },
   ],
-  
+
   examples: [
     // Basic Examples (3 examples)
     {
@@ -151,20 +151,32 @@ export const packageExampleConfig: PackageExampleConfig = {
       id: 'advanced-enterprise-observability',
       name: 'Enterprise Observability with Distributed Tracing',
       file: 'advanced/example-1.md',
-      tags: ['logging:advanced', 'observability:enterprise', 'tracing:distributed', 'correlation:tracking'],
+      tags: [
+        'logging:advanced',
+        'observability:enterprise',
+        'tracing:distributed',
+        'correlation:tracking',
+      ],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise-grade observability with comprehensive distributed tracing, correlation tracking, and performance monitoring',
+      description:
+        'Enterprise-grade observability with comprehensive distributed tracing, correlation tracking, and performance monitoring',
       validation: { fileExists: true },
     },
     {
       id: 'nestjs-advanced-production',
       name: 'NestJS Production Logging Infrastructure',
       file: 'frameworks/nestjs/advanced/example-1.md',
-      tags: ['nestjs:production', 'infrastructure:logging', 'monitoring:advanced', 'alerting:automated'],
+      tags: [
+        'nestjs:production',
+        'infrastructure:logging',
+        'monitoring:advanced',
+        'alerting:automated',
+      ],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Production-ready logging infrastructure with NestJS integration, threat detection, and automated incident response',
+      description:
+        'Production-ready logging infrastructure with NestJS integration, threat detection, and automated incident response',
       validation: { fileExists: true },
     },
 
@@ -178,14 +190,20 @@ export const packageExampleConfig: PackageExampleConfig = {
       priority: 'low',
       description: 'Core logging type definitions and interfaces',
       validation: { fileExists: true },
-    }
+    },
   ],
 
   tags: {
     core: ['logging:basic', 'logging:advanced'],
     integrations: ['nestjs:basic', 'nestjs:intermediate', 'nestjs:advanced'],
     frameworks: ['nestjs'],
-    patterns: ['logging', 'structured-logging', 'context-detection', 'observability', 'distributed-tracing']
+    patterns: [
+      'logging',
+      'structured-logging',
+      'context-detection',
+      'observability',
+      'distributed-tracing',
+    ],
   },
 
   contentConfig: {
@@ -195,7 +213,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -203,21 +221,21 @@ export const packageExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   sections: ['implementation', 'use-case', 'framework-integration'],
 
   relatedPackages: {
-    'cqrs': {
+    cqrs: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['basic-cqrs-logging']
+      integrationExamples: ['basic-cqrs-logging'],
     },
-    'utils': {
+    utils: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['basic-result-logging']
-    }
-  }
+      integrationExamples: ['basic-result-logging'],
+    },
+  },
 };

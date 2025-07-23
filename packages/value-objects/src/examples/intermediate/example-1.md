@@ -1,35 +1,40 @@
 # Date Range Value Object - Intermediate Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate
-**Domain**: Time & Scheduling
-**Patterns**: Range Value Objects, Time Calculations, Business Day Logic
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Intermediate **Domain**: Time & Scheduling **Patterns**: Range
+Value Objects, Time Calculations, Business Day Logic **Dependencies**:
+@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **DateRange** value object that encapsulates time periods with advanced business logic including business day calculations, overlap detection, duration analysis, and timezone handling. Shows intermediate patterns for range-based value objects with temporal intelligence.
+This example demonstrates creating a **DateRange** value object that
+encapsulates time periods with advanced business logic including business day
+calculations, overlap detection, duration analysis, and timezone handling. Shows
+intermediate patterns for range-based value objects with temporal intelligence.
 
 ## Business Context
 
-DateRange is essential for scheduling systems, booking platforms, project management, and financial reporting. It provides intelligent date range operations, business day calculations, and overlap detection. Critical for resource booking, project timelines, billing periods, and availability management.
+DateRange is essential for scheduling systems, booking platforms, project
+management, and financial reporting. It provides intelligent date range
+operations, business day calculations, and overlap detection. Critical for
+resource booking, project timelines, billing periods, and availability
+management.
 
 ## Code Example
 
 ```typescript
 // date-range.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  DateRangeData, 
-  DateRangeCalculation, 
-  ValueObjectValidationResult 
+import {
+  DateRangeData,
+  DateRangeCalculation,
+  ValueObjectValidationResult,
 } from './types';
-import { 
-  validateRequired, 
+import {
+  validateRequired,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class DateRange extends ValueObject<DateRangeData> {
@@ -37,7 +42,7 @@ export class DateRange extends ValueObject<DateRangeData> {
     // Common US holidays - in real implementation would be configurable
     new Date('2025-01-01'), // New Year's Day
     new Date('2025-07-04'), // Independence Day
-    new Date('2025-12-25')  // Christmas
+    new Date('2025-12-25'), // Christmas
   ];
 
   private constructor(data: DateRangeData) {
@@ -55,7 +60,7 @@ export class DateRange extends ValueObject<DateRangeData> {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       timezone,
-      inclusive
+      inclusive,
     };
 
     const validation = DateRange.validate(data);
@@ -76,7 +81,11 @@ export class DateRange extends ValueObject<DateRangeData> {
       throw new Error('Business days must be positive');
     }
 
-    const endDate = DateRange.addBusinessDays(startDate, businessDays, holidays);
+    const endDate = DateRange.addBusinessDays(
+      startDate,
+      businessDays,
+      holidays
+    );
     return DateRange.create(startDate, endDate);
   }
 
@@ -94,7 +103,7 @@ export class DateRange extends ValueObject<DateRangeData> {
       endDate.setMonth(endDate.getMonth() + duration.months);
     }
     if (duration.weeks) {
-      endDate.setDate(endDate.getDate() + (duration.weeks * 7));
+      endDate.setDate(endDate.getDate() + duration.weeks * 7);
     }
     if (duration.days) {
       endDate.setDate(endDate.getDate() + duration.days);
@@ -121,7 +130,9 @@ export class DateRange extends ValueObject<DateRangeData> {
 
     // Range validity
     if (data.startDate && data.endDate && data.startDate > data.endDate) {
-      results.push(createFailureResult(['Start date must be before or equal to end date']));
+      results.push(
+        createFailureResult(['Start date must be before or equal to end date'])
+      );
     }
 
     // Timezone validation
@@ -143,11 +154,15 @@ export class DateRange extends ValueObject<DateRangeData> {
 
   overlaps(other: DateRange): boolean {
     if (this.data.inclusive && other.data.inclusive) {
-      return this.data.startDate <= other.data.endDate && 
-             this.data.endDate >= other.data.startDate;
+      return (
+        this.data.startDate <= other.data.endDate &&
+        this.data.endDate >= other.data.startDate
+      );
     } else {
-      return this.data.startDate < other.data.endDate && 
-             this.data.endDate > other.data.startDate;
+      return (
+        this.data.startDate < other.data.endDate &&
+        this.data.endDate > other.data.startDate
+      );
     }
   }
 
@@ -156,27 +171,41 @@ export class DateRange extends ValueObject<DateRangeData> {
       return null;
     }
 
-    const startDate = this.data.startDate > other.data.startDate 
-      ? this.data.startDate 
-      : other.data.startDate;
-    
-    const endDate = this.data.endDate < other.data.endDate 
-      ? this.data.endDate 
-      : other.data.endDate;
+    const startDate =
+      this.data.startDate > other.data.startDate
+        ? this.data.startDate
+        : other.data.startDate;
 
-    return DateRange.create(startDate, endDate, this.data.timezone, this.data.inclusive);
+    const endDate =
+      this.data.endDate < other.data.endDate
+        ? this.data.endDate
+        : other.data.endDate;
+
+    return DateRange.create(
+      startDate,
+      endDate,
+      this.data.timezone,
+      this.data.inclusive
+    );
   }
 
   union(other: DateRange): DateRange {
-    const startDate = this.data.startDate < other.data.startDate 
-      ? this.data.startDate 
-      : other.data.startDate;
-    
-    const endDate = this.data.endDate > other.data.endDate 
-      ? this.data.endDate 
-      : other.data.endDate;
+    const startDate =
+      this.data.startDate < other.data.startDate
+        ? this.data.startDate
+        : other.data.startDate;
 
-    return DateRange.create(startDate, endDate, this.data.timezone, this.data.inclusive);
+    const endDate =
+      this.data.endDate > other.data.endDate
+        ? this.data.endDate
+        : other.data.endDate;
+
+    return DateRange.create(
+      startDate,
+      endDate,
+      this.data.timezone,
+      this.data.inclusive
+    );
   }
 
   gap(other: DateRange): DateRange | null {
@@ -186,7 +215,7 @@ export class DateRange extends ValueObject<DateRangeData> {
     }
 
     let earlierRange: DateRange, laterRange: DateRange;
-    
+
     if (this.data.endDate < other.data.startDate) {
       earlierRange = this;
       laterRange = other;
@@ -226,7 +255,8 @@ export class DateRange extends ValueObject<DateRangeData> {
 
     while (current <= endDate) {
       const dayOfWeek = current.getDay();
-      if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Sunday or Saturday
         count++;
       }
       current.setDate(current.getDate() + 1);
@@ -240,14 +270,18 @@ export class DateRange extends ValueObject<DateRangeData> {
   }
 
   // ✅ FOCUS: Duration calculations
-  getDurationCalculation(holidays: Date[] = DateRange.DEFAULT_HOLIDAYS): DateRangeCalculation {
+  getDurationCalculation(
+    holidays: Date[] = DateRange.DEFAULT_HOLIDAYS
+  ): DateRangeCalculation {
     const startTime = this.data.startDate.getTime();
     const endTime = this.data.endDate.getTime();
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const millisecondsPerHour = 60 * 60 * 1000;
 
     const durationDays = Math.ceil((endTime - startTime) / millisecondsPerDay);
-    const durationHours = Math.ceil((endTime - startTime) / millisecondsPerHour);
+    const durationHours = Math.ceil(
+      (endTime - startTime) / millisecondsPerHour
+    );
 
     const businessDays = this.getBusinessDaysCount(holidays);
     const includesWeekends = this.getWeekendDaysCount() > 0;
@@ -258,7 +292,7 @@ export class DateRange extends ValueObject<DateRangeData> {
       durationHours,
       businessDays,
       includesWeekends,
-      holidays: holidayList
+      holidays: holidayList,
     };
   }
 
@@ -266,7 +300,7 @@ export class DateRange extends ValueObject<DateRangeData> {
   extend(days: number): DateRange {
     const newEndDate = new Date(this.data.endDate);
     newEndDate.setDate(newEndDate.getDate() + days);
-    
+
     return DateRange.create(
       this.data.startDate,
       newEndDate,
@@ -278,7 +312,7 @@ export class DateRange extends ValueObject<DateRangeData> {
   shrink(days: number): DateRange {
     const newEndDate = new Date(this.data.endDate);
     newEndDate.setDate(newEndDate.getDate() - days);
-    
+
     if (newEndDate <= this.data.startDate) {
       throw new Error('Shrinking would make end date before start date');
     }
@@ -294,7 +328,7 @@ export class DateRange extends ValueObject<DateRangeData> {
   shift(days: number): DateRange {
     const newStartDate = new Date(this.data.startDate);
     const newEndDate = new Date(this.data.endDate);
-    
+
     newStartDate.setDate(newStartDate.getDate() + days);
     newEndDate.setDate(newEndDate.getDate() + days);
 
@@ -339,22 +373,24 @@ export class DateRange extends ValueObject<DateRangeData> {
 
     const chunks: DateRange[] = [];
     const current = new Date(this.data.startDate);
-    
+
     while (current <= this.data.endDate) {
       const chunkEnd = new Date(current);
       chunkEnd.setDate(chunkEnd.getDate() + chunkSize - 1);
-      
+
       // Don't exceed the original end date
       if (chunkEnd > this.data.endDate) {
         chunkEnd.setTime(this.data.endDate.getTime());
       }
 
-      chunks.push(DateRange.create(
-        new Date(current),
-        chunkEnd,
-        this.data.timezone,
-        this.data.inclusive
-      ));
+      chunks.push(
+        DateRange.create(
+          new Date(current),
+          chunkEnd,
+          this.data.timezone,
+          this.data.inclusive
+        )
+      );
 
       current.setDate(current.getDate() + chunkSize);
     }
@@ -369,21 +405,27 @@ export class DateRange extends ValueObject<DateRangeData> {
   chunkByMonths(): DateRange[] {
     const chunks: DateRange[] = [];
     const current = new Date(this.data.startDate);
-    
+
     while (current <= this.data.endDate) {
-      const monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0);
-      
+      const monthEnd = new Date(
+        current.getFullYear(),
+        current.getMonth() + 1,
+        0
+      );
+
       // Don't exceed the original end date
       if (monthEnd > this.data.endDate) {
         monthEnd.setTime(this.data.endDate.getTime());
       }
 
-      chunks.push(DateRange.create(
-        new Date(current),
-        monthEnd,
-        this.data.timezone,
-        this.data.inclusive
-      ));
+      chunks.push(
+        DateRange.create(
+          new Date(current),
+          monthEnd,
+          this.data.timezone,
+          this.data.inclusive
+        )
+      );
 
       current.setMonth(current.getMonth() + 1);
       current.setDate(1);
@@ -396,7 +438,7 @@ export class DateRange extends ValueObject<DateRangeData> {
   isToday(): boolean {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const todayEnd = new Date(today);
     todayEnd.setHours(23, 59, 59, 999);
 
@@ -421,7 +463,7 @@ export class DateRange extends ValueObject<DateRangeData> {
     const today = new Date();
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
+
     const currentMonth = DateRange.create(monthStart, monthEnd);
     return this.overlaps(currentMonth);
   }
@@ -454,7 +496,7 @@ export class DateRange extends ValueObject<DateRangeData> {
 
   toHumanReadable(): string {
     const calculation = this.getDurationCalculation();
-    
+
     if (calculation.durationDays === 1) {
       return this.data.startDate.toLocaleDateString();
     } else if (calculation.durationDays <= 7) {
@@ -499,13 +541,17 @@ export class DateRange extends ValueObject<DateRangeData> {
   }
 
   // Private helper methods
-  private static addBusinessDays(startDate: Date, businessDays: number, holidays: Date[]): Date {
+  private static addBusinessDays(
+    startDate: Date,
+    businessDays: number,
+    holidays: Date[]
+  ): Date {
     const result = new Date(startDate);
     let addedDays = 0;
 
     while (addedDays < businessDays) {
       result.setDate(result.getDate() + 1);
-      
+
       if (DateRange.isBusinessDay(result, holidays)) {
         addedDays++;
       }
@@ -517,13 +563,14 @@ export class DateRange extends ValueObject<DateRangeData> {
   private static isBusinessDay(date: Date, holidays: Date[]): boolean {
     const dayOfWeek = date.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
+
     if (isWeekend) return false;
 
-    const isHoliday = holidays.some(holiday => 
-      holiday.getFullYear() === date.getFullYear() &&
-      holiday.getMonth() === date.getMonth() &&
-      holiday.getDate() === date.getDate()
+    const isHoliday = holidays.some(
+      holiday =>
+        holiday.getFullYear() === date.getFullYear() &&
+        holiday.getMonth() === date.getMonth() &&
+        holiday.getDate() === date.getDate()
     );
 
     return !isHoliday;
@@ -540,10 +587,12 @@ export class DateRange extends ValueObject<DateRangeData> {
 
   // ✅ FOCUS: Value object equality implementation
   protected isEqualTo(other: DateRange): boolean {
-    return this.data.startDate.getTime() === other.data.startDate.getTime() &&
-           this.data.endDate.getTime() === other.data.endDate.getTime() &&
-           this.data.timezone === other.data.timezone &&
-           this.data.inclusive === other.data.inclusive;
+    return (
+      this.data.startDate.getTime() === other.data.startDate.getTime() &&
+      this.data.endDate.getTime() === other.data.endDate.getTime() &&
+      this.data.timezone === other.data.timezone &&
+      this.data.inclusive === other.data.inclusive
+    );
   }
 }
 ```
@@ -608,7 +657,7 @@ import { DateRange } from './date-range';
 // ✅ Complex range analysis
 class ProjectManager {
   private projectRanges: Map<string, DateRange> = new Map();
-  
+
   addProject(projectId: string, range: DateRange): void {
     this.projectRanges.set(projectId, range);
   }
@@ -618,7 +667,7 @@ class ProjectManager {
     if (!targetRange) return [];
 
     const overlapping: string[] = [];
-    
+
     this.projectRanges.forEach((range, id) => {
       if (id !== projectId && targetRange.overlaps(range)) {
         overlapping.push(id);
@@ -633,8 +682,9 @@ class ProjectManager {
     overlappingPeriods: DateRange[];
     maxConcurrentProjects: number;
   } {
-    const relevantProjects = Array.from(this.projectRanges.values())
-      .filter(range => range.overlaps(timeFrame));
+    const relevantProjects = Array.from(this.projectRanges.values()).filter(
+      range => range.overlaps(timeFrame)
+    );
 
     const overlappingPeriods: DateRange[] = [];
     let maxConcurrent = 0;
@@ -661,14 +711,16 @@ class ProjectManager {
 
     allDates.forEach(dateTime => {
       const date = new Date(dateTime);
-      const concurrent = relevantProjects.filter(range => range.contains(date)).length;
+      const concurrent = relevantProjects.filter(range =>
+        range.contains(date)
+      ).length;
       maxConcurrent = Math.max(maxConcurrent, concurrent);
     });
 
     return {
       totalProjects: relevantProjects.length,
       overlappingPeriods,
-      maxConcurrentProjects: maxConcurrent
+      maxConcurrentProjects: maxConcurrent,
     };
   }
 }
@@ -677,9 +729,14 @@ class ProjectManager {
 class MeetingScheduler {
   private bookedSlots: DateRange[] = [];
 
-  addMeeting(meetingRange: DateRange): { success: boolean; conflicts?: DateRange[] } {
-    const conflicts = this.bookedSlots.filter(slot => slot.overlaps(meetingRange));
-    
+  addMeeting(meetingRange: DateRange): {
+    success: boolean;
+    conflicts?: DateRange[];
+  } {
+    const conflicts = this.bookedSlots.filter(slot =>
+      slot.overlaps(meetingRange)
+    );
+
     if (conflicts.length > 0) {
       return { success: false, conflicts };
     }
@@ -695,17 +752,17 @@ class MeetingScheduler {
   ): DateRange[] {
     const availableSlots: DateRange[] = [];
     const durationMs = duration * 60 * 60 * 1000; // Convert to milliseconds
-    
+
     let currentTime = new Date(searchPeriod.startDate);
-    
+
     while (currentTime < searchPeriod.endDate) {
       const slotEnd = new Date(currentTime.getTime() + durationMs);
-      
+
       // Don't exceed search period
       if (slotEnd > searchPeriod.endDate) break;
-      
+
       const proposedSlot = DateRange.create(currentTime, slotEnd);
-      
+
       // Check if slot is during business hours (if required)
       if (businessHoursOnly && !this.isBusinessHours(proposedSlot)) {
         currentTime = this.getNextBusinessHour(currentTime);
@@ -713,8 +770,10 @@ class MeetingScheduler {
       }
 
       // Check for conflicts
-      const hasConflict = this.bookedSlots.some(slot => slot.overlaps(proposedSlot));
-      
+      const hasConflict = this.bookedSlots.some(slot =>
+        slot.overlaps(proposedSlot)
+      );
+
       if (!hasConflict) {
         availableSlots.push(proposedSlot);
       }
@@ -729,65 +788,69 @@ class MeetingScheduler {
   private isBusinessHours(slot: DateRange): boolean {
     const start = slot.startDate;
     const end = slot.endDate;
-    
+
     const startHour = start.getHours();
     const endHour = end.getHours();
     const startDay = start.getDay();
     const endDay = end.getDay();
-    
+
     // Check if both start and end are during business hours (9 AM - 5 PM)
     const isStartBusinessHour = startHour >= 9 && startHour < 17;
     const isEndBusinessHour = endHour >= 9 && endHour <= 17;
-    
+
     // Check if both are weekdays (Monday = 1, Friday = 5)
     const isStartWeekday = startDay >= 1 && startDay <= 5;
     const isEndWeekday = endDay >= 1 && endDay <= 5;
-    
-    return isStartBusinessHour && isEndBusinessHour && isStartWeekday && isEndWeekday;
+
+    return (
+      isStartBusinessHour && isEndBusinessHour && isStartWeekday && isEndWeekday
+    );
   }
 
   private getNextBusinessHour(date: Date): Date {
     const nextHour = new Date(date);
     nextHour.setHours(nextHour.getHours() + 1);
-    
+
     // If after business hours, move to next day 9 AM
     if (nextHour.getHours() >= 17) {
       nextHour.setDate(nextHour.getDate() + 1);
       nextHour.setHours(9, 0, 0, 0);
     }
-    
+
     // If weekend, move to Monday 9 AM
     if (nextHour.getDay() === 0 || nextHour.getDay() === 6) {
       const daysToMonday = nextHour.getDay() === 0 ? 1 : 2;
       nextHour.setDate(nextHour.getDate() + daysToMonday);
       nextHour.setHours(9, 0, 0, 0);
     }
-    
+
     return nextHour;
   }
 }
 
 // Usage examples
 const pm = new ProjectManager();
-pm.addProject('web-redesign', DateRange.create(
-  new Date('2025-02-01'),
-  new Date('2025-03-15')
-));
-pm.addProject('mobile-app', DateRange.create(
-  new Date('2025-02-15'),
-  new Date('2025-04-01')
-));
-pm.addProject('database-upgrade', DateRange.create(
-  new Date('2025-03-01'),
-  new Date('2025-03-31')
-));
+pm.addProject(
+  'web-redesign',
+  DateRange.create(new Date('2025-02-01'), new Date('2025-03-15'))
+);
+pm.addProject(
+  'mobile-app',
+  DateRange.create(new Date('2025-02-15'), new Date('2025-04-01'))
+);
+pm.addProject(
+  'database-upgrade',
+  DateRange.create(new Date('2025-03-01'), new Date('2025-03-31'))
+);
 
 const overlapping = pm.findOverlappingProjects('web-redesign');
 console.log('Overlapping projects:', overlapping); // ['mobile-app', 'database-upgrade']
 
 const q1 = DateRange.create(new Date('2025-01-01'), new Date('2025-03-31'));
 const utilization = pm.getResourceUtilization(q1);
-console.log(`Max concurrent projects in Q1: ${utilization.maxConcurrentProjects}`);
+console.log(
+  `Max concurrent projects in Q1: ${utilization.maxConcurrentProjects}`
+);
 
 // Meeting scheduler
 const scheduler = new MeetingScheduler();
@@ -821,7 +884,8 @@ console.log(`Available slots: ${availableSlots.length}`);
 ## Common Pitfalls
 
 - **Timezone Handling**: Be aware of timezone implications for range boundaries
-- **Inclusive vs Exclusive**: Understand the impact of inclusive/exclusive ranges
+- **Inclusive vs Exclusive**: Understand the impact of inclusive/exclusive
+  ranges
 - **Business Day Logic**: Account for holidays and regional variations
 - **Date Mutations**: Always create new Date objects to maintain immutability
 - **Performance**: Large date ranges can be expensive for day-by-day iteration

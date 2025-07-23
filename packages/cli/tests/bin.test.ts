@@ -3,11 +3,13 @@ import { safeRun } from '@vytches-ddd/utils';
 
 // Mock dependencies
 vi.mock('./cli.js', () => ({
-  main: vi.fn()
+  main: vi.fn(),
 }));
 
 // Mock console and process
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => { return });
+const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+  return;
+});
 const mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
 describe('bin.ts', () => {
@@ -18,7 +20,7 @@ describe('bin.ts', () => {
 
     // Reset dynamic import mock
     vi.doMock('../src/cli.js', () => ({
-      main: vi.fn()
+      main: vi.fn(),
     }));
   });
 
@@ -31,7 +33,7 @@ describe('bin.ts', () => {
       // Setup successful main function
       const mockMainFunction = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../src/cli.js', () => ({
-        main: mockMainFunction
+        main: mockMainFunction,
       }));
 
       // Import and execute bin module
@@ -66,7 +68,7 @@ describe('bin.ts', () => {
       // Setup main function that throws error
       const mockMainFunction = vi.fn().mockRejectedValue(new Error('CLI execution failed'));
       vi.doMock('../src/cli.js', () => ({
-        main: mockMainFunction
+        main: mockMainFunction,
       }));
 
       // Import bin module

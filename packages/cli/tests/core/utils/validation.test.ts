@@ -104,13 +104,17 @@ describe('Validation', () => {
     it('should throw ValidationError for name starting with lowercase', () => {
       const [error] = safeRun(() => Validation.componentName('testComponent'));
       expect(error).toBeInstanceOf(ValidationError);
-      expect(error?.message).toBe('Component name must start with uppercase letter and contain only letters and numbers (PascalCase recommended)');
+      expect(error?.message).toBe(
+        'Component name must start with uppercase letter and contain only letters and numbers (PascalCase recommended)'
+      );
     });
 
     it('should throw ValidationError for name with special characters', () => {
       const [error] = safeRun(() => Validation.componentName('Test-Component'));
       expect(error).toBeInstanceOf(ValidationError);
-      expect(error?.message).toBe('Component name must start with uppercase letter and contain only letters and numbers (PascalCase recommended)');
+      expect(error?.message).toBe(
+        'Component name must start with uppercase letter and contain only letters and numbers (PascalCase recommended)'
+      );
     });
 
     it('should throw ValidationError for name too short', () => {
@@ -296,7 +300,9 @@ describe('Validation', () => {
     it('should throw ValidationError for invalid package name format', () => {
       const [error] = safeRun(() => Validation.packageName('Invalid-Package'));
       expect(error).toBeInstanceOf(ValidationError);
-      expect(error?.message).toBe('Package name must be valid npm package name (lowercase, may contain hyphens, dots, underscores)');
+      expect(error?.message).toBe(
+        'Package name must be valid npm package name (lowercase, may contain hyphens, dots, underscores)'
+      );
     });
 
     it('should throw ValidationError for package name too long', () => {
@@ -347,7 +353,7 @@ describe('Validation', () => {
 
     beforeEach(() => {
       consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-        return
+        return;
       });
     });
 
@@ -382,7 +388,9 @@ describe('Validation', () => {
     it('should warn for commonly reserved ports', () => {
       const [error] = safeRun(() => Validation.port(80));
       expect(error).toBeUndefined();
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Warning: Port 80 is commonly reserved for system services');
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Warning: Port 80 is commonly reserved for system services'
+      );
     });
 
     it('should not warn for non-reserved ports', () => {
@@ -411,14 +419,7 @@ describe('Validation', () => {
     });
 
     it('should handle various valid JSON formats', () => {
-      const validJsonStrings = [
-        '{"key": "value"}',
-        '[1, 2, 3]',
-        'null',
-        'true',
-        '"string"',
-        '123',
-      ];
+      const validJsonStrings = ['{"key": "value"}', '[1, 2, 3]', 'null', 'true', '"string"', '123'];
 
       validJsonStrings.forEach(jsonString => {
         const [error] = safeRun(() => Validation.json(jsonString));
@@ -491,10 +492,7 @@ describe('Validation', () => {
     it('should stop at first validation error', () => {
       const value = '';
       const secondValidator = vi.fn();
-      const validators = [
-        (val: string) => Validation.required(val),
-        secondValidator,
-      ];
+      const validators = [(val: string) => Validation.required(val), secondValidator];
 
       const [error] = safeRun(() => Validation.combine(value, validators));
       expect(error).toBeInstanceOf(ValidationError);
@@ -552,12 +550,12 @@ describe('Validation', () => {
 
   describe('safe method', () => {
     it('should return success result for valid value', () => {
-      const result = Validation.safe('test@example.com', (value) => Validation.email(value));
+      const result = Validation.safe('test@example.com', value => Validation.email(value));
       expect(result).toEqual({ isValid: true });
     });
 
     it('should return error result for invalid value', () => {
-      const result = Validation.safe('invalid-email', (value) => Validation.email(value));
+      const result = Validation.safe('invalid-email', value => Validation.email(value));
       expect(result).toEqual({
         isValid: false,
         error: 'Email must be in valid format',

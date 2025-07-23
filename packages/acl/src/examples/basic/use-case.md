@@ -2,43 +2,53 @@
 
 **Package**: @vytches-ddd/acl  
 **Complexity**: Basic  
-**Focus**: Fundamental anti-corruption layer patterns for external system integration
+**Focus**: Fundamental anti-corruption layer patterns for external system
+integration
 
 ## Overview
 
-Basic ACL use cases focus on protecting domain models from external system inconsistencies through data translation, schema mapping, and clean integration boundaries. These patterns are essential for maintaining domain integrity while integrating with third-party systems.
+Basic ACL use cases focus on protecting domain models from external system
+inconsistencies through data translation, schema mapping, and clean integration
+boundaries. These patterns are essential for maintaining domain integrity while
+integrating with third-party systems.
 
 ## Use Case 1: Legacy System Migration
 
 ### Business Context
 
-A modern e-commerce platform needs to gradually migrate from a 15-year-old legacy system while maintaining operations. The legacy system has inconsistent data formats and different business rules.
+A modern e-commerce platform needs to gradually migrate from a 15-year-old
+legacy system while maintaining operations. The legacy system has inconsistent
+data formats and different business rules.
 
 ### Implementation
 
 ```typescript
 // Migration-focused ACL
-export class LegacyMigrationACL extends AntiCorruptionLayer<LegacyOrderData, Order> {
+export class LegacyMigrationACL extends AntiCorruptionLayer<
+  LegacyOrderData,
+  Order
+> {
   constructor(private legacySystem: LegacyOrderAPI) {
     super(new LegacyOrderTranslator());
   }
 
   async migrateOrder(legacyOrderId: string): Promise<Result<Order, Error>> {
     const legacyData = await this.legacySystem.getOrder(legacyOrderId);
-    
+
     // Clean translation protects new system from legacy quirks
     const result = this.translateData(legacyData);
     if (result.isSuccess()) {
       // Additional validation for migrated data
       return this.validateMigratedOrder(result.value);
     }
-    
+
     return result;
   }
 }
 ```
 
 ### Business Impact
+
 - **Risk Reduction**: 90% fewer data corruption issues during migration
 - **Speed**: 3x faster migration with automated translation
 - **Quality**: Consistent data format across systems
@@ -47,32 +57,42 @@ export class LegacyMigrationACL extends AntiCorruptionLayer<LegacyOrderData, Ord
 
 ### Business Context
 
-An online marketplace integrates with multiple payment gateways, each with different response formats and error codes. The ACL standardizes payment processing regardless of the provider.
+An online marketplace integrates with multiple payment gateways, each with
+different response formats and error codes. The ACL standardizes payment
+processing regardless of the provider.
 
 ### Implementation
 
 ```typescript
 // Payment gateway ACL
-export class PaymentGatewayACL extends AntiCorruptionLayer<ExternalPaymentResponse, PaymentResult> {
+export class PaymentGatewayACL extends AntiCorruptionLayer<
+  ExternalPaymentResponse,
+  PaymentResult
+> {
   constructor(private gateway: PaymentGateway) {
     super(new PaymentResponseTranslator());
   }
 
-  async processPayment(request: PaymentRequest): Promise<Result<PaymentResult, Error>> {
+  async processPayment(
+    request: PaymentRequest
+  ): Promise<Result<PaymentResult, Error>> {
     try {
       const externalRequest = this.convertToGatewayFormat(request);
       const externalResponse = await this.gateway.charge(externalRequest);
-      
+
       // Translate response to standard format
       return this.translateData(externalResponse);
     } catch (error) {
-      return Result.failure(new Error(`Payment processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment processing failed: ${error.message}`)
+      );
     }
   }
 }
 ```
 
 ### Business Impact
+
 - **Reliability**: 99.9% success rate in payment processing
 - **Flexibility**: Support for 5+ payment providers with single interface
 - **Maintenance**: 70% reduction in payment-related bugs
@@ -81,13 +101,18 @@ export class PaymentGatewayACL extends AntiCorruptionLayer<ExternalPaymentRespon
 
 ### Business Context
 
-A SaaS platform synchronizes customer data across multiple CRM systems used by different departments. Each CRM has different field structures and validation rules.
+A SaaS platform synchronizes customer data across multiple CRM systems used by
+different departments. Each CRM has different field structures and validation
+rules.
 
 ### Implementation
 
 ```typescript
 // Multi-CRM synchronization ACL
-export class CustomerSyncACL extends AntiCorruptionLayer<ExternalCustomerData, Customer> {
+export class CustomerSyncACL extends AntiCorruptionLayer<
+  ExternalCustomerData,
+  Customer
+> {
   constructor(
     private salesCRM: SalesCRMAPI,
     private supportCRM: SupportCRMAPI,
@@ -96,25 +121,28 @@ export class CustomerSyncACL extends AntiCorruptionLayer<ExternalCustomerData, C
     super(new UnifiedCustomerTranslator());
   }
 
-  async syncCustomerAcrossSystems(customerId: string): Promise<Result<Customer, Error>> {
+  async syncCustomerAcrossSystems(
+    customerId: string
+  ): Promise<Result<Customer, Error>> {
     // Get data from primary CRM
     const primaryData = await this.salesCRM.getCustomer(customerId);
     const customerResult = this.translateData(primaryData);
-    
+
     if (customerResult.isSuccess()) {
       const customer = customerResult.value;
-      
+
       // Sync to other systems
       await this.syncToSupport(customer);
       await this.syncToMarketing(customer);
     }
-    
+
     return customerResult;
   }
 }
 ```
 
 ### Business Impact
+
 - **Consistency**: 100% data consistency across all CRM systems
 - **Efficiency**: 50% reduction in manual data entry
 - **Accuracy**: 95% improvement in customer data quality
@@ -123,18 +151,20 @@ export class CustomerSyncACL extends AntiCorruptionLayer<ExternalCustomerData, C
 
 ### Business Context
 
-A retail chain manages inventory from multiple suppliers, each providing data in different formats (CSV, XML, JSON APIs). The ACL creates a unified inventory view.
+A retail chain manages inventory from multiple suppliers, each providing data in
+different formats (CSV, XML, JSON APIs). The ACL creates a unified inventory
+view.
 
 ### Implementation
 
 ```typescript
 // Multi-vendor inventory ACL
 export class InventoryAggregationACL {
-  constructor(
-    private vendors: Map<string, VendorInventoryAPI>
-  ) {}
+  constructor(private vendors: Map<string, VendorInventoryAPI>) {}
 
-  async getUnifiedInventory(productIds: string[]): Promise<Result<Product[], Error>> {
+  async getUnifiedInventory(
+    productIds: string[]
+  ): Promise<Result<Product[], Error>> {
     const products: Product[] = [];
     const errors: string[] = [];
 
@@ -142,7 +172,7 @@ export class InventoryAggregationACL {
       try {
         const vendorData = await api.getProducts(productIds);
         const acl = new VendorSpecificACL(api);
-        
+
         for (const data of vendorData) {
           const result = acl.translateData(data);
           if (result.isSuccess()) {
@@ -156,7 +186,7 @@ export class InventoryAggregationACL {
       }
     }
 
-    return products.length > 0 
+    return products.length > 0
       ? Result.success(products)
       : Result.failure(new Error(`All vendors failed: ${errors.join(', ')}`));
   }
@@ -164,6 +194,7 @@ export class InventoryAggregationACL {
 ```
 
 ### Business Impact
+
 - **Visibility**: Real-time inventory across 20+ suppliers
 - **Accuracy**: 98% inventory accuracy improvement
 - **Cost**: 30% reduction in stockouts and overstock
@@ -172,13 +203,18 @@ export class InventoryAggregationACL {
 
 ### Business Context
 
-An application uses multiple notification channels (email, SMS, push) from different providers. The ACL provides a unified notification interface with consistent error handling.
+An application uses multiple notification channels (email, SMS, push) from
+different providers. The ACL provides a unified notification interface with
+consistent error handling.
 
 ### Implementation
 
 ```typescript
 // Notification service ACL
-export class NotificationACL extends AntiCorruptionLayer<ExternalNotificationResponse, NotificationResult> {
+export class NotificationACL extends AntiCorruptionLayer<
+  ExternalNotificationResponse,
+  NotificationResult
+> {
   constructor(
     private emailService: EmailServiceAPI,
     private smsService: SMSServiceAPI,
@@ -187,22 +223,32 @@ export class NotificationACL extends AntiCorruptionLayer<ExternalNotificationRes
     super(new NotificationResponseTranslator());
   }
 
-  async sendNotification(request: NotificationRequest): Promise<Result<NotificationResult, Error>> {
+  async sendNotification(
+    request: NotificationRequest
+  ): Promise<Result<NotificationResult, Error>> {
     try {
       let externalResponse: ExternalNotificationResponse;
 
       switch (request.channel) {
         case 'email':
-          externalResponse = await this.emailService.send(this.convertToEmailFormat(request));
+          externalResponse = await this.emailService.send(
+            this.convertToEmailFormat(request)
+          );
           break;
         case 'sms':
-          externalResponse = await this.smsService.send(this.convertToSMSFormat(request));
+          externalResponse = await this.smsService.send(
+            this.convertToSMSFormat(request)
+          );
           break;
         case 'push':
-          externalResponse = await this.pushService.send(this.convertToPushFormat(request));
+          externalResponse = await this.pushService.send(
+            this.convertToPushFormat(request)
+          );
           break;
         default:
-          return Result.failure(new Error(`Unsupported channel: ${request.channel}`));
+          return Result.failure(
+            new Error(`Unsupported channel: ${request.channel}`)
+          );
       }
 
       return this.translateData(externalResponse);
@@ -214,6 +260,7 @@ export class NotificationACL extends AntiCorruptionLayer<ExternalNotificationRes
 ```
 
 ### Business Impact
+
 - **Reliability**: 99.5% notification delivery rate
 - **Flexibility**: Easy integration of new notification providers
 - **Monitoring**: Unified tracking across all channels
@@ -221,21 +268,25 @@ export class NotificationACL extends AntiCorruptionLayer<ExternalNotificationRes
 ## Common Patterns
 
 ### 1. **Data Validation**
+
 - Always validate external data before translation
 - Implement fallback values for missing fields
 - Log translation failures for monitoring
 
 ### 2. **Error Handling**
+
 - Use Result pattern for predictable error management
 - Provide meaningful error messages for debugging
 - Implement retry logic for transient failures
 
 ### 3. **Performance Optimization**
+
 - Cache translation mappings when possible
 - Batch operations to reduce API calls
 - Implement connection pooling for external services
 
 ### 4. **Monitoring and Observability**
+
 - Track translation success/failure rates
 - Monitor external API response times
 - Alert on data quality issues
@@ -250,6 +301,9 @@ export class NotificationACL extends AntiCorruptionLayer<ExternalNotificationRes
 
 ## Next Steps
 
-- Explore [Intermediate ACL Patterns](/packages/acl/src/examples/intermediate/use-case.md)
-- Learn about [Advanced Integration Strategies](/packages/acl/src/examples/advanced/use-case.md)
-- Review [Framework Integration](/packages/acl/src/examples/frameworks/nestjs/basic/example-1.md)
+- Explore
+  [Intermediate ACL Patterns](/packages/acl/src/examples/intermediate/use-case.md)
+- Learn about
+  [Advanced Integration Strategies](/packages/acl/src/examples/advanced/use-case.md)
+- Review
+  [Framework Integration](/packages/acl/src/examples/frameworks/nestjs/basic/example-1.md)

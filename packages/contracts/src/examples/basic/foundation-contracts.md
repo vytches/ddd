@@ -1,19 +1,22 @@
 # Foundation Contracts
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Basic
-**Domain**: Foundation
-**Patterns**: specifications, actors, foundation-interfaces
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Domain**: Foundation **Patterns**: specifications, actors,
+foundation-interfaces **Dependencies**: @vytches-ddd/contracts
 
 ## Description
 
-Foundation contracts provide the core interfaces and patterns that form the architectural foundation of VytchesDDD. This includes specifications for business rules, actor patterns for audit and security, and essential domain interfaces that enable consistent patterns across all domain implementations.
+Foundation contracts provide the core interfaces and patterns that form the
+architectural foundation of VytchesDDD. This includes specifications for
+business rules, actor patterns for audit and security, and essential domain
+interfaces that enable consistent patterns across all domain implementations.
 
 ## Business Context
 
-Foundation contracts establish consistent patterns for business rule validation, audit trails, user context tracking, and architectural boundaries. These contracts ensure that all domain implementations follow the same patterns, making the codebase maintainable and the architecture predictable.
+Foundation contracts establish consistent patterns for business rule validation,
+audit trails, user context tracking, and architectural boundaries. These
+contracts ensure that all domain implementations follow the same patterns,
+making the codebase maintainable and the architecture predictable.
 
 ## Specification Patterns
 
@@ -26,15 +29,15 @@ import { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
 // Simple business rule specification
 export class EmailValidationSpecification implements ISpecification<string> {
   private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   isSatisfiedBy(email: string): boolean {
     if (!email || typeof email !== 'string') {
       return false;
     }
-    
+
     return this.emailRegex.test(email.toLowerCase());
   }
-  
+
   // Optional: provide detailed reason for failure
   getFailureReason(email: string): string {
     if (!email) {
@@ -53,11 +56,11 @@ export class EmailValidationSpecification implements ISpecification<string> {
 // Age validation specification
 export class MinimumAgeSpecification implements ISpecification<number> {
   constructor(private readonly minimumAge: number) {}
-  
+
   isSatisfiedBy(age: number): boolean {
     return age >= this.minimumAge;
   }
-  
+
   getFailureReason(age: number): string {
     if (age < this.minimumAge) {
       return `Age must be at least ${this.minimumAge}, but got ${age}`;
@@ -72,31 +75,31 @@ export class UserEligibilitySpecification implements ISpecification<User> {
     private readonly minimumAge: number = 18,
     private readonly allowedCountries: string[] = ['US', 'CA', 'UK']
   ) {}
-  
+
   isSatisfiedBy(user: User): boolean {
     // Check age requirement
     if (user.age < this.minimumAge) {
       return false;
     }
-    
+
     // Check country restriction
     if (!this.allowedCountries.includes(user.country)) {
       return false;
     }
-    
+
     // Check email verification
     if (!user.isEmailVerified) {
       return false;
     }
-    
+
     // Check account status
     if (user.status === 'suspended' || user.status === 'banned') {
       return false;
     }
-    
+
     return true;
   }
-  
+
   getFailureReason(user: User): string {
     if (user.age < this.minimumAge) {
       return `User must be at least ${this.minimumAge} years old`;
@@ -134,12 +137,12 @@ import { IAsyncSpecification } from '@vytches-ddd/contracts';
 // Async specification for external validation
 export class UniqueEmailSpecification implements IAsyncSpecification<string> {
   constructor(private readonly userRepository: IUserRepository) {}
-  
+
   async isSatisfiedByAsync(email: string): Promise<boolean> {
     const existingUser = await this.userRepository.findByEmail(email);
     return existingUser === null;
   }
-  
+
   async getFailureReasonAsync(email: string): Promise<string> {
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
@@ -150,26 +153,38 @@ export class UniqueEmailSpecification implements IAsyncSpecification<string> {
 }
 
 // Credit check specification
-export class CreditWorthinessSpecification implements IAsyncSpecification<CreditApplication> {
+export class CreditWorthinessSpecification
+  implements IAsyncSpecification<CreditApplication>
+{
   constructor(
     private readonly creditService: ICreditService,
     private readonly minimumScore: number = 650
   ) {}
-  
+
   async isSatisfiedByAsync(application: CreditApplication): Promise<boolean> {
-    const creditScore = await this.creditService.getCreditScore(application.ssn);
-    const debtToIncomeRatio = await this.creditService.getDebtToIncomeRatio(application.ssn);
-    
+    const creditScore = await this.creditService.getCreditScore(
+      application.ssn
+    );
+    const debtToIncomeRatio = await this.creditService.getDebtToIncomeRatio(
+      application.ssn
+    );
+
     // Multiple criteria
-    return creditScore >= this.minimumScore && 
-           debtToIncomeRatio <= 0.4 && 
-           application.annualIncome >= 30000;
+    return (
+      creditScore >= this.minimumScore &&
+      debtToIncomeRatio <= 0.4 &&
+      application.annualIncome >= 30000
+    );
   }
-  
+
   async getFailureReasonAsync(application: CreditApplication): Promise<string> {
-    const creditScore = await this.creditService.getCreditScore(application.ssn);
-    const debtToIncomeRatio = await this.creditService.getDebtToIncomeRatio(application.ssn);
-    
+    const creditScore = await this.creditService.getCreditScore(
+      application.ssn
+    );
+    const debtToIncomeRatio = await this.creditService.getDebtToIncomeRatio(
+      application.ssn
+    );
+
     if (creditScore < this.minimumScore) {
       return `Credit score ${creditScore} is below minimum ${this.minimumScore}`;
     }
@@ -199,15 +214,19 @@ export class CompositeSpecification<T> implements ISpecification<T> {
     protected readonly specifications: ISpecification<T>[],
     protected readonly operator: 'AND' | 'OR'
   ) {}
-  
-  static and<T>(...specifications: ISpecification<T>[]): CompositeSpecification<T> {
+
+  static and<T>(
+    ...specifications: ISpecification<T>[]
+  ): CompositeSpecification<T> {
     return new CompositeSpecification(specifications, 'AND');
   }
-  
-  static or<T>(...specifications: ISpecification<T>[]): CompositeSpecification<T> {
+
+  static or<T>(
+    ...specifications: ISpecification<T>[]
+  ): CompositeSpecification<T> {
     return new CompositeSpecification(specifications, 'OR');
   }
-  
+
   isSatisfiedBy(candidate: T): boolean {
     if (this.operator === 'AND') {
       return this.specifications.every(spec => spec.isSatisfiedBy(candidate));
@@ -215,13 +234,13 @@ export class CompositeSpecification<T> implements ISpecification<T> {
       return this.specifications.some(spec => spec.isSatisfiedBy(candidate));
     }
   }
-  
+
   getFailureReason(candidate: T): string {
     const failedReasons: string[] = [];
-    
+
     for (const spec of this.specifications) {
       const satisfied = spec.isSatisfiedBy(candidate);
-      
+
       if (this.operator === 'AND' && !satisfied) {
         const reason = this.getSpecFailureReason(spec, candidate);
         if (reason) failedReasons.push(reason);
@@ -229,14 +248,17 @@ export class CompositeSpecification<T> implements ISpecification<T> {
         return ''; // At least one satisfied for OR
       }
     }
-    
-    if (this.operator === 'OR' && failedReasons.length === this.specifications.length) {
+
+    if (
+      this.operator === 'OR' &&
+      failedReasons.length === this.specifications.length
+    ) {
       return `None of the conditions met: ${failedReasons.join(', ')}`;
     }
-    
+
     return failedReasons.join('; ');
   }
-  
+
   private getSpecFailureReason(spec: ISpecification<T>, candidate: T): string {
     if (typeof (spec as any).getFailureReason === 'function') {
       return (spec as any).getFailureReason(candidate);
@@ -248,7 +270,7 @@ export class CompositeSpecification<T> implements ISpecification<T> {
 // Usage example
 export class UserRegistrationValidator {
   private readonly specification: ISpecification<User>;
-  
+
   constructor() {
     this.specification = CompositeSpecification.and(
       new MinimumAgeSpecification(18),
@@ -256,11 +278,14 @@ export class UserRegistrationValidator {
       new EmailValidationSpecification()
     );
   }
-  
-  validate(user: User & { email: string }): { valid: boolean; errors: string[] } {
+
+  validate(user: User & { email: string }): {
+    valid: boolean;
+    errors: string[];
+  } {
     const isValid = this.specification.isSatisfiedBy(user);
     const errors = isValid ? [] : [this.specification.getFailureReason(user)];
-    
+
     return { valid: isValid, errors };
   }
 }
@@ -279,26 +304,24 @@ export class SystemActor implements IActor {
   public readonly id: string = 'system';
   public readonly type: string = 'system';
   public readonly name: string = 'System';
-  
-  constructor(
-    public readonly context: Record<string, any> = {}
-  ) {
+
+  constructor(public readonly context: Record<string, any> = {}) {
     this.context = {
       timestamp: new Date(),
       source: 'internal-system',
-      ...context
+      ...context,
     };
   }
-  
+
   isSystem(): boolean {
     return true;
   }
-  
+
   hasPermission(permission: string): boolean {
     // System actor has all permissions
     return true;
   }
-  
+
   getDisplayName(): string {
     return this.name;
   }
@@ -315,27 +338,27 @@ export class UserActor implements IActor {
     this.context = {
       timestamp: new Date(),
       source: 'user-action',
-      ...context
+      ...context,
     };
   }
-  
+
   isSystem(): boolean {
     return false;
   }
-  
+
   hasPermission(permission: string): boolean {
     const permissions = this.context.permissions || [];
     return permissions.includes(permission) || permissions.includes('*');
   }
-  
+
   getDisplayName(): string {
     return this.name;
   }
-  
+
   getTenantId(): string | undefined {
     return this.context.tenantId;
   }
-  
+
   getRole(): string | undefined {
     return this.context.role;
   }
@@ -353,23 +376,23 @@ export class ServiceActor implements IActor {
       timestamp: new Date(),
       source: 'external-service',
       serviceVersion: context.serviceVersion || '1.0.0',
-      ...context
+      ...context,
     };
   }
-  
+
   isSystem(): boolean {
     return false;
   }
-  
+
   hasPermission(permission: string): boolean {
     const permissions = this.context.servicePermissions || [];
     return permissions.includes(permission);
   }
-  
+
   getDisplayName(): string {
     return `${this.name} Service`;
   }
-  
+
   getServiceType(): string {
     return this.context.serviceType || 'external';
   }
@@ -382,53 +405,58 @@ export class ServiceActor implements IActor {
 // src/domain/actors/actor-context.ts
 export class ActorContextManager {
   private static currentActor: IActor | null = null;
-  
+
   // Set current actor for request context
   static setCurrentActor(actor: IActor): void {
     this.currentActor = actor;
   }
-  
+
   // Get current actor
   static getCurrentActor(): IActor | null {
     return this.currentActor;
   }
-  
+
   // Require actor with specific permission
   static requirePermission(permission: string): IActor {
     const actor = this.getCurrentActor();
     if (!actor) {
       throw new Error('No actor in current context');
     }
-    
+
     if (!actor.hasPermission(permission)) {
-      throw new Error(`Actor ${actor.getDisplayName()} lacks permission: ${permission}`);
+      throw new Error(
+        `Actor ${actor.getDisplayName()} lacks permission: ${permission}`
+      );
     }
-    
+
     return actor;
   }
-  
+
   // Execute with actor context
   static async withActor<T>(
-    actor: IActor, 
+    actor: IActor,
     operation: () => Promise<T>
   ): Promise<T> {
     const previousActor = this.currentActor;
     this.setCurrentActor(actor);
-    
+
     try {
       return await operation();
     } finally {
       this.currentActor = previousActor;
     }
   }
-  
+
   // Create audit trail entry
-  static createAuditEntry(action: string, details?: Record<string, any>): AuditEntry {
+  static createAuditEntry(
+    action: string,
+    details?: Record<string, any>
+  ): AuditEntry {
     const actor = this.getCurrentActor();
     if (!actor) {
       throw new Error('No actor for audit trail');
     }
-    
+
     return {
       actorId: actor.id,
       actorType: actor.type,
@@ -436,7 +464,7 @@ export class ActorContextManager {
       action,
       timestamp: new Date(),
       details: details || {},
-      context: actor.context
+      context: actor.context,
     };
   }
 }
@@ -461,64 +489,69 @@ export class ActorAwareDomainService {
     private readonly userRepository: IUserRepository,
     private readonly auditLogger: IAuditLogger
   ) {}
-  
+
   async createUser(userData: CreateUserData): Promise<User> {
     // Require permission
     const actor = ActorContextManager.requirePermission('user:create');
-    
+
     // Create user
     const user = User.create(userData);
-    
+
     // Save user
     await this.userRepository.save(user);
-    
+
     // Create audit entry
     const auditEntry = ActorContextManager.createAuditEntry('user:created', {
       userId: user.id.getValue(),
       email: userData.email,
-      creationMethod: 'domain-service'
+      creationMethod: 'domain-service',
     });
-    
+
     await this.auditLogger.log(auditEntry);
-    
+
     return user;
   }
-  
+
   async updateUserProfile(
-    userId: string, 
+    userId: string,
     updates: Partial<UserData>
   ): Promise<User> {
     const actor = ActorContextManager.getCurrentActor();
     if (!actor) {
       throw new Error('Actor required for profile updates');
     }
-    
+
     // Business rule: users can only update their own profile unless admin
     const isAdmin = actor.hasPermission('user:admin');
     const isOwner = actor.id === userId;
-    
+
     if (!isAdmin && !isOwner) {
       throw new Error('Insufficient permissions to update profile');
     }
-    
-    const user = await this.userRepository.findById(EntityId.createText(userId));
+
+    const user = await this.userRepository.findById(
+      EntityId.createText(userId)
+    );
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     // Apply updates
     user.updateProfile(updates);
     await this.userRepository.save(user);
-    
+
     // Audit trail
-    const auditEntry = ActorContextManager.createAuditEntry('user:profile-updated', {
-      userId,
-      updates,
-      updateMethod: isAdmin ? 'admin-update' : 'self-update'
-    });
-    
+    const auditEntry = ActorContextManager.createAuditEntry(
+      'user:profile-updated',
+      {
+        userId,
+        updates,
+        updateMethod: isAdmin ? 'admin-update' : 'self-update',
+      }
+    );
+
     await this.auditLogger.log(auditEntry);
-    
+
     return user;
   }
 }
@@ -548,7 +581,9 @@ export interface IQueryRepository<T> {
 }
 
 // Full repository interface
-export interface IRepository<T> extends IBaseRepository<T>, IQueryRepository<T> {
+export interface IRepository<T>
+  extends IBaseRepository<T>,
+    IQueryRepository<T> {
   findByIds(ids: EntityId<string>[]): Promise<T[]>;
   saveMany(entities: T[]): Promise<void>;
   deleteMany(ids: EntityId<string>[]): Promise<void>;

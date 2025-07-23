@@ -27,9 +27,14 @@ const cliLogger = Logger.forContext('CLI');
 
 // Extend logger with success method for CLI operations
 export const logger = {
-  debug: (message: string, ...args: unknown[]) => cliLogger.debug(message, ...args.map(arg => arg as Record<string, unknown>)),
-  info: (message: string, ...args: unknown[]) => cliLogger.info(message, ...args.map(arg => arg as Record<string, unknown>)),
-  warn: (message: string, ...args: unknown[]) => cliLogger.warn(message, ...args.map(arg => arg as Record<string, unknown>)),
-  error: (message: string, ...args: unknown[]) => cliLogger.error(message, args.length > 0 ? args[0] as Error : undefined),
-  success: (message: string, ...args: unknown[]) => cliLogger.info(`✅ ${message}`, ...args.map(arg => arg as Record<string, unknown>)),
+  debug: (message: string, ...args: unknown[]) =>
+    cliLogger.debug(message, ...args.map(arg => arg as Record<string, unknown>)),
+  info: (message: string, ...args: unknown[]) =>
+    cliLogger.info(message, ...args.map(arg => arg as Record<string, unknown>)),
+  warn: (message: string, ...args: unknown[]) =>
+    cliLogger.warn(message, ...args.map(arg => arg as Record<string, unknown>)),
+  error: (message: string, ...args: unknown[]) =>
+    cliLogger.error(message, args.length > 0 ? (args[0] as Error) : undefined),
+  success: (message: string, ...args: unknown[]) =>
+    cliLogger.info(`✅ ${message}`, ...args.map(arg => arg as Record<string, unknown>)),
 };

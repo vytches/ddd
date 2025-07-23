@@ -9,11 +9,15 @@
 
 ## Description
 
-This example demonstrates a basic Anti-Corruption Layer implementation for integrating with external customer management systems while protecting your domain model from external data formats and inconsistencies.
+This example demonstrates a basic Anti-Corruption Layer implementation for
+integrating with external customer management systems while protecting your
+domain model from external data formats and inconsistencies.
 
 ## Business Context
 
-An e-commerce platform needs to integrate with a legacy CRM system that has different data structures and naming conventions. The ACL protects the domain model from external system changes and provides a clean translation layer.
+An e-commerce platform needs to integrate with a legacy CRM system that has
+different data structures and naming conventions. The ACL protects the domain
+model from external system changes and provides a clean translation layer.
 
 ## Code Example
 
@@ -24,7 +28,9 @@ import { Result } from '@vytches-ddd/utils';
 import { Customer, ExternalCustomerData } from '../types'; // From your application
 
 // Data translator for customer conversion
-export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerData, Customer> {
+export class CustomerDataTranslator
+  implements IDataTranslator<ExternalCustomerData, Customer>
+{
   translate(external: ExternalCustomerData): Result<Customer, Error> {
     try {
       const customer: Customer = {
@@ -37,8 +43,8 @@ export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerD
           currency: external.settings.preferred_currency,
           language: external.settings.locale,
           notifications: external.settings.email_notifications,
-          marketingConsent: external.settings.marketing_opt_in
-        }
+          marketingConsent: external.settings.marketing_opt_in,
+        },
       };
 
       return Result.success(customer);
@@ -62,7 +68,10 @@ export class CustomerDataTranslator implements IDataTranslator<ExternalCustomerD
 }
 
 // ACL implementation for customer management
-export class CustomerManagementACL extends AntiCorruptionLayer<ExternalCustomerData, Customer> {
+export class CustomerManagementACL extends AntiCorruptionLayer<
+  ExternalCustomerData,
+  Customer
+> {
   constructor(private externalCustomerAPI: ExternalCustomerAPI) {
     super(new CustomerDataTranslator());
   }
@@ -70,12 +79,15 @@ export class CustomerManagementACL extends AntiCorruptionLayer<ExternalCustomerD
   async getCustomer(customerId: string): Promise<Result<Customer, Error>> {
     try {
       // Call external system
-      const externalData = await this.externalCustomerAPI.getCustomer(customerId);
-      
+      const externalData =
+        await this.externalCustomerAPI.getCustomer(customerId);
+
       // Translate through ACL
       return this.translateData(externalData);
     } catch (error) {
-      return Result.failure(new Error(`Failed to get customer: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to get customer: ${error.message}`)
+      );
     }
   }
 
@@ -83,14 +95,17 @@ export class CustomerManagementACL extends AntiCorruptionLayer<ExternalCustomerD
     try {
       // Convert domain model to external format
       const externalData = this.convertToExternalFormat(customer);
-      
+
       // Update external system
-      const updatedData = await this.externalCustomerAPI.updateCustomer(externalData);
-      
+      const updatedData =
+        await this.externalCustomerAPI.updateCustomer(externalData);
+
       // Translate response back to domain model
       return this.translateData(updatedData);
     } catch (error) {
-      return Result.failure(new Error(`Failed to update customer: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to update customer: ${error.message}`)
+      );
     }
   }
 
@@ -105,8 +120,8 @@ export class CustomerManagementACL extends AntiCorruptionLayer<ExternalCustomerD
         preferred_currency: customer.preferences.currency,
         locale: customer.preferences.language,
         email_notifications: customer.preferences.notifications,
-        marketing_opt_in: customer.preferences.marketingConsent
-      }
+        marketing_opt_in: customer.preferences.marketingConsent,
+      },
     };
   }
 }
@@ -115,13 +130,15 @@ export class CustomerManagementACL extends AntiCorruptionLayer<ExternalCustomerD
 export class CustomerService {
   constructor(private customerACL: CustomerManagementACL) {}
 
-  async getCustomerProfile(customerId: string): Promise<Result<Customer, Error>> {
+  async getCustomerProfile(
+    customerId: string
+  ): Promise<Result<Customer, Error>> {
     // Clean domain operation using ACL
     return await this.customerACL.getCustomer(customerId);
   }
 
   async updateCustomerPreferences(
-    customerId: string, 
+    customerId: string,
     preferences: CustomerPreferences
   ): Promise<Result<Customer, Error>> {
     // Get current customer
@@ -131,11 +148,11 @@ export class CustomerService {
     }
 
     const customer = customerResult.value;
-    
+
     // Update preferences in domain model
     const updatedCustomer: Customer = {
       ...customer,
-      preferences: { ...customer.preferences, ...preferences }
+      preferences: { ...customer.preferences, ...preferences },
     };
 
     // Save through ACL
@@ -161,7 +178,8 @@ interface ExternalCustomerAPI {
 
 - **Leaky Abstraction**: Don't expose external data structures to domain
 - **Translation Loss**: Ensure no critical data is lost during conversion
-- **Performance**: Avoid unnecessary translations for simple pass-through operations
+- **Performance**: Avoid unnecessary translations for simple pass-through
+  operations
 
 ## Related Examples
 

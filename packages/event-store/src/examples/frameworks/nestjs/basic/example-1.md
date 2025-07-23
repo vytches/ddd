@@ -1,15 +1,18 @@
 # Event Store - NestJS Basic Manual Setup
 
-**Focus**: Basic Event Store usage in NestJS with manual instantiation
-**Base Example**: [Event Store Basic Usage](../../../basic/usage.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/event-store
+**Focus**: Basic Event Store usage in NestJS with manual instantiation **Base
+Example**: [Event Store Basic Usage](../../../basic/usage.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/event-store
 
 ## Service Implementation
 
 ```typescript
 // event-store.service.ts
 import { Injectable } from '@nestjs/common';
-import { InMemoryEventStore, EventStoreOptions } from '@vytches-ddd/event-store';
+import {
+  InMemoryEventStore,
+  EventStoreOptions,
+} from '@vytches-ddd/event-store';
 import { DomainEvent } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
 import { OrderEvent, InventoryEvent } from './types'; // From your app
@@ -22,14 +25,14 @@ export class EventStoreService {
     // ⭐ FOCUS: Manual event store setup (beginner-friendly)
     const options: EventStoreOptions = {
       enableSnapshots: true,
-      snapshotFrequency: 50
+      snapshotFrequency: 50,
     };
     this.eventStore = new InMemoryEventStore(options);
   }
 
   // ✅ FOCUS: Thin wrapper around event store
   async appendEvents(
-    streamId: string, 
+    streamId: string,
     events: DomainEvent[]
   ): Promise<Result<void, Error>> {
     try {
@@ -42,7 +45,7 @@ export class EventStoreService {
   async readEvents(streamId: string): Promise<Result<DomainEvent[], Error>> {
     try {
       const result = await this.eventStore.readStream(streamId);
-      return result.isSuccess() 
+      return result.isSuccess()
         ? Result.ok(result.value.events)
         : Result.fail(result.error);
     } catch (error) {
@@ -69,7 +72,7 @@ import { EventStoreService } from './event-store.service';
 
 @Module({
   providers: [EventStoreService],
-  exports: [EventStoreService]
+  exports: [EventStoreService],
 })
 export class EventStoreModule {}
 ```
@@ -107,19 +110,20 @@ export class OrderService {
 
   async getOrderHistory(orderId: string): Promise<OrderEvent[]> {
     const result = await this.eventStore.readEvents(`order-${orderId}`);
-    
+
     if (result.isSuccess()) {
-      return result.value.filter(event => 
+      return result.value.filter(event =>
         event.eventType.startsWith('Order')
       ) as OrderEvent[];
     }
-    
+
     throw new Error(`Failed to get order history: ${result.error.message}`);
   }
 }
 ```
 
 **Key Points:**
+
 - Simple manual instantiation for beginners
 - Focus on event store usage, not DI complexity
 - Standard NestJS patterns for framework integration

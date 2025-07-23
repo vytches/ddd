@@ -1,19 +1,23 @@
 # Event Sourced Shopping Cart - Advanced State Reconstruction
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Intermediate
-**Domain**: E-commerce Event Sourcing
-**Patterns**: Event Sourcing, Aggregate Root, Snapshot Strategy, Temporal Queries
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+Intermediate **Domain**: E-commerce Event Sourcing **Patterns**: Event Sourcing,
+Aggregate Root, Snapshot Strategy, Temporal Queries **Dependencies**:
+@vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
 
 ## Description
 
-This example demonstrates an event-sourced shopping cart aggregate that rebuilds its state from a sequence of domain events. It supports temporal queries, snapshot optimization, and complex business scenarios like abandoned cart recovery and session management.
+This example demonstrates an event-sourced shopping cart aggregate that rebuilds
+its state from a sequence of domain events. It supports temporal queries,
+snapshot optimization, and complex business scenarios like abandoned cart
+recovery and session management.
 
 ## Business Context
 
-An e-commerce platform needs sophisticated shopping cart functionality with the ability to recover sessions, analyze shopping behavior over time, and provide personalized experiences based on historical interactions. Event sourcing enables complete shopping history reconstruction and advanced analytics.
+An e-commerce platform needs sophisticated shopping cart functionality with the
+ability to recover sessions, analyze shopping behavior over time, and provide
+personalized experiences based on historical interactions. Event sourcing
+enables complete shopping history reconstruction and advanced analytics.
 
 ## Code Example
 
@@ -183,45 +187,50 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
 
   // ⭐ Factory method for new cart
   static create(
-    customerId: string, 
-    sessionId: string, 
+    customerId: string,
+    sessionId: string,
     expirationMinutes: number = 60
   ): EventSourcedShoppingCartAggregate {
     const cart = new EventSourcedShoppingCartAggregate(EntityId.generate());
-    
+
     const expiresAt = new Date(Date.now() + expirationMinutes * 60 * 1000);
-    
-    cart.addDomainEvent(new ShoppingCartCreatedEvent(
-      cart.id.value,
-      customerId,
-      sessionId,
-      expiresAt
-    ));
-    
+
+    cart.addDomainEvent(
+      new ShoppingCartCreatedEvent(
+        cart.id.value,
+        customerId,
+        sessionId,
+        expiresAt
+      )
+    );
+
     return cart;
   }
 
   // ⭐ Event sourcing reconstitution
-  static fromEvents(id: EntityId, events: DomainEvent[]): EventSourcedShoppingCartAggregate {
+  static fromEvents(
+    id: EntityId,
+    events: DomainEvent[]
+  ): EventSourcedShoppingCartAggregate {
     const cart = new EventSourcedShoppingCartAggregate(id);
-    
+
     // Apply all historical events to rebuild state
     events.forEach(event => cart.applyEvent(event));
-    
+
     // Mark as hydrated since we're reconstituting from events
     cart.markAsHydrated();
-    
+
     return cart;
   }
 
   // ⭐ Snapshot-based reconstitution (performance optimization)
   static fromSnapshot(
-    id: EntityId, 
-    snapshotData: ShoppingCartData, 
+    id: EntityId,
+    snapshotData: ShoppingCartData,
     eventsAfterSnapshot: DomainEvent[]
   ): EventSourcedShoppingCartAggregate {
     const cart = new EventSourcedShoppingCartAggregate(id);
-    
+
     // Restore from snapshot
     cart.customerId = snapshotData.customerId;
     cart.sessionId = snapshotData.sessionId || '';
@@ -230,185 +239,209 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
     cart.createdAt = snapshotData.createdAt;
     cart.updatedAt = snapshotData.updatedAt;
     cart.eventVersion = snapshotData.version || 0;
-    
+
     // Restore items
     snapshotData.items.forEach(item => {
       cart.items.set(item.productId, item);
     });
-    
+
     // Restore coupons
     snapshotData.appliedCoupons?.forEach(coupon => {
       cart.appliedCoupons.set(coupon, { code: coupon, applied: true });
     });
-    
+
     // Apply events that occurred after the snapshot
     eventsAfterSnapshot.forEach(event => cart.applyEvent(event));
-    
+
     cart.markAsHydrated();
-    
+
     return cart;
   }
 
   // ⭐ Business operations
-  addItem(productId: string, productName: string, quantity: number, unitPrice: number): void {
+  addItem(
+    productId: string,
+    productName: string,
+    quantity: number,
+    unitPrice: number
+  ): void {
     this.ensureCartActive();
-    
+
     if (quantity <= 0) {
       throw new BaseError('INVALID_QUANTITY', 'Quantity must be positive');
     }
-    
+
     if (unitPrice <= 0) {
       throw new BaseError('INVALID_PRICE', 'Unit price must be positive');
     }
-    
+
     const item: CartItem = {
       productId,
       productName,
       quantity,
       unitPrice,
       discount: 0,
-      addedAt: new Date()
+      addedAt: new Date(),
     };
-    
-    this.addDomainEvent(new ItemAddedToCartEvent(
-      this.id.value,
-      item,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new ItemAddedToCartEvent(this.id.value, item, new Date())
+    );
   }
 
   removeItem(productId: string): void {
     this.ensureCartActive();
-    
+
     const item = this.items.get(productId);
     if (!item) {
       throw new ItemNotInCartError(productId);
     }
-    
-    this.addDomainEvent(new ItemRemovedFromCartEvent(
-      this.id.value,
-      productId,
-      item.quantity,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new ItemRemovedFromCartEvent(
+        this.id.value,
+        productId,
+        item.quantity,
+        new Date()
+      )
+    );
   }
 
   updateItemQuantity(productId: string, newQuantity: number): void {
     this.ensureCartActive();
-    
+
     const item = this.items.get(productId);
     if (!item) {
       throw new ItemNotInCartError(productId);
     }
-    
+
     if (newQuantity <= 0) {
       this.removeItem(productId);
       return;
     }
-    
-    this.addDomainEvent(new ItemQuantityUpdatedEvent(
-      this.id.value,
-      productId,
-      item.quantity,
-      newQuantity,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new ItemQuantityUpdatedEvent(
+        this.id.value,
+        productId,
+        item.quantity,
+        newQuantity,
+        new Date()
+      )
+    );
   }
 
-  applyCoupon(couponCode: string, discountType: 'percentage' | 'fixed', discountValue: number): void {
+  applyCoupon(
+    couponCode: string,
+    discountType: 'percentage' | 'fixed',
+    discountValue: number
+  ): void {
     this.ensureCartActive();
-    
+
     if (this.appliedCoupons.has(couponCode)) {
       throw new InvalidCouponError(couponCode, 'Already applied');
     }
-    
+
     // Business rule: Maximum 3 coupons per cart
     if (this.appliedCoupons.size >= 3) {
       throw new InvalidCouponError(couponCode, 'Maximum 3 coupons allowed');
     }
-    
+
     // Business rule: Percentage discounts cannot exceed 50%
     if (discountType === 'percentage' && discountValue > 0.5) {
-      throw new InvalidCouponError(couponCode, 'Percentage discount cannot exceed 50%');
+      throw new InvalidCouponError(
+        couponCode,
+        'Percentage discount cannot exceed 50%'
+      );
     }
-    
-    this.addDomainEvent(new CouponAppliedEvent(
-      this.id.value,
-      couponCode,
-      discountType,
-      discountValue,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new CouponAppliedEvent(
+        this.id.value,
+        couponCode,
+        discountType,
+        discountValue,
+        new Date()
+      )
+    );
   }
 
   removeCoupon(couponCode: string): void {
     this.ensureCartActive();
-    
+
     if (!this.appliedCoupons.has(couponCode)) {
       throw new InvalidCouponError(couponCode, 'Not applied to cart');
     }
-    
-    this.addDomainEvent(new CouponRemovedEvent(
-      this.id.value,
-      couponCode,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new CouponRemovedEvent(this.id.value, couponCode, new Date())
+    );
   }
 
   abandonCart(): void {
     if (this.isAbandoned || this.isCheckedOut) {
       return; // Already abandoned or checked out
     }
-    
-    this.addDomainEvent(new CartAbandonedEvent(
-      this.id.value,
-      this.customerId,
-      this.totalAmount,
-      Array.from(this.items.values()).reduce((sum, item) => sum + item.quantity, 0),
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new CartAbandonedEvent(
+        this.id.value,
+        this.customerId,
+        this.totalAmount,
+        Array.from(this.items.values()).reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        ),
+        new Date()
+      )
+    );
   }
 
   restoreFromAbandonment(): void {
     if (!this.isAbandoned) {
       return; // Not abandoned
     }
-    
+
     if (this.isExpired()) {
       throw new CartExpiredError(this.id.value);
     }
-    
-    this.addDomainEvent(new CartRestoredEvent(
-      this.id.value,
-      this.customerId,
-      this.createdAt,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new CartRestoredEvent(
+        this.id.value,
+        this.customerId,
+        this.createdAt,
+        new Date()
+      )
+    );
   }
 
   checkout(orderId: string): void {
     this.ensureCartActive();
-    
+
     if (this.items.size === 0) {
       throw new BaseError('EMPTY_CART', 'Cannot checkout empty cart');
     }
-    
-    this.addDomainEvent(new CartCheckedOutEvent(
-      this.id.value,
-      orderId,
-      this.totalAmount,
-      Array.from(this.items.values()).reduce((sum, item) => sum + item.quantity, 0),
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new CartCheckedOutEvent(
+        this.id.value,
+        orderId,
+        this.totalAmount,
+        Array.from(this.items.values()).reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        ),
+        new Date()
+      )
+    );
   }
 
   expireCart(): void {
     if (this.isExpired() && !this.isCheckedOut) {
-      this.addDomainEvent(new CartExpiredEvent(
-        this.id.value,
-        this.customerId,
-        new Date()
-      ));
+      this.addDomainEvent(
+        new CartExpiredEvent(this.id.value, this.customerId, new Date())
+      );
     }
   }
 
@@ -446,7 +479,7 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
         this.applyCartExpiredEvent(event as CartExpiredEvent);
         break;
     }
-    
+
     this.eventVersion++;
     this.updatedAt = new Date();
   }
@@ -488,7 +521,7 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
       code: event.couponCode,
       type: event.discountType,
       value: event.discountValue,
-      appliedAt: event.timestamp
+      appliedAt: event.timestamp,
     });
     this.recalculateTotal();
   }
@@ -519,7 +552,7 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
     if (this.isCheckedOut) {
       throw new BaseError('CART_CHECKED_OUT', 'Cart has been checked out');
     }
-    
+
     if (this.isExpired()) {
       throw new CartExpiredError(this.id.value);
     }
@@ -531,12 +564,12 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
 
   private recalculateTotal(): void {
     let subtotal = 0;
-    
+
     // Calculate item subtotal
     this.items.forEach(item => {
       subtotal += item.quantity * item.unitPrice;
     });
-    
+
     // Apply coupons
     let totalDiscount = 0;
     this.appliedCoupons.forEach(coupon => {
@@ -546,7 +579,7 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
         totalDiscount += coupon.value;
       }
     });
-    
+
     this.totalDiscount = totalDiscount;
     this.totalAmount = Math.max(0, subtotal - totalDiscount);
   }
@@ -576,13 +609,16 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
       expiresAt: this.expiresAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.eventVersion
+      version: this.eventVersion,
     };
   }
 
   // ⭐ State accessors
   get itemCount(): number {
-    return Array.from(this.items.values()).reduce((sum, item) => sum + item.quantity, 0);
+    return Array.from(this.items.values()).reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
   }
 
   get cartTotal(): number {
@@ -604,7 +640,7 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
       totalDiscount: this.totalDiscount,
       appliedCoupons: Array.from(this.appliedCoupons.keys()),
       isActive: this.isActive,
-      expiresAt: this.expiresAt
+      expiresAt: this.expiresAt,
     };
   }
 }
@@ -612,47 +648,54 @@ export class EventSourcedShoppingCartAggregate extends AggregateRoot {
 // Usage example with event sourcing
 export function eventSourcedCartExample(): void {
   // Create new cart
-  const cart = EventSourcedShoppingCartAggregate.create('customer-123', 'session-456', 120);
-  
+  const cart = EventSourcedShoppingCartAggregate.create(
+    'customer-123',
+    'session-456',
+    120
+  );
+
   // Add items
   cart.addItem('PROD-001', 'Laptop', 1, 999.99);
   cart.addItem('PROD-002', 'Mouse', 2, 29.99);
-  
+
   // Apply discounts
-  cart.applyCoupon('SAVE10', 'percentage', 0.10);
+  cart.applyCoupon('SAVE10', 'percentage', 0.1);
   cart.applyCoupon('FREESHIP', 'fixed', 5.99);
-  
+
   // Simulate some operations
   cart.updateItemQuantity('PROD-002', 3);
   cart.removeCoupon('FREESHIP');
-  
+
   console.log('Cart summary:', cart.cartSummary);
   console.log('All events:', cart.getUncommittedEvents());
-  
+
   // Simulate event sourcing reconstitution
   const events = cart.getUncommittedEvents();
   const reconstitutedCart = EventSourcedShoppingCartAggregate.fromEvents(
-    cart.id, 
+    cart.id,
     events
   );
-  
+
   console.log('Reconstituted cart:', reconstitutedCart.cartSummary);
-  
+
   // Demonstrate snapshot optimization
   const snapshot = cart.toSnapshot();
   console.log('Snapshot data:', snapshot);
-  
+
   // Additional operations on reconstituted cart
   reconstitutedCart.abandonCart();
   console.log('Cart abandoned:', reconstitutedCart.isActive);
-  
+
   // Restore from abandonment
   reconstitutedCart.restoreFromAbandonment();
   console.log('Cart restored:', reconstitutedCart.isActive);
-  
+
   // Checkout
   reconstitutedCart.checkout('ORDER-789');
-  console.log('Final events count:', reconstitutedCart.getUncommittedEvents().length);
+  console.log(
+    'Final events count:',
+    reconstitutedCart.getUncommittedEvents().length
+  );
 }
 ```
 

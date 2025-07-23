@@ -1,7 +1,7 @@
 # Basic Repository - NestJS Manual Setup
 
-**Focus**: Basic IRepository usage in NestJS with manual instantiation
-**Base Example**: [Basic Generic Repository](../../basic/example-1.md)
+**Focus**: Basic IRepository usage in NestJS with manual instantiation **Base
+Example**: [Basic Generic Repository](../../basic/example-1.md)
 **Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories
 
 ## Service Implementation
@@ -23,7 +23,7 @@ export class UserService {
     this.userRepository = new BaseRepository<User>('users', {
       connection: this.connection,
       enableCaching: true,
-      cacheTTL: 300000 // 5 minutes
+      cacheTTL: 300000, // 5 minutes
     });
   }
 
@@ -45,7 +45,7 @@ export class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return await this.userRepository.save({ ...user, ...updates });
   }
 
@@ -57,7 +57,7 @@ export class UserService {
   async findActiveUsers(): Promise<User[]> {
     return await this.userRepository.find({
       where: [{ field: 'isActive', operator: 'eq', value: true }],
-      orderBy: [{ field: 'createdAt', direction: 'DESC' }]
+      orderBy: [{ field: 'createdAt', direction: 'DESC' }],
     });
   }
 }
@@ -74,12 +74,10 @@ import { UserController } from './user.controller';
 import { UserEntity } from './user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserEntity])
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity])],
   providers: [UserService],
   controllers: [UserController],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -88,7 +86,15 @@ export class UserModule {}
 
 ```typescript
 // user.controller.ts
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserData, UpdateUserData } from './types';
 
@@ -132,7 +138,7 @@ export class UserController {
 ## Key Points
 
 - Simple manual instantiation for beginners
-- Focus on @vytches-ddd/repositories usage, not DI complexity  
+- Focus on @vytches-ddd/repositories usage, not DI complexity
 - Standard NestJS patterns for framework integration
 - Minimal setup required - just inject TypeORM connection
 - All business logic delegates to repository methods

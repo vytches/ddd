@@ -5,15 +5,21 @@
 **Complexity**: intermediate  
 **Domain**: E-commerce Platform  
 **Patterns**: Auto-Discovery, Enhanced Decorators, Plugin System  
-**Dependencies**: @vytches-ddd/di  
+**Dependencies**: @vytches-ddd/di
 
 ## Description
 
-This example demonstrates VytchesDDD's auto-discovery system that automatically finds and registers services using enhanced decorators. The system scans for decorated classes and registers them with the appropriate configuration, reducing boilerplate code and improving maintainability.
+This example demonstrates VytchesDDD's auto-discovery system that automatically
+finds and registers services using enhanced decorators. The system scans for
+decorated classes and registers them with the appropriate configuration,
+reducing boilerplate code and improving maintainability.
 
 ## Business Context
 
-In large enterprise applications, manually registering dozens of services becomes cumbersome and error-prone. Auto-discovery automatically finds services based on decorators, ensuring all services are registered consistently and reducing the risk of missing registrations during deployments.
+In large enterprise applications, manually registering dozens of services
+becomes cumbersome and error-prone. Auto-discovery automatically finds services
+based on decorators, ensuring all services are registered consistently and
+reducing the risk of missing registrations during deployments.
 
 ## Code Example
 
@@ -32,11 +38,11 @@ import { User, Product } from '../types'; // Import from application
   dependencies: ['auditService', 'cacheService'],
   autoRegister: true,
   timeout: 30000,
-  tags: ['catalog', 'products', 'core']
+  tags: ['catalog', 'products', 'core'],
 })
 export class ProductService {
   private products: Map<string, Product> = new Map();
-  
+
   /**
    * Gets product by ID
    */
@@ -45,24 +51,26 @@ export class ProductService {
     console.log(`ProductService: Getting product ${id}`);
     return this.products.get(id) || null;
   }
-  
+
   /**
    * Creates a new product
    */
-  async createProduct(productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+  async createProduct(
+    productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Product> {
     const product: Product = {
       ...productData,
       id: this.generateProductId(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     this.products.set(product.id, product);
-    
+
     console.log(`ProductService: Created product ${product.id}`);
     return product;
   }
-  
+
   private generateProductId(): string {
     return `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -84,12 +92,12 @@ import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
   middleware: ['loggingMiddleware', 'validationMiddleware'],
   retryPolicy: {
     maxAttempts: 3,
-    baseDelay: 1000
-  }
+    baseDelay: 1000,
+  },
 })
 export class InventoryService {
   private inventory: Map<string, number> = new Map();
-  
+
   /**
    * Checks product availability
    */
@@ -98,19 +106,24 @@ export class InventoryService {
     console.log(`InventoryService: Checking availability for ${productId}`);
     return this.inventory.get(productId) || 0;
   }
-  
+
   /**
    * Reserves inventory
    */
-  async reserveInventory(productId: string, quantity: number): Promise<boolean> {
+  async reserveInventory(
+    productId: string,
+    quantity: number
+  ): Promise<boolean> {
     const available = await this.checkAvailability(productId);
-    
+
     if (available >= quantity) {
       this.inventory.set(productId, available - quantity);
-      console.log(`InventoryService: Reserved ${quantity} units of ${productId}`);
+      console.log(
+        `InventoryService: Reserved ${quantity} units of ${productId}`
+      );
       return true;
     }
-    
+
     console.log(`InventoryService: Insufficient inventory for ${productId}`);
     return false;
   }
@@ -131,34 +144,38 @@ import { AuditLogEntry } from '../types'; // Import from application
   context: 'Compliance',
   autoRegister: true,
   priority: 10, // High priority for early registration
-  healthCheck: true
+  healthCheck: true,
 })
 export class AuditService {
   private auditLog: AuditLogEntry[] = [];
-  
+
   /**
    * Logs an audit entry
    */
-  async logAction(entry: Omit<AuditLogEntry, 'id' | 'timestamp'>): Promise<void> {
+  async logAction(
+    entry: Omit<AuditLogEntry, 'id' | 'timestamp'>
+  ): Promise<void> {
     // ⭐ FOCUS: Auto-discovered audit service
     const auditEntry: AuditLogEntry = {
       ...entry,
       id: this.generateAuditId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.auditLog.push(auditEntry);
-    
-    console.log(`AuditService: Logged action ${entry.action} for ${entry.resource}`);
+
+    console.log(
+      `AuditService: Logged action ${entry.action} for ${entry.resource}`
+    );
   }
-  
+
   /**
    * Gets audit log for a resource
    */
   async getAuditLog(resourceId: string): Promise<AuditLogEntry[]> {
     return this.auditLog.filter(entry => entry.resourceId === resourceId);
   }
-  
+
   private generateAuditId(): string {
     return `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -179,47 +196,47 @@ import { CacheConfig } from '../types'; // Import from application
   context: 'Infrastructure',
   autoRegister: true,
   condition: () => process.env.NODE_ENV === 'production', // Conditional registration
-  factory: (container) => {
+  factory: container => {
     const config: CacheConfig = {
       provider: 'memory',
       ttl: 300000, // 5 minutes
-      maxSize: 1000
+      maxSize: 1000,
     };
     return new CacheService(config);
-  }
+  },
 })
 export class CacheService {
   private cache: Map<string, { value: any; expiry: number }> = new Map();
-  
+
   constructor(private config: CacheConfig) {}
-  
+
   /**
    * Gets cached value
    */
   async get<T>(key: string): Promise<T | null> {
     // ⭐ FOCUS: Auto-discovered cache service
     const cached = this.cache.get(key);
-    
+
     if (!cached) {
       return null;
     }
-    
+
     if (Date.now() > cached.expiry) {
       this.cache.delete(key);
       return null;
     }
-    
+
     console.log(`CacheService: Cache hit for ${key}`);
     return cached.value;
   }
-  
+
   /**
    * Sets cached value
    */
   async set(key: string, value: any): Promise<void> {
     const expiry = Date.now() + this.config.ttl;
     this.cache.set(key, { value, expiry });
-    
+
     console.log(`CacheService: Cached value for ${key}`);
   }
 }
@@ -238,39 +255,37 @@ export class DiscoveryConfiguration {
    */
   static async configure(): Promise<void> {
     const container = new SimpleContainer();
-    
+
     // ⭐ FOCUS: Enhanced auto-discovery configuration
     const discoveryOptions: DiscoveryOptions = {
       // Scan specific directories
-      scanPaths: [
-        './src/services',
-        './src/handlers',
-        './src/repositories'
-      ],
-      
+      scanPaths: ['./src/services', './src/handlers', './src/repositories'],
+
       // Include/exclude patterns
       include: ['**/*.service.ts', '**/*.handler.ts'],
       exclude: ['**/*.test.ts', '**/*.spec.ts'],
-      
+
       // Discovery settings
       enableAutoRegistration: true,
       enableDependencyValidation: true,
       enableCircularDependencyDetection: true,
-      
+
       // Lifecycle hooks
       onServiceDiscovered: (serviceId, metadata) => {
         console.log(`Discovered service: ${serviceId}`, metadata);
       },
-      
+
       onServiceRegistered: (serviceId, registration) => {
         console.log(`Registered service: ${serviceId}`, registration);
       },
-      
-      onDiscoveryComplete: (discoveredServices) => {
-        console.log(`Auto-discovery complete. Found ${discoveredServices.length} services`);
-      }
+
+      onDiscoveryComplete: discoveredServices => {
+        console.log(
+          `Auto-discovery complete. Found ${discoveredServices.length} services`
+        );
+      },
     };
-    
+
     // Configure with discovery options
     await VytchesDDD.configure(container, discoveryOptions);
   }
@@ -291,46 +306,48 @@ import { CacheService } from './cache.service';
  */
 async function demonstrateAutoDiscovery(): Promise<void> {
   console.log('=== Auto-Discovery System Demo ===\n');
-  
+
   // ⭐ FOCUS: Configure auto-discovery
   await DiscoveryConfiguration.configure();
-  
+
   console.log('\n1. Auto-discovered services:');
   const discoveredServices = VytchesDDD.getRegisteredServices();
   discoveredServices.forEach(serviceId => {
     console.log(`  - ${serviceId}`);
   });
-  
+
   console.log('\n2. Using auto-discovered services:');
-  
+
   // ⭐ FOCUS: Resolve auto-discovered services
   const productService = VytchesDDD.resolve<ProductService>('productService');
-  const inventoryService = VytchesDDD.resolve<InventoryService>('inventoryService');
+  const inventoryService =
+    VytchesDDD.resolve<InventoryService>('inventoryService');
   const auditService = VytchesDDD.resolve<AuditService>('auditService');
   const cacheService = VytchesDDD.resolve<CacheService>('cacheService');
-  
+
   // Create and use services
   const product = await productService.createProduct({
     name: 'Laptop',
     description: 'High-performance laptop',
     price: 999.99,
     category: 'Electronics',
-    sku: 'LAP-001'
+    sku: 'LAP-001',
   });
-  
+
   await inventoryService.reserveInventory(product.id, 5);
-  
+
   await auditService.logAction({
     userId: 'user123',
     action: 'CREATE_PRODUCT',
     resource: 'Product',
-    resourceId: product.id
+    resourceId: product.id,
   });
-  
+
   await cacheService.set('recent-product', product);
-  
+
   console.log('\n3. Service dependencies and metadata:');
-  const productServiceMetadata = VytchesDDD.getServiceMetadata('productService');
+  const productServiceMetadata =
+    VytchesDDD.getServiceMetadata('productService');
   console.log('ProductService metadata:', productServiceMetadata);
 }
 
@@ -351,13 +368,16 @@ demonstrateAutoDiscovery().catch(console.error);
 ## Common Pitfalls
 
 - **Missing Auto-Register**: Set `autoRegister: true` for automatic discovery
-- **Circular Dependencies**: Avoid services that depend on each other during construction
+- **Circular Dependencies**: Avoid services that depend on each other during
+  construction
 - **Scan Path Configuration**: Ensure scan paths include all service locations
 - **Context Isolation**: Be careful with context-specific services
-- **Factory Dependencies**: Custom factories should handle their own dependencies
+- **Factory Dependencies**: Custom factories should handle their own
+  dependencies
 
 ## Related Examples
 
-- [Basic Service Registration](../basic/example-1.md) - Simple service registration
+- [Basic Service Registration](../basic/example-1.md) - Simple service
+  registration
 - [Context Isolation](./example-2.md) - Bounded context support
 - [CQRS Handler Registration](./example-3.md) - Automatic handler registration

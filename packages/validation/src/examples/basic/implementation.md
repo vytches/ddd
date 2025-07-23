@@ -1,13 +1,16 @@
 # Basic Validation with Specifications Implementation
 
-**Focus**: Basic validation using specifications and business rules for domain validation  
+**Focus**: Basic validation using specifications and business rules for domain
+validation  
 **Domain**: E-commerce User Registration  
 **Complexity**: Basic  
 **Dependencies**: @vytches-ddd/validation, @vytches-ddd/utils
 
 ## Business Context
 
-This example demonstrates basic validation patterns for an e-commerce user registration system that requires:
+This example demonstrates basic validation patterns for an e-commerce user
+registration system that requires:
+
 - Specification-based validation for complex business rules
 - Composite validation for combining multiple validation rules
 - Domain-driven validation that reflects business requirements
@@ -18,10 +21,10 @@ This example demonstrates basic validation patterns for an e-commerce user regis
 
 ```typescript
 // user-specifications.ts
-import { 
-  ISpecification, 
+import {
+  ISpecification,
   IAsyncSpecification,
-  CompositeSpecification 
+  CompositeSpecification,
 } from '@vytches-ddd/validation';
 import { User, UserProfile, Address } from '../types'; // ALWAYS import from app
 
@@ -40,7 +43,8 @@ export class EmailFormatSpecification implements ISpecification<User> {
 export class PasswordStrengthSpecification implements ISpecification<User> {
   isSatisfiedBy(user: User): boolean {
     // Password must be at least 8 characters with uppercase, lowercase, and number
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(user.password);
   }
 
@@ -54,16 +58,19 @@ export class AgeRequirementSpecification implements ISpecification<User> {
 
   isSatisfiedBy(user: User): boolean {
     if (!user.dateOfBirth) return false;
-    
+
     const today = new Date();
     const birthDate = new Date(user.dateOfBirth);
     const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       return age - 1 >= this.minAge;
     }
-    
+
     return age >= this.minAge;
   }
 
@@ -77,7 +84,9 @@ export class UniqueUsernameSpecification implements IAsyncSpecification<User> {
 
   async isSatisfiedByAsync(user: User): Promise<boolean> {
     try {
-      const existingUser = await this.userRepository.findByUsername(user.username);
+      const existingUser = await this.userRepository.findByUsername(
+        user.username
+      );
       return !existingUser;
     } catch (error) {
       // If repository fails, assume username is not unique to be safe
@@ -130,11 +139,11 @@ export class AddressValidationSpecification implements ISpecification<Address> {
 
 export class PostalCodeFormatSpecification implements ISpecification<Address> {
   private postalCodePatterns: { [country: string]: RegExp } = {
-    'US': /^\d{5}(-\d{4})?$/,
-    'UK': /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i,
-    'CA': /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i,
-    'DE': /^\d{5}$/,
-    'FR': /^\d{5}$/
+    US: /^\d{5}(-\d{4})?$/,
+    UK: /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i,
+    CA: /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i,
+    DE: /^\d{5}$/,
+    FR: /^\d{5}$/,
   };
 
   isSatisfiedBy(address: Address): boolean {
@@ -143,7 +152,7 @@ export class PostalCodeFormatSpecification implements ISpecification<Address> {
       // If no pattern for country, accept any non-empty postal code
       return address.postalCode.trim().length > 0;
     }
-    
+
     return pattern.test(address.postalCode);
   }
 
@@ -153,11 +162,11 @@ export class PostalCodeFormatSpecification implements ISpecification<Address> {
 }
 
 // user-validation-service.ts
-import { 
+import {
   BusinessRuleValidator,
   ValidationFacade,
   CompositeSpecification,
-  SpecificationOperators 
+  SpecificationOperators,
 } from '@vytches-ddd/validation';
 import { Result } from '@vytches-ddd/utils';
 
@@ -178,22 +187,22 @@ export class UserValidationService {
       'email-format',
       new EmailFormatSpecification()
     );
-    
+
     this.businessRuleValidator.registerRule(
       'password-strength',
       new PasswordStrengthSpecification()
     );
-    
+
     this.businessRuleValidator.registerRule(
       'age-requirement',
       new AgeRequirementSpecification(18)
     );
-    
+
     this.businessRuleValidator.registerAsyncRule(
       'unique-username',
       new UniqueUsernameSpecification(this.userRepository)
     );
-    
+
     this.businessRuleValidator.registerAsyncRule(
       'unique-email',
       new UniqueEmailSpecification(this.userRepository)
@@ -201,24 +210,35 @@ export class UserValidationService {
   }
 
   // Validate basic user information
-  async validateBasicUserInfo(user: User): Promise<Result<void, ValidationError[]>> {
+  async validateBasicUserInfo(
+    user: User
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       const validationResults = [];
 
       // Validate email format
-      const emailValidation = this.businessRuleValidator.validate('email-format', user);
+      const emailValidation = this.businessRuleValidator.validate(
+        'email-format',
+        user
+      );
       if (emailValidation.isFailure()) {
         validationResults.push(...emailValidation.error);
       }
 
       // Validate password strength
-      const passwordValidation = this.businessRuleValidator.validate('password-strength', user);
+      const passwordValidation = this.businessRuleValidator.validate(
+        'password-strength',
+        user
+      );
       if (passwordValidation.isFailure()) {
         validationResults.push(...passwordValidation.error);
       }
 
       // Validate age requirement
-      const ageValidation = this.businessRuleValidator.validate('age-requirement', user);
+      const ageValidation = this.businessRuleValidator.validate(
+        'age-requirement',
+        user
+      );
       if (ageValidation.isFailure()) {
         validationResults.push(...ageValidation.error);
       }
@@ -229,27 +249,37 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Validation failed: ${error.message}`,
-        code: 'VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Validation failed: ${error.message}`,
+          code: 'VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
   // Validate user uniqueness (async validation)
-  async validateUserUniqueness(user: User): Promise<Result<void, ValidationError[]>> {
+  async validateUserUniqueness(
+    user: User
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       const validationResults = [];
 
       // Validate unique username
-      const usernameValidation = await this.businessRuleValidator.validateAsync('unique-username', user);
+      const usernameValidation = await this.businessRuleValidator.validateAsync(
+        'unique-username',
+        user
+      );
       if (usernameValidation.isFailure()) {
         validationResults.push(...usernameValidation.error);
       }
 
       // Validate unique email
-      const emailValidation = await this.businessRuleValidator.validateAsync('unique-email', user);
+      const emailValidation = await this.businessRuleValidator.validateAsync(
+        'unique-email',
+        user
+      );
       if (emailValidation.isFailure()) {
         validationResults.push(...emailValidation.error);
       }
@@ -260,11 +290,13 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Async validation failed: ${error.message}`,
-        code: 'ASYNC_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Async validation failed: ${error.message}`,
+          code: 'ASYNC_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
@@ -279,7 +311,7 @@ export class UserValidationService {
         validationResults.push({
           field: 'address',
           message: addressSpec.getErrorMessage(),
-          code: 'INVALID_ADDRESS'
+          code: 'INVALID_ADDRESS',
         });
       }
 
@@ -289,7 +321,7 @@ export class UserValidationService {
         validationResults.push({
           field: 'address.postalCode',
           message: postalCodeSpec.getErrorMessage(),
-          code: 'INVALID_POSTAL_CODE'
+          code: 'INVALID_POSTAL_CODE',
         });
       }
 
@@ -299,16 +331,20 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'address',
-        message: `Address validation failed: ${error.message}`,
-        code: 'ADDRESS_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'address',
+          message: `Address validation failed: ${error.message}`,
+          code: 'ADDRESS_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
   // Comprehensive user validation using composite specifications
-  async validateCompleteUser(user: User): Promise<Result<void, ValidationError[]>> {
+  async validateCompleteUser(
+    user: User
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       const allValidationResults = [];
 
@@ -338,11 +374,13 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Complete validation failed: ${error.message}`,
-        code: 'COMPLETE_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Complete validation failed: ${error.message}`,
+          code: 'COMPLETE_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
@@ -353,7 +391,7 @@ export class UserValidationService {
       const userValidationSpec = CompositeSpecification.and([
         new EmailFormatSpecification(),
         new PasswordStrengthSpecification(),
-        new AgeRequirementSpecification(18)
+        new AgeRequirementSpecification(18),
       ]);
 
       // Apply composite specification
@@ -364,31 +402,40 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Composite validation failed: ${error.message}`,
-        code: 'COMPOSITE_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Composite validation failed: ${error.message}`,
+          code: 'COMPOSITE_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
   // Validate user profile updates (less strict than registration)
-  async validateUserProfileUpdate(user: User, updates: Partial<UserProfile>): Promise<Result<void, ValidationError[]>> {
+  async validateUserProfileUpdate(
+    user: User,
+    updates: Partial<UserProfile>
+  ): Promise<Result<void, ValidationError[]>> {
     try {
       const validationResults = [];
 
       // Only validate fields that are being updated
       if (updates.email && updates.email !== user.email) {
-        const emailValidation = this.businessRuleValidator.validate('email-format', { ...user, email: updates.email });
+        const emailValidation = this.businessRuleValidator.validate(
+          'email-format',
+          { ...user, email: updates.email }
+        );
         if (emailValidation.isFailure()) {
           validationResults.push(...emailValidation.error);
         }
 
         // Check email uniqueness
-        const emailUniquenessValidation = await this.businessRuleValidator.validateAsync(
-          'unique-email', 
-          { ...user, email: updates.email }
-        );
+        const emailUniquenessValidation =
+          await this.businessRuleValidator.validateAsync('unique-email', {
+            ...user,
+            email: updates.email,
+          });
         if (emailUniquenessValidation.isFailure()) {
           validationResults.push(...emailUniquenessValidation.error);
         }
@@ -396,7 +443,7 @@ export class UserValidationService {
 
       if (updates.dateOfBirth && updates.dateOfBirth !== user.dateOfBirth) {
         const ageValidation = this.businessRuleValidator.validate(
-          'age-requirement', 
+          'age-requirement',
           { ...user, dateOfBirth: updates.dateOfBirth }
         );
         if (ageValidation.isFailure()) {
@@ -417,16 +464,20 @@ export class UserValidationService {
 
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Profile update validation failed: ${error.message}`,
-        code: 'PROFILE_UPDATE_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Profile update validation failed: ${error.message}`,
+          code: 'PROFILE_UPDATE_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
   // Validate batch user creation
-  async validateBatchUsers(users: User[]): Promise<Result<User[], ValidationError[]>> {
+  async validateBatchUsers(
+    users: User[]
+  ): Promise<Result<User[], ValidationError[]>> {
     try {
       const validUsers: User[] = [];
       const allValidationErrors: ValidationError[] = [];
@@ -434,7 +485,7 @@ export class UserValidationService {
       for (let i = 0; i < users.length; i++) {
         const user = users[i];
         const userValidation = await this.validateCompleteUser(user);
-        
+
         if (userValidation.isSuccess()) {
           validUsers.push(user);
         } else {
@@ -442,7 +493,7 @@ export class UserValidationService {
           const userErrors = userValidation.error.map(error => ({
             ...error,
             field: `users[${i}].${error.field}`,
-            message: `User ${i}: ${error.message}`
+            message: `User ${i}: ${error.message}`,
           }));
           allValidationErrors.push(...userErrors);
         }
@@ -454,11 +505,13 @@ export class UserValidationService {
 
       return Result.success(validUsers);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Batch validation failed: ${error.message}`,
-        code: 'BATCH_VALIDATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Batch validation failed: ${error.message}`,
+          code: 'BATCH_VALIDATION_ERROR',
+        },
+      ]);
     }
   }
 
@@ -473,11 +526,11 @@ export class UserValidationService {
       asyncRules: ['unique-username', 'unique-email'],
       specifications: [
         'EmailFormatSpecification',
-        'PasswordStrengthSpecification', 
+        'PasswordStrengthSpecification',
         'AgeRequirementSpecification',
         'AddressValidationSpecification',
-        'PostalCodeFormatSpecification'
-      ]
+        'PostalCodeFormatSpecification',
+      ],
     };
   }
 }
@@ -528,7 +581,9 @@ export class UserRegistrationService {
     private userRepository: UserRepository
   ) {}
 
-  async registerUser(userData: CreateUserData): Promise<Result<User, ValidationError[]>> {
+  async registerUser(
+    userData: CreateUserData
+  ): Promise<Result<User, ValidationError[]>> {
     try {
       // Create user object for validation
       const user: User = {
@@ -541,50 +596,56 @@ export class UserRegistrationService {
         dateOfBirth: userData.dateOfBirth,
         address: userData.address,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       // Validate complete user
-      const validationResult = await this.userValidationService.validateCompleteUser(user);
-      
+      const validationResult =
+        await this.userValidationService.validateCompleteUser(user);
+
       if (validationResult.isFailure()) {
         return Result.failure(validationResult.error);
       }
 
       // Save user to repository
       const savedUser = await this.userRepository.save(user);
-      
+
       return Result.success(savedUser);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `User registration failed: ${error.message}`,
-        code: 'REGISTRATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `User registration failed: ${error.message}`,
+          code: 'REGISTRATION_ERROR',
+        },
+      ]);
     }
   }
 
   async updateUserProfile(
-    userId: string, 
+    userId: string,
     updates: Partial<UserProfile>
   ): Promise<Result<User, ValidationError[]>> {
     try {
       // Get existing user
       const existingUser = await this.userRepository.findById(userId);
       if (!existingUser) {
-        return Result.failure([{
-          field: 'userId',
-          message: 'User not found',
-          code: 'USER_NOT_FOUND'
-        }]);
+        return Result.failure([
+          {
+            field: 'userId',
+            message: 'User not found',
+            code: 'USER_NOT_FOUND',
+          },
+        ]);
       }
 
       // Validate profile updates
-      const validationResult = await this.userValidationService.validateUserProfileUpdate(
-        existingUser,
-        updates
-      );
-      
+      const validationResult =
+        await this.userValidationService.validateUserProfileUpdate(
+          existingUser,
+          updates
+        );
+
       if (validationResult.isFailure()) {
         return Result.failure(validationResult.error);
       }
@@ -593,19 +654,21 @@ export class UserRegistrationService {
       const updatedUser = {
         ...existingUser,
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       // Save updated user
       const savedUser = await this.userRepository.save(updatedUser);
-      
+
       return Result.success(savedUser);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Profile update failed: ${error.message}`,
-        code: 'PROFILE_UPDATE_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Profile update failed: ${error.message}`,
+          code: 'PROFILE_UPDATE_ERROR',
+        },
+      ]);
     }
   }
 
@@ -617,11 +680,16 @@ export class UserRegistrationService {
 
 ## Key Features
 
-- **Specification Pattern**: Clean, reusable validation rules using specifications
-- **Async Validation**: Support for database-dependent validation like uniqueness checks
-- **Composite Validation**: Combine multiple specifications using AND/OR operators
-- **Business Rules**: Domain-specific validation logic separated from framework concerns
-- **Comprehensive Error Handling**: Detailed validation errors with field-specific messages
+- **Specification Pattern**: Clean, reusable validation rules using
+  specifications
+- **Async Validation**: Support for database-dependent validation like
+  uniqueness checks
+- **Composite Validation**: Combine multiple specifications using AND/OR
+  operators
+- **Business Rules**: Domain-specific validation logic separated from framework
+  concerns
+- **Comprehensive Error Handling**: Detailed validation errors with
+  field-specific messages
 - **Batch Validation**: Efficient validation of multiple entities
 
 ## Usage Example
@@ -634,11 +702,13 @@ export class UserController {
     private userValidationService: UserValidationService
   ) {}
 
-  async registerUser(userData: CreateUserData): Promise<Result<User, ValidationError[]>> {
+  async registerUser(
+    userData: CreateUserData
+  ): Promise<Result<User, ValidationError[]>> {
     try {
       // Register user with full validation
       const result = await this.userRegistrationService.registerUser(userData);
-      
+
       if (result.isFailure()) {
         console.log('Validation errors:', result.error);
         return Result.failure(result.error);
@@ -647,21 +717,26 @@ export class UserController {
       console.log('User registered successfully:', result.value);
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Registration failed: ${error.message}`,
-        code: 'REGISTRATION_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Registration failed: ${error.message}`,
+          code: 'REGISTRATION_ERROR',
+        },
+      ]);
     }
   }
 
   async updateProfile(
-    userId: string, 
+    userId: string,
     updates: Partial<UserProfile>
   ): Promise<Result<User, ValidationError[]>> {
     try {
-      const result = await this.userRegistrationService.updateUserProfile(userId, updates);
-      
+      const result = await this.userRegistrationService.updateUserProfile(
+        userId,
+        updates
+      );
+
       if (result.isFailure()) {
         console.log('Profile update validation errors:', result.error);
         return Result.failure(result.error);
@@ -669,11 +744,13 @@ export class UserController {
 
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure([{
-        field: 'general',
-        message: `Profile update failed: ${error.message}`,
-        code: 'PROFILE_UPDATE_ERROR'
-      }]);
+      return Result.failure([
+        {
+          field: 'general',
+          message: `Profile update failed: ${error.message}`,
+          code: 'PROFILE_UPDATE_ERROR',
+        },
+      ]);
     }
   }
 
@@ -681,11 +758,12 @@ export class UserController {
     isValid: boolean;
     errors: ValidationError[];
   }> {
-    const result = await this.userValidationService.validateCompleteUser(userData);
-    
+    const result =
+      await this.userValidationService.validateCompleteUser(userData);
+
     return {
       isValid: result.isSuccess(),
-      errors: result.isFailure() ? result.error : []
+      errors: result.isFailure() ? result.error : [],
     };
   }
 
@@ -698,8 +776,11 @@ export class UserController {
 ## Common Pitfalls
 
 - **Async Validation**: Remember to await async validation methods
-- **Composite Specifications**: Be careful with operator precedence in complex compositions
-- **Error Context**: Include sufficient context in validation errors for debugging
+- **Composite Specifications**: Be careful with operator precedence in complex
+  compositions
+- **Error Context**: Include sufficient context in validation errors for
+  debugging
 - **Performance**: Consider caching for expensive validation operations
 - **Validation Order**: Validate cheap operations before expensive ones
-- **Repository Dependencies**: Mock repositories properly in tests to avoid database calls
+- **Repository Dependencies**: Mock repositories properly in tests to avoid
+  database calls

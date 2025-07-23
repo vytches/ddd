@@ -1,8 +1,12 @@
 # CQRS - NestJS Enterprise Patterns
 
-**Focus**: Enterprise-grade CQRS patterns with distributed processing and advanced architecture  
-**Base Example**: [Advanced CQRS Patterns](../../../basic/example-3.md), [DI Integration](../intermediate/di-integration.md)  
-**Dependencies**: @nestjs/common, @nestjs/microservices, @vytches-ddd/cqrs, @vytches-ddd/di, @vytches-ddd/events, @vytches-ddd/messaging, @vytches-ddd/resilience
+**Focus**: Enterprise-grade CQRS patterns with distributed processing and
+advanced architecture  
+**Base Example**: [Advanced CQRS Patterns](../../../basic/example-3.md),
+[DI Integration](../intermediate/di-integration.md)  
+**Dependencies**: @nestjs/common, @nestjs/microservices, @vytches-ddd/cqrs,
+@vytches-ddd/di, @vytches-ddd/events, @vytches-ddd/messaging,
+@vytches-ddd/resilience
 
 ## Service Implementation
 
@@ -15,13 +19,13 @@ import { UnifiedEventBus } from '@vytches-ddd/events';
 import { OutboxPublisher } from '@vytches-ddd/messaging';
 import { CircuitBreakerStrategy, RetryStrategy } from '@vytches-ddd/resilience';
 import { Logger } from '@vytches-ddd/logging';
-import { 
+import {
   ProcessCompleteOrderCommand,
   GetOrderAnalyticsQuery,
   OrderProcessingResult,
   OrderAnalyticsResult,
   CreateOrderData,
-  AnalyticsFilters 
+  AnalyticsFilters,
 } from './types'; // From your application
 
 /**
@@ -42,7 +46,8 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     this.commandBus = VytchesDDD.resolve<CommandBus>('commandBus');
     this.queryBus = VytchesDDD.resolve<QueryBus>('queryBus');
     this.eventBus = VytchesDDD.resolve<UnifiedEventBus>('eventBus');
-    this.outboxPublisher = VytchesDDD.resolve<OutboxPublisher>('outboxPublisher');
+    this.outboxPublisher =
+      VytchesDDD.resolve<OutboxPublisher>('outboxPublisher');
   }
 
   async onModuleInit() {
@@ -59,16 +64,21 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
    * Processes complete order with enterprise-grade distributed coordination
    * including saga orchestration, fraud detection, and multi-service integration.
    */
-  async processCompleteOrder(orderData: CreateOrderData): Promise<OrderProcessingResult> {
+  async processCompleteOrder(
+    orderData: CreateOrderData
+  ): Promise<OrderProcessingResult> {
     const correlationId = this.generateCorrelationId();
     const sagaId = this.generateSagaId();
-    
+
     try {
       this.logger.info('Starting enterprise order processing', {
         correlationId,
         sagaId,
         customerId: orderData.customerId,
-        orderValue: orderData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+        orderValue: orderData.items.reduce(
+          (sum, item) => sum + item.quantity * item.unitPrice,
+          0
+        ),
       });
 
       // ✅ FOCUS: Advanced command with comprehensive enterprise patterns
@@ -83,7 +93,7 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
           customerIpAddress: orderData.metadata?.ipAddress,
           userAgent: orderData.metadata?.userAgent,
           promotionCodes: orderData.promotionCodes,
-          affiliateId: orderData.metadata?.affiliateId
+          affiliateId: orderData.metadata?.affiliateId,
         },
         correlationId,
         sagaId
@@ -96,7 +106,7 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
           retryStrategy: 'exponential',
           circuitBreakerEnabled: true,
           timeoutMs: 300000,
-          fallbackEnabled: true
+          fallbackEnabled: true,
         }
       );
 
@@ -112,17 +122,16 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         correlationId,
         sagaId,
         orderId: result.result!.orderId,
-        processingTime: result.result!.processingTime
+        processingTime: result.result!.processingTime,
       });
 
       return result.result!;
-
     } catch (error) {
       this.logger.error('Enterprise order processing failed', {
         correlationId,
         sagaId,
         error: error.message,
-        errorType: error.constructor.name
+        errorType: error.constructor.name,
       });
 
       throw new Error(`Enterprise order processing failed: ${error.message}`);
@@ -143,13 +152,13 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     } = {}
   ): Promise<OrderAnalyticsResult> {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       this.logger.info('Starting enterprise analytics query', {
         correlationId,
         dateRange: filters.dateRange,
         aggregationLevel: filters.aggregationLevel,
-        realTimeData: options.realTimeData
+        realTimeData: options.realTimeData,
       });
 
       // ✅ FOCUS: Advanced query with enterprise optimization patterns
@@ -162,20 +171,24 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
           shippingCarrier: filters.shippingCarrier,
           warehouseId: filters.warehouseId,
           minimumAmount: filters.minimumAmount,
-          maximumAmount: filters.maximumAmount
+          maximumAmount: filters.maximumAmount,
         },
         {
           level: filters.aggregationLevel || 'daily',
           groupBy: filters.groupBy,
           includeFailureAnalysis: options.includeFailureAnalysis || false,
           includePerformanceMetrics: options.includePerformanceMetrics || false,
-          includeCustomerSegmentation: options.includeCustomerSegmentation || false
+          includeCustomerSegmentation:
+            options.includeCustomerSegmentation || false,
         },
         correlationId
       );
 
       // Execute with performance optimization
-      const result = await this.executeAnalyticsWithOptimization(query, options.realTimeData);
+      const result = await this.executeAnalyticsWithOptimization(
+        query,
+        options.realTimeData
+      );
 
       if (!result.success) {
         throw new Error(`Analytics query failed: ${result.error}`);
@@ -186,16 +199,15 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         recordsProcessed: result.metadata?.recordsProcessed,
         executionTime: result.metadata?.executionTime,
         strategy: result.metadata?.strategy,
-        cacheHit: result.metadata?.cacheHit
+        cacheHit: result.metadata?.cacheHit,
       });
 
       return result.data!;
-
     } catch (error) {
       this.logger.error('Enterprise analytics failed', {
         correlationId,
         error: error.message,
-        filters
+        filters,
       });
 
       throw new Error(`Analytics query failed: ${error.message}`);
@@ -214,12 +226,18 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
   }> {
     try {
       // Parallel health checks for all enterprise components
-      const [cqrsHealth, sagaHealth, eventHealth, resilienceMetrics, performanceMetrics] = await Promise.all([
+      const [
+        cqrsHealth,
+        sagaHealth,
+        eventHealth,
+        resilienceMetrics,
+        performanceMetrics,
+      ] = await Promise.all([
         this.checkCQRSHealth(),
         this.checkSagaHealth(),
         this.checkEventSystemHealth(),
         this.getResilienceMetrics(),
-        this.getPerformanceMetrics()
+        this.getPerformanceMetrics(),
       ]);
 
       return {
@@ -227,9 +245,8 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         sagaHealth,
         eventSystemHealth: eventHealth,
         resilienceMetrics,
-        performanceMetrics
+        performanceMetrics,
       };
-
     } catch (error) {
       this.logger.error('System health check failed', { error: error.message });
       throw new Error(`System health check failed: ${error.message}`);
@@ -266,27 +283,37 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         batchId,
         orderCount: orders.length,
         parallelism,
-        failureStrategy: options.failureStrategy
+        failureStrategy: options.failureStrategy,
       });
 
       const successful: OrderProcessingResult[] = [];
-      const failed: { order: CreateOrderData; error: string; correlationId: string }[] = [];
+      const failed: {
+        order: CreateOrderData;
+        error: string;
+        correlationId: string;
+      }[] = [];
 
       // Process orders in controlled batches
       for (let i = 0; i < orders.length; i += parallelism) {
         const batch = orders.slice(i, i + parallelism);
-        
+
         // Check failure threshold
-        if (options.failureStrategy === 'stop_on_threshold' && failed.length >= maxFailures) {
-          this.logger.warn('Stopping batch processing due to failure threshold', {
-            batchId,
-            failedCount: failed.length,
-            maxFailures
-          });
+        if (
+          options.failureStrategy === 'stop_on_threshold' &&
+          failed.length >= maxFailures
+        ) {
+          this.logger.warn(
+            'Stopping batch processing due to failure threshold',
+            {
+              batchId,
+              failedCount: failed.length,
+              maxFailures,
+            }
+          );
           break;
         }
 
-        const batchPromises = batch.map(async (order) => {
+        const batchPromises = batch.map(async order => {
           try {
             const result = await this.processCompleteOrder(order);
             successful.push(result);
@@ -295,7 +322,7 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
             failed.push({
               order,
               error: error.message,
-              correlationId
+              correlationId,
             });
 
             if (options.failureStrategy === 'stop_on_first') {
@@ -314,7 +341,7 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         total: orders.length,
         successful: successful.length,
         failed: failed.length,
-        executionTime
+        executionTime,
       });
 
       return {
@@ -324,14 +351,13 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
           total: orders.length,
           successful: successful.length,
           failed: failed.length,
-          executionTime
-        }
+          executionTime,
+        },
       };
-
     } catch (error) {
       this.logger.error('Enterprise batch processing failed', {
         batchId,
-        error: error.message
+        error: error.message,
       });
 
       throw new Error(`Batch processing failed: ${error.message}`);
@@ -342,8 +368,13 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
 
   private async validateEnterpriseInfrastructure(): Promise<void> {
     const requiredServices = [
-      'commandBus', 'queryBus', 'eventBus', 'outboxPublisher',
-      'sagaOrchestrator', 'cacheService', 'metricsService'
+      'commandBus',
+      'queryBus',
+      'eventBus',
+      'outboxPublisher',
+      'sagaOrchestrator',
+      'cacheService',
+      'metricsService',
     ];
 
     for (const serviceId of requiredServices) {
@@ -360,9 +391,12 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     this.healthCheckInterval = setInterval(async () => {
       try {
         const health = await this.getSystemHealth();
-        
+
         // Check for critical issues
-        if (health.cqrsHealth.status !== 'healthy' || health.eventSystemHealth.status !== 'healthy') {
+        if (
+          health.cqrsHealth.status !== 'healthy' ||
+          health.eventSystemHealth.status !== 'healthy'
+        ) {
           this.logger.warn('Critical system health issue detected', { health });
         }
       } catch (error) {
@@ -396,21 +430,25 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     }
   ): Promise<T> {
     const resilienceStrategy = VytchesDDD.resolve('resilienceStrategy');
-    
+
     return await resilienceStrategy.execute(operation, {
       retry: {
         maxAttempts: 3,
         baseDelay: 1000,
-        strategy: options.retryStrategy
+        strategy: options.retryStrategy,
       },
-      circuitBreaker: options.circuitBreakerEnabled ? {
-        failureThreshold: 5,
-        resetTimeout: 60000
-      } : undefined,
+      circuitBreaker: options.circuitBreakerEnabled
+        ? {
+            failureThreshold: 5,
+            resetTimeout: 60000,
+          }
+        : undefined,
       timeout: options.timeoutMs,
-      fallback: options.fallbackEnabled ? async () => {
-        throw new Error('All resilience strategies exhausted');
-      } : undefined
+      fallback: options.fallbackEnabled
+        ? async () => {
+            throw new Error('All resilience strategies exhausted');
+          }
+        : undefined,
     });
   }
 
@@ -439,15 +477,15 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
         correlationId,
         sagaId,
         error: result.error,
-        failedComponent: result.metadata?.failedComponent
+        failedComponent: result.metadata?.failedComponent,
       },
-      correlationId
+      correlationId,
     });
 
     // Update metrics
     const metricsService = VytchesDDD.resolve('metricsService');
     metricsService.incrementCounter('order.processing.failures', {
-      component: result.metadata?.failedComponent || 'unknown'
+      component: result.metadata?.failedComponent || 'unknown',
     });
   }
 
@@ -462,24 +500,24 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
           orderId: result.orderId,
           totalAmount: result.totalAmount,
           processingTime: result.processingTime,
-          sagaId: result.sagaId
+          sagaId: result.sagaId,
         },
         correlationId,
         metadata: {
           source: 'enterprise-api',
           version: '2.0',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       },
       {
         eventType: 'BusinessMetricsUpdated',
         payload: {
           orderValue: result.totalAmount,
           processingTime: result.processingTime,
-          componentsInvolved: ['inventory', 'payment', 'shipping']
+          componentsInvolved: ['inventory', 'payment', 'shipping'],
         },
-        correlationId
-      }
+        correlationId,
+      },
     ];
 
     await this.outboxPublisher.publishMany(enterpriseEvents);
@@ -489,18 +527,18 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     try {
       const commandMetrics = this.commandBus.getMetrics();
       const queryMetrics = this.queryBus.getMetrics();
-      
+
       return {
         status: 'healthy',
         commands: commandMetrics,
         queries: queryMetrics,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     }
   }
@@ -509,19 +547,19 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
     try {
       const sagaOrchestrator = VytchesDDD.resolve('sagaOrchestrator');
       const metrics = await sagaOrchestrator.getMetrics();
-      
+
       return {
         status: 'healthy',
         activeSagas: metrics.activeSagas,
         completedSagas: metrics.completedSagas,
         failedSagas: metrics.failedSagas,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     }
   }
@@ -529,19 +567,19 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
   private async checkEventSystemHealth(): Promise<any> {
     try {
       const eventMetrics = this.eventBus.getMetrics();
-      
+
       return {
         status: 'healthy',
         eventsPublished: eventMetrics.published,
         eventsProcessed: eventMetrics.processed,
         processingErrors: eventMetrics.errors,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         error: error.message,
-        lastCheck: new Date()
+        lastCheck: new Date(),
       };
     }
   }
@@ -592,7 +630,10 @@ import { VytchesDDD } from '@vytches-ddd/di';
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
 import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
 import { OutboxPublisher } from '@vytches-ddd/messaging';
-import { ResilienceManager, CircuitBreakerStrategy } from '@vytches-ddd/resilience';
+import {
+  ResilienceManager,
+  CircuitBreakerStrategy,
+} from '@vytches-ddd/resilience';
 import { Logger } from '@vytches-ddd/logging';
 import { EnterpriseOrderService } from './enterprise-order.service';
 import { EnterpriseOrderController } from './enterprise-order.controller';
@@ -615,15 +656,15 @@ export class EnterpriseOrderModule implements OnModuleInit {
       EnterpriseOrderService,
       {
         provide: 'ENTERPRISE_CONFIG',
-        useValue: config || {}
-      }
+        useValue: config || {},
+      },
     ];
 
     return {
       module: EnterpriseOrderModule,
       controllers: [EnterpriseOrderController],
       providers,
-      exports: [EnterpriseOrderService]
+      exports: [EnterpriseOrderService],
     };
   }
 
@@ -633,19 +674,18 @@ export class EnterpriseOrderModule implements OnModuleInit {
 
       // Initialize enterprise infrastructure
       await this.initializeEnterpriseInfrastructure();
-      
+
       // Configure advanced patterns
       await this.configureAdvancedPatterns();
-      
+
       // Start monitoring systems
       await this.startMonitoringSystems();
 
       this.logger.info('Enterprise CQRS Module initialized successfully');
-
     } catch (error) {
       this.logger.error('Enterprise CQRS Module initialization failed', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }
@@ -659,13 +699,13 @@ export class EnterpriseOrderModule implements OnModuleInit {
       enableMetrics: true,
       enableTracing: true,
       batchSize: 100,
-      flushInterval: 1000
+      flushInterval: 1000,
     });
-    
+
     const eventDispatcher = new UniversalEventDispatcher(eventBus, {
       enableMiddleware: true,
       enableErrorRecovery: true,
-      maxRetries: 3
+      maxRetries: 3,
     });
 
     // 2. Initialize CQRS buses with enterprise features
@@ -675,7 +715,12 @@ export class EnterpriseOrderModule implements OnModuleInit {
       enableTracing: true,
       defaultTimeout: 30000,
       enableMiddleware: true,
-      middlewarePipeline: ['logging', 'validation', 'performance', 'resilience']
+      middlewarePipeline: [
+        'logging',
+        'validation',
+        'performance',
+        'resilience',
+      ],
     });
 
     const queryBus = new QueryBus({
@@ -686,8 +731,8 @@ export class EnterpriseOrderModule implements OnModuleInit {
       cacheStrategy: {
         defaultTTL: 300000,
         maxSize: 10000,
-        enableInvalidation: true
-      }
+        enableInvalidation: true,
+      },
     });
 
     // 3. Initialize messaging infrastructure
@@ -696,7 +741,7 @@ export class EnterpriseOrderModule implements OnModuleInit {
       flushInterval: 5000,
       enableRetry: true,
       maxRetries: 5,
-      enableDeadLetter: true
+      enableDeadLetter: true,
     });
 
     // 4. Initialize resilience infrastructure
@@ -705,22 +750,22 @@ export class EnterpriseOrderModule implements OnModuleInit {
         'order-processing': {
           failureThreshold: 10,
           resetTimeout: 60000,
-          monitoringWindow: 300000
+          monitoringWindow: 300000,
         },
         'payment-processing': {
           failureThreshold: 5,
           resetTimeout: 120000,
-          monitoringWindow: 300000
-        }
+          monitoringWindow: 300000,
+        },
       },
       retryPolicies: {
-        'default': {
+        default: {
           maxAttempts: 3,
           baseDelay: 1000,
           maxDelay: 30000,
-          backoff: 'exponential'
-        }
-      }
+          backoff: 'exponential',
+        },
+      },
     });
 
     // 5. Register all services with VytchesDDD container
@@ -742,13 +787,13 @@ export class EnterpriseOrderModule implements OnModuleInit {
 
     // Configure saga orchestration
     await this.configureSagaOrchestration();
-    
+
     // Configure distributed caching
     await this.configureDistributedCaching();
-    
+
     // Configure performance monitoring
     await this.configurePerformanceMonitoring();
-    
+
     // Configure distributed tracing
     await this.configureDistributedTracing();
 
@@ -778,21 +823,42 @@ export class EnterpriseOrderModule implements OnModuleInit {
 
   private async registerEnterpriseServices(): Promise<void> {
     // Register repositories
-    VytchesDDD.registerInstance('orderRepository', this.createOrderRepository());
-    VytchesDDD.registerInstance('customerRepository', this.createCustomerRepository());
-    VytchesDDD.registerInstance('inventoryRepository', this.createInventoryRepository());
+    VytchesDDD.registerInstance(
+      'orderRepository',
+      this.createOrderRepository()
+    );
+    VytchesDDD.registerInstance(
+      'customerRepository',
+      this.createCustomerRepository()
+    );
+    VytchesDDD.registerInstance(
+      'inventoryRepository',
+      this.createInventoryRepository()
+    );
 
-    // Register business services  
-    VytchesDDD.registerInstance('sagaOrchestrator', this.createSagaOrchestrator());
+    // Register business services
+    VytchesDDD.registerInstance(
+      'sagaOrchestrator',
+      this.createSagaOrchestrator()
+    );
     VytchesDDD.registerInstance('paymentService', this.createPaymentService());
-    VytchesDDD.registerInstance('shippingService', this.createShippingService());
-    VytchesDDD.registerInstance('fraudDetectionService', this.createFraudDetectionService());
+    VytchesDDD.registerInstance(
+      'shippingService',
+      this.createShippingService()
+    );
+    VytchesDDD.registerInstance(
+      'fraudDetectionService',
+      this.createFraudDetectionService()
+    );
 
     // Register infrastructure services
     VytchesDDD.registerInstance('cacheService', this.createCacheService());
     VytchesDDD.registerInstance('metricsService', this.createMetricsService());
     VytchesDDD.registerInstance('healthService', this.createHealthService());
-    VytchesDDD.registerInstance('performanceService', this.createPerformanceService());
+    VytchesDDD.registerInstance(
+      'performanceService',
+      this.createPerformanceService()
+    );
     VytchesDDD.registerInstance('tracingService', this.createTracingService());
 
     this.logger.info('📦 Enterprise services registered');
@@ -800,7 +866,7 @@ export class EnterpriseOrderModule implements OnModuleInit {
 
   private async configureSagaOrchestration(): Promise<void> {
     const sagaOrchestrator = VytchesDDD.resolve('sagaOrchestrator');
-    
+
     await sagaOrchestrator.configure({
       maxConcurrentSagas: 1000,
       sagaTimeout: 300000,
@@ -808,30 +874,32 @@ export class EnterpriseOrderModule implements OnModuleInit {
       enableDeadLetter: true,
       retryPolicy: {
         maxAttempts: 3,
-        baseDelay: 2000
-      }
+        baseDelay: 2000,
+      },
     });
   }
 
   private async configureDistributedCaching(): Promise<void> {
     const cacheService = VytchesDDD.resolve('cacheService');
-    
+
     await cacheService.configure({
       provider: 'redis',
       cluster: {
-        nodes: process.env.REDIS_CLUSTER_NODES?.split(',') || ['localhost:6379'],
-        enableReadReplicas: true
+        nodes: process.env.REDIS_CLUSTER_NODES?.split(',') || [
+          'localhost:6379',
+        ],
+        enableReadReplicas: true,
       },
       serialization: 'msgpack',
       compression: 'gzip',
       defaultTTL: 300000,
-      maxMemory: '2gb'
+      maxMemory: '2gb',
     });
   }
 
   private async configurePerformanceMonitoring(): Promise<void> {
     const performanceService = VytchesDDD.resolve('performanceService');
-    
+
     await performanceService.configure({
       metricsInterval: 10000,
       enableCPUProfiling: true,
@@ -841,21 +909,21 @@ export class EnterpriseOrderModule implements OnModuleInit {
       thresholds: {
         commandExecutionTime: 5000,
         queryExecutionTime: 2000,
-        sagaExecutionTime: 30000
-      }
+        sagaExecutionTime: 30000,
+      },
     });
   }
 
   private async configureDistributedTracing(): Promise<void> {
     const tracingService = VytchesDDD.resolve('tracingService');
-    
+
     await tracingService.configure({
       provider: 'jaeger',
       serviceName: 'enterprise-cqrs',
       samplingRate: 0.1,
       enableAutoInstrumentation: true,
       exporters: ['jaeger', 'zipkin'],
-      correlationIdHeader: 'X-Correlation-ID'
+      correlationIdHeader: 'X-Correlation-ID',
     });
   }
 
@@ -911,92 +979,120 @@ export class EnterpriseOrderModule implements OnModuleInit {
 
 // Mock implementations for demonstration
 class EnterpriseOrderRepository {
-  async save(order: any) { return { success: true }; }
-  async findById(id: string) { return null; }
+  async save(order: any) {
+    return { success: true };
+  }
+  async findById(id: string) {
+    return null;
+  }
 }
 
 class EnterpriseCustomerRepository {
-  async findById(id: string) { return null; }
+  async findById(id: string) {
+    return null;
+  }
 }
 
 class EnterpriseInventoryRepository {
-  async reserveItems(items: any[]) { return { success: true, reservations: [] }; }
+  async reserveItems(items: any[]) {
+    return { success: true, reservations: [] };
+  }
 }
 
 class EnterpriseSagaOrchestrator {
-  async configure(config: any) { }
-  async initialize() { }
-  async startSaga(options: any) { }
-  async completeSaga(sagaId: string, result: any) { }
-  async compensateSaga(sagaId: string, options: any) { }
-  async getMetrics() { return { activeSagas: 0, completedSagas: 0, failedSagas: 0 }; }
-  async gracefulShutdown() { }
+  async configure(config: any) {}
+  async initialize() {}
+  async startSaga(options: any) {}
+  async completeSaga(sagaId: string, result: any) {}
+  async compensateSaga(sagaId: string, options: any) {}
+  async getMetrics() {
+    return { activeSagas: 0, completedSagas: 0, failedSagas: 0 };
+  }
+  async gracefulShutdown() {}
 }
 
 class EnterprisePaymentService {
-  async processPayment(data: any) { return { success: true, transactionId: 'txn-123' }; }
+  async processPayment(data: any) {
+    return { success: true, transactionId: 'txn-123' };
+  }
 }
 
 class EnterpriseShippingService {
-  async selectOptimalCarrier(options: any) { return { carrierId: 'ups', cost: 15.99 }; }
-  async createShippingLabel(options: any) { return { trackingNumber: 'track-123' }; }
+  async selectOptimalCarrier(options: any) {
+    return { carrierId: 'ups', cost: 15.99 };
+  }
+  async createShippingLabel(options: any) {
+    return { trackingNumber: 'track-123' };
+  }
 }
 
 class EnterpriseFraudDetectionService {
-  async assessRisk(data: any) { return { riskScore: 25, fraudFlags: [] }; }
+  async assessRisk(data: any) {
+    return { riskScore: 25, fraudFlags: [] };
+  }
 }
 
 class EnterpriseRedisService {
-  async configure(config: any) { }
-  async get(key: string) { return null; }
-  async set(key: string, value: any, ttl: number) { }
+  async configure(config: any) {}
+  async get(key: string) {
+    return null;
+  }
+  async set(key: string, value: any, ttl: number) {}
 }
 
 class EnterpriseMetricsService {
-  async configure(config: any) { }
-  async start() { }
-  incrementCounter(name: string, tags?: any) { }
-  getMetrics() { return {}; }
+  async configure(config: any) {}
+  async start() {}
+  incrementCounter(name: string, tags?: any) {}
+  getMetrics() {
+    return {};
+  }
 }
 
 class EnterpriseHealthService {
-  async startMonitoring() { }
-  async getHealthStatus() { return { status: 'healthy' }; }
+  async startMonitoring() {}
+  async getHealthStatus() {
+    return { status: 'healthy' };
+  }
 }
 
 class EnterprisePerformanceService {
-  async configure(config: any) { }
-  async startTracking() { }
-  getMetrics() { return { commands: {}, queries: {} }; }
+  async configure(config: any) {}
+  async startTracking() {}
+  getMetrics() {
+    return { commands: {}, queries: {} };
+  }
 }
 
 class EnterpriseTracingService {
-  async configure(config: any) { }
-  createSpan(name: string, options?: any) { return { finish: () => {} }; }
+  async configure(config: any) {}
+  createSpan(name: string, options?: any) {
+    return { finish: () => {} };
+  }
 }
 ```
 
 ```typescript
 // enterprise-order.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Body, 
-  Query, 
-  Param, 
-  HttpStatus, 
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Query,
+  Param,
+  HttpStatus,
   HttpException,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { EnterpriseOrderService } from './enterprise-order.service';
 import { Logger } from '@vytches-ddd/logging';
-import { 
-  CreateOrderDto, 
-  AnalyticsQueryDto, 
+import {
+  CreateOrderDto,
+  AnalyticsQueryDto,
   BatchOrderDto,
-  HealthCheckResponseDto 
+  HealthCheckResponseDto,
 } from './dto'; // From your app
 
 /**
@@ -1014,12 +1110,12 @@ export class EnterpriseOrderController {
   @Post()
   async processOrder(@Body() createOrderDto: CreateOrderDto) {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       this.logger.info('Enterprise order processing request', {
         correlationId,
         customerId: createOrderDto.customerId,
-        itemCount: createOrderDto.items.length
+        itemCount: createOrderDto.items.length,
       });
 
       // ✅ FOCUS: Enterprise CQRS with comprehensive patterns
@@ -1033,8 +1129,8 @@ export class EnterpriseOrderController {
         metadata: {
           ipAddress: this.getClientIP(),
           userAgent: this.getUserAgent(),
-          affiliateId: createOrderDto.affiliateId
-        }
+          affiliateId: createOrderDto.affiliateId,
+        },
       });
 
       return {
@@ -1044,15 +1140,14 @@ export class EnterpriseOrderController {
           correlationId,
           timestamp: new Date(),
           processingTime: result.processingTime,
-          sagaId: result.sagaId
-        }
+          sagaId: result.sagaId,
+        },
       };
-
     } catch (error) {
       this.logger.error('Enterprise order processing failed', {
         correlationId,
         error: error.message,
-        customerId: createOrderDto.customerId
+        customerId: createOrderDto.customerId,
       });
 
       if (error.message.includes('validation')) {
@@ -1086,12 +1181,12 @@ export class EnterpriseOrderController {
   @Get('analytics')
   async getAnalytics(@Query() queryDto: AnalyticsQueryDto) {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       this.logger.info('Enterprise analytics request', {
         correlationId,
         dateRange: queryDto.dateRange,
-        aggregationLevel: queryDto.aggregationLevel
+        aggregationLevel: queryDto.aggregationLevel,
       });
 
       // ✅ FOCUS: Advanced analytics with optimization
@@ -1099,19 +1194,19 @@ export class EnterpriseOrderController {
         {
           dateRange: {
             from: new Date(queryDto.fromDate),
-            to: new Date(queryDto.toDate)
+            to: new Date(queryDto.toDate),
           },
           aggregationLevel: queryDto.aggregationLevel,
           customerId: queryDto.customerId,
           status: queryDto.status,
           paymentMethod: queryDto.paymentMethod,
-          groupBy: queryDto.groupBy
+          groupBy: queryDto.groupBy,
         },
         {
           includeFailureAnalysis: queryDto.includeFailureAnalysis,
           includePerformanceMetrics: queryDto.includePerformanceMetrics,
           includeCustomerSegmentation: queryDto.includeCustomerSegmentation,
-          realTimeData: queryDto.realTimeData
+          realTimeData: queryDto.realTimeData,
         }
       );
 
@@ -1121,14 +1216,13 @@ export class EnterpriseOrderController {
         metadata: {
           correlationId,
           timestamp: new Date(),
-          dataFreshness: queryDto.realTimeData ? 'real-time' : 'cached'
-        }
+          dataFreshness: queryDto.realTimeData ? 'real-time' : 'cached',
+        },
       };
-
     } catch (error) {
       this.logger.error('Enterprise analytics failed', {
         correlationId,
-        error: error.message
+        error: error.message,
       });
 
       throw new HttpException(
@@ -1141,12 +1235,12 @@ export class EnterpriseOrderController {
   @Post('batch')
   async processBatchOrders(@Body() batchDto: BatchOrderDto) {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       this.logger.info('Enterprise batch processing request', {
         correlationId,
         orderCount: batchDto.orders.length,
-        parallelism: batchDto.options?.parallelism
+        parallelism: batchDto.options?.parallelism,
       });
 
       // ✅ FOCUS: Distributed batch processing with resilience
@@ -1155,7 +1249,7 @@ export class EnterpriseOrderController {
         {
           parallelism: batchDto.options?.parallelism,
           failureStrategy: batchDto.options?.failureStrategy,
-          maxFailures: batchDto.options?.maxFailures
+          maxFailures: batchDto.options?.maxFailures,
         }
       );
 
@@ -1164,19 +1258,18 @@ export class EnterpriseOrderController {
         data: {
           successful: result.successful,
           failed: result.failed,
-          summary: result.summary
+          summary: result.summary,
         },
         metadata: {
           correlationId,
           timestamp: new Date(),
-          batchSize: batchDto.orders.length
-        }
+          batchSize: batchDto.orders.length,
+        },
       };
-
     } catch (error) {
       this.logger.error('Enterprise batch processing failed', {
         correlationId,
-        error: error.message
+        error: error.message,
       });
 
       throw new HttpException(
@@ -1189,7 +1282,7 @@ export class EnterpriseOrderController {
   @Get('health')
   async getSystemHealth(): Promise<HealthCheckResponseDto> {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       // ✅ FOCUS: Comprehensive enterprise health monitoring
       const health = await this.orderService.getSystemHealth();
@@ -1205,19 +1298,18 @@ export class EnterpriseOrderController {
           sagas: health.sagaHealth,
           events: health.eventSystemHealth,
           resilience: health.resilienceMetrics,
-          performance: health.performanceMetrics
+          performance: health.performanceMetrics,
         },
         metadata: {
           uptime: process.uptime(),
           version: process.env.npm_package_version,
-          environment: process.env.NODE_ENV
-        }
+          environment: process.env.NODE_ENV,
+        },
       };
-
     } catch (error) {
       this.logger.error('Health check failed', {
         correlationId,
-        error: error.message
+        error: error.message,
       });
 
       return {
@@ -1229,8 +1321,8 @@ export class EnterpriseOrderController {
         metadata: {
           uptime: process.uptime(),
           version: process.env.npm_package_version,
-          environment: process.env.NODE_ENV
-        }
+          environment: process.env.NODE_ENV,
+        },
       };
     }
   }
@@ -1238,15 +1330,15 @@ export class EnterpriseOrderController {
   @Get('metrics')
   async getMetrics(@Query('component') component?: string) {
     const correlationId = this.generateCorrelationId();
-    
+
     try {
       const health = await this.orderService.getSystemHealth();
-      
+
       if (component) {
         return {
           success: true,
           data: health[`${component}Health`] || health[`${component}Metrics`],
-          metadata: { correlationId, component }
+          metadata: { correlationId, component },
         };
       }
 
@@ -1255,11 +1347,10 @@ export class EnterpriseOrderController {
         data: {
           cqrs: health.cqrsHealth,
           resilience: health.resilienceMetrics,
-          performance: health.performanceMetrics
+          performance: health.performanceMetrics,
         },
-        metadata: { correlationId }
+        metadata: { correlationId },
       };
-
     } catch (error) {
       throw new HttpException(
         { message: error.message, type: 'METRICS_ERROR', correlationId },
@@ -1268,15 +1359,21 @@ export class EnterpriseOrderController {
     }
   }
 
-  private determineOverallHealth(health: any): 'healthy' | 'degraded' | 'unhealthy' {
+  private determineOverallHealth(
+    health: any
+  ): 'healthy' | 'degraded' | 'unhealthy' {
     const components = [
       health.cqrsHealth,
       health.sagaHealth,
-      health.eventSystemHealth
+      health.eventSystemHealth,
     ];
 
-    const unhealthyCount = components.filter(c => c.status === 'unhealthy').length;
-    const degradedCount = components.filter(c => c.status === 'degraded').length;
+    const unhealthyCount = components.filter(
+      c => c.status === 'unhealthy'
+    ).length;
+    const degradedCount = components.filter(
+      c => c.status === 'degraded'
+    ).length;
 
     if (unhealthyCount > 0) return 'unhealthy';
     if (degradedCount > 0) return 'degraded';
@@ -1308,9 +1405,11 @@ class EnterpriseAuthGuard {
 class PerformanceInterceptor {
   intercept(context: any, next: any) {
     const start = Date.now();
-    return next.handle().pipe(
+    return next
+      .handle()
+      .pipe
       // Add performance tracking
-    );
+      ();
   }
 }
 
@@ -1324,34 +1423,51 @@ class TracingInterceptor {
 
 ## Key Points
 
-- **Enterprise Architecture**: Complete distributed CQRS implementation with saga orchestration and advanced resilience patterns
-- **Service Orchestration**: Comprehensive service coordination with automatic compensation and failure recovery
-- **Performance Optimization**: Advanced query optimization with parallel processing and intelligent caching strategies
-- **Health Monitoring**: Real-time system health monitoring with comprehensive metrics and alerting
-- **Batch Processing**: Distributed batch processing with configurable parallelism and failure strategies
-- **Resilience Patterns**: Circuit breakers, retry policies, and timeout management for enterprise reliability
+- **Enterprise Architecture**: Complete distributed CQRS implementation with
+  saga orchestration and advanced resilience patterns
+- **Service Orchestration**: Comprehensive service coordination with automatic
+  compensation and failure recovery
+- **Performance Optimization**: Advanced query optimization with parallel
+  processing and intelligent caching strategies
+- **Health Monitoring**: Real-time system health monitoring with comprehensive
+  metrics and alerting
+- **Batch Processing**: Distributed batch processing with configurable
+  parallelism and failure strategies
+- **Resilience Patterns**: Circuit breakers, retry policies, and timeout
+  management for enterprise reliability
 
 ## Benefits
 
-- **Enterprise Scale**: Handles high-volume, complex business processes with distributed coordination
-- **Fault Tolerance**: Comprehensive error handling and automatic recovery patterns
-- **Observability**: Complete monitoring, tracing, and metrics collection for production systems
-- **Performance**: Advanced optimization strategies for both commands and queries
-- **Maintainability**: Clear separation of concerns with enterprise-grade patterns
+- **Enterprise Scale**: Handles high-volume, complex business processes with
+  distributed coordination
+- **Fault Tolerance**: Comprehensive error handling and automatic recovery
+  patterns
+- **Observability**: Complete monitoring, tracing, and metrics collection for
+  production systems
+- **Performance**: Advanced optimization strategies for both commands and
+  queries
+- **Maintainability**: Clear separation of concerns with enterprise-grade
+  patterns
 
 ## Advanced Features
 
-- **Distributed Sagas**: Long-running business process coordination across multiple services
+- **Distributed Sagas**: Long-running business process coordination across
+  multiple services
 - **Event Sourcing**: Complete audit trail and event replay capabilities
 - **Circuit Breakers**: Automatic service protection against cascading failures
-- **Intelligent Caching**: Multi-level caching with TTL and invalidation strategies
+- **Intelligent Caching**: Multi-level caching with TTL and invalidation
+  strategies
 - **Distributed Tracing**: End-to-end request tracking across service boundaries
 - **Performance Profiling**: Real-time performance monitoring and optimization
 
 ## Production Considerations
 
-- **Scalability**: Horizontal scaling with load balancing and service mesh integration
+- **Scalability**: Horizontal scaling with load balancing and service mesh
+  integration
 - **Security**: Enterprise authentication, authorization, and data protection
-- **Monitoring**: Integration with APM tools, logging aggregation, and alerting systems
-- **Deployment**: Container orchestration, blue-green deployments, and rollback strategies
-- **Data Consistency**: ACID transactions, eventual consistency, and conflict resolution
+- **Monitoring**: Integration with APM tools, logging aggregation, and alerting
+  systems
+- **Deployment**: Container orchestration, blue-green deployments, and rollback
+  strategies
+- **Data Consistency**: ACID transactions, eventual consistency, and conflict
+  resolution

@@ -4,28 +4,33 @@
 **Package**: @vytches-ddd/domain-primitives  
 **Complexity**: Basic  
 **Framework**: NestJS  
-**Focus**: Manual setup with basic error handling and actor tracking
-**Base Example**: [Simple Domain Errors](../../../basic/example-1.md)
+**Focus**: Manual setup with basic error handling and actor tracking **Base
+Example**: [Simple Domain Errors](../../../basic/example-1.md)
 
 ## Service Implementation
 
 ```typescript
 // user.service.ts
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { 
-  IDomainError, 
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
+import {
+  IDomainError,
   DomainErrorCode,
   IActor,
   DefaultActorType,
   NotFoundError,
-  InvalidParameterError 
+  InvalidParameterError,
 } from '@vytches-ddd/domain-primitives';
-import { 
-  CreateUserDto, 
-  UserData, 
+import {
+  CreateUserDto,
+  UserData,
   SuccessResponse,
   ErrorResponse,
-  AuditEntry 
+  AuditEntry,
 } from './types'; // From your application
 
 @Injectable()
@@ -34,20 +39,24 @@ export class UserService {
   private auditLog: AuditEntry[] = [];
 
   // ✅ FOCUS: Manual domain error handling with NestJS
-  async createUser(dto: CreateUserDto, actor: IActor): Promise<SuccessResponse<UserData>> {
+  async createUser(
+    dto: CreateUserDto,
+    actor: IActor
+  ): Promise<SuccessResponse<UserData>> {
     try {
       // Validate input using domain primitives
       this.validateCreateUserInput(dto);
 
       // Check for existing user
-      const existingUser = Array.from(this.users.values())
-        .find(user => user.email === dto.email);
-      
+      const existingUser = Array.from(this.users.values()).find(
+        user => user.email === dto.email
+      );
+
       if (existingUser) {
         throw new InvalidParameterError('Email already exists', {
           code: DomainErrorCode.Duplicate,
           domain: 'UserManagement',
-          data: { email: dto.email }
+          data: { email: dto.email },
         });
       }
 
@@ -56,7 +65,7 @@ export class UserService {
         id: this.generateId(),
         email: dto.email,
         name: dto.name,
-        role: 'user'
+        role: 'user',
       };
 
       this.users.set(user.id, user);
@@ -64,17 +73,17 @@ export class UserService {
       // Record audit entry
       await this.recordAuditEntry(actor, 'CREATE_USER', `user:${user.id}`, {
         email: user.email,
-        name: user.name
+        name: user.name,
       });
 
       return {
         success: true,
-        data: user
+        data: user,
       };
     } catch (error) {
       // Record failed action
       await this.recordAuditEntry(actor, 'CREATE_USER_FAILED', 'user:new', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
 
       // Convert domain errors to NestJS exceptions
@@ -83,15 +92,18 @@ export class UserService {
     }
   }
 
-  async findUser(userId: string, actor: IActor): Promise<SuccessResponse<UserData>> {
+  async findUser(
+    userId: string,
+    actor: IActor
+  ): Promise<SuccessResponse<UserData>> {
     try {
       const user = this.users.get(userId);
-      
+
       if (!user) {
         throw new NotFoundError(`User ${userId} not found`, {
           code: DomainErrorCode.NotFound,
           domain: 'UserManagement',
-          data: { userId }
+          data: { userId },
         });
       }
 
@@ -100,21 +112,21 @@ export class UserService {
         throw new InvalidParameterError('Access denied', {
           code: DomainErrorCode.Unauthorized,
           domain: 'UserManagement',
-          data: { userId, actorId: actor.id }
+          data: { userId, actorId: actor.id },
         });
       }
 
       await this.recordAuditEntry(actor, 'VIEW_USER', `user:${userId}`, {
-        targetUserId: userId
+        targetUserId: userId,
       });
 
       return {
         success: true,
-        data: user
+        data: user,
       };
     } catch (error) {
       await this.recordAuditEntry(actor, 'VIEW_USER_FAILED', `user:${userId}`, {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
 
       this.handleDomainError(error);
@@ -123,18 +135,18 @@ export class UserService {
   }
 
   async updateUser(
-    userId: string, 
-    updates: Partial<CreateUserDto>, 
+    userId: string,
+    updates: Partial<CreateUserDto>,
     actor: IActor
   ): Promise<SuccessResponse<UserData>> {
     try {
       const user = this.users.get(userId);
-      
+
       if (!user) {
         throw new NotFoundError(`User ${userId} not found`, {
           code: DomainErrorCode.NotFound,
           domain: 'UserManagement',
-          data: { userId }
+          data: { userId },
         });
       }
 
@@ -143,7 +155,7 @@ export class UserService {
         throw new InvalidParameterError('Insufficient permissions', {
           code: DomainErrorCode.Unauthorized,
           domain: 'UserManagement',
-          data: { userId, actorId: actor.id, actorType: actor.type }
+          data: { userId, actorId: actor.id, actorType: actor.type },
         });
       }
 
@@ -152,14 +164,15 @@ export class UserService {
       if (updates.name) updatedUser.name = updates.name;
       if (updates.email) {
         // Check email uniqueness
-        const emailExists = Array.from(this.users.values())
-          .some(u => u.id !== userId && u.email === updates.email);
-        
+        const emailExists = Array.from(this.users.values()).some(
+          u => u.id !== userId && u.email === updates.email
+        );
+
         if (emailExists) {
           throw new InvalidParameterError('Email already exists', {
             code: DomainErrorCode.Duplicate,
             domain: 'UserManagement',
-            data: { email: updates.email }
+            data: { email: updates.email },
           });
         }
         updatedUser.email = updates.email;
@@ -171,34 +184,42 @@ export class UserService {
         changes: updates,
         previousValues: {
           name: user.name,
-          email: user.email
-        }
+          email: user.email,
+        },
       });
 
       return {
         success: true,
-        data: updatedUser
+        data: updatedUser,
       };
     } catch (error) {
-      await this.recordAuditEntry(actor, 'UPDATE_USER_FAILED', `user:${userId}`, {
-        error: (error as Error).message,
-        attemptedChanges: updates
-      });
+      await this.recordAuditEntry(
+        actor,
+        'UPDATE_USER_FAILED',
+        `user:${userId}`,
+        {
+          error: (error as Error).message,
+          attemptedChanges: updates,
+        }
+      );
 
       this.handleDomainError(error);
       throw error;
     }
   }
 
-  async deleteUser(userId: string, actor: IActor): Promise<SuccessResponse<void>> {
+  async deleteUser(
+    userId: string,
+    actor: IActor
+  ): Promise<SuccessResponse<void>> {
     try {
       const user = this.users.get(userId);
-      
+
       if (!user) {
         throw new NotFoundError(`User ${userId} not found`, {
           code: DomainErrorCode.NotFound,
           domain: 'UserManagement',
-          data: { userId }
+          data: { userId },
         });
       }
 
@@ -207,7 +228,7 @@ export class UserService {
         throw new InvalidParameterError('Admin access required', {
           code: DomainErrorCode.Unauthorized,
           domain: 'UserManagement',
-          data: { userId, actorId: actor.id, requiredRole: 'admin' }
+          data: { userId, actorId: actor.id, requiredRole: 'admin' },
         });
       }
 
@@ -217,18 +238,23 @@ export class UserService {
         deletedUser: {
           email: user.email,
           name: user.name,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
 
       return {
         success: true,
-        data: undefined
+        data: undefined,
       };
     } catch (error) {
-      await this.recordAuditEntry(actor, 'DELETE_USER_FAILED', `user:${userId}`, {
-        error: (error as Error).message
-      });
+      await this.recordAuditEntry(
+        actor,
+        'DELETE_USER_FAILED',
+        `user:${userId}`,
+        {
+          error: (error as Error).message,
+        }
+      );
 
       this.handleDomainError(error);
       throw error;
@@ -248,13 +274,13 @@ export class UserService {
         type: actor.type,
         id: actor.id,
         source: actor.source,
-        metadata: actor.metadata
+        metadata: actor.metadata,
       },
       action,
       resource,
       timestamp: new Date(),
       changes: details,
-      result: 'success'
+      result: 'success',
     };
 
     this.auditLog.push(entry);
@@ -283,7 +309,7 @@ export class UserService {
       throw new InvalidParameterError('Invalid email format', {
         code: DomainErrorCode.InvalidParameter,
         domain: 'UserManagement',
-        data: { field: 'email', value: dto.email }
+        data: { field: 'email', value: dto.email },
       });
     }
 
@@ -291,16 +317,19 @@ export class UserService {
       throw new InvalidParameterError('Name must be at least 2 characters', {
         code: DomainErrorCode.InvalidParameter,
         domain: 'UserManagement',
-        data: { field: 'name', value: dto.name }
+        data: { field: 'name', value: dto.name },
       });
     }
 
     if (!dto.password || dto.password.length < 8) {
-      throw new InvalidParameterError('Password must be at least 8 characters', {
-        code: DomainErrorCode.InvalidParameter,
-        domain: 'UserManagement',
-        data: { field: 'password' }
-      });
+      throw new InvalidParameterError(
+        'Password must be at least 8 characters',
+        {
+          code: DomainErrorCode.InvalidParameter,
+          domain: 'UserManagement',
+          data: { field: 'password' },
+        }
+      );
     }
   }
 
@@ -328,18 +357,18 @@ export class UserService {
 
 ```typescript
 // user.controller.ts
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
   Req,
   UseGuards,
   HttpException,
-  HttpStatus 
+  HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { IActor, DefaultActorType } from '@vytches-ddd/domain-primitives';
@@ -415,7 +444,7 @@ export class UserController {
       // Authenticated user
       const userId = this.extractUserIdFromToken(authHeader);
       const isAdmin = this.checkAdminRole(authHeader);
-      
+
       return {
         type: isAdmin ? DefaultActorType.ADMIN : DefaultActorType.USER,
         id: userId,
@@ -424,8 +453,8 @@ export class UserController {
           userAgent,
           ipAddress,
           timestamp: new Date(),
-          authMethod: 'bearer_token'
-        }
+          authMethod: 'bearer_token',
+        },
       };
     } else {
       // Guest/anonymous request
@@ -437,8 +466,8 @@ export class UserController {
           userAgent,
           ipAddress,
           timestamp: new Date(),
-          sessionId: request.session?.id || 'no-session'
-        }
+          sessionId: request.session?.id || 'no-session',
+        },
       };
     }
   }
@@ -459,7 +488,7 @@ export class UserController {
     if (error instanceof HttpException) {
       throw error;
     }
-    
+
     // Unexpected errors
     throw new HttpException(
       'Internal server error',
@@ -489,11 +518,11 @@ export class UserModule {}
 
 ```typescript
 // domain-error.filter.ts
-import { 
-  ExceptionFilter, 
-  Catch, 
-  ArgumentsHost, 
-  HttpStatus 
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
@@ -513,13 +542,11 @@ export class DomainErrorFilter implements ExceptionFilter {
         message: exception.message,
         domain: exception.domain,
         timestamp: new Date().toISOString(),
-        details: exception.data
-      }
+        details: exception.data,
+      },
     };
 
-    response
-      .status(status)
-      .json(errorResponse);
+    response.status(status).json(errorResponse);
   }
 
   private mapDomainErrorToHttpStatus(code: DomainErrorCode): HttpStatus {
@@ -572,10 +599,10 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS if needed
   app.enableCors();
-  
+
   await app.listen(3000);
   console.log('Application is running on: http://localhost:3000');
 }
@@ -592,7 +619,8 @@ bootstrap();
 ## Key Points
 
 - **Manual Setup**: No dependency injection framework, direct instantiation
-- **Domain Error Integration**: Convert domain errors to appropriate HTTP responses
+- **Domain Error Integration**: Convert domain errors to appropriate HTTP
+  responses
 - **Actor Tracking**: Manual actor creation from HTTP request context
 - **Audit Trail**: Built-in audit logging for all operations
 - **Permission Checking**: Role-based access control using actor information

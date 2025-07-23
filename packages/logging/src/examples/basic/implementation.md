@@ -1,15 +1,15 @@
 # Basic Logging Implementation Guide
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging
-**Complexity**: basic
-**Domain**: Implementation Guidance
-**Patterns**: Setup, configuration, integration strategies
-**Dependencies**: @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Domain**: Implementation Guidance **Patterns**: Setup, configuration,
+integration strategies **Dependencies**: @vytches-ddd/logging
 
 ## Overview
 
-This guide provides step-by-step implementation guidance for integrating @vytches-ddd/logging into applications. It covers basic setup patterns, configuration strategies, and common integration approaches for different development scenarios.
+This guide provides step-by-step implementation guidance for integrating
+@vytches-ddd/logging into applications. It covers basic setup patterns,
+configuration strategies, and common integration approaches for different
+development scenarios.
 
 ## Implementation Steps
 
@@ -31,19 +31,19 @@ import { Logger, LoggerConfiguration } from '@vytches-ddd/logging';
 
 export const createLoggerConfig = (): LoggerConfiguration => {
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   return {
     level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
     enableConsoleOutput: true,
     enableFileOutput: !isDevelopment, // File logging in production
-    
+
     // ⭐ FOCUS: Context detection configuration
     contextDetection: {
       enabled: true,
       stackTraceAnalysis: true,
-      boundedContextDetection: true
+      boundedContextDetection: true,
     },
-    
+
     // ⭐ FOCUS: Data masking configuration
     masking: {
       enabled: true,
@@ -54,7 +54,7 @@ export const createLoggerConfig = (): LoggerConfiguration => {
         'apiKey',
         'cardNumber',
         'ssn',
-        'phoneNumber'
+        'phoneNumber',
       ],
       replacement: '[MASKED]',
       customMaskers: {
@@ -64,16 +64,16 @@ export const createLoggerConfig = (): LoggerConfiguration => {
         },
         phone: (phone: string) => {
           return phone.replace(/\d(?=\d{4})/g, '*');
-        }
-      }
+        },
+      },
     },
-    
+
     // Environment-specific formatting
     formatting: {
       colorize: isDevelopment,
       timestamp: true,
-      prettyPrint: isDevelopment
-    }
+      prettyPrint: isDevelopment,
+    },
   };
 };
 
@@ -81,7 +81,7 @@ export const createLoggerConfig = (): LoggerConfiguration => {
 export const initializeLogging = (): void => {
   const config = createLoggerConfig();
   Logger.configure(config);
-  
+
   console.log('✅ Logging system initialized');
 };
 ```
@@ -96,30 +96,29 @@ import { Logger } from '@vytches-ddd/logging';
 async function bootstrap(): Promise<void> {
   // ⭐ CRITICAL: Initialize logging FIRST
   initializeLogging();
-  
+
   const appLogger = Logger.forContext('Application');
-  
+
   try {
     appLogger.info('Application starting up', {
       version: process.env.APP_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
-      nodeVersion: process.version
+      nodeVersion: process.version,
     });
-    
+
     // Start your application
     await startApplication();
-    
+
     appLogger.info('Application started successfully', {
       port: process.env.PORT || 3000,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
   } catch (error) {
     appLogger.error('Application startup failed', {
       error: error,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     process.exit(1);
   }
 }
@@ -128,7 +127,7 @@ async function startApplication(): Promise<void> {
   // Your application startup logic
 }
 
-bootstrap().catch((error) => {
+bootstrap().catch(error => {
   console.error('Bootstrap failed:', error);
   process.exit(1);
 });
@@ -149,33 +148,32 @@ export class UserService {
     this.logger.info('Creating new user', {
       email: request.email, // Automatically masked
       role: request.role,
-      operation: 'createUser'
+      operation: 'createUser',
     });
 
     try {
       // Validate input
       await this.validateUserRequest(request);
-      
+
       // Create user
       const user = await this.saveUser(request);
-      
+
       // ⭐ FOCUS: Success logging
       this.logger.info('User created successfully', {
         userId: user.id,
         email: user.email, // Masked
-        role: user.role
+        role: user.role,
       });
-      
+
       return user;
-      
     } catch (error) {
       // ⭐ FOCUS: Error logging with context
       this.logger.error('User creation failed', {
         email: request.email, // Masked
         error: error,
-        operation: 'createUser'
+        operation: 'createUser',
       });
-      
+
       throw error;
     }
   }
@@ -185,23 +183,22 @@ export class UserService {
 
     try {
       const user = await this.loadUser(userId);
-      
+
       if (!user) {
         this.logger.warn('User not found', { userId });
         return null;
       }
 
-      this.logger.debug('User fetched successfully', { 
+      this.logger.debug('User fetched successfully', {
         userId: user.id,
-        isActive: user.isActive 
+        isActive: user.isActive,
       });
 
       return user;
-
     } catch (error) {
       this.logger.error('Failed to fetch user', {
         userId,
-        error: error
+        error: error,
       });
       throw error;
     }
@@ -211,9 +208,9 @@ export class UserService {
     if (!request.email?.includes('@')) {
       throw new Error('Invalid email format');
     }
-    
+
     this.logger.debug('User request validated', {
-      email: request.email // Masked
+      email: request.email, // Masked
     });
   }
 
@@ -225,12 +222,12 @@ export class UserService {
       email: request.email,
       role: request.role,
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     };
 
     this.logger.debug('User saved to database', {
       userId: user.id,
-      email: user.email // Masked
+      email: user.email, // Masked
     });
 
     return user;
@@ -248,7 +245,7 @@ export class UserService {
       email: 'john@example.com',
       role: 'user',
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     };
   }
 }
@@ -267,7 +264,7 @@ export class ApplicationErrorHandler {
     const errorContext = {
       errorType: error.constructor.name,
       timestamp: new Date(),
-      ...context
+      ...context,
     };
 
     if (this.isCriticalError(error)) {
@@ -276,26 +273,24 @@ export class ApplicationErrorHandler {
         error: error,
         context: errorContext,
         stackTrace: error.stack,
-        severity: 'critical'
+        severity: 'critical',
       });
-      
+
       // Could trigger alerts, notifications, etc.
       this.notifyOperationsTeam(error, errorContext);
-      
     } else if (this.isBusinessError(error)) {
       // ⭐ FOCUS: Business error logging
       this.logger.warn('Business logic error', {
         error: error,
         context: errorContext,
-        severity: 'business'
+        severity: 'business',
       });
-      
     } else {
       // ⭐ FOCUS: General error logging
       this.logger.error('Unexpected error occurred', {
         error: error,
         context: errorContext,
-        severity: 'error'
+        severity: 'error',
       });
     }
   }
@@ -305,7 +300,7 @@ export class ApplicationErrorHandler {
       reason: reason,
       promise: promise.toString(),
       severity: 'critical',
-      type: 'unhandledRejection'
+      type: 'unhandledRejection',
     });
   }
 
@@ -314,22 +309,23 @@ export class ApplicationErrorHandler {
       error: error,
       stackTrace: error.stack,
       severity: 'critical',
-      type: 'uncaughtException'
+      type: 'uncaughtException',
     });
-    
+
     // Graceful shutdown
     process.exit(1);
   }
 
   private isCriticalError(error: Error): boolean {
-    return error.message.includes('CRITICAL') || 
-           error.name.includes('System') ||
-           error.message.includes('Database connection');
+    return (
+      error.message.includes('CRITICAL') ||
+      error.name.includes('System') ||
+      error.message.includes('Database connection')
+    );
   }
 
   private isBusinessError(error: Error): boolean {
-    return error.name.includes('Business') || 
-           error.name.includes('Validation');
+    return error.name.includes('Business') || error.name.includes('Validation');
   }
 
   private notifyOperationsTeam(error: Error, context: any): void {
@@ -348,7 +344,7 @@ export const setupGlobalErrorHandling = (): void => {
   });
 
   // Handle uncaught exceptions
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', error => {
     errorHandler.handleUncaughtException(error);
   });
 };
@@ -375,16 +371,16 @@ export class LoggingMiddleware {
     return (req: any, res: any, next: any) => {
       const requestId = this.generateRequestId();
       const startTime = Date.now();
-      
+
       // Add request ID to request for downstream use
       req.requestId = requestId;
-      
+
       const requestContext: RequestContext = {
         requestId,
         method: req.method,
         url: req.url,
         userAgent: req.get('User-Agent'),
-        userId: req.user?.id // If authentication middleware sets user
+        userId: req.user?.id, // If authentication middleware sets user
       };
 
       // ⭐ FOCUS: Log incoming request
@@ -392,21 +388,21 @@ export class LoggingMiddleware {
         ...requestContext,
         headers: this.sanitizeHeaders(req.headers),
         query: req.query,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Capture response
       const originalSend = res.send.bind(res);
       res.send = (body: any) => {
         const duration = Date.now() - startTime;
-        
+
         // ⭐ FOCUS: Log outgoing response
         this.logger.info('HTTP request completed', {
           ...requestContext,
           statusCode: res.statusCode,
           duration,
           responseSize: body ? JSON.stringify(body).length : 0,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         return originalSend(body);
@@ -415,13 +411,13 @@ export class LoggingMiddleware {
       // Handle errors
       res.on('error', (error: Error) => {
         const duration = Date.now() - startTime;
-        
+
         // ⭐ FOCUS: Log request errors
         this.logger.error('HTTP request failed', {
           ...requestContext,
           error: error,
           duration,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       });
 
@@ -435,12 +431,12 @@ export class LoggingMiddleware {
 
   private sanitizeHeaders(headers: Record<string, any>): Record<string, any> {
     const sanitized = { ...headers };
-    
+
     // Remove sensitive headers
     delete sanitized.authorization;
     delete sanitized.cookie;
     delete sanitized['x-api-key'];
-    
+
     return sanitized;
   }
 }
@@ -464,14 +460,14 @@ export class DatabaseService {
     const queryLogger = this.logger.withContext({
       queryId,
       operation: 'database-query',
-      ...context
+      ...context,
     });
 
     // ⭐ FOCUS: Log query execution
     queryLogger.debug('Executing database query', {
       query: this.sanitizeQuery(query),
       parameterCount: parameters?.length || 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const startTime = Date.now();
@@ -486,11 +482,10 @@ export class DatabaseService {
         queryId,
         duration,
         resultCount: Array.isArray(result) ? result.length : 1,
-        performance: this.categorizePerformance(duration)
+        performance: this.categorizePerformance(duration),
       });
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
@@ -499,7 +494,7 @@ export class DatabaseService {
         queryId,
         duration,
         error: error,
-        query: this.sanitizeQuery(query)
+        query: this.sanitizeQuery(query),
       });
 
       throw error;
@@ -514,12 +509,12 @@ export class DatabaseService {
     const txLogger = this.logger.withContext({
       transactionId,
       operation: 'database-transaction',
-      ...context
+      ...context,
     });
 
     txLogger.info('Starting database transaction', {
       operationCount: operations.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const startTime = Date.now();
@@ -527,10 +522,12 @@ export class DatabaseService {
     try {
       // Begin transaction
       await this.beginTransaction();
-      
+
       const results = [];
       for (let i = 0; i < operations.length; i++) {
-        txLogger.debug(`Executing transaction operation ${i + 1}/${operations.length}`);
+        txLogger.debug(
+          `Executing transaction operation ${i + 1}/${operations.length}`
+        );
         const result = await operations[i]();
         results.push(result);
       }
@@ -542,11 +539,10 @@ export class DatabaseService {
       txLogger.info('Database transaction committed', {
         transactionId,
         operationCount: operations.length,
-        duration
+        duration,
       });
 
       return results as T;
-
     } catch (error) {
       // Rollback transaction
       await this.rollbackTransaction();
@@ -555,7 +551,7 @@ export class DatabaseService {
       txLogger.error('Database transaction rolled back', {
         transactionId,
         error: error,
-        duration
+        duration,
       });
 
       throw error;
@@ -578,7 +574,10 @@ export class DatabaseService {
   }
 
   // Mock database methods
-  private async executeQueryInternal<T>(query: string, parameters?: any[]): Promise<T> {
+  private async executeQueryInternal<T>(
+    query: string,
+    parameters?: any[]
+  ): Promise<T> {
     // Simulate database execution
     await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
     return {} as T;
@@ -611,13 +610,13 @@ export const developmentConfig = {
   formatting: {
     colorize: true,
     prettyPrint: true,
-    timestamp: true
+    timestamp: true,
   },
   masking: {
     enabled: true,
     // More lenient masking in development
-    sensitiveKeys: ['password', 'secret', 'token']
-  }
+    sensitiveKeys: ['password', 'secret', 'token'],
+  },
 };
 
 // config/environments/production.ts
@@ -629,16 +628,22 @@ export const productionConfig = {
   formatting: {
     colorize: false,
     prettyPrint: false,
-    timestamp: true
+    timestamp: true,
   },
   masking: {
     enabled: true,
     // Comprehensive masking in production
     sensitiveKeys: [
-      'password', 'secret', 'token', 'apiKey',
-      'cardNumber', 'ssn', 'phoneNumber', 'email'
-    ]
-  }
+      'password',
+      'secret',
+      'token',
+      'apiKey',
+      'cardNumber',
+      'ssn',
+      'phoneNumber',
+      'email',
+    ],
+  },
 };
 
 // config/logger.factory.ts
@@ -647,7 +652,7 @@ import { productionConfig } from './environments/production';
 
 export const createEnvironmentConfig = () => {
   const env = process.env.NODE_ENV || 'development';
-  
+
   switch (env) {
     case 'production':
       return productionConfig;
@@ -674,28 +679,28 @@ export interface FeatureFlags {
 
 export const createFeatureBasedConfig = (features: FeatureFlags) => {
   const baseConfig = createEnvironmentConfig();
-  
+
   return {
     ...baseConfig,
-    
+
     // Conditional features based on flags
     contextDetection: {
       ...baseConfig.contextDetection,
-      performanceTracking: features.enablePerformanceLogging
+      performanceTracking: features.enablePerformanceLogging,
     },
-    
+
     masking: {
       ...baseConfig.masking,
-      auditSensitiveAccess: features.enableSecurityAuditing
+      auditSensitiveAccess: features.enableSecurityAuditing,
     },
-    
+
     // Feature-specific loggers
     featureLoggers: {
       performance: features.enablePerformanceLogging,
       security: features.enableSecurityAuditing,
       business: features.enableBusinessEventLogging,
-      tracing: features.enableRequestTracing
-    }
+      tracing: features.enableRequestTracing,
+    },
   };
 };
 ```
@@ -712,7 +717,7 @@ export const setupTestLogging = () => {
     level: 'error', // Only show errors
     enableConsoleOutput: false,
     enableFileOutput: false,
-    masking: { enabled: false } // Easier debugging in tests
+    masking: { enabled: false }, // Easier debugging in tests
   });
 };
 
@@ -727,11 +732,11 @@ describe('UserService', () => {
 
   it('should create user with logging', async () => {
     const userService = new UserService();
-    
+
     const user = await userService.createUser({
       name: 'Test User',
       email: 'test@example.com',
-      role: 'user'
+      role: 'user',
     });
 
     expect(user).toBeDefined();
@@ -768,7 +773,8 @@ describe('UserService', () => {
 ### Common Issues
 
 1. **Context not detected**: Ensure stackTraceAnalysis is enabled
-2. **Performance issues**: Check log level configuration and reduce debug logging
+2. **Performance issues**: Check log level configuration and reduce debug
+   logging
 3. **Sensitive data leaked**: Review masking configuration and add missing keys
 4. **Missing logs**: Verify logger initialization and level configuration
 5. **Too many logs**: Adjust log levels and use conditional logging
@@ -779,14 +785,14 @@ describe('UserService', () => {
 // Conditional logging to avoid expensive operations
 if (this.logger.isLevelEnabled('debug')) {
   this.logger.debug('Expensive debug info', {
-    data: expensiveOperationToGenerateDebugData()
+    data: expensiveOperationToGenerateDebugData(),
   });
 }
 
 // Use lazy evaluation for expensive log data
 this.logger.info('Operation completed', () => ({
   results: generateExpensiveResults(),
-  metrics: calculateMetrics()
+  metrics: calculateMetrics(),
 }));
 ```
 

@@ -7,7 +7,9 @@
 
 ## Business Context
 
-This example demonstrates advanced event handling features for a multi-tenant e-commerce platform:
+This example demonstrates advanced event handling features for a multi-tenant
+e-commerce platform:
+
 - Context-aware event filtering for tenant isolation
 - Batch event processing for performance optimization
 - Event middleware pipeline for cross-cutting concerns
@@ -36,9 +38,9 @@ export class TenantOrderCreatedEvent extends DomainEvent {
       customerId,
       totalAmount,
       items,
-      orderType
+      orderType,
     });
-    
+
     // Set event context for filtering
     this.setEventContext(`tenant-${tenantId}`);
   }
@@ -57,9 +59,9 @@ export class BulkOrderProcessedEvent extends IntegrationEvent {
       batchId,
       processedOrders,
       failedOrders,
-      totalAmount
+      totalAmount,
     });
-    
+
     this.setEventContext(`tenant-${tenantId}`);
   }
 }
@@ -77,18 +79,18 @@ export class InventoryThresholdReachedEvent extends DomainEvent {
       productId,
       currentStock,
       thresholdLevel,
-      severity
+      severity,
     });
-    
+
     this.setEventContext(`tenant-${tenantId}`);
   }
 }
 
 // advanced-event-bus.ts
-import { 
-  UnifiedEventBus, 
+import {
+  UnifiedEventBus,
   UniversalEventDispatcher,
-  EventHandler 
+  EventHandler,
 } from '@vytches-ddd/events';
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
 import { Logger } from '@vytches-ddd/logging';
@@ -97,7 +99,7 @@ import { Result } from '@vytches-ddd/utils';
 // ⭐ Advanced Event Bus with Context Filtering
 @DomainService('advancedEventBus', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'EventManagement'
+  context: 'EventManagement',
 })
 export class AdvancedEventBus extends UnifiedEventBus {
   private logger = Logger.forContext('AdvancedEventBus');
@@ -123,13 +125,13 @@ export class AdvancedEventBus extends UnifiedEventBus {
         tenantId: context.tenantId,
         userId: context.userId,
         correlationId: context.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       this.logger.info('Publishing event with context', {
         eventType: event.eventType,
         tenantId: context.tenantId,
-        eventContext: event.eventContext
+        eventContext: event.eventContext,
       });
 
       return await this.publish(event);
@@ -137,10 +139,12 @@ export class AdvancedEventBus extends UnifiedEventBus {
       this.logger.error('Failed to publish event with context', {
         eventType: event.eventType,
         tenantId: context.tenantId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Context publishing failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Context publishing failed: ${error.message}`)
+      );
     }
   }
 
@@ -152,7 +156,7 @@ export class AdvancedEventBus extends UnifiedEventBus {
     try {
       this.logger.info('Publishing batch of events', {
         batchSize: events.length,
-        tenantId: context.tenantId
+        tenantId: context.tenantId,
       });
 
       // Apply context to all events
@@ -162,7 +166,7 @@ export class AdvancedEventBus extends UnifiedEventBus {
           ...event.metadata,
           tenantId: context.tenantId,
           batchId: `batch-${Date.now()}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         return event;
       });
@@ -172,10 +176,12 @@ export class AdvancedEventBus extends UnifiedEventBus {
       this.logger.error('Failed to publish event batch', {
         batchSize: events.length,
         tenantId: context.tenantId,
-        error: error.message
+        error: error.message,
       });
-      
-      return Result.failure(new Error(`Batch publishing failed: ${error.message}`));
+
+      return Result.failure(
+        new Error(`Batch publishing failed: ${error.message}`)
+      );
     }
   }
 
@@ -197,28 +203,40 @@ export class AdvancedEventBus extends UnifiedEventBus {
 
   private initializeContextFilters(): void {
     // Premium tenant filter
-    this.contextFilters.set('premium', new EventContextFilter({
-      allowedContexts: [/^tenant-premium-/],
-      priority: 'high',
-      description: 'Premium tenant events'
-    }));
+    this.contextFilters.set(
+      'premium',
+      new EventContextFilter({
+        allowedContexts: [/^tenant-premium-/],
+        priority: 'high',
+        description: 'Premium tenant events',
+      })
+    );
 
     // Standard tenant filter
-    this.contextFilters.set('standard', new EventContextFilter({
-      allowedContexts: [/^tenant-std-/],
-      priority: 'medium',
-      description: 'Standard tenant events'
-    }));
+    this.contextFilters.set(
+      'standard',
+      new EventContextFilter({
+        allowedContexts: [/^tenant-std-/],
+        priority: 'medium',
+        description: 'Standard tenant events',
+      })
+    );
 
     // Admin context filter
-    this.contextFilters.set('admin', new EventContextFilter({
-      allowedContexts: [/^admin-/, /^system-/],
-      priority: 'high',
-      description: 'Administrative events'
-    }));
+    this.contextFilters.set(
+      'admin',
+      new EventContextFilter({
+        allowedContexts: [/^admin-/, /^system-/],
+        priority: 'high',
+        description: 'Administrative events',
+      })
+    );
   }
 
-  private matchesContext(eventContext: string, pattern: string | RegExp): boolean {
+  private matchesContext(
+    eventContext: string,
+    pattern: string | RegExp
+  ): boolean {
     if (typeof pattern === 'string') {
       return eventContext === pattern;
     }
@@ -258,20 +276,20 @@ export class BatchEventProcessor {
 
   async addToBatch(tenantId: string, event: any): Promise<void> {
     const batchKey = `tenant-${tenantId}`;
-    
+
     if (!this.eventBuffer.has(batchKey)) {
       this.eventBuffer.set(batchKey, []);
     }
-    
+
     const batch = this.eventBuffer.get(batchKey)!;
     batch.push(event);
-    
+
     this.logger.debug('Event added to batch', {
       tenantId,
       batchSize: batch.length,
-      eventType: event.eventType
+      eventType: event.eventType,
     });
-    
+
     // Process batch if size threshold reached
     if (batch.length >= this.BATCH_SIZE) {
       await this.processBatch(batchKey);
@@ -288,7 +306,7 @@ export class BatchEventProcessor {
     try {
       this.logger.info('Processing event batch', {
         batchKey,
-        batchSize: batch.length
+        batchSize: batch.length,
       });
 
       // Clear batch and timer
@@ -308,7 +326,7 @@ export class BatchEventProcessor {
         batchKey,
         successful,
         failed,
-        totalEvents: batch.length
+        totalEvents: batch.length,
       });
 
       // Emit batch processed event
@@ -322,22 +340,21 @@ export class BatchEventProcessor {
       );
 
       await this.eventBus.publish(batchEvent);
-
     } catch (error) {
       this.logger.error('Batch processing failed', {
         batchKey,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   private resetBatchTimer(batchKey: string): void {
     this.clearBatchTimer(batchKey);
-    
+
     const timer = setTimeout(() => {
       this.processBatch(batchKey);
     }, this.BATCH_TIMEOUT);
-    
+
     this.batchTimers.set(batchKey, timer);
   }
 
@@ -351,15 +368,15 @@ export class BatchEventProcessor {
 }
 
 // advanced-event-handlers.ts
-import { 
-  TenantOrderCreatedEvent, 
+import {
+  TenantOrderCreatedEvent,
   BulkOrderProcessedEvent,
-  InventoryThresholdReachedEvent
+  InventoryThresholdReachedEvent,
 } from './tenant-order-events';
 
 // ⭐ Context-aware event handlers
 @EventHandler(TenantOrderCreatedEvent, {
-  eventContext: /^tenant-premium-/
+  eventContext: /^tenant-premium-/,
 })
 export class PremiumOrderCreatedHandler {
   private logger = Logger.forContext('PremiumOrderCreatedHandler');
@@ -368,7 +385,7 @@ export class PremiumOrderCreatedHandler {
     this.logger.info('Processing premium order', {
       tenantId: event.tenantId,
       orderId: event.orderId,
-      orderType: event.orderType
+      orderType: event.orderType,
     });
 
     // Premium customer benefits
@@ -377,36 +394,42 @@ export class PremiumOrderCreatedHandler {
     await this.assignPremiumSupport(event);
   }
 
-  private async applyPremiumBenefits(event: TenantOrderCreatedEvent): Promise<void> {
+  private async applyPremiumBenefits(
+    event: TenantOrderCreatedEvent
+  ): Promise<void> {
     this.logger.info('Applying premium benefits', {
       tenantId: event.tenantId,
-      orderId: event.orderId
+      orderId: event.orderId,
     });
-    
+
     // Apply premium discounts, free shipping, etc.
   }
 
-  private async prioritizeShipping(event: TenantOrderCreatedEvent): Promise<void> {
+  private async prioritizeShipping(
+    event: TenantOrderCreatedEvent
+  ): Promise<void> {
     this.logger.info('Prioritizing shipping for premium order', {
       tenantId: event.tenantId,
-      orderId: event.orderId
+      orderId: event.orderId,
     });
-    
+
     // Priority shipping queue
   }
 
-  private async assignPremiumSupport(event: TenantOrderCreatedEvent): Promise<void> {
+  private async assignPremiumSupport(
+    event: TenantOrderCreatedEvent
+  ): Promise<void> {
     this.logger.info('Assigning premium support', {
       tenantId: event.tenantId,
-      orderId: event.orderId
+      orderId: event.orderId,
     });
-    
+
     // Assign dedicated support representative
   }
 }
 
 @EventHandler(TenantOrderCreatedEvent, {
-  eventContext: /^tenant-std-/
+  eventContext: /^tenant-std-/,
 })
 export class StandardOrderCreatedHandler {
   private logger = Logger.forContext('StandardOrderCreatedHandler');
@@ -415,7 +438,7 @@ export class StandardOrderCreatedHandler {
     this.logger.info('Processing standard order', {
       tenantId: event.tenantId,
       orderId: event.orderId,
-      orderType: event.orderType
+      orderType: event.orderType,
     });
 
     // Standard order processing
@@ -423,21 +446,25 @@ export class StandardOrderCreatedHandler {
     await this.scheduleRegularShipping(event);
   }
 
-  private async processStandardOrder(event: TenantOrderCreatedEvent): Promise<void> {
+  private async processStandardOrder(
+    event: TenantOrderCreatedEvent
+  ): Promise<void> {
     this.logger.info('Processing standard order', {
       tenantId: event.tenantId,
-      orderId: event.orderId
+      orderId: event.orderId,
     });
-    
+
     // Standard order processing logic
   }
 
-  private async scheduleRegularShipping(event: TenantOrderCreatedEvent): Promise<void> {
+  private async scheduleRegularShipping(
+    event: TenantOrderCreatedEvent
+  ): Promise<void> {
     this.logger.info('Scheduling regular shipping', {
       tenantId: event.tenantId,
-      orderId: event.orderId
+      orderId: event.orderId,
     });
-    
+
     // Regular shipping queue
   }
 }
@@ -451,32 +478,40 @@ export class BulkOrderAnalyticsHandler {
       tenantId: event.tenantId,
       batchId: event.batchId,
       processedCount: event.processedOrders.length,
-      failedCount: event.failedOrders.length
+      failedCount: event.failedOrders.length,
     });
 
     // Analytics and reporting
     await this.updateTenantMetrics(event);
     await this.generatePerformanceReport(event);
-    
+
     // Alert on high failure rates
     if (event.failedOrders.length > event.processedOrders.length * 0.1) {
       await this.alertHighFailureRate(event);
     }
   }
 
-  private async updateTenantMetrics(event: BulkOrderProcessedEvent): Promise<void> {
+  private async updateTenantMetrics(
+    event: BulkOrderProcessedEvent
+  ): Promise<void> {
     // Update tenant-specific metrics
   }
 
-  private async generatePerformanceReport(event: BulkOrderProcessedEvent): Promise<void> {
+  private async generatePerformanceReport(
+    event: BulkOrderProcessedEvent
+  ): Promise<void> {
     // Generate performance analytics
   }
 
-  private async alertHighFailureRate(event: BulkOrderProcessedEvent): Promise<void> {
+  private async alertHighFailureRate(
+    event: BulkOrderProcessedEvent
+  ): Promise<void> {
     this.logger.warn('High failure rate detected', {
       tenantId: event.tenantId,
       batchId: event.batchId,
-      failureRate: event.failedOrders.length / (event.processedOrders.length + event.failedOrders.length)
+      failureRate:
+        event.failedOrders.length /
+        (event.processedOrders.length + event.failedOrders.length),
     });
   }
 }
@@ -490,7 +525,7 @@ export class InventoryAlertHandler {
       tenantId: event.tenantId,
       productId: event.productId,
       currentStock: event.currentStock,
-      severity: event.severity
+      severity: event.severity,
     });
 
     if (event.severity === 'critical') {
@@ -500,51 +535,65 @@ export class InventoryAlertHandler {
     }
   }
 
-  private async handleCriticalInventory(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async handleCriticalInventory(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     // Critical inventory actions
     await this.triggerEmergencyRestocking(event);
     await this.notifySuppliers(event);
     await this.alertManagement(event);
   }
 
-  private async handleLowInventory(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async handleLowInventory(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     // Low inventory actions
     await this.scheduleRestocking(event);
     await this.notifyPurchasing(event);
   }
 
-  private async triggerEmergencyRestocking(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async triggerEmergencyRestocking(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     this.logger.info('Triggering emergency restocking', {
       tenantId: event.tenantId,
-      productId: event.productId
+      productId: event.productId,
     });
   }
 
-  private async notifySuppliers(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async notifySuppliers(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     this.logger.info('Notifying suppliers', {
       tenantId: event.tenantId,
-      productId: event.productId
+      productId: event.productId,
     });
   }
 
-  private async alertManagement(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async alertManagement(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     this.logger.warn('Alerting management about critical inventory', {
       tenantId: event.tenantId,
-      productId: event.productId
+      productId: event.productId,
     });
   }
 
-  private async scheduleRestocking(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async scheduleRestocking(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     this.logger.info('Scheduling restocking', {
       tenantId: event.tenantId,
-      productId: event.productId
+      productId: event.productId,
     });
   }
 
-  private async notifyPurchasing(event: InventoryThresholdReachedEvent): Promise<void> {
+  private async notifyPurchasing(
+    event: InventoryThresholdReachedEvent
+  ): Promise<void> {
     this.logger.info('Notifying purchasing department', {
       tenantId: event.tenantId,
-      productId: event.productId
+      productId: event.productId,
     });
   }
 }
@@ -552,11 +601,14 @@ export class InventoryAlertHandler {
 
 ## Key Features
 
-- **Context-Aware Filtering**: Events are filtered based on tenant context patterns
-- **Batch Processing**: Automatic batching of events for performance optimization
+- **Context-Aware Filtering**: Events are filtered based on tenant context
+  patterns
+- **Batch Processing**: Automatic batching of events for performance
+  optimization
 - **Multi-Tenant Support**: Tenant isolation through event context
 - **Advanced Event Routing**: Different handlers for different tenant types
-- **Performance Monitoring**: Batch processing metrics and failure rate monitoring
+- **Performance Monitoring**: Batch processing metrics and failure rate
+  monitoring
 - **Timeout Management**: Automatic batch processing on timeout
 
 ## Usage Example
@@ -577,7 +629,7 @@ export class TenantOrderService {
     try {
       // Create order aggregate
       const order = OrderAggregate.create(customerId, items);
-      
+
       // Create tenant-specific event
       const orderEvent = new TenantOrderCreatedEvent(
         tenantContext.tenantId,
@@ -587,16 +639,18 @@ export class TenantOrderService {
         items,
         tenantContext.tier === 'premium' ? 'premium' : 'standard'
       );
-      
+
       // Publish with tenant context
       await this.eventBus.publishWithContext(orderEvent, tenantContext);
-      
+
       // Save order (additional events may be published)
       const saveResult = await this.orderRepository.save(order);
-      
+
       return saveResult;
     } catch (error) {
-      return Result.failure(new Error(`Failed to create order: ${error.message}`));
+      return Result.failure(
+        new Error(`Failed to create order: ${error.message}`)
+      );
     }
   }
 
@@ -606,23 +660,26 @@ export class TenantOrderService {
   ): Promise<Result<void, Error>> {
     try {
       // Create events for batch processing
-      const events = orders.map(orderData => 
-        new TenantOrderCreatedEvent(
-          tenantContext.tenantId,
-          orderData.id,
-          orderData.customerId,
-          orderData.totalAmount,
-          orderData.items,
-          'standard'
-        )
+      const events = orders.map(
+        orderData =>
+          new TenantOrderCreatedEvent(
+            tenantContext.tenantId,
+            orderData.id,
+            orderData.customerId,
+            orderData.totalAmount,
+            orderData.items,
+            'standard'
+          )
       );
-      
+
       // Publish batch of events
       await this.eventBus.publishBatch(events, tenantContext);
-      
+
       return Result.success(undefined);
     } catch (error) {
-      return Result.failure(new Error(`Bulk processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Bulk processing failed: ${error.message}`)
+      );
     }
   }
 }
@@ -632,6 +689,7 @@ export class TenantOrderService {
 
 - **Context Leakage**: Ensure proper tenant isolation in event contexts
 - **Batch Size Tuning**: Monitor and adjust batch sizes based on performance
-- **Handler Ordering**: Be aware of handler execution order in multi-tenant scenarios
+- **Handler Ordering**: Be aware of handler execution order in multi-tenant
+  scenarios
 - **Memory Management**: Monitor memory usage with large event batches
 - **Error Isolation**: Ensure tenant errors don't affect other tenants

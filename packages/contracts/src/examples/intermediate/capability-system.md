@@ -1,19 +1,23 @@
 # Capability System Architecture
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/contracts
-**Complexity**: Intermediate
-**Domain**: Foundation
-**Patterns**: capability-registry, extensible-architecture, plugin-system
-**Dependencies**: @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**:
+Intermediate **Domain**: Foundation **Patterns**: capability-registry,
+extensible-architecture, plugin-system **Dependencies**: @vytches-ddd/contracts
 
 ## Description
 
-The capability system provides an extensible architecture for adding cross-cutting functionality to domain objects. Capabilities can be dynamically registered, discovered, and composed to create flexible and maintainable systems that support features like caching, logging, validation, and custom business behaviors.
+The capability system provides an extensible architecture for adding
+cross-cutting functionality to domain objects. Capabilities can be dynamically
+registered, discovered, and composed to create flexible and maintainable systems
+that support features like caching, logging, validation, and custom business
+behaviors.
 
 ## Business Context
 
-Modern applications need flexible architecture that allows adding functionality without modifying core domain logic. The capability system enables features like audit logging, caching, performance monitoring, and business-specific behaviors to be added declaratively and composed together for powerful combinations.
+Modern applications need flexible architecture that allows adding functionality
+without modifying core domain logic. The capability system enables features like
+audit logging, caching, performance monitoring, and business-specific behaviors
+to be added declaratively and composed together for powerful combinations.
 
 ## Core Capability System
 
@@ -21,11 +25,11 @@ Modern applications need flexible architecture that allows adding functionality 
 
 ```typescript
 // src/domain/capabilities/capability-foundation.ts
-import { 
-  ICapability, 
-  CapabilityMetadata, 
+import {
+  ICapability,
+  CapabilityMetadata,
   ICapabilityRegistry,
-  CapabilityType 
+  CapabilityType,
 } from '@vytches-ddd/contracts';
 
 // Base capability class
@@ -41,7 +45,7 @@ export abstract class BaseCapability implements ICapability {
       dependencies: [],
       priority: 0,
       enabled: true,
-      ...metadata
+      ...metadata,
     };
   }
 
@@ -101,7 +105,7 @@ export class LoggingCapability extends BaseCapability {
     super('logging', 'cross-cutting', {
       ...metadata,
       description: 'Provides comprehensive logging for operations',
-      priority: 100 // High priority for logging
+      priority: 100, // High priority for logging
     });
   }
 
@@ -115,7 +119,7 @@ export class LoggingCapability extends BaseCapability {
         target: target.constructor.name,
         parameters: this.sanitizeParameters(parameters),
         correlationId: metadata.correlationId,
-        timestamp: context.timestamp
+        timestamp: context.timestamp,
       });
 
       // For post-operation logging, return success to continue
@@ -124,28 +128,29 @@ export class LoggingCapability extends BaseCapability {
         continueExecution: true,
         metadata: {
           loggedAt: new Date(),
-          logLevel: 'info'
-        }
+          logLevel: 'info',
+        },
       };
-
     } catch (error) {
       this.logger.error('Logging capability failed', {
         operation,
-        error: error.message
+        error: error.message,
       });
 
       // Don't fail the operation if logging fails
       return {
         success: false,
         error,
-        continueExecution: true
+        continueExecution: true,
       };
     }
   }
 
-  private sanitizeParameters(parameters: Record<string, any>): Record<string, any> {
+  private sanitizeParameters(
+    parameters: Record<string, any>
+  ): Record<string, any> {
     const sanitized = { ...parameters };
-    
+
     // Remove sensitive information
     const sensitiveKeys = ['password', 'token', 'secret', 'key'];
     for (const key of sensitiveKeys) {
@@ -169,7 +174,7 @@ export class PerformanceLoggingCapability extends BaseCapability {
     super('performance-logging', 'monitoring', {
       ...metadata,
       description: 'Tracks operation performance metrics',
-      priority: 90
+      priority: 90,
     });
   }
 
@@ -185,11 +190,11 @@ export class PerformanceLoggingCapability extends BaseCapability {
       const startTime = this.startTimes.get(operationKey);
       if (startTime) {
         const duration = Date.now() - startTime;
-        
+
         this.logger.info('Operation completed', {
           operation: operationKey,
           duration: `${duration}ms`,
-          correlationId: metadata.correlationId
+          correlationId: metadata.correlationId,
         });
 
         // Clean up
@@ -199,7 +204,7 @@ export class PerformanceLoggingCapability extends BaseCapability {
         if (duration > 1000) {
           this.logger.warn('Slow operation detected', {
             operation: operationKey,
-            duration: `${duration}ms`
+            duration: `${duration}ms`,
           });
         }
       }
@@ -209,8 +214,8 @@ export class PerformanceLoggingCapability extends BaseCapability {
       success: true,
       continueExecution: true,
       metadata: {
-        performanceTracked: true
-      }
+        performanceTracked: true,
+      },
     };
   }
 }
@@ -232,8 +237,8 @@ export class CachingCapability extends BaseCapability {
       configuration: {
         ttl: 3600, // 1 hour default
         maxSize: 1000,
-        keyPrefix: 'capability_cache_'
-      }
+        keyPrefix: 'capability_cache_',
+      },
     });
   }
 
@@ -245,7 +250,7 @@ export class CachingCapability extends BaseCapability {
     if (metadata.phase !== 'before' || !this.isCacheableOperation(operation)) {
       return {
         success: true,
-        continueExecution: true
+        continueExecution: true,
       };
     }
 
@@ -261,8 +266,8 @@ export class CachingCapability extends BaseCapability {
           continueExecution: false, // Stop execution, use cached result
           metadata: {
             cacheHit: true,
-            cacheKey
-          }
+            cacheKey,
+          },
         };
       }
 
@@ -272,16 +277,15 @@ export class CachingCapability extends BaseCapability {
         continueExecution: true,
         metadata: {
           cacheKey,
-          shouldCache: true
-        }
+          shouldCache: true,
+        },
       };
-
     } catch (error) {
       // If caching fails, continue with normal execution
       return {
         success: false,
         error,
-        continueExecution: true
+        continueExecution: true,
       };
     }
   }
@@ -315,11 +319,11 @@ export class CachingCapability extends BaseCapability {
   ): string {
     const config = this.getConfiguration();
     const keyBase = `${config.keyPrefix}${target.constructor.name}.${operation}`;
-    
+
     // Create deterministic key from parameters
     const paramString = this.serializeParameters(parameters);
     const hash = this.simpleHash(paramString);
-    
+
     return `${keyBase}.${hash}`;
   }
 
@@ -327,11 +331,11 @@ export class CachingCapability extends BaseCapability {
     // Sort keys for consistent serialization
     const sortedKeys = Object.keys(parameters).sort();
     const sortedParams: Record<string, any> = {};
-    
+
     for (const key of sortedKeys) {
       sortedParams[key] = parameters[key];
     }
-    
+
     return JSON.stringify(sortedParams);
   }
 
@@ -339,7 +343,7 @@ export class CachingCapability extends BaseCapability {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -359,7 +363,7 @@ export class ValidationCapability extends BaseCapability {
     super('validation', 'business-logic', {
       ...metadata,
       description: 'Provides comprehensive validation for operations',
-      priority: 300 // Highest priority - validate before everything else
+      priority: 300, // Highest priority - validate before everything else
     });
   }
 
@@ -370,7 +374,7 @@ export class ValidationCapability extends BaseCapability {
     if (metadata.phase !== 'before') {
       return {
         success: true,
-        continueExecution: true
+        continueExecution: true,
       };
     }
 
@@ -388,18 +392,18 @@ export class ValidationCapability extends BaseCapability {
 
       // Check if any validation failed
       const failures = validationResults.filter(r => !r.isValid);
-      
+
       if (failures.length > 0) {
         const allErrors = failures.flatMap(f => f.errors);
-        
+
         return {
           success: false,
           error: new ValidationError('Validation failed', allErrors),
           continueExecution: false, // Stop execution on validation failure
           metadata: {
             validationResults,
-            failureCount: failures.length
-          }
+            failureCount: failures.length,
+          },
         };
       }
 
@@ -408,15 +412,14 @@ export class ValidationCapability extends BaseCapability {
         continueExecution: true,
         metadata: {
           validationResults,
-          validatorCount: validators.length
-        }
+          validatorCount: validators.length,
+        },
       };
-
     } catch (error) {
       return {
         success: false,
         error: new Error(`Validation capability failed: ${error.message}`),
-        continueExecution: false
+        continueExecution: false,
       };
     }
   }
@@ -462,7 +465,10 @@ interface ValidationResult {
 }
 
 class ValidationError extends Error {
-  constructor(message: string, public readonly errors: string[]) {
+  constructor(
+    message: string,
+    public readonly errors: string[]
+  ) {
     super(message);
     this.name = 'ValidationError';
   }
@@ -552,7 +558,7 @@ export class CapabilityRegistry implements ICapabilityRegistry {
       target,
       parameters,
       metadata: { phase },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const results: CapabilityResult[] = [];
@@ -561,7 +567,7 @@ export class CapabilityRegistry implements ICapabilityRegistry {
 
     for (const capability of this.executionOrder) {
       if (!shouldContinue) break;
-      
+
       if (!capability.canExecute(context)) continue;
 
       try {
@@ -581,12 +587,11 @@ export class CapabilityRegistry implements ICapabilityRegistry {
           finalResult = result.data;
           break;
         }
-
       } catch (error) {
         const errorResult: CapabilityResult = {
           success: false,
           error: error as Error,
-          continueExecution: false
+          continueExecution: false,
         };
         results.push(errorResult);
         shouldContinue = false;
@@ -599,7 +604,7 @@ export class CapabilityRegistry implements ICapabilityRegistry {
       shouldContinueExecution: shouldContinue,
       results,
       finalResult,
-      executedCapabilities: results.length
+      executedCapabilities: results.length,
     };
   }
 
@@ -618,8 +623,8 @@ export class CapabilityRegistry implements ICapabilityRegistry {
       executionOrder: this.executionOrder.map(c => ({
         name: c.name,
         type: c.type,
-        priority: c.metadata.priority || 0
-      }))
+        priority: c.metadata.priority || 0,
+      })),
     };
   }
 
@@ -682,7 +687,7 @@ export class CapabilityEnabledUserService {
     // Execute main business logic
     let result: User;
     let error: Error | undefined;
-    
+
     try {
       const user = User.create(userData);
       await this.userRepository.save(user);
@@ -737,11 +742,18 @@ export class CapabilityEnabledUserService {
 
       // Handle post-operation caching
       if (result && !error) {
-        const cachingCapability = this.capabilityRegistry.get('caching') as CachingCapability;
+        const cachingCapability = this.capabilityRegistry.get(
+          'caching'
+        ) as CachingCapability;
         if (cachingCapability) {
-          const cacheMetadata = preResult.results.find(r => r.metadata?.shouldCache);
+          const cacheMetadata = preResult.results.find(
+            r => r.metadata?.shouldCache
+          );
           if (cacheMetadata?.metadata?.cacheKey) {
-            await cachingCapability.cacheResult(cacheMetadata.metadata.cacheKey, result);
+            await cachingCapability.cacheResult(
+              cacheMetadata.metadata.cacheKey,
+              result
+            );
           }
         }
       }
@@ -758,7 +770,7 @@ export function createCapabilityEnabledUserService(
   cache: ICache
 ): CapabilityEnabledUserService {
   const registry = new CapabilityRegistry();
-  
+
   // Register capabilities
   registry.register(new ValidationCapability());
   registry.register(new CachingCapability(cache));
@@ -771,7 +783,8 @@ export function createCapabilityEnabledUserService(
 
 ## Key Features
 
-- **Extensible Architecture**: Add functionality without modifying core domain logic
+- **Extensible Architecture**: Add functionality without modifying core domain
+  logic
 - **Priority-Based Execution**: Control execution order through priority levels
 - **Phase-Aware Execution**: Execute capabilities before and after operations
 - **Result Interception**: Capabilities can provide results (e.g., cached data)
@@ -782,7 +795,8 @@ export function createCapabilityEnabledUserService(
 
 ## Common Pitfalls
 
-- **Priority Conflicts**: Be careful with capability priorities to avoid conflicts
+- **Priority Conflicts**: Be careful with capability priorities to avoid
+  conflicts
 - **Performance Impact**: Monitor performance impact of capability chains
 - **Error Propagation**: Ensure proper error handling in capability execution
 - **Memory Leaks**: Properly dispose of capabilities and their resources

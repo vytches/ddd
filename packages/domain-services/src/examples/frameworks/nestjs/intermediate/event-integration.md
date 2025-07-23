@@ -1,7 +1,7 @@
 # Event-Driven NestJS Service - Intermediate
 
-**Focus**: Domain service with event publishing in NestJS
-**Base Example**: [Event-Driven Domain Service](../../../intermediate/example-1.md)
+**Focus**: Domain service with event publishing in NestJS **Base Example**:
+[Event-Driven Domain Service](../../../intermediate/example-1.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/core, @vytches-ddd/events
 
 ## Service Implementation
@@ -12,13 +12,13 @@ import { Injectable } from '@nestjs/common';
 import { BaseDomainService } from '@vytches-ddd/domain-services';
 import { EventHandler, IEventBus } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   Order,
   OrderCreatedEvent,
   PaymentProcessedEvent,
   InventoryUpdatedEvent,
   OrderProcessingResult,
-  IOrderRepository
+  IOrderRepository,
 } from '../types';
 
 @Injectable()
@@ -37,13 +37,12 @@ export class OrderEventService extends BaseDomainService {
   async handleOrderCreated(event: OrderCreatedEvent): Promise<void> {
     try {
       console.log(`Processing order created event: ${event.orderId}`);
-      
+
       // ⭐ FOCUS: Domain service event orchestration
       await this.updateOrderStatus(event.orderId, 'processing');
       await this.requestPaymentProcessing(event);
       await this.requestInventoryReservation(event);
       await this.scheduleNotifications(event);
-      
     } catch (error) {
       console.error(`Order processing failed for ${event.orderId}:`, error);
       await this.handleOrderFailure(event.orderId, error);
@@ -57,18 +56,19 @@ export class OrderEventService extends BaseDomainService {
   async handlePaymentProcessed(event: PaymentProcessedEvent): Promise<void> {
     try {
       console.log(`Processing payment event: ${event.orderId}`);
-      
+
       if (event.status === 'completed') {
         // ⭐ FOCUS: Event-driven decision making
-        const fulfillmentReady = await this.checkFulfillmentReadiness(event.orderId);
-        
+        const fulfillmentReady = await this.checkFulfillmentReadiness(
+          event.orderId
+        );
+
         if (fulfillmentReady.isSuccess()) {
           await this.proceedWithFulfillment(event.orderId);
         }
       } else {
         await this.handlePaymentFailure(event.orderId, event.status);
       }
-      
     } catch (error) {
       console.error(`Payment processing failed for ${event.orderId}:`, error);
       await this.handleOrderFailure(event.orderId, error);
@@ -82,14 +82,15 @@ export class OrderEventService extends BaseDomainService {
   async handleInventoryUpdated(event: InventoryUpdatedEvent): Promise<void> {
     try {
       console.log(`Processing inventory update: ${event.productId}`);
-      
+
       // ⭐ FOCUS: Cross-aggregate event handling
-      const affectedOrders = await this.findOrdersAffectedByInventory(event.productId);
-      
+      const affectedOrders = await this.findOrdersAffectedByInventory(
+        event.productId
+      );
+
       for (const order of affectedOrders) {
         await this.reevaluateOrderFulfillment(order.id);
       }
-      
     } catch (error) {
       console.error(`Inventory update handling failed:`, error);
     }
@@ -98,49 +99,59 @@ export class OrderEventService extends BaseDomainService {
   /**
    * Initiates order fulfillment with event publishing
    */
-  async initiateOrderFulfillment(orderId: string): Promise<Result<OrderProcessingResult, Error>> {
+  async initiateOrderFulfillment(
+    orderId: string
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       const order = await this.orderRepository.findById(orderId);
-      
+
       if (!order) {
         return Result.failure(new Error(`Order not found: ${orderId}`));
       }
-      
+
       if (order.status !== 'confirmed') {
-        return Result.failure(new Error(`Order not ready for fulfillment: ${order.status}`));
+        return Result.failure(
+          new Error(`Order not ready for fulfillment: ${order.status}`)
+        );
       }
-      
+
       // ⭐ FOCUS: Event publishing through domain service
       await this.publishFulfillmentInitiated(order);
-      
+
       const result: OrderProcessingResult = {
         orderId: order.id,
         status: order.status,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
-      
+
       return Result.success(result);
-      
     } catch (error) {
-      return Result.failure(new Error(`Fulfillment initiation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Fulfillment initiation failed: ${error.message}`)
+      );
     }
   }
 
-  private async updateOrderStatus(orderId: string, status: string): Promise<void> {
+  private async updateOrderStatus(
+    orderId: string,
+    status: string
+  ): Promise<void> {
     const order = await this.orderRepository.findById(orderId);
-    
+
     if (order) {
       order.status = status;
       order.updatedAt = new Date();
       await this.orderRepository.save(order);
-      
+
       // ⭐ FOCUS: Event publishing for status changes
       await this.publishOrderStatusChanged(order);
     }
   }
 
-  private async requestPaymentProcessing(event: OrderCreatedEvent): Promise<void> {
+  private async requestPaymentProcessing(
+    event: OrderCreatedEvent
+  ): Promise<void> {
     const paymentRequestEvent = {
       eventType: 'PaymentRequested',
       orderId: event.orderId,
@@ -148,15 +159,17 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         requestedBy: 'OrderEventService',
-        originalEvent: event.eventType
-      }
+        originalEvent: event.eventType,
+      },
     };
-    
+
     // ⭐ FOCUS: Event bus integration
     await this.eventBus.publish(paymentRequestEvent);
   }
 
-  private async requestInventoryReservation(event: OrderCreatedEvent): Promise<void> {
+  private async requestInventoryReservation(
+    event: OrderCreatedEvent
+  ): Promise<void> {
     for (const item of event.items) {
       const reservationEvent = {
         eventType: 'InventoryReservationRequested',
@@ -166,10 +179,10 @@ export class OrderEventService extends BaseDomainService {
         timestamp: new Date(),
         metadata: {
           requestedBy: 'OrderEventService',
-          originalEvent: event.eventType
-        }
+          originalEvent: event.eventType,
+        },
       };
-      
+
       // ⭐ FOCUS: Multiple event publishing
       await this.eventBus.publish(reservationEvent);
     }
@@ -183,7 +196,7 @@ export class OrderEventService extends BaseDomainService {
         userId: event.userId,
         type: 'order_confirmation',
         channel: 'email',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       {
         eventType: 'NotificationScheduled',
@@ -191,47 +204,52 @@ export class OrderEventService extends BaseDomainService {
         userId: event.userId,
         type: 'order_confirmation',
         channel: 'sms',
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     ];
-    
+
     // ⭐ FOCUS: Batch event publishing
     await this.eventBus.publishMany(notificationEvents);
   }
 
-  private async checkFulfillmentReadiness(orderId: string): Promise<Result<boolean, Error>> {
+  private async checkFulfillmentReadiness(
+    orderId: string
+  ): Promise<Result<boolean, Error>> {
     const order = await this.orderRepository.findById(orderId);
-    
+
     if (!order) {
       return Result.failure(new Error(`Order not found: ${orderId}`));
     }
-    
+
     // Query other services through events
     const paymentCompleted = await this.isPaymentCompleted(orderId);
     const inventoryReserved = await this.isInventoryReserved(orderId);
-    
+
     return Result.success(paymentCompleted && inventoryReserved);
   }
 
   private async proceedWithFulfillment(orderId: string): Promise<void> {
     await this.updateOrderStatus(orderId, 'processing');
-    
+
     const fulfillmentEvent = {
       eventType: 'FulfillmentStarted',
       orderId,
       timestamp: new Date(),
       metadata: {
         triggeredBy: 'PaymentProcessedEvent',
-        processor: 'OrderEventService'
-      }
+        processor: 'OrderEventService',
+      },
     };
-    
+
     await this.eventBus.publish(fulfillmentEvent);
   }
 
-  private async handlePaymentFailure(orderId: string, status: string): Promise<void> {
+  private async handlePaymentFailure(
+    orderId: string,
+    status: string
+  ): Promise<void> {
     await this.updateOrderStatus(orderId, 'cancelled');
-    
+
     const failureEvent = {
       eventType: 'OrderCancelled',
       orderId,
@@ -239,16 +257,19 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         failureType: 'payment_failure',
-        originalStatus: status
-      }
+        originalStatus: status,
+      },
     };
-    
+
     await this.eventBus.publish(failureEvent);
   }
 
-  private async handleOrderFailure(orderId: string, error: Error): Promise<void> {
+  private async handleOrderFailure(
+    orderId: string,
+    error: Error
+  ): Promise<void> {
     await this.updateOrderStatus(orderId, 'failed');
-    
+
     const failureEvent = {
       eventType: 'OrderFailed',
       orderId,
@@ -256,10 +277,10 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         failureType: 'processing_error',
-        errorMessage: error.message
-      }
+        errorMessage: error.message,
+      },
     };
-    
+
     await this.eventBus.publish(failureEvent);
   }
 
@@ -272,10 +293,10 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         initiatedBy: 'OrderEventService',
-        orderCreatedAt: order.createdAt.toISOString()
-      }
+        orderCreatedAt: order.createdAt.toISOString(),
+      },
     };
-    
+
     await this.eventBus.publish(event);
   }
 
@@ -288,17 +309,21 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         changedBy: 'OrderEventService',
-        orderTotal: order.totalAmount
-      }
+        orderTotal: order.totalAmount,
+      },
     };
-    
+
     await this.eventBus.publish(event);
   }
 
-  private async findOrdersAffectedByInventory(productId: string): Promise<Order[]> {
+  private async findOrdersAffectedByInventory(
+    productId: string
+  ): Promise<Order[]> {
     // In real implementation, this would query for orders with the affected product
     const orders = await this.orderRepository.findByProductId(productId);
-    return orders.filter(order => order.status === 'pending' || order.status === 'processing');
+    return orders.filter(
+      order => order.status === 'pending' || order.status === 'processing'
+    );
   }
 
   private async reevaluateOrderFulfillment(orderId: string): Promise<void> {
@@ -308,10 +333,10 @@ export class OrderEventService extends BaseDomainService {
       timestamp: new Date(),
       metadata: {
         trigger: 'inventory_update',
-        requestedBy: 'OrderEventService'
-      }
+        requestedBy: 'OrderEventService',
+      },
     };
-    
+
     await this.eventBus.publish(reevaluationEvent);
   }
 
@@ -333,23 +358,26 @@ export class OrderEventService extends BaseDomainService {
 // order-event.controller.ts
 import { Controller, Post, Body, Param } from '@nestjs/common';
 import { OrderEventService } from './order-event.service';
-import { OrderCreatedEvent, PaymentProcessedEvent, InventoryUpdatedEvent } from '../types';
+import {
+  OrderCreatedEvent,
+  PaymentProcessedEvent,
+  InventoryUpdatedEvent,
+} from '../types';
 
 @Controller('order-events')
 export class OrderEventController {
-  constructor(
-    private readonly orderEventService: OrderEventService
-  ) {}
+  constructor(private readonly orderEventService: OrderEventService) {}
 
   @Post(':orderId/initiate')
   async initiateOrderFulfillment(@Param('orderId') orderId: string) {
     // ⭐ FOCUS: Thin wrapper around event service
-    const result = await this.orderEventService.initiateOrderFulfillment(orderId);
-    
+    const result =
+      await this.orderEventService.initiateOrderFulfillment(orderId);
+
     if (result.isFailure()) {
       throw new Error(result.error.message);
     }
-    
+
     return result.value;
   }
 
@@ -391,21 +419,22 @@ import { OrderEventService } from './order-event.service';
     // Event bus and repository providers
     {
       provide: 'IEventBus',
-      useClass: UnifiedEventBus
+      useClass: UnifiedEventBus,
     },
     {
       provide: 'IOrderRepository',
-      useClass: OrderRepository
-    }
+      useClass: OrderRepository,
+    },
   ],
-  exports: [OrderEventService]
+  exports: [OrderEventService],
 })
 export class OrderEventModule {}
 ```
 
 ## Key Points
 
-- **Event-Driven Architecture**: Uses @EventHandler decorators for automatic event subscriptions
+- **Event-Driven Architecture**: Uses @EventHandler decorators for automatic
+  event subscriptions
 - **Event Publishing**: Demonstrates various event publishing patterns
 - **Cross-Aggregate Events**: Handles events that affect multiple aggregates
 - **Event Metadata**: Includes rich metadata with events for traceability
@@ -415,5 +444,7 @@ export class OrderEventModule {}
 ## Related Examples
 
 - [DI Integration](./di-integration.md) - Advanced dependency injection
-- [Event-Driven Domain Service](../../../intermediate/example-1.md) - Core library patterns
-- [Enterprise Setup](../advanced/enterprise-setup.md) - Complete enterprise integration
+- [Event-Driven Domain Service](../../../intermediate/example-1.md) - Core
+  library patterns
+- [Enterprise Setup](../advanced/enterprise-setup.md) - Complete enterprise
+  integration

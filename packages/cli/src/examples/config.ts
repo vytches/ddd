@@ -15,14 +15,15 @@ export const config: PackageExampleConfig = {
   packageName: 'cli',
   displayName: 'VytchesDDD CLI',
   version: '1.0.0',
-  description: 'Enterprise-Grade Domain-Driven Design CLI for code generation, domain modeling, and project management',
+  description:
+    'Enterprise-Grade Domain-Driven Design CLI for code generation, domain modeling, and project management',
   domain: 'Development Tools',
   patterns: ['cli', 'code-generation', 'domain-modeling', 'project-scaffolding'],
   tags: {
     core: ['cli:commands', 'cli:workflows'],
     integrations: ['cli:templates', 'cli:frameworks'],
     frameworks: ['nestjs'],
-    patterns: ['code-generation', 'domain-modeling', 'scaffolding', 'validation']
+    patterns: ['code-generation', 'domain-modeling', 'scaffolding', 'validation'],
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
   complexityLevels: {
@@ -30,20 +31,20 @@ export const config: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic CLI usage and commands'
+      description: 'Basic CLI usage and commands',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: false,
       diRequired: false,
-      description: 'Workflows and template customization'
+      description: 'Workflows and template customization',
     },
     advanced: {
       level: 'advanced',
       diSupport: false,
       diRequired: false,
-      description: 'Advanced configuration and troubleshooting'
-    }
+      description: 'Advanced configuration and troubleshooting',
+    },
   },
   frameworks: [
     {
@@ -51,8 +52,8 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS integration and code generation',
       complexityLevels: ['basic', 'intermediate'],
-      dependencies: ['@nestjs/common', '@nestjs/core']
-    }
+      dependencies: ['@nestjs/common', '@nestjs/core'],
+    },
   ],
 
   examples: [
@@ -64,9 +65,10 @@ export const config: PackageExampleConfig = {
       tags: ['cli:generate', 'commands:core', 'code-generation'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Generate DDD components with intelligent templates - aggregates, entities, commands, queries, and more',
+      description:
+        'Generate DDD components with intelligent templates - aggregates, entities, commands, queries, and more',
       dependencies: ['@vytches-ddd/core'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'examples-command',
@@ -75,9 +77,10 @@ export const config: PackageExampleConfig = {
       tags: ['cli:examples', 'documentation:generation', 'package:management'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Manage and generate package examples and documentation with validation and bundling capabilities',
+      description:
+        'Manage and generate package examples and documentation with validation and bundling capabilities',
       dependencies: ['@vytches-ddd/contracts'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'domain-builder-command',
@@ -86,9 +89,10 @@ export const config: PackageExampleConfig = {
       tags: ['cli:domain', 'modeling:interactive', 'ai:assistance'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Interactive domain modeling with AI-assisted guidance, context mapping, and validation',
+      description:
+        'Interactive domain modeling with AI-assisted guidance, context mapping, and validation',
       dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Workflows Documentation (2 examples)
@@ -99,9 +103,10 @@ export const config: PackageExampleConfig = {
       tags: ['workflow:new-project', 'scaffolding:complete', 'setup:guide'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Complete workflow for creating a DDD project from scratch with multiple bounded contexts',
+      description:
+        'Complete workflow for creating a DDD project from scratch with multiple bounded contexts',
       dependencies: ['@vytches-ddd/core', '@vytches-ddd/cqrs', '@vytches-ddd/events'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'add-bounded-context-workflow',
@@ -110,9 +115,10 @@ export const config: PackageExampleConfig = {
       tags: ['workflow:integration', 'bounded-context:add', 'domain:expansion'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Add new bounded context to existing DDD project with proper integration and anti-corruption layers',
+      description:
+        'Add new bounded context to existing DDD project with proper integration and anti-corruption layers',
       dependencies: ['@vytches-ddd/core', '@vytches-ddd/events'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Templates Documentation (1 example)
@@ -123,9 +129,10 @@ export const config: PackageExampleConfig = {
       tags: ['templates:custom', 'code-generation:advanced', 'customization:templates'],
       complexity: 'advanced',
       priority: 'medium',
-      description: 'Creating and customizing code generation templates with Handlebars for project-specific patterns',
+      description:
+        'Creating and customizing code generation templates with Handlebars for project-specific patterns',
       dependencies: ['handlebars'],
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Troubleshooting Documentation (1 example)
@@ -136,9 +143,10 @@ export const config: PackageExampleConfig = {
       tags: ['troubleshooting:errors', 'debugging:cli', 'solutions:common'],
       complexity: 'advanced',
       priority: 'medium',
-      description: 'Quick solutions to frequent CLI issues including generation errors, dependency issues, and configuration problems',
-      validation: { fileExists: true }
-    }
+      description:
+        'Quick solutions to frequent CLI issues including generation errors, dependency issues, and configuration problems',
+      validation: { fileExists: true },
+    },
   ],
 
   sections: [
@@ -150,7 +158,7 @@ export const config: PackageExampleConfig = {
     'workflows',
     'templates',
     'troubleshooting',
-    'examples'
+    'examples',
   ],
 
   contentConfig: {
@@ -160,7 +168,7 @@ export const config: PackageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -168,29 +176,29 @@ export const config: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: false
+    optimizeForCodeGeneration: false,
   },
 
   relatedPackages: {
-    'core': {
+    core: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['generate-command']
+      integrationExamples: ['generate-command'],
     },
-    'cqrs': {
+    cqrs: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['generate-command', 'new-project-workflow']
+      integrationExamples: ['generate-command', 'new-project-workflow'],
     },
-    'events': {
+    events: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['domain-builder-command']
+      integrationExamples: ['domain-builder-command'],
     },
-    'utils': {
+    utils: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['domain-builder-command']
-    }
-  }
+      integrationExamples: ['domain-builder-command'],
+    },
+  },
 };

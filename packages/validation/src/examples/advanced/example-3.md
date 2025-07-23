@@ -1,43 +1,47 @@
 # Real-time Global Data Quality Monitoring
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/validation
-**Complexity**: Advanced
-**Domain**: Global Data Governance
-**Patterns**: Real-time Monitoring, Global Coordination, Streaming Analytics, Predictive Quality Management
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/events, @vytches-ddd/messaging, @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Advanced
+**Domain**: Global Data Governance **Patterns**: Real-time Monitoring, Global
+Coordination, Streaming Analytics, Predictive Quality Management
+**Dependencies**: @vytches-ddd/validation, @vytches-ddd/events,
+@vytches-ddd/messaging, @vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates a real-time global data quality monitoring system that continuously tracks data quality across multiple regions, systems, and data streams. It provides predictive quality management, automated quality degradation detection, and intelligent alert escalation with global coordination.
+This example demonstrates a real-time global data quality monitoring system that
+continuously tracks data quality across multiple regions, systems, and data
+streams. It provides predictive quality management, automated quality
+degradation detection, and intelligent alert escalation with global
+coordination.
 
 ## Business Context
 
-A multinational corporation with 500+ data sources across 40 countries needs real-time monitoring of data quality to prevent cascading data issues, ensure regulatory compliance, and maintain business continuity. The system processes 1B+ data events daily with sub-second quality assessment and automated remediation capabilities.
+A multinational corporation with 500+ data sources across 40 countries needs
+real-time monitoring of data quality to prevent cascading data issues, ensure
+regulatory compliance, and maintain business continuity. The system processes
+1B+ data events daily with sub-second quality assessment and automated
+remediation capabilities.
 
 ## Code Example
 
 ```typescript
 // global-quality-monitor.ts
-import { 
+import {
   IValidator,
   ValidationResult,
   DataQualityMetrics,
   ValidationMetrics,
-  BatchValidationResult 
+  BatchValidationResult,
 } from '@vytches-ddd/validation';
-import { 
+import {
   UnifiedEventBus,
   UniversalEventDispatcher,
-  DomainEvent 
+  DomainEvent,
 } from '@vytches-ddd/events';
-import { 
-  OutboxPattern,
-  EventMeshService 
-} from '@vytches-ddd/messaging';
-import { 
+import { OutboxPattern, EventMeshService } from '@vytches-ddd/messaging';
+import {
   CircuitBreakerStrategy,
-  ResiliencePolicyBuilder 
+  ResiliencePolicyBuilder,
 } from '@vytches-ddd/resilience';
 
 // Real-time quality monitoring events
@@ -45,7 +49,7 @@ export class QualityDegradationDetectedEvent implements DomainEvent {
   readonly eventType = 'QualityDegradationDetected';
   readonly version = '1.0';
   readonly occurredAt = new Date();
-  
+
   constructor(
     public readonly monitoringId: string,
     public readonly dataSource: string,
@@ -61,7 +65,7 @@ export class QualityThresholdBreachedEvent implements DomainEvent {
   readonly eventType = 'QualityThresholdBreached';
   readonly version = '1.0';
   readonly occurredAt = new Date();
-  
+
   constructor(
     public readonly thresholdId: string,
     public readonly dataSource: string,
@@ -76,7 +80,7 @@ export class GlobalQualityAlertEvent implements DomainEvent {
   readonly eventType = 'GlobalQualityAlert';
   readonly version = '1.0';
   readonly occurredAt = new Date();
-  
+
   constructor(
     public readonly alertId: string,
     public readonly alertLevel: 'warning' | 'error' | 'critical',
@@ -153,7 +157,7 @@ export class GlobalDataQualityMonitor {
     this.outboxPattern = new OutboxPattern();
     this.qualityStateManager = new GlobalQualityStateManager();
     this.circuitBreakers = new Map();
-    
+
     this.initializeGlobalConfiguration();
     this.initializeStreamProcessors();
     this.initializeQualityPredictors();
@@ -162,9 +166,9 @@ export class GlobalDataQualityMonitor {
 
   async startGlobalMonitoring(): Promise<void> {
     console.log('Starting global data quality monitoring...');
-    
+
     // Start regional monitoring
-    const monitoringPromises = this.config.regions.map(region => 
+    const monitoringPromises = this.config.regions.map(region =>
       this.startRegionalMonitoring(region)
     );
 
@@ -177,16 +181,18 @@ export class GlobalDataQualityMonitor {
     await Promise.all([
       ...monitoringPromises,
       coordinationPromise,
-      predictivePromise
+      predictivePromise,
     ]);
 
     console.log('Global data quality monitoring started successfully');
   }
 
-  private async startRegionalMonitoring(region: RegionMonitoringConfig): Promise<void> {
+  private async startRegionalMonitoring(
+    region: RegionMonitoringConfig
+  ): Promise<void> {
     console.log(`Starting monitoring for region: ${region.regionId}`);
-    
-    const sourcePromises = region.dataSources.map(source => 
+
+    const sourcePromises = region.dataSources.map(source =>
       this.startSourceMonitoring(region.regionId, source)
     );
 
@@ -194,12 +200,12 @@ export class GlobalDataQualityMonitor {
   }
 
   private async startSourceMonitoring(
-    regionId: string, 
+    regionId: string,
     source: DataSourceConfig
   ): Promise<void> {
     const sourceKey = `${regionId}:${source.sourceId}`;
     const processor = this.streamProcessors.get(sourceKey);
-    
+
     if (!processor) {
       console.error(`No stream processor found for ${sourceKey}`);
       return;
@@ -222,7 +228,7 @@ export class GlobalDataQualityMonitor {
         await circuitBreaker?.execute(async () => {
           // Sample data from source
           const sampleData = await this.sampleDataFromSource(source);
-          
+
           if (sampleData.length === 0) {
             console.log(`No data available from source ${sourceKey}`);
             return;
@@ -242,45 +248,39 @@ export class GlobalDataQualityMonitor {
           );
 
           // Check for quality degradation
-          await this.checkQualityDegradation(
-            regionId,
-            source,
-            qualityMetrics
-          );
+          await this.checkQualityDegradation(regionId, source, qualityMetrics);
 
           // Check quality thresholds
-          await this.checkQualityThresholds(
-            regionId,
-            source,
-            qualityMetrics
-          );
+          await this.checkQualityThresholds(regionId, source, qualityMetrics);
 
           // Emit quality metrics event
-          await this.emitQualityMetricsEvent(
-            regionId,
-            source,
-            qualityMetrics
-          );
+          await this.emitQualityMetricsEvent(regionId, source, qualityMetrics);
         });
 
         // Wait before next monitoring cycle
-        await this.sleep(source.priority === 'high' ? 5000 : 
-                        source.priority === 'medium' ? 15000 : 30000);
-
+        await this.sleep(
+          source.priority === 'high'
+            ? 5000
+            : source.priority === 'medium'
+              ? 15000
+              : 30000
+        );
       } catch (error) {
         console.error(`Error monitoring source ${sourceKey}:`, error);
-        
+
         // Emit error event
         await this.eventBus.publish({
           eventType: 'MonitoringError',
           version: '1.0',
           occurredAt: new Date(),
           sourceKey,
-          error: error.message
+          error: error.message,
         } as DomainEvent);
 
         // Exponential backoff on error
-        await this.sleep(Math.min(300000, 10000 * Math.pow(2, this.getErrorCount(sourceKey))));
+        await this.sleep(
+          Math.min(300000, 10000 * Math.pow(2, this.getErrorCount(sourceKey)))
+        );
       }
     }
   }
@@ -306,20 +306,22 @@ export class GlobalDataQualityMonitor {
   private async sampleFromDatabase(source: DataSourceConfig): Promise<any[]> {
     // Sample a percentage of records for quality assessment
     const sampleSize = Math.max(100, Math.floor(10000 * source.samplingRate));
-    
+
     // This would connect to actual database
     // For demo purposes, return mock data
     return Array.from({ length: sampleSize }, (_, i) => ({
       id: `record-${i}`,
       data: `sample-data-${i}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     }));
   }
 
   private async sampleFromAPI(source: DataSourceConfig): Promise<any[]> {
     // Fetch sample data from API endpoint
     try {
-      const response = await fetch(`${source.endpoint}?limit=${Math.floor(1000 * source.samplingRate)}`);
+      const response = await fetch(
+        `${source.endpoint}?limit=${Math.floor(1000 * source.samplingRate)}`
+      );
       return await response.json();
     } catch (error) {
       console.error(`Failed to sample from API ${source.sourceId}:`, error);
@@ -339,7 +341,9 @@ export class GlobalDataQualityMonitor {
     return [];
   }
 
-  private async sampleFromMessageQueue(source: DataSourceConfig): Promise<any[]> {
+  private async sampleFromMessageQueue(
+    source: DataSourceConfig
+  ): Promise<any[]> {
     // Sample messages from queue without consuming
     // Implementation would peek at queue messages
     return [];
@@ -357,26 +361,34 @@ export class GlobalDataQualityMonitor {
 
     if (!baseline) return;
 
-    const degradation = this.calculateQualityDegradation(currentMetrics, baseline);
-    
+    const degradation = this.calculateQualityDegradation(
+      currentMetrics,
+      baseline
+    );
+
     if (degradation.severity !== 'none') {
       const affectedSystems = await this.identifyAffectedSystems(
         regionId,
         source.sourceId
       );
 
-      await this.eventBus.publish(new QualityDegradationDetectedEvent(
-        `degradation-${Date.now()}`,
-        source.sourceId,
-        regionId,
-        currentMetrics,
-        baseline,
-        degradation.severity,
-        affectedSystems
-      ));
+      await this.eventBus.publish(
+        new QualityDegradationDetectedEvent(
+          `degradation-${Date.now()}`,
+          source.sourceId,
+          regionId,
+          currentMetrics,
+          baseline,
+          degradation.severity,
+          affectedSystems
+        )
+      );
 
       // Trigger remediation if degradation is severe
-      if (degradation.severity === 'high' || degradation.severity === 'critical') {
+      if (
+        degradation.severity === 'high' ||
+        degradation.severity === 'critical'
+      ) {
         await this.triggerQualityRemediation(regionId, source, degradation);
       }
     }
@@ -385,7 +397,10 @@ export class GlobalDataQualityMonitor {
   private calculateQualityDegradation(
     current: DataQualityMetrics,
     baseline: DataQualityMetrics
-  ): { severity: 'none' | 'low' | 'medium' | 'high' | 'critical'; factors: string[] } {
+  ): {
+    severity: 'none' | 'low' | 'medium' | 'high' | 'critical';
+    factors: string[];
+  } {
     const factors: string[] = [];
     let maxDegradation = 0;
 
@@ -394,22 +409,31 @@ export class GlobalDataQualityMonitor {
       const metricKey = key as keyof DataQualityMetrics;
       const currentValue = current[metricKey];
       const baselineValue = baseline[metricKey];
-      
-      if (typeof currentValue === 'number' && typeof baselineValue === 'number') {
+
+      if (
+        typeof currentValue === 'number' &&
+        typeof baselineValue === 'number'
+      ) {
         const degradation = (baselineValue - currentValue) / baselineValue;
-        
-        if (degradation > 0.02) { // 2% degradation threshold
-          factors.push(`${key}: ${(degradation * 100).toFixed(1)}% degradation`);
+
+        if (degradation > 0.02) {
+          // 2% degradation threshold
+          factors.push(
+            `${key}: ${(degradation * 100).toFixed(1)}% degradation`
+          );
           maxDegradation = Math.max(maxDegradation, degradation);
         }
       }
     });
 
     let severity: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
-    
-    if (maxDegradation >= 0.20) severity = 'critical'; // 20%+ degradation
-    else if (maxDegradation >= 0.10) severity = 'high'; // 10%+ degradation
-    else if (maxDegradation >= 0.05) severity = 'medium'; // 5%+ degradation
+
+    if (maxDegradation >= 0.2)
+      severity = 'critical'; // 20%+ degradation
+    else if (maxDegradation >= 0.1)
+      severity = 'high'; // 10%+ degradation
+    else if (maxDegradation >= 0.05)
+      severity = 'medium'; // 5%+ degradation
     else if (maxDegradation >= 0.02) severity = 'low'; // 2%+ degradation
 
     return { severity, factors };
@@ -421,13 +445,16 @@ export class GlobalDataQualityMonitor {
     metrics: DataQualityMetrics
   ): Promise<void> {
     const thresholds = this.getApplicableThresholds(regionId, source.sourceId);
-    
+
     for (const threshold of thresholds) {
       const currentValue = metrics[threshold.metricType];
-      
+
       if (typeof currentValue === 'number') {
-        const breachType = this.determineThresholdBreach(currentValue, threshold);
-        
+        const breachType = this.determineThresholdBreach(
+          currentValue,
+          threshold
+        );
+
         if (breachType) {
           const breachDuration = await this.calculateBreachDuration(
             regionId,
@@ -435,19 +462,32 @@ export class GlobalDataQualityMonitor {
             threshold.metricType
           );
 
-          await this.eventBus.publish(new QualityThresholdBreachedEvent(
-            `${regionId}:${source.sourceId}:${threshold.metricType}`,
-            source.sourceId,
-            threshold.metricType,
-            currentValue,
-            this.getThresholdValue(threshold, breachType),
-            breachDuration
-          ));
+          await this.eventBus.publish(
+            new QualityThresholdBreachedEvent(
+              `${regionId}:${source.sourceId}:${threshold.metricType}`,
+              source.sourceId,
+              threshold.metricType,
+              currentValue,
+              this.getThresholdValue(threshold, breachType),
+              breachDuration
+            )
+          );
 
           // Escalate if consecutive breaches exceed threshold
-          if (breachDuration >= threshold.timeWindow && 
-              await this.getConsecutiveBreaches(regionId, source.sourceId, threshold.metricType) >= threshold.consecutiveBreaches) {
-            await this.escalateQualityAlert(regionId, source, threshold, breachType);
+          if (
+            breachDuration >= threshold.timeWindow &&
+            (await this.getConsecutiveBreaches(
+              regionId,
+              source.sourceId,
+              threshold.metricType
+            )) >= threshold.consecutiveBreaches
+          ) {
+            await this.escalateQualityAlert(
+              regionId,
+              source,
+              threshold,
+              breachType
+            );
           }
         }
       }
@@ -455,7 +495,7 @@ export class GlobalDataQualityMonitor {
   }
 
   private determineThresholdBreach(
-    value: number, 
+    value: number,
     threshold: QualityThreshold
   ): 'warning' | 'error' | 'critical' | null {
     if (value < threshold.criticalThreshold) return 'critical';
@@ -465,13 +505,16 @@ export class GlobalDataQualityMonitor {
   }
 
   private getThresholdValue(
-    threshold: QualityThreshold, 
+    threshold: QualityThreshold,
     breachType: 'warning' | 'error' | 'critical'
   ): number {
     switch (breachType) {
-      case 'critical': return threshold.criticalThreshold;
-      case 'error': return threshold.errorThreshold;
-      case 'warning': return threshold.warningThreshold;
+      case 'critical':
+        return threshold.criticalThreshold;
+      case 'error':
+        return threshold.errorThreshold;
+      case 'warning':
+        return threshold.warningThreshold;
     }
   }
 
@@ -481,28 +524,41 @@ export class GlobalDataQualityMonitor {
     threshold: QualityThreshold,
     breachType: 'warning' | 'error' | 'critical'
   ): Promise<void> {
-    const qualityImpact = await this.assessQualityImpact(regionId, source, threshold);
-    const recommendedActions = await this.generateRecommendedActions(qualityImpact);
+    const qualityImpact = await this.assessQualityImpact(
+      regionId,
+      source,
+      threshold
+    );
+    const recommendedActions =
+      await this.generateRecommendedActions(qualityImpact);
 
-    await this.eventBus.publish(new GlobalQualityAlertEvent(
-      `alert-${Date.now()}`,
-      breachType,
-      [regionId],
-      [source.sourceId],
-      qualityImpact,
-      recommendedActions
-    ));
+    await this.eventBus.publish(
+      new GlobalQualityAlertEvent(
+        `alert-${Date.now()}`,
+        breachType,
+        [regionId],
+        [source.sourceId],
+        qualityImpact,
+        recommendedActions
+      )
+    );
   }
 
   private async startGlobalCoordination(): Promise<void> {
     // Subscribe to quality events from all regions
-    await this.eventBus.subscribe('QualityDegradationDetected', async (event: QualityDegradationDetectedEvent) => {
-      await this.handleQualityDegradationEvent(event);
-    });
+    await this.eventBus.subscribe(
+      'QualityDegradationDetected',
+      async (event: QualityDegradationDetectedEvent) => {
+        await this.handleQualityDegradationEvent(event);
+      }
+    );
 
-    await this.eventBus.subscribe('QualityThresholdBreached', async (event: QualityThresholdBreachedEvent) => {
-      await this.handleThresholdBreachEvent(event);
-    });
+    await this.eventBus.subscribe(
+      'QualityThresholdBreached',
+      async (event: QualityThresholdBreachedEvent) => {
+        await this.handleThresholdBreachEvent(event);
+      }
+    );
 
     // Coordinate global quality state
     setInterval(async () => {
@@ -519,12 +575,15 @@ export class GlobalDataQualityMonitor {
 
   private async runPredictiveQualityAnalysis(): Promise<void> {
     console.log('Running predictive quality analysis...');
-    
+
     for (const [sourceKey, predictor] of this.qualityPredictors) {
       try {
         const prediction = await predictor.predictQualityTrends();
-        
-        if (prediction.riskLevel === 'high' || prediction.riskLevel === 'critical') {
+
+        if (
+          prediction.riskLevel === 'high' ||
+          prediction.riskLevel === 'critical'
+        ) {
           await this.alertManager.createPredictiveAlert(sourceKey, prediction);
         }
       } catch (error) {
@@ -539,7 +598,7 @@ export class GlobalDataQualityMonitor {
     degradation: { severity: string; factors: string[] }
   ): Promise<void> {
     console.log(`Triggering remediation for ${regionId}:${source.sourceId}`);
-    
+
     // Auto-remediation based on degradation type and severity
     const remediationActions = await this.generateRemediationActions(
       regionId,
@@ -576,9 +635,9 @@ export class GlobalDataQualityMonitor {
                 validity: 0.99,
                 uniqueness: 0.98,
                 timeliness: 0.95,
-                overallScore: 0.98
-              }
-            }
+                overallScore: 0.98,
+              },
+            },
           ],
           monitoringFrequency: 30000, // 30 seconds
           qualityBaseline: {
@@ -588,16 +647,16 @@ export class GlobalDataQualityMonitor {
             validity: 0.98,
             uniqueness: 0.96,
             timeliness: 0.92,
-            overallScore: 0.96
+            overallScore: 0.96,
           },
           escalationRules: [
             {
               condition: 'quality_degradation > 0.1',
               action: 'immediate_alert',
-              recipients: ['data-team', 'ops-team']
-            }
-          ]
-        }
+              recipients: ['data-team', 'ops-team'],
+            },
+          ],
+        },
         // More regions...
       ],
       qualityThresholds: {
@@ -605,35 +664,35 @@ export class GlobalDataQualityMonitor {
           {
             metricType: 'overallScore',
             warningThreshold: 0.95,
-            errorThreshold: 0.90,
+            errorThreshold: 0.9,
             criticalThreshold: 0.85,
             consecutiveBreaches: 3,
-            timeWindow: 300000 // 5 minutes
-          }
+            timeWindow: 300000, // 5 minutes
+          },
         ],
         regional: new Map(),
-        sourceSpecific: new Map()
+        sourceSpecific: new Map(),
       },
       alerting: {
         channels: ['email', 'slack', 'pagerduty'],
         escalationDelays: [300, 900, 1800], // 5min, 15min, 30min
-        globalAlertThreshold: 0.80
+        globalAlertThreshold: 0.8,
       },
       streaming: {
         bufferSize: 10000,
         windowSize: 60000, // 1 minute
-        enableRealTimeProcessing: true
+        enableRealTimeProcessing: true,
       },
       predictive: {
         enabled: true,
         forecastHorizon: 3600000, // 1 hour
-        models: ['arima', 'lstm', 'ensemble']
+        models: ['arima', 'lstm', 'ensemble'],
       },
       remediation: {
         autoRemediationEnabled: true,
         maxRemediationAttempts: 3,
-        remediationCooldown: 1800000 // 30 minutes
-      }
+        remediationCooldown: 1800000, // 30 minutes
+      },
     };
   }
 
@@ -641,11 +700,14 @@ export class GlobalDataQualityMonitor {
     this.config.regions.forEach(region => {
       region.dataSources.forEach(source => {
         const sourceKey = `${region.regionId}:${source.sourceId}`;
-        this.streamProcessors.set(sourceKey, new StreamingQualityProcessor(
+        this.streamProcessors.set(
           sourceKey,
-          this.config.streaming,
-          this.validator
-        ));
+          new StreamingQualityProcessor(
+            sourceKey,
+            this.config.streaming,
+            this.validator
+          )
+        );
       });
     });
   }
@@ -654,11 +716,14 @@ export class GlobalDataQualityMonitor {
     this.config.regions.forEach(region => {
       region.dataSources.forEach(source => {
         const sourceKey = `${region.regionId}:${source.sourceId}`;
-        this.qualityPredictors.set(sourceKey, new QualityPredictor(
+        this.qualityPredictors.set(
           sourceKey,
-          this.config.predictive,
-          this.qualityStateManager
-        ));
+          new QualityPredictor(
+            sourceKey,
+            this.config.predictive,
+            this.qualityStateManager
+          )
+        );
       });
     });
   }
@@ -667,20 +732,20 @@ export class GlobalDataQualityMonitor {
     this.config.regions.forEach(region => {
       region.dataSources.forEach(source => {
         const sourceKey = `${region.regionId}:${source.sourceId}`;
-        this.circuitBreakers.set(sourceKey, 
-          ResiliencePolicyBuilder
-            .create()
+        this.circuitBreakers.set(
+          sourceKey,
+          ResiliencePolicyBuilder.create()
             .withCircuitBreaker({
               failureThreshold: 5,
               resetTimeout: 60000,
-              halfOpenMaxCalls: 2
+              halfOpenMaxCalls: 2,
             })
             .withTimeout(30000)
             .withRetry({
               maxAttempts: 3,
               baseDelay: 1000,
               maxDelay: 5000,
-              backoff: 'exponential'
+              backoff: 'exponential',
             })
             .build()
         );
@@ -697,17 +762,21 @@ export class GlobalDataQualityMonitor {
     return 0;
   }
 
-  private getApplicableThresholds(regionId: string, sourceId: string): QualityThreshold[] {
+  private getApplicableThresholds(
+    regionId: string,
+    sourceId: string
+  ): QualityThreshold[] {
     const global = this.config.qualityThresholds.global;
     const regional = this.config.qualityThresholds.regional.get(regionId) || [];
-    const sourceSpecific = this.config.qualityThresholds.sourceSpecific.get(sourceId) || [];
-    
+    const sourceSpecific =
+      this.config.qualityThresholds.sourceSpecific.get(sourceId) || [];
+
     return [...global, ...regional, ...sourceSpecific];
   }
 
   private async calculateBreachDuration(
-    regionId: string, 
-    sourceId: string, 
+    regionId: string,
+    sourceId: string,
     metricType: keyof DataQualityMetrics
   ): Promise<number> {
     // Implementation would track breach history
@@ -715,22 +784,25 @@ export class GlobalDataQualityMonitor {
   }
 
   private async getConsecutiveBreaches(
-    regionId: string, 
-    sourceId: string, 
+    regionId: string,
+    sourceId: string,
     metricType: keyof DataQualityMetrics
   ): Promise<number> {
     // Implementation would count consecutive breaches
     return 0;
   }
 
-  private async identifyAffectedSystems(regionId: string, sourceId: string): Promise<string[]> {
+  private async identifyAffectedSystems(
+    regionId: string,
+    sourceId: string
+  ): Promise<string[]> {
     // Implementation would map data dependencies
     return [`system-${regionId}`, `downstream-${sourceId}`];
   }
 
   private async assessQualityImpact(
-    regionId: string, 
-    source: DataSourceConfig, 
+    regionId: string,
+    source: DataSourceConfig,
     threshold: QualityThreshold
   ): Promise<QualityImpactAssessment> {
     return {
@@ -738,16 +810,18 @@ export class GlobalDataQualityMonitor {
       technicalImpact: 'high',
       affectedProcesses: ['data-pipeline', 'reporting'],
       estimatedRecoveryTime: 1800000, // 30 minutes
-      riskLevel: 'high'
+      riskLevel: 'high',
     };
   }
 
-  private async generateRecommendedActions(impact: QualityImpactAssessment): Promise<string[]> {
+  private async generateRecommendedActions(
+    impact: QualityImpactAssessment
+  ): Promise<string[]> {
     return [
       'Investigate data source connectivity',
       'Check validation rule configuration',
       'Review recent data changes',
-      'Escalate to data engineering team'
+      'Escalate to data engineering team',
     ];
   }
 
@@ -760,28 +834,38 @@ export class GlobalDataQualityMonitor {
       {
         actionType: 'refresh_data_sample',
         priority: 'high',
-        estimatedDuration: 300000 // 5 minutes
+        estimatedDuration: 300000, // 5 minutes
       },
       {
         actionType: 'restart_validation_pipeline',
         priority: 'medium',
-        estimatedDuration: 600000 // 10 minutes
-      }
+        estimatedDuration: 600000, // 10 minutes
+      },
     ];
   }
 
-  private async executeRemediationAction(action: RemediationAction): Promise<void> {
+  private async executeRemediationAction(
+    action: RemediationAction
+  ): Promise<void> {
     console.log(`Executing remediation action: ${action.actionType}`);
     // Implementation would execute specific remediation logic
   }
 
-  private async handleQualityDegradationEvent(event: QualityDegradationDetectedEvent): Promise<void> {
-    console.log(`Handling quality degradation: ${event.dataSource} in ${event.region}`);
+  private async handleQualityDegradationEvent(
+    event: QualityDegradationDetectedEvent
+  ): Promise<void> {
+    console.log(
+      `Handling quality degradation: ${event.dataSource} in ${event.region}`
+    );
     // Implementation would coordinate global response
   }
 
-  private async handleThresholdBreachEvent(event: QualityThresholdBreachedEvent): Promise<void> {
-    console.log(`Handling threshold breach: ${event.dataSource} - ${event.metricType}`);
+  private async handleThresholdBreachEvent(
+    event: QualityThresholdBreachedEvent
+  ): Promise<void> {
+    console.log(
+      `Handling threshold breach: ${event.dataSource} - ${event.metricType}`
+    );
     // Implementation would track and escalate breaches
   }
 
@@ -801,7 +885,7 @@ export class GlobalDataQualityMonitor {
       occurredAt: new Date(),
       regionId,
       sourceId: source.sourceId,
-      metrics
+      metrics,
     } as DomainEvent);
   }
 }
@@ -825,20 +909,28 @@ console.log('- Global coordination and state management');
 
 ## Key Features
 
-- **Real-time Monitoring**: Continuous quality assessment across global data sources
-- **Predictive Analytics**: Machine learning-based prediction of quality degradation
-- **Global Coordination**: Centralized coordination of quality state across regions
+- **Real-time Monitoring**: Continuous quality assessment across global data
+  sources
+- **Predictive Analytics**: Machine learning-based prediction of quality
+  degradation
+- **Global Coordination**: Centralized coordination of quality state across
+  regions
 - **Automated Remediation**: Intelligent automatic recovery from quality issues
-- **Event-Driven Architecture**: Real-time event streaming for immediate response
+- **Event-Driven Architecture**: Real-time event streaming for immediate
+  response
 - **Circuit Breaker Protection**: Resilience patterns for fault tolerance
 - **Scalable Streaming**: High-throughput processing of quality metrics
 
 ## Common Pitfalls
 
-- **Monitoring Overhead**: Balance monitoring frequency with system performance impact
-- **Alert Fatigue**: Implement intelligent alert filtering to prevent notification overload
-- **False Positives**: Tune thresholds carefully to minimize false quality alerts
-- **Resource Management**: Monitor resource usage of the monitoring system itself
+- **Monitoring Overhead**: Balance monitoring frequency with system performance
+  impact
+- **Alert Fatigue**: Implement intelligent alert filtering to prevent
+  notification overload
+- **False Positives**: Tune thresholds carefully to minimize false quality
+  alerts
+- **Resource Management**: Monitor resource usage of the monitoring system
+  itself
 
 ## Related Examples
 

@@ -1,27 +1,33 @@
 # High Availability Scheduling - Clustering and Automatic Failover
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Complexity**: advanced
-**Domain**: Infrastructure
-**Patterns**: high-availability, clustering, automatic-failover, consensus-protocols
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+advanced **Domain**: Infrastructure **Patterns**: high-availability, clustering,
+automatic-failover, consensus-protocols
 
 ## Description
 
-Advanced implementation of high availability scheduling system with clustering capabilities, automatic failover, consensus protocols, and zero-downtime operations for mission-critical applications requiring 99.99% uptime.
+Advanced implementation of high availability scheduling system with clustering
+capabilities, automatic failover, consensus protocols, and zero-downtime
+operations for mission-critical applications requiring 99.99% uptime.
 
 ## Business Context
 
-Critical infrastructure platform for emergency services, healthcare systems, and financial trading operations that cannot tolerate scheduling failures or downtime. Requires instant failover, data consistency, and continuous operation even during node failures or network partitions.
+Critical infrastructure platform for emergency services, healthcare systems, and
+financial trading operations that cannot tolerate scheduling failures or
+downtime. Requires instant failover, data consistency, and continuous operation
+even during node failures or network partitions.
 
 ## Code Example
 
 ```typescript
 // high-availability-scheduling.ts
-import { InMemorySchedulerAdapter, ScheduledEvent } from '@vytches-ddd/event-scheduling';
+import {
+  InMemorySchedulerAdapter,
+  ScheduledEvent,
+} from '@vytches-ddd/event-scheduling';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   ClusterNodeState,
   ConsensusProtocol,
   FailoverStrategy,
@@ -30,7 +36,7 @@ import {
   QuorumDecision,
   ReplicationStatus,
   SchedulingOperation,
-  SplitBrainResolution
+  SplitBrainResolution,
 } from './types'; // From your app
 
 // ⭐ FOCUS: High availability scheduled event with replication
@@ -38,8 +44,12 @@ export class HAScheduledEvent<T = any> extends ScheduledEvent<T> {
   public readonly replicationId: string;
   public readonly replicationFactor: number;
   public readonly consistencyLevel: 'eventual' | 'strong' | 'linearizable';
-  public readonly criticalityLevel: 'standard' | 'important' | 'critical' | 'emergency';
-  
+  public readonly criticalityLevel:
+    | 'standard'
+    | 'important'
+    | 'critical'
+    | 'emergency';
+
   private replicationNodes: Set<string> = new Set();
   private acknowledgedNodes: Set<string> = new Set();
 
@@ -49,13 +59,22 @@ export class HAScheduledEvent<T = any> extends ScheduledEvent<T> {
     payload: T,
     replicationFactor: number = 3,
     consistencyLevel: 'eventual' | 'strong' | 'linearizable' = 'strong',
-    criticalityLevel: 'standard' | 'important' | 'critical' | 'emergency' = 'standard'
+    criticalityLevel:
+      | 'standard'
+      | 'important'
+      | 'critical'
+      | 'emergency' = 'standard'
   ) {
     super(aggregateId, scheduleAt, payload, {
-      maxRetries: criticalityLevel === 'emergency' ? 20 : criticalityLevel === 'critical' ? 10 : 5,
-      backoff: 'exponential'
+      maxRetries:
+        criticalityLevel === 'emergency'
+          ? 20
+          : criticalityLevel === 'critical'
+            ? 10
+            : 5,
+      backoff: 'exponential',
     });
-    
+
     this.replicationId = `repl-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     this.replicationFactor = Math.max(1, Math.min(replicationFactor, 5)); // 1-5 replicas
     this.consistencyLevel = consistencyLevel;
@@ -87,7 +106,7 @@ export class HAScheduledEvent<T = any> extends ScheduledEvent<T> {
       consistencyLevel: this.consistencyLevel,
       pendingNodes: Array.from(this.replicationNodes).filter(
         nodeId => !this.acknowledgedNodes.has(nodeId)
-      )
+      ),
     };
   }
 
@@ -119,12 +138,12 @@ export class SchedulingConsensusProtocol implements ConsensusProtocol {
     availableNodes: string[]
   ): Promise<QuorumDecision> {
     const currentTerm = ++this.currentTerm;
-    
+
     this.logger.info('Starting consensus for scheduling operation', {
       operationType: operation.type,
       eventId: operation.eventId,
       term: currentTerm,
-      availableNodes: availableNodes.length
+      availableNodes: availableNodes.length,
     });
 
     const votes: Map<string, boolean> = new Map();
@@ -133,13 +152,20 @@ export class SchedulingConsensusProtocol implements ConsensusProtocol {
     // Request votes from other nodes
     const votePromises = availableNodes
       .filter(nodeId => nodeId !== this.nodeId)
-      .map(async (nodeId) => {
+      .map(async nodeId => {
         try {
-          const vote = await this.requestVoteFromNode(nodeId, operation, currentTerm);
+          const vote = await this.requestVoteFromNode(
+            nodeId,
+            operation,
+            currentTerm
+          );
           votes.set(nodeId, vote);
           return vote;
         } catch (error) {
-          this.logger.warn('Failed to get vote from node', { nodeId, error: error.message });
+          this.logger.warn('Failed to get vote from node', {
+            nodeId,
+            error: error.message,
+          });
           votes.set(nodeId, false);
           return false;
         }
@@ -149,9 +175,12 @@ export class SchedulingConsensusProtocol implements ConsensusProtocol {
     try {
       await Promise.race([
         Promise.all(votePromises),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Consensus timeout')), this.consensusTimeout)
-        )
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Consensus timeout')),
+            this.consensusTimeout
+          )
+        ),
       ]);
     } catch (error) {
       this.logger.warn('Consensus request timeout', { term: currentTerm });
@@ -170,14 +199,14 @@ export class SchedulingConsensusProtocol implements ConsensusProtocol {
       yesVotes,
       requiredQuorum,
       participatingNodes: Array.from(votes.keys()),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.logger.info('Consensus decision reached', {
       hasConsensus,
       yesVotes,
       requiredQuorum,
-      totalNodes: votes.size
+      totalNodes: votes.size,
     });
 
     return decision;
@@ -190,12 +219,16 @@ export class SchedulingConsensusProtocol implements ConsensusProtocol {
   ): Promise<boolean> {
     // Simulate network request to other node for vote
     await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
-    
+
     // Simulate vote decision based on operation criticality and node health
     const random = Math.random();
-    const baseSuccessRate = operation.criticalityLevel === 'emergency' ? 0.95 : 
-                           operation.criticalityLevel === 'critical' ? 0.90 : 0.85;
-    
+    const baseSuccessRate =
+      operation.criticalityLevel === 'emergency'
+        ? 0.95
+        : operation.criticalityLevel === 'critical'
+          ? 0.9
+          : 0.85;
+
     return random < baseSuccessRate;
   }
 }
@@ -206,7 +239,7 @@ export class HAClusterManager {
   private consensusProtocol: SchedulingConsensusProtocol;
   private currentLeader: string | null = null;
   private readonly logger = Logger.forContext('HAClusterManager');
-  
+
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private leaderElectionTimeout: NodeJS.Timeout | null = null;
   private splitBrainResolution: SplitBrainResolution;
@@ -215,7 +248,10 @@ export class HAClusterManager {
     private readonly nodeId: string,
     private readonly config: HASchedulingConfig
   ) {
-    this.consensusProtocol = new SchedulingConsensusProtocol(nodeId, config.consensusTimeout);
+    this.consensusProtocol = new SchedulingConsensusProtocol(
+      nodeId,
+      config.consensusTimeout
+    );
     this.splitBrainResolution = config.splitBrainResolution;
     this.initializeCluster();
   }
@@ -223,17 +259,17 @@ export class HAClusterManager {
   async start(): Promise<void> {
     // Register this node in cluster
     this.registerNode(this.nodeId);
-    
+
     // Start health monitoring
     this.startHealthMonitoring();
-    
+
     // Attempt initial leader election
     await this.attemptLeaderElection();
-    
+
     this.logger.info('HA cluster manager started', {
       nodeId: this.nodeId,
       isLeader: this.isLeader(),
-      totalNodes: this.nodes.size
+      totalNodes: this.nodes.size,
     });
   }
 
@@ -241,14 +277,14 @@ export class HAClusterManager {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
-    
+
     if (this.leaderElectionTimeout) {
       clearTimeout(this.leaderElectionTimeout);
     }
 
     // Gracefully remove this node from cluster
     this.nodes.delete(this.nodeId);
-    
+
     this.logger.info('HA cluster manager stopped', { nodeId: this.nodeId });
   }
 
@@ -258,7 +294,9 @@ export class HAClusterManager {
   ): Promise<Result<HASchedulingResult, Error>> {
     try {
       // Determine optimal replication nodes
-      const replicationNodes = this.selectReplicationNodes(event.replicationFactor);
+      const replicationNodes = this.selectReplicationNodes(
+        event.replicationFactor
+      );
       event.setReplicationNodes(replicationNodes);
 
       // Create scheduling operation for consensus
@@ -268,7 +306,7 @@ export class HAClusterManager {
         event: event,
         criticalityLevel: event.criticalityLevel,
         requiredConsistency: event.consistencyLevel,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Request consensus from cluster
@@ -278,17 +316,31 @@ export class HAClusterManager {
       );
 
       if (!consensusDecision.hasConsensus) {
-        return Result.fail(new Error(`Failed to achieve consensus for event: ${event.aggregateId}`));
+        return Result.fail(
+          new Error(
+            `Failed to achieve consensus for event: ${event.aggregateId}`
+          )
+        );
       }
 
       // Execute replication across chosen nodes
-      const replicationResults = await this.executeReplication(event, replicationNodes);
-      
-      const successfulReplications = replicationResults.filter(r => r.success).length;
-      const hasQuorum = successfulReplications >= Math.floor(replicationNodes.length / 2) + 1;
+      const replicationResults = await this.executeReplication(
+        event,
+        replicationNodes
+      );
+
+      const successfulReplications = replicationResults.filter(
+        r => r.success
+      ).length;
+      const hasQuorum =
+        successfulReplications >= Math.floor(replicationNodes.length / 2) + 1;
 
       if (!hasQuorum && event.consistencyLevel === 'strong') {
-        return Result.fail(new Error('Failed to achieve replication quorum for strong consistency'));
+        return Result.fail(
+          new Error(
+            'Failed to achieve replication quorum for strong consistency'
+          )
+        );
       }
 
       const result: HASchedulingResult = {
@@ -299,7 +351,9 @@ export class HAClusterManager {
         hasQuorum,
         consistencyAchieved: event.consistencyLevel,
         primaryNodeId: this.currentLeader || this.nodeId,
-        backupNodeIds: replicationNodes.filter(id => id !== (this.currentLeader || this.nodeId))
+        backupNodeIds: replicationNodes.filter(
+          id => id !== (this.currentLeader || this.nodeId)
+        ),
       };
 
       this.logger.info('High availability event scheduled', {
@@ -307,11 +361,10 @@ export class HAClusterManager {
         replicationId: event.replicationId,
         successfulReplications,
         hasQuorum,
-        criticalityLevel: event.criticalityLevel
+        criticalityLevel: event.criticalityLevel,
       });
 
       return Result.ok(result);
-
     } catch (error) {
       return Result.fail(new Error(`HA scheduling failed: ${error.message}`));
     }
@@ -327,7 +380,11 @@ export class HAClusterManager {
     }
 
     // Mark node as failed
-    failedNode.health = { status: 'failed', lastHealthCheck: new Date(), responseTime: Infinity };
+    failedNode.health = {
+      status: 'failed',
+      lastHealthCheck: new Date(),
+      responseTime: Infinity,
+    };
     failedNode.isHealthy = false;
 
     const wasLeader = failedNodeId === this.currentLeader;
@@ -335,20 +392,24 @@ export class HAClusterManager {
 
     // Trigger leader election if failed node was leader
     if (wasLeader) {
-      this.logger.warn('Leader node failed, starting emergency leader election', {
-        failedLeader: failedNodeId
-      });
-      
+      this.logger.warn(
+        'Leader node failed, starting emergency leader election',
+        {
+          failedLeader: failedNodeId,
+        }
+      );
+
       leaderElectionResult = await this.emergencyLeaderElection();
     }
 
     // Redistribute events from failed node
-    const redistributionResult = await this.redistributeEventsFromFailedNode(failedNodeId);
-    
+    const redistributionResult =
+      await this.redistributeEventsFromFailedNode(failedNodeId);
+
     // Check for split-brain scenario
     const splitBrainDetected = await this.detectSplitBrain();
     let splitBrainResolution = null;
-    
+
     if (splitBrainDetected) {
       splitBrainResolution = await this.resolveSplitBrain();
     }
@@ -363,13 +424,13 @@ export class HAClusterManager {
       splitBrainDetected,
       splitBrainResolution,
       failoverDuration: this.measureFailoverDuration(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.logger.info('Node failure handled', {
       success: result.success,
       failoverDuration: result.failoverDuration,
-      newLeader: result.newLeaderId
+      newLeader: result.newLeaderId,
     });
 
     return result;
@@ -393,14 +454,14 @@ export class HAClusterManager {
       lastHealthCheck: new Date(),
       nodeHealthDetails: Object.fromEntries(
         Array.from(this.nodes.entries()).map(([id, node]) => [
-          id, 
+          id,
           {
             status: node.health.status,
             responseTime: node.health.responseTime,
-            lastCheck: node.health.lastHealthCheck
-          }
+            lastCheck: node.health.lastHealthCheck,
+          },
         ])
-      )
+      ),
     };
   }
 
@@ -420,10 +481,10 @@ export class HAClusterManager {
       health: {
         status: 'healthy',
         lastHealthCheck: new Date(),
-        responseTime: 0
+        responseTime: 0,
       },
       scheduledEvents: [],
-      replicationLoad: 0
+      replicationLoad: 0,
     };
 
     this.nodes.set(nodeId, nodeState);
@@ -431,12 +492,15 @@ export class HAClusterManager {
 
   private selectReplicationNodes(replicationFactor: number): string[] {
     const healthyNodes = this.getHealthyNodes();
-    
+
     if (healthyNodes.length < replicationFactor) {
-      this.logger.warn('Insufficient healthy nodes for desired replication factor', {
-        requested: replicationFactor,
-        available: healthyNodes.length
-      });
+      this.logger.warn(
+        'Insufficient healthy nodes for desired replication factor',
+        {
+          requested: replicationFactor,
+          available: healthyNodes.length,
+        }
+      );
     }
 
     // Select nodes with lowest replication load
@@ -451,39 +515,44 @@ export class HAClusterManager {
     event: HAScheduledEvent,
     replicationNodes: string[]
   ): Promise<ReplicationResult[]> {
-    const replicationPromises = replicationNodes.map(async (nodeId): Promise<ReplicationResult> => {
-      try {
-        // Simulate replication to specific node
-        await this.replicateToNode(nodeId, event);
-        
-        // Update node replication load
-        const node = this.nodes.get(nodeId);
-        if (node) {
-          node.replicationLoad++;
-          node.scheduledEvents.push(event.aggregateId);
-        }
+    const replicationPromises = replicationNodes.map(
+      async (nodeId): Promise<ReplicationResult> => {
+        try {
+          // Simulate replication to specific node
+          await this.replicateToNode(nodeId, event);
 
-        return {
-          nodeId,
-          success: true,
-          responseTime: Math.random() * 50 + 10, // 10-60ms
-          timestamp: new Date()
-        };
-      } catch (error) {
-        return {
-          nodeId,
-          success: false,
-          error: error.message,
-          responseTime: Infinity,
-          timestamp: new Date()
-        };
+          // Update node replication load
+          const node = this.nodes.get(nodeId);
+          if (node) {
+            node.replicationLoad++;
+            node.scheduledEvents.push(event.aggregateId);
+          }
+
+          return {
+            nodeId,
+            success: true,
+            responseTime: Math.random() * 50 + 10, // 10-60ms
+            timestamp: new Date(),
+          };
+        } catch (error) {
+          return {
+            nodeId,
+            success: false,
+            error: error.message,
+            responseTime: Infinity,
+            timestamp: new Date(),
+          };
+        }
       }
-    });
+    );
 
     return await Promise.all(replicationPromises);
   }
 
-  private async replicateToNode(nodeId: string, event: HAScheduledEvent): Promise<void> {
+  private async replicateToNode(
+    nodeId: string,
+    event: HAScheduledEvent
+  ): Promise<void> {
     // Simulate network replication with potential failures
     const node = this.nodes.get(nodeId);
     if (!node || !node.isHealthy) {
@@ -494,7 +563,8 @@ export class HAClusterManager {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
 
     // Simulate occasional replication failures
-    if (Math.random() < 0.05) { // 5% failure rate
+    if (Math.random() < 0.05) {
+      // 5% failure rate
       throw new Error(`Replication failed to node ${nodeId}`);
     }
 
@@ -517,7 +587,7 @@ export class HAClusterManager {
           node.health = {
             status: 'healthy',
             lastHealthCheck: new Date(),
-            responseTime: 1
+            responseTime: 1,
           };
           node.isHealthy = true;
           node.lastHeartbeat = new Date();
@@ -532,7 +602,7 @@ export class HAClusterManager {
           node.health = {
             status: responseTime < 1000 ? 'healthy' : 'degraded',
             lastHealthCheck: new Date(),
-            responseTime
+            responseTime,
           };
           node.isHealthy = responseTime < this.config.healthTimeout;
           node.lastHeartbeat = new Date();
@@ -540,7 +610,7 @@ export class HAClusterManager {
           node.health = {
             status: 'failed',
             lastHealthCheck: new Date(),
-            responseTime: Infinity
+            responseTime: Infinity,
           };
           node.isHealthy = false;
         }
@@ -553,26 +623,30 @@ export class HAClusterManager {
   private async pingNode(nodeId: string): Promise<void> {
     // Simulate node ping with potential failures
     await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 50));
-    
-    if (Math.random() < 0.02) { // 2% ping failure rate
+
+    if (Math.random() < 0.02) {
+      // 2% ping failure rate
       throw new Error(`Ping failed to node ${nodeId}`);
     }
   }
 
   private async detectNodeFailures(): Promise<void> {
     const now = new Date();
-    
+
     for (const [nodeId, node] of this.nodes) {
       if (nodeId === this.nodeId) continue;
-      
+
       const timeSinceHeartbeat = now.getTime() - node.lastHeartbeat.getTime();
-      
-      if (node.isHealthy && timeSinceHeartbeat > (this.config.healthTimeout || 15000)) {
+
+      if (
+        node.isHealthy &&
+        timeSinceHeartbeat > (this.config.healthTimeout || 15000)
+      ) {
         this.logger.warn('Node failure detected during health monitoring', {
           nodeId,
-          timeSinceHeartbeat
+          timeSinceHeartbeat,
         });
-        
+
         await this.handleNodeFailure(nodeId);
       }
     }
@@ -580,7 +654,7 @@ export class HAClusterManager {
 
   private async attemptLeaderElection(): Promise<boolean> {
     const healthyNodes = this.getHealthyNodes();
-    
+
     if (healthyNodes.length === 0) {
       return false;
     }
@@ -600,17 +674,17 @@ export class HAClusterManager {
 
   private async emergencyLeaderElection(): Promise<any> {
     this.logger.info('Starting emergency leader election');
-    
+
     // Clear current leader
     this.currentLeader = null;
-    
+
     // Attempt new leader election
     const success = await this.attemptLeaderElection();
-    
+
     return {
       success,
       newLeader: this.currentLeader,
-      electionDuration: Math.random() * 1000 + 500 // 500-1500ms
+      electionDuration: Math.random() * 1000 + 500, // 500-1500ms
     };
   }
 
@@ -629,7 +703,7 @@ export class HAClusterManager {
     if (node) {
       node.isLeader = false;
     }
-    
+
     if (this.currentLeader === this.nodeId) {
       this.currentLeader = null;
     }
@@ -637,7 +711,9 @@ export class HAClusterManager {
     this.logger.info('Node stepped down as leader', { nodeId: this.nodeId });
   }
 
-  private async redistributeEventsFromFailedNode(failedNodeId: string): Promise<any> {
+  private async redistributeEventsFromFailedNode(
+    failedNodeId: string
+  ): Promise<any> {
     const failedNode = this.nodes.get(failedNodeId);
     if (!failedNode) {
       return { redistributed: 0 };
@@ -645,9 +721,12 @@ export class HAClusterManager {
 
     const eventsToRedistribute = failedNode.scheduledEvents;
     const healthyNodes = this.getHealthyNodes();
-    
+
     if (healthyNodes.length === 0) {
-      return { redistributed: 0, error: 'No healthy nodes available for redistribution' };
+      return {
+        redistributed: 0,
+        error: 'No healthy nodes available for redistribution',
+      };
     }
 
     // Simulate redistribution
@@ -662,7 +741,7 @@ export class HAClusterManager {
     this.logger.info('Events redistributed from failed node', {
       failedNodeId,
       redistributed,
-      targetNodes: healthyNodes.length
+      targetNodes: healthyNodes.length,
     });
 
     return { redistributed };
@@ -670,13 +749,15 @@ export class HAClusterManager {
 
   private async detectSplitBrain(): Promise<boolean> {
     // Simple split-brain detection - multiple leaders exist
-    const leaderNodes = Array.from(this.nodes.values()).filter(node => node.isLeader);
+    const leaderNodes = Array.from(this.nodes.values()).filter(
+      node => node.isLeader
+    );
     return leaderNodes.length > 1;
   }
 
   private async resolveSplitBrain(): Promise<any> {
     this.logger.warn('Split-brain scenario detected, attempting resolution');
-    
+
     switch (this.splitBrainResolution) {
       case 'lowest-id-wins':
         return await this.resolveSplitBrainByLowestId();
@@ -688,11 +769,13 @@ export class HAClusterManager {
   }
 
   private async resolveSplitBrainByLowestId(): Promise<any> {
-    const leaderNodes = Array.from(this.nodes.values()).filter(node => node.isLeader);
+    const leaderNodes = Array.from(this.nodes.values()).filter(
+      node => node.isLeader
+    );
     const sortedLeaders = leaderNodes.sort((a, b) => a.id.localeCompare(b.id));
-    
+
     const winningLeader = sortedLeaders[0];
-    
+
     // Step down all other leaders
     for (const leader of sortedLeaders.slice(1)) {
       leader.isLeader = false;
@@ -701,12 +784,20 @@ export class HAClusterManager {
       }
     }
 
-    return { resolved: true, method: 'lowest-id-wins', winner: winningLeader.id };
+    return {
+      resolved: true,
+      method: 'lowest-id-wins',
+      winner: winningLeader.id,
+    };
   }
 
   private async resolveSplitBrainByQuorum(): Promise<any> {
     // Implementation would involve more complex quorum-based resolution
-    return { resolved: false, method: 'quorum-based', reason: 'Not implemented' };
+    return {
+      resolved: false,
+      method: 'quorum-based',
+      reason: 'Not implemented',
+    };
   }
 
   private getHealthyNodes(): ClusterNodeState[] {
@@ -729,33 +820,27 @@ export class HASchedulingService {
   private localScheduler: InMemorySchedulerAdapter;
   private readonly logger = Logger.forContext('HASchedulingService');
 
-  constructor(
-    nodeId: string,
-    config: HASchedulingConfig
-  ) {
+  constructor(nodeId: string, config: HASchedulingConfig) {
     this.clusterManager = new HAClusterManager(nodeId, config);
     this.localScheduler = new InMemorySchedulerAdapter({
       defaultMaxRetries: 10,
       defaultTimeout: 60000,
-      enableLogging: true
+      enableLogging: true,
     });
   }
 
   async start(): Promise<void> {
     await Promise.all([
       this.clusterManager.start(),
-      this.localScheduler.start()
+      this.localScheduler.start(),
     ]);
-    
+
     this.logger.info('HA scheduling service started');
   }
 
   async stop(): Promise<void> {
-    await Promise.all([
-      this.clusterManager.stop(),
-      this.localScheduler.stop()
-    ]);
-    
+    await Promise.all([this.clusterManager.stop(), this.localScheduler.stop()]);
+
     this.logger.info('HA scheduling service stopped');
   }
 
@@ -788,14 +873,14 @@ export class HASchedulingService {
         uptime: this.calculateUptime(),
         mtbf: this.calculateMTBF(), // Mean Time Between Failures
         mttr: this.calculateMTTR(), // Mean Time To Recovery
-        sla: this.calculateSLA()    // Service Level Agreement
+        sla: this.calculateSLA(), // Service Level Agreement
       },
       performance: {
         avgReplicationTime: this.calculateAvgReplicationTime(),
         failoverTime: this.calculateAvgFailoverTime(),
-        consensusLatency: this.calculateConsensusLatency()
+        consensusLatency: this.calculateConsensusLatency(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -837,10 +922,10 @@ export class HASchedulingService {
 
 ```typescript
 // usage-example.ts
-import { 
+import {
   HASchedulingService,
   HAScheduledEvent,
-  HASchedulingConfig 
+  HASchedulingConfig,
 } from './high-availability-scheduling';
 
 async function demonstrateHighAvailabilityScheduling() {
@@ -853,73 +938,80 @@ async function demonstrateHighAvailabilityScheduling() {
     replicationFactor: 3,
     splitBrainResolution: 'lowest-id-wins',
     automaticFailover: true,
-    maxFailoverTime: 30000 // 30 seconds max failover
+    maxFailoverTime: 30000, // 30 seconds max failover
   };
 
   const haScheduler = new HASchedulingService('node-1', haConfig);
-  
+
   await haScheduler.start();
-  
+
   try {
     console.log('🏥 High Availability Scheduling Platform Started');
-    
+
     // Schedule emergency medical dispatch
     console.log('\n🚨 Scheduling emergency medical dispatch...');
-    
+
     const emergencyEvent = new HAScheduledEvent(
       'MEDICAL-EMERGENCY-001',
       new Date(Date.now() + 30000), // 30 seconds from now
       {
         type: 'medical-emergency',
         priority: 'life-threatening',
-        location: { lat: 40.7128, lng: -74.0060 },
+        location: { lat: 40.7128, lng: -74.006 },
         dispatchUnits: ['AMBULANCE-7', 'PARAMEDIC-12'],
         estimatedResponseTime: 480, // 8 minutes
         patientInfo: {
           age: 65,
           condition: 'cardiac-arrest',
-          conscious: false
-        }
+          conscious: false,
+        },
       },
       5, // Full replication
       'linearizable', // Strongest consistency
       'emergency'
     );
 
-    const emergencyResult = await haScheduler.scheduleEmergencyEvent(emergencyEvent);
-    
+    const emergencyResult =
+      await haScheduler.scheduleEmergencyEvent(emergencyEvent);
+
     console.log('Emergency dispatch result:', {
       success: emergencyResult.isSuccess(),
-      replicationId: emergencyResult.isSuccess() ? emergencyResult.value.replicationId : null,
-      hasQuorum: emergencyResult.isSuccess() ? emergencyResult.value.hasQuorum : null,
-      backupNodes: emergencyResult.isSuccess() ? emergencyResult.value.backupNodeIds.length : 0
+      replicationId: emergencyResult.isSuccess()
+        ? emergencyResult.value.replicationId
+        : null,
+      hasQuorum: emergencyResult.isSuccess()
+        ? emergencyResult.value.hasQuorum
+        : null,
+      backupNodes: emergencyResult.isSuccess()
+        ? emergencyResult.value.backupNodeIds.length
+        : 0,
     });
 
     // Schedule critical financial trading events
     console.log('\n💰 Scheduling critical financial events...');
-    
+
     const tradingEvents = [
       {
         id: 'TRADE-HALT-001',
         type: 'trading-halt',
         symbol: 'AAPL',
         reason: 'circuit-breaker',
-        duration: 900000 // 15 minutes
+        duration: 900000, // 15 minutes
       },
       {
         id: 'MARGIN-CALL-002',
         type: 'margin-call',
         accountId: 'ACC-789123',
         amount: 250000,
-        deadline: new Date(Date.now() + 3600000) // 1 hour
+        deadline: new Date(Date.now() + 3600000), // 1 hour
       },
       {
         id: 'COMPLIANCE-REPORT-003',
         type: 'compliance-filing',
         reportType: 'T+1-Settlement',
         regulatoryBody: 'SEC',
-        deadline: new Date(Date.now() + 7200000) // 2 hours
-      }
+        deadline: new Date(Date.now() + 7200000), // 2 hours
+      },
     ];
 
     const tradingResults = await Promise.all(
@@ -940,16 +1032,20 @@ async function demonstrateHighAvailabilityScheduling() {
     console.log('Financial events scheduled:');
     tradingResults.forEach((result, index) => {
       const eventType = tradingEvents[index].type;
-      console.log(`  ${eventType}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`);
+      console.log(
+        `  ${eventType}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`
+      );
       if (result.isSuccess()) {
-        console.log(`    Consensus: ${result.value.consensusDecision.hasConsensus}`);
+        console.log(
+          `    Consensus: ${result.value.consensusDecision.hasConsensus}`
+        );
         console.log(`    Replicas: ${result.value.backupNodeIds.length}`);
       }
     });
 
     // Schedule infrastructure maintenance with HA
     console.log('\n⚙️ Scheduling infrastructure maintenance...');
-    
+
     const maintenanceEvent = new HAScheduledEvent(
       'MAINTENANCE-DB-001',
       new Date(Date.now() + 1800000), // 30 minutes from now
@@ -960,45 +1056,55 @@ async function demonstrateHighAvailabilityScheduling() {
         estimatedDuration: 2700000, // 45 minutes
         maintenanceWindow: {
           start: new Date(Date.now() + 1800000),
-          end: new Date(Date.now() + 4500000)
+          end: new Date(Date.now() + 4500000),
         },
         rollbackPlan: 'automatic-rollback-enabled',
-        affectedServices: ['trading-engine', 'risk-management']
+        affectedServices: ['trading-engine', 'risk-management'],
       },
       3, // Standard replication
       'strong',
       'important'
     );
 
-    const maintenanceResult = await haScheduler.clusterManager.scheduleWithHA(maintenanceEvent);
-    console.log('Maintenance scheduling:', maintenanceResult.isSuccess() ? 'Scheduled' : 'Failed');
+    const maintenanceResult =
+      await haScheduler.clusterManager.scheduleWithHA(maintenanceEvent);
+    console.log(
+      'Maintenance scheduling:',
+      maintenanceResult.isSuccess() ? 'Scheduled' : 'Failed'
+    );
 
     // Monitor HA metrics
     const monitorMetrics = async () => {
       const metrics = await haScheduler.getHAMetrics();
-      
+
       console.log('\n📊 High Availability Metrics:');
       console.log('  Cluster Health:');
       console.log(`    Total Nodes: ${metrics.cluster.totalNodes}`);
       console.log(`    Healthy Nodes: ${metrics.cluster.healthyNodes}`);
       console.log(`    Cluster State: ${metrics.cluster.clusterState}`);
-      console.log(`    Current Leader: ${metrics.cluster.currentLeader || 'none'}`);
+      console.log(
+        `    Current Leader: ${metrics.cluster.currentLeader || 'none'}`
+      );
       console.log(`    Has Quorum: ${metrics.cluster.hasQuorum}`);
-      
+
       console.log('  Availability:');
       console.log(`    SLA: ${metrics.availability.sla}%`);
       console.log(`    MTBF: ${metrics.availability.mtbf} hours`);
       console.log(`    MTTR: ${metrics.availability.mttr} seconds`);
-      
+
       console.log('  Performance:');
-      console.log(`    Avg Replication: ${metrics.performance.avgReplicationTime}ms`);
+      console.log(
+        `    Avg Replication: ${metrics.performance.avgReplicationTime}ms`
+      );
       console.log(`    Avg Failover: ${metrics.performance.failoverTime}ms`);
-      console.log(`    Consensus Latency: ${metrics.performance.consensusLatency}ms`);
+      console.log(
+        `    Consensus Latency: ${metrics.performance.consensusLatency}ms`
+      );
     };
 
     // Monitor every 30 seconds
     const metricsInterval = setInterval(monitorMetrics, 30000);
-    
+
     // Initial metrics
     await monitorMetrics();
 
@@ -1006,15 +1112,17 @@ async function demonstrateHighAvailabilityScheduling() {
     console.log('\n⚠️ Simulating node failure in 60 seconds...');
     setTimeout(async () => {
       console.log('🔥 Simulating node-2 failure...');
-      const failoverResult = await haScheduler.clusterManager.handleNodeFailure('node-2');
-      
+      const failoverResult =
+        await haScheduler.clusterManager.handleNodeFailure('node-2');
+
       console.log('Failover result:', {
         success: failoverResult.success,
         newLeader: failoverResult.newLeaderId,
         failoverDuration: `${failoverResult.failoverDuration}ms`,
-        eventsRedistributed: failoverResult.redistributionResult?.redistributed || 0
+        eventsRedistributed:
+          failoverResult.redistributionResult?.redistributed || 0,
       });
-      
+
       // Show metrics after failover
       setTimeout(async () => {
         console.log('\n📈 Metrics after failover:');
@@ -1025,13 +1133,12 @@ async function demonstrateHighAvailabilityScheduling() {
     // Run HA platform for 3 minutes
     console.log('\n⏱️ Running HA platform for 3 minutes...');
     await new Promise(resolve => setTimeout(resolve, 180000));
-    
+
     clearInterval(metricsInterval);
-    
+
     // Final metrics
     console.log('\n📈 Final HA Metrics:');
     await monitorMetrics();
-    
   } finally {
     await haScheduler.stop();
   }
@@ -1042,27 +1149,45 @@ demonstrateHighAvailabilityScheduling().catch(console.error);
 
 ## Key Features
 
-- **Automatic Failover**: Instant detection and recovery from node failures with sub-second response times
-- **Consensus Protocols**: Distributed consensus for scheduling decisions ensuring data consistency
-- **Replication Management**: Configurable replication factors with quorum-based acknowledgments
-- **Split-Brain Resolution**: Automatic detection and resolution of network partition scenarios
-- **Leader Election**: Robust leader election with emergency failover capabilities
-- **Health Monitoring**: Continuous cluster health monitoring with predictive failure detection
-- **Zero Downtime**: Seamless operation during node failures and network partitions
-- **Strong Consistency**: Multiple consistency levels (eventual, strong, linearizable) for different use cases
+- **Automatic Failover**: Instant detection and recovery from node failures with
+  sub-second response times
+- **Consensus Protocols**: Distributed consensus for scheduling decisions
+  ensuring data consistency
+- **Replication Management**: Configurable replication factors with quorum-based
+  acknowledgments
+- **Split-Brain Resolution**: Automatic detection and resolution of network
+  partition scenarios
+- **Leader Election**: Robust leader election with emergency failover
+  capabilities
+- **Health Monitoring**: Continuous cluster health monitoring with predictive
+  failure detection
+- **Zero Downtime**: Seamless operation during node failures and network
+  partitions
+- **Strong Consistency**: Multiple consistency levels (eventual, strong,
+  linearizable) for different use cases
 
 ## Common Pitfalls
 
-- **Network Partitions**: Implement proper quorum mechanisms to handle network splits gracefully
-- **Split-Brain Scenarios**: Always have an odd number of nodes and clear conflict resolution policies
-- **Consensus Timeouts**: Tune consensus timeouts carefully to balance responsiveness and stability
-- **Resource Exhaustion**: Monitor resource usage across cluster nodes to prevent cascading failures
-- **Clock Synchronization**: Ensure all nodes have synchronized clocks for accurate coordination
-- **Cascading Failures**: Implement circuit breakers to prevent failure propagation across the cluster
+- **Network Partitions**: Implement proper quorum mechanisms to handle network
+  splits gracefully
+- **Split-Brain Scenarios**: Always have an odd number of nodes and clear
+  conflict resolution policies
+- **Consensus Timeouts**: Tune consensus timeouts carefully to balance
+  responsiveness and stability
+- **Resource Exhaustion**: Monitor resource usage across cluster nodes to
+  prevent cascading failures
+- **Clock Synchronization**: Ensure all nodes have synchronized clocks for
+  accurate coordination
+- **Cascading Failures**: Implement circuit breakers to prevent failure
+  propagation across the cluster
 
 ## Related Examples
 
-- [Enterprise Scheduling Platform](./example-1.md) - Global coordination and compliance
-- [Distributed Event Scheduling](../intermediate/example-1.md) - Multi-node coordination foundations  
-- [Advanced Queue Management](../intermediate/example-2.md) - Sophisticated queue handling
-- [Performance-Optimized Scheduling](./example-3.md) - High-throughput optimization techniques
+- [Enterprise Scheduling Platform](./example-1.md) - Global coordination and
+  compliance
+- [Distributed Event Scheduling](../intermediate/example-1.md) - Multi-node
+  coordination foundations
+- [Advanced Queue Management](../intermediate/example-2.md) - Sophisticated
+  queue handling
+- [Performance-Optimized Scheduling](./example-3.md) - High-throughput
+  optimization techniques

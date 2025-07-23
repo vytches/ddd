@@ -39,7 +39,7 @@ export interface Order {
   updatedAt: Date;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'draft'
   | 'pending'
   | 'confirmed'
@@ -234,7 +234,7 @@ export interface ReplicationSettings {
 }
 
 /**
- * Query and filtering types  
+ * Query and filtering types
  */
 export interface EventQuery {
   streamId?: string;
@@ -267,6 +267,6 @@ export interface AggregateSnapshot {
 
 export interface SnapshotStrategy {
   frequency: number; // Every N events
-  maxAge: number;    // Max age in minutes
+  maxAge: number; // Max age in minutes
   compressionEnabled: boolean;
 }

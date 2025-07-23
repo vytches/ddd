@@ -7,22 +7,20 @@
 
 ## Overview
 
-This example demonstrates advanced NestJS integration using VytchesDDD DI for sophisticated validation orchestration, AI-enhanced validation, and enterprise-grade service management.
+This example demonstrates advanced NestJS integration using VytchesDDD DI for
+sophisticated validation orchestration, AI-enhanced validation, and
+enterprise-grade service management.
 
 ## Implementation
 
 ```typescript
 // enterprise-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  DomainService, 
-  ServiceLifetime, 
-  VytchesDDD 
-} from '@vytches-ddd/di';
-import { 
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import {
   EnterpriseValidationOrchestrator,
   AIEnhancedValidationSpecification,
-  DataQualityValidator 
+  DataQualityValidator,
 } from '@vytches-ddd/validation';
 import { User, ValidationContext } from './types'; // From your application
 
@@ -33,7 +31,7 @@ import { User, ValidationContext } from './types'; // From your application
   context: 'UserManagement',
   dependencies: ['eventBus', 'policyRegistry', 'aiValidationEngine'],
   timeout: 30000,
-  middleware: ['logging', 'resilience']
+  middleware: ['logging', 'resilience'],
 })
 export class EnterpriseUserValidationService {
   private orchestrator: EnterpriseValidationOrchestrator;
@@ -90,7 +88,7 @@ export class EnterpriseUserValidationService {
       consistency: 0.97,
       validity: 0.99,
       uniqueness: 0.98,
-      timeliness: 0.95
+      timeliness: 0.95,
     });
   }
 }
@@ -102,27 +100,33 @@ export class UserValidationBridgeService {
 
   constructor() {
     // ⭐ FOCUS: Bridge pattern with VytchesDDD DI
-    this.enterpriseValidator = VytchesDDD.resolve<EnterpriseUserValidationService>(
-      'enterpriseUserValidator'
-    );
+    this.enterpriseValidator =
+      VytchesDDD.resolve<EnterpriseUserValidationService>(
+        'enterpriseUserValidator'
+      );
   }
 
   async validateUser(user: User): Promise<EnterpriseValidationResult> {
     try {
       // Use enterprise validation orchestration
-      const orchestrationResult = await this.enterpriseValidator.validateWithOrchestration(
-        user,
-        'adaptive'
-      );
+      const orchestrationResult =
+        await this.enterpriseValidator.validateWithOrchestration(
+          user,
+          'adaptive'
+        );
 
       // AI-enhanced validation
       const aiResult = await this.enterpriseValidator.validateWithAI(user);
 
       // Data quality assessment
-      const qualityResult = await this.enterpriseValidator.assessDataQuality(user);
+      const qualityResult =
+        await this.enterpriseValidator.assessDataQuality(user);
 
       return {
-        isValid: orchestrationResult.isValid && aiResult.isSatisfied && qualityResult.isValid,
+        isValid:
+          orchestrationResult.isValid &&
+          aiResult.isSatisfied &&
+          qualityResult.isValid,
         orchestrationResult,
         aiEnhancedResult: aiResult,
         qualityAssessment: qualityResult,
@@ -131,15 +135,20 @@ export class UserValidationBridgeService {
           aiResult,
           qualityResult
         ),
-        recommendations: this.generateRecommendations(orchestrationResult, aiResult, qualityResult)
+        recommendations: this.generateRecommendations(
+          orchestrationResult,
+          aiResult,
+          qualityResult
+        ),
       };
-
     } catch (error) {
       throw new Error(`Enterprise validation failed: ${error.message}`);
     }
   }
 
-  async validateUserBatch(users: User[]): Promise<BatchEnterpriseValidationResult> {
+  async validateUserBatch(
+    users: User[]
+  ): Promise<BatchEnterpriseValidationResult> {
     const results = await Promise.allSettled(
       users.map(user => this.validateUser(user))
     );
@@ -156,8 +165,8 @@ export class UserValidationBridgeService {
         index,
         status: result.status,
         result: result.status === 'fulfilled' ? result.value : null,
-        error: result.status === 'rejected' ? result.reason : null
-      }))
+        error: result.status === 'rejected' ? result.reason : null,
+      })),
     };
   }
 
@@ -170,7 +179,7 @@ export class UserValidationBridgeService {
     const aiScore = ai.metadata?.prediction?.confidence || 0.5;
     const qualityScore = quality.metadata.qualityMetrics?.overallScore || 0.5;
 
-    return (orchestrationScore * 0.4 + aiScore * 0.4 + qualityScore * 0.2);
+    return orchestrationScore * 0.4 + aiScore * 0.4 + qualityScore * 0.2;
   }
 
   private generateRecommendations(
@@ -181,7 +190,9 @@ export class UserValidationBridgeService {
     const recommendations: string[] = [];
 
     if (orchestration.recommendations) {
-      recommendations.push(...orchestration.recommendations.map(r => r.description));
+      recommendations.push(
+        ...orchestration.recommendations.map(r => r.description)
+      );
     }
 
     if (!ai.isSatisfied && ai.reason) {
@@ -189,7 +200,9 @@ export class UserValidationBridgeService {
     }
 
     if (quality.warnings.length > 0) {
-      recommendations.push(...quality.warnings.map(w => w.suggestion).filter(Boolean));
+      recommendations.push(
+        ...quality.warnings.map(w => w.suggestion).filter(Boolean)
+      );
     }
 
     return recommendations;
@@ -197,13 +210,13 @@ export class UserValidationBridgeService {
 }
 
 // user.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Body, 
+import {
+  Controller,
+  Post,
+  Body,
   BadRequestException,
   HttpStatus,
-  HttpCode 
+  HttpCode,
 } from '@nestjs/common';
 import { UserValidationBridgeService } from './user-validation-bridge.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -228,7 +241,7 @@ export class UserController {
           message: 'Enterprise validation failed',
           orchestrationResult: result.orchestrationResult,
           aiResult: result.aiEnhancedResult,
-          qualityAssessment: result.qualityAssessment
+          qualityAssessment: result.qualityAssessment,
         });
       }
 
@@ -238,16 +251,17 @@ export class UserController {
         confidence: result.overallConfidence,
         recommendations: result.recommendations,
         validationSummary: {
-          globalConsensus: result.orchestrationResult.consensusResult.globalConsensus,
+          globalConsensus:
+            result.orchestrationResult.consensusResult.globalConsensus,
           aiPrediction: result.aiEnhancedResult.metadata?.prediction?.outcome,
-          qualityScore: result.qualityAssessment.metadata.qualityMetrics?.overallScore
-        }
+          qualityScore:
+            result.qualityAssessment.metadata.qualityMetrics?.overallScore,
+        },
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Enterprise validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -266,21 +280,20 @@ export class UserController {
           total: batchResult.totalProcessed,
           successful: batchResult.successful,
           failed: batchResult.failed,
-          successRate: batchResult.successRate
+          successRate: batchResult.successRate,
         },
         results: batchResult.results.map(r => ({
           index: r.index,
           isValid: r.result?.isValid || false,
           confidence: r.result?.overallConfidence || 0,
           recommendations: r.result?.recommendations || [],
-          error: r.error
-        }))
+          error: r.error,
+        })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Batch enterprise validation failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -295,7 +308,7 @@ import { VytchesDDD } from '@vytches-ddd/di';
 @Module({
   controllers: [UserController],
   providers: [UserValidationBridgeService],
-  exports: [UserValidationBridgeService]
+  exports: [UserValidationBridgeService],
 })
 export class UserModule implements OnModuleInit {
   async onModuleInit() {
@@ -306,8 +319,8 @@ export class UserModule implements OnModuleInit {
       enterpriseFeatures: {
         globalCoordination: true,
         aiEnhancement: true,
-        qualityMonitoring: true
-      }
+        qualityMonitoring: true,
+      },
     });
   }
 }
@@ -315,11 +328,15 @@ export class UserModule implements OnModuleInit {
 
 ## Key Points
 
-- **VytchesDDD DI Integration**: Enterprise-grade dependency injection with auto-discovery
-- **Bridge Pattern**: Clean separation between NestJS and VytchesDDD business logic
+- **VytchesDDD DI Integration**: Enterprise-grade dependency injection with
+  auto-discovery
+- **Bridge Pattern**: Clean separation between NestJS and VytchesDDD business
+  logic
 - **Global Validation Orchestration**: Multi-region validation coordination
-- **AI-Enhanced Validation**: Machine learning integration for adaptive validation
-- **Enterprise Service Management**: Sophisticated service lifecycle and configuration
+- **AI-Enhanced Validation**: Machine learning integration for adaptive
+  validation
+- **Enterprise Service Management**: Sophisticated service lifecycle and
+  configuration
 
 ## Usage Examples
 
@@ -346,7 +363,7 @@ curl -X POST http://localhost:3000/users/batch-enterprise \
       "age": 30
     },
     {
-      "email": "user2@enterprise.com", 
+      "email": "user2@enterprise.com",
       "firstName": "User",
       "lastName": "Two",
       "age": 25
@@ -358,9 +375,11 @@ curl -X POST http://localhost:3000/users/batch-enterprise \
 
 1. **Initialize VytchesDDD First**: Always configure VytchesDDD before NestJS DI
 2. **Use Bridge Pattern**: Keep NestJS services as thin delegation layers
-3. **Leverage Enterprise Features**: Utilize AI, global coordination, and quality monitoring
+3. **Leverage Enterprise Features**: Utilize AI, global coordination, and
+   quality monitoring
 4. **Service Discovery**: Let VytchesDDD auto-discover domain services
-5. **Error Handling**: Provide comprehensive error details for enterprise scenarios
+5. **Error Handling**: Provide comprehensive error details for enterprise
+   scenarios
 
 ## Next Steps
 

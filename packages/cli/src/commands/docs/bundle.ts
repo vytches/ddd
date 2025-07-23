@@ -12,56 +12,54 @@ interface BundleArgs {
   output?: string;
 }
 
-export const bundleCommand: CommandModule<Record<string,unknown>, BundleArgs> = {
+export const bundleCommand: CommandModule<Record<string, unknown>, BundleArgs> = {
   command: 'bundle',
   describe: 'Generate bundled documentation for multiple packages',
   builder: {
     packages: {
       type: 'string',
       describe: 'Comma-separated list of packages to include',
-      alias: 'p'
+      alias: 'p',
     },
     framework: {
       type: 'string',
       choices: ['nestjs', 'express', 'fastify'],
       describe: 'Framework integration for all packages',
-      alias: 'f'
+      alias: 'f',
     },
     complexity: {
       type: 'string',
       describe: 'Complexity level: basic, intermediate, advanced, or comma-separated list',
-      alias: 'c'
+      alias: 'c',
     },
     sections: {
       type: 'string',
       describe: 'Comma-separated list of sections to include',
-      alias: 's'
+      alias: 's',
     },
     llmOptimized: {
       type: 'boolean',
       describe: 'Generate LLM-optimized documentation',
       alias: 'llm',
-      default: false
+      default: false,
     },
     diOnly: {
       type: 'boolean',
       describe: 'Include only examples that support DI',
-      default: false
+      default: false,
     },
     output: {
       type: 'string',
       describe: 'Output file path',
-      alias: 'o'
-    }
+      alias: 'o',
+    },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       const bundler = new DocumentationBundler();
 
       // Parse packages
-      const packages = argv.packages
-        ? argv.packages.split(',').map(p => p.trim())
-        : undefined; // If not specified, use all packages
+      const packages = argv.packages ? argv.packages.split(',').map(p => p.trim()) : undefined; // If not specified, use all packages
 
       // Parse complexity levels
       const complexityLevels = argv.complexity
@@ -69,9 +67,7 @@ export const bundleCommand: CommandModule<Record<string,unknown>, BundleArgs> = 
         : undefined;
 
       // Parse sections
-      const sections = argv.sections
-        ? argv.sections.split(',').map(s => s.trim())
-        : undefined;
+      const sections = argv.sections ? argv.sections.split(',').map(s => s.trim()) : undefined;
 
       // Generate bundle
       const result = await bundler.generateBundle({
@@ -81,19 +77,22 @@ export const bundleCommand: CommandModule<Record<string,unknown>, BundleArgs> = 
         sections,
         llmOptimized: argv.llmOptimized,
         diOnly: argv.diOnly,
-        outputPath: argv.output
+        outputPath: argv.output,
       });
 
       logger.success(`✅ Bundle generated: ${result.outputPath}`);
-      logger.info(`📦 Includes ${result.packageCount} packages with ${result.exampleCount} examples`);
+      logger.info(
+        `📦 Includes ${result.packageCount} packages with ${result.exampleCount} examples`
+      );
 
       if (argv.llmOptimized) {
         logger.info('💡 Tip: Use this bundle with LLM prompts for complete library understanding');
       }
-
     } catch (error) {
-      logger.error(`❌ Failed to generate bundle: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `❌ Failed to generate bundle: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
-  }
+  },
 };

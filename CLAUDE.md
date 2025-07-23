@@ -884,7 +884,8 @@ const service = VytchesDDD.resolve<UserService>('userService');
 
 ### Framework Integration with Bridge Pattern
 
-**CRITICAL**: Use Bridge Pattern to avoid Double Instance Risk when integrating with frameworks like NestJS.
+**CRITICAL**: Use Bridge Pattern to avoid Double Instance Risk when integrating
+with frameworks like NestJS.
 
 #### NestJS Integration (Recommended Pattern)
 
@@ -892,7 +893,7 @@ const service = VytchesDDD.resolve<UserService>('userService');
 // 1. Domain service with VytchesDDD
 @DomainService('userService', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'UserManagement'
+  context: 'UserManagement',
 })
 class UserService {
   // Business logic with @Resilience, timeouts, etc.
@@ -941,7 +942,9 @@ export class VytchesDDDBridge {
       useFactory: () => {
         const instance = VytchesDDD.resolve<T>(serviceId);
         if (!instance) {
-          throw new Error(`Service ${serviceId} not found in VytchesDDD container`);
+          throw new Error(
+            `Service ${serviceId} not found in VytchesDDD container`
+          );
         }
         return instance;
       },
@@ -953,7 +956,7 @@ export class VytchesDDDBridge {
   providers: [
     VytchesDDDBridge.createNestJSProvider<UserService>('userService'),
     VytchesDDDBridge.createNestJSProvider<OrderService>('orderService'),
-  ]
+  ],
 })
 export class DomainModule implements OnModuleInit {
   async onModuleInit() {
@@ -964,11 +967,16 @@ export class DomainModule implements OnModuleInit {
 
 ### Key Principles for Framework Integration
 
-1. **VytchesDDD First**: Always initialize VytchesDDD container before framework DI
-2. **Single Instance**: Use factory pattern to get existing instances, never create new ones
-3. **No Dual Decorators**: Either `@DomainService` OR `@Injectable`, never both on same class
-4. **Business Logic in Domain**: Keep business functionality in `@DomainService` classes
-5. **Framework as Bridge**: Framework services are thin wrappers that delegate to VytchesDDD instances
+1. **VytchesDDD First**: Always initialize VytchesDDD container before framework
+   DI
+2. **Single Instance**: Use factory pattern to get existing instances, never
+   create new ones
+3. **No Dual Decorators**: Either `@DomainService` OR `@Injectable`, never both
+   on same class
+4. **Business Logic in Domain**: Keep business functionality in `@DomainService`
+   classes
+5. **Framework as Bridge**: Framework services are thin wrappers that delegate
+   to VytchesDDD instances
 
 ### Domain Service with DI
 
@@ -1736,12 +1744,16 @@ const policy3 = PolicyRetryDecorator.create(basePolicy, config); // Same as abov
 
 ### **CRITICAL: Library-First Framework Integration**
 
-**When creating framework examples, show ONLY the integration points that actually use library features.**
+**When creating framework examples, show ONLY the integration points that
+actually use library features.**
 
-- ✅ **INCLUDE**: Direct library usage (ACL setup, event publishing, CQRS handlers)
-- ✅ **INCLUDE**: Framework-specific integration patterns (DI configuration, decorators)
+- ✅ **INCLUDE**: Direct library usage (ACL setup, event publishing, CQRS
+  handlers)
+- ✅ **INCLUDE**: Framework-specific integration patterns (DI configuration,
+  decorators)
 - ✅ **INCLUDE**: Essential configuration that enables library features
-- ❌ **EXCLUDE**: Complete application implementations (controllers, guards, interceptors)
+- ❌ **EXCLUDE**: Complete application implementations (controllers, guards,
+  interceptors)
 - ❌ **EXCLUDE**: Business logic not related to library features
 - ❌ **EXCLUDE**: Framework ceremony (DTOs, validation, authentication)
 - ❌ **EXCLUDE**: Repository patterns unless they're part of the library feature
@@ -1752,24 +1764,26 @@ const policy3 = PolicyRetryDecorator.create(basePolicy, config); // Same as abov
 
 **When generating ANY example, follow this strict pattern:**
 
-#### **1. Domain/Basic Examples (*.md files in basic/)**
-```markdown
+#### **1. Domain/Basic Examples (\*.md files in basic/)**
+
+````markdown
 # [ComponentName] - [ComplexityLevel] Example
 
-**Version**: [current-version]
-**Package**: @vytches-ddd/[package-name]
-**Complexity**: [beginner|intermediate|advanced]
-**Domain**: [domain-name]
-**Patterns**: [pattern1, pattern2, pattern3]
-**Dependencies**: [list-of-dependencies]
+**Version**: [current-version] **Package**: @vytches-ddd/[package-name]
+**Complexity**: [beginner|intermediate|advanced] **Domain**: [domain-name]
+**Patterns**: [pattern1, pattern2, pattern3] **Dependencies**:
+[list-of-dependencies]
 
 ## Description
+
 [What this example demonstrates - library usage focus]
 
 ## Business Context
+
 [Why this pattern is useful - business scenario]
 
 ## Code Example
+
 ```typescript
 // [filename].ts
 import { [LibraryClasses] } from '@vytches-ddd/[package]';
@@ -1780,16 +1794,21 @@ export class [ComponentName] extends [LibraryBaseClass] {
   // Implementation using library features
 }
 ```
+````
 
 ## Key Features
+
 - [Library-specific features demonstrated]
 
 ## Common Pitfalls
+
 - [Mistakes to avoid when using library]
 
 ## Related Examples
+
 - [Links to related examples]
-```
+
+````
 
 #### **2. Framework Examples (*.md files in frameworks/)**
 
@@ -1824,13 +1843,15 @@ export class [ComponentName]Service {
     return await this.[libraryInstance].[method]();
   }
 }
-```
+````
 
 **Key Points:**
+
 - Simple manual instantiation for beginners
 - Focus on library usage, not DI complexity
 - Standard NestJS patterns for framework integration
-```
+
+````
 
 **B. DI Integration (Intermediate+) - di.md**
 ```markdown
@@ -1861,13 +1882,15 @@ export class [ComponentName]Service {
     return await this.[libraryInstance].[method]();
   }
 }
-```
+````
 
 **Key Points:**
+
 - Advanced DI integration with @vytches-ddd/di
 - Service locator pattern usage
 - Enterprise-grade dependency management
-```
+
+````
 
 #### **3. STRICT VALIDATION CHECKLIST**
 **Before creating ANY example, verify:**
@@ -1904,9 +1927,10 @@ async createUser(userData: CreateUserData): Promise<User> {
 constructor(api: ExternalAPI) {
   this.acl = new UserManagementACL(api, translator);
 }
-```
+````
 
 #### **5. REQUIRED PATTERNS**
+
 ```typescript
 // ✅ ALWAYS DO THIS - Import existing types
 import { User, CreateUserData } from './types'; // From your app
@@ -1923,7 +1947,9 @@ constructor(
 ```
 
 ### **VALIDATION COMMAND**
+
 Run this mental checklist before submitting ANY example:
+
 1. Does it show library usage prominently?
 2. Are all types imported from application?
 3. Is framework service a thin wrapper?
@@ -1933,29 +1959,43 @@ Run this mental checklist before submitting ANY example:
 **Framework-Specific Guidelines**:
 
 **NestJS Examples**:
-- ✅ **USE STANDARD NestJS DI**: Standard @Injectable(), useFactory patterns for framework integration
-- ✅ **LIBRARY DI HYBRID APPROACH**: Separate files for manual setup vs @vytches-ddd/di integration
-- ✅ **BEGINNER = MANUAL SETUP**: Basic examples use manual library instantiation (simple, clear)
-- ✅ **INTERMEDIATE+ = LIBRARY DI**: Advanced examples show @vytches-ddd/di integration (@DomainService, VytchesDDD.resolve())
+
+- ✅ **USE STANDARD NestJS DI**: Standard @Injectable(), useFactory patterns for
+  framework integration
+- ✅ **LIBRARY DI HYBRID APPROACH**: Separate files for manual setup vs
+  @vytches-ddd/di integration
+- ✅ **BEGINNER = MANUAL SETUP**: Basic examples use manual library
+  instantiation (simple, clear)
+- ✅ **INTERMEDIATE+ = LIBRARY DI**: Advanced examples show @vytches-ddd/di
+  integration (@DomainService, VytchesDDD.resolve())
 - ✅ **SEPARATE FILES**: manual.md and di.md files that can be merged in output
 - ✅ **KEEP SIMPLE**: 1-3 methods max, focus on core library operations
-- ✅ **IMPORT EXISTING**: Import ALL DTOs, interfaces from application (don't create ANY)
-- ✅ **ASSUME EXISTS**: Assume User, CreateUserData, UpdateUserData exist in application
+- ✅ **IMPORT EXISTING**: Import ALL DTOs, interfaces from application (don't
+  create ANY)
+- ✅ **ASSUME EXISTS**: Assume User, CreateUserData, UpdateUserData exist in
+  application
 - ❌ **AVOID**: Creating interfaces, DTOs, types, or any supporting code
 - ❌ **AVOID**: Business logic in framework services (keep as thin wrapper)
 - ❌ **AVOID**: Mixing manual and DI approaches in same example file
 
 **Error Handling**:
-- ✅ **USE standard try/catch**: Simple, clear error handling in implementation code
-- ✅ **USE safeRun in tests**: Always use safeRun from @vytches-ddd/utils in test files
-- ❌ **AVOID safeRun in implementation**: Don't use safeRun in usage examples or service code
+
+- ✅ **USE standard try/catch**: Simple, clear error handling in implementation
+  code
+- ✅ **USE safeRun in tests**: Always use safeRun from @vytches-ddd/utils in
+  test files
+- ❌ **AVOID safeRun in implementation**: Don't use safeRun in usage examples or
+  service code
 - ❌ **AVOID logging**: Skip unnecessary logging in examples
 
 **Code Style**:
+
 - ✅ **KEEP SIMPLE**: Focus on library integration, not complex patterns
 - ✅ **USE framework conventions**: Follow each framework's standard patterns
-- ✅ **ASSUME EXTERNAL CODE**: Import and use existing DTOs, services, interfaces
-- ❌ **AVOID over-engineering**: Don't add complexity that doesn't show library usage
+- ✅ **ASSUME EXTERNAL CODE**: Import and use existing DTOs, services,
+  interfaces
+- ❌ **AVOID over-engineering**: Don't add complexity that doesn't show library
+  usage
 - ❌ **AVOID creating supporting code**: Don't generate DTOs, validation, etc.
 
 ### Philosophy: "Show Library, Not Framework"
@@ -1965,7 +2005,7 @@ Run this mental checklist before submitting ANY example:
 @Injectable()
 export class PaymentService {
   constructor(private readonly paymentACL: PaymentACLService) {}
-  
+
   async processPayment(payment: Payment): Promise<Payment> {
     // ⭐ Main focus: Use our ACL from @vytches-ddd/acl
     try {
@@ -2006,6 +2046,7 @@ packages/[package]/examples/
 ```
 
 **Files to EXCLUDE from framework examples:**
+
 - `module.md` - Just DI configuration, no library features
 - `controller.md` - HTTP handling, no library interaction
 - `dto.md` - Framework validation, not library feature

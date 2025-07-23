@@ -1,15 +1,18 @@
 # Advanced Utils Integration - NestJS Intermediate
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: Intermediate
-**Framework**: NestJS
-**Base Example**: [Async Result Patterns](../../intermediate/example-2.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/utils, @vytches-ddd/di
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: Intermediate
+**Framework**: NestJS **Base Example**:
+[Async Result Patterns](../../intermediate/example-2.md) **Dependencies**:
+@nestjs/common, @vytches-ddd/utils, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates advanced VytchesDDD DI integration for utility services in enterprise applications. It shows how to leverage the dependency injection container for automatic service discovery and context-aware utility operations, particularly useful for large-scale financial services platforms requiring sophisticated error handling, async operations, and business rule validation.
+This example demonstrates advanced VytchesDDD DI integration for utility
+services in enterprise applications. It shows how to leverage the dependency
+injection container for automatic service discovery and context-aware utility
+operations, particularly useful for large-scale financial services platforms
+requiring sophisticated error handling, async operations, and business rule
+validation.
 
 ## Service Implementation
 
@@ -23,7 +26,7 @@ import type {
   ValidationContext,
   AsyncOperationResult,
   UtilityConfiguration,
-  BusinessRule
+  BusinessRule,
 } from '../types'; // From your application
 
 @Injectable()
@@ -37,9 +40,8 @@ export class AdvancedUtilsService {
     this.configurationManager = VytchesDDD.resolve<IConfigurationManager>(
       'configurationManager'
     );
-    this.businessRuleEngine = VytchesDDD.resolve<IBusinessRuleEngine>(
-      'businessRuleEngine'
-    );
+    this.businessRuleEngine =
+      VytchesDDD.resolve<IBusinessRuleEngine>('businessRuleEngine');
     this.asyncOperationManager = VytchesDDD.resolve<IAsyncOperationManager>(
       'asyncOperationManager'
     );
@@ -75,13 +77,12 @@ export class AdvancedUtilsService {
       );
 
       return executionResult;
-
     } catch (error) {
       return Result.fail({
         type: 'OPERATION_EXECUTION_ERROR',
         message: `Business operation failed: ${(error as Error).message}`,
         context: context.operationId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -93,35 +94,36 @@ export class AdvancedUtilsService {
     context: ValidationContext
   ): Promise<Result<T, ValidationError[]>> {
     // Execute multiple async validations
-    const validationPromises = rules.map(async (rule) => {
-      const [error, result] = await safeRun(async () => 
-        await this.businessRuleEngine.evaluateRule(rule, data, context)
+    const validationPromises = rules.map(async rule => {
+      const [error, result] = await safeRun(
+        async () =>
+          await this.businessRuleEngine.evaluateRule(rule, data, context)
       );
-      
+
       if (error) {
         return Result.fail<boolean, ValidationError>({
           ruleId: rule.id,
           message: `Rule validation failed: ${error.message}`,
           field: rule.field,
-          value: data
+          value: data,
         });
       }
-      
-      return result.isValid 
+
+      return result.isValid
         ? Result.ok<boolean, ValidationError>(true)
         : Result.fail<boolean, ValidationError>({
             ruleId: rule.id,
             message: result.errorMessage,
             field: rule.field,
-            value: data
+            value: data,
           });
     });
 
     const validationResults = await Promise.all(validationPromises);
-    
+
     // ⭐ Advanced: Combine multiple Result operations
     const combinedResult = Result.combine(validationResults);
-    
+
     if (combinedResult.isFailure) {
       return Result.fail(combinedResult.error);
     }
@@ -136,23 +138,30 @@ export class AdvancedUtilsService {
   ): Promise<Result<CalculationResult, CalculationError>> {
     return Result.tryAsync(async () => {
       // Use VytchesDDD services for complex calculations
-      const calculator = VytchesDDD.resolve<IFinancialCalculator>('financialCalculator');
-      const validator = VytchesDDD.resolve<ICalculationValidator>('calculationValidator');
+      const calculator = VytchesDDD.resolve<IFinancialCalculator>(
+        'financialCalculator'
+      );
+      const validator = VytchesDDD.resolve<ICalculationValidator>(
+        'calculationValidator'
+      );
 
       // Validate calculation parameters
       const validation = await validator.validate(calculation);
       if (!validation.isValid) {
-        throw new Error(`Calculation validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Calculation validation failed: ${validation.errors.join(', ')}`
+        );
       }
 
       // Perform calculation with risk assessment
       const result = await calculator.calculate(calculation, context);
-      
+
       // Additional business logic validation
       if (result.riskLevel === 'HIGH') {
-        const approvalService = VytchesDDD.resolve<IApprovalService>('approvalService');
+        const approvalService =
+          VytchesDDD.resolve<IApprovalService>('approvalService');
         const approval = await approvalService.requireApproval(result, context);
-        
+
         if (!approval.approved) {
           throw new Error('High-risk calculation requires manual approval');
         }
@@ -164,7 +173,7 @@ export class AdvancedUtilsService {
       message: error.message,
       calculation: calculation.type,
       context: context.operationId,
-      timestamp: new Date()
+      timestamp: new Date(),
     }));
   }
 
@@ -174,8 +183,9 @@ export class AdvancedUtilsService {
     processor: (item: T) => Promise<Result<R, ProcessingError>>,
     context: ValidationContext
   ): Promise<Result<R[], BatchProcessingError>> {
-    const batchProcessor = VytchesDDD.resolve<IBatchProcessor>('batchProcessor');
-    
+    const batchProcessor =
+      VytchesDDD.resolve<IBatchProcessor>('batchProcessor');
+
     try {
       // Process operations in optimized batches
       const batchConfig = await this.configurationManager.getBatchConfig(
@@ -185,23 +195,26 @@ export class AdvancedUtilsService {
       const results: R[] = [];
       const errors: ProcessingError[] = [];
 
-      const batches = batchProcessor.createBatches(operations, batchConfig.batchSize);
+      const batches = batchProcessor.createBatches(
+        operations,
+        batchConfig.batchSize
+      );
 
       for (const batch of batches) {
         const batchResults = await Promise.all(
-          batch.map(async (operation) => {
-            const [error, result] = await safeRun(async () => 
-              await processor(operation)
+          batch.map(async operation => {
+            const [error, result] = await safeRun(
+              async () => await processor(operation)
             );
-            
+
             if (error) {
               return Result.fail<R, ProcessingError>({
                 operationId: (operation as any).id,
                 message: error.message,
-                type: 'PROCESSING_ERROR'
+                type: 'PROCESSING_ERROR',
               });
             }
-            
+
             return result;
           })
         );
@@ -222,20 +235,19 @@ export class AdvancedUtilsService {
             message: `Too many errors: ${errors.length}`,
             errors,
             processedCount: results.length,
-            totalCount: operations.length
+            totalCount: operations.length,
           });
         }
       }
 
       return Result.ok(results);
-
     } catch (error) {
       return Result.fail({
         type: 'BATCH_PROCESSING_SYSTEM_ERROR',
         message: `Batch processing failed: ${(error as Error).message}`,
         errors: [],
         processedCount: 0,
-        totalCount: operations.length
+        totalCount: operations.length,
       });
     }
   }
@@ -258,7 +270,7 @@ export class AdvancedUtilsService {
           type: 'CONFIGURATION_NOT_FOUND',
           message: `No configuration found for operation: ${operationType}`,
           operationType,
-          tenantId: context.tenantId
+          tenantId: context.tenantId,
         });
       }
 
@@ -270,13 +282,12 @@ export class AdvancedUtilsService {
       );
 
       return Result.ok(transformedData);
-
     } catch (error) {
       return Result.fail({
         type: 'CONFIGURATION_ERROR',
         message: `Configuration operation failed: ${(error as Error).message}`,
         operationType,
-        tenantId: context.tenantId
+        tenantId: context.tenantId,
       });
     }
   }
@@ -325,16 +336,14 @@ export class AdvancedUtilsModule implements OnModuleInit {
 ```typescript
 // Example usage in a business service
 export class TradingService {
-  constructor(
-    private readonly advancedUtilsService: AdvancedUtilsService
-  ) {}
+  constructor(private readonly advancedUtilsService: AdvancedUtilsService) {}
 
   async executeTrade(tradeRequest: TradeRequest, context: ValidationContext) {
     // Complex business operation with advanced utilities
     const operation: BusinessOperation<TradeResult> = {
       type: 'EXECUTE_TRADE',
       data: tradeRequest,
-      metadata: { priority: 'HIGH', timeout: 30000 }
+      metadata: { priority: 'HIGH', timeout: 30000 },
     };
 
     const result = await this.advancedUtilsService.executeBusinessOperation(
@@ -352,8 +361,16 @@ export class TradingService {
   async validateTradeRules(tradeData: TradeData, context: ValidationContext) {
     const businessRules: BusinessRule[] = [
       { id: 'RISK_LIMIT', field: 'amount', validator: 'riskLimitValidator' },
-      { id: 'MARKET_HOURS', field: 'timestamp', validator: 'marketHoursValidator' },
-      { id: 'COMPLIANCE', field: 'instrument', validator: 'complianceValidator' }
+      {
+        id: 'MARKET_HOURS',
+        field: 'timestamp',
+        validator: 'marketHoursValidator',
+      },
+      {
+        id: 'COMPLIANCE',
+        field: 'instrument',
+        validator: 'complianceValidator',
+      },
     ];
 
     return await this.advancedUtilsService.validateComplexBusinessRules(
@@ -367,26 +384,41 @@ export class TradingService {
 
 ## Key Features
 
-- **VytchesDDD DI Integration**: Advanced dependency injection with service locator pattern
-- **Complex Async Operations**: Sophisticated async Result patterns with error handling
-- **Business Rule Engine**: Integration with configurable business rule validation
-- **Batch Processing**: Optimized batch operations with error threshold management
-- **Configuration-Driven**: Dynamic utility operations based on tenant configuration
-- **Safe Async Execution**: safeRun integration for exception-safe async operations
-- **Result Combination**: Advanced Result.combine patterns for multiple validations
+- **VytchesDDD DI Integration**: Advanced dependency injection with service
+  locator pattern
+- **Complex Async Operations**: Sophisticated async Result patterns with error
+  handling
+- **Business Rule Engine**: Integration with configurable business rule
+  validation
+- **Batch Processing**: Optimized batch operations with error threshold
+  management
+- **Configuration-Driven**: Dynamic utility operations based on tenant
+  configuration
+- **Safe Async Execution**: safeRun integration for exception-safe async
+  operations
+- **Result Combination**: Advanced Result.combine patterns for multiple
+  validations
 
 ## Common Pitfalls
 
-- **Missing Container Initialization**: Always call `VytchesDDD.configure()` in `OnModuleInit`
-- **Service Resolution Timing**: Ensure services are resolved after container configuration
-- **Async Result Handling**: Use proper Promise<Result<T, E>> patterns for async operations
+- **Missing Container Initialization**: Always call `VytchesDDD.configure()` in
+  `OnModuleInit`
+- **Service Resolution Timing**: Ensure services are resolved after container
+  configuration
+- **Async Result Handling**: Use proper Promise<Result<T, E>> patterns for async
+  operations
 - **Batch Error Handling**: Don't ignore partial failures in batch operations
 - **Configuration Caching**: Consider caching configuration for performance
-- **Context Propagation**: Always pass validation context through the operation chain
+- **Context Propagation**: Always pass validation context through the operation
+  chain
 
 ## Related Examples
 
-- [Async Result Patterns](../../intermediate/example-2.md) - Base async Result implementation
-- [Advanced Async Operations](../../advanced/example-2.md) - Complex async patterns
-- [Basic NestJS Integration](../basic/example-1.md) - Simple manual setup approach
-- [Advanced NestJS Integration](../advanced/example-1.md) - Complete enterprise platform setup
+- [Async Result Patterns](../../intermediate/example-2.md) - Base async Result
+  implementation
+- [Advanced Async Operations](../../advanced/example-2.md) - Complex async
+  patterns
+- [Basic NestJS Integration](../basic/example-1.md) - Simple manual setup
+  approach
+- [Advanced NestJS Integration](../advanced/example-1.md) - Complete enterprise
+  platform setup

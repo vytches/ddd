@@ -1,19 +1,23 @@
 # Multi-Tenant Domain Security - Advanced Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-primitives
-**Complexity**: advanced
-**Domain**: Multi-Tenant Security
-**Patterns**: Multi-Tenancy, Security Contexts, Isolation Boundaries, Compliance Frameworks
-**Dependencies**: BaseError, IDomainError, IActor, ActorError, Error Enums
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+advanced **Domain**: Multi-Tenant Security **Patterns**: Multi-Tenancy, Security
+Contexts, Isolation Boundaries, Compliance Frameworks **Dependencies**:
+BaseError, IDomainError, IActor, ActorError, Error Enums
 
 ## Description
 
-Demonstrates sophisticated multi-tenant domain security architecture using domain primitives as the foundation for tenant isolation, security context management, compliance frameworks, and advanced threat detection with comprehensive audit trails.
+Demonstrates sophisticated multi-tenant domain security architecture using
+domain primitives as the foundation for tenant isolation, security context
+management, compliance frameworks, and advanced threat detection with
+comprehensive audit trails.
 
 ## Business Context
 
-Enterprise SaaS platform serving multiple regulated industries (healthcare, finance, government) requiring strict tenant isolation, comprehensive security controls, compliance monitoring, threat detection, and detailed audit trails for regulatory requirements (SOC2, HIPAA, PCI-DSS, FedRAMP).
+Enterprise SaaS platform serving multiple regulated industries (healthcare,
+finance, government) requiring strict tenant isolation, comprehensive security
+controls, compliance monitoring, threat detection, and detailed audit trails for
+regulatory requirements (SOC2, HIPAA, PCI-DSS, FedRAMP).
 
 ## Code Example
 
@@ -25,20 +29,23 @@ import {
   IActor,
   ActorError,
   DomainErrorCode,
-  type DomainErrorOptions
+  type DomainErrorOptions,
 } from '@vytches-ddd/domain-primitives';
 import {
   TenantSecurityContext,
   ComplianceFramework,
   SecurityThreat,
   IsolationBoundary,
-  SecurityPolicy
+  SecurityPolicy,
 } from './types'; // From your app
 
 /**
  * Multi-tenant security error hierarchy
  */
-export abstract class MultiTenantSecurityError extends BaseError implements IDomainError {
+export abstract class MultiTenantSecurityError
+  extends BaseError
+  implements IDomainError
+{
   public readonly domain = 'MultiTenantSecurity';
   public readonly tenantId: string;
   public readonly securityContext: string;
@@ -79,7 +86,7 @@ export abstract class MultiTenantSecurityError extends BaseError implements IDom
       timestamp: new Date(),
       errorCode: this.code,
       requiresImmediateResponse: this.requiresImmediateResponse(),
-      affectedCompliance: this.complianceImpact.map(c => c.framework)
+      affectedCompliance: this.complianceImpact.map(c => c.framework),
     };
   }
 
@@ -136,7 +143,7 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       {
         isolationBreach: true,
         complianceImpact: options.complianceImpact || [],
-        ...options
+        ...options,
       }
     );
 
@@ -147,9 +154,11 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
   }
 
   requiresImmediateResponse(): boolean {
-    return this.breachType === 'DATA_LEAKAGE' || 
-           this.dataExposureRisk.level === 'CRITICAL' ||
-           this.affectedTenants.length > 1;
+    return (
+      this.breachType === 'DATA_LEAKAGE' ||
+      this.dataExposureRisk.level === 'CRITICAL' ||
+      this.affectedTenants.length > 1
+    );
   }
 
   getRequiredSecurityActions(): SecurityAction[] {
@@ -162,7 +171,7 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       target: 'AFFECTED_RESOURCES',
       description: 'Isolate affected tenant resources immediately',
       timeoutMinutes: 5,
-      autoExecute: true
+      autoExecute: true,
     });
 
     // Tenant notification
@@ -174,19 +183,22 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
         description: 'Notify affected tenants of potential breach',
         timeoutMinutes: 15,
         autoExecute: false,
-        requiresApproval: true
+        requiresApproval: true,
       });
     }
 
     // Data exposure assessment
-    if (this.dataExposureRisk.level === 'HIGH' || this.dataExposureRisk.level === 'CRITICAL') {
+    if (
+      this.dataExposureRisk.level === 'HIGH' ||
+      this.dataExposureRisk.level === 'CRITICAL'
+    ) {
       actions.push({
         type: 'DATA_EXPOSURE_ASSESSMENT',
         priority: 'HIGH',
         target: 'EXPOSED_DATA',
         description: 'Assess scope and impact of data exposure',
         timeoutMinutes: 30,
-        autoExecute: false
+        autoExecute: false,
       });
     }
 
@@ -198,7 +210,7 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
         target: 'COMPLIANCE_FRAMEWORKS',
         description: 'Generate compliance incident reports',
         timeoutMinutes: 60,
-        autoExecute: true
+        autoExecute: true,
       });
     }
 
@@ -209,18 +221,24 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       target: 'BREACH_ARTIFACTS',
       description: 'Conduct forensic analysis of breach',
       timeoutMinutes: 240, // 4 hours
-      autoExecute: false
+      autoExecute: false,
     });
 
     return actions;
   }
 
   getComplianceSeverity(): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (this.dataExposureRisk.level === 'CRITICAL' || this.affectedTenants.length > 5) {
+    if (
+      this.dataExposureRisk.level === 'CRITICAL' ||
+      this.affectedTenants.length > 5
+    ) {
       return 'CRITICAL';
     }
-    
-    if (this.dataExposureRisk.level === 'HIGH' || this.breachType === 'DATA_LEAKAGE') {
+
+    if (
+      this.dataExposureRisk.level === 'HIGH' ||
+      this.breachType === 'DATA_LEAKAGE'
+    ) {
       return 'HIGH';
     }
 
@@ -245,7 +263,7 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       estimatedImpact: this.calculateEstimatedImpact(),
       containmentStrategy: this.getContainmentStrategy(),
       recoveryTimeEstimate: this.estimateRecoveryTime(),
-      forensicRequirements: this.getForensicRequirements()
+      forensicRequirements: this.getForensicRequirements(),
     };
   }
 
@@ -255,23 +273,29 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       reputationalImpact: this.assessReputationalImpact(),
       financialImpact: this.assessFinancialImpact(),
       legalImpact: this.assessLegalImpact(),
-      operationalImpact: this.assessOperationalImpact()
+      operationalImpact: this.assessOperationalImpact(),
     };
   }
 
   private getContainmentStrategy(): ContainmentStrategy {
     return {
-      immediateActions: this.getRequiredSecurityActions().filter(a => a.priority === 'CRITICAL'),
+      immediateActions: this.getRequiredSecurityActions().filter(
+        a => a.priority === 'CRITICAL'
+      ),
       isolationMeasures: this.generateIsolationMeasures(),
       communicationPlan: this.generateCommunicationPlan(),
-      escalationPath: this.generateEscalationPath()
+      escalationPath: this.generateEscalationPath(),
     };
   }
 
   private estimateRecoveryTime(): RecoveryTimeEstimate {
     const baseTime = this.affectedTenants.length * 30; // 30 minutes per tenant
-    const complexityMultiplier = this.breachType === 'DATA_LEAKAGE' ? 3.0 : 
-                                this.dataExposureRisk.level === 'CRITICAL' ? 2.0 : 1.5;
+    const complexityMultiplier =
+      this.breachType === 'DATA_LEAKAGE'
+        ? 3.0
+        : this.dataExposureRisk.level === 'CRITICAL'
+          ? 2.0
+          : 1.5;
 
     return {
       estimatedMinutes: Math.round(baseTime * complexityMultiplier),
@@ -279,8 +303,8 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       factors: [
         `Affected tenants: ${this.affectedTenants.length}`,
         `Breach type: ${this.breachType}`,
-        `Data exposure risk: ${this.dataExposureRisk.level}`
-      ]
+        `Data exposure risk: ${this.dataExposureRisk.level}`,
+      ],
     };
   }
 
@@ -288,19 +312,25 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
     return {
       evidencePreservation: this.dataExposureRisk.level === 'CRITICAL',
       logAnalysisRequired: true,
-      externalForensics: this.hasComplianceImpact() && this.getComplianceSeverity() === 'CRITICAL',
+      externalForensics:
+        this.hasComplianceImpact() &&
+        this.getComplianceSeverity() === 'CRITICAL',
       retentionPeriod: this.hasComplianceImpact() ? 2555 : 365, // 7 years for compliance, 1 year standard
       complianceRequirements: this.complianceImpact.map(c => ({
         framework: c.framework,
         reportingDeadline: c.reportingDeadline,
-        evidenceRequirements: c.evidenceRequirements
-      }))
+        evidenceRequirements: c.evidenceRequirements,
+      })),
     };
   }
 
   private assessBusinessImpact(): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (this.affectedTenants.length > 10) return 'CRITICAL';
-    if (this.affectedTenants.length > 5 || this.dataExposureRisk.level === 'CRITICAL') return 'HIGH';
+    if (
+      this.affectedTenants.length > 5 ||
+      this.dataExposureRisk.level === 'CRITICAL'
+    )
+      return 'HIGH';
     if (this.affectedTenants.length > 2) return 'MEDIUM';
     return 'LOW';
   }
@@ -310,7 +340,7 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
   }
 
   private assessFinancialImpact(): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const compliancePenalties = this.complianceImpact.some(c => 
+    const compliancePenalties = this.complianceImpact.some(c =>
       ['GDPR', 'HIPAA', 'PCI_DSS'].includes(c.framework)
     );
     return compliancePenalties ? 'CRITICAL' : 'MEDIUM';
@@ -330,14 +360,14 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
         type: 'NETWORK_ISOLATION',
         target: this.tenantId,
         description: 'Isolate tenant network traffic',
-        priority: 'CRITICAL'
+        priority: 'CRITICAL',
       },
       {
         type: 'DATA_ACCESS_REVOCATION',
         target: 'AFFECTED_RESOURCES',
         description: 'Revoke access to affected data resources',
-        priority: 'CRITICAL'
-      }
+        priority: 'CRITICAL',
+      },
     ];
   }
 
@@ -346,19 +376,21 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       internalNotifications: [
         { team: 'SECURITY_TEAM', priority: 'IMMEDIATE' },
         { team: 'LEGAL_TEAM', priority: 'HIGH' },
-        { team: 'EXECUTIVE_TEAM', priority: 'HIGH' }
+        { team: 'EXECUTIVE_TEAM', priority: 'HIGH' },
       ],
       externalNotifications: this.affectedTenants.map(tenantId => ({
         recipient: tenantId,
         type: 'TENANT_NOTIFICATION',
         priority: 'HIGH',
-        timeline: '15 minutes'
+        timeline: '15 minutes',
       })),
-      regulatoryNotifications: this.complianceImpact.filter(c => c.requiresNotification).map(c => ({
-        regulator: c.framework,
-        deadline: c.reportingDeadline,
-        priority: 'HIGH'
-      }))
+      regulatoryNotifications: this.complianceImpact
+        .filter(c => c.requiresNotification)
+        .map(c => ({
+          regulator: c.framework,
+          deadline: c.reportingDeadline,
+          priority: 'HIGH',
+        })),
     };
   }
 
@@ -369,8 +401,8 @@ export class TenantIsolationBreachError extends MultiTenantSecurityError {
       level3: 'CEO_CTO',
       timeToEscalation: {
         level1To2: 30, // 30 minutes
-        level2To3: 60  // 60 minutes
-      }
+        level2To3: 60, // 60 minutes
+      },
     };
   }
 }
@@ -406,9 +438,9 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
           severity: regulatoryRisk.level,
           reportingDeadline: framework.reportingDeadline,
           evidenceRequirements: framework.evidenceRequirements,
-          requiresNotification: framework.requiresImmediateNotification
+          requiresNotification: framework.requiresImmediateNotification,
         })),
-        ...options
+        ...options,
       }
     );
 
@@ -419,9 +451,11 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
   }
 
   requiresImmediateResponse(): boolean {
-    return this.regulatoryRisk.level === 'CRITICAL' ||
-           this.violatedFrameworks.some(f => f.requiresImmediateNotification) ||
-           this.violationType === 'DATA_RETENTION_VIOLATION';
+    return (
+      this.regulatoryRisk.level === 'CRITICAL' ||
+      this.violatedFrameworks.some(f => f.requiresImmediateNotification) ||
+      this.violationType === 'DATA_RETENTION_VIOLATION'
+    );
   }
 
   getRequiredSecurityActions(): SecurityAction[] {
@@ -435,7 +469,7 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
       description: 'Remediate compliance violation at source',
       timeoutMinutes: this.calculateRemediationTimeout(),
       autoExecute: false,
-      requiresApproval: true
+      requiresApproval: true,
     });
 
     // Regulatory reporting
@@ -447,7 +481,7 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
         description: 'Notify relevant regulatory bodies',
         timeoutMinutes: this.getNotificationDeadline(),
         autoExecute: false,
-        requiresApproval: true
+        requiresApproval: true,
       });
     }
 
@@ -459,7 +493,7 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
         target: 'AUDIT_LOGS',
         description: 'Preserve audit trail for compliance investigation',
         timeoutMinutes: 60,
-        autoExecute: true
+        autoExecute: true,
       });
     }
 
@@ -471,7 +505,7 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
         target: 'VIOLATION_DOCUMENTATION',
         description: 'Legal review of compliance violation',
         timeoutMinutes: 240, // 4 hours
-        autoExecute: false
+        autoExecute: false,
       });
     }
 
@@ -479,13 +513,20 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
   }
 
   getComplianceSeverity(): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (this.regulatoryRisk.level === 'CRITICAL' ||
-        this.regulatoryRisk.potentialFine > 1000000) { // $1M+
+    if (
+      this.regulatoryRisk.level === 'CRITICAL' ||
+      this.regulatoryRisk.potentialFine > 1000000
+    ) {
+      // $1M+
       return 'CRITICAL';
     }
 
-    if (this.regulatoryRisk.level === 'HIGH' ||
-        this.violatedFrameworks.some(f => ['GDPR', 'HIPAA', 'SOX'].includes(f.name))) {
+    if (
+      this.regulatoryRisk.level === 'HIGH' ||
+      this.violatedFrameworks.some(f =>
+        ['GDPR', 'HIPAA', 'SOX'].includes(f.name)
+      )
+    ) {
       return 'HIGH';
     }
 
@@ -510,7 +551,7 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
       estimatedFinancialImpact: this.calculateFinancialImpact(),
       recommendedActions: this.getRequiredSecurityActions(),
       complianceOfficerNotified: false,
-      legalCounselNotified: this.regulatoryRisk.litigationRisk === 'HIGH'
+      legalCounselNotified: this.regulatoryRisk.litigationRisk === 'HIGH',
     };
   }
 
@@ -537,12 +578,14 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
 
   private generateRemediationPlan(): RemediationPlan {
     return {
-      immediateActions: this.getRequiredSecurityActions().filter(a => a.priority === 'CRITICAL'),
+      immediateActions: this.getRequiredSecurityActions().filter(
+        a => a.priority === 'CRITICAL'
+      ),
       shortTermActions: this.generateShortTermActions(),
       longTermActions: this.generateLongTermActions(),
       timeline: this.calculateRemediationTimeline(),
       responsibleParties: this.identifyResponsibleParties(),
-      successCriteria: this.defineSuccessCriteria()
+      successCriteria: this.defineSuccessCriteria(),
     };
   }
 
@@ -553,21 +596,27 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
       requiredDocumentation: framework.evidenceRequirements,
       regulatoryBody: framework.regulatoryBody,
       contactInformation: framework.contactInformation,
-      templateRequired: framework.templateRequired
+      templateRequired: framework.templateRequired,
     }));
   }
 
   private calculateFinancialImpact(): FinancialImpact {
-    const totalPotentialFine = this.violatedFrameworks.reduce((sum, framework) => {
-      return sum + (framework.maximumPenalty || 0);
-    }, 0);
+    const totalPotentialFine = this.violatedFrameworks.reduce(
+      (sum, framework) => {
+        return sum + (framework.maximumPenalty || 0);
+      },
+      0
+    );
 
     return {
-      potentialFines: Math.min(totalPotentialFine, this.regulatoryRisk.potentialFine),
+      potentialFines: Math.min(
+        totalPotentialFine,
+        this.regulatoryRisk.potentialFine
+      ),
       legalCosts: this.estimateLegalCosts(),
       operationalImpact: this.estimateOperationalImpact(),
       reputationalImpact: this.estimateReputationalCost(),
-      totalEstimatedImpact: 0 // Calculated as sum of above
+      totalEstimatedImpact: 0, // Calculated as sum of above
     };
   }
 
@@ -579,8 +628,8 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
         target: 'SECURITY_POLICIES',
         description: 'Update security policies to address violation',
         timeoutMinutes: 48 * 60, // 48 hours
-        autoExecute: false
-      }
+        autoExecute: false,
+      },
     ];
   }
 
@@ -592,19 +641,23 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
         target: 'MONITORING_SYSTEMS',
         description: 'Implement enhanced compliance monitoring',
         timeoutMinutes: 30 * 24 * 60, // 30 days
-        autoExecute: false
-      }
+        autoExecute: false,
+      },
     ];
   }
 
   private calculateRemediationTimeline(): RemediationTimeline {
-    const urgentDeadline = Math.min(...this.violatedFrameworks.map(f => f.remediationTimelineDays));
-    
+    const urgentDeadline = Math.min(
+      ...this.violatedFrameworks.map(f => f.remediationTimelineDays)
+    );
+
     return {
       immediate: '24 hours',
       shortTerm: '7 days',
       longTerm: `${urgentDeadline} days`,
-      complianceDeadline: new Date(Date.now() + urgentDeadline * 24 * 60 * 60 * 1000)
+      complianceDeadline: new Date(
+        Date.now() + urgentDeadline * 24 * 60 * 60 * 1000
+      ),
     };
   }
 
@@ -613,13 +666,13 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
       {
         role: 'COMPLIANCE_OFFICER',
         responsibility: 'Overall remediation oversight',
-        contactInfo: 'compliance@company.com'
+        contactInfo: 'compliance@company.com',
       },
       {
         role: 'SECURITY_MANAGER',
         responsibility: 'Technical remediation implementation',
-        contactInfo: 'security@company.com'
-      }
+        contactInfo: 'security@company.com',
+      },
     ];
   }
 
@@ -628,13 +681,13 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
       {
         criteria: 'Violation source remediated',
         measurable: true,
-        timeline: '48 hours'
+        timeline: '48 hours',
       },
       {
         criteria: 'Compliance monitoring implemented',
         measurable: true,
-        timeline: '7 days'
-      }
+        timeline: '7 days',
+      },
     ];
   }
 
@@ -647,7 +700,9 @@ export class ComplianceViolationSecurityError extends MultiTenantSecurityError {
   }
 
   private estimateReputationalCost(): number {
-    return this.violatedFrameworks.some(f => f.publicDisclosureRequired) ? 200000 : 50000;
+    return this.violatedFrameworks.some(f => f.publicDisclosureRequired)
+      ? 200000
+      : 50000;
   }
 }
 
@@ -703,31 +758,47 @@ export class MultiTenantSecurityManager {
         isolationRequirements: securityRequirements.isolationRequirements,
         encryptionRequirements: securityRequirements.encryptionRequirements,
         auditRequirements: securityRequirements.auditRequirements,
-        threatDetectionProfile: this.createThreatDetectionProfile(securityRequirements),
+        threatDetectionProfile:
+          this.createThreatDetectionProfile(securityRequirements),
         securityPolicies: this.generateSecurityPolicies(securityRequirements),
-        isolationBoundaries: await this.establishIsolationBoundaries(tenantId, securityRequirements),
+        isolationBoundaries: await this.establishIsolationBoundaries(
+          tenantId,
+          securityRequirements
+        ),
         createdAt: new Date(),
         createdBy: initializingActor.id,
         lastUpdated: new Date(),
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       };
 
       // Store security context
       this.securityContexts.set(tenantId, securityContext);
 
       // Initialize compliance monitoring
-      await this.complianceMonitor.initializeTenantMonitoring(tenantId, complianceFrameworks);
+      await this.complianceMonitor.initializeTenantMonitoring(
+        tenantId,
+        complianceFrameworks
+      );
 
       // Setup threat detection
-      await this.threatDetectionEngine.initializeTenantProfile(tenantId, securityContext.threatDetectionProfile);
+      await this.threatDetectionEngine.initializeTenantProfile(
+        tenantId,
+        securityContext.threatDetectionProfile
+      );
 
       // Log security initialization
-      await this.auditLogger.logTenantSecurityInitialization(securityContext, initializingActor);
+      await this.auditLogger.logTenantSecurityInitialization(
+        securityContext,
+        initializingActor
+      );
 
       return securityContext;
-
     } catch (error) {
-      await this.auditLogger.logTenantSecurityInitializationFailure(tenantId, error, initializingActor);
+      await this.auditLogger.logTenantSecurityInitializationFailure(
+        tenantId,
+        error,
+        initializingActor
+      );
       throw error;
     }
   }
@@ -753,7 +824,10 @@ export class MultiTenantSecurityManager {
 
     try {
       // Analyze threat using detection engine
-      const threatAnalysis = await this.threatDetectionEngine.analyzeEvent(securityEvent, securityContext);
+      const threatAnalysis = await this.threatDetectionEngine.analyzeEvent(
+        securityEvent,
+        securityContext
+      );
 
       const result: ThreatHandlingResult = {
         threatId: `THREAT-${Date.now()}-${tenantId}`,
@@ -764,38 +838,68 @@ export class MultiTenantSecurityManager {
         handled: false,
         actions: [],
         isolationRequired: false,
-        complianceImpact: []
+        complianceImpact: [],
       };
 
       // Handle based on threat level and type
       if (threatAnalysis.threatLevel === 'CRITICAL') {
-        await this.handleCriticalThreat(tenantId, threatAnalysis, securityContext, result);
+        await this.handleCriticalThreat(
+          tenantId,
+          threatAnalysis,
+          securityContext,
+          result
+        );
       } else if (threatAnalysis.threatLevel === 'HIGH') {
-        await this.handleHighThreat(tenantId, threatAnalysis, securityContext, result);
+        await this.handleHighThreat(
+          tenantId,
+          threatAnalysis,
+          securityContext,
+          result
+        );
       } else {
-        await this.handleStandardThreat(tenantId, threatAnalysis, securityContext, result);
+        await this.handleStandardThreat(
+          tenantId,
+          threatAnalysis,
+          securityContext,
+          result
+        );
       }
 
       // Check for isolation breach
       if (threatAnalysis.isolationBreach) {
-        await this.handleIsolationBreach(tenantId, threatAnalysis, securityContext);
+        await this.handleIsolationBreach(
+          tenantId,
+          threatAnalysis,
+          securityContext
+        );
         result.isolationRequired = true;
       }
 
       // Check compliance impact
-      const complianceImpact = await this.assessComplianceImpact(threatAnalysis, securityContext);
+      const complianceImpact = await this.assessComplianceImpact(
+        threatAnalysis,
+        securityContext
+      );
       if (complianceImpact.length > 0) {
         result.complianceImpact = complianceImpact;
-        await this.handleComplianceViolation(tenantId, complianceImpact, securityContext);
+        await this.handleComplianceViolation(
+          tenantId,
+          complianceImpact,
+          securityContext
+        );
       }
 
       result.handled = true;
       await this.auditLogger.logThreatHandled(result, reportingActor);
 
       return result;
-
     } catch (error) {
-      await this.auditLogger.logThreatHandlingFailure(tenantId, securityEvent, error, reportingActor);
+      await this.auditLogger.logThreatHandlingFailure(
+        tenantId,
+        securityEvent,
+        error,
+        reportingActor
+      );
       throw error;
     }
   }
@@ -811,7 +915,9 @@ export class MultiTenantSecurityManager {
   ): Promise<SecurityReport> {
     try {
       // Validate permissions
-      if (!this.canGenerateSecurityReport(requestingActor, tenantId, reportType)) {
+      if (
+        !this.canGenerateSecurityReport(requestingActor, tenantId, reportType)
+      ) {
         throw new ActorError(
           `Actor ${requestingActor.id} cannot generate ${reportType} security report for ${tenantId}`,
           'SECURITY_REPORT_ACCESS_DENIED',
@@ -826,34 +932,58 @@ export class MultiTenantSecurityManager {
         timeframe,
         generatedAt: new Date(),
         generatedBy: requestingActor.id,
-        executiveSummary: await this.generateExecutiveSummary(tenantId, timeframe),
+        executiveSummary: await this.generateExecutiveSummary(
+          tenantId,
+          timeframe
+        ),
         threatAnalysis: await this.generateThreatAnalysis(tenantId, timeframe),
-        complianceStatus: await this.generateComplianceStatus(tenantId, timeframe),
-        isolationMetrics: await this.generateIsolationMetrics(tenantId, timeframe),
+        complianceStatus: await this.generateComplianceStatus(
+          tenantId,
+          timeframe
+        ),
+        isolationMetrics: await this.generateIsolationMetrics(
+          tenantId,
+          timeframe
+        ),
         securityIncidents: await this.getSecurityIncidents(tenantId, timeframe),
-        recommendations: await this.generateSecurityRecommendations(tenantId, timeframe),
-        attachments: []
+        recommendations: await this.generateSecurityRecommendations(
+          tenantId,
+          timeframe
+        ),
+        attachments: [],
       };
 
       // Add detailed sections based on report type
       if (reportType === 'COMPREHENSIVE' || reportType === 'COMPLIANCE') {
-        report.complianceDetails = await this.generateDetailedComplianceAnalysis(tenantId, timeframe);
+        report.complianceDetails =
+          await this.generateDetailedComplianceAnalysis(tenantId, timeframe);
       }
 
       if (reportType === 'COMPREHENSIVE' || reportType === 'THREAT_ANALYSIS') {
-        report.detailedThreatAnalysis = await this.generateDetailedThreatAnalysis(tenantId, timeframe);
+        report.detailedThreatAnalysis =
+          await this.generateDetailedThreatAnalysis(tenantId, timeframe);
       }
 
       if (reportType === 'FORENSIC') {
-        report.forensicEvidence = await this.gatherForensicEvidence(tenantId, timeframe);
+        report.forensicEvidence = await this.gatherForensicEvidence(
+          tenantId,
+          timeframe
+        );
       }
 
-      await this.auditLogger.logSecurityReportGenerated(report, requestingActor);
+      await this.auditLogger.logSecurityReportGenerated(
+        report,
+        requestingActor
+      );
 
       return report;
-
     } catch (error) {
-      await this.auditLogger.logSecurityReportGenerationFailure(tenantId, reportType, error, requestingActor);
+      await this.auditLogger.logSecurityReportGenerationFailure(
+        tenantId,
+        reportType,
+        error,
+        requestingActor
+      );
       throw error;
     }
   }
@@ -870,7 +1000,9 @@ export class MultiTenantSecurityManager {
   ): Promise<IsolationResult> {
     try {
       // Validate isolation permissions
-      if (!this.canPerformIsolation(authorizingActor, tenantId, isolationLevel)) {
+      if (
+        !this.canPerformIsolation(authorizingActor, tenantId, isolationLevel)
+      ) {
         throw new ActorError(
           `Actor ${authorizingActor.id} cannot perform ${isolationLevel} isolation for tenant ${tenantId}`,
           'TENANT_ISOLATION_DENIED',
@@ -890,7 +1022,7 @@ export class MultiTenantSecurityManager {
         expiresAt: duration ? new Date(Date.now() + duration) : undefined,
         status: 'IN_PROGRESS',
         actionsPerformed: [],
-        affectedResources: []
+        affectedResources: [],
       };
 
       // Perform isolation actions based on level
@@ -917,7 +1049,8 @@ export class MultiTenantSecurityManager {
       }
 
       // Get affected resources
-      isolationResult.affectedResources = await this.isolationController.getAffectedResources(tenantId);
+      isolationResult.affectedResources =
+        await this.isolationController.getAffectedResources(tenantId);
       isolationResult.status = 'ACTIVE';
       isolationResult.completedAt = new Date();
 
@@ -926,45 +1059,62 @@ export class MultiTenantSecurityManager {
         await this.scheduleIsolationRestoration(isolationId, duration);
       }
 
-      await this.auditLogger.logTenantIsolationPerformed(isolationResult, authorizingActor);
+      await this.auditLogger.logTenantIsolationPerformed(
+        isolationResult,
+        authorizingActor
+      );
 
       return isolationResult;
-
     } catch (error) {
-      await this.auditLogger.logTenantIsolationFailure(tenantId, isolationLevel, error, authorizingActor);
+      await this.auditLogger.logTenantIsolationFailure(
+        tenantId,
+        isolationLevel,
+        error,
+        authorizingActor
+      );
       throw error;
     }
   }
 
   // Private helper methods
-  private canInitializeTenantSecurity(actor: IActor, tenantId: string): boolean {
+  private canInitializeTenantSecurity(
+    actor: IActor,
+    tenantId: string
+  ): boolean {
     // Implementation for security initialization permission check
     return true; // Simplified for example
   }
 
-  private createThreatDetectionProfile(requirements: TenantSecurityRequirements): ThreatDetectionProfile {
+  private createThreatDetectionProfile(
+    requirements: TenantSecurityRequirements
+  ): ThreatDetectionProfile {
     return {
-      sensitivityLevel: requirements.securityLevel === 'MAXIMUM' ? 'HIGH' : 'MEDIUM',
+      sensitivityLevel:
+        requirements.securityLevel === 'MAXIMUM' ? 'HIGH' : 'MEDIUM',
       monitoringScope: ['NETWORK', 'DATA_ACCESS', 'USER_BEHAVIOR'],
-      alertThresholds: this.calculateAlertThresholds(requirements.securityLevel),
-      complianceChecks: requirements.complianceFrameworks || []
+      alertThresholds: this.calculateAlertThresholds(
+        requirements.securityLevel
+      ),
+      complianceChecks: requirements.complianceFrameworks || [],
     };
   }
 
-  private generateSecurityPolicies(requirements: TenantSecurityRequirements): SecurityPolicy[] {
+  private generateSecurityPolicies(
+    requirements: TenantSecurityRequirements
+  ): SecurityPolicy[] {
     return [
       {
         policyId: 'SEC-POL-001',
         name: 'Data Access Policy',
         type: 'DATA_ACCESS',
         enforcementLevel: requirements.securityLevel,
-        rules: this.generateDataAccessRules(requirements)
-      }
+        rules: this.generateDataAccessRules(requirements),
+      },
     ];
   }
 
   private async establishIsolationBoundaries(
-    tenantId: string, 
+    tenantId: string,
     requirements: TenantSecurityRequirements
   ): Promise<IsolationBoundary[]> {
     return [
@@ -972,8 +1122,8 @@ export class MultiTenantSecurityManager {
         boundaryId: `BOUNDARY-${tenantId}-NETWORK`,
         type: 'NETWORK',
         tenantId,
-        configuration: requirements.isolationRequirements?.network || {}
-      }
+        configuration: requirements.isolationRequirements?.network || {},
+      },
     ];
   }
 
@@ -990,11 +1140,14 @@ export class MultiTenantSecurityManager {
       target: 'AFFECTED_RESOURCES',
       description: 'Critical threat containment',
       timeoutMinutes: 5,
-      autoExecute: true
+      autoExecute: true,
     });
 
     // Alert security team
-    await this.alertingService.sendCriticalThreatAlert(tenantId, threatAnalysis);
+    await this.alertingService.sendCriticalThreatAlert(
+      tenantId,
+      threatAnalysis
+    );
   }
 
   private async handleHighThreat(
@@ -1010,7 +1163,7 @@ export class MultiTenantSecurityManager {
       target: 'THREAT_SOURCE',
       description: 'Enhanced monitoring of threat source',
       timeoutMinutes: 15,
-      autoExecute: true
+      autoExecute: true,
     });
   }
 
@@ -1027,7 +1180,7 @@ export class MultiTenantSecurityManager {
       target: 'THREAT_INDICATORS',
       description: 'Standard threat monitoring',
       timeoutMinutes: 60,
-      autoExecute: true
+      autoExecute: true,
     });
   }
 
@@ -1063,8 +1216,9 @@ export class MultiTenantSecurityManager {
       severity: threatAnalysis.threatLevel,
       reportingDeadline: framework.reportingDeadline,
       evidenceRequirements: framework.evidenceRequirements,
-      requiresNotification: framework.requiresImmediateNotification && 
-                          threatAnalysis.threatLevel === 'CRITICAL'
+      requiresNotification:
+        framework.requiresImmediateNotification &&
+        threatAnalysis.threatLevel === 'CRITICAL',
     }));
   }
 
@@ -1077,8 +1231,8 @@ export class MultiTenantSecurityManager {
   }
 
   private canGenerateSecurityReport(
-    actor: IActor, 
-    tenantId: string | 'ALL', 
+    actor: IActor,
+    tenantId: string | 'ALL',
     reportType: SecurityReportType
   ): boolean {
     // Implementation for report generation permission check
@@ -1094,68 +1248,105 @@ export class MultiTenantSecurityManager {
     return true; // Simplified for example
   }
 
-  private calculateAlertThresholds(securityLevel: SecurityLevel): AlertThresholds {
+  private calculateAlertThresholds(
+    securityLevel: SecurityLevel
+  ): AlertThresholds {
     return {
       anomalyScore: securityLevel === 'MAXIMUM' ? 0.7 : 0.8,
       accessFailures: securityLevel === 'MAXIMUM' ? 3 : 5,
-      dataVolumeThreshold: securityLevel === 'MAXIMUM' ? 100 : 500
+      dataVolumeThreshold: securityLevel === 'MAXIMUM' ? 100 : 500,
     };
   }
 
-  private generateDataAccessRules(requirements: TenantSecurityRequirements): SecurityRule[] {
+  private generateDataAccessRules(
+    requirements: TenantSecurityRequirements
+  ): SecurityRule[] {
     return [
       {
         ruleId: 'DAR-001',
         description: 'Tenant data isolation',
         condition: 'tenantId === currentUser.tenantId',
         action: 'ALLOW',
-        priority: 1
-      }
+        priority: 1,
+      },
     ];
   }
 
-  private async executeSecurityAction(action: SecurityAction, tenantId: string): Promise<void> {
+  private async executeSecurityAction(
+    action: SecurityAction,
+    tenantId: string
+  ): Promise<void> {
     // Implementation for executing security actions
   }
 
-  private async scheduleIsolationRestoration(isolationId: string, duration: number): Promise<void> {
+  private async scheduleIsolationRestoration(
+    isolationId: string,
+    duration: number
+  ): Promise<void> {
     // Implementation for scheduling automatic isolation restoration
   }
 
   // Report generation methods (simplified signatures)
-  private async generateExecutiveSummary(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<ExecutiveSummary> {
+  private async generateExecutiveSummary(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<ExecutiveSummary> {
     return {} as ExecutiveSummary;
   }
 
-  private async generateThreatAnalysis(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<ThreatAnalysisSummary> {
+  private async generateThreatAnalysis(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<ThreatAnalysisSummary> {
     return {} as ThreatAnalysisSummary;
   }
 
-  private async generateComplianceStatus(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<ComplianceStatusSummary> {
+  private async generateComplianceStatus(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<ComplianceStatusSummary> {
     return {} as ComplianceStatusSummary;
   }
 
-  private async generateIsolationMetrics(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<IsolationMetrics> {
+  private async generateIsolationMetrics(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<IsolationMetrics> {
     return {} as IsolationMetrics;
   }
 
-  private async getSecurityIncidents(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<SecurityIncident[]> {
+  private async getSecurityIncidents(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<SecurityIncident[]> {
     return [];
   }
 
-  private async generateSecurityRecommendations(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<SecurityRecommendation[]> {
+  private async generateSecurityRecommendations(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<SecurityRecommendation[]> {
     return [];
   }
 
-  private async generateDetailedComplianceAnalysis(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<DetailedComplianceAnalysis> {
+  private async generateDetailedComplianceAnalysis(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<DetailedComplianceAnalysis> {
     return {} as DetailedComplianceAnalysis;
   }
 
-  private async generateDetailedThreatAnalysis(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<DetailedThreatAnalysis> {
+  private async generateDetailedThreatAnalysis(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<DetailedThreatAnalysis> {
     return {} as DetailedThreatAnalysis;
   }
 
-  private async gatherForensicEvidence(tenantId: string | 'ALL', timeframe: { start: Date; end: Date }): Promise<ForensicEvidence> {
+  private async gatherForensicEvidence(
+    tenantId: string | 'ALL',
+    timeframe: { start: Date; end: Date }
+  ): Promise<ForensicEvidence> {
     return {} as ForensicEvidence;
   }
 }
@@ -1168,7 +1359,7 @@ export class MultiTenantSecurityManager {
 import {
   MultiTenantSecurityManager,
   TenantIsolationBreachError,
-  ComplianceViolationSecurityError
+  ComplianceViolationSecurityError,
 } from './multi-tenant-security';
 import { SystemAdministratorActor } from '../intermediate/example-3'; // Reference to actor example
 
@@ -1182,112 +1373,131 @@ export class MultiTenantSecurityDemo {
   async demonstrateSecurityInitialization(): Promise<void> {
     try {
       // Create system admin for security operations
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-SEC-001', 'ENTERPRISE', {
-        sessionMetadata: {
-          sessionId: 'SEC-SESSION-001',
-          createdAt: new Date(),
-          ipAddress: '10.0.0.1',
-          userAgent: 'SecurityDemo/1.0'
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-SEC-001',
+        'ENTERPRISE',
+        {
+          sessionMetadata: {
+            sessionId: 'SEC-SESSION-001',
+            createdAt: new Date(),
+            ipAddress: '10.0.0.1',
+            userAgent: 'SecurityDemo/1.0',
+          },
         }
-      });
+      );
 
       // Initialize security for healthcare tenant (HIPAA compliance)
-      const healthcareSecurityContext = await this.securityManager.initializeTenantSecurity(
-        'TENANT-HEALTHCARE-001',
-        {
-          securityLevel: 'MAXIMUM',
-          isolationRequirements: {
-            network: { strictIsolation: true, encryptedTraffic: true },
-            data: { encryptionAtRest: true, encryptionInTransit: true },
-            compute: { dedicatedResources: true, secureEnclaves: true }
-          },
-          encryptionRequirements: {
-            algorithm: 'AES-256',
-            keyManagement: 'HSM',
-            rotationPolicy: 'QUARTERLY'
-          },
-          auditRequirements: {
-            logLevel: 'COMPREHENSIVE',
-            retentionYears: 7,
-            tamperProofing: true,
-            realTimeMonitoring: true
-          },
-          complianceFrameworks: ['HIPAA', 'SOC2_TYPE2']
-        },
-        [
+      const healthcareSecurityContext =
+        await this.securityManager.initializeTenantSecurity(
+          'TENANT-HEALTHCARE-001',
           {
-            name: 'HIPAA',
-            version: '2013',
-            regulatoryBody: 'HHS',
-            requiresImmediateNotification: true,
-            notificationDeadlineHours: 60,
-            reportingDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-            remediationTimelineDays: 30,
-            maximumPenalty: 1900000, // $1.9M per HIPAA
-            evidenceRequirements: ['AUDIT_LOGS', 'ACCESS_RECORDS', 'ENCRYPTION_CERTIFICATES'],
-            templateRequired: true,
-            publicDisclosureRequired: true,
-            contactInformation: 'hipaa-compliance@hhs.gov'
-          }
-        ],
-        sysAdmin
-      );
+            securityLevel: 'MAXIMUM',
+            isolationRequirements: {
+              network: { strictIsolation: true, encryptedTraffic: true },
+              data: { encryptionAtRest: true, encryptionInTransit: true },
+              compute: { dedicatedResources: true, secureEnclaves: true },
+            },
+            encryptionRequirements: {
+              algorithm: 'AES-256',
+              keyManagement: 'HSM',
+              rotationPolicy: 'QUARTERLY',
+            },
+            auditRequirements: {
+              logLevel: 'COMPREHENSIVE',
+              retentionYears: 7,
+              tamperProofing: true,
+              realTimeMonitoring: true,
+            },
+            complianceFrameworks: ['HIPAA', 'SOC2_TYPE2'],
+          },
+          [
+            {
+              name: 'HIPAA',
+              version: '2013',
+              regulatoryBody: 'HHS',
+              requiresImmediateNotification: true,
+              notificationDeadlineHours: 60,
+              reportingDeadline: new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000
+              ), // 30 days
+              remediationTimelineDays: 30,
+              maximumPenalty: 1900000, // $1.9M per HIPAA
+              evidenceRequirements: [
+                'AUDIT_LOGS',
+                'ACCESS_RECORDS',
+                'ENCRYPTION_CERTIFICATES',
+              ],
+              templateRequired: true,
+              publicDisclosureRequired: true,
+              contactInformation: 'hipaa-compliance@hhs.gov',
+            },
+          ],
+          sysAdmin
+        );
 
       console.log('Healthcare tenant security initialized:', {
         tenantId: healthcareSecurityContext.tenantId,
         securityLevel: healthcareSecurityContext.securityLevel,
-        complianceFrameworks: healthcareSecurityContext.complianceFrameworks.map(f => f.name),
-        isolationBoundaries: healthcareSecurityContext.isolationBoundaries.length
+        complianceFrameworks:
+          healthcareSecurityContext.complianceFrameworks.map(f => f.name),
+        isolationBoundaries:
+          healthcareSecurityContext.isolationBoundaries.length,
       });
 
       // Initialize security for financial tenant (PCI-DSS compliance)
-      const financialSecurityContext = await this.securityManager.initializeTenantSecurity(
-        'TENANT-FINANCIAL-001',
-        {
-          securityLevel: 'HIGH',
-          isolationRequirements: {
-            network: { strictIsolation: true, encryptedTraffic: true },
-            data: { encryptionAtRest: true, tokenization: true },
-            compute: { isolatedProcessing: true }
-          },
-          encryptionRequirements: {
-            algorithm: 'AES-256',
-            keyManagement: 'DEDICATED_HSM',
-            rotationPolicy: 'MONTHLY'
-          },
-          auditRequirements: {
-            logLevel: 'DETAILED',
-            retentionYears: 5,
-            tamperProofing: true,
-            realTimeMonitoring: true
-          },
-          complianceFrameworks: ['PCI_DSS', 'SOC2_TYPE2', 'SOX']
-        },
-        [
+      const financialSecurityContext =
+        await this.securityManager.initializeTenantSecurity(
+          'TENANT-FINANCIAL-001',
           {
-            name: 'PCI_DSS',
-            version: '4.0',
-            regulatoryBody: 'PCI_SSC',
-            requiresImmediateNotification: true,
-            notificationDeadlineHours: 24,
-            reportingDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-            remediationTimelineDays: 90,
-            maximumPenalty: 500000, // $500K typical fine
-            evidenceRequirements: ['TRANSACTION_LOGS', 'SECURITY_ASSESSMENTS', 'COMPLIANCE_SCANS'],
-            templateRequired: false,
-            publicDisclosureRequired: false,
-            contactInformation: 'security@pcisecuritystandards.org'
-          }
-        ],
-        sysAdmin
-      );
+            securityLevel: 'HIGH',
+            isolationRequirements: {
+              network: { strictIsolation: true, encryptedTraffic: true },
+              data: { encryptionAtRest: true, tokenization: true },
+              compute: { isolatedProcessing: true },
+            },
+            encryptionRequirements: {
+              algorithm: 'AES-256',
+              keyManagement: 'DEDICATED_HSM',
+              rotationPolicy: 'MONTHLY',
+            },
+            auditRequirements: {
+              logLevel: 'DETAILED',
+              retentionYears: 5,
+              tamperProofing: true,
+              realTimeMonitoring: true,
+            },
+            complianceFrameworks: ['PCI_DSS', 'SOC2_TYPE2', 'SOX'],
+          },
+          [
+            {
+              name: 'PCI_DSS',
+              version: '4.0',
+              regulatoryBody: 'PCI_SSC',
+              requiresImmediateNotification: true,
+              notificationDeadlineHours: 24,
+              reportingDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+              remediationTimelineDays: 90,
+              maximumPenalty: 500000, // $500K typical fine
+              evidenceRequirements: [
+                'TRANSACTION_LOGS',
+                'SECURITY_ASSESSMENTS',
+                'COMPLIANCE_SCANS',
+              ],
+              templateRequired: false,
+              publicDisclosureRequired: false,
+              contactInformation: 'security@pcisecuritystandards.org',
+            },
+          ],
+          sysAdmin
+        );
 
       console.log('Financial tenant security initialized:', {
         tenantId: financialSecurityContext.tenantId,
         securityLevel: financialSecurityContext.securityLevel,
-        complianceFrameworks: financialSecurityContext.complianceFrameworks.map(f => f.name)
+        complianceFrameworks: financialSecurityContext.complianceFrameworks.map(
+          f => f.name
+        ),
       });
-
     } catch (error) {
       console.error('Security initialization error:', error);
     }
@@ -1306,12 +1516,12 @@ export class MultiTenantSecurityDemo {
           level: 'CRITICAL',
           dataTypes: ['PHI', 'FINANCIAL_RECORDS'],
           estimatedRecordCount: 15000,
-          sensitivityLevel: 'HIGHLY_SENSITIVE'
+          sensitivityLevel: 'HIGHLY_SENSITIVE',
         },
         {
           type: 'DATABASE_MISCONFIGURATION',
           source: 'APPLICATION_QUERY',
-          discoveredBy: 'AUTOMATED_MONITORING'
+          discoveredBy: 'AUTOMATED_MONITORING',
         },
         {
           complianceImpact: [
@@ -1319,17 +1529,30 @@ export class MultiTenantSecurityDemo {
               framework: 'HIPAA',
               severity: 'CRITICAL',
               reportingDeadline: new Date(Date.now() + 60 * 60 * 1000), // 60 minutes
-              evidenceRequirements: ['QUERY_LOGS', 'ACCESS_RECORDS', 'DATA_CLASSIFICATION'],
-              requiresNotification: true
-            }
-          ]
+              evidenceRequirements: [
+                'QUERY_LOGS',
+                'ACCESS_RECORDS',
+                'DATA_CLASSIFICATION',
+              ],
+              requiresNotification: true,
+            },
+          ],
         }
       );
 
       console.log('\n=== Isolation Breach Analysis ===');
-      console.log('Breach Context:', isolationBreach.getSecurityIncidentContext());
-      console.log('Requires Immediate Response:', isolationBreach.requiresImmediateResponse());
-      console.log('Compliance Severity:', isolationBreach.getComplianceSeverity());
+      console.log(
+        'Breach Context:',
+        isolationBreach.getSecurityIncidentContext()
+      );
+      console.log(
+        'Requires Immediate Response:',
+        isolationBreach.requiresImmediateResponse()
+      );
+      console.log(
+        'Compliance Severity:',
+        isolationBreach.getComplianceSeverity()
+      );
 
       const breachAnalysis = isolationBreach.generateBreachAnalysis();
       console.log('\nBreach Analysis:', {
@@ -1337,17 +1560,19 @@ export class MultiTenantSecurityDemo {
         affectedTenants: breachAnalysis.affectedTenants,
         dataExposureRisk: breachAnalysis.dataExposureRisk,
         estimatedImpact: breachAnalysis.estimatedImpact,
-        recoveryTimeEstimate: breachAnalysis.recoveryTimeEstimate
+        recoveryTimeEstimate: breachAnalysis.recoveryTimeEstimate,
       });
 
       const requiredActions = isolationBreach.getRequiredSecurityActions();
-      console.log('\nRequired Security Actions:', requiredActions.map(action => ({
-        type: action.type,
-        priority: action.priority,
-        timeoutMinutes: action.timeoutMinutes,
-        autoExecute: action.autoExecute
-      })));
-
+      console.log(
+        '\nRequired Security Actions:',
+        requiredActions.map(action => ({
+          type: action.type,
+          priority: action.priority,
+          timeoutMinutes: action.timeoutMinutes,
+          autoExecute: action.autoExecute,
+        }))
+      );
     } catch (error) {
       console.error('Error in isolation breach demo:', error);
     }
@@ -1370,51 +1595,66 @@ export class MultiTenantSecurityDemo {
             reportingDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             remediationTimelineDays: 30,
             maximumPenalty: 1900000,
-            evidenceRequirements: ['RETENTION_POLICIES', 'DELETION_LOGS', 'DATA_INVENTORY'],
+            evidenceRequirements: [
+              'RETENTION_POLICIES',
+              'DELETION_LOGS',
+              'DATA_INVENTORY',
+            ],
             templateRequired: true,
             publicDisclosureRequired: true,
-            contactInformation: 'hipaa-compliance@hhs.gov'
-          }
+            contactInformation: 'hipaa-compliance@hhs.gov',
+          },
         ],
         'DATA_RETENTION_VIOLATION',
         {
           level: 'HIGH',
           potentialFine: 500000,
           litigationRisk: 'MEDIUM',
-          reputationalImpact: 'HIGH'
+          reputationalImpact: 'HIGH',
         },
         {
           preservationRequired: true,
           retentionPeriodDays: 2555, // 7 years
           auditTrailCompleteness: 'PARTIAL',
-          evidenceIntegrity: 'INTACT'
+          evidenceIntegrity: 'INTACT',
         }
       );
 
       console.log('\n=== Compliance Violation Analysis ===');
-      console.log('Violation Context:', complianceViolation.getSecurityIncidentContext());
-      console.log('Compliance Severity:', complianceViolation.getComplianceSeverity());
+      console.log(
+        'Violation Context:',
+        complianceViolation.getSecurityIncidentContext()
+      );
+      console.log(
+        'Compliance Severity:',
+        complianceViolation.getComplianceSeverity()
+      );
 
-      const violationReport = complianceViolation.generateComplianceViolationReport();
+      const violationReport =
+        complianceViolation.generateComplianceViolationReport();
       console.log('\nViolation Report:', {
         violationId: violationReport.violationId,
         violatedFrameworks: violationReport.violatedFrameworks,
         regulatoryRisk: violationReport.regulatoryRisk,
         estimatedFinancialImpact: violationReport.estimatedFinancialImpact,
-        reportingRequirements: violationReport.reportingRequirements.map(req => ({
-          framework: req.framework,
-          reportingDeadline: req.reportingDeadline,
-          regulatoryBody: req.regulatoryBody
-        }))
+        reportingRequirements: violationReport.reportingRequirements.map(
+          req => ({
+            framework: req.framework,
+            reportingDeadline: req.reportingDeadline,
+            regulatoryBody: req.regulatoryBody,
+          })
+        ),
       });
 
       const requiredActions = complianceViolation.getRequiredSecurityActions();
-      console.log('\nRequired Actions:', requiredActions.map(action => ({
-        type: action.type,
-        priority: action.priority,
-        description: action.description
-      })));
-
+      console.log(
+        '\nRequired Actions:',
+        requiredActions.map(action => ({
+          type: action.type,
+          priority: action.priority,
+          description: action.description,
+        }))
+      );
     } catch (error) {
       console.error('Error in compliance violation demo:', error);
     }
@@ -1422,35 +1662,39 @@ export class MultiTenantSecurityDemo {
 
   async demonstrateThreatDetectionAndResponse(): Promise<void> {
     try {
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-THREAT-001', 'ENTERPRISE');
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-THREAT-001',
+        'ENTERPRISE'
+      );
 
       // Simulate threat detection and response
-      const threatHandlingResult = await this.securityManager.detectAndHandleThreats(
-        'TENANT-HEALTHCARE-001',
-        {
-          eventId: 'SEC-EVENT-001',
-          eventType: 'ANOMALOUS_DATA_ACCESS',
-          timestamp: new Date(),
-          source: {
-            userId: 'USER-SUSPICIOUS-001',
-            ipAddress: '192.168.1.100',
-            userAgent: 'SuspiciousBot/1.0',
-            location: 'Unknown'
+      const threatHandlingResult =
+        await this.securityManager.detectAndHandleThreats(
+          'TENANT-HEALTHCARE-001',
+          {
+            eventId: 'SEC-EVENT-001',
+            eventType: 'ANOMALOUS_DATA_ACCESS',
+            timestamp: new Date(),
+            source: {
+              userId: 'USER-SUSPICIOUS-001',
+              ipAddress: '192.168.1.100',
+              userAgent: 'SuspiciousBot/1.0',
+              location: 'Unknown',
+            },
+            details: {
+              accessedResources: ['PATIENT_RECORDS', 'BILLING_DATA'],
+              accessPattern: 'BULK_DOWNLOAD',
+              dataVolume: '50GB',
+              timeOfDay: 'OFF_HOURS',
+              anomalyScore: 0.95,
+            },
+            metadata: {
+              correlationId: 'THREAT-CORR-001',
+              sessionId: 'SESSION-SUSPICIOUS-001',
+            },
           },
-          details: {
-            accessedResources: ['PATIENT_RECORDS', 'BILLING_DATA'],
-            accessPattern: 'BULK_DOWNLOAD',
-            dataVolume: '50GB',
-            timeOfDay: 'OFF_HOURS',
-            anomalyScore: 0.95
-          },
-          metadata: {
-            correlationId: 'THREAT-CORR-001',
-            sessionId: 'SESSION-SUSPICIOUS-001'
-          }
-        },
-        sysAdmin
-      );
+          sysAdmin
+        );
 
       console.log('\n=== Threat Detection and Response ===');
       console.log('Threat Handling Result:', {
@@ -1459,27 +1703,27 @@ export class MultiTenantSecurityDemo {
         threatType: threatHandlingResult.threatType,
         handled: threatHandlingResult.handled,
         isolationRequired: threatHandlingResult.isolationRequired,
-        actionsPerformed: threatHandlingResult.actions.length
+        actionsPerformed: threatHandlingResult.actions.length,
       });
 
       if (threatHandlingResult.isolationRequired) {
         // Perform tenant isolation
-        const isolationResult = await this.securityManager.performTenantIsolation(
-          'TENANT-HEALTHCARE-001',
-          'NETWORK_ONLY',
-          'Suspicious bulk data access detected',
-          sysAdmin,
-          60 * 60 * 1000 // 1 hour
-        );
+        const isolationResult =
+          await this.securityManager.performTenantIsolation(
+            'TENANT-HEALTHCARE-001',
+            'NETWORK_ONLY',
+            'Suspicious bulk data access detected',
+            sysAdmin,
+            60 * 60 * 1000 // 1 hour
+          );
 
         console.log('\nTenant Isolation Performed:', {
           isolationId: isolationResult.isolationId,
           isolationLevel: isolationResult.isolationLevel,
           actionsPerformed: isolationResult.actionsPerformed,
-          expiresAt: isolationResult.expiresAt
+          expiresAt: isolationResult.expiresAt,
         });
       }
-
     } catch (error) {
       console.error('Error in threat detection demo:', error);
     }
@@ -1487,7 +1731,10 @@ export class MultiTenantSecurityDemo {
 
   async demonstrateSecurityReporting(): Promise<void> {
     try {
-      const sysAdmin = new SystemAdministratorActor('SYSADMIN-REPORT-001', 'ENTERPRISE');
+      const sysAdmin = new SystemAdministratorActor(
+        'SYSADMIN-REPORT-001',
+        'ENTERPRISE'
+      );
 
       // Generate comprehensive security report
       const securityReport = await this.securityManager.generateSecurityReport(
@@ -1495,7 +1742,7 @@ export class MultiTenantSecurityDemo {
         'COMPREHENSIVE',
         {
           start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-          end: new Date()
+          end: new Date(),
         },
         sysAdmin
       );
@@ -1511,27 +1758,29 @@ export class MultiTenantSecurityDemo {
         complianceStatus: securityReport.complianceStatus,
         isolationMetrics: securityReport.isolationMetrics,
         totalIncidents: securityReport.securityIncidents.length,
-        recommendations: securityReport.recommendations.length
+        recommendations: securityReport.recommendations.length,
       });
 
       // Generate compliance-specific report
-      const complianceReport = await this.securityManager.generateSecurityReport(
-        'ALL',
-        'COMPLIANCE',
-        {
-          start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // 90 days ago
-          end: new Date()
-        },
-        sysAdmin
-      );
+      const complianceReport =
+        await this.securityManager.generateSecurityReport(
+          'ALL',
+          'COMPLIANCE',
+          {
+            start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // 90 days ago
+            end: new Date(),
+          },
+          sysAdmin
+        );
 
       console.log('\nCompliance Report Summary:', {
         reportId: complianceReport.reportId,
         scope: complianceReport.tenantId,
-        complianceDetails: complianceReport.complianceDetails ? 'Included' : 'Not Included',
-        timeframe: complianceReport.timeframe
+        complianceDetails: complianceReport.complianceDetails
+          ? 'Included'
+          : 'Not Included',
+        timeframe: complianceReport.timeframe,
       });
-
     } catch (error) {
       console.error('Error in security reporting demo:', error);
     }
@@ -1541,27 +1790,43 @@ export class MultiTenantSecurityDemo {
 
 ## Key Features
 
-- **Multi-Tenant Security Architecture**: Comprehensive tenant isolation and security context management
-- **Advanced Threat Detection**: Sophisticated threat analysis with automated response capabilities
-- **Compliance Framework Integration**: Built-in support for HIPAA, PCI-DSS, SOC2, GDPR, and other frameworks
-- **Isolation Breach Management**: Advanced detection and handling of tenant isolation breaches
-- **Compliance Violation Handling**: Automated compliance monitoring and violation response
-- **Security Incident Management**: Complete incident lifecycle management with forensic capabilities
-- **Regulatory Reporting**: Automated compliance reporting with framework-specific requirements
-- **Tenant Isolation Controls**: Multiple isolation levels with automated restoration
-- **Audit and Forensics**: Comprehensive audit trails and forensic evidence collection
+- **Multi-Tenant Security Architecture**: Comprehensive tenant isolation and
+  security context management
+- **Advanced Threat Detection**: Sophisticated threat analysis with automated
+  response capabilities
+- **Compliance Framework Integration**: Built-in support for HIPAA, PCI-DSS,
+  SOC2, GDPR, and other frameworks
+- **Isolation Breach Management**: Advanced detection and handling of tenant
+  isolation breaches
+- **Compliance Violation Handling**: Automated compliance monitoring and
+  violation response
+- **Security Incident Management**: Complete incident lifecycle management with
+  forensic capabilities
+- **Regulatory Reporting**: Automated compliance reporting with
+  framework-specific requirements
+- **Tenant Isolation Controls**: Multiple isolation levels with automated
+  restoration
+- **Audit and Forensics**: Comprehensive audit trails and forensic evidence
+  collection
 
 ## Common Pitfalls
 
-- **Over-Isolation**: Balance security with operational efficiency to avoid excessive isolation
-- **Compliance Complexity**: Ensure all framework requirements are properly mapped and tracked
-- **Alert Fatigue**: Tune threat detection thresholds to minimize false positives
+- **Over-Isolation**: Balance security with operational efficiency to avoid
+  excessive isolation
+- **Compliance Complexity**: Ensure all framework requirements are properly
+  mapped and tracked
+- **Alert Fatigue**: Tune threat detection thresholds to minimize false
+  positives
 - **Performance Impact**: Monitor security overhead on system performance
 - **Recovery Planning**: Ensure robust recovery procedures for isolation events
 
 ## Related Examples
 
-- [Enterprise Domain Orchestration](../advanced/example-1.md) - Cross-domain security coordination
-- [Actor Pattern Implementation](../intermediate/example-3.md) - Security actor patterns and contexts
-- [Domain Error Hierarchies](../intermediate/example-2.md) - Security error management patterns
-- [NestJS Security Integration](../frameworks/nestjs/advanced/example-1.md) - Framework-specific security implementations
+- [Enterprise Domain Orchestration](../advanced/example-1.md) - Cross-domain
+  security coordination
+- [Actor Pattern Implementation](../intermediate/example-3.md) - Security actor
+  patterns and contexts
+- [Domain Error Hierarchies](../intermediate/example-2.md) - Security error
+  management patterns
+- [NestJS Security Integration](../frameworks/nestjs/advanced/example-1.md) -
+  Framework-specific security implementations

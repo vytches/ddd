@@ -1,19 +1,24 @@
 # NestJS Enterprise Monitoring
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging + NestJS
-**Complexity**: intermediate
-**Framework**: NestJS
-**Integration**: Enterprise monitoring and observability patterns
-**Dependencies**: @nestjs/common, @vytches-ddd/logging, monitoring integrations
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging + NestJS **Complexity**:
+intermediate **Framework**: NestJS **Integration**: Enterprise monitoring and
+observability patterns **Dependencies**: @nestjs/common, @vytches-ddd/logging,
+monitoring integrations
 
 ## Description
 
-Enterprise monitoring and observability solution with structured logging, metrics correlation, and comprehensive observability patterns. This example demonstrates production-grade monitoring integration for large-scale NestJS applications requiring advanced observability and operational intelligence.
+Enterprise monitoring and observability solution with structured logging,
+metrics correlation, and comprehensive observability patterns. This example
+demonstrates production-grade monitoring integration for large-scale NestJS
+applications requiring advanced observability and operational intelligence.
 
 ## Business Context
 
-Enterprise applications require comprehensive observability that goes beyond basic logging to include metrics correlation, distributed tracing, alerting, and operational intelligence. This integration provides complete visibility into application health, performance trends, business metrics, and system behavior for proactive operational management.
+Enterprise applications require comprehensive observability that goes beyond
+basic logging to include metrics correlation, distributed tracing, alerting, and
+operational intelligence. This integration provides complete visibility into
+application health, performance trends, business metrics, and system behavior
+for proactive operational management.
 
 ## Code Example
 
@@ -50,12 +55,17 @@ export interface MonitoringConfig {
 }
 
 @Injectable()
-export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestroy {
+export class EnterpriseMonitoringService
+  implements OnModuleInit, OnModuleDestroy
+{
   private logger: Logger;
   private metrics = new Map<string, any>();
   private alerts = new Map<string, AlertRule>();
   private metricDefinitions = new Map<string, MetricDefinition>();
-  private timeSeriesData = new Map<string, Array<{ timestamp: Date; value: number }>>();
+  private timeSeriesData = new Map<
+    string,
+    Array<{ timestamp: Date; value: number }>
+  >();
   private activeAlerts = new Map<string, Date>();
   private healthChecks = new Map<string, () => Promise<any>>();
 
@@ -68,7 +78,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   async onModuleInit() {
     this.logger.info('Enterprise monitoring service initializing', {
       service: 'EnterpriseMonitoringService',
-      features: ['metrics', 'alerting', 'health-checks', 'observability']
+      features: ['metrics', 'alerting', 'health-checks', 'observability'],
     });
 
     // Start monitoring loops
@@ -86,15 +96,15 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 
   // ⭐ FOCUS: Application Performance Monitoring (APM)
   recordBusinessMetric(
-    metricName: string, 
-    value: number, 
+    metricName: string,
+    value: number,
     labels: Record<string, string> = {},
     timestamp?: Date
   ): void {
     const metricLogger = this.logger.withContext({
       operation: 'recordBusinessMetric',
       metricName,
-      metricValue: value
+      metricValue: value,
     });
 
     // Record metric value
@@ -106,7 +116,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       value,
       labels,
       timestamp: timestamp || new Date(),
-      metricType: 'business'
+      metricType: 'business',
     });
 
     // Emit event for real-time processing
@@ -114,7 +124,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       metricName,
       value,
       labels,
-      timestamp: timestamp || new Date()
+      timestamp: timestamp || new Date(),
     });
 
     // Check for alert conditions
@@ -135,42 +145,42 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       operation: 'trackRequestMetrics',
       endpoint,
       method,
-      statusCode
+      statusCode,
     });
 
     // Record HTTP metrics
     this.recordMetricValue('http_requests_total', 1, {
       endpoint,
       method,
-      status_code: statusCode.toString()
+      status_code: statusCode.toString(),
     });
 
     this.recordMetricValue('http_request_duration_ms', duration, {
       endpoint,
-      method
+      method,
     });
 
     this.recordMetricValue('http_request_size_bytes', requestSize, {
       endpoint,
-      method
+      method,
     });
 
     this.recordMetricValue('http_response_size_bytes', responseSize, {
       endpoint,
       method,
-      status_code: statusCode.toString()
+      status_code: statusCode.toString(),
     });
 
     // ⭐ FOCUS: Business metrics correlation
     const isError = statusCode >= 400;
     const isSlowRequest = duration > 2000;
-    
+
     if (isError) {
       this.recordMetricValue('http_errors_total', 1, {
         endpoint,
         method,
         status_code: statusCode.toString(),
-        error_type: statusCode >= 500 ? 'server_error' : 'client_error'
+        error_type: statusCode >= 500 ? 'server_error' : 'client_error',
       });
     }
 
@@ -178,7 +188,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       this.recordMetricValue('http_slow_requests_total', 1, {
         endpoint,
         method,
-        duration_category: this.categorizeDuration(duration)
+        duration_category: this.categorizeDuration(duration),
       });
     }
 
@@ -192,7 +202,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       responseSize,
       isError,
       isSlowRequest,
-      performanceCategory: this.categorizeDuration(duration)
+      performanceCategory: this.categorizeDuration(duration),
     });
 
     // User behavior tracking
@@ -204,7 +214,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   // ⭐ FOCUS: System Health Monitoring
   async performSystemHealthCheck(): Promise<any> {
     const healthLogger = this.logger.withContext({
-      operation: 'systemHealthCheck'
+      operation: 'systemHealthCheck',
     });
 
     const healthResults: Record<string, any> = {};
@@ -240,18 +250,18 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
           system: systemHealth.status,
           database: dbHealth.status,
           external_services: servicesHealth.status,
-          application: appHealth.status
+          application: appHealth.status,
         },
-        details: healthResults
+        details: healthResults,
       });
 
       // Record health metrics
       this.recordMetricValue('health_check_score', overallHealth.score, {
-        check_type: 'overall'
+        check_type: 'overall',
       });
 
       this.recordMetricValue('health_check_duration_ms', duration, {
-        check_type: 'comprehensive'
+        check_type: 'comprehensive',
       });
 
       // Alert on health issues
@@ -264,21 +274,20 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
         score: overallHealth.score,
         timestamp: new Date(),
         duration,
-        checks: healthResults
+        checks: healthResults,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
       healthLogger.error('System health check failed', {
         error: error,
         duration,
-        partialResults: healthResults
+        partialResults: healthResults,
       });
 
       // Record failure metrics
       this.recordMetricValue('health_check_failures_total', 1, {
-        error_type: 'health_check_system_failure'
+        error_type: 'health_check_system_failure',
       });
 
       throw error;
@@ -288,7 +297,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   // ⭐ FOCUS: Business Intelligence Metrics
   async generateBusinessIntelligence(): Promise<any> {
     const biLogger = this.logger.withContext({
-      operation: 'generateBusinessIntelligence'
+      operation: 'generateBusinessIntelligence',
     });
 
     const intelligence = {
@@ -298,7 +307,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       errors: await this.analyzeErrorPatterns(),
       capacity: await this.analyzeCapacityTrends(),
       business: await this.analyzeBusinessMetrics(),
-      predictions: await this.generatePredictiveInsights()
+      predictions: await this.generatePredictiveInsights(),
     };
 
     // ⭐ FOCUS: Business intelligence logging
@@ -308,7 +317,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       errorRate: intelligence.errors.overallRate,
       capacityUtilization: intelligence.capacity.currentUtilization,
       keyBusinessMetrics: intelligence.business.keyMetrics,
-      predictiveAlerts: intelligence.predictions.alerts.length
+      predictiveAlerts: intelligence.predictions.alerts.length,
     });
 
     // Log specific insights
@@ -318,8 +327,8 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
         alerts: intelligence.predictions.alerts.map(alert => ({
           type: alert.type,
           severity: alert.severity,
-          prediction: alert.prediction
-        }))
+          prediction: alert.prediction,
+        })),
       });
     }
 
@@ -327,29 +336,40 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   }
 
   // ⭐ FOCUS: Real-time Alerting System
-  private async evaluateAlertConditions(metricName: string, value: number): Promise<void> {
-    const alertsForMetric = Array.from(this.alerts.values())
-      .filter(alert => alert.condition.includes(metricName));
+  private async evaluateAlertConditions(
+    metricName: string,
+    value: number
+  ): Promise<void> {
+    const alertsForMetric = Array.from(this.alerts.values()).filter(alert =>
+      alert.condition.includes(metricName)
+    );
 
     for (const alert of alertsForMetric) {
-      const shouldAlert = await this.evaluateAlertCondition(alert, metricName, value);
-      
+      const shouldAlert = await this.evaluateAlertCondition(
+        alert,
+        metricName,
+        value
+      );
+
       if (shouldAlert && !this.isInCooldown(alert.name)) {
         await this.triggerAlert(alert, { metricName, value });
       }
     }
   }
 
-  private async triggerAlert(alert: AlertRule, context: Record<string, any>): Promise<void> {
+  private async triggerAlert(
+    alert: AlertRule,
+    context: Record<string, any>
+  ): Promise<void> {
     const alertLogger = this.logger.withContext({
       operation: 'triggerAlert',
       alertName: alert.name,
-      severity: alert.severity
+      severity: alert.severity,
     });
 
     // Record alert trigger
     this.activeAlerts.set(alert.name, new Date());
-    
+
     // ⭐ FOCUS: Alert logging with comprehensive context
     alertLogger.error('Alert triggered', {
       alertName: alert.name,
@@ -361,14 +381,14 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       exceedsThresholdBy: context.value - alert.threshold,
       cooldownMinutes: alert.cooldown,
       alertId: this.generateAlertId(),
-      requiresImmediateAction: alert.severity === 'critical'
+      requiresImmediateAction: alert.severity === 'critical',
     });
 
     // Record alert metrics
     this.recordMetricValue('alerts_triggered_total', 1, {
       alert_name: alert.name,
       severity: alert.severity,
-      metric_name: context.metricName
+      metric_name: context.metricName,
     });
 
     // Emit alert event for external integrations
@@ -376,7 +396,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       alert,
       context,
       timestamp: new Date(),
-      alertId: this.generateAlertId()
+      alertId: this.generateAlertId(),
     });
 
     // For critical alerts, could integrate with external alerting systems
@@ -389,14 +409,14 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   createTraceContext(operationName: string, correlationId?: string): any {
     const traceId = correlationId || this.generateTraceId();
     const spanId = this.generateSpanId();
-    
+
     const traceContext = {
       traceId,
       spanId,
       operation: operationName,
       startTime: Date.now(),
       tags: new Map<string, any>(),
-      logs: []
+      logs: [],
     };
 
     // Log trace start
@@ -404,7 +424,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       traceId,
       spanId,
       operation: operationName,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return traceContext;
@@ -412,7 +432,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 
   finishTrace(traceContext: any, success: boolean, error?: Error): void {
     const duration = Date.now() - traceContext.startTime;
-    
+
     // ⭐ FOCUS: Trace completion logging
     this.logger.info('Distributed trace completed', {
       traceId: traceContext.traceId,
@@ -422,17 +442,17 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
       success,
       error: error?.message,
       tags: Object.fromEntries(traceContext.tags),
-      logCount: traceContext.logs.length
+      logCount: traceContext.logs.length,
     });
 
     // Record trace metrics
     this.recordMetricValue('traces_completed_total', 1, {
       operation: traceContext.operation,
-      success: success.toString()
+      success: success.toString(),
     });
 
     this.recordMetricValue('trace_duration_ms', duration, {
-      operation: traceContext.operation
+      operation: traceContext.operation,
     });
   }
 
@@ -446,30 +466,49 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
         cpu: process.cpuUsage(),
         uptime: process.uptime(),
         activeHandles: (process as any)._getActiveHandles().length,
-        eventLoopDelay: await this.measureEventLoopDelay()
+        eventLoopDelay: await this.measureEventLoopDelay(),
       };
 
       // Record system metrics
-      this.recordMetricValue('system_memory_heap_used_bytes', systemMetrics.memory.heapUsed);
-      this.recordMetricValue('system_memory_heap_total_bytes', systemMetrics.memory.heapTotal);
-      this.recordMetricValue('system_cpu_user_microseconds', systemMetrics.cpu.user);
-      this.recordMetricValue('system_cpu_system_microseconds', systemMetrics.cpu.system);
+      this.recordMetricValue(
+        'system_memory_heap_used_bytes',
+        systemMetrics.memory.heapUsed
+      );
+      this.recordMetricValue(
+        'system_memory_heap_total_bytes',
+        systemMetrics.memory.heapTotal
+      );
+      this.recordMetricValue(
+        'system_cpu_user_microseconds',
+        systemMetrics.cpu.user
+      );
+      this.recordMetricValue(
+        'system_cpu_system_microseconds',
+        systemMetrics.cpu.system
+      );
       this.recordMetricValue('system_uptime_seconds', systemMetrics.uptime);
-      this.recordMetricValue('system_active_handles_total', systemMetrics.activeHandles);
-      this.recordMetricValue('system_event_loop_delay_ms', systemMetrics.eventLoopDelay);
+      this.recordMetricValue(
+        'system_active_handles_total',
+        systemMetrics.activeHandles
+      );
+      this.recordMetricValue(
+        'system_event_loop_delay_ms',
+        systemMetrics.eventLoopDelay
+      );
 
       // Log system health
       this.logger.debug('System metrics collected', {
         memoryUsageMB: Math.round(systemMetrics.memory.heapUsed / 1024 / 1024),
-        memoryUtilization: Math.round((systemMetrics.memory.heapUsed / systemMetrics.memory.heapTotal) * 100),
+        memoryUtilization: Math.round(
+          (systemMetrics.memory.heapUsed / systemMetrics.memory.heapTotal) * 100
+        ),
         uptimeHours: Math.round(systemMetrics.uptime / 3600),
         activeHandles: systemMetrics.activeHandles,
-        eventLoopDelayMs: systemMetrics.eventLoopDelay
+        eventLoopDelayMs: systemMetrics.eventLoopDelay,
       });
-
     } catch (error) {
       this.logger.error('Failed to collect system metrics', {
-        error: error
+        error: error,
       });
     }
   }
@@ -481,34 +520,34 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
         name: 'http_requests_total',
         type: 'counter',
         description: 'Total HTTP requests',
-        labels: ['endpoint', 'method', 'status_code']
+        labels: ['endpoint', 'method', 'status_code'],
       },
       {
         name: 'http_request_duration_ms',
         type: 'histogram',
         description: 'HTTP request duration in milliseconds',
         labels: ['endpoint', 'method'],
-        unit: 'ms'
+        unit: 'ms',
       },
       {
         name: 'business_transactions_total',
         type: 'counter',
         description: 'Total business transactions',
-        labels: ['transaction_type', 'status']
+        labels: ['transaction_type', 'status'],
       },
       {
         name: 'system_memory_heap_used_bytes',
         type: 'gauge',
         description: 'System memory heap used',
         labels: [],
-        unit: 'bytes'
+        unit: 'bytes',
       },
       {
         name: 'alerts_triggered_total',
         type: 'counter',
         description: 'Total alerts triggered',
-        labels: ['alert_name', 'severity']
-      }
+        labels: ['alert_name', 'severity'],
+      },
     ];
 
     standardMetrics.forEach(metric => {
@@ -517,7 +556,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 
     this.logger.info('Standard metrics initialized', {
       metricCount: standardMetrics.length,
-      metricTypes: Array.from(new Set(standardMetrics.map(m => m.type)))
+      metricTypes: Array.from(new Set(standardMetrics.map(m => m.type))),
     });
   }
 
@@ -528,22 +567,22 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
         condition: 'system_memory_heap_used_bytes > threshold',
         threshold: 500 * 1024 * 1024, // 500MB
         severity: 'medium',
-        cooldown: 10
+        cooldown: 10,
       },
       {
         name: 'high_error_rate',
         condition: 'http_errors_rate > threshold',
         threshold: 5, // 5%
         severity: 'high',
-        cooldown: 5
+        cooldown: 5,
       },
       {
         name: 'slow_response_time',
         condition: 'avg_http_request_duration_ms > threshold',
         threshold: 5000, // 5 seconds
         severity: 'medium',
-        cooldown: 15
-      }
+        cooldown: 15,
+      },
     ];
 
     standardAlerts.forEach(alert => {
@@ -552,20 +591,20 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 
     this.logger.info('Standard alerts initialized', {
       alertCount: standardAlerts.length,
-      severityLevels: Array.from(new Set(standardAlerts.map(a => a.severity)))
+      severityLevels: Array.from(new Set(standardAlerts.map(a => a.severity))),
     });
   }
 
   private recordMetricValue(
-    metricName: string, 
-    value: number, 
+    metricName: string,
+    value: number,
     labels: Record<string, string> = {},
     timestamp?: Date
   ): void {
     const key = `${metricName}:${JSON.stringify(labels)}`;
     const dataPoint = {
       timestamp: timestamp || new Date(),
-      value
+      value,
     };
 
     if (!this.timeSeriesData.has(key)) {
@@ -586,7 +625,7 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 
   // Additional helper methods...
   private async measureEventLoopDelay(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const start = process.hrtime.bigint();
       setImmediate(() => {
         const delta = process.hrtime.bigint() - start;
@@ -633,31 +672,40 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   }
 
   private async analyzeBusinessMetrics(): Promise<any> {
-    return { 
-      keyMetrics: { 
-        activeUsers: 1250, 
-        transactionsPerHour: 450, 
-        revenueGrowth: 8.5 
-      } 
+    return {
+      keyMetrics: {
+        activeUsers: 1250,
+        transactionsPerHour: 450,
+        revenueGrowth: 8.5,
+      },
     };
   }
 
   private async generatePredictiveInsights(): Promise<any> {
-    return { 
+    return {
       alerts: [
-        { type: 'capacity', severity: 'medium', prediction: 'Capacity will reach 90% in 7 days' }
-      ] 
+        {
+          type: 'capacity',
+          severity: 'medium',
+          prediction: 'Capacity will reach 90% in 7 days',
+        },
+      ],
     };
   }
 
   private async checkSystemResources(): Promise<any> {
     const memory = process.memoryUsage();
     const memoryUsage = (memory.heapUsed / memory.heapTotal) * 100;
-    
+
     return {
-      status: memoryUsage > 90 ? 'critical' : memoryUsage > 70 ? 'warning' : 'healthy',
+      status:
+        memoryUsage > 90
+          ? 'critical'
+          : memoryUsage > 70
+            ? 'warning'
+            : 'healthy',
       memoryUsage,
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 
@@ -666,7 +714,10 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   }
 
   private async checkExternalServices(): Promise<any> {
-    return { status: 'healthy', services: ['payment-api', 'notification-service'] };
+    return {
+      status: 'healthy',
+      services: ['payment-api', 'notification-service'],
+    };
   }
 
   private async checkApplicationHealth(): Promise<any> {
@@ -676,20 +727,33 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   private calculateOverallHealth(healthResults: Record<string, any>): any {
     const scores = Object.values(healthResults).map((health: any) => {
       switch (health.status) {
-        case 'healthy': return 100;
-        case 'warning': return 70;
-        case 'critical': return 30;
-        default: return 0;
+        case 'healthy':
+          return 100;
+        case 'warning':
+          return 70;
+        case 'critical':
+          return 30;
+        default:
+          return 0;
       }
     });
 
     const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const status = averageScore >= 80 ? 'healthy' : averageScore >= 50 ? 'warning' : 'critical';
+    const status =
+      averageScore >= 80
+        ? 'healthy'
+        : averageScore >= 50
+          ? 'warning'
+          : 'critical';
 
     return { status, score: Math.round(averageScore) };
   }
 
-  private async evaluateAlertCondition(alert: AlertRule, metricName: string, value: number): Promise<boolean> {
+  private async evaluateAlertCondition(
+    alert: AlertRule,
+    metricName: string,
+    value: number
+  ): Promise<boolean> {
     // Simplified alert evaluation
     return value > alert.threshold;
   }
@@ -705,40 +769,46 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
     return Date.now() - lastTriggered.getTime() < cooldownMs;
   }
 
-  private async triggerHealthAlert(overallHealth: any, healthResults: any): Promise<void> {
+  private async triggerHealthAlert(
+    overallHealth: any,
+    healthResults: any
+  ): Promise<void> {
     this.logger.warn('System health alert', {
       overallStatus: overallHealth.status,
       healthScore: overallHealth.score,
       unhealthyComponents: Object.entries(healthResults)
         .filter(([_, health]: [string, any]) => health.status !== 'healthy')
-        .map(([component, health]) => ({ component, status: health.status }))
+        .map(([component, health]) => ({ component, status: health.status })),
     });
   }
 
-  private async notifyOpsTeam(alert: AlertRule, context: Record<string, any>): Promise<void> {
+  private async notifyOpsTeam(
+    alert: AlertRule,
+    context: Record<string, any>
+  ): Promise<void> {
     this.logger.error('Critical alert - ops team notified', {
       alertName: alert.name,
       context,
-      notificationSent: true
+      notificationSent: true,
     });
   }
 
   private trackUserBehavior(
-    userId: string, 
-    endpoint: string, 
-    method: string, 
-    statusCode: number, 
+    userId: string,
+    endpoint: string,
+    method: string,
+    statusCode: number,
     duration: number
   ): void {
     this.recordMetricValue('user_requests_total', 1, {
       user_id: userId,
-      endpoint_category: this.categorizeEndpoint(endpoint)
+      endpoint_category: this.categorizeEndpoint(endpoint),
     });
 
     if (statusCode >= 400) {
       this.recordMetricValue('user_errors_total', 1, {
         user_id: userId,
-        error_type: statusCode >= 500 ? 'server_error' : 'client_error'
+        error_type: statusCode >= 500 ? 'server_error' : 'client_error',
       });
     }
   }
@@ -768,8 +838,10 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
   private async exportFinalMetrics(): Promise<void> {
     this.logger.info('Exporting final metrics', {
       totalMetrics: this.metrics.size,
-      timeSeriesDataPoints: Array.from(this.timeSeriesData.values())
-        .reduce((sum, series) => sum + series.length, 0)
+      timeSeriesDataPoints: Array.from(this.timeSeriesData.values()).reduce(
+        (sum, series) => sum + series.length,
+        0
+      ),
     });
   }
 }
@@ -783,19 +855,20 @@ export class EnterpriseMonitoringService implements OnModuleInit, OnModuleDestro
 export class MonitoredUserService {
   private logger: Logger;
 
-  constructor(
-    private readonly monitoring: EnterpriseMonitoringService
-  ) {
+  constructor(private readonly monitoring: EnterpriseMonitoringService) {
     this.logger = Logger.forContext('MonitoredUserService');
   }
 
   async createUser(userData: any): Promise<any> {
     // Create trace context
-    const trace = this.monitoring.createTraceContext('createUser', 'user-creation-flow');
-    
+    const trace = this.monitoring.createTraceContext(
+      'createUser',
+      'user-creation-flow'
+    );
+
     try {
       const startTime = Date.now();
-      
+
       // Business logic
       const user = await this.performUserCreation(userData);
       const duration = Date.now() - startTime;
@@ -803,28 +876,31 @@ export class MonitoredUserService {
       // Record business metrics
       this.monitoring.recordBusinessMetric('users_created_total', 1, {
         user_type: userData.role,
-        registration_source: userData.source || 'direct'
+        registration_source: userData.source || 'direct',
       });
 
-      this.monitoring.recordBusinessMetric('user_creation_duration_ms', duration, {
-        complexity: userData.preferences ? 'complex' : 'simple'
-      });
+      this.monitoring.recordBusinessMetric(
+        'user_creation_duration_ms',
+        duration,
+        {
+          complexity: userData.preferences ? 'complex' : 'simple',
+        }
+      );
 
       // Complete trace
       this.monitoring.finishTrace(trace, true);
 
       return user;
-
     } catch (error) {
       // Record error metrics
       this.monitoring.recordBusinessMetric('user_creation_errors_total', 1, {
         error_type: error.constructor.name,
-        user_type: userData.role
+        user_type: userData.role,
       });
 
       // Complete trace with error
       this.monitoring.finishTrace(trace, false, error);
-      
+
       throw error;
     }
   }
@@ -856,9 +932,9 @@ export class MonitoringInterceptor implements NestInterceptor {
           request.user?.id
         );
       }),
-      catchError((error) => {
+      catchError(error => {
         const duration = Date.now() - startTime;
-        
+
         this.monitoring.trackRequestMetrics(
           request.route?.path || request.url,
           request.method,
@@ -878,13 +954,20 @@ export class MonitoringInterceptor implements NestInterceptor {
 
 ## Key Features
 
-- **Comprehensive APM**: Application Performance Monitoring with business metrics correlation
-- **Real-time Alerting**: Configurable alert rules with severity levels and cooldown periods
-- **System Health Monitoring**: Automated health checks for system resources, database, and external services
-- **Distributed Tracing**: Trace context propagation for complex operation tracking
-- **Business Intelligence**: Performance trends, usage patterns, and predictive insights
-- **Automated Metrics Collection**: System metrics, application metrics, and business KPIs
-- **Observability Integration**: Ready for integration with monitoring systems like Prometheus, Grafana
+- **Comprehensive APM**: Application Performance Monitoring with business
+  metrics correlation
+- **Real-time Alerting**: Configurable alert rules with severity levels and
+  cooldown periods
+- **System Health Monitoring**: Automated health checks for system resources,
+  database, and external services
+- **Distributed Tracing**: Trace context propagation for complex operation
+  tracking
+- **Business Intelligence**: Performance trends, usage patterns, and predictive
+  insights
+- **Automated Metrics Collection**: System metrics, application metrics, and
+  business KPIs
+- **Observability Integration**: Ready for integration with monitoring systems
+  like Prometheus, Grafana
 - **User Behavior Tracking**: User-specific metrics and behavior analysis
 
 ## Configuration
@@ -897,28 +980,34 @@ export const monitoringConfig: MonitoringConfig = {
   enableAlerting: process.env.ENABLE_ALERTING === 'true',
   metricsInterval: 60000, // 1 minute
   retentionDays: 30,
-  exportTargets: ['prometheus', 'grafana', 'datadog'].filter(target => 
-    process.env[`ENABLE_${target.toUpperCase()}`] === 'true'
-  )
+  exportTargets: ['prometheus', 'grafana', 'datadog'].filter(
+    target => process.env[`ENABLE_${target.toUpperCase()}`] === 'true'
+  ),
 };
 ```
 
 ## Best Practices
 
 - **Monitor Business Metrics**: Track KPIs that matter to business operations
-- **Set Appropriate Alert Thresholds**: Avoid alert fatigue with well-tuned thresholds
-- **Use Distributed Tracing**: Track complex operations across service boundaries
-- **Correlate Logs and Metrics**: Use correlation IDs to connect logs with metrics
+- **Set Appropriate Alert Thresholds**: Avoid alert fatigue with well-tuned
+  thresholds
+- **Use Distributed Tracing**: Track complex operations across service
+  boundaries
+- **Correlate Logs and Metrics**: Use correlation IDs to connect logs with
+  metrics
 - **Monitor User Experience**: Track user-centric metrics and behavior patterns
-- **Regular Health Checks**: Implement comprehensive health checks for all system components
-- **Predictive Analytics**: Use trends to predict and prevent issues before they occur
+- **Regular Health Checks**: Implement comprehensive health checks for all
+  system components
+- **Predictive Analytics**: Use trends to predict and prevent issues before they
+  occur
 
 ## Common Pitfalls
 
 - **Metric Explosion**: Avoid creating too many high-cardinality metrics
 - **Alert Fatigue**: Set appropriate cooldown periods and thresholds
 - **Performance Impact**: Monitor the performance impact of monitoring itself
-- **Storage Growth**: Implement appropriate retention policies for time-series data
+- **Storage Growth**: Implement appropriate retention policies for time-series
+  data
 - **Context Loss**: Ensure proper context propagation in distributed systems
 
 ## Related Examples

@@ -3,7 +3,7 @@ import type { CommandBuilder } from 'yargs';
 export const command = 'examples <command>';
 export const describe = 'Manage and work with examples';
 
-export const builder: CommandBuilder = (yargs) => {
+export const builder: CommandBuilder = yargs => {
   return yargs
     .commandDir('.', {
       extensions: ['ts', 'js'],

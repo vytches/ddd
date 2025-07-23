@@ -20,7 +20,6 @@ export { Colors } from './core/utils/colors';
 export { Validation } from './core/utils/validation';
 export { Performance } from './core/utils/performance';
 
-
 // Types
 export * from './types';
 

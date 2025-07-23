@@ -6,13 +6,17 @@
 
 ## Overview
 
-This document presents real-world use cases for basic messaging patterns in the @vytches-ddd/messaging package. These examples demonstrate practical applications in various business domains.
+This document presents real-world use cases for basic messaging patterns in the
+@vytches-ddd/messaging package. These examples demonstrate practical
+applications in various business domains.
 
 ## Use Case 1: E-commerce Order Fulfillment
 
 ### Business Context
 
-An online retailer needs to coordinate multiple services when processing orders: inventory management, payment processing, shipping, and customer notifications. Message reliability is crucial to prevent lost orders or duplicate charges.
+An online retailer needs to coordinate multiple services when processing orders:
+inventory management, payment processing, shipping, and customer notifications.
+Message reliability is crucial to prevent lost orders or duplicate charges.
 
 ### Implementation with @vytches-ddd/messaging
 
@@ -28,34 +32,37 @@ export class OrderFulfillmentService {
   ) {}
 
   async fulfillOrder(orderId: string): Promise<void> {
-    await this.orderRepo.transaction(async (tx) => {
+    await this.orderRepo.transaction(async tx => {
       const order = await this.orderRepo.findById(orderId, tx);
-      
+
       // Update order status
       order.startFulfillment();
       await this.orderRepo.save(order, tx);
-      
+
       // Queue messages for other services (same transaction)
-      await this.outbox.storeMessages([
-        {
-          messageType: 'ReserveInventory',
-          payload: { orderId, items: order.items },
-          targetService: 'inventory-service',
-          priority: MessagePriority.HIGH
-        },
-        {
-          messageType: 'CreateShippingLabel',
-          payload: { orderId, address: order.shippingAddress },
-          targetService: 'shipping-service',
-          priority: MessagePriority.NORMAL
-        },
-        {
-          messageType: 'SendConfirmationEmail',
-          payload: { orderId, customerEmail: order.customerEmail },
-          targetService: 'notification-service',
-          priority: MessagePriority.LOW
-        }
-      ], tx);
+      await this.outbox.storeMessages(
+        [
+          {
+            messageType: 'ReserveInventory',
+            payload: { orderId, items: order.items },
+            targetService: 'inventory-service',
+            priority: MessagePriority.HIGH,
+          },
+          {
+            messageType: 'CreateShippingLabel',
+            payload: { orderId, address: order.shippingAddress },
+            targetService: 'shipping-service',
+            priority: MessagePriority.NORMAL,
+          },
+          {
+            messageType: 'SendConfirmationEmail',
+            payload: { orderId, customerEmail: order.customerEmail },
+            targetService: 'notification-service',
+            priority: MessagePriority.LOW,
+          },
+        ],
+        tx
+      );
     });
   }
 }
@@ -64,7 +71,8 @@ export class OrderFulfillmentService {
 ### Business Impact
 
 - **Reliability**: 99.99% order processing success rate
-- **Performance**: Asynchronous processing reduces order confirmation time by 70%
+- **Performance**: Asynchronous processing reduces order confirmation time by
+  70%
 - **Scalability**: Handle 10,000+ orders/hour during peak times
 - **Cost Savings**: Reduced manual intervention by 95%
 
@@ -72,19 +80,25 @@ export class OrderFulfillmentService {
 
 ### Business Context
 
-A payment processor handles millions of transactions daily, requiring guaranteed delivery of transaction records to multiple systems: fraud detection, accounting, regulatory reporting, and merchant notifications.
+A payment processor handles millions of transactions daily, requiring guaranteed
+delivery of transaction records to multiple systems: fraud detection,
+accounting, regulatory reporting, and merchant notifications.
 
 ### Implementation with @vytches-ddd/messaging
 
 ```typescript
 // transaction-processor.service.ts
-import { MessageProcessor, RetryableMessage, DeadLetterQueue } from '@vytches-ddd/messaging';
+import {
+  MessageProcessor,
+  RetryableMessage,
+  DeadLetterQueue,
+} from '@vytches-ddd/messaging';
 import { PaymentDetails, ExternalApiResponse } from './types';
 
 export class TransactionProcessor {
   private fraudProcessor: MessageProcessor<PaymentDetails>;
   private accountingProcessor: MessageProcessor<PaymentDetails>;
-  
+
   constructor(
     private deadLetterQueue: DeadLetterQueue,
     private fraudApi: IFraudDetectionAPI,
@@ -93,16 +107,16 @@ export class TransactionProcessor {
     // Configure processors with different retry strategies
     this.fraudProcessor = new MessageProcessor({
       processFunction: this.processFraudCheck.bind(this),
-      maxRetries: 10,  // Critical - more retries
+      maxRetries: 10, // Critical - more retries
       initialDelay: 500,
-      maxDelay: 5000
+      maxDelay: 5000,
     });
-    
+
     this.accountingProcessor = new MessageProcessor({
       processFunction: this.processAccounting.bind(this),
-      maxRetries: 3,   // Less critical
+      maxRetries: 3, // Less critical
       initialDelay: 2000,
-      maxDelay: 30000
+      maxDelay: 30000,
     });
   }
 
@@ -114,7 +128,7 @@ export class TransactionProcessor {
       ),
       this.accountingProcessor.process(
         RetryableMessage.create(payment, { priority: 'normal' })
-      )
+      ),
     ]);
   }
 
@@ -125,7 +139,7 @@ export class TransactionProcessor {
       await this.deadLetterQueue.add({
         ...message,
         failureReason: 'High fraud risk',
-        requiresManualReview: true
+        requiresManualReview: true,
       });
     }
   }
@@ -143,13 +157,19 @@ export class TransactionProcessor {
 
 ### Business Context
 
-An IoT platform collects sensor data from thousands of devices. Messages must be processed reliably despite network instability and varying data volumes. Failed messages need special handling based on data criticality.
+An IoT platform collects sensor data from thousands of devices. Messages must be
+processed reliably despite network instability and varying data volumes. Failed
+messages need special handling based on data criticality.
 
 ### Implementation with @vytches-ddd/messaging
 
 ```typescript
 // iot-data-pipeline.service.ts
-import { OutboxMessageHandler, MessageBatch, MessagePriority } from '@vytches-ddd/messaging';
+import {
+  OutboxMessageHandler,
+  MessageBatch,
+  MessagePriority,
+} from '@vytches-ddd/messaging';
 
 export class IoTDataPipeline {
   constructor(
@@ -157,22 +177,27 @@ export class IoTDataPipeline {
     private telemetryStore: ITelemetryStore
   ) {}
 
-  async processSensorData(deviceId: string, readings: SensorReading[]): Promise<void> {
+  async processSensorData(
+    deviceId: string,
+    readings: SensorReading[]
+  ): Promise<void> {
     // Categorize by criticality
-    const critical = readings.filter(r => r.type === 'alarm' || r.value > r.threshold);
+    const critical = readings.filter(
+      r => r.type === 'alarm' || r.value > r.threshold
+    );
     const normal = readings.filter(r => !critical.includes(r));
-    
+
     // Batch processing with different priorities
     const messages = [
       ...critical.map(reading => ({
         messageType: 'CriticalReading',
         payload: { deviceId, reading },
         priority: MessagePriority.CRITICAL,
-        ttl: 300000  // 5 minutes
+        ttl: 300000, // 5 minutes
       })),
-      ...this.batchNormalReadings(deviceId, normal)
+      ...this.batchNormalReadings(deviceId, normal),
     ];
-    
+
     await this.outbox.storeMessages(messages);
   }
 
@@ -183,7 +208,7 @@ export class IoTDataPipeline {
       messageType: 'TelemetryBatch',
       payload: { deviceId, readings: batch },
       priority: MessagePriority.LOW,
-      ttl: 3600000  // 1 hour
+      ttl: 3600000, // 1 hour
     }));
   }
 }
@@ -200,7 +225,8 @@ export class IoTDataPipeline {
 
 ### When to Use Basic Messaging Patterns
 
-1. **Outbox Pattern**: When you need transactional guarantees between database and messaging
+1. **Outbox Pattern**: When you need transactional guarantees between database
+   and messaging
 2. **Retry with DLQ**: For integrating with unreliable external services
 3. **Priority Queues**: When some messages are more critical than others
 4. **Batching**: For high-volume, low-priority data processing
@@ -215,6 +241,12 @@ export class IoTDataPipeline {
 
 ### Next Steps
 
-- Explore [Intermediate Saga Patterns](/packages/messaging/src/examples/intermediate/example-1.md) for complex workflows
-- Review [Advanced Event Streaming](/packages/messaging/src/examples/advanced/example-1.md) for real-time processing
-- Consider [Integration with Event Store](/packages/event-store/src/examples/intermediate/example-1.md) for event sourcing
+- Explore
+  [Intermediate Saga Patterns](/packages/messaging/src/examples/intermediate/example-1.md)
+  for complex workflows
+- Review
+  [Advanced Event Streaming](/packages/messaging/src/examples/advanced/example-1.md)
+  for real-time processing
+- Consider
+  [Integration with Event Store](/packages/event-store/src/examples/intermediate/example-1.md)
+  for event sourcing

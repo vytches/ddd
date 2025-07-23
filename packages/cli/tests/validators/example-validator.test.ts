@@ -23,9 +23,15 @@ describe('ExampleValidator', () => {
     validator = new ExampleValidator('/test/project');
 
     // Mock console methods to avoid noise in tests
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'warn').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     mockExample = {
       id: 'test-example',
@@ -39,7 +45,7 @@ describe('ExampleValidator', () => {
       tags: ['aggregate', 'testing'],
       dependencies: [],
       diSupport: false,
-      frameworkIntegrations: []
+      frameworkIntegrations: [],
     };
 
     mockPackageConfig = {
@@ -55,22 +61,24 @@ describe('ExampleValidator', () => {
           level: 'basic',
           description: 'Basic examples',
           diSupport: false,
-          diRequired: false
-        }
+          diRequired: false,
+        },
       },
-      frameworks: [{
-        name: 'nestjs',
-        displayName: 'NestJS',
-        description: 'NestJS framework',
-        complexityLevels: ['basic'],
-        dependencies: []
-      }],
+      frameworks: [
+        {
+          name: 'nestjs',
+          displayName: 'NestJS',
+          description: 'NestJS framework',
+          complexityLevels: ['basic'],
+          dependencies: [],
+        },
+      ],
       examples: [mockExample],
       tags: {
         core: ['aggregate'],
         integrations: [],
         frameworks: [],
-        patterns: []
+        patterns: [],
       },
       contentConfig: {
         showImportStatements: true,
@@ -79,17 +87,17 @@ describe('ExampleValidator', () => {
         showPerformance: false,
         includeBestPractices: true,
         includeCommonPitfalls: false,
-        showVersionHistory: false
+        showVersionHistory: false,
       },
       llmSupport: {
         enabled: false,
         includePrompts: false,
         includeTips: false,
         includePatterns: false,
-        optimizeForCodeGeneration: false
+        optimizeForCodeGeneration: false,
       },
       sections: [],
-      relatedPackages: {}
+      relatedPackages: {},
     };
 
     // Default mocks
@@ -148,7 +156,9 @@ describe('ExampleValidator', () => {
     });
 
     it('should handle package config loading errors', async () => {
-      vi.spyOn(validator as any, 'loadPackageConfig').mockRejectedValue(new Error('Config not found'));
+      vi.spyOn(validator as any, 'loadPackageConfig').mockRejectedValue(
+        new Error('Config not found')
+      );
 
       const result = await safeRun(async () => {
         return await validator.validatePackage('invalid-package');
@@ -160,7 +170,9 @@ describe('ExampleValidator', () => {
       expect(validationResult!.isValid).toBe(false);
       expect(validationResult!.errors).toHaveLength(1);
       expect(validationResult!.errors[0]!.type).toBe('invalid_config');
-      expect(validationResult!.errors[0]!.message).toContain('Failed to load package configuration');
+      expect(validationResult!.errors[0]!.message).toContain(
+        'Failed to load package configuration'
+      );
     });
 
     it('should validate with syntax checking option', async () => {
@@ -168,11 +180,11 @@ describe('ExampleValidator', () => {
         isValid: true,
         errors: [],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       });
 
       const options: ValidationOptions = {
-        checkSyntax: true
+        checkSyntax: true,
       };
 
       const result = await safeRun(async () => {
@@ -281,7 +293,7 @@ describe('ExampleValidator', () => {
         isValid: false,
         errors: [{ type: 'syntax_error' as const, message: 'Syntax error found' }],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       };
 
       vi.spyOn(validator as any, 'validateSyntax').mockResolvedValue(mockSyntaxResult);
@@ -307,7 +319,7 @@ describe('ExampleValidator', () => {
         isValid: true,
         errors: [],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       });
 
       const result = await safeRun(async () => {
@@ -331,7 +343,7 @@ describe('ExampleValidator', () => {
     it('should detect duplicate example IDs', () => {
       const configWithDuplicates = {
         ...mockPackageConfig,
-        examples: [mockExample, { ...mockExample, name: 'Duplicate Example' }]
+        examples: [mockExample, { ...mockExample, name: 'Duplicate Example' }],
       };
 
       const result = (validator as any).validateConfiguration(configWithDuplicates);
@@ -346,32 +358,36 @@ describe('ExampleValidator', () => {
       const basicExamples = Array.from({ length: 10 }, (_, i) => ({
         ...mockExample,
         id: `basic-example-${i}`,
-        complexity: 'basic' as const
+        complexity: 'basic' as const,
       }));
 
       const configWithManyBasic = {
         ...mockPackageConfig,
-        examples: basicExamples
+        examples: basicExamples,
       };
 
       const result = (validator as any).validateConfiguration(configWithManyBasic);
 
       expect(result.suggestions).toHaveLength(1);
-      expect(result.suggestions[0]!).toContain('Consider adding more intermediate and advanced examples');
+      expect(result.suggestions[0]!).toContain(
+        'Consider adding more intermediate and advanced examples'
+      );
     });
   });
 
   describe('validateSyntax', () => {
     beforeEach(() => {
       const mockFs = {
-        readFile: vi.fn()
+        readFile: vi.fn(),
       };
       vi.doMock('fs/promises', () => mockFs);
     });
 
     it('should validate syntax successfully', async () => {
       const mockFs = await import('fs/promises');
-      vi.mocked(mockFs.readFile).mockResolvedValue('# Valid Markdown\n\n```typescript\nconst valid = true;\n```');
+      vi.mocked(mockFs.readFile).mockResolvedValue(
+        '# Valid Markdown\n\n```typescript\nconst valid = true;\n```'
+      );
 
       const result = await safeRun(async () => {
         return await (validator as any).validateSyntax('/test/file.md', 'test-example');
@@ -385,7 +401,9 @@ describe('ExampleValidator', () => {
 
     it('should detect potential syntax issues', async () => {
       const mockFs = await import('fs/promises');
-      vi.mocked(mockFs.readFile).mockResolvedValue('```typescript { invalid\nconst test = "code";\n```');
+      vi.mocked(mockFs.readFile).mockResolvedValue(
+        '```typescript { invalid\nconst test = "code";\n```'
+      );
 
       const result = await safeRun(async () => {
         return await (validator as any).validateSyntax('/test/file.md', 'test-example');
@@ -424,11 +442,11 @@ describe('ExampleValidator', () => {
             type: 'file_not_found',
             message: 'File not found',
             file: 'missing-example.md',
-            exampleId: 'missing-example'
-          }
+            exampleId: 'missing-example',
+          },
         ],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       });
 
       vi.spyOn(validator as any, 'createMissingFile').mockResolvedValue(undefined);
@@ -453,12 +471,12 @@ describe('ExampleValidator', () => {
     beforeEach(() => {
       const mockFs = {
         mkdir: vi.fn(),
-        writeFile: vi.fn()
+        writeFile: vi.fn(),
       };
       vi.doMock('fs/promises', () => mockFs);
 
       const mockPath = {
-        dirname: vi.fn().mockReturnValue('/test/project/packages/test-package/examples')
+        dirname: vi.fn().mockReturnValue('/test/project/packages/test-package/examples'),
       };
       vi.doMock('path', () => mockPath);
     });
@@ -469,7 +487,11 @@ describe('ExampleValidator', () => {
       vi.mocked(mockFs.writeFile).mockResolvedValue(undefined);
 
       const result = await safeRun(async () => {
-        return await (validator as any).createMissingFile('test-package', 'new-example.md', 'new-example');
+        return await (validator as any).createMissingFile(
+          'test-package',
+          'new-example.md',
+          'new-example'
+        );
       });
       const error = result[0] as Error | undefined;
 
@@ -488,7 +510,11 @@ describe('ExampleValidator', () => {
       vi.mocked(mockFs.writeFile).mockRejectedValue(new Error('Write error'));
 
       const result = await safeRun(async () => {
-        return await (validator as any).createMissingFile('test-package', 'error-example.md', 'error-example');
+        return await (validator as any).createMissingFile(
+          'test-package',
+          'error-example.md',
+          'error-example'
+        );
       });
       const error = result[0] as Error | undefined;
 
@@ -499,7 +525,9 @@ describe('ExampleValidator', () => {
   describe('getExamplePath', () => {
     it('should construct correct example path', () => {
       const path = (validator as any).getExamplePath('test-package', 'example.md');
-      expect(path).toBe(join('/test/project', 'packages', 'test-package', 'examples', 'example.md'));
+      expect(path).toBe(
+        join('/test/project', 'packages', 'test-package', 'examples', 'example.md')
+      );
     });
   });
 
@@ -527,11 +555,11 @@ describe('ExampleValidator', () => {
           mockExample,
           { ...mockExample, id: 'example-2', name: '', file: 'missing.md' }, // Invalid example (error)
           { ...mockExample, id: 'example-3', complexity: 'invalid' }, // Invalid complexity (error)
-          { ...mockExample, id: 'example-4', description: '', tags: [], priority: 'invalid' } // Missing description, no tags, invalid priority (warnings)
-        ]
+          { ...mockExample, id: 'example-4', description: '', tags: [], priority: 'invalid' }, // Missing description, no tags, invalid priority (warnings)
+        ],
       });
 
-      mockExistsSync.mockImplementation((path) => {
+      mockExistsSync.mockImplementation(path => {
         return !String(path).includes('missing.md');
       });
 
@@ -553,7 +581,7 @@ describe('ExampleValidator', () => {
         isValid: true,
         errors: [],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       });
 
       const options: ValidationOptions = {
@@ -562,7 +590,7 @@ describe('ExampleValidator', () => {
         autoFix: true,
         verbose: true,
         checkSyntax: true,
-        checkLinks: true
+        checkLinks: true,
       };
 
       const result = await safeRun(async () => {

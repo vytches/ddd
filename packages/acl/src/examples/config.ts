@@ -1,22 +1,35 @@
-import type { PackageExampleConfig } from "@vytches-ddd/contracts";
+import type { PackageExampleConfig } from '@vytches-ddd/contracts';
 
 export const config: PackageExampleConfig = {
   packageName: 'acl',
   displayName: 'Anti-Corruption Layer',
   version: '1.0.0',
-  description: 'Anti-Corruption Layer provides patterns for integrating with external systems while protecting domain models from external data formats and inconsistencies.',
+  description:
+    'Anti-Corruption Layer provides patterns for integrating with external systems while protecting domain models from external data formats and inconsistencies.',
   domain: 'Integration',
-  patterns: ['anti-corruption-layer', 'data-translation', 'external-integration', 'domain-protection', 'system-boundaries'],
+  patterns: [
+    'anti-corruption-layer',
+    'data-translation',
+    'external-integration',
+    'domain-protection',
+    'system-boundaries',
+  ],
   tags: {
     core: ['acl:core', 'acl:translation', 'acl:protection', 'acl:integration'],
     integrations: ['acl:events', 'acl:resilience', 'acl:policies', 'acl:di'],
     frameworks: ['acl:nestjs', 'acl:express', 'acl:fastify'],
-    patterns: ['acl:translator', 'acl:aggregator', 'acl:orchestrator', 'acl:composite', 'acl:ai-enhanced']
+    patterns: [
+      'acl:translator',
+      'acl:aggregator',
+      'acl:orchestrator',
+      'acl:composite',
+      'acl:ai-enhanced',
+    ],
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/acl', '@vytches-ddd/utils'],
   sections: [
     'hero',
-    'description', 
+    'description',
     'whenToUse',
     'whenNotToUse',
     'examples',
@@ -24,27 +37,28 @@ export const config: PackageExampleConfig = {
     'frameworkIntegration',
     'commonPitfalls',
     'troubleshooting',
-    'performance'
+    'performance',
   ],
   complexityLevels: {
     basic: {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic data translation and external system integration'
+      description: 'Basic data translation and external system integration',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced ACL patterns with caching, resilience, and multi-system orchestration'
+      description: 'Advanced ACL patterns with caching, resilience, and multi-system orchestration',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise ACL orchestration with AI-powered adaptation and global coordination'
-    }
+      description:
+        'Enterprise ACL orchestration with AI-powered adaptation and global coordination',
+    },
   },
   frameworks: [
     {
@@ -52,15 +66,15 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'Integration with NestJS framework',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/common', '@nestjs/core']
+      dependencies: ['@nestjs/common', '@nestjs/core'],
     },
     {
       name: 'express',
       displayName: 'Express',
       description: 'Integration with Express framework',
       complexityLevels: ['basic'],
-      dependencies: ['express']
-    }
+      dependencies: ['express'],
+    },
   ],
   examples: [
     // Basic examples
@@ -72,7 +86,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic ACL implementation for external customer management system integration',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core'],
     },
     {
       id: 'basic-inventory-translation',
@@ -82,7 +96,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Data translation for legacy inventory systems with different schemas',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/core'],
     },
     {
       id: 'basic-use-cases',
@@ -92,7 +106,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Real-world use cases for basic anti-corruption layer patterns',
-      dependencies: ['@vytches-ddd/acl']
+      dependencies: ['@vytches-ddd/acl'],
     },
 
     // Intermediate examples
@@ -104,7 +118,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced ACL with caching, circuit breakers, and fault tolerance',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience', '@vytches-ddd/core']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience', '@vytches-ddd/core'],
     },
     {
       id: 'intermediate-composite-acl',
@@ -114,7 +128,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Composite ACL pattern for orchestrating multiple external systems',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/core']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/core'],
     },
     {
       id: 'intermediate-use-cases',
@@ -124,7 +138,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Advanced use cases with resilience patterns and multi-system coordination',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/resilience'],
     },
 
     // Advanced examples
@@ -136,7 +150,12 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Enterprise-scale ACL orchestration with global coordination and event mesh',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/cqrs', '@vytches-ddd/resilience']
+      dependencies: [
+        '@vytches-ddd/acl',
+        '@vytches-ddd/events',
+        '@vytches-ddd/cqrs',
+        '@vytches-ddd/resilience',
+      ],
     },
     {
       id: 'advanced-ai-powered-acl',
@@ -146,7 +165,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'AI-enhanced ACL with machine learning for adaptive data transformation',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/policies']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/policies'],
     },
     {
       id: 'advanced-use-cases',
@@ -156,7 +175,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Enterprise-scale use cases with AI and global orchestration',
-      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/cqrs']
+      dependencies: ['@vytches-ddd/acl', '@vytches-ddd/events', '@vytches-ddd/cqrs'],
     },
 
     // Framework examples - NestJS
@@ -169,7 +188,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Manual integration of ACL with NestJS using standard DI patterns',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl']
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl'],
     },
     {
       id: 'nestjs-basic-order-manual',
@@ -180,7 +199,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Order processing with external systems using manual NestJS setup',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl']
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl'],
     },
     {
       id: 'nestjs-intermediate-enterprise-di',
@@ -191,7 +210,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Enterprise ACL patterns with VytchesDDD DI integration and advanced features',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di'],
     },
     {
       id: 'nestjs-advanced-orchestration',
@@ -202,7 +221,12 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Enterprise ACL orchestration with global coordination and AI-enhanced features',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di', '@vytches-ddd/resilience']
+      dependencies: [
+        '@nestjs/common',
+        '@vytches-ddd/acl',
+        '@vytches-ddd/di',
+        '@vytches-ddd/resilience',
+      ],
     },
     {
       id: 'nestjs-advanced-implementation',
@@ -213,7 +237,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Overview of advanced ACL implementation patterns in NestJS',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di'],
     },
     {
       id: 'nestjs-advanced-use-cases',
@@ -224,8 +248,8 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Enterprise-scale ACL use cases with NestJS integration',
-      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di']
-    }
+      dependencies: ['@nestjs/common', '@vytches-ddd/acl', '@vytches-ddd/di'],
+    },
   ],
   contentConfig: {
     showImportStatements: true,
@@ -234,35 +258,35 @@ export const config: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
   llmSupport: {
     enabled: true,
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
   relatedPackages: {
-    'resilience': {
+    resilience: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['resilient-acl', 'circuit-breaker-integration']
+      integrationExamples: ['resilient-acl', 'circuit-breaker-integration'],
     },
-    'events': {
+    events: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['event-driven-acl', 'acl-orchestration']
+      integrationExamples: ['event-driven-acl', 'acl-orchestration'],
     },
-    'policies': {
+    policies: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['policy-driven-translation', 'validation-policies']
+      integrationExamples: ['policy-driven-translation', 'validation-policies'],
     },
-    'di': {
+    di: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['enterprise-di-acl', 'service-discovery']
-    }
-  }
+      integrationExamples: ['enterprise-di-acl', 'service-discovery'],
+    },
+  },
 };

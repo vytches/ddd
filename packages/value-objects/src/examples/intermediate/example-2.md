@@ -1,40 +1,46 @@
 # User Profile Composite Value Object - Intermediate Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate
-**Domain**: User Management & Identity
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Intermediate **Domain**: User Management & Identity
 **Patterns**: Composite Value Objects, Nested Validation, Profile Aggregation
 **Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **UserProfile** composite value object that aggregates multiple simpler value objects (PersonName, Email, PhoneNumber, Address) with advanced validation, preference management, and privacy controls. Shows intermediate patterns for complex composite structures with intelligent behavior.
+This example demonstrates creating a **UserProfile** composite value object that
+aggregates multiple simpler value objects (PersonName, Email, PhoneNumber,
+Address) with advanced validation, preference management, and privacy controls.
+Shows intermediate patterns for complex composite structures with intelligent
+behavior.
 
 ## Business Context
 
-UserProfile is essential for user management systems, CRM platforms, and personalization engines. It provides comprehensive user data management with privacy controls, preference handling, and validation across multiple related data types. Critical for user registration, profile management, and personalized experiences.
+UserProfile is essential for user management systems, CRM platforms, and
+personalization engines. It provides comprehensive user data management with
+privacy controls, preference handling, and validation across multiple related
+data types. Critical for user registration, profile management, and personalized
+experiences.
 
 ## Code Example
 
 ```typescript
 // user-profile.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  UserProfileData, 
-  UserPreferences, 
+import {
+  UserProfileData,
+  UserPreferences,
   NotificationPreferences,
   PrivacySettings,
   ProfileMetadata,
-  ValueObjectValidationResult 
+  ValueObjectValidationResult,
 } from './types';
 import { Email } from '../basic/email';
 import { Address } from '../basic/address';
-import { 
+import {
   validateRequired,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 // ✅ Supporting value objects for complex data
@@ -57,7 +63,7 @@ export class PersonName extends ValueObject<PersonNameData> {
       middleName: middleName?.trim(),
       title: title?.trim(),
       suffix: suffix?.trim(),
-      preferredName: preferredName?.trim()
+      preferredName: preferredName?.trim(),
     };
 
     const validation = PersonName.validate(data);
@@ -71,26 +77,32 @@ export class PersonName extends ValueObject<PersonNameData> {
   static validate(data: PersonNameData): ValueObjectValidationResult {
     const results = [
       validateRequired(data.firstName, 'first name'),
-      validateRequired(data.lastName, 'last name')
+      validateRequired(data.lastName, 'last name'),
     ];
 
     // Name length validations
     if (data.firstName && data.firstName.length > 50) {
-      results.push(createFailureResult(['First name cannot exceed 50 characters']));
+      results.push(
+        createFailureResult(['First name cannot exceed 50 characters'])
+      );
     }
     if (data.lastName && data.lastName.length > 50) {
-      results.push(createFailureResult(['Last name cannot exceed 50 characters']));
+      results.push(
+        createFailureResult(['Last name cannot exceed 50 characters'])
+      );
     }
 
     return combineValidationResults(...results);
   }
 
-  getDisplayName(format: PersonNameFormatOptions = { 
-    includeTitle: false, 
-    includeMiddleName: false, 
-    includeSuffix: false,
-    format: 'first-last' 
-  }): string {
+  getDisplayName(
+    format: PersonNameFormatOptions = {
+      includeTitle: false,
+      includeMiddleName: false,
+      includeSuffix: false,
+      format: 'first-last',
+    }
+  ): string {
     if (this.data.preferredName && format.format === 'first-last') {
       return this.data.preferredName;
     }
@@ -131,18 +143,28 @@ export class PersonName extends ValueObject<PersonNameData> {
     return parts.join(' ');
   }
 
-  get firstName(): string { return this.data.firstName; }
-  get lastName(): string { return this.data.lastName; }
-  get middleName(): string | undefined { return this.data.middleName; }
-  get preferredName(): string | undefined { return this.data.preferredName; }
+  get firstName(): string {
+    return this.data.firstName;
+  }
+  get lastName(): string {
+    return this.data.lastName;
+  }
+  get middleName(): string | undefined {
+    return this.data.middleName;
+  }
+  get preferredName(): string | undefined {
+    return this.data.preferredName;
+  }
 
   protected isEqualTo(other: PersonName): boolean {
-    return this.data.firstName === other.data.firstName &&
-           this.data.lastName === other.data.lastName &&
-           this.data.middleName === other.data.middleName &&
-           this.data.title === other.data.title &&
-           this.data.suffix === other.data.suffix &&
-           this.data.preferredName === other.data.preferredName;
+    return (
+      this.data.firstName === other.data.firstName &&
+      this.data.lastName === other.data.lastName &&
+      this.data.middleName === other.data.middleName &&
+      this.data.title === other.data.title &&
+      this.data.suffix === other.data.suffix &&
+      this.data.preferredName === other.data.preferredName
+    );
   }
 }
 
@@ -158,7 +180,10 @@ export class PhoneNumber extends ValueObject<PhoneNumberData> {
     extension?: string
   ): PhoneNumber {
     const cleanNumber = number.replace(/[\s\-\(\)\.]/g, '');
-    const nationalNumber = PhoneNumber.extractNationalNumber(cleanNumber, countryCode);
+    const nationalNumber = PhoneNumber.extractNationalNumber(
+      cleanNumber,
+      countryCode
+    );
     const type = PhoneNumber.detectPhoneType(cleanNumber);
 
     const data: PhoneNumberData = {
@@ -166,7 +191,7 @@ export class PhoneNumber extends ValueObject<PhoneNumberData> {
       countryCode: countryCode.toUpperCase(),
       nationalNumber,
       extension: extension?.trim(),
-      type
+      type,
     };
 
     const validation = PhoneNumber.validate(data);
@@ -180,23 +205,32 @@ export class PhoneNumber extends ValueObject<PhoneNumberData> {
   static validate(data: PhoneNumberData): ValueObjectValidationResult {
     const results = [
       validateRequired(data.number, 'phone number'),
-      validateRequired(data.countryCode, 'country code')
+      validateRequired(data.countryCode, 'country code'),
     ];
 
     // Phone number format validation
     if (data.number && !/^\+?[\d]+$/.test(data.number)) {
-      results.push(createFailureResult(['Phone number must contain only digits and optional + prefix']));
+      results.push(
+        createFailureResult([
+          'Phone number must contain only digits and optional + prefix',
+        ])
+      );
     }
 
     // Length validation
     if (data.number && (data.number.length < 7 || data.number.length > 15)) {
-      results.push(createFailureResult(['Phone number must be between 7 and 15 digits']));
+      results.push(
+        createFailureResult(['Phone number must be between 7 and 15 digits'])
+      );
     }
 
     return combineValidationResults(...results);
   }
 
-  private static extractNationalNumber(number: string, countryCode: string): string {
+  private static extractNationalNumber(
+    number: string,
+    countryCode: string
+  ): string {
     // Simplified - in real implementation would use libphonenumber
     if (number.startsWith('+1') && countryCode === 'US') {
       return number.substring(2);
@@ -207,11 +241,14 @@ export class PhoneNumber extends ValueObject<PhoneNumberData> {
   private static detectPhoneType(number: string): PhoneType {
     // Simplified detection logic
     if (number.length === 10) return 'mobile';
-    if (number.startsWith('800') || number.startsWith('888')) return 'toll-free';
+    if (number.startsWith('800') || number.startsWith('888'))
+      return 'toll-free';
     return 'unknown';
   }
 
-  getFormattedNumber(format: 'national' | 'international' = 'national'): string {
+  getFormattedNumber(
+    format: 'national' | 'international' = 'national'
+  ): string {
     if (format === 'international') {
       return `+${this.data.countryCode === 'US' ? '1' : '1'} ${this.formatForDisplay(this.data.nationalNumber)}`;
     }
@@ -226,14 +263,22 @@ export class PhoneNumber extends ValueObject<PhoneNumberData> {
     return number;
   }
 
-  get number(): string { return this.data.number; }
-  get countryCode(): string { return this.data.countryCode; }
-  get type(): PhoneType { return this.data.type; }
+  get number(): string {
+    return this.data.number;
+  }
+  get countryCode(): string {
+    return this.data.countryCode;
+  }
+  get type(): PhoneType {
+    return this.data.type;
+  }
 
   protected isEqualTo(other: PhoneNumber): boolean {
-    return this.data.number === other.data.number &&
-           this.data.countryCode === other.data.countryCode &&
-           this.data.extension === other.data.extension;
+    return (
+      this.data.number === other.data.number &&
+      this.data.countryCode === other.data.countryCode &&
+      this.data.extension === other.data.extension
+    );
   }
 }
 
@@ -259,21 +304,21 @@ export class UserProfile extends ValueObject<UserProfileData> {
         email: true,
         sms: false,
         push: true,
-        frequency: 'immediate'
+        frequency: 'immediate',
       },
       privacy: {
         profileVisibility: 'private',
         dataSharing: false,
         analytics: false,
-        marketing: false
-      }
+        marketing: false,
+      },
     };
 
     const metadata: ProfileMetadata = {
       createdAt: new Date(),
       lastUpdatedAt: new Date(),
       version: 1,
-      source: 'user_registration'
+      source: 'user_registration',
     };
 
     const data: UserProfileData = {
@@ -282,7 +327,7 @@ export class UserProfile extends ValueObject<UserProfileData> {
       phoneNumber,
       address,
       preferences: { ...defaultPreferences, ...preferences },
-      metadata
+      metadata,
     };
 
     const validation = UserProfile.validate(data);
@@ -306,19 +351,31 @@ export class UserProfile extends ValueObject<UserProfileData> {
     // But we can add business rules here
 
     // Email verification requirement for certain privacy settings
-    if (data.preferences.privacy.profileVisibility === 'public' && 
-        !data.email.isVerified) {
-      results.push(createFailureResult(['Public profiles require verified email addresses']));
+    if (
+      data.preferences.privacy.profileVisibility === 'public' &&
+      !data.email.isVerified
+    ) {
+      results.push(
+        createFailureResult([
+          'Public profiles require verified email addresses',
+        ])
+      );
     }
 
     // Phone requirement for SMS notifications
     if (data.preferences.notifications.sms && !data.phoneNumber) {
-      results.push(createFailureResult(['SMS notifications require a phone number']));
+      results.push(
+        createFailureResult(['SMS notifications require a phone number'])
+      );
     }
 
     // Address requirement for certain features
     if (data.preferences.notifications.frequency === 'daily' && !data.address) {
-      results.push(createFailureResult(['Daily notifications require an address for timezone calculation']));
+      results.push(
+        createFailureResult([
+          'Daily notifications require an address for timezone calculation',
+        ])
+      );
     }
 
     return combineValidationResults(...results);
@@ -329,7 +386,7 @@ export class UserProfile extends ValueObject<UserProfileData> {
     return new UserProfile({
       ...this.data,
       personalInfo,
-      metadata: this.updateMetadata()
+      metadata: this.updateMetadata(),
     });
   }
 
@@ -337,7 +394,7 @@ export class UserProfile extends ValueObject<UserProfileData> {
     const newData = {
       ...this.data,
       email,
-      metadata: this.updateMetadata()
+      metadata: this.updateMetadata(),
     };
 
     // Re-validate with new email
@@ -352,29 +409,33 @@ export class UserProfile extends ValueObject<UserProfileData> {
   updatePreferences(preferences: Partial<UserPreferences>): UserProfile {
     const updatedPreferences = {
       ...this.data.preferences,
-      ...preferences
+      ...preferences,
     };
 
     const newData = {
       ...this.data,
       preferences: updatedPreferences,
-      metadata: this.updateMetadata()
+      metadata: this.updateMetadata(),
     };
 
     const validation = UserProfile.validate(newData);
     if (!validation.isValid) {
-      throw new Error(`Preferences update failed: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Preferences update failed: ${validation.errors.join(', ')}`
+      );
     }
 
     return new UserProfile(newData);
   }
 
-  updateNotificationPreferences(notifications: Partial<NotificationPreferences>): UserProfile {
+  updateNotificationPreferences(
+    notifications: Partial<NotificationPreferences>
+  ): UserProfile {
     return this.updatePreferences({
       notifications: {
         ...this.data.preferences.notifications,
-        ...notifications
-      }
+        ...notifications,
+      },
     });
   }
 
@@ -382,8 +443,8 @@ export class UserProfile extends ValueObject<UserProfileData> {
     return this.updatePreferences({
       privacy: {
         ...this.data.preferences.privacy,
-        ...privacy
-      }
+        ...privacy,
+      },
     });
   }
 
@@ -400,7 +461,7 @@ export class UserProfile extends ValueObject<UserProfileData> {
       { name: 'address', required: false, weight: 15 },
       { name: 'emailVerified', required: false, weight: 15 },
       { name: 'profilePhoto', required: false, weight: 10 },
-      { name: 'preferences', required: true, weight: 5 }
+      { name: 'preferences', required: true, weight: 5 },
     ];
 
     let totalScore = 0;
@@ -419,11 +480,13 @@ export class UserProfile extends ValueObject<UserProfileData> {
           break;
         case 'phoneNumber':
           hasField = !!this.data.phoneNumber;
-          if (!hasField) recommendations.push('Add phone number for SMS notifications');
+          if (!hasField)
+            recommendations.push('Add phone number for SMS notifications');
           break;
         case 'address':
           hasField = !!this.data.address;
-          if (!hasField) recommendations.push('Add address for location-based features');
+          if (!hasField)
+            recommendations.push('Add address for location-based features');
           break;
         case 'emailVerified':
           hasField = this.data.email.isVerified;
@@ -448,7 +511,7 @@ export class UserProfile extends ValueObject<UserProfileData> {
     return {
       score: Math.round(totalScore),
       missingFields,
-      recommendations
+      recommendations,
     };
   }
 
@@ -471,7 +534,9 @@ export class UserProfile extends ValueObject<UserProfileData> {
     if (this.data.preferences.privacy.dataSharing) {
       riskScore += 25;
       concerns.push('Data sharing is enabled');
-      recommendations.push('Consider disabling data sharing for better privacy');
+      recommendations.push(
+        'Consider disabling data sharing for better privacy'
+      );
     }
 
     // Marketing consent
@@ -487,8 +552,10 @@ export class UserProfile extends ValueObject<UserProfileData> {
     }
 
     // Unverified email with public profile
-    if (!this.data.email.isVerified && 
-        this.data.preferences.privacy.profileVisibility === 'public') {
+    if (
+      !this.data.email.isVerified &&
+      this.data.preferences.privacy.profileVisibility === 'public'
+    ) {
       riskScore += 20;
       concerns.push('Unverified email with public profile');
       recommendations.push('Verify your email address');
@@ -537,7 +604,9 @@ export class UserProfile extends ValueObject<UserProfileData> {
     if (this.data.preferences.timezone) {
       const timezone = this.data.preferences.timezone;
       const now = new Date();
-      const timeInTimezone = now.toLocaleString('en-US', { timeZone: timezone });
+      const timeInTimezone = now.toLocaleString('en-US', {
+        timeZone: timezone,
+      });
       bestTimeToContact = `Business hours in ${timezone}`;
     }
 
@@ -547,23 +616,30 @@ export class UserProfile extends ValueObject<UserProfileData> {
       preferences: {
         canEmail: notifications.email && this.data.email.isVerified,
         canSMS: notifications.sms && !!this.data.phoneNumber,
-        canPush: notifications.push
+        canPush: notifications.push,
       },
-      bestTimeToContact
+      bestTimeToContact,
     };
   }
 
   // ✅ FOCUS: Profile display methods
-  getDisplayName(format: PersonNameFormatOptions = { format: 'first-last', includeTitle: false, includeMiddleName: false, includeSuffix: false }): string {
+  getDisplayName(
+    format: PersonNameFormatOptions = {
+      format: 'first-last',
+      includeTitle: false,
+      includeMiddleName: false,
+      includeSuffix: false,
+    }
+  ): string {
     return this.data.personalInfo.getDisplayName(format);
   }
 
   getContactSummary(): string {
     const parts: string[] = [];
-    
+
     parts.push(this.getDisplayName());
     parts.push(this.data.email.toString());
-    
+
     if (this.data.phoneNumber) {
       parts.push(this.data.phoneNumber.getFormattedNumber());
     }
@@ -590,37 +666,54 @@ export class UserProfile extends ValueObject<UserProfileData> {
       name: this.getDisplayName(),
       email: this.data.email.toString(),
       phone: this.data.phoneNumber?.getFormattedNumber(),
-      location: this.data.address ? `${this.data.address.city}, ${this.data.address.state}` : undefined,
+      location: this.data.address
+        ? `${this.data.address.city}, ${this.data.address.state}`
+        : undefined,
       verified: this.data.email.isVerified,
       completionScore: completion.score,
-      memberSince: this.data.metadata.createdAt
+      memberSince: this.data.metadata.createdAt,
     };
   }
 
   // ✅ FOCUS: Getters
-  get personalInfo(): PersonName { return this.data.personalInfo; }
-  get email(): Email { return this.data.email; }
-  get phoneNumber(): PhoneNumber | undefined { return this.data.phoneNumber; }
-  get address(): Address | undefined { return this.data.address; }
-  get preferences(): UserPreferences { return this.data.preferences; }
-  get metadata(): ProfileMetadata { return this.data.metadata; }
+  get personalInfo(): PersonName {
+    return this.data.personalInfo;
+  }
+  get email(): Email {
+    return this.data.email;
+  }
+  get phoneNumber(): PhoneNumber | undefined {
+    return this.data.phoneNumber;
+  }
+  get address(): Address | undefined {
+    return this.data.address;
+  }
+  get preferences(): UserPreferences {
+    return this.data.preferences;
+  }
+  get metadata(): ProfileMetadata {
+    return this.data.metadata;
+  }
 
   // Helper methods
   private updateMetadata(): ProfileMetadata {
     return {
       ...this.data.metadata,
       lastUpdatedAt: new Date(),
-      version: this.data.metadata.version + 1
+      version: this.data.metadata.version + 1,
     };
   }
 
   // ✅ FOCUS: Value object equality implementation
   protected isEqualTo(other: UserProfile): boolean {
-    return this.data.personalInfo.equals(other.data.personalInfo) &&
-           this.data.email.equals(other.data.email) &&
-           this.phoneNumberEquals(this.data.phoneNumber, other.data.phoneNumber) &&
-           this.addressEquals(this.data.address, other.data.address) &&
-           JSON.stringify(this.data.preferences) === JSON.stringify(other.data.preferences);
+    return (
+      this.data.personalInfo.equals(other.data.personalInfo) &&
+      this.data.email.equals(other.data.email) &&
+      this.phoneNumberEquals(this.data.phoneNumber, other.data.phoneNumber) &&
+      this.addressEquals(this.data.address, other.data.address) &&
+      JSON.stringify(this.data.preferences) ===
+        JSON.stringify(other.data.preferences)
+    );
   }
 
   private phoneNumberEquals(a?: PhoneNumber, b?: PhoneNumber): boolean {
@@ -665,28 +758,22 @@ const address = Address.create(
   'US'
 );
 
-let userProfile = UserProfile.create(
-  name,
-  email,
-  phone,
-  address,
-  {
-    language: 'en-US',
-    timezone: 'America/Chicago',
-    notifications: {
-      email: true,
-      sms: true,
-      push: false,
-      frequency: 'daily'
-    },
-    privacy: {
-      profileVisibility: 'private',
-      dataSharing: false,
-      analytics: true,
-      marketing: false
-    }
-  }
-);
+let userProfile = UserProfile.create(name, email, phone, address, {
+  language: 'en-US',
+  timezone: 'America/Chicago',
+  notifications: {
+    email: true,
+    sms: true,
+    push: false,
+    frequency: 'daily',
+  },
+  privacy: {
+    profileVisibility: 'private',
+    dataSharing: false,
+    analytics: true,
+    marketing: false,
+  },
+});
 
 console.log(userProfile.getDisplayName()); // "Johnny" (preferred name)
 console.log(userProfile.getContactSummary());
@@ -714,11 +801,13 @@ const newPreferences = {
     email: true,
     sms: false,
     push: true,
-    frequency: 'immediate' as const
-  }
+    frequency: 'immediate' as const,
+  },
 };
 
-userProfile = userProfile.updateNotificationPreferences(newPreferences.notifications);
+userProfile = userProfile.updateNotificationPreferences(
+  newPreferences.notifications
+);
 
 console.log('Updated communication:', userProfile.getCommunicationProfile());
 ```
@@ -733,7 +822,7 @@ import { Email } from '../basic/email';
 // ✅ Profile management system
 class ProfileManager {
   private profiles: Map<string, UserProfile> = new Map();
-  
+
   createProfile(profileData: {
     name: { first: string; last: string; middle?: string; preferred?: string };
     email: string;
@@ -741,7 +830,7 @@ class ProfileManager {
     preferences?: any;
   }): { profileId: string; profile: UserProfile; warnings: string[] } {
     const warnings: string[] = [];
-    
+
     // Create name
     const name = PersonName.create(
       profileData.name.first,
@@ -757,7 +846,9 @@ class ProfileManager {
     try {
       email = Email.create(profileData.email);
     } catch (error) {
-      throw new Error(`Invalid email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Invalid email: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
 
     // Check for existing profile with same email
@@ -776,18 +867,29 @@ class ProfileManager {
       }
     }
 
-    const profile = UserProfile.create(name, email, phone, undefined, profileData.preferences);
+    const profile = UserProfile.create(
+      name,
+      email,
+      phone,
+      undefined,
+      profileData.preferences
+    );
     const profileId = this.generateProfileId();
-    
+
     this.profiles.set(profileId, profile);
 
     return { profileId, profile, warnings };
   }
 
   updateProfile(
-    profileId: string, 
+    profileId: string,
     updates: {
-      name?: Partial<{ first: string; last: string; middle?: string; preferred?: string }>;
+      name?: Partial<{
+        first: string;
+        last: string;
+        middle?: string;
+        preferred?: string;
+      }>;
       email?: string;
       phone?: string;
       preferences?: any;
@@ -828,9 +930,10 @@ class ProfileManager {
 
       this.profiles.set(profileId, profile);
       return { profile, warnings };
-
     } catch (error) {
-      throw new Error(`Profile update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Profile update failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -849,7 +952,7 @@ class ProfileManager {
       completion: profile.getCompletionScore(),
       privacy: profile.getPrivacyRiskAssessment(),
       communication: profile.getCommunicationProfile(),
-      summary: profile.getProfileSummary()
+      summary: profile.getProfileSummary(),
     };
   }
 
@@ -862,9 +965,12 @@ class ProfileManager {
     return null;
   }
 
-  getProfilesByCompletionScore(minScore: number): Array<{ id: string; profile: UserProfile; score: number }> {
-    const results: Array<{ id: string; profile: UserProfile; score: number }> = [];
-    
+  getProfilesByCompletionScore(
+    minScore: number
+  ): Array<{ id: string; profile: UserProfile; score: number }> {
+    const results: Array<{ id: string; profile: UserProfile; score: number }> =
+      [];
+
     for (const [id, profile] of this.profiles) {
       const completion = profile.getCompletionScore();
       if (completion.score >= minScore) {
@@ -894,7 +1000,7 @@ class ProfileValidationService {
     // Check for duplicate emails and validation
     profiles.forEach(profile => {
       const emailStr = profile.email.toString();
-      
+
       if (!emailMap.has(emailStr)) {
         emailMap.set(emailStr, []);
       }
@@ -906,7 +1012,10 @@ class ProfileValidationService {
         if (completion.score < 50) {
           invalid.push({
             profile,
-            errors: [`Low completion score: ${completion.score}%`, ...completion.missingFields]
+            errors: [
+              `Low completion score: ${completion.score}%`,
+              ...completion.missingFields,
+            ],
           });
         } else {
           valid.push(profile);
@@ -914,13 +1023,16 @@ class ProfileValidationService {
       } catch (error) {
         invalid.push({
           profile,
-          errors: [error instanceof Error ? error.message : 'Validation failed']
+          errors: [
+            error instanceof Error ? error.message : 'Validation failed',
+          ],
         });
       }
     });
 
     // Find duplicate emails
-    const duplicateEmails: Array<{ email: string; profiles: UserProfile[] }> = [];
+    const duplicateEmails: Array<{ email: string; profiles: UserProfile[] }> =
+      [];
     emailMap.forEach((profileList, email) => {
       if (profileList.length > 1) {
         duplicateEmails.push({ email, profiles: profileList });
@@ -940,8 +1052,8 @@ const { profileId, profile, warnings } = manager.createProfile({
   phone: '5559876543',
   preferences: {
     notifications: { email: true, sms: false, push: true, frequency: 'daily' },
-    privacy: { profileVisibility: 'private', dataSharing: false }
-  }
+    privacy: { profileVisibility: 'private', dataSharing: false },
+  },
 });
 
 console.log(`Created profile: ${profileId}`);
@@ -951,31 +1063,41 @@ const analysis = manager.analyzeProfile(profileId);
 console.log('Profile Analysis:');
 console.log(`- Completion: ${analysis.completion.score}%`);
 console.log(`- Privacy Risk: ${analysis.privacy.riskLevel}`);
-console.log(`- Communication Channels: ${analysis.communication.channels.join(', ')}`);
+console.log(
+  `- Communication Channels: ${analysis.communication.channels.join(', ')}`
+);
 
 // Update profile
 const { profile: updatedProfile } = manager.updateProfile(profileId, {
   preferences: {
-    privacy: { profileVisibility: 'public', dataSharing: true }
-  }
+    privacy: { profileVisibility: 'public', dataSharing: true },
+  },
 });
 
-console.log('Updated privacy risk:', updatedProfile.getPrivacyRiskAssessment().riskLevel);
+console.log(
+  'Updated privacy risk:',
+  updatedProfile.getPrivacyRiskAssessment().riskLevel
+);
 ```
 
 ## Key Features
 
-- **Composite Structure**: Aggregates multiple value objects with intelligent coordination
-- **Nested Validation**: Validates both individual components and their relationships
-- **Profile Analysis**: Completion scoring, privacy risk assessment, and communication profiling
-- **Smart Updates**: Update methods with re-validation and business rule enforcement
+- **Composite Structure**: Aggregates multiple value objects with intelligent
+  coordination
+- **Nested Validation**: Validates both individual components and their
+  relationships
+- **Profile Analysis**: Completion scoring, privacy risk assessment, and
+  communication profiling
+- **Smart Updates**: Update methods with re-validation and business rule
+  enforcement
 - **Privacy Controls**: Advanced privacy settings with risk assessment
 - **Communication Intelligence**: Channel availability and preference analysis
 - **Immutable Updates**: All modifications return new profile instances
 
 ## Common Pitfalls
 
-- **Circular Validation**: Be careful when validating relationships between nested objects
+- **Circular Validation**: Be careful when validating relationships between
+  nested objects
 - **Update Complexity**: Large composite objects can become expensive to update
 - **Deep Equality**: Complex equality comparisons can be performance-intensive
 - **Privacy Compliance**: Ensure privacy settings are consistently enforced
@@ -983,5 +1105,7 @@ console.log('Updated privacy risk:', updatedProfile.getPrivacyRiskAssessment().r
 
 ## Related Examples
 
-- [Date Range Value Object](./example-1.md) - Complex range operations and calculations
-- [Basic Email Value Object](../basic/example-2.md) - Foundation component used in composition
+- [Date Range Value Object](./example-1.md) - Complex range operations and
+  calculations
+- [Basic Email Value Object](../basic/example-2.md) - Foundation component used
+  in composition

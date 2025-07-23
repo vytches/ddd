@@ -1,17 +1,17 @@
 /**
  * @fileoverview Shared utilities for Value Objects examples
- * 
+ *
  * This module provides common utilities and helpers used across all value object
  * examples, ensuring consistency and reducing code duplication.
  */
 
-import { 
-  ValueObjectError, 
-  ValueObjectValidationResult, 
+import type {
+  ValueObjectError,
+  ValueObjectValidationResult,
   ValidationContext,
   SerializationOptions,
   BaseValueObjectData,
-  Currency
+  Currency,
 } from '../types';
 
 // ===== VALIDATION UTILITIES =====
@@ -41,9 +41,7 @@ export function createSuccessResult(): ValueObjectValidationResult {
 export function createFailureResult(
   errors: string[] | ValueObjectError[]
 ): ValueObjectValidationResult {
-  const errorStrings = errors.map(error => 
-    typeof error === 'string' ? error : error.message
-  );
+  const errorStrings = errors.map(error => (typeof error === 'string' ? error : error.message));
   return { isValid: false, errors: errorStrings };
 }
 
@@ -63,9 +61,7 @@ export function combineValidationResults(
     }
   }
 
-  return hasErrors 
-    ? { isValid: false, errors: allErrors }
-    : { isValid: true, errors: [] };
+  return hasErrors ? { isValid: false, errors: allErrors } : { isValid: true, errors: [] };
 }
 
 // ===== SERIALIZATION UTILITIES =====
@@ -76,7 +72,7 @@ export function combineValidationResults(
 export const DEFAULT_SERIALIZATION_OPTIONS: SerializationOptions = {
   includeTypeInfo: false,
   format: 'json',
-  compression: false
+  compression: false,
 };
 
 /**
@@ -87,14 +83,12 @@ export function serializeValueObject<T extends BaseValueObjectData>(
   options: SerializationOptions = DEFAULT_SERIALIZATION_OPTIONS
 ): string {
   const opts = { ...DEFAULT_SERIALIZATION_OPTIONS, ...options };
-  
+
   if (opts.format === 'json') {
-    const payload = opts.includeTypeInfo 
-      ? { ...data, __type: data.constructor.name }
-      : data;
+    const payload = opts.includeTypeInfo ? { ...data, __type: data.constructor.name } : data;
     return JSON.stringify(payload);
   }
-  
+
   throw new Error(`Unsupported serialization format: ${opts.format}`);
 }
 
@@ -106,17 +100,17 @@ export function deserializeValueObject<T extends BaseValueObjectData>(
   options: SerializationOptions = DEFAULT_SERIALIZATION_OPTIONS
 ): T {
   const opts = { ...DEFAULT_SERIALIZATION_OPTIONS, ...options };
-  
+
   if (opts.format === 'json') {
     const parsed = JSON.parse(serialized);
-    
+
     if (opts.includeTypeInfo && parsed.__type) {
       delete parsed.__type;
     }
-    
+
     return parsed as T;
   }
-  
+
   throw new Error(`Unsupported deserialization format: ${opts.format}`);
 }
 
@@ -129,21 +123,21 @@ export function deepEquals(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (typeof a !== typeof b) return false;
-  
+
   if (typeof a === 'object') {
     const aProps = Object.getOwnPropertyNames(a);
     const bProps = Object.getOwnPropertyNames(b);
-    
+
     if (aProps.length !== bProps.length) return false;
-    
+
     for (const prop of aProps) {
       if (!bProps.includes(prop)) return false;
       if (!deepEquals((a as any)[prop], (b as any)[prop])) return false;
     }
-    
+
     return true;
   }
-  
+
   return false;
 }
 
@@ -153,13 +147,13 @@ export function deepEquals(a: unknown, b: unknown): boolean {
 export function createHashCode(data: BaseValueObjectData): number {
   const str = JSON.stringify(data, Object.keys(data).sort());
   let hash = 0;
-  
+
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
-  
+
   return Math.abs(hash);
 }
 
@@ -168,10 +162,7 @@ export function createHashCode(data: BaseValueObjectData): number {
 /**
  * Validates that a value is not null or undefined
  */
-export function validateRequired(
-  value: unknown, 
-  fieldName: string
-): ValueObjectValidationResult {
+export function validateRequired(value: unknown, fieldName: string): ValueObjectValidationResult {
   if (value == null || value === '') {
     return createFailureResult([`${fieldName} is required`]);
   }
@@ -188,18 +179,16 @@ export function validateStringLength(
   fieldName: string
 ): ValueObjectValidationResult {
   const errors: string[] = [];
-  
+
   if (value.length < minLength) {
     errors.push(`${fieldName} must be at least ${minLength} characters`);
   }
-  
+
   if (value.length > maxLength) {
     errors.push(`${fieldName} must not exceed ${maxLength} characters`);
   }
-  
-  return errors.length > 0 
-    ? createFailureResult(errors)
-    : createSuccessResult();
+
+  return errors.length > 0 ? createFailureResult(errors) : createSuccessResult();
 }
 
 /**
@@ -212,18 +201,16 @@ export function validateNumericRange(
   fieldName: string
 ): ValueObjectValidationResult {
   const errors: string[] = [];
-  
+
   if (value < min) {
     errors.push(`${fieldName} must be at least ${min}`);
   }
-  
+
   if (value > max) {
     errors.push(`${fieldName} must not exceed ${max}`);
   }
-  
-  return errors.length > 0 
-    ? createFailureResult(errors)
-    : createSuccessResult();
+
+  return errors.length > 0 ? createFailureResult(errors) : createSuccessResult();
 }
 
 /**
@@ -231,14 +218,14 @@ export function validateNumericRange(
  */
 export function validateEmailFormat(
   email: string,
-  fieldName: string = 'email'
+  fieldName = 'email'
 ): ValueObjectValidationResult {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (!emailRegex.test(email)) {
     return createFailureResult([`${fieldName} must be a valid email address`]);
   }
-  
+
   return createSuccessResult();
 }
 
@@ -247,15 +234,15 @@ export function validateEmailFormat(
  */
 export function validatePhoneFormat(
   phone: string,
-  fieldName: string = 'phone'
+  fieldName = 'phone'
 ): ValueObjectValidationResult {
   // Basic international phone format validation
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-  
-  if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+
+  if (!phoneRegex.test(phone.replace(/[\s\-()]/g, ''))) {
     return createFailureResult([`${fieldName} must be a valid phone number`]);
   }
-  
+
   return createSuccessResult();
 }
 
@@ -264,16 +251,12 @@ export function validatePhoneFormat(
 /**
  * Formats a currency amount with proper precision
  */
-export function formatCurrency(
-  amount: number,
-  currency: Currency,
-  locale: string = 'en-US'
-): string {
+export function formatCurrency(amount: number, currency: Currency, locale = 'en-US'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency.code,
     minimumFractionDigits: currency.decimalPlaces,
-    maximumFractionDigits: currency.decimalPlaces
+    maximumFractionDigits: currency.decimalPlaces,
   }).format(amount);
 }
 
@@ -287,16 +270,16 @@ export function formatPhoneNumber(
 ): string {
   // Simplified phone formatting - in real implementation would use a library
   const cleaned = phoneNumber.replace(/\D/g, '');
-  
+
   if (format === 'international') {
     return `+${countryCode} ${cleaned.substring(countryCode.length)}`;
   }
-  
+
   // Basic US phone formatting as example
   if (cleaned.length === 10) {
     return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}`;
   }
-  
+
   return phoneNumber;
 }
 
@@ -312,19 +295,19 @@ export function formatAddress(
   apartment?: string
 ): string {
   const parts: string[] = [];
-  
+
   if (apartment) {
     parts.push(`${street}, ${apartment}`);
   } else {
     parts.push(street);
   }
-  
+
   parts.push(`${city}, ${state} ${postalCode}`);
-  
+
   if (country !== 'US') {
     parts.push(country);
   }
-  
+
   return parts.join('\n');
 }
 
@@ -334,8 +317,7 @@ export function formatAddress(
  * Generates a unique identifier
  */
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 /**
@@ -356,7 +338,7 @@ export function createValidationContext(
     strict: true,
     customRules: [],
     metadata: {},
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -371,9 +353,12 @@ export const COMMON_CURRENCIES: Map<string, Currency> = new Map([
   ['GBP', { code: 'GBP', symbol: '£', name: 'British Pound', decimalPlaces: 2, isActive: true }],
   ['JPY', { code: 'JPY', symbol: '¥', name: 'Japanese Yen', decimalPlaces: 0, isActive: true }],
   ['CAD', { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', decimalPlaces: 2, isActive: true }],
-  ['AUD', { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', decimalPlaces: 2, isActive: true }],
+  [
+    'AUD',
+    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', decimalPlaces: 2, isActive: true },
+  ],
   ['CHF', { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc', decimalPlaces: 2, isActive: true }],
-  ['CNY', { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', decimalPlaces: 2, isActive: true }]
+  ['CNY', { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', decimalPlaces: 2, isActive: true }],
 ]);
 
 /**
@@ -388,12 +373,12 @@ export function getCurrency(code: string): Currency | undefined {
  */
 export function validateCurrencyCode(
   code: string,
-  fieldName: string = 'currency'
+  fieldName = 'currency'
 ): ValueObjectValidationResult {
   if (!getCurrency(code)) {
     return createFailureResult([`${fieldName} '${code}' is not a supported currency`]);
   }
-  
+
   return createSuccessResult();
 }
 
@@ -402,10 +387,7 @@ export function validateCurrencyCode(
 /**
  * Wraps value object creation with error handling
  */
-export function safeCreate<T>(
-  factory: () => T,
-  errorMessage?: string
-): T | Error {
+export function safeCreate<T>(factory: () => T, errorMessage?: string): T | Error {
   try {
     return factory();
   } catch (error) {
@@ -419,10 +401,7 @@ export function safeCreate<T>(
 /**
  * Validates and throws if invalid
  */
-export function validateOrThrow(
-  result: ValueObjectValidationResult,
-  errorMessage?: string
-): void {
+export function validateOrThrow(result: ValueObjectValidationResult, errorMessage?: string): void {
   if (!result.isValid) {
     const message = errorMessage || result.errors.join('; ');
     throw new Error(message);
@@ -435,24 +414,28 @@ export function validateOrThrow(
  * Type guard for value object validation result
  */
 export function isValidationResult(obj: unknown): obj is ValueObjectValidationResult {
-  return typeof obj === 'object' 
-    && obj !== null 
-    && 'isValid' in obj 
-    && 'errors' in obj
-    && typeof (obj as any).isValid === 'boolean'
-    && Array.isArray((obj as any).errors);
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'isValid' in obj &&
+    'errors' in obj &&
+    typeof (obj as any).isValid === 'boolean' &&
+    Array.isArray((obj as any).errors)
+  );
 }
 
 /**
  * Type guard for value object error
  */
 export function isValueObjectError(obj: unknown): obj is ValueObjectError {
-  return typeof obj === 'object'
-    && obj !== null
-    && 'code' in obj
-    && 'message' in obj
-    && typeof (obj as any).code === 'string'
-    && typeof (obj as any).message === 'string';
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'code' in obj &&
+    'message' in obj &&
+    typeof (obj as any).code === 'string' &&
+    typeof (obj as any).message === 'string'
+  );
 }
 
 /**

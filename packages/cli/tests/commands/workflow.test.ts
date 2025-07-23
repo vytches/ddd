@@ -14,15 +14,15 @@ vi.mock('../../src/core/engines/config-manager');
 vi.mock('../../src/core/utils/chat-history');
 vi.mock('../../src/core/utils/colors', () => ({
   Colors: {
-    bold: vi.fn((text) => text),
-    cyan: vi.fn((text) => text),
-    error: vi.fn((text) => text),
-    info: vi.fn((text) => text),
-    success: vi.fn((text) => text),
-    warning: vi.fn((text) => text),
-    dim: vi.fn((text) => text),
-    green: vi.fn((text) => text),
-    blue: vi.fn((text) => text),
+    bold: vi.fn(text => text),
+    cyan: vi.fn(text => text),
+    error: vi.fn(text => text),
+    info: vi.fn(text => text),
+    success: vi.fn(text => text),
+    warning: vi.fn(text => text),
+    dim: vi.fn(text => text),
+    green: vi.fn(text => text),
+    blue: vi.fn(text => text),
   },
 }));
 
@@ -60,8 +60,10 @@ describe('workflowCommand', () => {
     };
 
     (mockDomainModelingWorkflow as any).mockImplementation(() => mockDomainWorkflowInstance);
-    
-    (mockWorkflowEngine as any).createComponentWorkflow = vi.fn().mockReturnValue(mockComponentWorkflowInstance);
+
+    (mockWorkflowEngine as any).createComponentWorkflow = vi
+      .fn()
+      .mockReturnValue(mockComponentWorkflowInstance);
 
     // Mock chatHistory methods
     (mockChatHistory as any).getSessionHistory = vi.fn().mockReturnValue([]);
@@ -73,8 +75,12 @@ describe('workflowCommand', () => {
     (mockChatHistory as any).getCurrentSession = vi.fn().mockReturnValue(null);
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -83,7 +89,9 @@ describe('workflowCommand', () => {
   describe('command configuration', () => {
     it('should have correct name and description', () => {
       expect(workflowCommand.name).toBe('workflow');
-      expect(workflowCommand.description).toBe('Start interactive AI-powered workflows for domain modeling and generation');
+      expect(workflowCommand.description).toBe(
+        'Start interactive AI-powered workflows for domain modeling and generation'
+      );
       expect(workflowCommand.aliases).toEqual(['w', 'interactive']);
     });
 
@@ -114,7 +122,7 @@ describe('workflowCommand', () => {
 
     it('should have examples', () => {
       expect(workflowCommand.examples).toBeDefined();
-      expect((workflowCommand.examples as any[] || []).length).toBeGreaterThan(0);
+      expect(((workflowCommand.examples as any[]) || []).length).toBeGreaterThan(0);
     });
   });
 
@@ -192,9 +200,7 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Unknown workflow type')
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Unknown workflow type'));
     });
 
     it('should show debug context when debug is enabled', async () => {
@@ -211,9 +217,7 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Final context:')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Final context:'));
     });
   });
 
@@ -246,9 +250,7 @@ describe('workflowCommand', () => {
 
       expect(error).toBeUndefined();
       expect((mockChatHistory as any).getSessionHistory).toHaveBeenCalledWith(10);
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Available Chat Sessions')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Available Chat Sessions'));
     });
 
     it('should show message when no sessions found', async () => {
@@ -262,9 +264,7 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('No chat sessions found')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('No chat sessions found'));
     });
 
     it('should export session when --export is provided', async () => {
@@ -282,7 +282,10 @@ describe('workflowCommand', () => {
 
       expect(error).toBeUndefined();
       expect((mockChatHistory as any).exportSession).toHaveBeenCalledWith('session-123', 'json');
-      expect((mockChatHistory as any).exportSession).toHaveBeenCalledWith('session-123', 'markdown');
+      expect((mockChatHistory as any).exportSession).toHaveBeenCalledWith(
+        'session-123',
+        'markdown'
+      );
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('Session exported successfully')
       );
@@ -330,9 +333,7 @@ describe('workflowCommand', () => {
 
       expect(error).toBeUndefined();
       expect((mockChatHistory as any).resumeSession).toHaveBeenCalledWith('session-123');
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Resumed session')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Resumed session'));
     });
 
     it('should handle resume session not found', async () => {
@@ -346,9 +347,7 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Session not found')
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Session not found'));
     });
 
     it('should handle resume session load failure', async () => {
@@ -363,9 +362,7 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to load session')
-      );
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Failed to load session'));
     });
 
     it('should show recent conversation when resuming session', async () => {
@@ -378,7 +375,11 @@ describe('workflowCommand', () => {
           { role: 'assistant', content: 'First response' },
           { role: 'user', content: 'Second message' },
           { role: 'assistant', content: 'Second response' },
-          { role: 'user', content: 'Third message that is very long and should be truncated after 100 characters to show ellipsis in the output' },
+          {
+            role: 'user',
+            content:
+              'Third message that is very long and should be truncated after 100 characters to show ellipsis in the output',
+          },
         ],
         context: {
           workflowType: 'domain-modeling',
@@ -396,13 +397,9 @@ describe('workflowCommand', () => {
       });
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Recent Conversation')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Recent Conversation'));
       // Check that long messages are truncated
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('...')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('...'));
     });
   });
 

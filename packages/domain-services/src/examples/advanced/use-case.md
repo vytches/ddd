@@ -1,6 +1,7 @@
 ## Advanced Use Case: Financial Services Loan Approval
 
-This example shows a complex domain service managing a multi-step loan approval process with compensating transactions:
+This example shows a complex domain service managing a multi-step loan approval
+process with compensating transactions:
 
 ```typescript
 // loan-approval-workflow.ts
@@ -8,12 +9,12 @@ import { LoanApprovalService } from './services/loan-approval.service';
 import { UnitOfWork } from '@vytches-ddd/repositories';
 import { EventBus } from '@vytches-ddd/events';
 import { Logger } from '@vytches-ddd/logging';
-import { 
+import {
   LoanApprovalCommand,
   CreditCheckService,
   CollateralService,
   RiskAssessmentService,
-  ComplianceService
+  ComplianceService,
 } from './domain';
 
 class LoanApplicationProcessor {
@@ -42,7 +43,7 @@ class LoanApplicationProcessor {
 
   async processApplication(applicationId: string): Promise<ProcessingResult> {
     const startTime = Date.now();
-    
+
     try {
       // Create approval command
       const command: LoanApprovalCommand = {
@@ -51,25 +52,25 @@ class LoanApplicationProcessor {
         priority: await this.determinePriority(applicationId),
         options: {
           fastTrack: false,
-          requireManualReview: false
-        }
+          requireManualReview: false,
+        },
       };
 
       // Process with monitoring
-      this.logger.info('Starting loan approval', { 
+      this.logger.info('Starting loan approval', {
         applicationId,
-        priority: command.priority 
+        priority: command.priority,
       });
 
       const result = await this.approvalService.processLoanApproval(command);
 
       const processingTime = Date.now() - startTime;
-      
+
       if (result.isSuccess()) {
         this.logger.info('Loan approval completed', {
           applicationId,
           status: result.value.status,
-          processingTime
+          processingTime,
         });
 
         // Trigger post-approval workflows
@@ -80,57 +81,61 @@ class LoanApplicationProcessor {
         return {
           success: true,
           application: result.value,
-          processingTime
+          processingTime,
         };
       } else {
         this.logger.error('Loan approval failed', {
           applicationId,
           error: result.error,
-          processingTime
+          processingTime,
         });
 
         return {
           success: false,
           error: result.error,
-          processingTime
+          processingTime,
         };
       }
     } catch (error) {
       this.logger.error('Unexpected error in loan processing', {
         applicationId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       return {
         success: false,
         error: new Error(`System error: ${error.message}`),
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
     }
   }
 
-  private async determinePriority(applicationId: string): Promise<'low' | 'normal' | 'high'> {
+  private async determinePriority(
+    applicationId: string
+  ): Promise<'low' | 'normal' | 'high'> {
     // Business logic to determine priority
     const application = await this.loadApplication(applicationId);
-    
+
     if (application.amount > 1000000) return 'high';
     if (application.customerTier === 'premium') return 'high';
     if (application.processingDeadline < new Date()) return 'high';
-    
+
     return 'normal';
   }
 
-  private async initiatePostApprovalWorkflow(application: LoanApplication): Promise<void> {
+  private async initiatePostApprovalWorkflow(
+    application: LoanApplication
+  ): Promise<void> {
     // Create loan account
     await this.createLoanAccount(application);
-    
+
     // Schedule disbursement
     await this.scheduleDisbursement(application);
-    
+
     // Set up payment schedule
     await this.createPaymentSchedule(application);
-    
+
     // Notify relevant parties
     await this.sendApprovalNotifications(application);
   }
@@ -145,35 +150,57 @@ class LoanApprovalSaga {
   private steps: SagaStep[] = [];
   private completedSteps: string[] = [];
 
-  async execute(applicationId: string): Promise<Result<LoanApplication, Error>> {
+  async execute(
+    applicationId: string
+  ): Promise<Result<LoanApplication, Error>> {
     try {
       // Step 1: Lock application
-      await this.executeStep('lockApplication', async () => {
-        await this.lockApplication(applicationId);
-      }, async () => {
-        await this.unlockApplication(applicationId);
-      });
+      await this.executeStep(
+        'lockApplication',
+        async () => {
+          await this.lockApplication(applicationId);
+        },
+        async () => {
+          await this.unlockApplication(applicationId);
+        }
+      );
 
       // Step 2: Perform credit check
-      const creditScore = await this.executeStep('creditCheck', async () => {
-        return await this.performCreditCheck(applicationId);
-      }, async () => {
-        await this.cancelCreditCheck(applicationId);
-      });
+      const creditScore = await this.executeStep(
+        'creditCheck',
+        async () => {
+          return await this.performCreditCheck(applicationId);
+        },
+        async () => {
+          await this.cancelCreditCheck(applicationId);
+        }
+      );
 
       // Step 3: Evaluate collateral
-      const collateralValue = await this.executeStep('collateralEvaluation', async () => {
-        return await this.evaluateCollateral(applicationId);
-      }, async () => {
-        await this.releaseCollateralEvaluation(applicationId);
-      });
+      const collateralValue = await this.executeStep(
+        'collateralEvaluation',
+        async () => {
+          return await this.evaluateCollateral(applicationId);
+        },
+        async () => {
+          await this.releaseCollateralEvaluation(applicationId);
+        }
+      );
 
       // Step 4: Assess risk
-      const riskLevel = await this.executeStep('riskAssessment', async () => {
-        return await this.assessRisk(applicationId, creditScore, collateralValue);
-      }, async () => {
-        await this.cancelRiskAssessment(applicationId);
-      });
+      const riskLevel = await this.executeStep(
+        'riskAssessment',
+        async () => {
+          return await this.assessRisk(
+            applicationId,
+            creditScore,
+            collateralValue
+          );
+        },
+        async () => {
+          await this.cancelRiskAssessment(applicationId);
+        }
+      );
 
       // Step 5: Final approval
       const approval = await this.executeStep('finalApproval', async () => {
@@ -186,7 +213,6 @@ class LoanApprovalSaga {
       });
 
       return Result.success(approval);
-
     } catch (error) {
       // Compensate in reverse order
       await this.compensate();
@@ -202,11 +228,11 @@ class LoanApprovalSaga {
     try {
       const result = await action();
       this.completedSteps.push(name);
-      
+
       if (compensator) {
         this.steps.push({ name, compensator });
       }
-      
+
       return result;
     } catch (error) {
       throw new Error(`Step ${name} failed: ${error.message}`);
@@ -216,7 +242,7 @@ class LoanApprovalSaga {
   private async compensate(): Promise<void> {
     // Execute compensators in reverse order
     const stepsToCompensate = [...this.steps].reverse();
-    
+
     for (const step of stepsToCompensate) {
       try {
         console.log(`Compensating step: ${step.name}`);
@@ -245,8 +271,8 @@ class AuditedLoanApprovalService extends LoanApprovalService {
       payload: command,
       metadata: {
         userId: command.requestedBy,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     // Execute with event tracking
@@ -255,12 +281,14 @@ class AuditedLoanApprovalService extends LoanApprovalService {
     // Record result
     await this.eventStore.append({
       streamId: `loan-${command.applicationId}`,
-      eventType: result.isSuccess() ? 'LoanApprovalCompleted' : 'LoanApprovalFailed',
+      eventType: result.isSuccess()
+        ? 'LoanApprovalCompleted'
+        : 'LoanApprovalFailed',
       payload: result.isSuccess() ? result.value : result.error,
       metadata: {
         userId: command.requestedBy,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     return result;

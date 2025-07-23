@@ -1,7 +1,7 @@
 # Basic Repository - NestJS DI Integration
 
-**Focus**: Basic IRepository usage with @vytches-ddd/di integration
-**Base Example**: [Basic Generic Repository](../../basic/example-1.md)
+**Focus**: Basic IRepository usage with @vytches-ddd/di integration **Base
+Example**: [Basic Generic Repository](../../basic/example-1.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/repositories, @vytches-ddd/di
 
 ## Service Implementation
@@ -19,7 +19,8 @@ export class UserService {
 
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration for repository access
-    this.userRepository = VytchesDDD.resolve<BaseRepository<User>>('userRepository');
+    this.userRepository =
+      VytchesDDD.resolve<BaseRepository<User>>('userRepository');
   }
 
   // ✅ FOCUS: Thin wrapper around DI-managed repository
@@ -40,7 +41,7 @@ export class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return await this.userRepository.save({ ...user, ...updates });
   }
 
@@ -52,14 +53,14 @@ export class UserService {
   async findActiveUsers(): Promise<User[]> {
     return await this.userRepository.find({
       where: [{ field: 'isActive', operator: 'eq', value: true }],
-      orderBy: [{ field: 'createdAt', direction: 'DESC' }]
+      orderBy: [{ field: 'createdAt', direction: 'DESC' }],
     });
   }
 
   async findUsersByEmail(email: string): Promise<User[]> {
     return await this.userRepository.find({
       where: [{ field: 'email', operator: 'like', value: `%${email}%` }],
-      limit: 10
+      limit: 10,
     });
   }
 
@@ -92,7 +93,7 @@ export class UserRepositoryConfig {
       cacheTTL: 300000, // 5 minutes
       enableOptimisticLocking: true,
       enableAuditing: true,
-      batchSize: 100
+      batchSize: 100,
     });
   }
 }
@@ -103,7 +104,7 @@ export class UserCacheServiceConfig {
     return new UserCacheService({
       provider: 'redis',
       defaultTTL: 300000,
-      maxSize: 10000
+      maxSize: 10000,
     });
   }
 }
@@ -114,7 +115,7 @@ export class UserValidatorConfig {
     return new UserValidator({
       enableEmailValidation: true,
       enableUsernameUniqueness: true,
-      minPasswordLength: 8
+      minPasswordLength: 8,
     });
   }
 }
@@ -132,7 +133,7 @@ import { UserController } from './user.controller';
 @Module({
   providers: [UserService],
   controllers: [UserController],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule implements OnModuleInit {
   async onModuleInit() {
@@ -146,7 +147,15 @@ export class UserModule implements OnModuleInit {
 
 ```typescript
 // user.controller.ts
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserData, UpdateUserData } from './types';
 
@@ -207,11 +216,11 @@ export class UserController {
 ```typescript
 // enhanced-user-di.setup.ts
 import { VytchesDDD, DomainService } from '@vytches-ddd/di';
-import { 
-  BaseRepository, 
+import {
+  BaseRepository,
   CacheService,
   ValidationService,
-  AuditService 
+  AuditService,
 } from '@vytches-ddd/repositories';
 
 // Primary repository with advanced features
@@ -226,7 +235,7 @@ export class EnhancedUserRepositoryConfig {
       enableMetrics: true,
       enableValidation: true,
       batchSize: 100,
-      enableEventSourcing: false // Basic level
+      enableEventSourcing: false, // Basic level
     });
   }
 }
@@ -239,7 +248,7 @@ export class UserCacheServiceConfig {
       provider: 'in-memory', // Simple for basic usage
       defaultTTL: 300000,
       maxSize: 5000,
-      enableMetrics: true
+      enableMetrics: true,
     });
   }
 }
@@ -252,9 +261,9 @@ export class UserValidationServiceConfig {
       rules: {
         email: ['required', 'email', 'unique'],
         username: ['required', 'min:3', 'max:50', 'unique'],
-        password: ['required', 'min:8', 'complexity']
+        password: ['required', 'min:8', 'complexity'],
       },
-      enableAsyncValidation: true
+      enableAsyncValidation: true,
     });
   }
 }
@@ -267,7 +276,7 @@ export class UserAuditServiceConfig {
       enableChangeTracking: true,
       retentionPeriod: 90, // days
       includeUserContext: true,
-      enableCompression: false // Simple for basic usage
+      enableCompression: false, // Simple for basic usage
     });
   }
 }
@@ -279,11 +288,11 @@ export class UserAuditServiceConfig {
 // enhanced-user.service.ts
 import { Injectable } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   BaseRepository,
   CacheService,
   ValidationService,
-  AuditService 
+  AuditService,
 } from '@vytches-ddd/repositories';
 import { User, CreateUserData, UpdateUserData } from './types';
 
@@ -296,9 +305,13 @@ export class EnhancedUserService {
 
   constructor() {
     // ⭐ FOCUS: Multiple DI services for enhanced functionality
-    this.userRepository = VytchesDDD.resolve<BaseRepository<User>>('enhancedUserRepository');
+    this.userRepository = VytchesDDD.resolve<BaseRepository<User>>(
+      'enhancedUserRepository'
+    );
     this.cacheService = VytchesDDD.resolve<CacheService>('userCacheService');
-    this.validationService = VytchesDDD.resolve<ValidationService>('userValidationService');
+    this.validationService = VytchesDDD.resolve<ValidationService>(
+      'userValidationService'
+    );
     this.auditService = VytchesDDD.resolve<AuditService>('userAuditService');
   }
 
@@ -307,7 +320,9 @@ export class EnhancedUserService {
     // Step 1: Validate through DI service
     const validationResult = await this.validationService.validate(userData);
     if (!validationResult.isValid) {
-      throw new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
+      throw new Error(
+        `Validation failed: ${validationResult.errors.join(', ')}`
+      );
     }
 
     // Step 2: Create through repository
@@ -319,7 +334,7 @@ export class EnhancedUserService {
     // Step 4: Audit the creation
     await this.auditService.logAction('USER_CREATED', {
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     return user;
@@ -334,7 +349,7 @@ export class EnhancedUserService {
 
     // Step 2: Fallback to repository
     const user = await this.userRepository.findById(id);
-    
+
     // Step 3: Cache the result if found
     if (user) {
       await this.cacheService.set(`user:${id}`, user, 300000);
@@ -351,13 +366,19 @@ export class EnhancedUserService {
     }
 
     // Step 2: Validate updates
-    const validationResult = await this.validationService.validatePartial(updates);
+    const validationResult =
+      await this.validationService.validatePartial(updates);
     if (!validationResult.isValid) {
-      throw new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
+      throw new Error(
+        `Validation failed: ${validationResult.errors.join(', ')}`
+      );
     }
 
     // Step 3: Update through repository
-    const updatedUser = await this.userRepository.save({ ...existingUser, ...updates });
+    const updatedUser = await this.userRepository.save({
+      ...existingUser,
+      ...updates,
+    });
 
     // Step 4: Update cache
     await this.cacheService.set(`user:${id}`, updatedUser, 300000);
@@ -366,7 +387,7 @@ export class EnhancedUserService {
     await this.auditService.logAction('USER_UPDATED', {
       userId: id,
       changes: updates,
-      previousValues: existingUser
+      previousValues: existingUser,
     });
 
     return updatedUser;
@@ -388,14 +409,14 @@ export class EnhancedUserService {
     // Step 4: Audit the deletion
     await this.auditService.logAction('USER_DELETED', {
       userId: id,
-      email: user.email
+      email: user.email,
     });
   }
 
   // ✅ FOCUS: Cached querying with DI services
   async findActiveUsers(): Promise<User[]> {
     const cacheKey = 'users:active';
-    
+
     // Try cache first
     const cachedUsers = await this.cacheService.get<User[]>(cacheKey);
     if (cachedUsers) {
@@ -405,7 +426,7 @@ export class EnhancedUserService {
     // Fallback to repository
     const users = await this.userRepository.find({
       where: [{ field: 'isActive', operator: 'eq', value: true }],
-      orderBy: [{ field: 'createdAt', direction: 'DESC' }]
+      orderBy: [{ field: 'createdAt', direction: 'DESC' }],
     });
 
     // Cache the results

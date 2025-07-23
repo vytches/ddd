@@ -1,13 +1,17 @@
 # Enterprise Resilience System Implementation
 
-**Focus**: Enterprise resilience system with policies, messaging, and comprehensive fault tolerance  
+**Focus**: Enterprise resilience system with policies, messaging, and
+comprehensive fault tolerance  
 **Domain**: Financial Trading Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/policies, @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/policies,
+@vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates an enterprise-grade resilience system for a financial trading platform that requires:
+This example demonstrates an enterprise-grade resilience system for a financial
+trading platform that requires:
+
 - Policy-driven resilience configuration based on business rules
 - Integration with messaging systems for reliable communication
 - Comprehensive fault tolerance across multiple service boundaries
@@ -18,10 +22,10 @@ This example demonstrates an enterprise-grade resilience system for a financial 
 
 ```typescript
 // resilience-policies.ts
-import { 
-  PolicyBuilder, 
-  PolicyContext, 
-  ISpecification 
+import {
+  PolicyBuilder,
+  PolicyContext,
+  ISpecification,
 } from '@vytches-ddd/policies';
 import { ResilienceConfiguration } from '../types'; // ALWAYS import from app
 
@@ -43,13 +47,15 @@ class CriticalTradingHoursSpec implements ISpecification<any> {
 
 class RegulatoryReportingSpec implements ISpecification<any> {
   isSatisfiedBy(context: any): boolean {
-    return context.requiresRegulatory || context.transactionType === 'large-trader';
+    return (
+      context.requiresRegulatory || context.transactionType === 'large-trader'
+    );
   }
 }
 
 class CustomerTierSpec implements ISpecification<any> {
   constructor(private tier: 'retail' | 'institutional' | 'prime') {}
-  
+
   isSatisfiedBy(context: any): boolean {
     return context.customerTier === this.tier;
   }
@@ -91,7 +97,9 @@ export class ResiliencePolicyEngine {
     .withCode('CRITICAL_HOURS_REQUIRED')
     .build();
 
-  async getResilienceConfiguration(context: any): Promise<ResilienceConfiguration> {
+  async getResilienceConfiguration(
+    context: any
+  ): Promise<ResilienceConfiguration> {
     const policyContext = PolicyContext.create()
       .withUserId(context.userId)
       .withRequestId(context.requestId)
@@ -99,8 +107,16 @@ export class ResiliencePolicyEngine {
       .build();
 
     // Evaluate policies to determine resilience configuration
-    const isHighValue = await this.evaluatePolicy(this.highValuePolicy, context, policyContext);
-    const isCriticalHours = await this.evaluatePolicy(this.criticalHoursPolicy, context, policyContext);
+    const isHighValue = await this.evaluatePolicy(
+      this.highValuePolicy,
+      context,
+      policyContext
+    );
+    const isCriticalHours = await this.evaluatePolicy(
+      this.criticalHoursPolicy,
+      context,
+      policyContext
+    );
     const isInstitutional = context.customerTier === 'institutional';
     const requiresRegulatory = context.requiresRegulatory;
 
@@ -109,13 +125,20 @@ export class ResiliencePolicyEngine {
       isCriticalHours,
       isInstitutional,
       requiresRegulatory,
-      context
+      context,
     });
   }
 
-  private async evaluatePolicy(policy: any, context: any, policyContext: PolicyContext): Promise<boolean> {
+  private async evaluatePolicy(
+    policy: any,
+    context: any,
+    policyContext: PolicyContext
+  ): Promise<boolean> {
     try {
-      const result = await policy.check({ entity: context, context: policyContext });
+      const result = await policy.check({
+        entity: context,
+        context: policyContext,
+      });
       return result.isSuccess();
     } catch (error) {
       // Default to safe configuration on policy evaluation error
@@ -130,7 +153,12 @@ export class ResiliencePolicyEngine {
     requiresRegulatory: boolean;
     context: any;
   }): ResilienceConfiguration {
-    const { isHighValue, isCriticalHours, isInstitutional, requiresRegulatory } = params;
+    const {
+      isHighValue,
+      isCriticalHours,
+      isInstitutional,
+      requiresRegulatory,
+    } = params;
 
     // Base configuration
     let config: ResilienceConfiguration = {
@@ -138,22 +166,22 @@ export class ResiliencePolicyEngine {
         failureThreshold: 5,
         recoveryTimeout: 30000,
         monitoringPeriod: 60000,
-        successThreshold: 3
+        successThreshold: 3,
       },
       retry: {
         maxAttempts: 3,
         baseDelay: 1000,
         maxDelay: 10000,
         backoffMultiplier: 2,
-        jitter: true
+        jitter: true,
       },
       timeout: {
-        timeout: 15000
+        timeout: 15000,
       },
       bulkhead: {
         maxConcurrentCalls: 20,
-        maxQueueSize: 100
-      }
+        maxQueueSize: 100,
+      },
     };
 
     // Apply policy-driven modifications
@@ -186,11 +214,11 @@ export class ResiliencePolicyEngine {
 }
 
 // enterprise-resilience-service.ts
-import { 
+import {
   ResiliencePolicyBuilder,
   CircuitBreakerState,
   ResilienceMetrics,
-  ResilienceContext 
+  ResilienceContext,
 } from '@vytches-ddd/resilience';
 import { UnifiedEventBus } from '@vytches-ddd/events';
 import { OutboxService } from '@vytches-ddd/messaging';
@@ -200,7 +228,7 @@ import { Logger } from '@vytches-ddd/logging';
 // ⭐ Enterprise Resilience Service with Policy Integration
 @DomainService('enterpriseResilienceService', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'TradingPlatform'
+  context: 'TradingPlatform',
 })
 export class EnterpriseResilienceService {
   private logger = Logger.forContext('EnterpriseResilienceService');
@@ -218,7 +246,7 @@ export class EnterpriseResilienceService {
       this.eventBus,
       this.outboxService
     );
-    
+
     this.initializeServicePolicies();
     this.startHealthMonitoring();
   }
@@ -229,44 +257,47 @@ export class EnterpriseResilienceService {
       serviceName: 'trade-execution',
       operationTypes: ['execute', 'validate', 'settle'],
       criticality: 'high',
-      regulatoryRequirements: ['MiFID', 'Dodd-Frank']
+      regulatoryRequirements: ['MiFID', 'Dodd-Frank'],
     });
 
     this.registerServicePolicy('market-data', {
       serviceName: 'market-data',
       operationTypes: ['subscribe', 'fetch', 'stream'],
       criticality: 'critical',
-      regulatoryRequirements: ['SEC', 'CFTC']
+      regulatoryRequirements: ['SEC', 'CFTC'],
     });
 
     this.registerServicePolicy('risk-management', {
       serviceName: 'risk-management',
       operationTypes: ['calculate', 'monitor', 'alert'],
       criticality: 'high',
-      regulatoryRequirements: ['Basel III', 'Solvency II']
+      regulatoryRequirements: ['Basel III', 'Solvency II'],
     });
 
     this.registerServicePolicy('settlement', {
       serviceName: 'settlement',
       operationTypes: ['process', 'confirm', 'reconcile'],
       criticality: 'medium',
-      regulatoryRequirements: ['T+2', 'CSDR']
+      regulatoryRequirements: ['T+2', 'CSDR'],
     });
   }
 
-  private async registerServicePolicy(serviceName: string, config: any): Promise<void> {
+  private async registerServicePolicy(
+    serviceName: string,
+    config: any
+  ): Promise<void> {
     try {
       this.logger.info('Registering service resilience policy', {
         serviceName,
         criticality: config.criticality,
-        operationTypes: config.operationTypes
+        operationTypes: config.operationTypes,
       });
 
       // Get base resilience configuration from policy engine
       const baseConfig = await this.policyEngine.getResilienceConfiguration({
         serviceName,
         criticality: config.criticality,
-        regulatoryRequirements: config.regulatoryRequirements
+        regulatoryRequirements: config.regulatoryRequirements,
       });
 
       // Build resilience policy with messaging integration
@@ -275,26 +306,31 @@ export class EnterpriseResilienceService {
           ...baseConfig.circuitBreaker,
           name: `${serviceName}-circuit-breaker`,
           onStateChange: (previous, current, reason) => {
-            this.handleCircuitBreakerStateChange(serviceName, previous, current, reason);
-          }
+            this.handleCircuitBreakerStateChange(
+              serviceName,
+              previous,
+              current,
+              reason
+            );
+          },
         })
         .withRetry({
           ...baseConfig.retry,
           onRetryAttempt: (attempt, maxAttempts, error) => {
             this.handleRetryAttempt(serviceName, attempt, maxAttempts, error);
-          }
+          },
         })
         .withTimeout({
           ...baseConfig.timeout,
           onTimeout: (timeoutMs, context) => {
             this.handleTimeout(serviceName, timeoutMs, context);
-          }
+          },
         })
         .withBulkhead({
           ...baseConfig.bulkhead,
           onRejection: (reason, context) => {
             this.handleBulkheadRejection(serviceName, reason, context);
-          }
+          },
         })
         .build();
 
@@ -302,13 +338,12 @@ export class EnterpriseResilienceService {
 
       this.logger.info('Service resilience policy registered', {
         serviceName,
-        policyConfiguration: baseConfig
+        policyConfiguration: baseConfig,
       });
-
     } catch (error) {
       this.logger.error('Failed to register service resilience policy', {
         serviceName,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -321,9 +356,11 @@ export class EnterpriseResilienceService {
   ): Promise<Result<T, Error>> {
     try {
       const resiliencePolicy = this.serviceResiliencePolicies.get(serviceName);
-      
+
       if (!resiliencePolicy) {
-        this.logger.warn('No resilience policy found for service', { serviceName });
+        this.logger.warn('No resilience policy found for service', {
+          serviceName,
+        });
         return await this.executeDirectly(operation);
       }
 
@@ -331,7 +368,7 @@ export class EnterpriseResilienceService {
       const dynamicConfig = await this.policyEngine.getResilienceConfiguration({
         serviceName,
         operationName,
-        ...context
+        ...context,
       });
 
       // Update policy configuration if needed
@@ -343,34 +380,43 @@ export class EnterpriseResilienceService {
         operationName,
         correlationId: context.correlationId || `${serviceName}-${Date.now()}`,
         userId: context.userId,
-        metadata: context
+        metadata: context,
       };
 
-      const result = await resiliencePolicy.execute(operation, resilienceContext);
+      const result = await resiliencePolicy.execute(
+        operation,
+        resilienceContext
+      );
 
       // Record success metrics
       this.recordSuccessMetrics(serviceName, operationName, resilienceContext);
 
       return Result.success(result);
-
     } catch (error) {
       this.logger.error('Resilient execution failed', {
         serviceName,
         operationName,
-        error: error.message
+        error: error.message,
       });
 
       // Record failure metrics
       this.recordFailureMetrics(serviceName, operationName, error);
 
       // Trigger failure recovery if needed
-      await this.failureRecoveryOrchestrator.handleFailure(serviceName, operationName, error, context);
+      await this.failureRecoveryOrchestrator.handleFailure(
+        serviceName,
+        operationName,
+        error,
+        context
+      );
 
       return Result.failure(error);
     }
   }
 
-  private async executeDirectly<T>(operation: () => Promise<T>): Promise<Result<T, Error>> {
+  private async executeDirectly<T>(
+    operation: () => Promise<T>
+  ): Promise<Result<T, Error>> {
     try {
       const result = await operation();
       return Result.success(result);
@@ -379,7 +425,10 @@ export class EnterpriseResilienceService {
     }
   }
 
-  private async updatePolicyConfiguration(serviceName: string, config: ResilienceConfiguration): Promise<void> {
+  private async updatePolicyConfiguration(
+    serviceName: string,
+    config: ResilienceConfiguration
+  ): Promise<void> {
     const policy = this.serviceResiliencePolicies.get(serviceName);
     if (policy && policy.updateConfiguration) {
       await policy.updateConfiguration(config);
@@ -396,7 +445,7 @@ export class EnterpriseResilienceService {
       serviceName,
       previousState,
       currentState,
-      reason
+      reason,
     });
 
     // Publish event for monitoring
@@ -407,8 +456,8 @@ export class EnterpriseResilienceService {
         previousState,
         currentState,
         reason,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     // Send critical alert if circuit breaker opens
@@ -419,9 +468,9 @@ export class EnterpriseResilienceService {
           serviceName,
           alertType: 'circuit-breaker-open',
           reason,
-          timestamp: new Date()
+          timestamp: new Date(),
         },
-        priority: 'CRITICAL'
+        priority: 'CRITICAL',
       });
     }
   }
@@ -436,7 +485,7 @@ export class EnterpriseResilienceService {
       serviceName,
       attempt,
       maxAttempts,
-      error: error.message
+      error: error.message,
     });
 
     // Send alert if max retries reached
@@ -447,9 +496,9 @@ export class EnterpriseResilienceService {
           serviceName,
           alertType: 'max-retries-reached',
           error: error.message,
-          timestamp: new Date()
+          timestamp: new Date(),
         },
-        priority: 'HIGH'
+        priority: 'HIGH',
       });
     }
   }
@@ -463,7 +512,7 @@ export class EnterpriseResilienceService {
       serviceName,
       operationName: context.operationName,
       timeoutMs,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     // Send timeout alert
@@ -475,9 +524,9 @@ export class EnterpriseResilienceService {
         alertType: 'operation-timeout',
         timeoutMs,
         correlationId: context.correlationId,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'MEDIUM'
+      priority: 'MEDIUM',
     });
   }
 
@@ -490,7 +539,7 @@ export class EnterpriseResilienceService {
       serviceName,
       operationName: context.operationName,
       reason,
-      correlationId: context.correlationId
+      correlationId: context.correlationId,
     });
 
     // Send capacity alert
@@ -502,9 +551,9 @@ export class EnterpriseResilienceService {
         alertType: 'bulkhead-rejection',
         reason,
         correlationId: context.correlationId,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'HIGH'
+      priority: 'HIGH',
     });
   }
 
@@ -513,7 +562,8 @@ export class EnterpriseResilienceService {
     operationName: string,
     context: ResilienceContext
   ): void {
-    const metrics = this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
+    const metrics =
+      this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
     metrics.successCount++;
     metrics.totalRequests++;
     metrics.lastSuccessTime = new Date();
@@ -525,7 +575,8 @@ export class EnterpriseResilienceService {
     operationName: string,
     error: Error
   ): void {
-    const metrics = this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
+    const metrics =
+      this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
     metrics.failureCount++;
     metrics.totalRequests++;
     metrics.lastFailureTime = new Date();
@@ -541,7 +592,7 @@ export class EnterpriseResilienceService {
       circuitBreakerState: 'CLOSED',
       lastSuccessTime: null,
       lastFailureTime: null,
-      lastFailureReason: null
+      lastFailureReason: null,
     };
   }
 
@@ -556,33 +607,35 @@ export class EnterpriseResilienceService {
     const healthReport = {
       timestamp: new Date(),
       services: Object.fromEntries(this.resilienceMetrics.entries()),
-      overallHealth: this.calculateOverallHealth()
+      overallHealth: this.calculateOverallHealth(),
     };
 
     await this.eventBus.publish({
       eventType: 'ResilienceHealthReport',
-      payload: healthReport
+      payload: healthReport,
     });
   }
 
   private calculateOverallHealth(): { status: string; score: number } {
     const services = Array.from(this.resilienceMetrics.values());
-    
+
     if (services.length === 0) {
       return { status: 'unknown', score: 0 };
     }
 
     const totalRequests = services.reduce((sum, s) => sum + s.totalRequests, 0);
     const totalFailures = services.reduce((sum, s) => sum + s.failureCount, 0);
-    const openCircuits = services.filter(s => s.circuitBreakerState === 'OPEN').length;
+    const openCircuits = services.filter(
+      s => s.circuitBreakerState === 'OPEN'
+    ).length;
 
     let score = 100;
-    
+
     if (totalRequests > 0) {
       const failureRate = totalFailures / totalRequests;
       score -= failureRate * 50;
     }
-    
+
     score -= openCircuits * 25;
 
     let status = 'healthy';
@@ -601,9 +654,10 @@ export class EnterpriseResilienceService {
     policy: any;
     health: string;
   }> {
-    const metrics = this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
+    const metrics =
+      this.resilienceMetrics.get(serviceName) || this.createEmptyMetrics();
     const policy = this.serviceResiliencePolicies.get(serviceName);
-    
+
     let health = 'unknown';
     if (metrics.totalRequests > 0) {
       const successRate = metrics.successCount / metrics.totalRequests;
@@ -621,7 +675,7 @@ export class EnterpriseResilienceService {
 
   async getAllServicesHealth(): Promise<{ [serviceName: string]: any }> {
     const health: { [serviceName: string]: any } = {};
-    
+
     for (const serviceName of this.serviceResiliencePolicies.keys()) {
       health[serviceName] = await this.getServiceHealth(serviceName);
     }
@@ -633,17 +687,17 @@ export class EnterpriseResilienceService {
     const policy = this.serviceResiliencePolicies.get(serviceName);
     if (policy && policy.forceCircuitBreakerOpen) {
       await policy.forceCircuitBreakerOpen();
-      
+
       this.logger.warn('Circuit breaker manually opened', { serviceName });
-      
+
       await this.outboxService.sendMessage({
         type: 'manual-intervention',
         payload: {
           serviceName,
           action: 'circuit-breaker-opened',
-          timestamp: new Date()
+          timestamp: new Date(),
         },
-        priority: 'HIGH'
+        priority: 'HIGH',
       });
     }
   }
@@ -652,17 +706,17 @@ export class EnterpriseResilienceService {
     const policy = this.serviceResiliencePolicies.get(serviceName);
     if (policy && policy.forceCircuitBreakerClosed) {
       await policy.forceCircuitBreakerClosed();
-      
+
       this.logger.info('Circuit breaker manually closed', { serviceName });
-      
+
       await this.outboxService.sendMessage({
         type: 'manual-intervention',
         payload: {
           serviceName,
           action: 'circuit-breaker-closed',
-          timestamp: new Date()
+          timestamp: new Date(),
         },
-        priority: 'MEDIUM'
+        priority: 'MEDIUM',
       });
     }
   }
@@ -671,7 +725,10 @@ export class EnterpriseResilienceService {
 // failure-recovery-orchestrator.ts
 export class FailureRecoveryOrchestrator {
   private logger = Logger.forContext('FailureRecoveryOrchestrator');
-  private recoveryStrategies: Map<string, (serviceName: string, error: Error, context: any) => Promise<void>> = new Map();
+  private recoveryStrategies: Map<
+    string,
+    (serviceName: string, error: Error, context: any) => Promise<void>
+  > = new Map();
 
   constructor(
     private eventBus: UnifiedEventBus,
@@ -681,19 +738,36 @@ export class FailureRecoveryOrchestrator {
   }
 
   private initializeRecoveryStrategies(): void {
-    this.recoveryStrategies.set('trade-execution', this.handleTradeExecutionFailure.bind(this));
-    this.recoveryStrategies.set('market-data', this.handleMarketDataFailure.bind(this));
-    this.recoveryStrategies.set('risk-management', this.handleRiskManagementFailure.bind(this));
-    this.recoveryStrategies.set('settlement', this.handleSettlementFailure.bind(this));
+    this.recoveryStrategies.set(
+      'trade-execution',
+      this.handleTradeExecutionFailure.bind(this)
+    );
+    this.recoveryStrategies.set(
+      'market-data',
+      this.handleMarketDataFailure.bind(this)
+    );
+    this.recoveryStrategies.set(
+      'risk-management',
+      this.handleRiskManagementFailure.bind(this)
+    );
+    this.recoveryStrategies.set(
+      'settlement',
+      this.handleSettlementFailure.bind(this)
+    );
   }
 
-  async handleFailure(serviceName: string, operationName: string, error: Error, context: any): Promise<void> {
+  async handleFailure(
+    serviceName: string,
+    operationName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     try {
       this.logger.error('Handling service failure', {
         serviceName,
         operationName,
         error: error.message,
-        context
+        context,
       });
 
       // Execute service-specific recovery strategy
@@ -712,24 +786,31 @@ export class FailureRecoveryOrchestrator {
           operationName,
           error: error.message,
           recoveryAction: 'automatic',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
-
     } catch (recoveryError) {
       this.logger.error('Recovery strategy failed', {
         serviceName,
         operationName,
         originalError: error.message,
-        recoveryError: recoveryError.message
+        recoveryError: recoveryError.message,
       });
 
       // Escalate to manual intervention
-      await this.escalateToManualIntervention(serviceName, error, recoveryError);
+      await this.escalateToManualIntervention(
+        serviceName,
+        error,
+        recoveryError
+      );
     }
   }
 
-  private async handleTradeExecutionFailure(serviceName: string, error: Error, context: any): Promise<void> {
+  private async handleTradeExecutionFailure(
+    serviceName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     // Critical service - immediate escalation
     await this.outboxService.sendMessage({
       type: 'critical-failure',
@@ -738,13 +819,17 @@ export class FailureRecoveryOrchestrator {
         error: error.message,
         context,
         requiredAction: 'immediate-review',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'CRITICAL'
+      priority: 'CRITICAL',
     });
   }
 
-  private async handleMarketDataFailure(serviceName: string, error: Error, context: any): Promise<void> {
+  private async handleMarketDataFailure(
+    serviceName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     // Attempt to switch to backup market data provider
     await this.outboxService.sendMessage({
       type: 'failover-request',
@@ -753,13 +838,17 @@ export class FailureRecoveryOrchestrator {
         error: error.message,
         context,
         action: 'switch-to-backup-provider',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'HIGH'
+      priority: 'HIGH',
     });
   }
 
-  private async handleRiskManagementFailure(serviceName: string, error: Error, context: any): Promise<void> {
+  private async handleRiskManagementFailure(
+    serviceName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     // Implement risk management failsafe
     await this.outboxService.sendMessage({
       type: 'risk-failsafe',
@@ -768,13 +857,17 @@ export class FailureRecoveryOrchestrator {
         error: error.message,
         context,
         action: 'activate-conservative-limits',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'HIGH'
+      priority: 'HIGH',
     });
   }
 
-  private async handleSettlementFailure(serviceName: string, error: Error, context: any): Promise<void> {
+  private async handleSettlementFailure(
+    serviceName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     // Queue for batch processing
     await this.outboxService.sendMessage({
       type: 'settlement-queue',
@@ -783,13 +876,17 @@ export class FailureRecoveryOrchestrator {
         error: error.message,
         context,
         action: 'queue-for-batch-processing',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'MEDIUM'
+      priority: 'MEDIUM',
     });
   }
 
-  private async handleGenericFailure(serviceName: string, error: Error, context: any): Promise<void> {
+  private async handleGenericFailure(
+    serviceName: string,
+    error: Error,
+    context: any
+  ): Promise<void> {
     // Generic failure handling
     await this.outboxService.sendMessage({
       type: 'generic-failure',
@@ -798,13 +895,17 @@ export class FailureRecoveryOrchestrator {
         error: error.message,
         context,
         action: 'log-and-monitor',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'LOW'
+      priority: 'LOW',
     });
   }
 
-  private async escalateToManualIntervention(serviceName: string, originalError: Error, recoveryError: Error): Promise<void> {
+  private async escalateToManualIntervention(
+    serviceName: string,
+    originalError: Error,
+    recoveryError: Error
+  ): Promise<void> {
     await this.outboxService.sendMessage({
       type: 'manual-intervention-required',
       payload: {
@@ -812,9 +913,9 @@ export class FailureRecoveryOrchestrator {
         originalError: originalError.message,
         recoveryError: recoveryError.message,
         escalationLevel: 'high',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      priority: 'CRITICAL'
+      priority: 'CRITICAL',
     });
   }
 }
@@ -823,7 +924,8 @@ export class FailureRecoveryOrchestrator {
 ## Key Features
 
 - **Policy-Driven Configuration**: Business rules determine resilience behavior
-- **Comprehensive Service Integration**: Resilience patterns across all service boundaries
+- **Comprehensive Service Integration**: Resilience patterns across all service
+  boundaries
 - **Messaging Integration**: Reliable communication through outbox pattern
 - **Automated Recovery**: Orchestrated failure recovery with escalation
 - **Real-time Monitoring**: Continuous health monitoring and metrics
@@ -842,7 +944,9 @@ export class TradingService {
     private riskManager: RiskManager
   ) {}
 
-  async executeTrade(tradeRequest: TradeRequest): Promise<Result<TradeResult, Error>> {
+  async executeTrade(
+    tradeRequest: TradeRequest
+  ): Promise<Result<TradeResult, Error>> {
     try {
       // Execute trade with comprehensive resilience
       const result = await this.resilience.executeWithResilience(
@@ -854,46 +958,56 @@ export class TradingService {
             'market-data',
             'get-current-price',
             () => this.marketDataService.getCurrentPrice(tradeRequest.symbol),
-            { 
+            {
               transactionAmount: tradeRequest.amount,
               customerTier: tradeRequest.customerTier,
-              requiresRegulatory: tradeRequest.amount > 1000000
+              requiresRegulatory: tradeRequest.amount > 1000000,
             }
           );
 
           if (marketData.isFailure()) {
-            throw new Error(`Market data unavailable: ${marketData.error.message}`);
+            throw new Error(
+              `Market data unavailable: ${marketData.error.message}`
+            );
           }
 
           // Validate risk with resilience
           const riskValidation = await this.resilience.executeWithResilience(
             'risk-management',
             'validate-trade-risk',
-            () => this.riskManager.validateTrade(tradeRequest, marketData.value),
+            () =>
+              this.riskManager.validateTrade(tradeRequest, marketData.value),
             {
               transactionAmount: tradeRequest.amount,
-              customerTier: tradeRequest.customerTier
+              customerTier: tradeRequest.customerTier,
             }
           );
 
           if (riskValidation.isFailure()) {
-            throw new Error(`Risk validation failed: ${riskValidation.error.message}`);
+            throw new Error(
+              `Risk validation failed: ${riskValidation.error.message}`
+            );
           }
 
           // Execute trade
-          return await this.tradeExecutor.execute(tradeRequest, marketData.value);
+          return await this.tradeExecutor.execute(
+            tradeRequest,
+            marketData.value
+          );
         },
         {
           transactionAmount: tradeRequest.amount,
           customerTier: tradeRequest.customerTier,
           requiresRegulatory: tradeRequest.amount > 1000000,
-          correlationId: tradeRequest.correlationId
+          correlationId: tradeRequest.correlationId,
         }
       );
 
       return result;
     } catch (error) {
-      return Result.failure(new Error(`Trade execution failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Trade execution failed: ${error.message}`)
+      );
     }
   }
 
@@ -906,7 +1020,7 @@ export class TradingService {
 
     return {
       overallHealth,
-      services
+      services,
     };
   }
 }
@@ -915,8 +1029,12 @@ export class TradingService {
 ## Common Pitfalls
 
 - **Policy Complexity**: Keep resilience policies simple and testable
-- **Configuration Drift**: Monitor and validate that policies match business requirements
-- **Recovery Cascades**: Ensure recovery strategies don't trigger additional failures
+- **Configuration Drift**: Monitor and validate that policies match business
+  requirements
+- **Recovery Cascades**: Ensure recovery strategies don't trigger additional
+  failures
 - **Compliance Integration**: Maintain audit trails for all resilience decisions
-- **Performance Overhead**: Monitor the impact of comprehensive resilience on system performance
-- **Manual Intervention**: Ensure manual controls are properly secured and audited
+- **Performance Overhead**: Monitor the impact of comprehensive resilience on
+  system performance
+- **Manual Intervention**: Ensure manual controls are properly secured and
+  audited

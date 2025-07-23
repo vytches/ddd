@@ -1,33 +1,41 @@
 # Email Value Object - Basic Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Domain**: Identity & Communication
-**Patterns**: Value Object, String Validation, Domain Parsing
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Domain**: Identity & Communication **Patterns**: Value
+Object, String Validation, Domain Parsing **Dependencies**:
+@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating an **Email** value object that encapsulates email addresses with comprehensive validation, domain parsing, and normalization. Shows string-based value object patterns including format validation, case normalization, and domain extraction.
+This example demonstrates creating an **Email** value object that encapsulates
+email addresses with comprehensive validation, domain parsing, and
+normalization. Shows string-based value object patterns including format
+validation, case normalization, and domain extraction.
 
 ## Business Context
 
-Email is a critical value object in user management, communication, and identity systems. It ensures valid email formats, provides consistent normalization, and enables domain-based business rules. Essential for user registration, communication systems, and email marketing platforms.
+Email is a critical value object in user management, communication, and identity
+systems. It ensures valid email formats, provides consistent normalization, and
+enables domain-based business rules. Essential for user registration,
+communication systems, and email marketing platforms.
 
 ## Code Example
 
 ```typescript
 // email.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { EmailData, EmailValidationConfig, ValueObjectValidationResult } from './types';
-import { 
-  validateRequired, 
+import {
+  EmailData,
+  EmailValidationConfig,
+  ValueObjectValidationResult,
+} from './types';
+import {
+  validateRequired,
   validateEmailFormat,
   validateStringLength,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class Email extends ValueObject<EmailData> {
@@ -36,7 +44,7 @@ export class Email extends ValueObject<EmailData> {
     maxLength: 254,
     blockedDomains: ['tempmail.com', '10minutemail.com'],
     requireTLD: true,
-    allowSubdomains: true
+    allowSubdomains: true,
   };
 
   private constructor(data: EmailData) {
@@ -45,17 +53,17 @@ export class Email extends ValueObject<EmailData> {
 
   // ✅ FOCUS: Factory method with normalization and validation
   static create(
-    address: string, 
+    address: string,
     config: Partial<EmailValidationConfig> = {}
   ): Email {
     const fullConfig = { ...Email.DEFAULT_CONFIG, ...config };
-    
+
     // Normalize email address
     const normalizedAddress = address.trim().toLowerCase();
-    
+
     // Parse email components
     const [localPart, domain] = normalizedAddress.split('@');
-    
+
     if (!localPart || !domain) {
       throw new Error('Invalid email format');
     }
@@ -64,7 +72,7 @@ export class Email extends ValueObject<EmailData> {
       address: normalizedAddress,
       domain: domain,
       localPart: localPart,
-      isVerified: false
+      isVerified: false,
     };
 
     const validation = Email.validate(data, fullConfig);
@@ -83,13 +91,13 @@ export class Email extends ValueObject<EmailData> {
     const email = Email.create(address, config);
     return new Email({
       ...email.data,
-      isVerified: true
+      isVerified: true,
     });
   }
 
   // ✅ FOCUS: Comprehensive validation
   static validate(
-    data: EmailData, 
+    data: EmailData,
     config: EmailValidationConfig = Email.DEFAULT_CONFIG
   ): ValueObjectValidationResult {
     const results: ValueObjectValidationResult[] = [];
@@ -100,12 +108,9 @@ export class Email extends ValueObject<EmailData> {
     results.push(validateRequired(data.localPart, 'local part'));
 
     // Length validation
-    results.push(validateStringLength(
-      data.address, 
-      1, 
-      config.maxLength, 
-      'email address'
-    ));
+    results.push(
+      validateStringLength(data.address, 1, config.maxLength, 'email address')
+    );
 
     // Format validation
     results.push(validateEmailFormat(data.address, 'email address'));
@@ -117,17 +122,23 @@ export class Email extends ValueObject<EmailData> {
 
     // Blocked domains check
     if (config.blockedDomains.includes(data.domain)) {
-      results.push(createFailureResult([`Email domain '${data.domain}' is not allowed`]));
+      results.push(
+        createFailureResult([`Email domain '${data.domain}' is not allowed`])
+      );
     }
 
     // International domain validation
     if (!config.allowInternational && Email.hasNonASCII(data.address)) {
-      results.push(createFailureResult(['International email addresses are not allowed']));
+      results.push(
+        createFailureResult(['International email addresses are not allowed'])
+      );
     }
 
     // Subdomain validation
     if (!config.allowSubdomains && Email.hasSubdomain(data.domain)) {
-      results.push(createFailureResult(['Subdomain email addresses are not allowed']));
+      results.push(
+        createFailureResult(['Subdomain email addresses are not allowed'])
+      );
     }
 
     return combineValidationResults(...results);
@@ -141,7 +152,7 @@ export class Email extends ValueObject<EmailData> {
 
     return new Email({
       ...this.data,
-      isVerified: true
+      isVerified: true,
     });
   }
 
@@ -152,7 +163,7 @@ export class Email extends ValueObject<EmailData> {
 
     return new Email({
       ...this.data,
-      isVerified: false
+      isVerified: false,
     });
   }
 
@@ -172,23 +183,31 @@ export class Email extends ValueObject<EmailData> {
       domain: this.data.domain,
       topLevelDomain: tld,
       hasSubdomain,
-      subdomains
+      subdomains,
     };
   }
 
   isPersonalDomain(): boolean {
     const personalDomains = [
-      'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
-      'aol.com', 'icloud.com', 'live.com', 'msn.com'
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'aol.com',
+      'icloud.com',
+      'live.com',
+      'msn.com',
     ];
-    
+
     return personalDomains.includes(this.data.domain);
   }
 
   isCorporateDomain(): boolean {
-    return !this.isPersonalDomain() && 
-           !this.data.domain.includes('tempmail') &&
-           !this.data.domain.includes('disposable');
+    return (
+      !this.isPersonalDomain() &&
+      !this.data.domain.includes('tempmail') &&
+      !this.data.domain.includes('disposable')
+    );
   }
 
   // ✅ FOCUS: String representations
@@ -197,17 +216,16 @@ export class Email extends ValueObject<EmailData> {
   }
 
   toDisplayString(): string {
-    return this.data.isVerified 
-      ? `${this.data.address} ✓` 
-      : this.data.address;
+    return this.data.isVerified ? `${this.data.address} ✓` : this.data.address;
   }
 
   toObfuscatedString(): string {
     const [local, domain] = this.data.address.split('@');
-    const obfuscatedLocal = local.length > 2 
-      ? `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}`
-      : local;
-    
+    const obfuscatedLocal =
+      local.length > 2
+        ? `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}`
+        : local;
+
     return `${obfuscatedLocal}@${domain}`;
   }
 
@@ -257,10 +275,10 @@ import { Email } from './email';
 
 // ✅ Creating email instances
 const userEmail = Email.create('john.doe@example.com');
-const adminEmail = Email.create('ADMIN@COMPANY.COM');  // Auto-normalized to lowercase
+const adminEmail = Email.create('ADMIN@COMPANY.COM'); // Auto-normalized to lowercase
 
-console.log(userEmail.toString());     // "john.doe@example.com"
-console.log(adminEmail.toString());    // "admin@company.com"
+console.log(userEmail.toString()); // "john.doe@example.com"
+console.log(adminEmail.toString()); // "admin@company.com"
 
 // ✅ Verified emails
 const verifiedEmail = Email.createVerified('verified@example.com');
@@ -270,31 +288,31 @@ console.log(verifiedEmail.toDisplayString()); // "verified@example.com ✓"
 const corporateEmail = Email.create('jane@acmecorp.com');
 const domainInfo = corporateEmail.getDomainInfo();
 
-console.log(domainInfo.domain);           // "acmecorp.com"
-console.log(domainInfo.topLevelDomain);   // "com"
-console.log(domainInfo.hasSubdomain);     // false
+console.log(domainInfo.domain); // "acmecorp.com"
+console.log(domainInfo.topLevelDomain); // "com"
+console.log(domainInfo.hasSubdomain); // false
 
-console.log(corporateEmail.isPersonalDomain());  // false
+console.log(corporateEmail.isPersonalDomain()); // false
 console.log(corporateEmail.isCorporateDomain()); // true
 
 // ✅ Personal email example
 const personalEmail = Email.create('user@gmail.com');
-console.log(personalEmail.isPersonalDomain());   // true
-console.log(personalEmail.isCorporateDomain());  // false
+console.log(personalEmail.isPersonalDomain()); // true
+console.log(personalEmail.isCorporateDomain()); // false
 
 // ✅ Subdomain email
 const subdomainEmail = Email.create('support@help.company.com');
 const subdomainInfo = subdomainEmail.getDomainInfo();
 
-console.log(subdomainInfo.hasSubdomain);  // true
-console.log(subdomainInfo.subdomains);    // ["help"]
+console.log(subdomainInfo.hasSubdomain); // true
+console.log(subdomainInfo.subdomains); // ["help"]
 
 // ✅ Verification workflow
 let customerEmail = Email.create('customer@example.com');
-console.log(customerEmail.isVerified);     // false
+console.log(customerEmail.isVerified); // false
 
 customerEmail = customerEmail.markAsVerified();
-console.log(customerEmail.isVerified);     // true
+console.log(customerEmail.isVerified); // true
 console.log(customerEmail.toDisplayString()); // "customer@example.com ✓"
 
 // ✅ Privacy/obfuscation
@@ -314,12 +332,15 @@ const restrictiveConfig = {
   maxLength: 100,
   blockedDomains: ['tempmail.com', 'guerrillamail.com', 'spam.com'],
   requireTLD: true,
-  allowSubdomains: false
+  allowSubdomains: false,
 };
 
 try {
   // This will fail due to subdomain restriction
-  const restrictedEmail = Email.create('user@mail.company.com', restrictiveConfig);
+  const restrictedEmail = Email.create(
+    'user@mail.company.com',
+    restrictiveConfig
+  );
 } catch (error) {
   console.error(error.message); // "Invalid email: Subdomain email addresses are not allowed"
 }
@@ -329,16 +350,16 @@ function categorizeEmailDomain(email: Email): string {
   if (email.isPersonalDomain()) {
     return 'personal';
   }
-  
+
   const domainInfo = email.getDomainInfo();
   if (domainInfo.hasSubdomain) {
     return 'corporate-subdomain';
   }
-  
+
   if (email.isCorporateDomain()) {
     return 'corporate';
   }
-  
+
   return 'other';
 }
 
@@ -351,7 +372,7 @@ class EmailCollection {
     if (this.emails.has(emailStr)) {
       return false; // Already exists
     }
-    
+
     this.emails.add(emailStr);
     return true;
   }
@@ -377,10 +398,10 @@ class EmailCollection {
 // Usage examples
 const emails = [
   'user1@company.com',
-  'user2@company.com', 
+  'user2@company.com',
   'admin@company.com',
   'support@help.company.com',
-  'customer@gmail.com'
+  'customer@gmail.com',
 ].map(addr => Email.create(addr));
 
 const collection = new EmailCollection();
@@ -393,7 +414,7 @@ emails.forEach(email => {
   console.log(`${email}: ${categorizeEmailDomain(email)}`);
 });
 // user1@company.com: corporate
-// user2@company.com: corporate  
+// user2@company.com: corporate
 // admin@company.com: corporate
 // support@help.company.com: corporate-subdomain
 // customer@gmail.com: personal
@@ -410,7 +431,7 @@ const validEmails = [
   'simple@example.com',
   'user.name@company.co.uk',
   'admin+test@subdomain.example.org',
-  'user123@test-domain.com'
+  'user123@test-domain.com',
 ];
 
 validEmails.forEach(addr => {
@@ -424,11 +445,11 @@ validEmails.forEach(addr => {
 
 // ✅ Invalid emails that will throw errors
 const invalidEmails = [
-  'notanemail',           // No @ symbol
-  '@missinglocal.com',    // Missing local part
-  'missingdomain@',       // Missing domain
-  'spaces in@email.com',  // Spaces in local part
-  'toolong' + 'x'.repeat(250) + '@example.com' // Too long
+  'notanemail', // No @ symbol
+  '@missinglocal.com', // Missing local part
+  'missingdomain@', // Missing domain
+  'spaces in@email.com', // Spaces in local part
+  'toolong' + 'x'.repeat(250) + '@example.com', // Too long
 ];
 
 invalidEmails.forEach(addr => {
@@ -442,7 +463,7 @@ invalidEmails.forEach(addr => {
 
 // ✅ Domain restrictions
 const blockedDomainConfig = {
-  blockedDomains: ['spam.com', 'tempmail.org']
+  blockedDomains: ['spam.com', 'tempmail.org'],
 };
 
 try {
@@ -473,4 +494,5 @@ try {
 ## Related Examples
 
 - [Money Value Object](./example-1.md) - Numeric value object with currency
-- [Phone Number Value Object](./example-3.md) - Complex string validation with formatting
+- [Phone Number Value Object](./example-3.md) - Complex string validation with
+  formatting

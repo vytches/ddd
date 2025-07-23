@@ -1,6 +1,6 @@
 // Type definitions for event-scheduling examples
 
-import { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
+import type { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
 
 // === BASIC EVENT SCHEDULING TYPES ===
 

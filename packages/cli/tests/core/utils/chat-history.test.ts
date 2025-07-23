@@ -2,7 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
 import type { ChatHistoryConfig } from '../../../src/core/utils/chat-history';
 import { ChatHistory, ChatMessage, ChatSession } from '../../../src/core/utils/chat-history';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync, type Dirent } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+  type Dirent,
+} from 'fs';
 import * as path from 'path';
 
 // Mock fs module
@@ -31,7 +40,7 @@ describe('ChatHistory', () => {
 
     // Setup path mocks
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
-    vi.mocked(path.dirname).mockImplementation((p) => p.split('/').slice(0, -1).join('/'));
+    vi.mocked(path.dirname).mockImplementation(p => p.split('/').slice(0, -1).join('/'));
 
     // Setup fs mocks
     vi.mocked(existsSync).mockReturnValue(false);
@@ -72,7 +81,7 @@ describe('ChatHistory', () => {
       });
 
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-        return
+        return;
       });
 
       const [error] = safeRun(() => new ChatHistory(mockConfig));
@@ -280,7 +289,9 @@ describe('ChatHistory', () => {
         await chatHistory.addMessage('user', 'Hello');
 
         const updatedSession = chatHistory.getCurrentSession();
-        expect(updatedSession?.lastActivity.getTime()).toBeGreaterThan(originalActivity?.getTime() || 0);
+        expect(updatedSession?.lastActivity.getTime()).toBeGreaterThan(
+          originalActivity?.getTime() || 0
+        );
       });
     });
 
@@ -420,7 +431,10 @@ describe('ChatHistory', () => {
 
       it('should calculate storage size', () => {
         vi.mocked(existsSync).mockReturnValue(true);
-        vi.mocked(readdirSync).mockReturnValue(['session1.json', 'session2.json'] as unknown as Dirent<Buffer<ArrayBufferLike>>[]);
+        vi.mocked(readdirSync).mockReturnValue([
+          'session1.json',
+          'session2.json',
+        ] as unknown as Dirent<Buffer<ArrayBufferLike>>[]);
         vi.mocked(statSync).mockReturnValue({ isDirectory: () => false, size: 2048 } as any);
 
         const stats = chatHistory.getStats();
@@ -437,12 +451,16 @@ describe('ChatHistory', () => {
         title: 'Existing Session',
         startedAt: new Date().toISOString(),
         lastActivity: new Date().toISOString(),
-        messages: [{ id: 'msg1', role: 'user', content: 'Hello', timestamp: new Date().toISOString() }],
+        messages: [
+          { id: 'msg1', role: 'user', content: 'Hello', timestamp: new Date().toISOString() },
+        ],
         context: { projectPath: '/test' },
       };
 
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readdirSync).mockReturnValue(['existing-session.json']  as unknown as Dirent<Buffer<ArrayBufferLike>>[]);
+      vi.mocked(readdirSync).mockReturnValue(['existing-session.json'] as unknown as Dirent<
+        Buffer<ArrayBufferLike>
+      >[]);
       vi.mocked(readFileSync).mockReturnValue(JSON.stringify(sessionData));
 
       const newHistory = new ChatHistory(mockConfig);
@@ -454,10 +472,14 @@ describe('ChatHistory', () => {
 
     it('should handle corrupted session files gracefully', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
-      vi.mocked(readdirSync).mockReturnValue(['corrupted.json'] as unknown as Dirent<Buffer<ArrayBufferLike>>[]);
+      vi.mocked(readdirSync).mockReturnValue(['corrupted.json'] as unknown as Dirent<
+        Buffer<ArrayBufferLike>
+      >[]);
       vi.mocked(readFileSync).mockReturnValue('invalid json');
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { return });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       const newHistory = new ChatHistory(mockConfig);
       const history = newHistory.getSessionHistory();
@@ -485,8 +507,8 @@ describe('ChatHistory', () => {
 
       it('should not update when no current session', async () => {
         const noSessionHistory = new ChatHistory({ enabled: true });
-        const [error] = await safeRun(async () =>
-          await noSessionHistory.updateSessionContext({ test: 'value' })
+        const [error] = await safeRun(
+          async () => await noSessionHistory.updateSessionContext({ test: 'value' })
         );
 
         expect(error).toBeUndefined();
@@ -519,9 +541,7 @@ describe('ChatHistory', () => {
       });
 
       it('should throw error for non-existent session', async () => {
-        const [error] = await safeRun(async () =>
-          await chatHistory.exportSession('non-existent')
-        );
+        const [error] = await safeRun(async () => await chatHistory.exportSession('non-existent'));
 
         expect(error).toBeInstanceOf(Error);
         expect(error?.message).toContain('not found');
@@ -549,7 +569,7 @@ describe('ChatHistory', () => {
         const historyWithCleanup = new ChatHistory({
           ...mockConfig,
           maxHistoryDays: 5,
-          autoCleanup: false
+          autoCleanup: false,
         });
 
         // Create sessions that would be cleaned up
@@ -566,7 +586,7 @@ describe('ChatHistory', () => {
         const limitedHistory = new ChatHistory({
           ...mockConfig,
           maxSessions: 1,
-          autoCleanup: false
+          autoCleanup: false,
         });
 
         await limitedHistory.startSession('Session 1');
@@ -599,7 +619,9 @@ describe('ChatHistory', () => {
         throw new Error('Permission denied');
       });
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { return });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       const [error] = safeRun(() => new ChatHistory(mockConfig));
 
@@ -612,7 +634,9 @@ describe('ChatHistory', () => {
         throw new Error('Disk full');
       });
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { return });
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
+        return;
+      });
 
       await chatHistory.startSession('Test Session');
 

@@ -7,7 +7,9 @@
 
 ## Business Context
 
-This example demonstrates basic policy validation for an e-commerce system where orders must meet certain criteria before processing:
+This example demonstrates basic policy validation for an e-commerce system where
+orders must meet certain criteria before processing:
+
 - VIP customers get special treatment
 - Order amounts must be within credit limits
 - Inventory must be available
@@ -23,7 +25,7 @@ import { Order, Customer, InventoryItem } from '../types'; // ALWAYS import from
 // Basic specifications for order validation
 class MinimumOrderAmountSpec {
   constructor(private minAmount: number) {}
-  
+
   isSatisfiedBy(order: Order): boolean {
     return order.amount >= this.minAmount;
   }
@@ -37,8 +39,8 @@ class CustomerCreditLimitSpec {
 
 class InventoryAvailabilitySpec {
   isSatisfiedBy(order: Order): boolean {
-    return order.items.every(item => 
-      item.requestedQuantity <= item.availableQuantity
+    return order.items.every(
+      item => item.requestedQuantity <= item.availableQuantity
     );
   }
 }
@@ -65,7 +67,10 @@ export class OrderValidationPolicy {
     .withSeverity('ERROR')
     .build();
 
-  async validateOrder(order: Order, customerId: string): Promise<Result<Order, Error>> {
+  async validateOrder(
+    order: Order,
+    customerId: string
+  ): Promise<Result<Order, Error>> {
     try {
       const context = PolicyContext.create()
         .withUserId(customerId)
@@ -74,21 +79,30 @@ export class OrderValidationPolicy {
         .build();
 
       const result = await this.policy.check({ entity: order, context });
-      
+
       if (result.isFailure()) {
         const violations = result.error.violations;
-        const errorMessages = violations.map(v => `${v.code}: ${v.message}`).join(', ');
-        return Result.failure(new Error(`Order validation failed: ${errorMessages}`));
+        const errorMessages = violations
+          .map(v => `${v.code}: ${v.message}`)
+          .join(', ');
+        return Result.failure(
+          new Error(`Order validation failed: ${errorMessages}`)
+        );
       }
 
       return Result.success(order);
     } catch (error) {
-      return Result.failure(new Error(`Policy validation error: ${error.message}`));
+      return Result.failure(
+        new Error(`Policy validation error: ${error.message}`)
+      );
     }
   }
 
   // Special handling for VIP customers
-  async validateVIPOrder(order: Order, customerId: string): Promise<Result<Order, Error>> {
+  async validateVIPOrder(
+    order: Order,
+    customerId: string
+  ): Promise<Result<Order, Error>> {
     try {
       // VIP customers get relaxed minimum order requirement
       const vipPolicy = PolicyBuilder.create<Order>()
@@ -119,16 +133,22 @@ export class OrderValidationPolicy {
         .build();
 
       const result = await vipPolicy.check({ entity: order, context });
-      
+
       if (result.isFailure()) {
         const violations = result.error.violations;
-        const errorMessages = violations.map(v => `${v.code}: ${v.message}`).join(', ');
-        return Result.failure(new Error(`VIP order validation failed: ${errorMessages}`));
+        const errorMessages = violations
+          .map(v => `${v.code}: ${v.message}`)
+          .join(', ');
+        return Result.failure(
+          new Error(`VIP order validation failed: ${errorMessages}`)
+        );
       }
 
       return Result.success(order);
     } catch (error) {
-      return Result.failure(new Error(`VIP policy validation error: ${error.message}`));
+      return Result.failure(
+        new Error(`VIP policy validation error: ${error.message}`)
+      );
     }
   }
 }
@@ -152,7 +172,7 @@ export class OrderService {
   async processOrder(order: Order): Promise<Result<Order, Error>> {
     try {
       // Validate based on customer type
-      const validationResult = order.customer.isVIP 
+      const validationResult = order.customer.isVIP
         ? await this.orderPolicy.validateVIPOrder(order, order.customer.id)
         : await this.orderPolicy.validateOrder(order, order.customer.id);
 
@@ -163,7 +183,9 @@ export class OrderService {
       // Process the validated order
       return Result.success(validationResult.value);
     } catch (error) {
-      return Result.failure(new Error(`Order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order processing failed: ${error.message}`)
+      );
     }
   }
 }

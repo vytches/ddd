@@ -1,30 +1,43 @@
 # Real-time Analytics CQRS with Stream Processing
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/cqrs
-**Complexity**: Advanced
-**Domain**: Architecture
-**Patterns**: CQRS, Stream Processing, Real-time Analytics, Complex Event Processing
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/event-store, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Domain**: Architecture **Patterns**: CQRS, Stream Processing, Real-time
+Analytics, Complex Event Processing **Dependencies**: @vytches-ddd/cqrs,
+@vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/event-store,
+@vytches-ddd/utils
 
 ## Description
 
-This example demonstrates implementing real-time analytics using CQRS patterns with stream processing capabilities. It shows how to build complex event processing pipelines, real-time dashboards, anomaly detection, and business intelligence systems that process millions of events per second with sub-second latency.
+This example demonstrates implementing real-time analytics using CQRS patterns
+with stream processing capabilities. It shows how to build complex event
+processing pipelines, real-time dashboards, anomaly detection, and business
+intelligence systems that process millions of events per second with sub-second
+latency.
 
 ## Business Context
 
 Real-time analytics is crucial for modern enterprises:
-- **Financial Trading**: Real-time market analysis, risk monitoring, algorithmic trading
-- **E-commerce**: Live conversion tracking, inventory monitoring, dynamic pricing
-- **IoT/Smart Cities**: Sensor data processing, traffic analysis, resource optimization
+
+- **Financial Trading**: Real-time market analysis, risk monitoring, algorithmic
+  trading
+- **E-commerce**: Live conversion tracking, inventory monitoring, dynamic
+  pricing
+- **IoT/Smart Cities**: Sensor data processing, traffic analysis, resource
+  optimization
 - **Gaming**: Player behavior analytics, real-time leaderboards, fraud detection
-- **Social Media**: Trending topic detection, engagement analytics, content moderation
+- **Social Media**: Trending topic detection, engagement analytics, content
+  moderation
 
 ## Code Example
 
 ```typescript
 // realtime-analytics-cqrs.ts
-import { Command, CommandHandler, Query, QueryHandler } from '@vytches-ddd/cqrs';
+import {
+  Command,
+  CommandHandler,
+  Query,
+  QueryHandler,
+} from '@vytches-ddd/cqrs';
 import { EventBus, DomainEvent, EventStream } from '@vytches-ddd/events';
 import { ProjectionEngine, StreamProjection } from '@vytches-ddd/projections';
 import { EventStore } from '@vytches-ddd/event-store';
@@ -34,7 +47,7 @@ import type {
   TimeWindow,
   AggregationResult,
   StreamMetrics,
-  DashboardData
+  DashboardData,
 } from '../types'; // From your application
 
 // ✅ FOCUS: Stream processing command for analytics
@@ -53,7 +66,7 @@ export class StartAnalyticsStreamCommand extends Command {
 export class StreamAnalyticsEngine {
   private activeStreams = new Map<string, AnalyticsStream>();
   private windowedAggregators = new Map<string, WindowedAggregator>();
-  
+
   constructor(
     private readonly eventStore: EventStore,
     private readonly projectionEngine: ProjectionEngine,
@@ -63,11 +76,14 @@ export class StreamAnalyticsEngine {
   // ✅ FOCUS: Start real-time stream processing
   async startStream(config: StreamConfiguration): Promise<AnalyticsStream> {
     const stream = new AnalyticsStream(config);
-    
+
     // Initialize windowed aggregators
     for (const window of config.windows) {
       const aggregator = new WindowedAggregator(window);
-      this.windowedAggregators.set(`${config.streamId}-${window.type}`, aggregator);
+      this.windowedAggregators.set(
+        `${config.streamId}-${window.type}`,
+        aggregator
+      );
     }
 
     // Subscribe to event stream
@@ -76,13 +92,13 @@ export class StreamAnalyticsEngine {
       {
         fromPosition: config.startFrom || 'latest',
         batchSize: config.batchSize || 1000,
-        maxConcurrency: config.maxConcurrency || 10
+        maxConcurrency: config.maxConcurrency || 10,
       }
     );
 
     // Process events in real-time
     this.processEventStream(stream, eventStream);
-    
+
     this.activeStreams.set(config.streamId, stream);
     return stream;
   }
@@ -98,21 +114,21 @@ export class StreamAnalyticsEngine {
 
     for await (const event of eventStream) {
       eventCount++;
-      
+
       // Add to batch
       batchProcessor.add(event);
-      
+
       // Process when batch is full
       if (batchProcessor.isFull()) {
         await this.processBatch(stream, batchProcessor.flush());
-        
+
         // Update metrics every 1000 events
         if (eventCount % 1000 === 0) {
           const throughput = eventCount / ((Date.now() - startTime) / 1000);
           await this.updateStreamMetrics(stream.config.streamId, {
             eventsProcessed: eventCount,
             throughput: throughput,
-            latency: batchProcessor.getAverageLatency()
+            latency: batchProcessor.getAverageLatency(),
           });
         }
       }
@@ -132,15 +148,23 @@ export class StreamAnalyticsEngine {
     const processingStart = process.hrtime.bigint();
 
     // Apply transformations
-    const transformedEvents = await this.applyTransformations(batch, stream.config.transformations);
-    
+    const transformedEvents = await this.applyTransformations(
+      batch,
+      stream.config.transformations
+    );
+
     // Filter events based on rules
-    const filteredEvents = this.applyFilters(transformedEvents, stream.config.filters);
-    
+    const filteredEvents = this.applyFilters(
+      transformedEvents,
+      stream.config.filters
+    );
+
     // Update windowed aggregations
     for (const event of filteredEvents) {
       for (const window of stream.config.windows) {
-        const aggregator = this.windowedAggregators.get(`${stream.config.streamId}-${window.type}`);
+        const aggregator = this.windowedAggregators.get(
+          `${stream.config.streamId}-${window.type}`
+        );
         if (aggregator) {
           aggregator.addEvent(event);
         }
@@ -148,8 +172,11 @@ export class StreamAnalyticsEngine {
     }
 
     // Check for pattern matches
-    const patterns = await this.detectPatterns(filteredEvents, stream.config.patterns);
-    
+    const patterns = await this.detectPatterns(
+      filteredEvents,
+      stream.config.patterns
+    );
+
     // Trigger alerts if needed
     if (patterns.length > 0) {
       await this.triggerAlerts(patterns, stream.config.alerts);
@@ -157,9 +184,10 @@ export class StreamAnalyticsEngine {
 
     // Update projections
     await this.updateProjections(filteredEvents, stream.config.projections);
-    
-    const processingTime = Number(process.hrtime.bigint() - processingStart) / 1_000_000;
-    
+
+    const processingTime =
+      Number(process.hrtime.bigint() - processingStart) / 1_000_000;
+
     // Record batch metrics
     await this.metricsCollector.recordMetrics({
       operation: 'StreamAnalytics.processBatch',
@@ -167,8 +195,8 @@ export class StreamAnalyticsEngine {
       processingTimeMs: processingTime,
       throughput: batch.length / (processingTime / 1000),
       tags: {
-        streamId: stream.config.streamId
-      }
+        streamId: stream.config.streamId,
+      },
     });
   }
 
@@ -185,17 +213,17 @@ export class StreamAnalyticsEngine {
           const sequenceMatches = this.detectSequencePattern(events, pattern);
           matches.push(...sequenceMatches);
           break;
-          
+
         case 'THRESHOLD':
           const thresholdMatches = this.detectThresholdPattern(events, pattern);
           matches.push(...thresholdMatches);
           break;
-          
+
         case 'ANOMALY':
           const anomalies = await this.detectAnomalies(events, pattern);
           matches.push(...anomalies);
           break;
-          
+
         case 'CORRELATION':
           const correlations = this.detectCorrelations(events, pattern);
           matches.push(...correlations);
@@ -213,17 +241,17 @@ export class StreamAnalyticsEngine {
   ): PatternMatch[] {
     const matches: PatternMatch[] = [];
     const windowSize = pattern.windowSize || 60000; // 1 minute default
-    
+
     // Group events by time window
     const windows = this.groupByTimeWindow(events, windowSize);
-    
+
     for (const [windowStart, windowEvents] of windows) {
       const aggregatedValue = this.aggregate(
         windowEvents,
         pattern.aggregation,
         pattern.field
       );
-      
+
       if (this.evaluateThreshold(aggregatedValue, pattern.threshold)) {
         matches.push({
           patternId: pattern.id,
@@ -234,8 +262,8 @@ export class StreamAnalyticsEngine {
           metadata: {
             threshold: pattern.threshold,
             actual: aggregatedValue,
-            windowSize: windowSize
-          }
+            windowSize: windowSize,
+          },
         });
       }
     }
@@ -248,13 +276,17 @@ export class StreamAnalyticsEngine {
     aggregation: AggregationType,
     field: string
   ): number {
-    const values = events.map(e => e.data[field]).filter(v => typeof v === 'number');
-    
+    const values = events
+      .map(e => e.data[field])
+      .filter(v => typeof v === 'number');
+
     switch (aggregation) {
       case 'SUM':
         return values.reduce((a, b) => a + b, 0);
       case 'AVG':
-        return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        return values.length > 0
+          ? values.reduce((a, b) => a + b, 0) / values.length
+          : 0;
       case 'MAX':
         return Math.max(...values);
       case 'MIN':
@@ -276,7 +308,7 @@ export class WindowedAggregator {
   private windows: Map<number, WindowData> = new Map();
   private readonly windowSizeMs: number;
   private readonly slideIntervalMs: number;
-  
+
   constructor(private config: WindowConfiguration) {
     this.windowSizeMs = this.parseTimeWindow(config.size);
     this.slideIntervalMs = this.parseTimeWindow(config.slide || config.size);
@@ -285,7 +317,7 @@ export class WindowedAggregator {
   addEvent(event: AnalyticsEvent): void {
     const timestamp = event.timestamp.getTime();
     const windowKeys = this.getWindowKeys(timestamp);
-    
+
     for (const windowKey of windowKeys) {
       let window = this.windows.get(windowKey);
       if (!window) {
@@ -293,33 +325,33 @@ export class WindowedAggregator {
           startTime: windowKey,
           endTime: windowKey + this.windowSizeMs,
           events: [],
-          aggregates: {}
+          aggregates: {},
         };
         this.windows.set(windowKey, window);
       }
-      
+
       window.events.push(event);
       this.updateAggregates(window, event);
     }
-    
+
     // Clean old windows
     this.cleanOldWindows(timestamp);
   }
 
   getAggregates(timestamp: number): AggregationResult[] {
     const results: AggregationResult[] = [];
-    
+
     for (const [windowStart, window] of this.windows) {
       if (timestamp >= window.startTime && timestamp < window.endTime) {
         results.push({
           windowStart: new Date(window.startTime),
           windowEnd: new Date(window.endTime),
           eventCount: window.events.length,
-          aggregates: { ...window.aggregates }
+          aggregates: { ...window.aggregates },
         });
       }
     }
-    
+
     return results;
   }
 
@@ -333,10 +365,10 @@ export class WindowedAggregator {
             count: 0,
             min: Infinity,
             max: -Infinity,
-            values: []
+            values: [],
           };
         }
-        
+
         const agg = window.aggregates[field];
         agg.sum += value;
         agg.count++;
@@ -349,22 +381,27 @@ export class WindowedAggregator {
 
   private getWindowKeys(timestamp: number): number[] {
     const keys: number[] = [];
-    const alignedTime = Math.floor(timestamp / this.slideIntervalMs) * this.slideIntervalMs;
-    
+    const alignedTime =
+      Math.floor(timestamp / this.slideIntervalMs) * this.slideIntervalMs;
+
     // Get all windows that include this timestamp
-    for (let i = 0; i < Math.ceil(this.windowSizeMs / this.slideIntervalMs); i++) {
-      const windowStart = alignedTime - (i * this.slideIntervalMs);
+    for (
+      let i = 0;
+      i < Math.ceil(this.windowSizeMs / this.slideIntervalMs);
+      i++
+    ) {
+      const windowStart = alignedTime - i * this.slideIntervalMs;
       if (windowStart >= 0) {
         keys.push(windowStart);
       }
     }
-    
+
     return keys;
   }
 
   private cleanOldWindows(currentTime: number): void {
-    const cutoffTime = currentTime - (this.windowSizeMs * 2);
-    
+    const cutoffTime = currentTime - this.windowSizeMs * 2;
+
     for (const [windowStart, window] of this.windows) {
       if (window.endTime < cutoffTime) {
         this.windows.delete(windowStart);
@@ -393,17 +430,22 @@ export class GetRealTimeDashboardHandler {
     private readonly cacheService: IRealtimeCache
   ) {}
 
-  async execute(query: GetRealTimeDashboardQuery): Promise<Result<DashboardData, Error>> {
+  async execute(
+    query: GetRealTimeDashboardQuery
+  ): Promise<Result<DashboardData, Error>> {
     try {
       // Get dashboard configuration
       const dashboardConfig = await this.getDashboardConfig(query.dashboardId);
-      
+
       // Collect metrics from multiple sources
       const metrics = await Promise.all([
         this.getStreamMetrics(dashboardConfig.streams),
-        this.getAggregatedMetrics(dashboardConfig.aggregations, query.timeRange),
+        this.getAggregatedMetrics(
+          dashboardConfig.aggregations,
+          query.timeRange
+        ),
         this.getProjectionData(dashboardConfig.projections),
-        this.getAlertStatus(dashboardConfig.alerts)
+        this.getAlertStatus(dashboardConfig.alerts),
       ]);
 
       const dashboardData: DashboardData = {
@@ -417,9 +459,9 @@ export class GetRealTimeDashboardHandler {
           dataFreshness: this.calculateDataFreshness(metrics),
           performance: {
             queryTimeMs: 0, // Will be updated
-            dataSources: dashboardConfig.dataSources.length
-          }
-        }
+            dataSources: dashboardConfig.dataSources.length,
+          },
+        },
       };
 
       // Cache with short TTL for real-time data
@@ -430,15 +472,16 @@ export class GetRealTimeDashboardHandler {
       );
 
       return Result.ok(dashboardData);
-
     } catch (error) {
       return Result.fail(error as Error);
     }
   }
 
-  private async getStreamMetrics(streamIds: string[]): Promise<StreamMetrics[]> {
+  private async getStreamMetrics(
+    streamIds: string[]
+  ): Promise<StreamMetrics[]> {
     const metrics: StreamMetrics[] = [];
-    
+
     for (const streamId of streamIds) {
       const stream = this.streamAnalytics.getStream(streamId);
       if (stream) {
@@ -448,11 +491,11 @@ export class GetRealTimeDashboardHandler {
           totalEvents: stream.getTotalEvents(),
           avgLatency: stream.getAverageLatency(),
           errorRate: stream.getErrorRate(),
-          status: stream.getStatus()
+          status: stream.getStatus(),
         });
       }
     }
-    
+
     return metrics;
   }
 
@@ -461,24 +504,26 @@ export class GetRealTimeDashboardHandler {
     timeRange: TimeRange
   ): Promise<AggregatedMetric[]> {
     const results: AggregatedMetric[] = [];
-    
+
     for (const config of aggregations) {
-      const aggregator = this.streamAnalytics.getAggregator(config.aggregatorId);
+      const aggregator = this.streamAnalytics.getAggregator(
+        config.aggregatorId
+      );
       if (aggregator) {
         const currentTime = Date.now();
         const aggregates = aggregator.getAggregates(currentTime);
-        
+
         results.push({
           id: config.id,
           name: config.name,
           type: config.type,
           value: this.extractAggregateValue(aggregates, config),
           trend: await this.calculateTrend(config, timeRange),
-          sparkline: await this.generateSparkline(config, timeRange)
+          sparkline: await this.generateSparkline(config, timeRange),
         });
       }
     }
-    
+
     return results;
   }
 
@@ -513,7 +558,9 @@ export class StartAnalyticsStreamHandler {
     private readonly eventBus: EventBus
   ) {}
 
-  async execute(command: StartAnalyticsStreamCommand): Promise<Result<StreamStartResult, Error>> {
+  async execute(
+    command: StartAnalyticsStreamCommand
+  ): Promise<Result<StreamStartResult, Error>> {
     try {
       // Validate stream configuration
       const validationResult = this.validateStreamConfig(command.streamConfig);
@@ -522,36 +569,43 @@ export class StartAnalyticsStreamHandler {
       }
 
       // Start the analytics stream
-      const stream = await this.streamAnalytics.startStream(command.streamConfig);
-      
+      const stream = await this.streamAnalytics.startStream(
+        command.streamConfig
+      );
+
       // Apply analytics rules
       for (const rule of command.analyticsRules) {
         await stream.addRule(rule);
       }
 
       // Publish stream started event
-      await this.eventBus.publish(new AnalyticsStreamStartedEvent(
-        command.streamId,
-        command.streamConfig,
-        command.analyticsRules
-      ));
+      await this.eventBus.publish(
+        new AnalyticsStreamStartedEvent(
+          command.streamId,
+          command.streamConfig,
+          command.analyticsRules
+        )
+      );
 
       return Result.ok({
         streamId: command.streamId,
         status: 'STARTED',
         startTime: new Date(),
-        config: command.streamConfig
+        config: command.streamConfig,
       });
-
     } catch (error) {
       return Result.fail(error as Error);
     }
   }
 
-  private validateStreamConfig(config: StreamConfiguration): Result<void, Error> {
+  private validateStreamConfig(
+    config: StreamConfiguration
+  ): Result<void, Error> {
     // Validate event types
     if (!config.eventTypes || config.eventTypes.length === 0) {
-      return Result.fail(new Error('At least one event type must be specified'));
+      return Result.fail(
+        new Error('At least one event type must be specified')
+      );
     }
 
     // Validate windows
@@ -564,7 +618,10 @@ export class StartAnalyticsStreamHandler {
     }
 
     // Validate batch size
-    if (config.batchSize && (config.batchSize < 1 || config.batchSize > 10000)) {
+    if (
+      config.batchSize &&
+      (config.batchSize < 1 || config.batchSize > 10000)
+    ) {
       return Result.fail(new Error('Batch size must be between 1 and 10000'));
     }
 
@@ -598,7 +655,7 @@ export class CEPPatternMatcher {
       id: pattern.id,
       stateMachine: this.buildStateMachine(pattern),
       timeConstraints: pattern.timeConstraints,
-      correlationFields: pattern.correlationFields
+      correlationFields: pattern.correlationFields,
     };
   }
 
@@ -612,8 +669,13 @@ export class CEPPatternMatcher {
       const step = pattern.sequence[i];
       states.push({
         id: `state-${i}`,
-        type: i === 0 ? 'START' : i === pattern.sequence.length - 1 ? 'END' : 'INTERMEDIATE',
-        condition: step.condition
+        type:
+          i === 0
+            ? 'START'
+            : i === pattern.sequence.length - 1
+              ? 'END'
+              : 'INTERMEDIATE',
+        condition: step.condition,
       });
 
       if (i < pattern.sequence.length - 1) {
@@ -621,7 +683,7 @@ export class CEPPatternMatcher {
           from: `state-${i}`,
           to: `state-${i + 1}`,
           condition: step.condition,
-          timeConstraint: step.timeConstraint
+          timeConstraint: step.timeConstraint,
         });
       }
     }
@@ -634,12 +696,15 @@ export class CEPPatternMatcher {
 ## Key Features
 
 - **Stream Processing**: High-throughput event stream processing with batching
-- **Windowed Aggregations**: Sliding, tumbling, and session windows for time-series analysis
-- **Complex Event Processing**: Pattern matching, sequence detection, and correlation
+- **Windowed Aggregations**: Sliding, tumbling, and session windows for
+  time-series analysis
+- **Complex Event Processing**: Pattern matching, sequence detection, and
+  correlation
 - **Real-time Dashboards**: Live data visualization with sub-second updates
 - **Anomaly Detection**: Statistical and ML-based anomaly detection in streams
 - **Multi-source Analytics**: Combining data from multiple event streams
-- **Performance Optimization**: Efficient batch processing and caching strategies
+- **Performance Optimization**: Efficient batch processing and caching
+  strategies
 - **Flexible Alerting**: Rule-based alerts with complex conditions
 
 ## Usage Examples
@@ -655,18 +720,23 @@ const streamAnalytics = new StreamAnalyticsEngine(
 // Configure and start analytics stream
 const streamConfig: StreamConfiguration = {
   streamId: 'order-analytics',
-  eventTypes: ['OrderCreated', 'OrderUpdated', 'OrderCompleted', 'OrderCancelled'],
+  eventTypes: [
+    'OrderCreated',
+    'OrderUpdated',
+    'OrderCompleted',
+    'OrderCancelled',
+  ],
   windows: [
     { type: 'TUMBLING', size: '1m' },
     { type: 'SLIDING', size: '5m', slide: '1m' },
-    { type: 'SESSION', gap: '30s' }
+    { type: 'SESSION', gap: '30s' },
   ],
   batchSize: 1000,
   maxConcurrency: 5,
   transformations: [
     { type: 'ENRICH', source: 'customerService' },
-    { type: 'FILTER', condition: 'amount > 100' }
-  ]
+    { type: 'FILTER', condition: 'amount > 100' },
+  ],
 };
 
 const analyticsRules: AnalyticsRule[] = [
@@ -675,15 +745,15 @@ const analyticsRules: AnalyticsRule[] = [
     type: 'THRESHOLD',
     condition: 'SUM(amount) > 10000',
     window: '5m',
-    action: 'ALERT'
+    action: 'ALERT',
   },
   {
     id: 'order-velocity',
     type: 'PATTERN',
     pattern: 'ORDER_SPIKE',
     condition: 'COUNT(*) > 100',
-    window: '1m'
-  }
+    window: '1m',
+  },
 ];
 
 const startCommand = new StartAnalyticsStreamCommand(
@@ -709,22 +779,35 @@ patternMatcher.registerPattern({
   id: 'fraud-pattern',
   sequence: [
     { eventType: 'OrderCreated', condition: 'amount > 1000' },
-    { eventType: 'OrderCreated', condition: 'amount > 1000', timeConstraint: '1m' },
-    { eventType: 'OrderCreated', condition: 'amount > 1000', timeConstraint: '1m' }
+    {
+      eventType: 'OrderCreated',
+      condition: 'amount > 1000',
+      timeConstraint: '1m',
+    },
+    {
+      eventType: 'OrderCreated',
+      condition: 'amount > 1000',
+      timeConstraint: '1m',
+    },
   ],
   correlationFields: ['customerId'],
-  action: 'ALERT_FRAUD_TEAM'
+  action: 'ALERT_FRAUD_TEAM',
 });
 ```
 
 ## Common Pitfalls
 
-- **Memory Management**: Monitor memory usage with large windows and high-volume streams
-- **Late Arriving Events**: Handle out-of-order events with appropriate watermarking
-- **Window Boundaries**: Be careful with window alignment and time zone considerations
-- **Backpressure**: Implement proper backpressure handling for high-volume streams
+- **Memory Management**: Monitor memory usage with large windows and high-volume
+  streams
+- **Late Arriving Events**: Handle out-of-order events with appropriate
+  watermarking
+- **Window Boundaries**: Be careful with window alignment and time zone
+  considerations
+- **Backpressure**: Implement proper backpressure handling for high-volume
+  streams
 - **State Management**: Persist window state for fault tolerance
-- **Query Performance**: Optimize dashboard queries to avoid impacting stream processing
+- **Query Performance**: Optimize dashboard queries to avoid impacting stream
+  processing
 
 ## Related Examples
 

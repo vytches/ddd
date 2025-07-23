@@ -1,19 +1,21 @@
 # CQRS with Policy-Based Authorization
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/cqrs
-**Complexity**: Intermediate
-**Domain**: Architecture
-**Patterns**: CQRS, Policy-based authorization, Command validation, Query security
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Intermediate
+**Domain**: Architecture **Patterns**: CQRS, Policy-based authorization, Command
+validation, Query security **Dependencies**: @vytches-ddd/cqrs,
+@vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/utils
 
 ## Description
 
-This example demonstrates integrating policy-based authorization with CQRS patterns. It shows how to implement sophisticated security policies for commands and queries, including role-based access control, context-aware permissions, and dynamic authorization rules for enterprise applications.
+This example demonstrates integrating policy-based authorization with CQRS
+patterns. It shows how to implement sophisticated security policies for commands
+and queries, including role-based access control, context-aware permissions, and
+dynamic authorization rules for enterprise applications.
 
 ## Business Context
 
 In enterprise applications, security is paramount. This pattern addresses:
+
 - Complex authorization requirements that go beyond simple role checks
 - Context-aware permissions based on resource ownership or business rules
 - Audit trails for sensitive operations
@@ -28,12 +30,7 @@ import { Command, CommandHandler, CommandBus } from '@vytches-ddd/cqrs';
 import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
 import { Result } from '@vytches-ddd/utils';
 import { Injectable } from '@vytches-ddd/di';
-import type { 
-  User, 
-  Account, 
-  TransferCommand, 
-  SecurityContext 
-} from '../types'; // From your application
+import type { User, Account, TransferCommand, SecurityContext } from '../types'; // From your application
 
 // ✅ FOCUS: Command with security metadata
 export class SecureTransferCommand extends Command {
@@ -54,7 +51,7 @@ export class SecureTransferCommand extends Command {
       userId: this.securityContext.userId,
       sessionId: this.securityContext.sessionId,
       riskLevel: this.amount > 10000 ? 'HIGH' : 'NORMAL',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -68,7 +65,7 @@ export class SecureTransferCommandHandler {
     .withDomain('financial')
     .withName('Secure Transfer Authorization')
     // Basic authentication check
-    .must((cmd) => !!cmd.securityContext.userId)
+    .must(cmd => !!cmd.securityContext.userId)
     .withCode('UNAUTHENTICATED')
     .withMessage('User must be authenticated')
     .withSeverity('ERROR')
@@ -91,17 +88,21 @@ export class SecureTransferCommandHandler {
     .then()
     .must(cmd => cmd.securityContext.mfaVerified === true)
     .withCode('MFA_REQUIRED')
-    .withMessage('Multi-factor authentication required for transfers over $10,000')
+    .withMessage(
+      'Multi-factor authentication required for transfers over $10,000'
+    )
     .withSeverity('ERROR')
     // Business hours restriction for large transfers
     .when(cmd => cmd.amount > 25000)
     .then()
-    .mustSatisfy((cmd) => {
+    .mustSatisfy(cmd => {
       const hour = new Date().getHours();
       return hour >= 9 && hour <= 17;
     })
     .withCode('BUSINESS_HOURS_REQUIRED')
-    .withMessage('Large transfers must be made during business hours (9 AM - 5 PM)')
+    .withMessage(
+      'Large transfers must be made during business hours (9 AM - 5 PM)'
+    )
     .withSeverity('WARNING')
     .build();
 
@@ -110,7 +111,9 @@ export class SecureTransferCommandHandler {
     private readonly auditService: IAuditService
   ) {}
 
-  async execute(command: SecureTransferCommand): Promise<Result<TransferResult, SecurityError>> {
+  async execute(
+    command: SecureTransferCommand
+  ): Promise<Result<TransferResult, SecurityError>> {
     // ✅ FOCUS: Policy validation with context
     const policyContext = PolicyContext.create()
       .withUserId(command.securityContext.userId)
@@ -118,13 +121,13 @@ export class SecureTransferCommandHandler {
       .withRequestId(command.commandId)
       .withMetadata({
         ipAddress: command.securityContext.ipAddress,
-        userAgent: command.securityContext.userAgent
+        userAgent: command.securityContext.userAgent,
       })
       .build();
 
     const policyResult = await this.transferPolicy.check({
       entity: command,
-      context: policyContext
+      context: policyContext,
     });
 
     if (policyResult.isFailure()) {
@@ -132,13 +135,13 @@ export class SecureTransferCommandHandler {
       await this.auditService.logSecurityViolation({
         ...command.auditMetadata,
         violations: policyResult.error.violations,
-        result: 'DENIED'
+        result: 'DENIED',
       });
 
       return Result.fail({
         type: 'AUTHORIZATION_FAILED',
         violations: policyResult.error.violations,
-        message: 'Transfer not authorized'
+        message: 'Transfer not authorized',
       });
     }
 
@@ -155,19 +158,19 @@ export class SecureTransferCommandHandler {
     // Execute the transfer
     try {
       const result = await this.performTransfer(command);
-      
+
       // Audit successful operation
       await this.auditService.logSuccessfulOperation({
         ...command.auditMetadata,
         result: 'SUCCESS',
-        transferId: result.transferId
+        transferId: result.transferId,
       });
 
       return Result.ok(result);
     } catch (error) {
       return Result.fail({
         type: 'TRANSFER_FAILED',
-        message: (error as Error).message
+        message: (error as Error).message,
       });
     }
   }
@@ -177,23 +180,25 @@ export class SecureTransferCommandHandler {
     userId: string
   ): Promise<Result<void, SecurityError>> {
     const account = await this.accountRepository.findById(accountId);
-    
+
     if (!account || account.ownerId !== userId) {
       return Result.fail({
         type: 'OWNERSHIP_VALIDATION_FAILED',
-        message: 'User does not own the source account'
+        message: 'User does not own the source account',
       });
     }
 
     return Result.ok(undefined);
   }
 
-  private async performTransfer(command: SecureTransferCommand): Promise<TransferResult> {
+  private async performTransfer(
+    command: SecureTransferCommand
+  ): Promise<TransferResult> {
     // Transfer implementation
     return {
       transferId: `transfer-${Date.now()}`,
       status: 'COMPLETED',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -234,25 +239,27 @@ export class SecureAccountQueryHandler {
     private readonly dataProtectionService: IDataProtectionService
   ) {}
 
-  async execute(query: SecureAccountQuery): Promise<Result<AccountQueryResult[], SecurityError>> {
+  async execute(
+    query: SecureAccountQuery
+  ): Promise<Result<AccountQueryResult[], SecurityError>> {
     // Validate query permissions
     const policyResult = await this.queryPolicy.check({
       entity: query,
       context: PolicyContext.create()
         .withUserId(query.securityContext.userId)
-        .build()
+        .build(),
     });
 
     if (policyResult.isFailure()) {
       return Result.fail({
         type: 'QUERY_AUTHORIZATION_FAILED',
-        violations: policyResult.error.violations
+        violations: policyResult.error.violations,
       });
     }
 
     // Apply row-level security filters
     const securedFilters = this.applySecurityFilters(query);
-    
+
     // Execute query with secured filters
     const accounts = await this.accountRepository.find(securedFilters);
 
@@ -289,15 +296,14 @@ export class SecureAccountQueryHandler {
     return accounts.map(account => ({
       id: account.id,
       // Mask sensitive data for non-owners
-      accountNumber: context.userId === account.ownerId 
-        ? account.accountNumber 
-        : this.dataProtectionService.maskAccountNumber(account.accountNumber),
-      balance: context.userId === account.ownerId
-        ? account.balance
-        : null, // Hide balance from non-owners
+      accountNumber:
+        context.userId === account.ownerId
+          ? account.accountNumber
+          : this.dataProtectionService.maskAccountNumber(account.accountNumber),
+      balance: context.userId === account.ownerId ? account.balance : null, // Hide balance from non-owners
       currency: account.currency,
       status: account.status,
-      createdAt: account.createdAt
+      createdAt: account.createdAt,
     }));
   }
 }
@@ -310,7 +316,7 @@ export class SecurityPolicyMiddleware implements ICommandMiddleware {
   ): Promise<any> {
     // Extract security context
     const securityContext = (command as any).securityContext;
-    
+
     if (!securityContext) {
       throw new Error('Security context required for all commands');
     }
@@ -354,9 +360,9 @@ export class SecurityPolicyMiddleware implements ICommandMiddleware {
     const sensitiveCommands = [
       'SecureTransferCommand',
       'DeleteAccountCommand',
-      'UpdateSecuritySettingsCommand'
+      'UpdateSecuritySettingsCommand',
     ];
-    
+
     return sensitiveCommands.includes(command.constructor.name);
   }
 
@@ -372,11 +378,14 @@ export class SecurityPolicyMiddleware implements ICommandMiddleware {
 
 ## Key Features
 
-- **Policy-Based Authorization**: Comprehensive security policies using @vytches-ddd/policies
-- **Context-Aware Permissions**: Dynamic authorization based on user context and business rules
+- **Policy-Based Authorization**: Comprehensive security policies using
+  @vytches-ddd/policies
+- **Context-Aware Permissions**: Dynamic authorization based on user context and
+  business rules
 - **Role-Based Limits**: Different transaction limits for different user roles
 - **Multi-Factor Authentication**: Enhanced security for high-value operations
-- **Row-Level Security**: Automatic filtering of query results based on permissions
+- **Row-Level Security**: Automatic filtering of query results based on
+  permissions
 - **Data Masking**: Sensitive data protection in query results
 - **Audit Trails**: Comprehensive logging of security-sensitive operations
 - **Rate Limiting**: Protection against abuse through middleware
@@ -401,7 +410,7 @@ const transferCommand = new SecureTransferCommand(
     sessionId: 'session-123',
     mfaVerified: true,
     ipAddress: '192.168.1.1',
-    userAgent: 'Mozilla/5.0...'
+    userAgent: 'Mozilla/5.0...',
   }
 );
 
@@ -416,14 +425,14 @@ if (result.isFailure()) {
 // Execute secure query
 const queryBus = new QueryBus();
 const accountQuery = new SecureAccountQuery(
-  { 
+  {
     status: 'ACTIVE',
-    minBalance: 1000
+    minBalance: 1000,
   },
   {
     userId: 'user-789',
     userRole: 'STANDARD',
-    sessionId: 'session-123'
+    sessionId: 'session-123',
   }
 );
 
@@ -432,12 +441,16 @@ const queryResult = await queryBus.execute(accountQuery);
 
 ## Common Pitfalls
 
-- **Missing Security Context**: Always ensure commands/queries include security context
+- **Missing Security Context**: Always ensure commands/queries include security
+  context
 - **Policy Bypass**: Never skip policy validation for "trusted" operations
-- **Insufficient Audit Logging**: Log both successful and failed authorization attempts
-- **Hardcoded Permissions**: Use dynamic policies instead of hardcoded role checks
+- **Insufficient Audit Logging**: Log both successful and failed authorization
+  attempts
+- **Hardcoded Permissions**: Use dynamic policies instead of hardcoded role
+  checks
 - **Forgetting Data Masking**: Always mask sensitive data in query results
-- **Rate Limit Bypass**: Apply rate limiting at the middleware level, not handler level
+- **Rate Limit Bypass**: Apply rate limiting at the middleware level, not
+  handler level
 
 ## Related Examples
 

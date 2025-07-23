@@ -1,27 +1,18 @@
-// Testing Pattern for Domain Services
-import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import { UserManagementService } from './user-management.service';
-import { CreateUserCommand } from '../types';
+// Testing Pattern for Domain Services import { describe, it, expect, beforeEach
+} from 'vitest'; import { safeRun } from '@vytches-ddd/utils'; import {
+UserManagementService } from './user-management.service'; import {
+CreateUserCommand } from '../types';
 
-describe('UserManagementService', () => {
-  let service: UserManagementService;
-  let mockRepository: MockUserRepository;
-  let mockEventBus: MockEventBus;
+describe('UserManagementService', () => { let service: UserManagementService;
+let mockRepository: MockUserRepository; let mockEventBus: MockEventBus;
 
-  beforeEach(() => {
-    mockRepository = new MockUserRepository();
-    mockEventBus = new MockEventBus();
-    service = new UserManagementService(mockRepository, mockEventBus);
-  });
+beforeEach(() => { mockRepository = new MockUserRepository(); mockEventBus = new
+MockEventBus(); service = new UserManagementService(mockRepository,
+mockEventBus); });
 
-  describe('createUser', () => {
-    it('should create user successfully with all steps', async () => {
-      // Arrange
-      const command: CreateUserCommand = {
-        email: 'test@example.com',
-        name: 'Test User'
-      };
+describe('createUser', () => { it('should create user successfully with all
+steps', async () => { // Arrange const command: CreateUserCommand = { email:
+'test@example.com', name: 'Test User' };
 
       // Act
       const [error, result] = await safeRun(
@@ -82,13 +73,12 @@ describe('UserManagementService', () => {
       expect(result?.isFailure()).toBe(true);
       expect(result?.error?.message).toContain('User creation failed');
     });
-  });
 
-  describe('orchestration testing', () => {
-    it('should execute steps in correct order', async () => {
-      // Arrange
-      const executionOrder: string[] = [];
-      service.onStep = (step: string) => executionOrder.push(step);
+});
+
+describe('orchestration testing', () => { it('should execute steps in correct
+order', async () => { // Arrange const executionOrder: string[] = [];
+service.onStep = (step: string) => executionOrder.push(step);
 
       // Act
       await service.createUser({
@@ -125,27 +115,15 @@ describe('UserManagementService', () => {
         'saveUser'
       ]);
     });
-  });
-});
 
-// Mock implementations for testing
-class MockUserRepository {
-  saved: any[] = [];
-  shouldFail = false;
+}); });
 
-  async save(user: any): Promise<any> {
-    if (this.shouldFail) {
-      throw new Error('Repository error');
-    }
-    this.saved.push(user);
-    return user;
-  }
-}
+// Mock implementations for testing class MockUserRepository { saved: any[] =
+[]; shouldFail = false;
 
-class MockEventBus {
-  published: any[] = [];
+async save(user: any): Promise<any> { if (this.shouldFail) { throw new
+Error('Repository error'); } this.saved.push(user); return user; } }
 
-  async publish(event: any): Promise<void> {
-    this.published.push(event);
-  }
-}
+class MockEventBus { published: any[] = [];
+
+async publish(event: any): Promise<void> { this.published.push(event); } }

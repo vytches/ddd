@@ -9,19 +9,19 @@
 ```typescript
 // financial.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  UnitOfWork, 
-  BaseRepository, 
-  SpecificationRegistry 
+import {
+  UnitOfWork,
+  BaseRepository,
+  SpecificationRegistry,
 } from '@vytches-ddd/repositories';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { 
-  Account, 
-  Transaction, 
-  AuditLog, 
+import {
+  Account,
+  Transaction,
+  AuditLog,
   TransferRequest,
-  AccountSpecification 
+  AccountSpecification,
 } from './types'; // From your app
 
 @Injectable()
@@ -36,18 +36,21 @@ export class FinancialService {
     this.accountRepository = new BaseRepository<Account>('accounts', {
       connection: this.connection,
       enableOptimisticLocking: true,
-      enableAuditing: true
+      enableAuditing: true,
     });
 
-    this.transactionRepository = new BaseRepository<Transaction>('transactions', {
-      connection: this.connection,
-      enableEventSourcing: true,
-      batchSize: 1000
-    });
+    this.transactionRepository = new BaseRepository<Transaction>(
+      'transactions',
+      {
+        connection: this.connection,
+        enableEventSourcing: true,
+        batchSize: 1000,
+      }
+    );
 
     this.auditRepository = new BaseRepository<AuditLog>('audit_logs', {
       connection: this.connection,
-      enableCompression: true
+      enableCompression: true,
     });
 
     // Initialize specifications
@@ -58,13 +61,13 @@ export class FinancialService {
   // ✅ FOCUS: Complex financial transaction with UoW
   async processTransfer(request: TransferRequest): Promise<TransferResult> {
     const uow = new UnitOfWork(this.connection);
-    
+
     try {
       await uow.begin();
 
       // Get accounts within transaction
       const fromAccount = await this.accountRepository.findById(
-        request.fromAccountId, 
+        request.fromAccountId,
         { transaction: uow.getTransaction() }
       );
       const toAccount = await this.accountRepository.findById(
@@ -90,11 +93,11 @@ export class FinancialService {
       toAccount.balance += request.amount;
 
       // Save changes within transaction
-      await this.accountRepository.save(fromAccount, { 
-        transaction: uow.getTransaction() 
+      await this.accountRepository.save(fromAccount, {
+        transaction: uow.getTransaction(),
       });
-      await this.accountRepository.save(toAccount, { 
-        transaction: uow.getTransaction() 
+      await this.accountRepository.save(toAccount, {
+        transaction: uow.getTransaction(),
       });
 
       // Create transaction records
@@ -105,21 +108,28 @@ export class FinancialService {
         amount: request.amount,
         type: 'TRANSFER',
         status: 'COMPLETED',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       await this.transactionRepository.save(transaction, {
-        transaction: uow.getTransaction()
+        transaction: uow.getTransaction(),
       });
 
       // Create audit log
-      await this.auditRepository.save({
-        id: generateId(),
-        action: 'TRANSFER_PROCESSED',
-        userId: request.userId,
-        details: { fromAccount: fromAccount.id, toAccount: toAccount.id, amount: request.amount },
-        timestamp: new Date()
-      }, { transaction: uow.getTransaction() });
+      await this.auditRepository.save(
+        {
+          id: generateId(),
+          action: 'TRANSFER_PROCESSED',
+          userId: request.userId,
+          details: {
+            fromAccount: fromAccount.id,
+            toAccount: toAccount.id,
+            amount: request.amount,
+          },
+          timestamp: new Date(),
+        },
+        { transaction: uow.getTransaction() }
+      );
 
       await uow.commit();
 
@@ -127,9 +137,8 @@ export class FinancialService {
         success: true,
         transactionId: transaction.id,
         fromBalance: fromAccount.balance,
-        toBalance: toAccount.balance
+        toBalance: toAccount.balance,
       };
-
     } catch (error) {
       await uow.rollback();
       throw error;
@@ -147,10 +156,13 @@ export class FinancialService {
     }
 
     const queryOptions = specification.toQueryOptions();
-    
+
     // Add additional criteria if provided
     if (additionalCriteria) {
-      queryOptions.where = [...(queryOptions.where || []), ...additionalCriteria];
+      queryOptions.where = [
+        ...(queryOptions.where || []),
+        ...additionalCriteria,
+      ];
     }
 
     return await this.accountRepository.find(queryOptions);
@@ -170,7 +182,7 @@ export class FinancialService {
       // Process in batches to manage memory and performance
       for (let i = 0; i < transactions.length; i += batchSize) {
         const batch = transactions.slice(i, i + batchSize);
-        
+
         for (const request of batch) {
           try {
             const result = await this.processTransferInBatch(request, uow);
@@ -179,7 +191,7 @@ export class FinancialService {
             results.push({
               success: false,
               error: error.message,
-              transactionId: null
+              transactionId: null,
             });
           }
         }
@@ -196,9 +208,8 @@ export class FinancialService {
         totalProcessed: transactions.length,
         successful: results.filter(r => r.success).length,
         failed: results.filter(r => !r.success).length,
-        results
+        results,
       };
-
     } catch (error) {
       await uow.rollback();
       throw error;
@@ -206,7 +217,9 @@ export class FinancialService {
   }
 
   // ✅ FOCUS: Advanced querying with multiple specifications
-  async generateAccountReport(criteria: ReportCriteria): Promise<AccountReport> {
+  async generateAccountReport(
+    criteria: ReportCriteria
+  ): Promise<AccountReport> {
     // Build composite specification
     let specification = this.specificationRegistry.get('account-active')!;
 
@@ -231,11 +244,13 @@ export class FinancialService {
     return {
       totalAccounts: accounts.length,
       totalBalance: accounts.reduce((sum, acc) => sum + acc.balance, 0),
-      averageBalance: accounts.length > 0 
-        ? accounts.reduce((sum, acc) => sum + acc.balance, 0) / accounts.length 
-        : 0,
+      averageBalance:
+        accounts.length > 0
+          ? accounts.reduce((sum, acc) => sum + acc.balance, 0) /
+            accounts.length
+          : 0,
       accountsByType: this.groupAccountsByType(accounts),
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -244,17 +259,17 @@ export class FinancialService {
       'sufficient-balance',
       new AccountSpecification.SufficientBalance()
     );
-    
+
     this.specificationRegistry.register(
-      'account-active', 
+      'account-active',
       new AccountSpecification.AccountActive()
     );
-    
+
     this.specificationRegistry.register(
       'minimum-balance',
       new AccountSpecification.MinimumBalance()
     );
-    
+
     this.specificationRegistry.register(
       'account-type',
       new AccountSpecification.AccountType()
@@ -262,7 +277,7 @@ export class FinancialService {
   }
 
   private async processTransferInBatch(
-    request: TransferRequest, 
+    request: TransferRequest,
     uow: UnitOfWork
   ): Promise<TransferResult> {
     // Simplified batch processing logic
@@ -271,15 +286,18 @@ export class FinancialService {
       success: true,
       transactionId: generateId(),
       fromBalance: 0,
-      toBalance: 0
+      toBalance: 0,
     };
   }
 
   private groupAccountsByType(accounts: Account[]): Record<string, number> {
-    return accounts.reduce((groups, account) => {
-      groups[account.type] = (groups[account.type] || 0) + 1;
-      return groups;
-    }, {} as Record<string, number>);
+    return accounts.reduce(
+      (groups, account) => {
+        groups[account.type] = (groups[account.type] || 0) + 1;
+        return groups;
+      },
+      {} as Record<string, number>
+    );
   }
 }
 ```
@@ -298,13 +316,13 @@ import { AccountEntity, TransactionEntity, AuditLogEntity } from './entities';
   imports: [
     TypeOrmModule.forFeature([
       AccountEntity,
-      TransactionEntity, 
-      AuditLogEntity
-    ])
+      TransactionEntity,
+      AuditLogEntity,
+    ]),
   ],
   providers: [FinancialService],
   controllers: [FinancialController],
-  exports: [FinancialService]
+  exports: [FinancialService],
 })
 export class FinancialModule {}
 ```
@@ -333,7 +351,9 @@ export class FinancialController {
 
   @Get('accounts')
   async findAccounts(@Query('specification') specification: string) {
-    return await this.financialService.findAccountsBySpecification(specification);
+    return await this.financialService.findAccountsBySpecification(
+      specification
+    );
   }
 
   @Get('report')
@@ -346,7 +366,7 @@ export class FinancialController {
 ## Key Points
 
 - Manual setup showcasing advanced repository patterns
-- Unit of Work for transaction management across multiple repositories  
+- Unit of Work for transaction management across multiple repositories
 - Specification Pattern for complex business rule validation
 - Batch processing for high-performance scenarios
 - All business logic uses @vytches-ddd/repositories capabilities

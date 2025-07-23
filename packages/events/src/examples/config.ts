@@ -4,19 +4,25 @@ export const config: PackageExampleConfig = {
   packageName: 'events',
   displayName: 'Unified Event System',
   version: '1.0.0',
-  description: 'Unified Event System provides a consolidated event handling architecture with automatic event publishing through repository pattern and comprehensive event management.',
+  description:
+    'Unified Event System provides a consolidated event handling architecture with automatic event publishing through repository pattern and comprehensive event management.',
   domain: 'Architecture',
-  patterns: ['event-driven-architecture', 'domain-events', 'integration-events', 'repository-pattern'],
+  patterns: [
+    'event-driven-architecture',
+    'domain-events',
+    'integration-events',
+    'repository-pattern',
+  ],
   tags: {
     core: ['events:core', 'events:domain', 'events:integration', 'events:unified'],
     integrations: ['events:repository', 'events:handlers', 'events:dispatcher', 'events:bus'],
     frameworks: ['events:nestjs', 'events:express', 'events:fastify'],
-    patterns: ['events:aggregate', 'events:publishing', 'events:context', 'events:batch']
+    patterns: ['events:aggregate', 'events:publishing', 'events:context', 'events:batch'],
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/events', '@vytches-ddd/utils'],
   sections: [
     'hero',
-    'description', 
+    'description',
     'whenToUse',
     'whenNotToUse',
     'examples',
@@ -24,27 +30,27 @@ export const config: PackageExampleConfig = {
     'frameworkIntegration',
     'commonPitfalls',
     'troubleshooting',
-    'performance'
+    'performance',
   ],
   complexityLevels: {
     basic: {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic event publishing with repository pattern'
+      description: 'Basic event publishing with repository pattern',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: true,
-      description: 'Advanced event handling with context filtering and batch processing'
+      description: 'Advanced event handling with context filtering and batch processing',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise event system with event sourcing and projections'
-    }
+      description: 'Enterprise event system with event sourcing and projections',
+    },
   },
   frameworks: [
     {
@@ -52,15 +58,15 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'Integration with NestJS framework',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/common', '@nestjs/cqrs']
+      dependencies: ['@nestjs/common', '@nestjs/cqrs'],
     },
     {
       name: 'express',
       displayName: 'Express',
       description: 'Integration with Express framework',
       complexityLevels: ['basic', 'intermediate'],
-      dependencies: ['express']
-    }
+      dependencies: ['express'],
+    },
   ],
   examples: [
     // Basic Examples
@@ -71,8 +77,9 @@ export const config: PackageExampleConfig = {
       tags: ['events:core', 'events:repository', 'domain-events', 'automatic-publishing'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Core repository pattern with automatic event publishing when aggregates are saved',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/repositories', '@vytches-ddd/aggregates']
+      description:
+        'Core repository pattern with automatic event publishing when aggregates are saved',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/repositories', '@vytches-ddd/aggregates'],
     },
     {
       id: 'basic-event-handlers',
@@ -82,7 +89,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Creating event handlers that automatically respond to published domain events',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/di']
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/di'],
     },
     {
       id: 'basic-context-aware',
@@ -92,7 +99,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Multi-tenant event processing with context-based filtering and routing',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils'],
     },
     {
       id: 'basic-implementation-overview',
@@ -102,7 +109,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'High-level overview of event system implementation patterns',
-      dependencies: ['@vytches-ddd/events']
+      dependencies: ['@vytches-ddd/events'],
     },
     {
       id: 'basic-use-cases',
@@ -112,7 +119,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Real-world business scenarios and use cases for event-driven architecture',
-      dependencies: ['@vytches-ddd/events']
+      dependencies: ['@vytches-ddd/events'],
     },
     // Intermediate Examples
     {
@@ -123,7 +130,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'High-performance batch processing and bulk event publishing for large volumes',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/utils'],
     },
     {
       id: 'intermediate-event-deduplication',
@@ -133,7 +140,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced event deduplication and idempotency handling for distributed systems',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging'],
     },
     {
       id: 'intermediate-event-middleware',
@@ -142,8 +149,9 @@ export const config: PackageExampleConfig = {
       tags: ['events:middleware', 'events:pipeline', 'events:cross-cutting'],
       complexity: 'intermediate',
       priority: 'high',
-      description: 'Advanced event middleware system for cross-cutting concerns in event processing',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+      description:
+        'Advanced event middleware system for cross-cutting concerns in event processing',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging'],
     },
     // Advanced Examples
     {
@@ -153,8 +161,9 @@ export const config: PackageExampleConfig = {
       tags: ['events:event-sourcing', 'events:snapshots', 'events:aggregate-reconstruction'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Advanced event sourcing implementation with snapshot optimization for aggregate reconstruction',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/aggregates', '@vytches-ddd/event-store']
+      description:
+        'Advanced event sourcing implementation with snapshot optimization for aggregate reconstruction',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/aggregates', '@vytches-ddd/event-store'],
     },
     {
       id: 'advanced-stream-processing',
@@ -163,8 +172,9 @@ export const config: PackageExampleConfig = {
       tags: ['events:stream-processing', 'events:real-time-analytics', 'events:windowing'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Advanced event stream processing with real-time analytics and complex event processing',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging']
+      description:
+        'Advanced event stream processing with real-time analytics and complex event processing',
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/utils', '@vytches-ddd/logging'],
     },
     {
       id: 'advanced-event-mesh',
@@ -173,8 +183,14 @@ export const config: PackageExampleConfig = {
       tags: ['events:event-mesh', 'events:distributed', 'events:microservices'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise-grade event mesh architecture for distributed microservices communication',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/resilience', '@vytches-ddd/logging', '@vytches-ddd/messaging']
+      description:
+        'Enterprise-grade event mesh architecture for distributed microservices communication',
+      dependencies: [
+        '@vytches-ddd/events',
+        '@vytches-ddd/resilience',
+        '@vytches-ddd/logging',
+        '@vytches-ddd/messaging',
+      ],
     },
     {
       id: 'advanced-implementation-guide',
@@ -184,7 +200,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Comprehensive implementation patterns for advanced event-driven architectures',
-      dependencies: ['@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/resilience']
+      dependencies: ['@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/resilience'],
     },
     {
       id: 'advanced-use-cases',
@@ -194,7 +210,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Enterprise use cases and real-world applications of advanced event systems',
-      dependencies: ['@vytches-ddd/events']
+      dependencies: ['@vytches-ddd/events'],
     },
     // Framework Examples - NestJS
     {
@@ -205,7 +221,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic NestJS integration with manual event system setup',
-      dependencies: ['@nestjs/common', '@vytches-ddd/events']
+      dependencies: ['@nestjs/common', '@vytches-ddd/events'],
     },
     {
       id: 'nestjs-basic-integration',
@@ -214,8 +230,9 @@ export const config: PackageExampleConfig = {
       tags: ['events:nestjs', 'events:repository-pattern', 'framework:nestjs'],
       complexity: 'basic',
       priority: 'high',
-      description: 'Basic NestJS integration with automatic event publishing through repository pattern',
-      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/repositories']
+      description:
+        'Basic NestJS integration with automatic event publishing through repository pattern',
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/repositories'],
     },
     {
       id: 'nestjs-di-integration',
@@ -225,7 +242,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'NestJS integration using @vytches-ddd/di service locator pattern',
-      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/di']
+      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/di'],
     },
     {
       id: 'nestjs-intermediate-integration',
@@ -235,7 +252,12 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced NestJS integration with batch processing and resilience patterns',
-      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/di', '@vytches-ddd/resilience']
+      dependencies: [
+        '@nestjs/common',
+        '@vytches-ddd/events',
+        '@vytches-ddd/di',
+        '@vytches-ddd/resilience',
+      ],
     },
     {
       id: 'nestjs-advanced-integration',
@@ -244,9 +266,16 @@ export const config: PackageExampleConfig = {
       tags: ['events:nestjs', 'events:event-sourcing', 'events:event-mesh', 'framework:nestjs'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise-grade NestJS integration with event sourcing and complex event processing',
-      dependencies: ['@nestjs/common', '@vytches-ddd/events', '@vytches-ddd/event-store', '@vytches-ddd/di', '@vytches-ddd/resilience']
-    }
+      description:
+        'Enterprise-grade NestJS integration with event sourcing and complex event processing',
+      dependencies: [
+        '@nestjs/common',
+        '@vytches-ddd/events',
+        '@vytches-ddd/event-store',
+        '@vytches-ddd/di',
+        '@vytches-ddd/resilience',
+      ],
+    },
   ],
   contentConfig: {
     showImportStatements: true,
@@ -255,35 +284,35 @@ export const config: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
   llmSupport: {
     enabled: true,
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
   relatedPackages: {
-    'repositories': {
+    repositories: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['aggregate-events', 'repository-integration']
+      integrationExamples: ['aggregate-events', 'repository-integration'],
     },
-    'aggregates': {
+    aggregates: {
       priority: 'high',
       relationship: 'consumes-from',
-      integrationExamples: ['aggregate-events', 'domain-events']
+      integrationExamples: ['aggregate-events', 'domain-events'],
     },
     'event-store': {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['event-sourcing', 'event-persistence']
+      integrationExamples: ['event-sourcing', 'event-persistence'],
     },
-    'projections': {
+    projections: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['event-projections', 'read-models']
-    }
-  }
+      integrationExamples: ['event-projections', 'read-models'],
+    },
+  },
 };

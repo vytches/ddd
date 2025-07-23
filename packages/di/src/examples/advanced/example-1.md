@@ -5,15 +5,21 @@
 **Complexity**: advanced  
 **Domain**: Enterprise Multi-Framework Architecture  
 **Patterns**: Framework Integration, Adapter Pattern, Bridge Pattern  
-**Dependencies**: @vytches-ddd/di, NestJS, InversifyJS, TSyringe  
+**Dependencies**: @vytches-ddd/di, NestJS, InversifyJS, TSyringe
 
 ## Description
 
-This example demonstrates advanced patterns for integrating VytchesDDD's DI system with popular frameworks like NestJS, InversifyJS, and TSyringe. It shows how to create adapters, avoid double instance risks, and maintain clean boundaries between framework and domain services.
+This example demonstrates advanced patterns for integrating VytchesDDD's DI
+system with popular frameworks like NestJS, InversifyJS, and TSyringe. It shows
+how to create adapters, avoid double instance risks, and maintain clean
+boundaries between framework and domain services.
 
 ## Business Context
 
-Enterprise applications often need to integrate with multiple frameworks or migrate between them. Using adapter patterns allows you to keep your domain logic framework-agnostic while leveraging each framework's strengths. This approach provides flexibility and reduces migration costs.
+Enterprise applications often need to integrate with multiple frameworks or
+migrate between them. Using adapter patterns allows you to keep your domain
+logic framework-agnostic while leveraging each framework's strengths. This
+approach provides flexibility and reduces migration costs.
 
 ## Code Example
 
@@ -30,39 +36,39 @@ import { User, CreateUserData, UpdateUserData } from '../types'; // Import from 
   lifetime: ServiceLifetime.Singleton,
   context: 'UserManagement',
   autoRegister: true,
-  dependencies: ['auditService', 'validationService']
+  dependencies: ['auditService', 'validationService'],
 })
 export class UserDomainService {
   private users: Map<string, User> = new Map();
-  
+
   /**
    * Creates a new user with domain logic
    */
   async createUser(userData: CreateUserData): Promise<User> {
     // ⭐ FOCUS: Pure domain logic, no framework dependencies
     console.log(`UserDomainService: Creating user ${userData.email}`);
-    
+
     // Domain validation
     await this.validateUserData(userData);
-    
+
     const user: User = {
       id: this.generateUserId(),
       email: userData.email,
       name: userData.name,
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     this.users.set(user.id, user);
-    
+
     // Domain events, business rules, etc.
     await this.publishUserCreatedEvent(user);
-    
+
     console.log(`UserDomainService: Created user ${user.id}`);
     return user;
   }
-  
+
   /**
    * Updates user with domain logic
    */
@@ -71,44 +77,44 @@ export class UserDomainService {
     if (!existingUser) {
       throw new Error(`User not found: ${userId}`);
     }
-    
+
     const updatedUser = {
       ...existingUser,
       ...userData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     this.users.set(userId, updatedUser);
-    
+
     await this.publishUserUpdatedEvent(updatedUser);
-    
+
     console.log(`UserDomainService: Updated user ${userId}`);
     return updatedUser;
   }
-  
+
   /**
    * Gets user by ID
    */
   async getUserById(userId: string): Promise<User | null> {
     return this.users.get(userId) || null;
   }
-  
+
   private async validateUserData(userData: CreateUserData): Promise<void> {
     // Domain validation logic
     if (!userData.email || !userData.name) {
       throw new Error('Email and name are required');
     }
   }
-  
+
   private generateUserId(): string {
     return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-  
+
   private async publishUserCreatedEvent(user: User): Promise<void> {
     // Domain event publishing
     console.log(`Publishing UserCreated event for ${user.id}`);
   }
-  
+
   private async publishUserUpdatedEvent(user: User): Promise<void> {
     // Domain event publishing
     console.log(`Publishing UserUpdated event for ${user.id}`);
@@ -127,11 +133,11 @@ import { UserDomainService } from '../domain/user-domain.service';
  */
 export class NestJSVytchesDDDAdapter implements OnModuleInit {
   constructor(private moduleRef: ModuleRef) {}
-  
+
   async onModuleInit(): Promise<void> {
     // ⭐ FOCUS: Initialize VytchesDDD before NestJS DI
     await VytchesDDD.configure();
-    
+
     console.log('NestJS adapter initialized with VytchesDDD');
   }
 }
@@ -142,12 +148,13 @@ export class NestJSVytchesDDDAdapter implements OnModuleInit {
 @Injectable()
 export class NestJSUserService {
   private readonly userDomainService: UserDomainService;
-  
+
   constructor() {
     // ⭐ FOCUS: Bridge pattern - get existing instance from VytchesDDD
-    this.userDomainService = VytchesDDD.resolve<UserDomainService>('userDomainService');
+    this.userDomainService =
+      VytchesDDD.resolve<UserDomainService>('userDomainService');
   }
-  
+
   /**
    * NestJS service delegates to domain service
    */
@@ -155,11 +162,11 @@ export class NestJSUserService {
     // ⭐ FOCUS: Thin wrapper around domain service
     return await this.userDomainService.createUser(userData);
   }
-  
+
   async updateUser(userId: string, userData: UpdateUserData): Promise<User> {
     return await this.userDomainService.updateUser(userId, userData);
   }
-  
+
   async getUserById(userId: string): Promise<User | null> {
     return await this.userDomainService.getUserById(userId);
   }
@@ -191,23 +198,25 @@ import { UserDomainService } from '../domain/user-domain.service';
  */
 export class InversifyVytchesDDDAdapter {
   private container: Container;
-  
+
   constructor() {
     this.container = new Container();
   }
-  
+
   /**
    * Configures InversifyJS to work with VytchesDDD
    */
   async configure(): Promise<Container> {
     // ⭐ FOCUS: Initialize VytchesDDD first
     await VytchesDDD.configure();
-    
+
     // Bind VytchesDDD services to InversifyJS container
-    this.container.bind<UserDomainService>('UserDomainService').toDynamicValue(() => {
-      return VytchesDDD.resolve<UserDomainService>('userDomainService');
-    });
-    
+    this.container
+      .bind<UserDomainService>('UserDomainService')
+      .toDynamicValue(() => {
+        return VytchesDDD.resolve<UserDomainService>('userDomainService');
+      });
+
     console.log('InversifyJS adapter configured with VytchesDDD');
     return this.container;
   }
@@ -221,7 +230,7 @@ export class InversifyUserService {
   constructor(
     @inject('UserDomainService') private userDomainService: UserDomainService
   ) {}
-  
+
   /**
    * InversifyJS service delegates to domain service
    */
@@ -229,11 +238,11 @@ export class InversifyUserService {
     // ⭐ FOCUS: Uses injected VytchesDDD service
     return await this.userDomainService.createUser(userData);
   }
-  
+
   async updateUser(userId: string, userData: UpdateUserData): Promise<User> {
     return await this.userDomainService.updateUser(userId, userData);
   }
-  
+
   async getUserById(userId: string): Promise<User | null> {
     return await this.userDomainService.getUserById(userId);
   }
@@ -256,12 +265,13 @@ export class TSyringeVytchesDDDAdapter {
   static async configure(): Promise<void> {
     // ⭐ FOCUS: Initialize VytchesDDD first
     await VytchesDDD.configure();
-    
+
     // Register VytchesDDD services in TSyringe
     container.register<UserDomainService>('UserDomainService', {
-      useFactory: () => VytchesDDD.resolve<UserDomainService>('userDomainService')
+      useFactory: () =>
+        VytchesDDD.resolve<UserDomainService>('userDomainService'),
     });
-    
+
     console.log('TSyringe adapter configured with VytchesDDD');
   }
 }
@@ -273,9 +283,11 @@ export class TSyringeVytchesDDDAdapter {
 @singleton()
 export class TSyringeUserService {
   constructor(
-    private userDomainService: UserDomainService = container.resolve<UserDomainService>('UserDomainService')
+    private userDomainService: UserDomainService = container.resolve<UserDomainService>(
+      'UserDomainService'
+    )
   ) {}
-  
+
   /**
    * TSyringe service delegates to domain service
    */
@@ -283,11 +295,11 @@ export class TSyringeUserService {
     // ⭐ FOCUS: Uses TSyringe-injected VytchesDDD service
     return await this.userDomainService.createUser(userData);
   }
-  
+
   async updateUser(userId: string, userData: UpdateUserData): Promise<User> {
     return await this.userDomainService.updateUser(userId, userData);
   }
-  
+
   async getUserById(userId: string): Promise<User | null> {
     return await this.userDomainService.getUserById(userId);
   }
@@ -311,19 +323,19 @@ export interface FrameworkAdapter<T> {
  */
 export class GenericFrameworkAdapter<T> implements FrameworkAdapter<T> {
   private frameworkContainer: T | null = null;
-  
+
   /**
    * Configures the adapter with any framework container
    */
   async configure(frameworkContainer: T): Promise<void> {
     this.frameworkContainer = frameworkContainer;
-    
+
     // ⭐ FOCUS: Always initialize VytchesDDD first
     await VytchesDDD.configure();
-    
+
     console.log('Generic framework adapter configured');
   }
-  
+
   /**
    * Gets bridge service from VytchesDDD
    */
@@ -347,7 +359,7 @@ export class ServiceFactory {
     // ⭐ FOCUS: Framework-agnostic service access
     return VytchesDDD.resolve<TService>(serviceId);
   }
-  
+
   /**
    * Creates lazy service bridge
    */
@@ -359,9 +371,18 @@ export class ServiceFactory {
 
 ```typescript
 // integration/multi-framework-app.ts
-import { NestJSVytchesDDDAdapter, NestJSUserService } from '../adapters/nestjs-adapter';
-import { InversifyVytchesDDDAdapter, InversifyUserService } from '../adapters/inversify-adapter';
-import { TSyringeVytchesDDDAdapter, TSyringeUserService } from '../adapters/tsyringe-adapter';
+import {
+  NestJSVytchesDDDAdapter,
+  NestJSUserService,
+} from '../adapters/nestjs-adapter';
+import {
+  InversifyVytchesDDDAdapter,
+  InversifyUserService,
+} from '../adapters/inversify-adapter';
+import {
+  TSyringeVytchesDDDAdapter,
+  TSyringeUserService,
+} from '../adapters/tsyringe-adapter';
 import { GenericFrameworkAdapter } from '../adapters/generic-adapter';
 import { CreateUserData, UpdateUserData } from '../types'; // Import from application
 
@@ -372,116 +393,120 @@ export class MultiFrameworkApplication {
   private nestjsAdapter: NestJSVytchesDDDAdapter;
   private inversifyAdapter: InversifyVytchesDDDAdapter;
   private genericAdapter: GenericFrameworkAdapter<any>;
-  
+
   constructor() {
     this.nestjsAdapter = new NestJSVytchesDDDAdapter(null as any); // Simplified
     this.inversifyAdapter = new InversifyVytchesDDDAdapter();
     this.genericAdapter = new GenericFrameworkAdapter();
   }
-  
+
   /**
    * Demonstrates NestJS integration
    */
   async demonstrateNestJSIntegration(): Promise<void> {
     console.log('\n=== NestJS Integration ===');
-    
+
     // ⭐ FOCUS: Initialize NestJS adapter
     await this.nestjsAdapter.onModuleInit();
-    
+
     const nestjsService = new NestJSUserService();
-    
+
     const userData: CreateUserData = {
       email: 'nestjs@example.com',
-      name: 'NestJS User'
+      name: 'NestJS User',
     };
-    
+
     const user = await nestjsService.createUser(userData);
     console.log('NestJS created user:', user.id);
-    
+
     const retrievedUser = await nestjsService.getUserById(user.id);
     console.log('NestJS retrieved user:', retrievedUser?.name);
   }
-  
+
   /**
    * Demonstrates InversifyJS integration
    */
   async demonstrateInversifyIntegration(): Promise<void> {
     console.log('\n=== InversifyJS Integration ===');
-    
+
     // ⭐ FOCUS: Configure InversifyJS adapter
     const container = await this.inversifyAdapter.configure();
-    
-    const inversifyService = container.get<InversifyUserService>(InversifyUserService);
-    
+
+    const inversifyService =
+      container.get<InversifyUserService>(InversifyUserService);
+
     const userData: CreateUserData = {
       email: 'inversify@example.com',
-      name: 'InversifyJS User'
+      name: 'InversifyJS User',
     };
-    
+
     const user = await inversifyService.createUser(userData);
     console.log('InversifyJS created user:', user.id);
-    
+
     const retrievedUser = await inversifyService.getUserById(user.id);
     console.log('InversifyJS retrieved user:', retrievedUser?.name);
   }
-  
+
   /**
    * Demonstrates TSyringe integration
    */
   async demonstrateTSyringeIntegration(): Promise<void> {
     console.log('\n=== TSyringe Integration ===');
-    
+
     // ⭐ FOCUS: Configure TSyringe adapter
     await TSyringeVytchesDDDAdapter.configure();
-    
+
     const tsyringeService = new TSyringeUserService();
-    
+
     const userData: CreateUserData = {
       email: 'tsyringe@example.com',
-      name: 'TSyringe User'
+      name: 'TSyringe User',
     };
-    
+
     const user = await tsyringeService.createUser(userData);
     console.log('TSyringe created user:', user.id);
-    
+
     const retrievedUser = await tsyringeService.getUserById(user.id);
     console.log('TSyringe retrieved user:', retrievedUser?.name);
   }
-  
+
   /**
    * Demonstrates generic adapter usage
    */
   async demonstrateGenericIntegration(): Promise<void> {
     console.log('\n=== Generic Integration ===');
-    
+
     // ⭐ FOCUS: Configure generic adapter
     await this.genericAdapter.configure({});
-    
-    const userService = this.genericAdapter.getBridgeService<UserDomainService>('userDomainService');
-    
+
+    const userService =
+      this.genericAdapter.getBridgeService<UserDomainService>(
+        'userDomainService'
+      );
+
     const userData: CreateUserData = {
       email: 'generic@example.com',
-      name: 'Generic User'
+      name: 'Generic User',
     };
-    
+
     const user = await userService.createUser(userData);
     console.log('Generic created user:', user.id);
-    
+
     const retrievedUser = await userService.getUserById(user.id);
     console.log('Generic retrieved user:', retrievedUser?.name);
   }
-  
+
   /**
    * Runs all integration demonstrations
    */
   async runAllDemonstrations(): Promise<void> {
     console.log('=== Multi-Framework Integration Demo ===');
-    
+
     await this.demonstrateNestJSIntegration();
     await this.demonstrateInversifyIntegration();
     await this.demonstrateTSyringeIntegration();
     await this.demonstrateGenericIntegration();
-    
+
     console.log('\n=== All integrations completed ===');
   }
 }
@@ -496,7 +521,7 @@ import { MultiFrameworkApplication } from './integration/multi-framework-app';
  */
 async function demonstrateFrameworkIntegration(): Promise<void> {
   const app = new MultiFrameworkApplication();
-  
+
   try {
     await app.runAllDemonstrations();
   } catch (error) {
@@ -520,7 +545,8 @@ demonstrateFrameworkIntegration().catch(console.error);
 
 ## Common Pitfalls
 
-- **Double Instance Risk**: Never use both framework DI and VytchesDDD DI for the same service
+- **Double Instance Risk**: Never use both framework DI and VytchesDDD DI for
+  the same service
 - **Initialization Order**: Always initialize VytchesDDD before framework DI
 - **Service Leakage**: Keep domain services framework-agnostic
 - **Circular Dependencies**: Avoid circular dependencies between adapters

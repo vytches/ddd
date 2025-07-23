@@ -10,27 +10,28 @@
 
 ## Description
 
-Advanced integration of @vytches-ddd/policies with NestJS using the @vytches-ddd/di service locator pattern for enterprise-grade dependency injection, policy behaviors, and cross-cutting concerns.
+Advanced integration of @vytches-ddd/policies with NestJS using the
+@vytches-ddd/di service locator pattern for enterprise-grade dependency
+injection, policy behaviors, and cross-cutting concerns.
 
 ## Business Context
 
-Enterprise applications require sophisticated policy management with cross-cutting concerns like retry logic, caching, and audit logging. This example demonstrates integration with @vytches-ddd/di for advanced policy orchestration and behavior composition.
+Enterprise applications require sophisticated policy management with
+cross-cutting concerns like retry logic, caching, and audit logging. This
+example demonstrates integration with @vytches-ddd/di for advanced policy
+orchestration and behavior composition.
 
 ## Code Example
 
 ```typescript
 // user-policy.service.ts - Domain Service with DI Integration
 import { Injectable } from '@nestjs/common';
-import { 
-  DomainService, 
-  VytchesDDD, 
-  ServiceLifetime 
-} from '@vytches-ddd/di';
-import { 
-  PolicyBuilder, 
+import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import {
+  PolicyBuilder,
   PolicyRetryBehavior,
   PolicyCachingBehavior,
-  PolicyResult 
+  PolicyResult,
 } from '@vytches-ddd/policies';
 import { User, CreateUserRequest, PolicyContext } from './types'; // From your application
 
@@ -43,7 +44,7 @@ import { User, CreateUserRequest, PolicyContext } from './types'; // From your a
   lifetime: ServiceLifetime.Singleton,
   context: 'UserManagement',
   dependencies: ['auditService', 'configurationService'],
-  autoRegister: true
+  autoRegister: true,
 })
 export class UserPolicyService {
   private readonly baseUserPolicy;
@@ -74,7 +75,7 @@ export class UserPolicyService {
       ttl: 300000, // 5 minutes
       maxSize: 1000,
       keyGenerator: request => `user-${request.entity.email}`,
-      namespace: 'user-validation'
+      namespace: 'user-validation',
     });
 
     // ⭐ FOCUS: Wrap with retry behavior for resilience
@@ -82,14 +83,17 @@ export class UserPolicyService {
       maxAttempts: 3,
       baseDelay: 1000,
       backoff: 'exponential',
-      shouldRetry: violation => violation.code.includes('TIMEOUT')
+      shouldRetry: violation => violation.code.includes('TIMEOUT'),
     });
   }
 
   /**
    * ✅ FOCUS: Advanced policy validation with behaviors
    */
-  async validateUser(userData: CreateUserRequest, context: PolicyContext): Promise<PolicyResult<User>> {
+  async validateUser(
+    userData: CreateUserRequest,
+    context: PolicyContext
+  ): Promise<PolicyResult<User>> {
     try {
       const user: User = {
         id: userData.id || `user-${Date.now()}`,
@@ -97,7 +101,7 @@ export class UserPolicyService {
         age: userData.age,
         name: userData.name,
         isActive: true,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Use policy with retry and caching behaviors
@@ -107,8 +111,8 @@ export class UserPolicyService {
           ...context,
           operation: 'user-validation',
           timestamp: new Date(),
-          correlationId: context.correlationId || `validate-${Date.now()}`
-        }
+          correlationId: context.correlationId || `validate-${Date.now()}`,
+        },
       });
     } catch (error) {
       throw new Error(`Advanced user validation failed: ${error.message}`);
@@ -118,7 +122,9 @@ export class UserPolicyService {
   /**
    * ✅ FOCUS: Policy behavior composition for different scenarios
    */
-  async validatePremiumUser(userData: CreateUserRequest): Promise<PolicyResult<User>> {
+  async validatePremiumUser(
+    userData: CreateUserRequest
+  ): Promise<PolicyResult<User>> {
     // Create premium-specific policy with different rules
     const premiumPolicy = PolicyBuilder.create<User>()
       .withId('premium-user-validation')
@@ -137,7 +143,7 @@ export class UserPolicyService {
     const premiumCachedPolicy = PolicyCachingBehavior.create(premiumPolicy, {
       ttl: 600000, // 10 minutes for premium
       keyGenerator: request => `premium-${request.entity.email}`,
-      namespace: 'premium-validation'
+      namespace: 'premium-validation',
     });
 
     const user: User = {
@@ -146,15 +152,15 @@ export class UserPolicyService {
       age: userData.age,
       name: userData.name,
       isActive: true,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     return await premiumCachedPolicy.check({
       entity: user,
-      context: { 
+      context: {
         operation: 'premium-validation',
-        tier: 'premium'
-      }
+        tier: 'premium',
+      },
     });
   }
 
@@ -173,14 +179,16 @@ export class UserPolicyService {
 
   private async findUserByEmail(email: string): Promise<User | null> {
     // Simulate database lookup
-    return Math.random() > 0.9 ? null : { 
-      id: 'existing', 
-      email, 
-      age: 25, 
-      name: 'Existing User',
-      isActive: true,
-      createdAt: new Date()
-    };
+    return Math.random() > 0.9
+      ? null
+      : {
+          id: 'existing',
+          email,
+          age: 25,
+          name: 'Existing User',
+          isActive: true,
+          createdAt: new Date(),
+        };
   }
 }
 
@@ -199,7 +207,8 @@ export class UserManagementController {
 
   constructor() {
     // ⭐ FOCUS: Bridge Pattern - Get existing instance from VytchesDDD
-    this.userPolicyService = VytchesDDD.resolve<UserPolicyService>('userPolicyService');
+    this.userPolicyService =
+      VytchesDDD.resolve<UserPolicyService>('userPolicyService');
   }
 
   /**
@@ -211,7 +220,7 @@ export class UserManagementController {
       const result = await this.userPolicyService.validateUser(userData, {
         correlationId: `req-${Date.now()}`,
         userId: userData.id,
-        operation: 'user-registration'
+        operation: 'user-registration',
       });
 
       if (result.isFailure()) {
@@ -220,15 +229,15 @@ export class UserManagementController {
           errors: result.error.violations.map(v => ({
             code: v.code,
             message: v.message,
-            field: this.mapCodeToField(v.code)
-          }))
+            field: this.mapCodeToField(v.code),
+          })),
         });
       }
 
       return {
         success: true,
         message: 'User validation successful',
-        user: result.value
+        user: result.value,
       };
     } catch (error) {
       throw new BadRequestException(`Validation failed: ${error.message}`);
@@ -243,27 +252,29 @@ export class UserManagementController {
       if (result.isFailure()) {
         throw new BadRequestException({
           message: 'Premium user validation failed',
-          errors: result.error.violations
+          errors: result.error.violations,
         });
       }
 
       return {
         success: true,
         message: 'Premium user validation successful',
-        user: result.value
+        user: result.value,
       };
     } catch (error) {
-      throw new BadRequestException(`Premium validation failed: ${error.message}`);
+      throw new BadRequestException(
+        `Premium validation failed: ${error.message}`
+      );
     }
   }
 
   private mapCodeToField(code: string): string {
     const fieldMapping = {
-      'AGE_INSUFFICIENT': 'age',
-      'EMAIL_INVALID': 'email',
-      'EMAIL_DUPLICATE': 'email',
-      'PREMIUM_AGE_INSUFFICIENT': 'age',
-      'CREDIT_SCORE_TOO_LOW': 'creditScore'
+      AGE_INSUFFICIENT: 'age',
+      EMAIL_INVALID: 'email',
+      EMAIL_DUPLICATE: 'email',
+      PREMIUM_AGE_INSUFFICIENT: 'age',
+      CREDIT_SCORE_TOO_LOW: 'creditScore',
     };
     return fieldMapping[code] || 'general';
   }
@@ -287,7 +298,8 @@ export class UserManagementModule implements OnModuleInit {
 
 ## Key Features
 
-- **🔄 Service Locator Pattern**: Enterprise-grade dependency injection with VytchesDDD
+- **🔄 Service Locator Pattern**: Enterprise-grade dependency injection with
+  VytchesDDD
 - **🎯 Policy Behaviors**: Retry, caching, and temporal policy enhancements
 - **🌉 Bridge Pattern**: Clean integration between NestJS and VytchesDDD DI
 - **⚡ Performance Optimization**: Intelligent caching and retry strategies
@@ -296,29 +308,42 @@ export class UserManagementModule implements OnModuleInit {
 ## Advanced Integration Benefits
 
 ### **Enterprise Dependency Injection**
+
 - **Service Locator**: Global service resolution with context isolation
 - **Auto-Discovery**: Automatic service registration through decorators
-- **Lifecycle Management**: Configurable service lifetimes (Singleton, Transient, Scoped)
+- **Lifecycle Management**: Configurable service lifetimes (Singleton,
+  Transient, Scoped)
 
 ### **Policy Enhancement**
+
 - **Behavior Composition**: Layer retry, caching, and temporal behaviors
 - **Cross-Cutting Concerns**: Centralized handling of resilience and performance
-- **Context-Aware Policies**: Rich policy execution context and correlation tracking
+- **Context-Aware Policies**: Rich policy execution context and correlation
+  tracking
 
 ### **Framework Integration**
+
 - **Bridge Pattern**: Clean separation between framework and domain services
-- **No Dual Decorators**: Clear distinction between NestJS and VytchesDDD services
+- **No Dual Decorators**: Clear distinction between NestJS and VytchesDDD
+  services
 - **Consistent Patterns**: Unified approach across all domain services
 
 ## Common Pitfalls
 
-- **❌ Double Instance Risk**: Always use Bridge Pattern to avoid creating duplicate service instances
-- **❌ Initialization Order**: Ensure VytchesDDD is configured before NestJS DI resolution
-- **❌ Context Pollution**: Keep policy contexts clean and focused on business concerns
-- **❌ Behavior Overuse**: Don't add behaviors unless they provide clear business value
+- **❌ Double Instance Risk**: Always use Bridge Pattern to avoid creating
+  duplicate service instances
+- **❌ Initialization Order**: Ensure VytchesDDD is configured before NestJS DI
+  resolution
+- **❌ Context Pollution**: Keep policy contexts clean and focused on business
+  concerns
+- **❌ Behavior Overuse**: Don't add behaviors unless they provide clear
+  business value
 
 ## Related Examples
 
-- [Example 2: Policy Registry Integration](./example-2.md) - Advanced policy management patterns
-- [Basic: Policy Usage](../basic/example-1.md) - Foundation patterns for comparison
-- [Advanced: Enterprise Policy Orchestration](../advanced/example-1.md) - Large-scale policy coordination
+- [Example 2: Policy Registry Integration](./example-2.md) - Advanced policy
+  management patterns
+- [Basic: Policy Usage](../basic/example-1.md) - Foundation patterns for
+  comparison
+- [Advanced: Enterprise Policy Orchestration](../advanced/example-1.md) -
+  Large-scale policy coordination

@@ -4,33 +4,40 @@
 **Package**: @vytches-ddd/messaging  
 **Framework**: NestJS  
 **Complexity**: Basic  
-**Focus**: Manual integration of message processing with retry and dead letter queue handling
+**Focus**: Manual integration of message processing with retry and dead letter
+queue handling
 
 ## Description
 
-This example demonstrates implementing message processing with retry logic and dead letter queue handling in NestJS using manual service setup. Perfect for understanding the fundamentals before moving to advanced DI integration.
+This example demonstrates implementing message processing with retry logic and
+dead letter queue handling in NestJS using manual service setup. Perfect for
+understanding the fundamentals before moving to advanced DI integration.
 
 ## Business Context
 
-A notification service processes various message types (emails, SMS, push notifications) with different external service providers. Some providers may be temporarily unavailable, requiring intelligent retry logic.
+A notification service processes various message types (emails, SMS, push
+notifications) with different external service providers. Some providers may be
+temporarily unavailable, requiring intelligent retry logic.
 
 ## Code Example
 
 ```typescript
 // notification-processor.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { 
-  MessageProcessor, 
-  RetryableMessage, 
+import {
+  MessageProcessor,
+  RetryableMessage,
   DeadLetterQueue,
-  ExponentialBackoff 
+  ExponentialBackoff,
 } from '@vytches-ddd/messaging';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationRequest } from './types'; // From your application
 
 @Injectable()
-export class NotificationProcessorService implements OnModuleInit, OnModuleDestroy {
+export class NotificationProcessorService
+  implements OnModuleInit, OnModuleDestroy
+{
   private emailProcessor: MessageProcessor<EmailNotification>;
   private smsProcessor: MessageProcessor<SmsNotification>;
   private pushProcessor: MessageProcessor<PushNotification>;
@@ -38,8 +45,8 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
 
   constructor(
     private emailService: EmailService, // Your email service
-    private smsService: SmsService,     // Your SMS service
-    private pushService: PushService,   // Your push notification service
+    private smsService: SmsService, // Your SMS service
+    private pushService: PushService, // Your push notification service
     @InjectRepository(ProcessingLog)
     private logRepository: Repository<ProcessingLog>
   ) {
@@ -51,7 +58,7 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
     this.deadLetterQueue = new DeadLetterQueue({
       storage: this.createDLQStorage(),
       alertThreshold: 50, // Alert when 50+ messages in DLQ
-      alertCallback: this.handleDLQAlert.bind(this)
+      alertCallback: this.handleDLQAlert.bind(this),
     });
 
     // Email processor with aggressive retry
@@ -59,13 +66,13 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
       processFunction: this.processEmail.bind(this),
       maxRetries: 10, // Emails are critical
       backoffStrategy: new ExponentialBackoff({
-        initialDelay: 2000,  // 2 seconds
-        maxDelay: 300000,    // 5 minutes
-        multiplier: 2
+        initialDelay: 2000, // 2 seconds
+        maxDelay: 300000, // 5 minutes
+        multiplier: 2,
       }),
       deadLetterQueue: this.deadLetterQueue,
       onSuccess: this.logSuccess.bind(this),
-      onFailure: this.logFailure.bind(this)
+      onFailure: this.logFailure.bind(this),
     });
 
     // SMS processor with moderate retry
@@ -75,9 +82,9 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
       backoffStrategy: new ExponentialBackoff({
         initialDelay: 1000,
         maxDelay: 60000,
-        multiplier: 1.5
+        multiplier: 1.5,
       }),
-      deadLetterQueue: this.deadLetterQueue
+      deadLetterQueue: this.deadLetterQueue,
     });
 
     // Push processor with minimal retry (fast but less reliable)
@@ -87,34 +94,36 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
       backoffStrategy: new ExponentialBackoff({
         initialDelay: 500,
         maxDelay: 10000,
-        multiplier: 2
+        multiplier: 2,
       }),
-      deadLetterQueue: this.deadLetterQueue
+      deadLetterQueue: this.deadLetterQueue,
     });
   }
 
-  async processNotification(request: NotificationRequest): Promise<ProcessingResult> {
+  async processNotification(
+    request: NotificationRequest
+  ): Promise<ProcessingResult> {
     const retryableMessage = RetryableMessage.create(request, {
       messageId: `notif-${request.id}`,
       priority: this.determinePriority(request),
       metadata: {
         userId: request.userId,
         type: request.type,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     try {
       switch (request.type) {
         case 'email':
           return await this.emailProcessor.process(retryableMessage);
-        
+
         case 'sms':
           return await this.smsProcessor.process(retryableMessage);
-        
+
         case 'push':
           return await this.pushProcessor.process(retryableMessage);
-        
+
         default:
           throw new Error(`Unsupported notification type: ${request.type}`);
       }
@@ -125,87 +134,94 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
   }
 
   // Individual processing functions
-  private async processEmail(message: RetryableMessage<EmailNotification>): Promise<Result<void, Error>> {
+  private async processEmail(
+    message: RetryableMessage<EmailNotification>
+  ): Promise<Result<void, Error>> {
     const { payload } = message;
-    
+
     try {
       await this.emailService.sendEmail({
         to: payload.recipient,
         subject: payload.subject,
         body: payload.body,
-        template: payload.template
+        template: payload.template,
       });
 
       return Result.success(undefined);
-      
     } catch (error) {
       // Determine if error is retryable
       if (this.isRetryableEmailError(error)) {
-        return Result.failure(new Error(`Email service error: ${error.message}`));
+        return Result.failure(
+          new Error(`Email service error: ${error.message}`)
+        );
       }
-      
+
       // Non-retryable error - move to DLQ immediately
       await this.deadLetterQueue.add({
         ...message,
         failureReason: 'Non-retryable email error',
-        errorDetails: error
+        errorDetails: error,
       });
-      
+
       return Result.success(undefined); // Don't retry
     }
   }
 
-  private async processSms(message: RetryableMessage<SmsNotification>): Promise<Result<void, Error>> {
+  private async processSms(
+    message: RetryableMessage<SmsNotification>
+  ): Promise<Result<void, Error>> {
     const { payload } = message;
-    
+
     try {
       await this.smsService.sendSms({
         phoneNumber: payload.phoneNumber,
         message: payload.text,
-        sender: payload.senderId
+        sender: payload.senderId,
       });
 
       return Result.success(undefined);
-      
     } catch (error) {
       if (this.isRetryableSmsError(error)) {
         return Result.failure(new Error(`SMS service error: ${error.message}`));
       }
-      
+
       await this.deadLetterQueue.add({
         ...message,
         failureReason: 'Invalid phone number or blocked',
-        errorDetails: error
+        errorDetails: error,
       });
-      
+
       return Result.success(undefined);
     }
   }
 
-  private async processPush(message: RetryableMessage<PushNotification>): Promise<Result<void, Error>> {
+  private async processPush(
+    message: RetryableMessage<PushNotification>
+  ): Promise<Result<void, Error>> {
     const { payload } = message;
-    
+
     try {
       await this.pushService.sendPushNotification({
         deviceToken: payload.deviceToken,
         title: payload.title,
         body: payload.body,
-        data: payload.data
+        data: payload.data,
       });
 
       return Result.success(undefined);
-      
     } catch (error) {
       if (this.isRetryablePushError(error)) {
-        return Result.failure(new Error(`Push service error: ${error.message}`));
+        return Result.failure(
+          new Error(`Push service error: ${error.message}`)
+        );
       }
-      
+
       await this.deadLetterQueue.add({
         ...message,
         failureReason: 'Invalid device token',
-        errorDetails: error
+        errorDetails: error,
       });
-      
+
       return Result.success(undefined);
     }
   }
@@ -228,32 +244,28 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
   async reprocessDeadLetterMessages(): Promise<ReprocessingResult> {
     const deadMessages = await this.deadLetterQueue.getMessages({
       limit: 100,
-      olderThan: new Date(Date.now() - 3600000) // 1 hour old
+      olderThan: new Date(Date.now() - 3600000), // 1 hour old
     });
 
     const results = {
       processed: 0,
       failed: 0,
-      skipped: 0
+      skipped: 0,
     };
 
     for (const message of deadMessages) {
       // Check if error is now resolved
       if (await this.shouldRetryDeadMessage(message)) {
         try {
-          const retryable = RetryableMessage.create(
-            message.payload,
-            { 
-              ...message.metadata,
-              attempts: 0, // Reset attempts
-              isReprocessed: true 
-            }
-          );
+          const retryable = RetryableMessage.create(message.payload, {
+            ...message.metadata,
+            attempts: 0, // Reset attempts
+            isReprocessed: true,
+          });
 
           await this.processNotification(retryable.payload);
           await this.deadLetterQueue.removeMessage(message.id);
           results.processed++;
-
         } catch (error) {
           results.failed++;
         }
@@ -270,21 +282,21 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
     if (message.failureReason === 'Invalid phone number') return false;
     if (message.failureReason === 'Invalid device token') return false;
     if (message.attempts > 20) return false; // Hard limit
-    
+
     return true;
   }
 
   // Monitoring and alerting
   private async handleDLQAlert(stats: DLQStatistics): Promise<void> {
     console.warn(`Dead Letter Queue Alert: ${stats.totalMessages} messages`);
-    
+
     // Send alert to operations team
     await this.processNotification({
       type: 'email',
       recipient: 'ops-team@company.com',
       subject: 'DLQ Alert - High Volume',
       body: `Dead Letter Queue has ${stats.totalMessages} messages. Please investigate.`,
-      priority: 'high'
+      priority: 'high',
     });
   }
 
@@ -294,18 +306,21 @@ export class NotificationProcessorService implements OnModuleInit, OnModuleDestr
       type: message.payload.type,
       status: 'success',
       attempts: message.attempts,
-      processedAt: new Date()
+      processedAt: new Date(),
     });
   }
 
-  private async logFailure(message: RetryableMessage<any>, error: Error): Promise<void> {
+  private async logFailure(
+    message: RetryableMessage<any>,
+    error: Error
+  ): Promise<void> {
     await this.logRepository.save({
       messageId: message.metadata.messageId,
       type: message.payload.type,
       status: 'failed',
       attempts: message.attempts,
       error: error.message,
-      processedAt: new Date()
+      processedAt: new Date(),
     });
   }
 
@@ -339,12 +354,12 @@ export class NotificationController {
       return {
         success: true,
         messageId: result.messageId,
-        status: 'queued'
+        status: 'queued',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -352,15 +367,16 @@ export class NotificationController {
   @Post('reprocess-failed')
   async reprocessFailed() {
     try {
-      const result = await this.notificationProcessor.reprocessDeadLetterMessages();
+      const result =
+        await this.notificationProcessor.reprocessDeadLetterMessages();
       return {
         success: true,
-        results: result
+        results: result,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -369,7 +385,8 @@ export class NotificationController {
 
 ## Key Features
 
-- **Multiple Processors**: Different retry strategies for different notification types
+- **Multiple Processors**: Different retry strategies for different notification
+  types
 - **Smart Error Handling**: Distinguish between retryable and permanent failures
 - **Dead Letter Queue**: Isolate problematic messages for investigation
 - **Monitoring Integration**: Alerts and logging for operational visibility

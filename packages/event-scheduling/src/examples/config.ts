@@ -5,14 +5,21 @@ export const packageExampleConfig: PackageExampleConfig = {
   packageName: 'event-scheduling',
   displayName: 'Event Scheduling',
   version: '1.0.0',
-  description: 'Time-based event scheduling with priority queuing, recurring patterns, and distributed coordination capabilities',
+  description:
+    'Time-based event scheduling with priority queuing, recurring patterns, and distributed coordination capabilities',
   domain: 'Infrastructure',
-  patterns: ['event-scheduling', 'job-queuing', 'priority-scheduling', 'recurring-events', 'delayed-execution'],
+  patterns: [
+    'event-scheduling',
+    'job-queuing',
+    'priority-scheduling',
+    'recurring-events',
+    'delayed-execution',
+  ],
   dependencies: [
     '@vytches-ddd/contracts',
     '@vytches-ddd/events',
     '@vytches-ddd/domain-primitives',
-    '@vytches-ddd/utils'
+    '@vytches-ddd/utils',
   ],
 
   // === REQUIRED COMPLEXITY LEVELS ===
@@ -21,20 +28,22 @@ export const packageExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Simple event scheduling with basic retry policies and priority queuing'
+      description: 'Simple event scheduling with basic retry policies and priority queuing',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: true,
-      description: 'Advanced scheduling patterns with distributed coordination and sophisticated queue management'
+      description:
+        'Advanced scheduling patterns with distributed coordination and sophisticated queue management',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise-scale scheduling with clustering, high availability, and global coordination'
-    }
+      description:
+        'Enterprise-scale scheduling with clustering, high availability, and global coordination',
+    },
   },
 
   // === REQUIRED FRAMEWORK INTEGRATIONS ===
@@ -42,11 +51,12 @@ export const packageExampleConfig: PackageExampleConfig = {
     {
       name: 'nestjs',
       displayName: 'NestJS',
-      description: 'NestJS integration with decorators, health checks, and dependency injection support',
+      description:
+        'NestJS integration with decorators, health checks, and dependency injection support',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
       dependencies: ['@nestjs/core', '@nestjs/common', '@nestjs/schedule'],
-      minimumVersion: '9.0.0'
-    }
+      minimumVersion: '9.0.0',
+    },
   ],
 
   // === REQUIRED EXAMPLES ARRAY ===
@@ -60,7 +70,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['event-scheduling:basic', 'scheduling:simple', 'retry-policies'],
       complexity: 'basic',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'basic-recurring-events',
@@ -70,17 +80,22 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['event-scheduling:basic', 'recurring-events', 'cron-scheduling', 'periodic-tasks'],
       complexity: 'basic',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'basic-priority-queuing',
       name: 'Priority Queuing and Resource Management',
       description: 'Priority-based event scheduling with queue management and resource constraints',
       file: 'basic/example-3.md',
-      tags: ['event-scheduling:basic', 'priority-queuing', 'resource-management', 'job-prioritization'],
+      tags: [
+        'event-scheduling:basic',
+        'priority-queuing',
+        'resource-management',
+        'job-prioritization',
+      ],
       complexity: 'basic',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Intermediate Examples
@@ -89,30 +104,47 @@ export const packageExampleConfig: PackageExampleConfig = {
       name: 'Distributed Event Scheduling',
       description: 'Multi-node event scheduling with leader election and partition management',
       file: 'intermediate/example-1.md',
-      tags: ['event-scheduling:intermediate', 'distributed-systems', 'leader-election', 'partitioning'],
+      tags: [
+        'event-scheduling:intermediate',
+        'distributed-systems',
+        'leader-election',
+        'partitioning',
+      ],
       complexity: 'intermediate',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'intermediate-advanced-queuing',
       name: 'Advanced Queue Management',
-      description: 'Sophisticated queue management with dead letter queues and backpressure handling',
+      description:
+        'Sophisticated queue management with dead letter queues and backpressure handling',
       file: 'intermediate/example-2.md',
-      tags: ['event-scheduling:intermediate', 'queue-management', 'dead-letter-queue', 'backpressure'],
+      tags: [
+        'event-scheduling:intermediate',
+        'queue-management',
+        'dead-letter-queue',
+        'backpressure',
+      ],
       complexity: 'intermediate',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'intermediate-scheduling-patterns',
       name: 'Complex Scheduling Patterns',
-      description: 'Advanced scheduling patterns with conditional execution and dynamic rescheduling',
+      description:
+        'Advanced scheduling patterns with conditional execution and dynamic rescheduling',
       file: 'intermediate/example-3.md',
-      tags: ['event-scheduling:intermediate', 'scheduling-patterns', 'conditional-execution', 'dynamic-scheduling'],
+      tags: [
+        'event-scheduling:intermediate',
+        'scheduling-patterns',
+        'conditional-execution',
+        'dynamic-scheduling',
+      ],
       complexity: 'intermediate',
       priority: 'medium',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // Advanced Examples
@@ -121,10 +153,15 @@ export const packageExampleConfig: PackageExampleConfig = {
       name: 'Enterprise Scheduling Platform',
       description: 'Global enterprise scheduling with multi-region coordination and failover',
       file: 'advanced/example-1.md',
-      tags: ['event-scheduling:advanced', 'enterprise-scheduling', 'multi-region', 'global-coordination'],
+      tags: [
+        'event-scheduling:advanced',
+        'enterprise-scheduling',
+        'multi-region',
+        'global-coordination',
+      ],
       complexity: 'advanced',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'advanced-high-availability',
@@ -134,17 +171,22 @@ export const packageExampleConfig: PackageExampleConfig = {
       tags: ['event-scheduling:advanced', 'high-availability', 'clustering', 'failover'],
       complexity: 'advanced',
       priority: 'high',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'advanced-performance-optimization',
       name: 'Performance-Optimized Scheduling',
       description: 'Ultra-high performance scheduling with advanced optimization techniques',
       file: 'advanced/example-3.md',
-      tags: ['event-scheduling:advanced', 'performance-optimization', 'high-throughput', 'low-latency'],
+      tags: [
+        'event-scheduling:advanced',
+        'performance-optimization',
+        'high-throughput',
+        'low-latency',
+      ],
       complexity: 'advanced',
       priority: 'medium',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
 
     // NestJS Framework Integration
@@ -157,30 +199,36 @@ export const packageExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       framework: 'nestjs',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-intermediate-scheduling',
       name: 'NestJS Advanced DI Integration',
-      description: 'Advanced NestJS integration with VytchesDDD DI and comprehensive scheduling features',
+      description:
+        'Advanced NestJS integration with VytchesDDD DI and comprehensive scheduling features',
       file: 'frameworks/nestjs/intermediate/example-1.md',
       tags: ['nestjs:intermediate', 'event-scheduling:di', 'vytches-ddd:integration'],
       complexity: 'intermediate',
       priority: 'high',
       framework: 'nestjs',
-      validation: { fileExists: true }
+      validation: { fileExists: true },
     },
     {
       id: 'nestjs-advanced-enterprise',
       name: 'NestJS Enterprise Scheduling Platform',
       description: 'Enterprise-grade NestJS integration with distributed scheduling and monitoring',
       file: 'frameworks/nestjs/advanced/example-1.md',
-      tags: ['nestjs:advanced', 'event-scheduling:enterprise', 'distributed-scheduling', 'monitoring'],
+      tags: [
+        'nestjs:advanced',
+        'event-scheduling:enterprise',
+        'distributed-scheduling',
+        'monitoring',
+      ],
       complexity: 'advanced',
       priority: 'high',
       framework: 'nestjs',
-      validation: { fileExists: true }
-    }
+      validation: { fileExists: true },
+    },
   ],
 
   // === REQUIRED TAGS SYSTEM ===
@@ -190,14 +238,14 @@ export const packageExampleConfig: PackageExampleConfig = {
       'job-queuing',
       'time-based-execution',
       'delayed-events',
-      'scheduled-tasks'
+      'scheduled-tasks',
     ],
     integrations: [
       'retry-policies',
       'priority-queuing',
       'recurring-events',
       'cron-scheduling',
-      'distributed-coordination'
+      'distributed-coordination',
     ],
     frameworks: ['nestjs'],
     patterns: [
@@ -205,8 +253,8 @@ export const packageExampleConfig: PackageExampleConfig = {
       'queue-pattern',
       'priority-pattern',
       'recurring-pattern',
-      'distributed-pattern'
-    ]
+      'distributed-pattern',
+    ],
   },
 
   // === REQUIRED CONTENT CONFIG ===
@@ -217,7 +265,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   // === REQUIRED LLM SUPPORT ===
@@ -226,7 +274,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   // === REQUIRED SECTIONS ===
@@ -234,42 +282,42 @@ export const packageExampleConfig: PackageExampleConfig = {
 
   // === REQUIRED RELATED PACKAGES ===
   relatedPackages: {
-    'events': {
+    events: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['basic-simple-scheduling', 'intermediate-distributed-scheduling']
+      integrationExamples: ['basic-simple-scheduling', 'intermediate-distributed-scheduling'],
     },
-    'contracts': {
+    contracts: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['basic-priority-queuing', 'advanced-enterprise-scheduling']
+      integrationExamples: ['basic-priority-queuing', 'advanced-enterprise-scheduling'],
     },
-    'utils': {
+    utils: {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['basic-simple-scheduling', 'intermediate-advanced-queuing']
+      integrationExamples: ['basic-simple-scheduling', 'intermediate-advanced-queuing'],
     },
     'domain-primitives': {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['basic-recurring-events', 'advanced-performance-optimization']
+      integrationExamples: ['basic-recurring-events', 'advanced-performance-optimization'],
     },
-    'resilience': {
+    resilience: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['intermediate-advanced-queuing', 'advanced-high-availability']
+      integrationExamples: ['intermediate-advanced-queuing', 'advanced-high-availability'],
     },
-    'messaging': {
+    messaging: {
       priority: 'low',
       relationship: 'enables',
-      integrationExamples: ['advanced-enterprise-scheduling']
+      integrationExamples: ['advanced-enterprise-scheduling'],
     },
-    'di': {
+    di: {
       priority: 'high',
       relationship: 'enables',
-      integrationExamples: ['nestjs-intermediate-scheduling', 'nestjs-advanced-enterprise']
-    }
-  }
+      integrationExamples: ['nestjs-intermediate-scheduling', 'nestjs-advanced-enterprise'],
+    },
+  },
 };
 
 export default packageExampleConfig;

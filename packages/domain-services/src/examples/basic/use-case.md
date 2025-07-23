@@ -1,6 +1,7 @@
 ## Basic Use Case: User Registration
 
-This example shows how to use a domain service for a simple user registration workflow:
+This example shows how to use a domain service for a simple user registration
+workflow:
 
 ```typescript
 // app.ts
@@ -9,15 +10,15 @@ import { CreateUserCommand } from './types';
 
 async function registerNewUser() {
   const userService = new UserManagementService();
-  
+
   const command: CreateUserCommand = {
     email: 'john.doe@example.com',
     name: 'John Doe',
-    password: 'securePassword123'
+    password: 'securePassword123',
   };
 
   const result = await userService.createUser(command);
-  
+
   if (result.isSuccess()) {
     console.log('User created successfully:', result.value);
     // Continue with login flow, send welcome email, etc.
@@ -34,35 +35,35 @@ async function registerNewUser() {
 async function handleRegistration(userData: CreateUserCommand) {
   const userService = new UserManagementService();
   const result = await userService.createUser(userData);
-  
+
   if (result.isFailure()) {
     // Check specific error types
     const error = result.error;
-    
+
     if (error.message.includes('email')) {
-      return { 
-        status: 400, 
-        message: 'Invalid email address provided' 
+      return {
+        status: 400,
+        message: 'Invalid email address provided',
       };
     }
-    
+
     if (error.message.includes('duplicate')) {
-      return { 
-        status: 409, 
-        message: 'User already exists' 
+      return {
+        status: 409,
+        message: 'User already exists',
       };
     }
-    
+
     // Generic error
-    return { 
-      status: 500, 
-      message: 'Registration failed' 
+    return {
+      status: 500,
+      message: 'Registration failed',
     };
   }
-  
-  return { 
-    status: 201, 
-    data: result.value 
+
+  return {
+    status: 201,
+    data: result.value,
   };
 }
 ```

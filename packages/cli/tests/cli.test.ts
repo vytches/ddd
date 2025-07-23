@@ -29,20 +29,24 @@ describe('CLI', () => {
     projectStructure: 'clean-architecture',
     framework: 'nestjs',
     patterns: [],
-    plugins: []
+    plugins: [],
   };
   const mockParsed = {
     command: '',
     args: [],
-    options: {}
+    options: {},
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
     vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
     });
@@ -65,7 +69,9 @@ describe('CLI', () => {
     it('should show help when --help flag is provided', async () => {
       const parsed = { ...mockParsed, options: { help: true } };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
-      vi.mocked(SimpleArgsParser.showHelp).mockImplementation(() => { return });
+      vi.mocked(SimpleArgsParser.showHelp).mockImplementation(() => {
+        return;
+      });
 
       const [error] = await safeRun(async () => await main());
 
@@ -76,7 +82,9 @@ describe('CLI', () => {
     it('should show help when -h flag is provided', async () => {
       const parsed = { ...mockParsed, options: { h: true } };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
-      vi.mocked(SimpleArgsParser.showHelp).mockImplementation(() => { return });
+      vi.mocked(SimpleArgsParser.showHelp).mockImplementation(() => {
+        return;
+      });
 
       const [error] = await safeRun(async () => await main());
 
@@ -131,7 +139,7 @@ describe('CLI', () => {
       const parsed = {
         command: 'generate',
         args: ['entity'],
-        options: { name: 'User' }
+        options: { name: 'User' },
       };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
       vi.mocked(generateCommand.action).mockResolvedValue();
@@ -146,7 +154,7 @@ describe('CLI', () => {
       const parsed = {
         command: 'g',
         args: ['value-object'],
-        options: {}
+        options: {},
       };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
       vi.mocked(generateCommand.action).mockResolvedValue();
@@ -161,7 +169,7 @@ describe('CLI', () => {
       const parsed = {
         command: 'domain-builder',
         args: ['user-management'],
-        options: {}
+        options: {},
       };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
       vi.mocked(domainBuilderCommand.action).mockResolvedValue();
@@ -176,7 +184,7 @@ describe('CLI', () => {
       const parsed = {
         command: 'domain',
         args: [],
-        options: {}
+        options: {},
       };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
       vi.mocked(domainBuilderCommand.action).mockResolvedValue();
@@ -191,7 +199,7 @@ describe('CLI', () => {
       const parsed = {
         command: 'examples',
         args: ['list'],
-        options: {}
+        options: {},
       };
       vi.mocked(SimpleArgsParser.parse).mockReturnValue(parsed);
       vi.mocked(examplesCommand.action).mockResolvedValue();
@@ -211,7 +219,9 @@ describe('CLI', () => {
       const [error] = await safeRun(async () => await main());
 
       expect(error).toBeUndefined();
-      expect(console.log).toHaveBeenCalledWith('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder');
+      expect(console.log).toHaveBeenCalledWith(
+        '🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'
+      );
       expect(console.log).toHaveBeenCalledWith('Available commands:');
       expect(console.log).toHaveBeenCalledWith('  generate, g      Generate DDD components');
       expect(console.log).toHaveBeenCalledWith('  domain           Build complete domains');

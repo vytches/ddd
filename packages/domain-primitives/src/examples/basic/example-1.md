@@ -7,18 +7,20 @@
 
 ## Overview
 
-Domain errors are fundamental building blocks in Domain-Driven Design. They provide rich context about what went wrong in your domain operations, making debugging easier and improving system reliability.
+Domain errors are fundamental building blocks in Domain-Driven Design. They
+provide rich context about what went wrong in your domain operations, making
+debugging easier and improving system reliability.
 
 ## Basic Domain Error Implementation
 
 ```typescript
-import { 
-  BaseError, 
-  IDomainError, 
+import {
+  BaseError,
+  IDomainError,
   DomainErrorCode,
   NotFoundError,
   InvalidParameterError,
-  DuplicateError 
+  DuplicateError,
 } from '@vytches-ddd/domain-primitives';
 import { UserData, CreateUserDto } from '../types';
 
@@ -28,7 +30,7 @@ export class UserNotFoundError extends NotFoundError {
     super(`User with ID ${userId} not found`, {
       code: DomainErrorCode.NotFound,
       domain: 'UserManagement',
-      data: { userId }
+      data: { userId },
     });
   }
 }
@@ -39,7 +41,7 @@ export class EmailAlreadyExistsError extends DuplicateError {
     super(`Email ${email} is already registered`, {
       code: DomainErrorCode.Duplicate,
       domain: 'UserManagement',
-      data: { email }
+      data: { email },
     });
   }
 }
@@ -50,7 +52,7 @@ export class InvalidUserDataError extends InvalidParameterError {
     super(`Invalid user data: ${field} - ${reason}`, {
       code: DomainErrorCode.InvalidParameter,
       domain: 'UserManagement',
-      data: { field, reason }
+      data: { field, reason },
     });
   }
 }
@@ -67,11 +69,17 @@ export class UserService {
     }
 
     if (!dto.name || dto.name.length < 2) {
-      throw new InvalidUserDataError('name', 'Name must be at least 2 characters');
+      throw new InvalidUserDataError(
+        'name',
+        'Name must be at least 2 characters'
+      );
     }
 
     if (!dto.password || dto.password.length < 8) {
-      throw new InvalidUserDataError('password', 'Password must be at least 8 characters');
+      throw new InvalidUserDataError(
+        'password',
+        'Password must be at least 8 characters'
+      );
     }
 
     // Check for duplicate email
@@ -84,7 +92,7 @@ export class UserService {
       id: this.generateId(),
       email: dto.email.toLowerCase(),
       name: dto.name,
-      role: 'user'
+      role: 'user',
     };
 
     this.users.set(user.id, user);
@@ -95,7 +103,7 @@ export class UserService {
 
   async findUserById(userId: string): Promise<UserData> {
     const user = this.users.get(userId);
-    
+
     if (!user) {
       throw new UserNotFoundError(userId);
     }
@@ -110,8 +118,10 @@ export class UserService {
       throw new InvalidUserDataError('email', 'Invalid email format');
     }
 
-    if (this.emailIndex.has(newEmail.toLowerCase()) && 
-        user.email !== newEmail.toLowerCase()) {
+    if (
+      this.emailIndex.has(newEmail.toLowerCase()) &&
+      user.email !== newEmail.toLowerCase()
+    ) {
       throw new EmailAlreadyExistsError(newEmail);
     }
 
@@ -141,31 +151,33 @@ import { ErrorResponse, SuccessResponse } from '../types';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  async handleCreateUser(dto: CreateUserDto): Promise<SuccessResponse<UserData> | ErrorResponse> {
+  async handleCreateUser(
+    dto: CreateUserDto
+  ): Promise<SuccessResponse<UserData> | ErrorResponse> {
     try {
       const user = await this.userService.createUser(dto);
-      
+
       return {
         success: true,
         data: user,
         metadata: {
           timestamp: new Date(),
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       if (error instanceof IDomainError) {
         return this.handleDomainError(error);
       }
-      
+
       // Handle unexpected errors
       return {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'An unexpected error occurred',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
     }
   }
@@ -177,8 +189,8 @@ export class UserController {
         code: error.code,
         message: error.message,
         details: error.data,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
   }
 }
@@ -187,7 +199,10 @@ export class UserController {
 ## Error Context and Logging
 
 ```typescript
-import { DomainErrorCode, type DomainErrorOptions } from '@vytches-ddd/domain-primitives';
+import {
+  DomainErrorCode,
+  type DomainErrorOptions,
+} from '@vytches-ddd/domain-primitives';
 import { ErrorContext } from '../types';
 
 // Enhanced error with context
@@ -195,7 +210,7 @@ export class ContextualDomainError extends IDomainError {
   context: ErrorContext;
 
   constructor(
-    message: string, 
+    message: string,
     options: DomainErrorOptions,
     context: ErrorContext
   ) {
@@ -211,7 +226,7 @@ export class ContextualDomainError extends IDomainError {
       domain: this.domain,
       data: this.data,
       context: this.context,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -219,11 +234,15 @@ export class ContextualDomainError extends IDomainError {
 // Usage with context
 export class AuthenticationError extends ContextualDomainError {
   constructor(reason: string, context: ErrorContext) {
-    super(`Authentication failed: ${reason}`, {
-      code: DomainErrorCode.Unauthorized,
-      domain: 'Authentication',
-      data: { reason }
-    }, context);
+    super(
+      `Authentication failed: ${reason}`,
+      {
+        code: DomainErrorCode.Unauthorized,
+        domain: 'Authentication',
+        data: { reason },
+      },
+      context
+    );
   }
 }
 
@@ -254,7 +273,7 @@ export class AuthService {
       id: 'user_123',
       email: 'user@example.com',
       name: 'Test User',
-      role: 'user'
+      role: 'user',
     };
   }
 }
@@ -262,7 +281,8 @@ export class AuthService {
 
 ## Key Benefits
 
-1. **Rich Context**: Domain errors carry meaningful information about what went wrong
+1. **Rich Context**: Domain errors carry meaningful information about what went
+   wrong
 2. **Type Safety**: TypeScript ensures proper error handling
 3. **Consistency**: Standardized error structure across the application
 4. **Debugging**: Easy to trace and debug with detailed error information
@@ -294,7 +314,7 @@ throw new PaymentFailedError(paymentId, {
   amount,
   currency,
   gateway: 'stripe',
-  errorCode: 'insufficient_funds'
+  errorCode: 'insufficient_funds',
 });
 
 // ❌ Bad: Missing context

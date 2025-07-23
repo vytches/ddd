@@ -10,22 +10,27 @@
 
 ## Description
 
-Integration of specification pattern with @vytches-ddd/policies in NestJS applications, demonstrating business rule composition and reusable validation logic using manual instantiation.
+Integration of specification pattern with @vytches-ddd/policies in NestJS
+applications, demonstrating business rule composition and reusable validation
+logic using manual instantiation.
 
 ## Business Context
 
-Business applications often have complex validation rules that need to be composed and reused across different contexts. This example shows how to integrate specification patterns with policies for flexible business rule management.
+Business applications often have complex validation rules that need to be
+composed and reused across different contexts. This example shows how to
+integrate specification patterns with policies for flexible business rule
+management.
 
 ## Code Example
 
 ```typescript
 // order-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  PolicyBuilder, 
-  PolicyResult, 
+import {
+  PolicyBuilder,
+  PolicyResult,
   ISpecification,
-  SpecificationBuilder 
+  SpecificationBuilder,
 } from '@vytches-ddd/policies';
 import { Order, OrderItem, Customer } from './types'; // From your application
 
@@ -43,13 +48,15 @@ export class OrderValidationService {
   constructor() {
     // ⭐ FOCUS: Create reusable specifications
     this.minimumOrderValueSpec = SpecificationBuilder.create<Order>()
-      .withRule(order => order.totalValue >= 10.00)
+      .withRule(order => order.totalValue >= 10.0)
       .withErrorCode('ORDER_VALUE_TOO_LOW')
       .withErrorMessage('Order must be at least $10.00')
       .build();
 
     this.validCustomerSpec = SpecificationBuilder.create<Order>()
-      .withRule(order => order.customer.isActive && !order.customer.isBlacklisted)
+      .withRule(
+        order => order.customer.isActive && !order.customer.isBlacklisted
+      )
       .withErrorCode('INVALID_CUSTOMER')
       .withErrorMessage('Customer account is not valid for orders')
       .build();
@@ -88,17 +95,17 @@ export class OrderValidationService {
         customer: orderData.customer,
         totalValue: orderData.totalValue,
         status: 'pending',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Policy validation with specification composition
       return await this.orderValidationPolicy.check({
         entity: order,
-        context: { 
+        context: {
           operation: 'order-creation',
           customerId: orderData.customer.id,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
     } catch (error) {
       throw new Error(`Order validation failed: ${error.message}`);
@@ -123,7 +130,7 @@ export class OrderValidationService {
     try {
       // Create priority-specific policy with different minimum value
       const priorityMinimumSpec = SpecificationBuilder.create<Order>()
-        .withRule(order => order.totalValue >= 50.00)
+        .withRule(order => order.totalValue >= 50.0)
         .withErrorCode('PRIORITY_ORDER_VALUE_TOO_LOW')
         .withErrorMessage('Priority orders must be at least $50.00')
         .build();
@@ -141,10 +148,10 @@ export class OrderValidationService {
 
       return await priorityPolicy.check({
         entity: order,
-        context: { 
+        context: {
           operation: 'priority-order-creation',
-          priority: 'high'
-        }
+          priority: 'high',
+        },
       });
     } catch (error) {
       throw new Error(`Priority order validation failed: ${error.message}`);
@@ -163,11 +170,13 @@ export class OrderValidationService {
 ## Integration Benefits
 
 ### **Reusability**
+
 - **Modular Rules**: Specifications can be reused across different policies
 - **Composition Flexibility**: Mix and match business rules as needed
 - **Test Isolation**: Individual specifications are easily testable
 
 ### **Maintainability**
+
 - **Single Responsibility**: Each specification handles one business rule
 - **Clear Semantics**: Specifications express business logic clearly
 - **Easy Extension**: New rules can be added without modifying existing code
@@ -180,6 +189,9 @@ export class OrderValidationService {
 
 ## Related Examples
 
-- [Example 1: Basic Policy Usage](./example-1.md) - Simple policy integration patterns
-- [Basic: Specification Pattern](../../basic/example-2.md) - Core specification usage
-- [Intermediate: Policy Behaviors](../intermediate/example-1.md) - Advanced policy enhancement patterns
+- [Example 1: Basic Policy Usage](./example-1.md) - Simple policy integration
+  patterns
+- [Basic: Specification Pattern](../../basic/example-2.md) - Core specification
+  usage
+- [Intermediate: Policy Behaviors](../intermediate/example-1.md) - Advanced
+  policy enhancement patterns

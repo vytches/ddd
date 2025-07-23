@@ -57,7 +57,6 @@ async function main(): Promise<void> {
         await examplesCommand.action(parsed.args, parsed.options);
         break;
 
-
       default:
         if (!parsed.command) {
           console.log(Colors.yellow('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'));

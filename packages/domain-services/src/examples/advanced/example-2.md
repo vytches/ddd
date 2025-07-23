@@ -1,54 +1,57 @@
 # Resilient Domain Service - Advanced Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: advanced
-**Domain**: order-management
-**Patterns**: domain-service, resilience, fault-tolerance
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+advanced **Domain**: order-management **Patterns**: domain-service, resilience,
+fault-tolerance **Dependencies**: @vytches-ddd/core, @vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates a domain service with comprehensive resilience patterns including circuit breakers, retry logic, bulkhead isolation, and timeout handling. It shows how to build fault-tolerant services that gracefully handle failures.
+This example demonstrates a domain service with comprehensive resilience
+patterns including circuit breakers, retry logic, bulkhead isolation, and
+timeout handling. It shows how to build fault-tolerant services that gracefully
+handle failures.
 
 ## Business Context
 
-In distributed systems, services must be resilient to failures. External service calls can fail, timeouts can occur, and dependencies can become unavailable. Resilience patterns help services maintain availability and provide graceful degradation.
+In distributed systems, services must be resilient to failures. External service
+calls can fail, timeouts can occur, and dependencies can become unavailable.
+Resilience patterns help services maintain availability and provide graceful
+degradation.
 
 ## Code Example
 
-```typescript
+````typescript
 // resilient-order.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { 
-  CircuitBreaker, 
-  RetryPolicy, 
-  BulkheadStrategy, 
+import {
+  CircuitBreaker,
+  RetryPolicy,
+  BulkheadStrategy,
   TimeoutStrategy,
   ResiliencePolicyBuilder,
-  CompositeResilienceStrategy
+  CompositeResilienceStrategy,
 } from '@vytches-ddd/resilience';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  Customer, 
-  CreateOrderCommand, 
+import {
+  Order,
+  Customer,
+  CreateOrderCommand,
   OrderProcessingResult,
   IOrderRepository,
   ICustomerRepository,
   IPaymentGateway,
-  INotificationService
+  INotificationService,
 } from '../types';
 
 /**
  * @llm-summary Resilient domain service with comprehensive fault tolerance
  * @llm-domain order-management
  * @llm-complexity Complex
- * 
+ *
  * @description
  * Demonstrates resilience patterns including circuit breakers, retry logic,
  * bulkhead isolation, and timeout handling for fault-tolerant operations.
- * 
+ *
  * @example
  * ```typescript
  * const service = new ResilientOrderService(repositories, services);
@@ -75,11 +78,13 @@ export class ResilientOrderService extends BaseDomainService {
 
   /**
    * Processes order with comprehensive resilience patterns
-   * 
+   *
    * @param command - Order creation command
    * @returns Result containing processing result or error
    */
-  async processOrderWithResilience(command: CreateOrderCommand): Promise<Result<OrderProcessingResult, Error>> {
+  async processOrderWithResilience(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       // Use composite resilience strategy for entire operation
       const result = await this.compositeStrategy.execute(
@@ -87,7 +92,7 @@ export class ResilientOrderService extends BaseDomainService {
         {
           operationName: 'processOrder',
           correlationId: this.generateCorrelationId(),
-          metadata: { orderId: command.orderId }
+          metadata: { orderId: command.orderId },
         }
       );
 
@@ -96,28 +101,31 @@ export class ResilientOrderService extends BaseDomainService {
       }
 
       return Result.success(result.value);
-
     } catch (error) {
-      return Result.failure(new Error(`Resilient order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Resilient order processing failed: ${error.message}`)
+      );
     }
   }
 
   /**
    * Executes order processing with individual resilience patterns
    */
-  private async executeOrderProcessing(command: CreateOrderCommand): Promise<OrderProcessingResult> {
+  private async executeOrderProcessing(
+    command: CreateOrderCommand
+  ): Promise<OrderProcessingResult> {
     // Step 1: Create order with retry for transient failures
     const order = await this.retryPolicy.execute(
       async () => await this.createOrder(command),
       {
         operationName: 'createOrder',
-        correlationId: this.generateCorrelationId()
+        correlationId: this.generateCorrelationId(),
       }
     );
 
     // Step 2: Process payment with circuit breaker and timeout
     const paymentResult = await this.processPaymentWithResilience(order);
-    
+
     // Step 3: Send notifications with bulkhead isolation
     await this.sendNotificationsWithBulkhead(order);
 
@@ -129,14 +137,16 @@ export class ResilientOrderService extends BaseDomainService {
       status: order.status,
       paymentId: paymentResult.transactionId,
       inventoryUpdates: [],
-      notifications: []
+      notifications: [],
     };
   }
 
   /**
    * Processes payment with circuit breaker protection
    */
-  private async processPaymentWithResilience(order: Order): Promise<PaymentResult> {
+  private async processPaymentWithResilience(
+    order: Order
+  ): Promise<PaymentResult> {
     return await this.paymentCircuitBreaker.execute(
       async () => {
         // Apply timeout strategy to payment processing
@@ -147,7 +157,7 @@ export class ResilientOrderService extends BaseDomainService {
               orderId: order.id,
               amount: order.totalAmount,
               status: 'pending',
-              method: 'credit_card'
+              method: 'credit_card',
             };
 
             return await this.paymentGateway.processPayment(payment);
@@ -155,14 +165,14 @@ export class ResilientOrderService extends BaseDomainService {
           {
             operationName: 'processPayment',
             correlationId: this.generateCorrelationId(),
-            metadata: { orderId: order.id }
+            metadata: { orderId: order.id },
           }
         );
       },
       {
         operationName: 'paymentProcessing',
         correlationId: this.generateCorrelationId(),
-        metadata: { orderId: order.id, amount: order.totalAmount }
+        metadata: { orderId: order.id, amount: order.totalAmount },
       }
     );
   }
@@ -177,7 +187,7 @@ export class ResilientOrderService extends BaseDomainService {
         const notifications = [
           this.sendEmailNotification(order),
           this.sendSMSNotification(order),
-          this.sendPushNotification(order)
+          this.sendPushNotification(order),
         ];
 
         // Execute notifications concurrently with individual circuit breakers
@@ -186,7 +196,7 @@ export class ResilientOrderService extends BaseDomainService {
       {
         operationName: 'sendNotifications',
         correlationId: this.generateCorrelationId(),
-        metadata: { orderId: order.id }
+        metadata: { orderId: order.id },
       }
     );
   }
@@ -209,7 +219,7 @@ export class ResilientOrderService extends BaseDomainService {
       {
         operationName: 'sendEmail',
         correlationId: this.generateCorrelationId(),
-        metadata: { orderId: order.id }
+        metadata: { orderId: order.id },
       }
     );
   }
@@ -232,7 +242,7 @@ export class ResilientOrderService extends BaseDomainService {
       {
         operationName: 'sendSMS',
         correlationId: this.generateCorrelationId(),
-        metadata: { orderId: order.id }
+        metadata: { orderId: order.id },
       }
     );
   }
@@ -254,7 +264,7 @@ export class ResilientOrderService extends BaseDomainService {
       {
         operationName: 'sendPush',
         correlationId: this.generateCorrelationId(),
-        metadata: { orderId: order.id }
+        metadata: { orderId: order.id },
       }
     );
   }
@@ -262,19 +272,23 @@ export class ResilientOrderService extends BaseDomainService {
   /**
    * Handles order processing with graceful degradation
    */
-  async processOrderWithDegradation(command: CreateOrderCommand): Promise<Result<OrderProcessingResult, Error>> {
+  async processOrderWithDegradation(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       const order = await this.createOrder(command);
-      
+
       // Try payment processing with fallback
       let paymentResult: PaymentResult | null = null;
-      
+
       try {
         paymentResult = await this.processPaymentWithResilience(order);
       } catch (error) {
         // Graceful degradation: Mark order as pending payment
         await this.updateOrderStatus(order, 'pending_payment');
-        console.warn(`Payment failed, order marked as pending: ${error.message}`);
+        console.warn(
+          `Payment failed, order marked as pending: ${error.message}`
+        );
       }
 
       // Try notifications with fallback
@@ -290,13 +304,14 @@ export class ResilientOrderService extends BaseDomainService {
         status: order.status,
         paymentId: paymentResult?.transactionId,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
 
       return Result.success(result);
-
     } catch (error) {
-      return Result.failure(new Error(`Order processing with degradation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order processing with degradation failed: ${error.message}`)
+      );
     }
   }
 
@@ -309,7 +324,7 @@ export class ResilientOrderService extends BaseDomainService {
       notificationCircuitBreaker: this.notificationCircuitBreaker.getMetrics(),
       retryPolicy: this.retryPolicy.getMetrics(),
       bulkheadStrategy: this.bulkheadStrategy.getMetrics(),
-      timeoutStrategy: this.timeoutStrategy.getMetrics()
+      timeoutStrategy: this.timeoutStrategy.getMetrics(),
     };
   }
 
@@ -322,7 +337,7 @@ export class ResilientOrderService extends BaseDomainService {
       failureThreshold: 5,
       resetTimeout: 60000,
       monitoringPeriod: 10000,
-      name: 'PaymentCircuitBreaker'
+      name: 'PaymentCircuitBreaker',
     });
 
     // Circuit breaker for notifications
@@ -330,7 +345,7 @@ export class ResilientOrderService extends BaseDomainService {
       failureThreshold: 10,
       resetTimeout: 30000,
       monitoringPeriod: 5000,
-      name: 'NotificationCircuitBreaker'
+      name: 'NotificationCircuitBreaker',
     });
 
     // Retry policy for transient failures
@@ -340,12 +355,14 @@ export class ResilientOrderService extends BaseDomainService {
       maxDelay: 10000,
       backoffMultiplier: 2,
       jitter: true,
-      retryCondition: (error) => {
+      retryCondition: error => {
         // Retry on specific error types
-        return error.message.includes('timeout') || 
-               error.message.includes('network') ||
-               error.message.includes('temporary');
-      }
+        return (
+          error.message.includes('timeout') ||
+          error.message.includes('network') ||
+          error.message.includes('temporary')
+        );
+      },
     });
 
     // Bulkhead strategy for resource isolation
@@ -353,13 +370,13 @@ export class ResilientOrderService extends BaseDomainService {
       maxConcurrentCalls: 10,
       maxQueueSize: 20,
       queueTimeout: 5000,
-      name: 'NotificationBulkhead'
+      name: 'NotificationBulkhead',
     });
 
     // Timeout strategy
     this.timeoutStrategy = new TimeoutStrategy({
       timeout: 30000,
-      name: 'PaymentTimeout'
+      name: 'PaymentTimeout',
     });
 
     // Composite strategy combining all patterns
@@ -367,21 +384,21 @@ export class ResilientOrderService extends BaseDomainService {
       .withCircuitBreaker({
         failureThreshold: 5,
         resetTimeout: 60000,
-        monitoringPeriod: 10000
+        monitoringPeriod: 10000,
       })
       .withRetry({
         maxAttempts: 3,
         baseDelay: 1000,
         maxDelay: 10000,
-        backoffMultiplier: 2
+        backoffMultiplier: 2,
       })
       .withTimeout({
-        timeout: 120000
+        timeout: 120000,
       })
       .withBulkhead({
         maxConcurrentCalls: 5,
         maxQueueSize: 10,
-        queueTimeout: 5000
+        queueTimeout: 5000,
       })
       .build();
   }
@@ -402,12 +419,15 @@ export class ResilientOrderService extends BaseDomainService {
         productId: item.productId,
         quantity: item.quantity,
         price: 100, // Simplified
-        name: `Product ${item.productId}`
+        name: `Product ${item.productId}`,
       })),
       status: 'pending',
-      totalAmount: command.items.reduce((sum, item) => sum + (item.quantity * 100), 0),
+      totalAmount: command.items.reduce(
+        (sum, item) => sum + item.quantity * 100,
+        0
+      ),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return await this.orderRepository.save(order);
@@ -454,12 +474,14 @@ interface ResilienceMetrics {
   bulkheadStrategy: any;
   timeoutStrategy: any;
 }
-```
+````
 
 ## Key Features
 
-- **Circuit Breaker Pattern**: Prevents cascading failures and provides fail-fast behavior
-- **Retry Logic**: Handles transient failures with exponential backoff and jitter
+- **Circuit Breaker Pattern**: Prevents cascading failures and provides
+  fail-fast behavior
+- **Retry Logic**: Handles transient failures with exponential backoff and
+  jitter
 - **Bulkhead Isolation**: Isolates resources to prevent failure propagation
 - **Timeout Handling**: Prevents operations from hanging indefinitely
 - **Graceful Degradation**: Continues operation even when some components fail

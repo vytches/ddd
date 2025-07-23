@@ -415,9 +415,15 @@ export type ValueObjectFactory<T extends BaseValueObjectData> = (data: T) => unk
 
 export type ValueObjectComparator<T> = (a: T, b: T) => ComparisonResult;
 
-export type ValueObjectSerializer<T> = (value: T, options?: SerializationOptions) => string | Buffer;
+export type ValueObjectSerializer<T> = (
+  value: T,
+  options?: SerializationOptions
+) => string | Buffer;
 
-export type ValueObjectDeserializer<T> = (data: string | Buffer, options?: SerializationOptions) => T;
+export type ValueObjectDeserializer<T> = (
+  data: string | Buffer,
+  options?: SerializationOptions
+) => T;
 
 // ===== EXPORT UTILITIES =====
 
@@ -431,10 +437,7 @@ export function createValueObjectError(
 }
 
 export function isValidationResult(obj: unknown): obj is ValueObjectValidationResult {
-  return typeof obj === 'object'
-    && obj !== null
-    && 'isValid' in obj
-    && 'errors' in obj;
+  return typeof obj === 'object' && obj !== null && 'isValid' in obj && 'errors' in obj;
 }
 
 export function createValidationContext(
@@ -444,6 +447,6 @@ export function createValidationContext(
     locale: options.locale || 'en-US',
     strict: options.strict ?? true,
     customRules: options.customRules || [],
-    metadata: options.metadata || {}
+    metadata: options.metadata || {},
   };
 }

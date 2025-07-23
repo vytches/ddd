@@ -9,23 +9,30 @@
 
 ## Description
 
-Enterprise use cases demonstrating intermediate @vytches-ddd/policies integration with NestJS for complex business scenarios including financial services, SaaS platforms, and e-commerce systems requiring advanced policy management.
+Enterprise use cases demonstrating intermediate @vytches-ddd/policies
+integration with NestJS for complex business scenarios including financial
+services, SaaS platforms, and e-commerce systems requiring advanced policy
+management.
 
 ## Enterprise Use Cases
 
 ### **Financial Services - Risk Assessment Platform**
 
 #### **Challenge**: Complex Risk Evaluation with Regulatory Compliance
-A financial services company needs sophisticated risk assessment policies with retry logic for external credit checks, caching for performance, and A/B testing for different risk models while maintaining regulatory compliance.
+
+A financial services company needs sophisticated risk assessment policies with
+retry logic for external credit checks, caching for performance, and A/B testing
+for different risk models while maintaining regulatory compliance.
 
 #### **Solution**: Advanced DI Integration with Policy Behaviors
+
 ```typescript
 // Risk assessment service with advanced behaviors
 @DomainService({
   serviceId: 'riskAssessmentService',
   lifetime: ServiceLifetime.Singleton,
   context: 'RiskManagement',
-  dependencies: ['creditService', 'complianceService']
+  dependencies: ['creditService', 'complianceService'],
 })
 export class RiskAssessmentService {
   private readonly baseRiskPolicy;
@@ -52,26 +59,30 @@ export class RiskAssessmentService {
       maxAttempts: 3,
       baseDelay: 2000,
       backoff: 'exponential',
-      shouldRetry: violation => violation.code.includes('TIMEOUT')
+      shouldRetry: violation => violation.code.includes('TIMEOUT'),
     });
 
     // Enhanced with caching for performance
     this.enhancedRiskPolicy = PolicyCachingBehavior.create(retryPolicy, {
       ttl: 600000, // 10 minutes for financial data
-      keyGenerator: request => `risk-${request.entity.ssn}-${request.entity.loanAmount}`,
-      namespace: 'risk-assessment'
+      keyGenerator: request =>
+        `risk-${request.entity.ssn}-${request.entity.loanAmount}`,
+      namespace: 'risk-assessment',
     });
   }
 
-  async assessRisk(application: LoanApplication, context: RiskContext): Promise<RiskAssessmentResult> {
+  async assessRisk(
+    application: LoanApplication,
+    context: RiskContext
+  ): Promise<RiskAssessmentResult> {
     const result = await this.enhancedRiskPolicy.check({
       entity: application,
       context: {
         ...context,
         operation: 'risk-assessment',
         regulatoryFramework: 'FFIEC',
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     if (result.isFailure()) {
@@ -79,7 +90,7 @@ export class RiskAssessmentService {
         approved: false,
         riskLevel: 'HIGH',
         violations: result.error.violations,
-        requiresManualReview: true
+        requiresManualReview: true,
       };
     }
 
@@ -87,7 +98,7 @@ export class RiskAssessmentService {
       approved: true,
       riskLevel: this.calculateRiskLevel(application),
       confidenceScore: 0.95,
-      requiresManualReview: false
+      requiresManualReview: false,
     };
   }
 
@@ -98,7 +109,7 @@ export class RiskAssessmentService {
   }
 
   private async checkDebtToIncomeRatio(app: LoanApplication): Promise<boolean> {
-    return (app.monthlyDebt / app.monthlyIncome) <= 0.43;
+    return app.monthlyDebt / app.monthlyIncome <= 0.43;
   }
 
   private calculateRiskLevel(app: LoanApplication): 'LOW' | 'MEDIUM' | 'HIGH' {
@@ -115,7 +126,9 @@ export class RiskAssessmentController {
   private readonly riskService: RiskAssessmentService;
 
   constructor() {
-    this.riskService = VytchesDDD.resolve<RiskAssessmentService>('riskAssessmentService');
+    this.riskService = VytchesDDD.resolve<RiskAssessmentService>(
+      'riskAssessmentService'
+    );
   }
 
   @Post('evaluate')
@@ -124,13 +137,13 @@ export class RiskAssessmentController {
       const result = await this.riskService.assessRisk(application, {
         correlationId: `risk-${Date.now()}`,
         userId: application.applicantId,
-        operation: 'loan-evaluation'
+        operation: 'loan-evaluation',
       });
 
       return {
         success: true,
         assessment: result,
-        processingTime: '1.2s'
+        processingTime: '1.2s',
       };
     } catch (error) {
       throw new BadRequestException(`Risk assessment failed: ${error.message}`);
@@ -140,23 +153,29 @@ export class RiskAssessmentController {
 ```
 
 **Business Impact:**
+
 - **99.5% Uptime**: Retry logic ensures external service resilience
 - **40% Performance Improvement**: Intelligent caching reduces assessment time
 - **Regulatory Compliance**: Comprehensive audit trails for compliance reviews
-- **Risk Accuracy**: 15% improvement in risk prediction through enhanced policies
+- **Risk Accuracy**: 15% improvement in risk prediction through enhanced
+  policies
 
 ### **SaaS Platform - Feature Access Control with A/B Testing**
 
 #### **Challenge**: Dynamic Feature Access with Policy Versioning
-A multi-tenant SaaS platform needs dynamic feature access control with A/B testing for different pricing tiers, policy versioning for rollback capabilities, and analytics for optimization.
+
+A multi-tenant SaaS platform needs dynamic feature access control with A/B
+testing for different pricing tiers, policy versioning for rollback
+capabilities, and analytics for optimization.
 
 #### **Solution**: Policy Registry with A/B Testing and Versioning
+
 ```typescript
 // Feature access policy registry service
 @DomainService({
   serviceId: 'featureAccessRegistryService',
   lifetime: ServiceLifetime.Singleton,
-  context: 'FeatureManagement'
+  context: 'FeatureManagement',
 })
 export class FeatureAccessRegistryService {
   private readonly registry: PolicyRegistry;
@@ -167,8 +186,8 @@ export class FeatureAccessRegistryService {
   }
 
   async checkFeatureAccess(
-    tenantId: string, 
-    feature: string, 
+    tenantId: string,
+    feature: string,
     user: User
   ): Promise<FeatureAccessResult> {
     try {
@@ -181,18 +200,27 @@ export class FeatureAccessRegistryService {
           tenantId,
           userId: user.id,
           operation: 'feature-access',
-          environment: process.env.NODE_ENV || 'production'
+          environment: process.env.NODE_ENV || 'production',
         }
       );
 
       // Log A/B testing metrics for optimization
-      await this.logFeatureAccessMetrics(tenantId, feature, result.variant, result.isSuccess());
+      await this.logFeatureAccessMetrics(
+        tenantId,
+        feature,
+        result.variant,
+        result.isSuccess()
+      );
 
       return {
         allowed: result.isSuccess(),
         variant: result.variant,
-        reason: result.isFailure() ? result.error.violations[0]?.message : 'Access granted',
-        upgradeRequired: result.isFailure() ? this.requiresUpgrade(result.error.violations) : false
+        reason: result.isFailure()
+          ? result.error.violations[0]?.message
+          : 'Access granted',
+        upgradeRequired: result.isFailure()
+          ? this.requiresUpgrade(result.error.violations)
+          : false,
       };
     } catch (error) {
       throw new Error(`Feature access check failed: ${error.message}`);
@@ -234,9 +262,13 @@ export class FeatureAccessRegistryService {
       .withId('advanced-analytics-access-b')
       .withName('Advanced Analytics Access (Relaxed)')
       .withDomain('feature-access')
-      .must(user => ['professional', 'enterprise'].includes(user.subscription.tier))
+      .must(user =>
+        ['professional', 'enterprise'].includes(user.subscription.tier)
+      )
       .withCode('PROFESSIONAL_REQUIRED')
-      .withMessage('Advanced analytics requires professional or enterprise subscription')
+      .withMessage(
+        'Advanced analytics requires professional or enterprise subscription'
+      )
       .build();
 
     // Register A/B testing variants
@@ -246,16 +278,16 @@ export class FeatureAccessRegistryService {
       name: 'Advanced Analytics Access Variant A',
       policy: advancedAnalyticsA,
       version: '1.0.0',
-      tags: ['ab-test', 'variant-a', 'strict']
+      tags: ['ab-test', 'variant-a', 'strict'],
     });
 
     this.registry.register({
       id: 'advanced-analytics-access-b',
-      domain: 'feature-access', 
+      domain: 'feature-access',
       name: 'Advanced Analytics Access Variant B',
       policy: advancedAnalyticsB,
       version: '1.0.0',
-      tags: ['ab-test', 'variant-b', 'relaxed']
+      tags: ['ab-test', 'variant-b', 'relaxed'],
     });
   }
 
@@ -272,12 +304,15 @@ export class FeatureAccessRegistryService {
       feature,
       variant,
       success,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   private requiresUpgrade(violations: any[]): boolean {
-    const upgradeRequiredCodes = ['ENTERPRISE_REQUIRED', 'PROFESSIONAL_REQUIRED'];
+    const upgradeRequiredCodes = [
+      'ENTERPRISE_REQUIRED',
+      'PROFESSIONAL_REQUIRED',
+    ];
     return violations.some(v => upgradeRequiredCodes.includes(v.code));
   }
 }
@@ -288,7 +323,9 @@ export class FeatureAccessController {
   private readonly featureRegistry: FeatureAccessRegistryService;
 
   constructor() {
-    this.featureRegistry = VytchesDDD.resolve<FeatureAccessRegistryService>('featureAccessRegistryService');
+    this.featureRegistry = VytchesDDD.resolve<FeatureAccessRegistryService>(
+      'featureAccessRegistryService'
+    );
   }
 
   @Post('check-access/:feature')
@@ -305,7 +342,7 @@ export class FeatureAccessController {
     return {
       feature,
       access: result,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -315,9 +352,10 @@ export class FeatureAccessController {
     @Body() deployment: { version: string; strategy: string }
   ) {
     // Simplified policy factory for demo
-    const policyFactory = () => PolicyBuilder.create<User>()
-      .must(user => user.subscription.tier === 'enterprise')
-      .build();
+    const policyFactory = () =>
+      PolicyBuilder.create<User>()
+        .must(user => user.subscription.tier === 'enterprise')
+        .build();
 
     await this.featureRegistry.deployNewPolicyVersion(
       feature,
@@ -332,24 +370,32 @@ export class FeatureAccessController {
 ```
 
 **Business Impact:**
-- **25% Conversion Increase**: A/B testing optimization improved subscription conversions
-- **Real-time Policy Updates**: Zero-downtime policy deployments with canary releases
-- **Data-Driven Optimization**: Analytics-driven policy refinement for better user experience
+
+- **25% Conversion Increase**: A/B testing optimization improved subscription
+  conversions
+- **Real-time Policy Updates**: Zero-downtime policy deployments with canary
+  releases
+- **Data-Driven Optimization**: Analytics-driven policy refinement for better
+  user experience
 - **Operational Efficiency**: 60% reduction in manual feature flag management
 
 ### **E-Commerce Platform - Dynamic Pricing and Promotion Policies**
 
 #### **Challenge**: Complex Pricing Rules with Performance Requirements
-An e-commerce platform needs sophisticated pricing and promotion policies with high-performance requirements, complex business rules, and real-time inventory considerations.
+
+An e-commerce platform needs sophisticated pricing and promotion policies with
+high-performance requirements, complex business rules, and real-time inventory
+considerations.
 
 #### **Solution**: Behavioral Policy Composition with Advanced Caching
+
 ```typescript
 // Dynamic pricing service with advanced behaviors
 @DomainService({
   serviceId: 'dynamicPricingService',
   lifetime: ServiceLifetime.Singleton,
   context: 'PricingManagement',
-  dependencies: ['inventoryService', 'customerSegmentService']
+  dependencies: ['inventoryService', 'customerSegmentService'],
 })
 export class DynamicPricingService {
   private readonly pricingPolicies: Map<string, IPolicy<PricingRequest>>;
@@ -359,7 +405,10 @@ export class DynamicPricingService {
     this.initializePricingPolicies();
   }
 
-  async calculatePrice(request: PricingRequest, context: PricingContext): Promise<PricingResult> {
+  async calculatePrice(
+    request: PricingRequest,
+    context: PricingContext
+  ): Promise<PricingResult> {
     try {
       const policyType = this.determinePolicyType(request, context);
       const policy = this.pricingPolicies.get(policyType);
@@ -373,8 +422,8 @@ export class DynamicPricingService {
         context: {
           ...context,
           operation: 'price-calculation',
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       if (result.isFailure()) {
@@ -383,7 +432,7 @@ export class DynamicPricingService {
           originalPrice: request.basePrice,
           finalPrice: request.basePrice,
           discountApplied: 0,
-          violations: result.error.violations
+          violations: result.error.violations,
         };
       }
 
@@ -392,7 +441,7 @@ export class DynamicPricingService {
         originalPrice: request.basePrice,
         finalPrice: this.calculateFinalPrice(request, context),
         discountApplied: this.calculateDiscount(request, context),
-        promotionsApplied: this.getApplicablePromotions(request, context)
+        promotionsApplied: this.getApplicablePromotions(request, context),
       };
     } catch (error) {
       throw new Error(`Price calculation failed: ${error.message}`);
@@ -428,45 +477,66 @@ export class DynamicPricingService {
       .build();
 
     // Wrap with performance behaviors
-    const cachedStandardPolicy = PolicyCachingBehavior.create(standardPricingPolicy, {
-      ttl: 60000, // 1 minute for standard pricing
-      keyGenerator: req => `standard-${req.entity.productId}-${req.entity.quantity}`,
-      namespace: 'pricing-standard'
-    });
+    const cachedStandardPolicy = PolicyCachingBehavior.create(
+      standardPricingPolicy,
+      {
+        ttl: 60000, // 1 minute for standard pricing
+        keyGenerator: req =>
+          `standard-${req.entity.productId}-${req.entity.quantity}`,
+        namespace: 'pricing-standard',
+      }
+    );
 
-    const cachedPremiumPolicy = PolicyCachingBehavior.create(premiumPricingPolicy, {
-      ttl: 300000, // 5 minutes for premium pricing
-      keyGenerator: req => `premium-${req.entity.productId}-${req.entity.customer.id}`,
-      namespace: 'pricing-premium'
-    });
+    const cachedPremiumPolicy = PolicyCachingBehavior.create(
+      premiumPricingPolicy,
+      {
+        ttl: 300000, // 5 minutes for premium pricing
+        keyGenerator: req =>
+          `premium-${req.entity.productId}-${req.entity.customer.id}`,
+        namespace: 'pricing-premium',
+      }
+    );
 
     // Add retry for external inventory checks
-    const resilientStandardPolicy = PolicyRetryBehavior.create(cachedStandardPolicy, {
-      maxAttempts: 2,
-      baseDelay: 500,
-      shouldRetry: violation => violation.code === 'INSUFFICIENT_INVENTORY'
-    });
+    const resilientStandardPolicy = PolicyRetryBehavior.create(
+      cachedStandardPolicy,
+      {
+        maxAttempts: 2,
+        baseDelay: 500,
+        shouldRetry: violation => violation.code === 'INSUFFICIENT_INVENTORY',
+      }
+    );
 
     this.pricingPolicies.set('standard', resilientStandardPolicy);
     this.pricingPolicies.set('premium', cachedPremiumPolicy);
   }
 
-  private determinePolicyType(request: PricingRequest, context: PricingContext): string {
+  private determinePolicyType(
+    request: PricingRequest,
+    context: PricingContext
+  ): string {
     if (request.customer.tier === 'premium') {
       return 'premium';
     }
     return 'standard';
   }
 
-  private async checkInventoryAvailability(request: PricingRequest): Promise<boolean> {
+  private async checkInventoryAvailability(
+    request: PricingRequest
+  ): Promise<boolean> {
     const inventoryService = VytchesDDD.resolve<any>('inventoryService');
-    const available = await inventoryService.getAvailableQuantity(request.productId);
+    const available = await inventoryService.getAvailableQuantity(
+      request.productId
+    );
     return available >= request.quantity;
   }
 
-  private calculateFinalPrice(request: PricingRequest, context: PricingContext): number {
+  private calculateFinalPrice(
+    request: PricingRequest,
+    context: PricingContext
+  ): number {
     let finalPrice = request.basePrice;
-    
+
     // Apply customer tier discount
     if (request.customer.tier === 'premium') {
       finalPrice *= 0.9; // 10% premium discount
@@ -480,19 +550,26 @@ export class DynamicPricingService {
     return Math.round(finalPrice * 100) / 100;
   }
 
-  private calculateDiscount(request: PricingRequest, context: PricingContext): number {
+  private calculateDiscount(
+    request: PricingRequest,
+    context: PricingContext
+  ): number {
     const originalPrice = request.basePrice * request.quantity;
-    const finalPrice = this.calculateFinalPrice(request, context) * request.quantity;
+    const finalPrice =
+      this.calculateFinalPrice(request, context) * request.quantity;
     return originalPrice - finalPrice;
   }
 
-  private getApplicablePromotions(request: PricingRequest, context: PricingContext): string[] {
+  private getApplicablePromotions(
+    request: PricingRequest,
+    context: PricingContext
+  ): string[] {
     const promotions = [];
-    
+
     if (request.customer.tier === 'premium') {
       promotions.push('PREMIUM_DISCOUNT');
     }
-    
+
     if (request.quantity >= 10) {
       promotions.push('BULK_DISCOUNT');
     }
@@ -503,6 +580,7 @@ export class DynamicPricingService {
 ```
 
 **Business Impact:**
+
 - **Sub-100ms Response Time**: Advanced caching achieved 95% cache hit rate
 - **15% Revenue Increase**: Dynamic pricing optimization improved profit margins
 - **99.9% Availability**: Retry logic ensured pricing service reliability
@@ -512,29 +590,34 @@ export class DynamicPricingService {
 
 ### **Pattern Selection for Intermediate Use Cases**
 
-| **Use Case Characteristics** | **DI Integration** | **Policy Registry** | **Behavior Composition** |
-|------------------------------|-------------------|---------------------|--------------------------|
-| **External Service Dependencies** | ✅ Essential | ⚠️ Optional | ✅ Essential |
-| **High Performance Requirements** | ✅ Important | ⚠️ Consider | ✅ Critical |
-| **A/B Testing Needs** | ⚠️ Support | ✅ Essential | ⚠️ Optional |
-| **Complex Business Rules** | ✅ Important | ✅ Important | ✅ Important |
-| **Regulatory Compliance** | ✅ Important | ✅ Important | ✅ Important |
+| **Use Case Characteristics**      | **DI Integration** | **Policy Registry** | **Behavior Composition** |
+| --------------------------------- | ------------------ | ------------------- | ------------------------ |
+| **External Service Dependencies** | ✅ Essential       | ⚠️ Optional         | ✅ Essential             |
+| **High Performance Requirements** | ✅ Important       | ⚠️ Consider         | ✅ Critical              |
+| **A/B Testing Needs**             | ⚠️ Support         | ✅ Essential        | ⚠️ Optional              |
+| **Complex Business Rules**        | ✅ Important       | ✅ Important        | ✅ Important             |
+| **Regulatory Compliance**         | ✅ Important       | ✅ Important        | ✅ Important             |
 
 ### **Success Metrics Across Industries**
 
 #### **Financial Services**
+
 - **Risk Assessment Accuracy**: 95%+ with enhanced policy behaviors
 - **External Service Resilience**: 99.5% uptime with retry policies
 - **Regulatory Compliance**: 100% audit trail coverage
 
 #### **SaaS Platform**
+
 - **Feature Access Performance**: Sub-50ms response times
 - **A/B Testing Conversion**: 25% improvement in subscription rates
 - **Policy Deployment**: Zero-downtime updates with canary strategies
 
 #### **E-Commerce**
+
 - **Pricing Calculation Speed**: 95% sub-100ms response times
 - **Revenue Optimization**: 15% increase through dynamic pricing
 - **System Reliability**: 99.9% pricing service availability
 
-These intermediate use cases demonstrate how advanced @vytches-ddd/policies integration with NestJS enables sophisticated business scenarios while maintaining high performance, reliability, and operational excellence.
+These intermediate use cases demonstrate how advanced @vytches-ddd/policies
+integration with NestJS enables sophisticated business scenarios while
+maintaining high performance, reliability, and operational excellence.

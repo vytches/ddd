@@ -1,45 +1,47 @@
 # Domain Service with Repository - Beginner Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: beginner
-**Domain**: order-management
-**Patterns**: domain-service, repository-coordination
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/repositories
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+beginner **Domain**: order-management **Patterns**: domain-service,
+repository-coordination **Dependencies**: @vytches-ddd/core,
+@vytches-ddd/repositories
 
 ## Description
 
-This example demonstrates how to create a domain service that coordinates multiple repositories. It shows proper dependency injection and repository coordination patterns within a domain service.
+This example demonstrates how to create a domain service that coordinates
+multiple repositories. It shows proper dependency injection and repository
+coordination patterns within a domain service.
 
 ## Business Context
 
-Order processing typically involves multiple data sources: orders, products, inventory, and customers. A domain service can coordinate these repositories while maintaining transactional consistency and domain boundaries.
+Order processing typically involves multiple data sources: orders, products,
+inventory, and customers. A domain service can coordinate these repositories
+while maintaining transactional consistency and domain boundaries.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-processing.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  Product, 
-  CreateOrderCommand, 
+import {
+  Order,
+  Product,
+  CreateOrderCommand,
   OrderCreatedEvent,
   IOrderRepository,
   IProductRepository,
-  OrderProcessingResult
+  OrderProcessingResult,
 } from '../types';
 
 /**
  * @llm-summary Domain service for order processing operations
  * @llm-domain order-management
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Coordinates order creation across multiple repositories.
  * Handles product validation, inventory checks, and order persistence.
- * 
+ *
  * @example
  * ```typescript
  * const service = new OrderProcessingService(orderRepo, productRepo);
@@ -59,11 +61,13 @@ export class OrderProcessingService extends BaseDomainService {
 
   /**
    * Processes a new order with product validation and inventory checks
-   * 
+   *
    * @param command - Order creation command
    * @returns Result containing processing result or error
    */
-  async processOrder(command: CreateOrderCommand): Promise<Result<OrderProcessingResult, Error>> {
+  async processOrder(
+    command: CreateOrderCommand
+  ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       // Step 1: Validate order items
       const validation = await this.validateOrderItems(command.items);
@@ -72,102 +76,122 @@ export class OrderProcessingService extends BaseDomainService {
       }
 
       // Step 2: Check product availability
-      const availabilityCheck = await this.checkProductAvailability(command.items);
+      const availabilityCheck = await this.checkProductAvailability(
+        command.items
+      );
       if (availabilityCheck.isFailure()) {
         return Result.failure(availabilityCheck.error);
       }
 
       // Step 3: Calculate order total
       const totalAmount = await this.calculateOrderTotal(command.items);
-      
+
       // Step 4: Create order entity
       const order = await this.createOrder(command, totalAmount);
-      
+
       // Step 5: Save order
       const savedOrder = await this.orderRepository.save(order);
-      
+
       // Step 6: Update product inventory
       await this.updateProductInventory(command.items);
-      
+
       // Step 7: Publish domain event
       await this.publishOrderCreatedEvent(savedOrder);
-      
+
       const result: OrderProcessingResult = {
         orderId: savedOrder.id,
         status: savedOrder.status,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
-      
+
       return Result.success(result);
-      
     } catch (error) {
-      return Result.failure(new Error(`Order processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order processing failed: ${error.message}`)
+      );
     }
   }
 
   /**
    * Validates order items
    */
-  private async validateOrderItems(items: CreateOrderItemCommand[]): Promise<Result<void, Error>> {
+  private async validateOrderItems(
+    items: CreateOrderItemCommand[]
+  ): Promise<Result<void, Error>> {
     if (!items || items.length === 0) {
       return Result.failure(new Error('Order must contain at least one item'));
     }
-    
+
     for (const item of items) {
       if (!item.productId || item.quantity <= 0) {
-        return Result.failure(new Error('Invalid item: productId and positive quantity required'));
+        return Result.failure(
+          new Error('Invalid item: productId and positive quantity required')
+        );
       }
     }
-    
+
     return Result.success();
   }
 
   /**
    * Checks if all products are available
    */
-  private async checkProductAvailability(items: CreateOrderItemCommand[]): Promise<Result<void, Error>> {
+  private async checkProductAvailability(
+    items: CreateOrderItemCommand[]
+  ): Promise<Result<void, Error>> {
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
-      
+
       if (!product) {
-        return Result.failure(new Error(`Product not found: ${item.productId}`));
+        return Result.failure(
+          new Error(`Product not found: ${item.productId}`)
+        );
       }
-      
+
       if (product.status !== 'active') {
-        return Result.failure(new Error(`Product not available: ${product.name}`));
+        return Result.failure(
+          new Error(`Product not available: ${product.name}`)
+        );
       }
-      
+
       if (product.inventory < item.quantity) {
-        return Result.failure(new Error(`Insufficient inventory for product: ${product.name}`));
+        return Result.failure(
+          new Error(`Insufficient inventory for product: ${product.name}`)
+        );
       }
     }
-    
+
     return Result.success();
   }
 
   /**
    * Calculates total order amount
    */
-  private async calculateOrderTotal(items: CreateOrderItemCommand[]): Promise<number> {
+  private async calculateOrderTotal(
+    items: CreateOrderItemCommand[]
+  ): Promise<number> {
     let total = 0;
-    
+
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
         total += product.price * item.quantity;
       }
     }
-    
+
     return total;
   }
 
   /**
    * Creates order entity
    */
-  private async createOrder(command: CreateOrderCommand, totalAmount: number): Promise<Order> {
+  private async createOrder(
+    command: CreateOrderCommand,
+    totalAmount: number
+  ): Promise<Order> {
     const orderItems = await this.buildOrderItems(command.items);
-    
+
     return {
       id: this.generateOrderId(),
       userId: command.userId,
@@ -175,16 +199,18 @@ export class OrderProcessingService extends BaseDomainService {
       status: 'pending',
       totalAmount,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
   /**
    * Builds order items from command
    */
-  private async buildOrderItems(items: CreateOrderItemCommand[]): Promise<OrderItem[]> {
+  private async buildOrderItems(
+    items: CreateOrderItemCommand[]
+  ): Promise<OrderItem[]> {
     const orderItems: OrderItem[] = [];
-    
+
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
@@ -192,18 +218,20 @@ export class OrderProcessingService extends BaseDomainService {
           productId: item.productId,
           quantity: item.quantity,
           price: product.price,
-          name: product.name
+          name: product.name,
         });
       }
     }
-    
+
     return orderItems;
   }
 
   /**
    * Updates product inventory
    */
-  private async updateProductInventory(items: CreateOrderItemCommand[]): Promise<void> {
+  private async updateProductInventory(
+    items: CreateOrderItemCommand[]
+  ): Promise<void> {
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
       if (product) {
@@ -222,9 +250,9 @@ export class OrderProcessingService extends BaseDomainService {
       userId: order.userId,
       items: order.items,
       totalAmount: order.totalAmount,
-      createdAt: order.createdAt
+      createdAt: order.createdAt,
     };
-    
+
     // In real implementation, this would publish to event bus
     console.log('Publishing OrderCreatedEvent:', event);
   }
@@ -236,13 +264,15 @@ export class OrderProcessingService extends BaseDomainService {
     return `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
-```
+````
 
 ## Key Features
 
-- **Repository Coordination**: Coordinates multiple repositories (orders, products)
+- **Repository Coordination**: Coordinates multiple repositories (orders,
+  products)
 - **Dependency Injection**: Accepts repositories through constructor injection
-- **Transaction Coordination**: Manages multi-step operations with proper error handling
+- **Transaction Coordination**: Manages multi-step operations with proper error
+  handling
 - **Business Validation**: Validates products, inventory, and order constraints
 - **Domain Events**: Publishes events for decoupled communication
 - **Error Propagation**: Uses Result pattern for clean error handling
@@ -251,12 +281,15 @@ export class OrderProcessingService extends BaseDomainService {
 
 - **Avoid Long Transactions**: Keep transactions short and focused
 - **Don't Ignore Concurrency**: Consider concurrent access to shared resources
-- **Avoid Repository Leakage**: Don't expose repository details outside the service
+- **Avoid Repository Leakage**: Don't expose repository details outside the
+  service
 - **Don't Skip Validation**: Always validate inputs and business rules
 - **Avoid Inconsistent State**: Ensure all operations succeed or fail together
 
 ## Related Examples
 
 - [Basic Domain Service](./example-1.md) - Simple domain service patterns
-- [Cross-Aggregate Domain Service](../intermediate/example-3.md) - Advanced coordination
-- [NestJS Simple Service](../frameworks/nestjs/basic/simple-service.md) - Framework integration
+- [Cross-Aggregate Domain Service](../intermediate/example-3.md) - Advanced
+  coordination
+- [NestJS Simple Service](../frameworks/nestjs/basic/simple-service.md) -
+  Framework integration

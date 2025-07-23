@@ -1,17 +1,23 @@
 # Specification Pattern - Advanced Query Composition
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/repositories
-**Complexity**: intermediate
-**Domain**: product-catalog
-**Patterns**: specification-pattern, query-composition, domain-criteria
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/validation
+**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+intermediate **Domain**: product-catalog **Patterns**: specification-pattern,
+query-composition, domain-criteria **Dependencies**: @vytches-ddd/repositories,
+@vytches-ddd/validation
 
 ## Description
-Advanced querying using the Specification pattern to create composable, reusable business criteria. Demonstrates complex query building, specification chaining, and domain-driven query logic with the @vytches-ddd/repositories specification system.
+
+Advanced querying using the Specification pattern to create composable, reusable
+business criteria. Demonstrates complex query building, specification chaining,
+and domain-driven query logic with the @vytches-ddd/repositories specification
+system.
 
 ## Business Context
-Product catalog system requiring sophisticated filtering capabilities for inventory management, customer searches, and administrative reporting. Specifications encapsulate business rules for product selection and enable complex query composition.
+
+Product catalog system requiring sophisticated filtering capabilities for
+inventory management, customer searches, and administrative reporting.
+Specifications encapsulate business rules for product selection and enable
+complex query composition.
 
 ## Code Example
 
@@ -176,7 +182,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
   async findLowStockProducts(): Promise<Product[]> {
     const specification = new ActiveProductsSpecification()
       .and(new ProductsLowStockSpecification());
-    
+
     return await this.findBySpecification(specification);
   }
 
@@ -228,7 +234,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
   ): Promise<PaginationResult<Product>> {
     const offset = (page - 1) * limit;
     let queryOptions = specification.toQueryOptions();
-    
+
     queryOptions = {
       ...queryOptions,
       limit,
@@ -247,7 +253,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
   // ✅ FOCUS: Advanced specification queries with sorting
   async findProductsByPopularity(specification: BaseSpecification<Product>): Promise<Product[]> {
     let queryOptions = specification.toQueryOptions();
-    
+
     queryOptions = {
       ...queryOptions,
       orderBy: [
@@ -265,7 +271,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
     specification: BaseSpecification<Product>
   ): Promise<ProductCategoryStats[]> {
     const products = await this.findBySpecification(specification);
-    
+
     // Group by category and calculate statistics
     const categoryStats = new Map<string, {
       category: string;
@@ -287,7 +293,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
       existing.totalProducts++;
       existing.averagePrice = (existing.averagePrice * (existing.totalProducts - 1) + product.price) / existing.totalProducts;
       existing.totalInventory += product.inventory.quantity;
-      
+
       if (product.inventory.quantity <= product.inventory.minStock) {
         existing.lowStockCount++;
       }
@@ -305,7 +311,7 @@ export class ProductSpecificationRepository extends BaseRepository<Product> {
     ttl: number = 300
   ): Promise<Product[]> {
     const actualCacheKey = cacheKey || `spec:${specification.getSpecificationKey()}`;
-    
+
     return await this.findWithCache(
       specification.toQueryOptions(),
       { key: actualCacheKey, ttl }
@@ -351,7 +357,7 @@ export class ProductSpecificationFactory {
     maxPrice: number,
     requiredTags: string[]
   ): BaseSpecification<Product> {
-    const categorySpecs = targetCategories.map(cat => 
+    const categorySpecs = targetCategories.map(cat =>
       new ProductsInCategorySpecification(cat)
     );
     const categoriesSpec = categorySpecs.reduce((acc, spec) => acc.or(spec));
@@ -397,7 +403,7 @@ async function demonstrateSpecificationPattern() {
     .and(new ProductsInCategorySpecification('electronics'))
     .and(new ProductsPriceBetweenSpecification(100, 500))
     .and(new ProductsInStockSpecification());
-  
+
   const electronics = await productRepo.findBySpecification(electronicsSpec);
   console.log(`Found ${electronics.length} electronics in price range`);
 
@@ -419,7 +425,7 @@ async function demonstrateSpecificationPattern() {
     tags: ['fiction', 'bestseller'],
     inStockOnly: true
   };
-  
+
   const searchResults = await productRepo.searchProducts(searchCriteria);
   console.log(`Found ${searchResults.length} books matching criteria`);
 
@@ -472,6 +478,7 @@ interface ProductCategoryStats {
 ```
 
 ## Key Features
+
 - Composable business logic through specification chaining (AND, OR, NOT)
 - Domain-driven query criteria encapsulated in specifications
 - Factory pattern for common business scenarios
@@ -480,11 +487,15 @@ interface ProductCategoryStats {
 - Cached query execution with specification-based cache keys
 
 ## Common Pitfalls
+
 - Over-complicating simple queries with unnecessary specifications
 - Not optimizing specification-generated queries for database performance
 - Creating too many fine-grained specifications (maintainability issues)
-- Forgetting to implement both `isSatisfiedBy()` and `toQueryOptions()` methods consistently
+- Forgetting to implement both `isSatisfiedBy()` and `toQueryOptions()` methods
+  consistently
 
 ## Related Examples
-- [Unit of Work Pattern](example-1.md) - Transaction management across repositories
+
+- [Unit of Work Pattern](example-1.md) - Transaction management across
+  repositories
 - [Multi-Tenant Repository](example-3.md) - Tenant-aware data access patterns

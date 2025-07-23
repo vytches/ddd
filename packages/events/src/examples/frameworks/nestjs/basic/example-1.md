@@ -1,19 +1,23 @@
 # Event System - NestJS Basic Integration
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/events
-**Complexity**: basic
-**Domain**: Integration
-**Patterns**: event-publishing, repository-pattern, domain-events, nestjs-integration
-**Dependencies**: @nestjs/common, @vytches-ddd/events, @vytches-ddd/repositories
+**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: basic
+**Domain**: Integration **Patterns**: event-publishing, repository-pattern,
+domain-events, nestjs-integration **Dependencies**: @nestjs/common,
+@vytches-ddd/events, @vytches-ddd/repositories
 
 ## Description
 
-Basic NestJS integration with the Unified Event System using manual setup. This example demonstrates how to integrate automatic event publishing through the repository pattern in a NestJS application with clean separation of concerns.
+Basic NestJS integration with the Unified Event System using manual setup. This
+example demonstrates how to integrate automatic event publishing through the
+repository pattern in a NestJS application with clean separation of concerns.
 
 ## Business Context
 
-NestJS applications need to publish domain events when business operations occur, such as user registration, order processing, or inventory updates. The repository pattern provides automatic event publishing when aggregates are saved, ensuring events are consistently published without requiring manual event handling in controllers.
+NestJS applications need to publish domain events when business operations
+occur, such as user registration, order processing, or inventory updates. The
+repository pattern provides automatic event publishing when aggregates are
+saved, ensuring events are consistently published without requiring manual event
+handling in controllers.
 
 ## Code Example
 
@@ -40,7 +44,7 @@ export class UserService {
       // ⭐ FOCUS: Repository automatically publishes events when saving
       const user = User.create(userData);
       await this.userRepository.save(user);
-      
+
       return user;
     } catch (error) {
       throw new Error(`Failed to create user: ${error.message}`);
@@ -57,7 +61,7 @@ export class UserService {
       // ⭐ FOCUS: Business operation that triggers domain events
       user.updateProfile(userData);
       await this.userRepository.save(user); // Automatically publishes events
-      
+
       return user;
     } catch (error) {
       throw new Error(`Failed to update user: ${error.message}`);
@@ -74,7 +78,6 @@ export class UserService {
       // ⭐ FOCUS: Archive user instead of hard delete
       user.archive('User requested deletion');
       await this.userRepository.save(user); // Publishes UserArchivedEvent
-      
     } catch (error) {
       throw new Error(`Failed to delete user: ${error.message}`);
     }
@@ -132,9 +135,12 @@ export class NotificationService {
       await this.sendProfileUpdateNotification(event);
     });
 
-    this.eventBus.subscribe('UserArchived', async (event: UserArchivedEvent) => {
-      await this.sendGoodbyeEmail(event);
-    });
+    this.eventBus.subscribe(
+      'UserArchived',
+      async (event: UserArchivedEvent) => {
+        await this.sendGoodbyeEmail(event);
+      }
+    );
   }
 
   private async sendWelcomeEmail(event: UserCreatedEvent): Promise<void> {
@@ -143,7 +149,9 @@ export class NotificationService {
     // Email sending implementation
   }
 
-  private async sendProfileUpdateNotification(event: UserUpdatedEvent): Promise<void> {
+  private async sendProfileUpdateNotification(
+    event: UserUpdatedEvent
+  ): Promise<void> {
     console.log(`Sending profile update notification to user ${event.userId}`);
     // Notification implementation
   }
@@ -163,35 +171,36 @@ import { NotificationService } from './notification.service';
 
 @Module({
   controllers: [UserController],
-  providers: [
-    UserService,
-    UserRepository,
-    NotificationService
-  ],
-  exports: [UserService]
+  providers: [UserService, UserRepository, NotificationService],
+  exports: [UserService],
 })
 export class UserModule {}
 ```
 
 ## Key Features
 
-- **Repository Pattern Integration**: Automatic event publishing when aggregates are saved
-- **Domain Event Handling**: Subscribe to and handle domain events across services
-- **Clean Architecture**: Separation between controllers, services, and event handling
+- **Repository Pattern Integration**: Automatic event publishing when aggregates
+  are saved
+- **Domain Event Handling**: Subscribe to and handle domain events across
+  services
+- **Clean Architecture**: Separation between controllers, services, and event
+  handling
 - **Manual Setup**: Simple, explicit event system configuration
 - **Error Handling**: Proper error handling with meaningful messages
 
 ## Integration Benefits
 
 1. **Automatic Event Publishing**: No manual event publishing required
-2. **Loose Coupling**: Services communicate through events, not direct dependencies  
+2. **Loose Coupling**: Services communicate through events, not direct
+   dependencies
 3. **Consistency**: Repository pattern ensures events are always published
 4. **Testability**: Easy to test services and event handlers independently
 5. **Scalability**: Event-driven architecture supports growth
 
 ## Common Pitfalls
 
-- **Event Bus Isolation**: Each service creates its own event bus - consider sharing instance
+- **Event Bus Isolation**: Each service creates its own event bus - consider
+  sharing instance
 - **Error Handling**: Ensure event handlers don't throw unhandled exceptions
 - **Memory Leaks**: Properly manage event subscriptions in service lifecycle
 - **Event Ordering**: Events are processed asynchronously - don't rely on order

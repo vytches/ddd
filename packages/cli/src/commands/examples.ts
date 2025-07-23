@@ -100,7 +100,7 @@ export const examplesCommand = {
         console.error(Colors.red(`❌ Unknown examples command: ${subcommand}`));
         console.log('Use: examples --help for available commands');
     }
-  }
+  },
 };
 
 async function generateDocumentation(packageName: string, options: ExamplesOptions): Promise<void> {
@@ -113,9 +113,7 @@ async function generateDocumentation(packageName: string, options: ExamplesOptio
       : undefined;
 
     // Parse sections
-    const sections = options.sections
-      ? options.sections.split(',').map(s => s.trim())
-      : undefined;
+    const sections = options.sections ? options.sections.split(',').map(s => s.trim()) : undefined;
 
     // Generate documentation
     const result = await generator.generate({
@@ -130,7 +128,7 @@ async function generateDocumentation(packageName: string, options: ExamplesOptio
       randomize: !options.noRandomize,
       ...(options.seed && { seed: options.seed }),
       ...(options.diOnly && { diOnly: options.diOnly }),
-      ...(options.output && { outputPath: options.output })
+      ...(options.output && { outputPath: options.output }),
     });
 
     console.log(Colors.green(`✅ Documentation generated: ${result.outputPath}`));
@@ -140,11 +138,16 @@ async function generateDocumentation(packageName: string, options: ExamplesOptio
     }
 
     if (result.randomizedExamples && result.randomizedExamples.length > 0) {
-      console.log(Colors.yellow('🎲 Examples were randomized. Run again to see different examples'));
+      console.log(
+        Colors.yellow('🎲 Examples were randomized. Run again to see different examples')
+      );
     }
-
   } catch (error) {
-    console.error(Colors.red(`❌ Failed to generate documentation: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      Colors.red(
+        `❌ Failed to generate documentation: ${error instanceof Error ? error.message : String(error)}`
+      )
+    );
     process.exit(1);
   }
 }
@@ -154,9 +157,7 @@ async function generateBundle(options: ExamplesOptions): Promise<void> {
     const bundler = new DocumentationBundler();
 
     // Parse packages
-    const packages = options.packages
-      ? options.packages.split(',').map(p => p.trim())
-      : [];
+    const packages = options.packages ? options.packages.split(',').map(p => p.trim()) : [];
 
     // Parse complexity levels
     const complexityLevels = options.complexity
@@ -164,9 +165,7 @@ async function generateBundle(options: ExamplesOptions): Promise<void> {
       : undefined;
 
     // Parse sections
-    const sections = options.sections
-      ? options.sections.split(',').map(s => s.trim())
-      : undefined;
+    const sections = options.sections ? options.sections.split(',').map(s => s.trim()) : undefined;
 
     // Generate bundle
     const result = await bundler.generateBundle({
@@ -176,7 +175,7 @@ async function generateBundle(options: ExamplesOptions): Promise<void> {
       sections,
       llmOptimized: options.llmOptimized || options.llm,
       diOnly: options.diOnly,
-      outputPath: options.output
+      outputPath: options.output,
     });
 
     // Write the bundle to file
@@ -184,14 +183,23 @@ async function generateBundle(options: ExamplesOptions): Promise<void> {
     await fs.writeFile(result.outputPath!, result.content, 'utf8');
 
     console.log(Colors.green(`✅ Bundle generated: ${result.outputPath}`));
-    console.log(Colors.cyan(`📦 Includes ${result.packageCount} packages with ${result.exampleCount} examples`));
+    console.log(
+      Colors.cyan(
+        `📦 Includes ${result.packageCount} packages with ${result.exampleCount} examples`
+      )
+    );
 
     if (options.llmOptimized || options.llm) {
-      console.log(Colors.cyan('💡 Tip: Use this bundle with LLM prompts for complete library understanding'));
+      console.log(
+        Colors.cyan('💡 Tip: Use this bundle with LLM prompts for complete library understanding')
+      );
     }
-
   } catch (error) {
-    console.error(Colors.red(`❌ Failed to generate bundle: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      Colors.red(
+        `❌ Failed to generate bundle: ${error instanceof Error ? error.message : String(error)}`
+      )
+    );
     process.exit(1);
   }
 }
@@ -205,7 +213,7 @@ async function findByTag(tagPattern: string, options: ExamplesOptions): Promise<
       ...(options.framework && { framework: options.framework }),
       maxExamples: options.maxExamples || 10,
       randomize: !options.noRandomize,
-      ...(options.seed && { seed: options.seed })
+      ...(options.seed && { seed: options.seed }),
     });
 
     if (examples.length === 0) {
@@ -239,11 +247,16 @@ async function findByTag(tagPattern: string, options: ExamplesOptions): Promise<
 
     // Show randomization info
     if (!options.noRandomize && examples.length > 0) {
-      console.log(Colors.dim('🎲 Results were randomized. Use --no-randomize for deterministic results'));
+      console.log(
+        Colors.dim('🎲 Results were randomized. Use --no-randomize for deterministic results')
+      );
     }
-
   } catch (error) {
-    console.error(Colors.red(`❌ Failed to find examples: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      Colors.red(
+        `❌ Failed to find examples: ${error instanceof Error ? error.message : String(error)}`
+      )
+    );
     process.exit(1);
   }
 }
@@ -256,7 +269,7 @@ async function validateExamples(options: ExamplesOptions): Promise<void> {
     const results = await validator.validateExamples(options.package || '', {
       packageName: options.package,
       autoFix: options.fix,
-      verbose: options.verbose
+      verbose: options.verbose,
     });
 
     // Display results
@@ -304,18 +317,23 @@ async function validateExamples(options: ExamplesOptions): Promise<void> {
     if (results.errors.length > 0) {
       process.exit(1);
     }
-
   } catch (error) {
-    console.error(Colors.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      Colors.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`)
+    );
     process.exit(1);
   }
 }
 
 function getComplexityIcon(complexity: string): string {
   switch (complexity) {
-    case 'basic': return '🟢';
-    case 'intermediate': return '🟡';
-    case 'advanced': return '🔴';
-    default: return '⚪';
+    case 'basic':
+      return '🟢';
+    case 'intermediate':
+      return '🟡';
+    case 'advanced':
+      return '🔴';
+    default:
+      return '⚪';
   }
 }

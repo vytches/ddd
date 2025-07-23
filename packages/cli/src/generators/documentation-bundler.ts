@@ -95,20 +95,21 @@ export class DocumentationBundler {
     const content = await this.generateBundledContent(filteredExamples, options);
 
     // Determine output path
-    const outputPath = options.outputPath || this.generateBundleOutputPath(options.packages, options.framework);
+    const outputPath =
+      options.outputPath || this.generateBundleOutputPath(options.packages, options.framework);
 
     return {
       metadata: {
         title: `Documentation Bundle - ${options.packages.join(', ')}`,
         packages: options.packages,
         generatedAt: new Date().toISOString(),
-        version: '1.0.0'
+        version: '1.0.0',
       },
       content,
       examples: filteredExamples,
       outputPath,
       packageCount: options.packages.length,
-      exampleCount: filteredExamples.length
+      exampleCount: filteredExamples.length,
     };
   }
 
@@ -122,14 +123,15 @@ export class DocumentationBundler {
   /**
    * Filter examples based on bundle options
    */
-  private filterExamples(examples: ExampleDefinition[], options: BundleOptions): ExampleDefinition[] {
+  private filterExamples(
+    examples: ExampleDefinition[],
+    options: BundleOptions
+  ): ExampleDefinition[] {
     let filtered = examples;
 
     // Filter by complexity levels
     if (options.complexityLevels && options.complexityLevels.length > 0) {
-      filtered = filtered.filter(example =>
-        options.complexityLevels!.includes(example.complexity)
-      );
+      filtered = filtered.filter(example => options.complexityLevels!.includes(example.complexity));
     }
 
     // Filter by framework - more flexible approach
@@ -138,8 +140,8 @@ export class DocumentationBundler {
         // Check if any tag includes the framework name
         const hasFrameworkTag = example.tags.some(tag => tag.includes(options.framework!));
         // For core examples, include them if they're marked as basic or don't have framework-specific tags
-        const isCoreExample = example.tags.some(tag => tag.includes(':core')) && 
-                             example.complexity === 'basic';
+        const isCoreExample =
+          example.tags.some(tag => tag.includes(':core')) && example.complexity === 'basic';
         return hasFrameworkTag || isCoreExample;
       });
     }
@@ -160,7 +162,10 @@ export class DocumentationBundler {
   /**
    * Generate bundled content
    */
-  private async generateBundledContent(examples: ExampleDefinition[], options: BundleOptions): Promise<string> {
+  private async generateBundledContent(
+    examples: ExampleDefinition[],
+    options: BundleOptions
+  ): Promise<string> {
     const sections: string[] = [];
 
     // Add introduction
@@ -188,7 +193,9 @@ export class DocumentationBundler {
           sections.push(content);
         } catch (error) {
           sections.push('```typescript');
-          sections.push(`// Unable to load example content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          sections.push(
+            `// Unable to load example content: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
           sections.push('```');
         }
         sections.push('');
@@ -201,7 +208,9 @@ export class DocumentationBundler {
   /**
    * Group examples by package
    */
-  private groupExamplesByPackage(examples: ExampleDefinition[]): Record<string, ExampleDefinition[]> {
+  private groupExamplesByPackage(
+    examples: ExampleDefinition[]
+  ): Record<string, ExampleDefinition[]> {
     const grouped: Record<string, ExampleDefinition[]> = {};
 
     for (const example of examples) {
@@ -273,7 +282,7 @@ export class DocumentationBundler {
     const dateStr = new Date().toISOString().split('T')[0];
     const packagesStr = packages.join('-');
     const frameworkStr = framework ? `-${framework}` : '';
-    
+
     return `${packagesStr}-Bundle${frameworkStr}-v1.0.0-${dateStr}.md`;
   }
 
@@ -283,6 +292,7 @@ export class DocumentationBundler {
   private async loadExampleContent(packageName: string, filePath: string): Promise<string> {
     // Find the root directory by going up until we find packages/
     let rootDir = process.cwd();
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await fs.access(path.join(rootDir, 'packages'));
@@ -296,14 +306,7 @@ export class DocumentationBundler {
       }
     }
 
-    const fullPath = path.join(
-      rootDir,
-      'packages',
-      packageName,
-      'src',
-      'examples',
-      filePath
-    );
+    const fullPath = path.join(rootDir, 'packages', packageName, 'src', 'examples', filePath);
 
     try {
       const content = await fs.readFile(fullPath, 'utf8');

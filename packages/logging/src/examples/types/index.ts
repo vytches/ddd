@@ -1,6 +1,6 @@
 /**
  * Logging Package - Type Definitions
- * 
+ *
  * Common types used across logging examples.
  * These types represent application-level concepts that would exist in your domain.
  */
@@ -227,14 +227,22 @@ export interface OrderProcessedEvent {
 
 // Error Types
 export class ValidationError extends Error {
-  constructor(message: string, public field?: string, public value?: any) {
+  constructor(
+    message: string,
+    public field?: string,
+    public value?: any
+  ) {
     super(message);
     this.name = 'ValidationError';
   }
 }
 
 export class BusinessError extends Error {
-  constructor(message: string, public code?: string, public details?: Record<string, any>) {
+  constructor(
+    message: string,
+    public code?: string,
+    public details?: Record<string, any>
+  ) {
     super(message);
     this.name = 'BusinessError';
   }
@@ -277,11 +285,14 @@ export interface MetricsData {
 
 export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy';
-  checks: Record<string, {
-    status: 'up' | 'down';
-    message?: string;
-    details?: Record<string, any>;
-  }>;
+  checks: Record<
+    string,
+    {
+      status: 'up' | 'down';
+      message?: string;
+      details?: Record<string, any>;
+    }
+  >;
   timestamp: Date;
 }
 
@@ -344,5 +355,5 @@ export type {
   Product as ProductData,
   LogContext as LoggingContext,
   LoggerConfiguration as LoggingConfig,
-  ServiceResponse as Response
+  ServiceResponse as Response,
 };

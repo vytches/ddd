@@ -1,46 +1,53 @@
 # Domain Service with Policy Integration - Intermediate Example
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/domain-services
-**Complexity**: intermediate
-**Domain**: order-management
-**Patterns**: domain-service, policy-enforcement, business-rules
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/policies
+**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+intermediate **Domain**: order-management **Patterns**: domain-service,
+policy-enforcement, business-rules **Dependencies**: @vytches-ddd/core,
+@vytches-ddd/policies
 
 ## Description
 
-This example demonstrates how to integrate business policies within domain services. It shows policy enforcement, validation, and business rule evaluation as part of service operations.
+This example demonstrates how to integrate business policies within domain
+services. It shows policy enforcement, validation, and business rule evaluation
+as part of service operations.
 
 ## Business Context
 
-Business operations often require complex policy enforcement: pricing rules, discount policies, approval workflows, and regulatory compliance. Domain services can coordinate policy evaluation while maintaining business rule integrity.
+Business operations often require complex policy enforcement: pricing rules,
+discount policies, approval workflows, and regulatory compliance. Domain
+services can coordinate policy evaluation while maintaining business rule
+integrity.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-validation.service.ts
 import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { PolicyBuilder, PolicyContext, PolicyRegistry } from '@vytches-ddd/policies';
+import {
+  PolicyBuilder,
+  PolicyContext,
+  PolicyRegistry,
+} from '@vytches-ddd/policies';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  Order, 
-  Customer, 
-  CreateOrderCommand, 
+import {
+  Order,
+  Customer,
+  CreateOrderCommand,
   OrderProcessingResult,
   LoyaltyLevel,
   IOrderRepository,
-  ICustomerRepository
+  ICustomerRepository,
 } from '../types';
 
 /**
  * @llm-summary Domain service with integrated business policy enforcement
  * @llm-domain order-management
  * @llm-complexity Medium
- * 
+ *
  * @description
  * Validates orders using business policies and rules.
  * Enforces pricing policies, discount rules, and approval workflows.
- * 
+ *
  * @example
  * ```typescript
  * const service = new OrderValidationService(orderRepo, customerRepo, policyRegistry);
@@ -58,46 +65,64 @@ export class OrderValidationService extends BaseDomainService {
 
   /**
    * Validates and processes order with policy enforcement
-   * 
+   *
    * @param command - Order creation command
    * @param context - Policy context for evaluation
    * @returns Result containing processing result or error
    */
   async validateAndProcessOrder(
-    command: CreateOrderCommand, 
+    command: CreateOrderCommand,
     context: PolicyContext
   ): Promise<Result<OrderProcessingResult, Error>> {
     try {
       // Step 1: Get customer for policy evaluation
       const customer = await this.customerRepository.findById(command.userId);
       if (!customer) {
-        return Result.failure(new Error(`Customer not found: ${command.userId}`));
+        return Result.failure(
+          new Error(`Customer not found: ${command.userId}`)
+        );
       }
 
       // Step 2: Create order for validation
       const order = await this.buildOrder(command, customer);
-      
+
       // Step 3: Apply order validation policies
-      const validationResult = await this.applyOrderValidationPolicies(order, customer, context);
+      const validationResult = await this.applyOrderValidationPolicies(
+        order,
+        customer,
+        context
+      );
       if (validationResult.isFailure()) {
         return Result.failure(validationResult.error);
       }
 
       // Step 4: Apply pricing policies
-      const pricingResult = await this.applyPricingPolicies(order, customer, context);
+      const pricingResult = await this.applyPricingPolicies(
+        order,
+        customer,
+        context
+      );
       if (pricingResult.isFailure()) {
         return Result.failure(pricingResult.error);
       }
 
       // Step 5: Apply discount policies
-      const discountResult = await this.applyDiscountPolicies(order, customer, context);
+      const discountResult = await this.applyDiscountPolicies(
+        order,
+        customer,
+        context
+      );
       if (discountResult.isSuccess()) {
         // Apply discount to order
         order.totalAmount = discountResult.value.adjustedAmount;
       }
 
       // Step 6: Check approval policies
-      const approvalResult = await this.checkApprovalPolicies(order, customer, context);
+      const approvalResult = await this.checkApprovalPolicies(
+        order,
+        customer,
+        context
+      );
       if (approvalResult.isFailure()) {
         return Result.failure(approvalResult.error);
       }
@@ -109,13 +134,14 @@ export class OrderValidationService extends BaseDomainService {
         orderId: savedOrder.id,
         status: savedOrder.status,
         inventoryUpdates: [],
-        notifications: []
+        notifications: [],
       };
 
       return Result.success(result);
-
     } catch (error) {
-      return Result.failure(new Error(`Order validation failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Order validation failed: ${error.message}`)
+      );
     }
   }
 
@@ -123,15 +149,14 @@ export class OrderValidationService extends BaseDomainService {
    * Applies order validation policies
    */
   private async applyOrderValidationPolicies(
-    order: Order, 
-    customer: Customer, 
+    order: Order,
+    customer: Customer,
     context: PolicyContext
   ): Promise<Result<void, Error>> {
-    
     // Get order validation policy
     const policy = this.policyRegistry.resolve({
       domain: 'order-management',
-      id: 'order-validation'
+      id: 'order-validation',
     });
 
     if (!policy) {
@@ -140,11 +165,13 @@ export class OrderValidationService extends BaseDomainService {
 
     // Execute policy
     const result = await policy.check({ entity: order, context });
-    
+
     if (result.isFailure()) {
       const violations = result.error.violations;
       const errorMessages = violations.map(v => v.message).join(', ');
-      return Result.failure(new Error(`Order validation failed: ${errorMessages}`));
+      return Result.failure(
+        new Error(`Order validation failed: ${errorMessages}`)
+      );
     }
 
     return Result.success();
@@ -154,11 +181,10 @@ export class OrderValidationService extends BaseDomainService {
    * Applies pricing policies
    */
   private async applyPricingPolicies(
-    order: Order, 
-    customer: Customer, 
+    order: Order,
+    customer: Customer,
     context: PolicyContext
   ): Promise<Result<void, Error>> {
-    
     // Create dynamic pricing policy
     const pricingPolicy = PolicyBuilder.create<Order>()
       .withId('pricing-validation')
@@ -183,11 +209,13 @@ export class OrderValidationService extends BaseDomainService {
 
     // Execute pricing policy
     const result = await pricingPolicy.check({ entity: order, context });
-    
+
     if (result.isFailure()) {
       const violations = result.error.violations;
       const errorMessages = violations.map(v => v.message).join(', ');
-      return Result.failure(new Error(`Pricing validation failed: ${errorMessages}`));
+      return Result.failure(
+        new Error(`Pricing validation failed: ${errorMessages}`)
+      );
     }
 
     return Result.success();
@@ -197,13 +225,14 @@ export class OrderValidationService extends BaseDomainService {
    * Applies discount policies
    */
   private async applyDiscountPolicies(
-    order: Order, 
-    customer: Customer, 
+    order: Order,
+    customer: Customer,
     context: PolicyContext
-  ): Promise<Result<{ adjustedAmount: number; discountApplied: number }, Error>> {
-    
+  ): Promise<
+    Result<{ adjustedAmount: number; discountApplied: number }, Error>
+  > {
     let discountPercentage = 0;
-    
+
     // Loyalty discount policy
     const loyaltyPolicy = PolicyBuilder.create<Customer>()
       .withId('loyalty-discount')
@@ -220,12 +249,15 @@ export class OrderValidationService extends BaseDomainService {
       .withMessage('Platinum customer eligible for 15% discount')
       .build();
 
-    const loyaltyResult = await loyaltyPolicy.check({ entity: customer, context });
-    
+    const loyaltyResult = await loyaltyPolicy.check({
+      entity: customer,
+      context,
+    });
+
     if (loyaltyResult.isSuccess()) {
       switch (customer.loyaltyLevel) {
         case LoyaltyLevel.GOLD:
-          discountPercentage = 0.10;
+          discountPercentage = 0.1;
           break;
         case LoyaltyLevel.PLATINUM:
           discountPercentage = 0.15;
@@ -244,8 +276,11 @@ export class OrderValidationService extends BaseDomainService {
       .withMessage('Large order eligible for 5% discount')
       .build();
 
-    const largeOrderResult = await largeOrderPolicy.check({ entity: order, context });
-    
+    const largeOrderResult = await largeOrderPolicy.check({
+      entity: order,
+      context,
+    });
+
     if (largeOrderResult.isSuccess()) {
       discountPercentage = Math.max(discountPercentage, 0.05);
     }
@@ -255,7 +290,7 @@ export class OrderValidationService extends BaseDomainService {
 
     return Result.success({
       adjustedAmount,
-      discountApplied: discountAmount
+      discountApplied: discountAmount,
     });
   }
 
@@ -263,11 +298,10 @@ export class OrderValidationService extends BaseDomainService {
    * Checks approval policies
    */
   private async checkApprovalPolicies(
-    order: Order, 
-    customer: Customer, 
+    order: Order,
+    customer: Customer,
     context: PolicyContext
   ): Promise<Result<void, Error>> {
-    
     // Manager approval policy
     const approvalPolicy = PolicyBuilder.create<Order>()
       .withId('manager-approval')
@@ -278,7 +312,11 @@ export class OrderValidationService extends BaseDomainService {
       .withCode('MANAGER_APPROVAL_REQUIRED')
       .withMessage('Orders over $10,000 require manager approval')
       .withSeverity('ERROR')
-      .when(customer => customer.loyaltyLevel === LoyaltyLevel.BRONZE && order.totalAmount > 2000)
+      .when(
+        customer =>
+          customer.loyaltyLevel === LoyaltyLevel.BRONZE &&
+          order.totalAmount > 2000
+      )
       .then()
       .must(order => this.hasManagerApproval(order, context))
       .withCode('BRONZE_APPROVAL_REQUIRED')
@@ -287,7 +325,7 @@ export class OrderValidationService extends BaseDomainService {
       .build();
 
     const result = await approvalPolicy.check({ entity: order, context });
-    
+
     if (result.isFailure()) {
       const violations = result.error.violations;
       const errorMessages = violations.map(v => v.message).join(', ');
@@ -300,10 +338,16 @@ export class OrderValidationService extends BaseDomainService {
   /**
    * Builds order from command
    */
-  private async buildOrder(command: CreateOrderCommand, customer: Customer): Promise<Order> {
+  private async buildOrder(
+    command: CreateOrderCommand,
+    customer: Customer
+  ): Promise<Order> {
     // Calculate total amount (simplified)
-    const totalAmount = command.items.reduce((sum, item) => sum + (item.quantity * 100), 0);
-    
+    const totalAmount = command.items.reduce(
+      (sum, item) => sum + item.quantity * 100,
+      0
+    );
+
     return {
       id: this.generateOrderId(),
       userId: command.userId,
@@ -311,12 +355,12 @@ export class OrderValidationService extends BaseDomainService {
         productId: item.productId,
         quantity: item.quantity,
         price: 100, // Simplified pricing
-        name: `Product ${item.productId}`
+        name: `Product ${item.productId}`,
       })),
       status: 'pending',
       totalAmount,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -335,7 +379,7 @@ export class OrderValidationService extends BaseDomainService {
     return `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
-```
+````
 
 ## Key Features
 
@@ -344,7 +388,8 @@ export class OrderValidationService extends BaseDomainService {
 - **Dynamic Policies**: Creates policies based on runtime conditions
 - **Conditional Logic**: Uses when/then patterns for complex business logic
 - **Error Handling**: Provides detailed policy violation messages
-- **Validation Layers**: Multiple validation layers (order, pricing, discount, approval)
+- **Validation Layers**: Multiple validation layers (order, pricing, discount,
+  approval)
 
 ## Common Pitfalls
 
@@ -358,4 +403,5 @@ export class OrderValidationService extends BaseDomainService {
 
 - [Event-Driven Domain Service](./example-1.md) - Event-driven patterns
 - [Cross-Aggregate Domain Service](./example-3.md) - Advanced coordination
-- [Business Policy examples](../../policies/examples/) - Policy creation patterns
+- [Business Policy examples](../../policies/examples/) - Policy creation
+  patterns

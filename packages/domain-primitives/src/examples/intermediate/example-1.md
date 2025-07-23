@@ -7,7 +7,9 @@
 
 ## Overview
 
-Advanced error hierarchies provide structured error handling with categorization, severity levels, and rich context propagation. This enables sophisticated error handling strategies and better system observability.
+Advanced error hierarchies provide structured error handling with
+categorization, severity levels, and rich context propagation. This enables
+sophisticated error handling strategies and better system observability.
 
 ## Comprehensive Error Hierarchy
 
@@ -17,7 +19,7 @@ import {
   IDomainError,
   DomainErrorCode,
   ApplicationErrorCode,
-  FrameworkErrorCode
+  FrameworkErrorCode,
 } from '@vytches-ddd/domain-primitives';
 import { ErrorContext } from '../types';
 
@@ -29,7 +31,7 @@ export abstract class ApplicationError extends BaseError {
   abstract readonly category: ErrorCategory;
   abstract readonly severity: ErrorSeverity;
   abstract readonly retryable: boolean;
-  
+
   constructor(
     message: string,
     public readonly context?: ErrorContext
@@ -46,7 +48,7 @@ export abstract class ApplicationError extends BaseError {
       retryable: this.retryable,
       context: this.context,
       timestamp: new Date(),
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -58,14 +60,14 @@ export enum ErrorCategory {
   EXTERNAL_SERVICE = 'external_service',
   INFRASTRUCTURE = 'infrastructure',
   CONCURRENCY = 'concurrency',
-  DATA_INTEGRITY = 'data_integrity'
+  DATA_INTEGRITY = 'data_integrity',
 }
 
 export enum ErrorSeverity {
-  LOW = 'low',        // Log only
-  MEDIUM = 'medium',  // Alert ops team
-  HIGH = 'high',      // Page on-call
-  CRITICAL = 'critical' // All hands
+  LOW = 'low', // Log only
+  MEDIUM = 'medium', // Alert ops team
+  HIGH = 'high', // Page on-call
+  CRITICAL = 'critical', // All hands
 }
 
 // ==================
@@ -155,11 +157,7 @@ export class EntityValidationError extends ValidationError {
     errors: ValidationErrorDetail[],
     context?: ErrorContext
   ) {
-    super(
-      `Validation failed for ${entityType}`,
-      errors,
-      context
-    );
+    super(`Validation failed for ${entityType}`, errors, context);
   }
 }
 
@@ -171,11 +169,7 @@ export class CommandValidationError extends ValidationError {
     errors: ValidationErrorDetail[],
     context?: ErrorContext
   ) {
-    super(
-      `Invalid command: ${commandName}`,
-      errors,
-      context
-    );
+    super(`Invalid command: ${commandName}`, errors, context);
   }
 }
 
@@ -185,7 +179,7 @@ export class CommandValidationError extends ValidationError {
 
 export abstract class ExternalServiceError extends ApplicationError {
   readonly category = ErrorCategory.EXTERNAL_SERVICE;
-  
+
   constructor(
     message: string,
     public readonly service: string,
@@ -462,13 +456,13 @@ class BusinessRuleErrorHandler implements ErrorHandler {
     console.error('Business rule violated:', {
       rule: error.rule,
       domain: error.domain,
-      message: error.message
+      message: error.message,
     });
 
     return {
       handled: true,
       retry: false,
-      userMessage: `Business rule violation: ${error.message}`
+      userMessage: `Business rule violation: ${error.message}`,
     };
   }
 }
@@ -483,7 +477,7 @@ class ValidationErrorHandler implements ErrorHandler {
     return {
       handled: true,
       retry: false,
-      userMessage: `Validation failed: ${fieldErrors}`
+      userMessage: `Validation failed: ${fieldErrors}`,
     };
   }
 }
@@ -496,7 +490,7 @@ class ExternalServiceErrorHandler implements ErrorHandler {
         handled: true,
         retry: true,
         fallbackAction: 'use_cache',
-        userMessage: 'Service temporarily unavailable. Using cached data.'
+        userMessage: 'Service temporarily unavailable. Using cached data.',
       };
     }
 
@@ -505,14 +499,14 @@ class ExternalServiceErrorHandler implements ErrorHandler {
       return {
         handled: true,
         retry: true,
-        userMessage: `Rate limit exceeded. Try again in ${Math.ceil(waitTime / 1000)} seconds.`
+        userMessage: `Rate limit exceeded. Try again in ${Math.ceil(waitTime / 1000)} seconds.`,
       };
     }
 
     return {
       handled: true,
       retry: error.retryable,
-      userMessage: 'External service error. Please try again later.'
+      userMessage: 'External service error. Please try again later.',
     };
   }
 }
@@ -529,7 +523,7 @@ class InfrastructureErrorHandler implements ErrorHandler {
       handled: true,
       retry: error.recoverable,
       fallbackAction: 'graceful_degradation',
-      userMessage: 'System issue detected. Our team has been notified.'
+      userMessage: 'System issue detected. Our team has been notified.',
     };
   }
 }
@@ -540,7 +534,8 @@ class ConcurrencyErrorHandler implements ErrorHandler {
       return {
         handled: true,
         retry: true,
-        userMessage: 'The data has been modified. Please refresh and try again.'
+        userMessage:
+          'The data has been modified. Please refresh and try again.',
       };
     }
 
@@ -552,14 +547,14 @@ class ConcurrencyErrorHandler implements ErrorHandler {
       return {
         handled: true,
         retry: true,
-        userMessage: `Resource is currently in use.${waitMessage}`
+        userMessage: `Resource is currently in use.${waitMessage}`,
       };
     }
 
     return {
       handled: true,
       retry: true,
-      userMessage: 'Resource conflict. Please try again.'
+      userMessage: 'Resource conflict. Please try again.',
     };
   }
 }
@@ -567,11 +562,11 @@ class ConcurrencyErrorHandler implements ErrorHandler {
 class DefaultErrorHandler implements ErrorHandler {
   async handle(error: Error): Promise<ErrorHandlingResult> {
     console.error('Unhandled error:', error);
-    
+
     return {
       handled: false,
       retry: false,
-      userMessage: 'An unexpected error occurred. Please contact support.'
+      userMessage: 'An unexpected error occurred. Please contact support.',
     };
   }
 }
@@ -595,7 +590,7 @@ export class OrderProcessingService {
     try {
       // Validate order invariants
       const order = await this.loadOrder(orderId);
-      
+
       if (order.total <= 0) {
         throw new InvariantViolationError(
           'Order',
@@ -617,10 +612,9 @@ export class OrderProcessingService {
 
       // Process payment
       await this.processPayment(order);
-
     } catch (error) {
       const result = await this.errorHandler.handle(error as Error);
-      
+
       if (result.retry) {
         // Implement retry logic
         console.log('Retrying operation...');
@@ -644,7 +638,7 @@ export class OrderProcessingService {
       errors.push({
         field: 'customerId',
         constraint: 'required',
-        message: 'Customer ID is required'
+        message: 'Customer ID is required',
       });
     }
 
@@ -653,7 +647,7 @@ export class OrderProcessingService {
         field: 'items',
         constraint: 'minLength',
         message: 'At least one item is required',
-        value: order.items
+        value: order.items,
       });
     }
 
@@ -666,7 +660,7 @@ export class OrderProcessingService {
     try {
       // Simulate external call
       const response = await this.paymentGateway.charge(order);
-      
+
       if (response.status === 503) {
         throw new ServiceUnavailableError(
           'PaymentGateway',
@@ -685,12 +679,11 @@ export class OrderProcessingService {
           { correlationId: this.getCorrelationId() }
         );
       }
-
     } catch (error) {
       if (error instanceof ApplicationError) {
         throw error;
       }
-      
+
       // Wrap unknown errors
       throw new ExternalServiceError(
         `Payment processing failed: ${(error as Error).message}`,
@@ -720,7 +713,7 @@ export class OrderProcessingService {
   }
 
   private paymentGateway = {
-    charge: async (order: any) => ({ status: 200 })
+    charge: async (order: any) => ({ status: 200 }),
   };
 }
 ```
@@ -774,14 +767,17 @@ export class ErrorAggregator {
         critical: this.getBySeverity(ErrorSeverity.CRITICAL).length,
         high: this.getBySeverity(ErrorSeverity.HIGH).length,
         medium: this.getBySeverity(ErrorSeverity.MEDIUM).length,
-        low: this.getBySeverity(ErrorSeverity.LOW).length
+        low: this.getBySeverity(ErrorSeverity.LOW).length,
       },
-      byCategory: Object.values(ErrorCategory).reduce((acc, category) => {
-        acc[category] = this.getByCategory(category).length;
-        return acc;
-      }, {} as Record<ErrorCategory, number>),
+      byCategory: Object.values(ErrorCategory).reduce(
+        (acc, category) => {
+          acc[category] = this.getByCategory(category).length;
+          return acc;
+        },
+        {} as Record<ErrorCategory, number>
+      ),
       retryable: this.getRetryableErrors().length,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -798,7 +794,8 @@ interface ErrorReport {
 ## Key Benefits
 
 1. **Structured Classification**: Errors are organized by category and severity
-2. **Automatic Handling**: Category-specific handlers manage different error types
+2. **Automatic Handling**: Category-specific handlers manage different error
+   types
 3. **Rich Context**: Errors carry detailed information for debugging
 4. **Retry Logic**: Built-in support for retryable operations
 5. **Severity Actions**: Automatic escalation based on error severity

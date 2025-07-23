@@ -1,36 +1,41 @@
 # AI-Enhanced Resilience with Machine Learning
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/resilience
-**Complexity**: Advanced
-**Domain**: AI-Driven Operations
-**Patterns**: Machine Learning Integration, Predictive Analytics, Adaptive Intelligence
-**Dependencies**: @vytches-ddd/resilience
+**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Advanced
+**Domain**: AI-Driven Operations **Patterns**: Machine Learning Integration,
+Predictive Analytics, Adaptive Intelligence **Dependencies**:
+@vytches-ddd/resilience
 
 ## Description
 
-This example demonstrates AI-enhanced resilience patterns that use machine learning to predict failures, optimize configurations, and automatically adapt to changing system conditions. The system learns from historical data to provide intelligent resilience management.
+This example demonstrates AI-enhanced resilience patterns that use machine
+learning to predict failures, optimize configurations, and automatically adapt
+to changing system conditions. The system learns from historical data to provide
+intelligent resilience management.
 
 ## Business Context
 
-A high-traffic SaaS platform serves millions of users across diverse geographic regions with varying usage patterns. Traditional static resilience configurations cannot adapt to the dynamic nature of user behavior, seasonal traffic patterns, and evolving infrastructure. ML-enhanced resilience provides intelligent adaptation and predictive protection.
+A high-traffic SaaS platform serves millions of users across diverse geographic
+regions with varying usage patterns. Traditional static resilience
+configurations cannot adapt to the dynamic nature of user behavior, seasonal
+traffic patterns, and evolving infrastructure. ML-enhanced resilience provides
+intelligent adaptation and predictive protection.
 
 ## Code Example
 
 ```typescript
 // ai-enhanced-resilience-manager.ts
-import { 
+import {
   AIResilienceManager,
   MachineLearningPredictor,
   AdaptiveConfiguration,
   PatternAnalyzer,
-  AnomalyDetector 
+  AnomalyDetector,
 } from '@vytches-ddd/resilience';
-import { 
+import {
   Customer,
   SystemMetrics,
   TrafficPattern,
-  PerformanceData 
+  PerformanceData,
 } from './types'; // From your application
 
 // AI-enhanced resilience with machine learning capabilities
@@ -41,7 +46,7 @@ export class AIEnhancedResilienceManager {
   private adaptiveConfigurator: AdaptiveConfiguration;
   private historicalDataStore: HistoricalDataStore;
   private realTimeAnalyzer: RealTimeAnalyzer;
-  
+
   constructor() {
     this.mlPredictor = new MachineLearningPredictor();
     this.patternAnalyzer = new PatternAnalyzer();
@@ -49,7 +54,7 @@ export class AIEnhancedResilienceManager {
     this.adaptiveConfigurator = new AdaptiveConfiguration();
     this.historicalDataStore = new HistoricalDataStore();
     this.realTimeAnalyzer = new RealTimeAnalyzer();
-    
+
     this.initializeMLModels();
     this.startContinuousLearning();
     this.startPredictiveAnalysis();
@@ -66,19 +71,23 @@ export class AIEnhancedResilienceManager {
       serviceId,
       operationContext
     );
-    
+
     // Adaptive configuration based on prediction
-    const optimizedConfig = await this.adaptiveConfigurator.optimizeForOperation(
-      serviceId,
-      prediction,
-      operationContext
-    );
-    
+    const optimizedConfig =
+      await this.adaptiveConfigurator.optimizeForOperation(
+        serviceId,
+        prediction,
+        operationContext
+      );
+
     // Apply AI-optimized resilience strategy
-    const aiStrategy = await this.createAIOptimizedStrategy(serviceId, optimizedConfig);
-    
+    const aiStrategy = await this.createAIOptimizedStrategy(
+      serviceId,
+      optimizedConfig
+    );
+
     const startTime = Date.now();
-    
+
     try {
       // Execute with AI-enhanced monitoring
       const result = await this.executeWithIntelligentMonitoring(
@@ -87,16 +96,25 @@ export class AIEnhancedResilienceManager {
         operationContext,
         prediction
       );
-      
+
       // Learn from successful execution
-      await this.learnFromSuccess(serviceId, operationContext, result, Date.now() - startTime);
-      
+      await this.learnFromSuccess(
+        serviceId,
+        operationContext,
+        result,
+        Date.now() - startTime
+      );
+
       return result;
-      
     } catch (error) {
       // Learn from failure and adapt
-      await this.learnFromFailure(serviceId, operationContext, error, Date.now() - startTime);
-      
+      await this.learnFromFailure(
+        serviceId,
+        operationContext,
+        error,
+        Date.now() - startTime
+      );
+
       // Attempt AI-driven recovery
       const recoveryResult = await this.attemptIntelligentRecovery(
         serviceId,
@@ -104,11 +122,11 @@ export class AIEnhancedResilienceManager {
         operationContext,
         error
       );
-      
+
       if (recoveryResult.success) {
         return recoveryResult.result;
       }
-      
+
       throw error;
     }
   }
@@ -120,24 +138,23 @@ export class AIEnhancedResilienceManager {
     prediction: OperationPrediction
   ): Promise<T> {
     const monitoringSession = await this.realTimeAnalyzer.startSession(context);
-    
+
     try {
       // Real-time anomaly detection during execution
       monitoringSession.enableAnomalyDetection({
         responseTimeThreshold: prediction.expectedResponseTime * 1.5,
         errorRateThreshold: prediction.expectedErrorRate * 2,
-        customMetrics: prediction.watchMetrics
+        customMetrics: prediction.watchMetrics,
       });
-      
+
       // Execute with dynamic strategy adjustment
       const result = await strategy.execute(operation, context);
-      
+
       // Analyze execution patterns
       const executionMetrics = monitoringSession.getMetrics();
       await this.patternAnalyzer.analyzeExecutionPattern(executionMetrics);
-      
+
       return result;
-      
     } finally {
       await monitoringSession.close();
     }
@@ -150,55 +167,71 @@ export class AIEnhancedResilienceManager {
     error: Error
   ): Promise<RecoveryResult<T>> {
     console.log(`Attempting AI-driven recovery for service: ${serviceId}`);
-    
+
     // Analyze failure pattern
-    const failureAnalysis = await this.analyzeFailurePattern(serviceId, error, context);
-    
-    // Generate recovery strategies using ML
-    const recoveryStrategies = await this.mlPredictor.generateRecoveryStrategies(
-      failureAnalysis,
+    const failureAnalysis = await this.analyzeFailurePattern(
+      serviceId,
+      error,
       context
     );
-    
+
+    // Generate recovery strategies using ML
+    const recoveryStrategies =
+      await this.mlPredictor.generateRecoveryStrategies(
+        failureAnalysis,
+        context
+      );
+
     // Sort strategies by predicted success probability
-    const sortedStrategies = recoveryStrategies.sort((a, b) => 
-      b.successProbability - a.successProbability
+    const sortedStrategies = recoveryStrategies.sort(
+      (a, b) => b.successProbability - a.successProbability
     );
-    
+
     // Try recovery strategies in order of likelihood
     for (const strategy of sortedStrategies) {
       if (strategy.successProbability < 0.3) {
         break; // Don't try strategies with low success probability
       }
-      
+
       try {
-        console.log(`Trying recovery strategy: ${strategy.name} (${(strategy.successProbability * 100).toFixed(1)}% chance)`);
-        
+        console.log(
+          `Trying recovery strategy: ${strategy.name} (${(strategy.successProbability * 100).toFixed(1)}% chance)`
+        );
+
         // Apply recovery strategy configuration
-        const recoveryConfig = await this.adaptiveConfigurator.createRecoveryConfiguration(strategy);
-        const recoveryStrategy = await this.createAIOptimizedStrategy(serviceId, recoveryConfig);
-        
+        const recoveryConfig =
+          await this.adaptiveConfigurator.createRecoveryConfiguration(strategy);
+        const recoveryStrategy = await this.createAIOptimizedStrategy(
+          serviceId,
+          recoveryConfig
+        );
+
         // Attempt recovery with shorter timeout
         const recoveryContext = {
           ...context,
           timeout: strategy.recommendedTimeout,
-          retryAttempt: (context.retryAttempt || 0) + 1
+          retryAttempt: (context.retryAttempt || 0) + 1,
         };
-        
-        const result = await recoveryStrategy.execute(operation, recoveryContext);
-        
+
+        const result = await recoveryStrategy.execute(
+          operation,
+          recoveryContext
+        );
+
         // Learn from successful recovery
         await this.learnFromRecovery(serviceId, strategy, context, true);
-        
+
         return { success: true, result, strategy: strategy.name };
-        
       } catch (recoveryError) {
-        console.warn(`Recovery strategy ${strategy.name} failed:`, recoveryError);
+        console.warn(
+          `Recovery strategy ${strategy.name} failed:`,
+          recoveryError
+        );
         await this.learnFromRecovery(serviceId, strategy, context, false);
         continue;
       }
     }
-    
+
     return { success: false, strategy: 'none' };
   }
 
@@ -208,25 +241,28 @@ export class AIEnhancedResilienceManager {
     context: OperationContext
   ): Promise<FailureAnalysis> {
     // Get historical failure data
-    const historicalFailures = await this.historicalDataStore.getFailures(serviceId, {
-      timeRange: 7 * 24 * 60 * 60 * 1000, // 7 days
-      limit: 1000
-    });
-    
+    const historicalFailures = await this.historicalDataStore.getFailures(
+      serviceId,
+      {
+        timeRange: 7 * 24 * 60 * 60 * 1000, // 7 days
+        limit: 1000,
+      }
+    );
+
     // Analyze failure patterns
     const patterns = await this.patternAnalyzer.analyzeFailurePatterns(
       historicalFailures,
       error,
       context
     );
-    
+
     // Detect anomalies in current failure
     const anomalies = await this.anomalyDetector.detectFailureAnomalies(
       error,
       context,
       patterns
     );
-    
+
     return {
       errorType: this.classifyError(error),
       frequency: patterns.frequency,
@@ -235,7 +271,7 @@ export class AIEnhancedResilienceManager {
       anomalies,
       similarFailures: patterns.similarFailures,
       environmentalFactors: await this.getEnvironmentalFactors(context),
-      timeToRecovery: patterns.averageRecoveryTime
+      timeToRecovery: patterns.averageRecoveryTime,
     };
   }
 
@@ -252,12 +288,12 @@ export class AIEnhancedResilienceManager {
         'request-volume',
         'time-of-day',
         'day-of-week',
-        'seasonal-factor'
+        'seasonal-factor',
       ],
       targetVariable: 'failure-probability',
-      trainingDataDays: 30
+      trainingDataDays: 30,
     });
-    
+
     // Initialize performance optimization model
     this.mlPredictor.initializeModel('performance-optimization', {
       algorithm: 'neural-network',
@@ -267,12 +303,12 @@ export class AIEnhancedResilienceManager {
         'timeout-duration',
         'bulkhead-capacity',
         'current-load',
-        'historical-performance'
+        'historical-performance',
       ],
       targetVariable: 'optimal-configuration',
-      trainingDataDays: 14
+      trainingDataDays: 14,
     });
-    
+
     // Initialize anomaly detection model
     this.anomalyDetector.initializeModel({
       algorithm: 'isolation-forest',
@@ -280,9 +316,9 @@ export class AIEnhancedResilienceManager {
         'response-time-distribution',
         'error-rate-pattern',
         'throughput-variation',
-        'resource-usage-pattern'
+        'resource-usage-pattern',
       ],
-      sensitivityLevel: 0.8
+      sensitivityLevel: 0.8,
     });
   }
 
@@ -294,19 +330,27 @@ export class AIEnhancedResilienceManager {
         const recentData = await this.historicalDataStore.getRecentData({
           timeRange: 60 * 60 * 1000, // Last hour
           includeSuccesses: true,
-          includeFailures: true
+          includeFailures: true,
         });
-        
-        if (recentData.length > 100) { // Enough data for learning
+
+        if (recentData.length > 100) {
+          // Enough data for learning
           // Update failure prediction model
-          await this.mlPredictor.incrementalTraining('failure-prediction', recentData);
-          
+          await this.mlPredictor.incrementalTraining(
+            'failure-prediction',
+            recentData
+          );
+
           // Update performance optimization model
-          await this.mlPredictor.incrementalTraining('performance-optimization', recentData);
-          
-          console.log(`ML models updated with ${recentData.length} new data points`);
+          await this.mlPredictor.incrementalTraining(
+            'performance-optimization',
+            recentData
+          );
+
+          console.log(
+            `ML models updated with ${recentData.length} new data points`
+          );
         }
-        
       } catch (error) {
         console.error('Continuous learning failed:', error);
       }
@@ -318,21 +362,23 @@ export class AIEnhancedResilienceManager {
     setInterval(async () => {
       try {
         const services = await this.getMonitoredServices();
-        
+
         for (const serviceId of services) {
           // Predict potential issues in next 30 minutes
-          const predictions = await this.mlPredictor.predictNearTermFailures(serviceId, {
-            timeHorizon: 30 * 60 * 1000, // 30 minutes
-            confidenceThreshold: 0.7
-          });
-          
+          const predictions = await this.mlPredictor.predictNearTermFailures(
+            serviceId,
+            {
+              timeHorizon: 30 * 60 * 1000, // 30 minutes
+              confidenceThreshold: 0.7,
+            }
+          );
+
           for (const prediction of predictions) {
             if (prediction.confidence > 0.8 && prediction.severity === 'high') {
               await this.applyProactiveIntervention(serviceId, prediction);
             }
           }
         }
-        
       } catch (error) {
         console.error('Predictive analysis failed:', error);
       }
@@ -344,26 +390,32 @@ export class AIEnhancedResilienceManager {
     setInterval(async () => {
       try {
         const services = await this.getMonitoredServices();
-        
+
         for (const serviceId of services) {
           // Analyze recent performance and optimize configuration
-          const performanceData = await this.getRecentPerformanceData(serviceId);
+          const performanceData =
+            await this.getRecentPerformanceData(serviceId);
           const currentConfig = await this.getCurrentConfiguration(serviceId);
-          
+
           // Use ML to suggest optimized configuration
           const optimizedConfig = await this.mlPredictor.optimizeConfiguration(
             serviceId,
             performanceData,
             currentConfig
           );
-          
+
           // Apply configuration if improvement is significant
-          if (optimizedConfig.improvementScore > 0.15) { // 15% improvement threshold
-            await this.adaptiveConfigurator.applyConfiguration(serviceId, optimizedConfig);
-            console.log(`Applied ML-optimized configuration for ${serviceId} (${(optimizedConfig.improvementScore * 100).toFixed(1)}% improvement expected)`);
+          if (optimizedConfig.improvementScore > 0.15) {
+            // 15% improvement threshold
+            await this.adaptiveConfigurator.applyConfiguration(
+              serviceId,
+              optimizedConfig
+            );
+            console.log(
+              `Applied ML-optimized configuration for ${serviceId} (${(optimizedConfig.improvementScore * 100).toFixed(1)}% improvement expected)`
+            );
           }
         }
-        
       } catch (error) {
         console.error('Adaptive optimization failed:', error);
       }
@@ -374,23 +426,37 @@ export class AIEnhancedResilienceManager {
     serviceId: string,
     prediction: FailurePrediction
   ): Promise<void> {
-    console.log(`🔮 Applying proactive intervention for ${serviceId}: ${prediction.type}`);
-    
+    console.log(
+      `🔮 Applying proactive intervention for ${serviceId}: ${prediction.type}`
+    );
+
     switch (prediction.type) {
       case 'circuit-breaker-likely-to-open':
-        await this.preemptivelyTightenCircuitBreaker(serviceId, prediction.recommendedAdjustment);
+        await this.preemptivelyTightenCircuitBreaker(
+          serviceId,
+          prediction.recommendedAdjustment
+        );
         break;
-        
+
       case 'timeout-storm-incoming':
-        await this.preemptivelyIncreaseTimeouts(serviceId, prediction.recommendedTimeout);
+        await this.preemptivelyIncreaseTimeouts(
+          serviceId,
+          prediction.recommendedTimeout
+        );
         break;
-        
+
       case 'resource-exhaustion-predicted':
-        await this.preemptivelyActivateBulkhead(serviceId, prediction.recommendedCapacity);
+        await this.preemptivelyActivateBulkhead(
+          serviceId,
+          prediction.recommendedCapacity
+        );
         break;
-        
+
       case 'cascade-failure-risk':
-        await this.preemptivelyIsolateDependencies(serviceId, prediction.riskyDependencies);
+        await this.preemptivelyIsolateDependencies(
+          serviceId,
+          prediction.riskyDependencies
+        );
         break;
     }
   }
@@ -408,11 +474,11 @@ export class AIEnhancedResilienceManager {
       duration,
       timestamp: new Date(),
       environmentalFactors: await this.getEnvironmentalFactors(context),
-      configuration: await this.getCurrentConfiguration(serviceId)
+      configuration: await this.getCurrentConfiguration(serviceId),
     };
-    
+
     await this.historicalDataStore.recordSuccess(successData);
-    
+
     // Update ML models with positive outcome
     await this.mlPredictor.recordPositiveOutcome(serviceId, successData);
   }
@@ -429,19 +495,19 @@ export class AIEnhancedResilienceManager {
       error: {
         message: error.message,
         type: error.constructor.name,
-        stack: error.stack
+        stack: error.stack,
       },
       duration,
       timestamp: new Date(),
       environmentalFactors: await this.getEnvironmentalFactors(context),
-      configuration: await this.getCurrentConfiguration(serviceId)
+      configuration: await this.getCurrentConfiguration(serviceId),
     };
-    
+
     await this.historicalDataStore.recordFailure(failureData);
-    
+
     // Update ML models with negative outcome
     await this.mlPredictor.recordNegativeOutcome(serviceId, failureData);
-    
+
     // Trigger immediate pattern analysis for similar failures
     await this.patternAnalyzer.analyzeFailureImmediate(failureData);
   }
@@ -453,107 +519,121 @@ export class AIEnhancedResilienceManager {
       recentPredictions: this.mlPredictor.getRecentPredictions(serviceId),
       detectedPatterns: this.patternAnalyzer.getDetectedPatterns(serviceId),
       anomalies: this.anomalyDetector.getRecentAnomalies(serviceId),
-      optimizationImpact: this.adaptiveConfigurator.getOptimizationImpact(serviceId),
+      optimizationImpact:
+        this.adaptiveConfigurator.getOptimizationImpact(serviceId),
       learningStats: this.getModelLearningStats(),
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     };
-    
+
     return insights;
   }
 
   async retrainModels(serviceId?: string): Promise<ModelRetrainingResult> {
-    console.log(`🤖 Retraining ML models${serviceId ? ` for ${serviceId}` : ' globally'}`);
-    
+    console.log(
+      `🤖 Retraining ML models${serviceId ? ` for ${serviceId}` : ' globally'}`
+    );
+
     const trainingData = await this.historicalDataStore.getTrainingData({
       serviceId,
       timeRange: 30 * 24 * 60 * 60 * 1000, // 30 days
-      minSamples: 1000
+      minSamples: 1000,
     });
-    
+
     const results = await Promise.all([
       this.mlPredictor.retrain('failure-prediction', trainingData),
       this.mlPredictor.retrain('performance-optimization', trainingData),
-      this.anomalyDetector.retrain(trainingData)
+      this.anomalyDetector.retrain(trainingData),
     ]);
-    
+
     return {
       modelsRetrained: results.length,
       accuracyImprovements: results.map(r => r.accuracyImprovement),
       trainingDataSize: trainingData.length,
       retrainingTime: Date.now(),
-      nextScheduledRetraining: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      nextScheduledRetraining: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     };
   }
 
-  async explainPrediction(serviceId: string, operationContext: OperationContext): Promise<PredictionExplanation> {
-    const prediction = await this.mlPredictor.predictOperationOutcome(serviceId, operationContext);
-    
+  async explainPrediction(
+    serviceId: string,
+    operationContext: OperationContext
+  ): Promise<PredictionExplanation> {
+    const prediction = await this.mlPredictor.predictOperationOutcome(
+      serviceId,
+      operationContext
+    );
+
     const explanation = await this.mlPredictor.explainPrediction(prediction, {
       includeFeatureImportance: true,
       includeConfidenceInterval: true,
-      includeAlternativeScenarios: true
+      includeAlternativeScenarios: true,
     });
-    
+
     return {
       prediction,
       explanation,
       topInfluencingFactors: explanation.featureImportance.slice(0, 5),
       confidenceLevel: explanation.confidence,
       alternativeOutcomes: explanation.alternatives,
-      recommendedActions: this.generateRecommendedActions(explanation)
+      recommendedActions: this.generateRecommendedActions(explanation),
     };
   }
 
   private generateRecommendedActions(explanation: any): string[] {
     const actions = [];
-    
+
     // Generate actions based on top influencing factors
     explanation.featureImportance.slice(0, 3).forEach((factor: any) => {
       if (factor.impact > 0.2) {
         actions.push(this.getActionForFactor(factor.name, factor.impact));
       }
     });
-    
+
     return actions;
   }
 
   private getActionForFactor(factorName: string, impact: number): string {
     const factorActions: Record<string, (impact: number) => string> = {
-      'service-response-time': (impact) => 
+      'service-response-time': impact =>
         `Monitor response time closely - ${(impact * 100).toFixed(1)}% impact on prediction`,
-      'error-rate': (impact) => 
+      'error-rate': impact =>
         `Investigate error patterns - ${(impact * 100).toFixed(1)}% impact on prediction`,
-      'current-load': (impact) => 
+      'current-load': impact =>
         `Consider load balancing adjustments - ${(impact * 100).toFixed(1)}% impact on prediction`,
-      'time-of-day': (impact) => 
-        `Apply time-based configuration - ${(impact * 100).toFixed(1)}% impact on prediction`
+      'time-of-day': impact =>
+        `Apply time-based configuration - ${(impact * 100).toFixed(1)}% impact on prediction`,
     };
-    
-    return factorActions[factorName]?.(impact) || 
-           `Monitor ${factorName} - ${(impact * 100).toFixed(1)}% impact on prediction`;
+
+    return (
+      factorActions[factorName]?.(impact) ||
+      `Monitor ${factorName} - ${(impact * 100).toFixed(1)}% impact on prediction`
+    );
   }
 }
 
 // AI-specific supporting classes
 class MachineLearningPredictor {
   private models: Map<string, MLModel> = new Map();
-  
-  async predictOperationOutcome(serviceId: string, context: OperationContext): Promise<OperationPrediction> {
+
+  async predictOperationOutcome(
+    serviceId: string,
+    context: OperationContext
+  ): Promise<OperationPrediction> {
     const model = this.models.get('failure-prediction');
     if (!model) throw new Error('Failure prediction model not initialized');
-    
+
     const features = this.extractFeatures(serviceId, context);
     const prediction = await model.predict(features);
-    
+
     return {
       failureProbability: prediction.probability,
       expectedResponseTime: prediction.responseTime,
       expectedErrorRate: prediction.errorRate,
       confidence: prediction.confidence,
-      watchMetrics: prediction.watchMetrics
+      watchMetrics: prediction.watchMetrics,
     };
   }
-  
+
   async generateRecoveryStrategies(
     failureAnalysis: FailureAnalysis,
     context: OperationContext
@@ -564,26 +644,29 @@ class MachineLearningPredictor {
         name: 'exponential-backoff-retry',
         successProbability: 0.7,
         recommendedTimeout: 5000,
-        description: 'Retry with exponential backoff'
+        description: 'Retry with exponential backoff',
       },
       {
         name: 'circuit-breaker-reset',
         successProbability: 0.5,
         recommendedTimeout: 3000,
-        description: 'Force circuit breaker reset'
+        description: 'Force circuit breaker reset',
       },
       {
         name: 'alternative-endpoint',
         successProbability: 0.8,
         recommendedTimeout: 4000,
-        description: 'Use alternative service endpoint'
-      }
+        description: 'Use alternative service endpoint',
+      },
     ];
-    
+
     return strategies;
   }
-  
-  private extractFeatures(serviceId: string, context: OperationContext): MLFeatures {
+
+  private extractFeatures(
+    serviceId: string,
+    context: OperationContext
+  ): MLFeatures {
     return {
       serviceResponseTime: context.averageResponseTime || 0,
       errorRate: context.recentErrorRate || 0,
@@ -593,13 +676,15 @@ class MachineLearningPredictor {
       requestVolume: context.currentLoad || 0,
       timeOfDay: new Date().getHours(),
       dayOfWeek: new Date().getDay(),
-      seasonalFactor: this.calculateSeasonalFactor()
+      seasonalFactor: this.calculateSeasonalFactor(),
     };
   }
-  
+
   private calculateSeasonalFactor(): number {
     const now = new Date();
-    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+    const dayOfYear = Math.floor(
+      (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
+    );
     return Math.sin((2 * Math.PI * dayOfYear) / 365);
   }
 }
@@ -618,8 +703,8 @@ async function processOrderWithAI(orderId: string) {
     systemMetrics: {
       cpuUsage: 0.65,
       memoryUsage: 0.72,
-      networkLatency: 45
-    }
+      networkLatency: 45,
+    },
   };
 
   try {
@@ -635,15 +720,17 @@ async function processOrderWithAI(orderId: string) {
 
     console.log('Order processed with AI resilience:', result);
     return result;
-
   } catch (error) {
     console.error('Order processing failed:', error);
-    
+
     // Get AI explanation for the failure
-    const explanation = await aiResilience.explainPrediction('order-service', operationContext);
+    const explanation = await aiResilience.explainPrediction(
+      'order-service',
+      operationContext
+    );
     console.log('AI Explanation:', explanation.topInfluencingFactors);
     console.log('Recommended Actions:', explanation.recommendedActions);
-    
+
     throw error;
   }
 }
@@ -655,7 +742,7 @@ setInterval(() => {
     modelAccuracy: `${(insights.modelAccuracy * 100).toFixed(1)}%`,
     recentPredictions: insights.recentPredictions.length,
     detectedPatterns: insights.detectedPatterns.length,
-    anomalies: insights.anomalies.length
+    anomalies: insights.anomalies.length,
   });
 }, 300000); // Every 5 minutes
 

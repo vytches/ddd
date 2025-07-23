@@ -10,28 +10,29 @@
 
 ## Description
 
-Advanced policy management using the Policy Registry pattern in NestJS applications, demonstrating policy versioning, A/B testing, and centralized policy management for enterprise scenarios.
+Advanced policy management using the Policy Registry pattern in NestJS
+applications, demonstrating policy versioning, A/B testing, and centralized
+policy management for enterprise scenarios.
 
 ## Business Context
 
-Large applications need centralized policy management with versioning capabilities, A/B testing for business rules, and dynamic policy resolution based on context. This example shows how to implement enterprise-grade policy registry integration.
+Large applications need centralized policy management with versioning
+capabilities, A/B testing for business rules, and dynamic policy resolution
+based on context. This example shows how to implement enterprise-grade policy
+registry integration.
 
 ## Code Example
 
 ```typescript
 // policy-registry.service.ts - Centralized Policy Management
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { 
-  DomainService, 
-  VytchesDDD, 
-  ServiceLifetime 
-} from '@vytches-ddd/di';
-import { 
+import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import {
   PolicyRegistry,
   PolicyBuilder,
   PolicyCachingBehavior,
   PolicyResult,
-  IPolicy
+  IPolicy,
 } from '@vytches-ddd/policies';
 import { User, Order, PolicyContext } from './types'; // From your application
 
@@ -43,7 +44,7 @@ import { User, Order, PolicyContext } from './types'; // From your application
   serviceId: 'policyRegistryService',
   lifetime: ServiceLifetime.Singleton,
   context: 'PolicyManagement',
-  autoRegister: true
+  autoRegister: true,
 })
 export class PolicyRegistryService implements OnModuleInit {
   private readonly registry: PolicyRegistry;
@@ -59,15 +60,22 @@ export class PolicyRegistryService implements OnModuleInit {
   /**
    * ✅ FOCUS: Dynamic policy resolution based on context
    */
-  async resolvePolicy<T>(domain: string, policyId: string, context: PolicyContext): Promise<IPolicy<T>> {
+  async resolvePolicy<T>(
+    domain: string,
+    policyId: string,
+    context: PolicyContext
+  ): Promise<IPolicy<T>> {
     try {
       // Resolve based on A/B testing or feature flags
-      const resolvedPolicyId = await this.resolvePolicyWithABTesting(policyId, context);
-      
+      const resolvedPolicyId = await this.resolvePolicyWithABTesting(
+        policyId,
+        context
+      );
+
       const policy = this.registry.resolve<T>({
         domain,
         id: resolvedPolicyId,
-        version: await this.determineVersion(context)
+        version: await this.determineVersion(context),
       });
 
       if (!policy) {
@@ -84,24 +92,33 @@ export class PolicyRegistryService implements OnModuleInit {
    * ✅ FOCUS: A/B testing for policy variants
    */
   async validateWithABTesting<T>(
-    domain: string, 
-    policyId: string, 
-    entity: T, 
+    domain: string,
+    policyId: string,
+    entity: T,
     context: PolicyContext
   ): Promise<PolicyResult<T> & { variant: string }> {
     try {
       const variant = await this.getABTestVariant(policyId, context.userId);
       const variantPolicyId = `${policyId}-${variant}`;
 
-      const policy = await this.resolvePolicy<T>(domain, variantPolicyId, context);
+      const policy = await this.resolvePolicy<T>(
+        domain,
+        variantPolicyId,
+        context
+      );
       const result = await policy.check({ entity, context });
 
       // Log A/B testing metrics
-      await this.logABTestingResult(policyId, variant, result.isSuccess(), context);
+      await this.logABTestingResult(
+        policyId,
+        variant,
+        result.isSuccess(),
+        context
+      );
 
       return {
         ...result,
-        variant
+        variant,
       };
     } catch (error) {
       throw new Error(`A/B testing validation failed: ${error.message}`);
@@ -120,7 +137,7 @@ export class PolicyRegistryService implements OnModuleInit {
   ): Promise<void> {
     try {
       const policy = policyFactory();
-      
+
       // Register new version
       this.registry.register({
         id: policyId,
@@ -132,8 +149,8 @@ export class PolicyRegistryService implements OnModuleInit {
         metadata: {
           deployedAt: new Date(),
           deploymentStrategy,
-          deployedBy: 'system'
-        }
+          deployedBy: 'system',
+        },
       });
 
       // Handle deployment strategy
@@ -148,7 +165,6 @@ export class PolicyRegistryService implements OnModuleInit {
           await this.deployImmediate(domain, policyId, version);
           break;
       }
-
     } catch (error) {
       throw new Error(`Policy deployment failed: ${error.message}`);
     }
@@ -157,9 +173,14 @@ export class PolicyRegistryService implements OnModuleInit {
   /**
    * ✅ FOCUS: Policy analytics and performance monitoring
    */
-  async getPolicyAnalytics(domain: string, policyId: string, timeRange: { start: Date; end: Date }) {
+  async getPolicyAnalytics(
+    domain: string,
+    policyId: string,
+    timeRange: { start: Date; end: Date }
+  ) {
     try {
-      const policies = this.registry.findByDomain(domain)
+      const policies = this.registry
+        .findByDomain(domain)
         .filter(p => p.id.includes(policyId));
 
       const analytics = await Promise.all(
@@ -169,7 +190,7 @@ export class PolicyRegistryService implements OnModuleInit {
           executionCount: await this.getExecutionCount(policy.id, timeRange),
           successRate: await this.getSuccessRate(policy.id, timeRange),
           averageLatency: await this.getAverageLatency(policy.id, timeRange),
-          errorRate: await this.getErrorRate(policy.id, timeRange)
+          errorRate: await this.getErrorRate(policy.id, timeRange),
         }))
       );
 
@@ -178,7 +199,8 @@ export class PolicyRegistryService implements OnModuleInit {
         policyId,
         timeRange,
         versions: analytics,
-        recommendations: await this.generateOptimizationRecommendations(analytics)
+        recommendations:
+          await this.generateOptimizationRecommendations(analytics),
       };
     } catch (error) {
       throw new Error(`Policy analytics failed: ${error.message}`);
@@ -190,10 +212,10 @@ export class PolicyRegistryService implements OnModuleInit {
   private async initializePolicies(): Promise<void> {
     // Register user validation policies
     await this.registerUserPolicies();
-    
-    // Register order processing policies  
+
+    // Register order processing policies
     await this.registerOrderPolicies();
-    
+
     // Register A/B testing variants
     await this.registerABTestingVariants();
   }
@@ -230,7 +252,7 @@ export class PolicyRegistryService implements OnModuleInit {
       name: 'User Validation Policy v1.0',
       policy: PolicyCachingBehavior.create(userPolicyV1, { ttl: 300000 }),
       version: '1.0.0',
-      tags: ['stable', 'production']
+      tags: ['stable', 'production'],
     });
 
     this.registry.register({
@@ -239,7 +261,7 @@ export class PolicyRegistryService implements OnModuleInit {
       name: 'User Validation Policy v2.0',
       policy: PolicyCachingBehavior.create(userPolicyV2, { ttl: 300000 }),
       version: '2.0.0',
-      tags: ['beta', 'testing']
+      tags: ['beta', 'testing'],
     });
   }
 
@@ -248,7 +270,7 @@ export class PolicyRegistryService implements OnModuleInit {
       .withId('order-validation')
       .withName('Order Validation Policy')
       .withDomain('order-management')
-      .must(order => order.totalValue >= 10.00)
+      .must(order => order.totalValue >= 10.0)
       .withCode('MINIMUM_ORDER_VALUE')
       .withMessage('Order must be at least $10.00')
       .and()
@@ -263,7 +285,7 @@ export class PolicyRegistryService implements OnModuleInit {
       name: 'Order Validation Policy',
       policy: orderPolicy,
       version: '1.0.0',
-      tags: ['production', 'active']
+      tags: ['production', 'active'],
     });
   }
 
@@ -294,20 +316,23 @@ export class PolicyRegistryService implements OnModuleInit {
       name: 'User Validation Variant A',
       policy: userValidationA,
       version: '1.0.0',
-      tags: ['ab-test', 'variant-a', 'strict']
+      tags: ['ab-test', 'variant-a', 'strict'],
     });
 
     this.registry.register({
-      id: 'user-validation-b', 
+      id: 'user-validation-b',
       domain: 'user-management',
       name: 'User Validation Variant B',
       policy: userValidationB,
       version: '1.0.0',
-      tags: ['ab-test', 'variant-b', 'relaxed']
+      tags: ['ab-test', 'variant-b', 'relaxed'],
     });
   }
 
-  private async resolvePolicyWithABTesting(policyId: string, context: PolicyContext): Promise<string> {
+  private async resolvePolicyWithABTesting(
+    policyId: string,
+    context: PolicyContext
+  ): Promise<string> {
     // Check if this policy has A/B testing enabled
     if (await this.hasABTesting(policyId)) {
       const variant = await this.getABTestVariant(policyId, context.userId);
@@ -328,7 +353,10 @@ export class PolicyRegistryService implements OnModuleInit {
     return ['user-validation'].includes(policyId);
   }
 
-  private async getABTestVariant(policyId: string, userId: string): Promise<string> {
+  private async getABTestVariant(
+    policyId: string,
+    userId: string
+  ): Promise<string> {
     // Simple hash-based A/B testing
     const hash = this.hashUserId(userId);
     return hash % 2 === 0 ? 'a' : 'b';
@@ -338,62 +366,94 @@ export class PolicyRegistryService implements OnModuleInit {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
   }
 
   private async logABTestingResult(
-    policyId: string, 
-    variant: string, 
-    success: boolean, 
+    policyId: string,
+    variant: string,
+    success: boolean,
     context: PolicyContext
   ): Promise<void> {
     // Log for analytics (would integrate with actual analytics service)
-    console.log(`A/B Test: ${policyId}-${variant}, Success: ${success}, User: ${context.userId}`);
+    console.log(
+      `A/B Test: ${policyId}-${variant}, Success: ${success}, User: ${context.userId}`
+    );
   }
 
-  private async deployCanary(domain: string, policyId: string, version: string): Promise<void> {
+  private async deployCanary(
+    domain: string,
+    policyId: string,
+    version: string
+  ): Promise<void> {
     // Implement canary deployment logic
     console.log(`Deploying canary: ${domain}/${policyId} v${version}`);
   }
 
-  private async deployBlueGreen(domain: string, policyId: string, version: string): Promise<void> {
+  private async deployBlueGreen(
+    domain: string,
+    policyId: string,
+    version: string
+  ): Promise<void> {
     // Implement blue-green deployment logic
     console.log(`Deploying blue-green: ${domain}/${policyId} v${version}`);
   }
 
-  private async deployImmediate(domain: string, policyId: string, version: string): Promise<void> {
+  private async deployImmediate(
+    domain: string,
+    policyId: string,
+    version: string
+  ): Promise<void> {
     // Implement immediate deployment logic
     console.log(`Deploying immediate: ${domain}/${policyId} v${version}`);
   }
 
-  private async getExecutionCount(policyId: string, timeRange: any): Promise<number> {
+  private async getExecutionCount(
+    policyId: string,
+    timeRange: any
+  ): Promise<number> {
     return Math.floor(Math.random() * 10000) + 1000;
   }
 
-  private async getSuccessRate(policyId: string, timeRange: any): Promise<number> {
+  private async getSuccessRate(
+    policyId: string,
+    timeRange: any
+  ): Promise<number> {
     return 0.95 + Math.random() * 0.04;
   }
 
-  private async getAverageLatency(policyId: string, timeRange: any): Promise<number> {
+  private async getAverageLatency(
+    policyId: string,
+    timeRange: any
+  ): Promise<number> {
     return Math.random() * 50 + 10;
   }
 
-  private async getErrorRate(policyId: string, timeRange: any): Promise<number> {
+  private async getErrorRate(
+    policyId: string,
+    timeRange: any
+  ): Promise<number> {
     return Math.random() * 0.05;
   }
 
-  private async generateOptimizationRecommendations(analytics: any[]): Promise<string[]> {
+  private async generateOptimizationRecommendations(
+    analytics: any[]
+  ): Promise<string[]> {
     const recommendations = [];
-    
+
     analytics.forEach(analytic => {
       if (analytic.successRate < 0.95) {
-        recommendations.push(`Consider reviewing policy rules for ${analytic.id}`);
+        recommendations.push(
+          `Consider reviewing policy rules for ${analytic.id}`
+        );
       }
       if (analytic.averageLatency > 100) {
-        recommendations.push(`Optimize performance for ${analytic.id} - consider caching`);
+        recommendations.push(
+          `Optimize performance for ${analytic.id} - consider caching`
+        );
       }
     });
 
@@ -411,7 +471,9 @@ export class PolicyManagementController {
 
   constructor() {
     // ⭐ FOCUS: Bridge Pattern - Get existing instance from VytchesDDD
-    this.policyRegistryService = VytchesDDD.resolve<PolicyRegistryService>('policyRegistryService');
+    this.policyRegistryService = VytchesDDD.resolve<PolicyRegistryService>(
+      'policyRegistryService'
+    );
   }
 
   @Post('validate-ab/:domain/:policyId')
@@ -432,7 +494,7 @@ export class PolicyManagementController {
         success: result.isSuccess(),
         variant: result.variant,
         violations: result.isFailure() ? result.error.violations : [],
-        entity: result.isSuccess() ? result.value : null
+        entity: result.isSuccess() ? result.value : null,
       };
     } catch (error) {
       throw new Error(`A/B testing validation failed: ${error.message}`);
@@ -449,10 +511,14 @@ export class PolicyManagementController {
     try {
       const timeRange = {
         start: new Date(start),
-        end: new Date(end)
+        end: new Date(end),
       };
 
-      return await this.policyRegistryService.getPolicyAnalytics(domain, policyId, timeRange);
+      return await this.policyRegistryService.getPolicyAnalytics(
+        domain,
+        policyId,
+        timeRange
+      );
     } catch (error) {
       throw new Error(`Policy analytics failed: ${error.message}`);
     }
@@ -465,35 +531,44 @@ export class PolicyManagementController {
 - **📚 Policy Registry**: Centralized policy management with versioning
 - **🧪 A/B Testing**: Dynamic policy variant testing and analytics
 - **🚀 Deployment Strategies**: Canary, blue-green, and immediate deployment
-- **📊 Analytics Integration**: Performance monitoring and optimization recommendations
+- **📊 Analytics Integration**: Performance monitoring and optimization
+  recommendations
 - **🔄 Version Management**: Policy versioning with rollback capabilities
 
 ## Advanced Registry Benefits
 
 ### **Centralized Management**
+
 - **Single Source of Truth**: All policies managed through central registry
 - **Version Control**: Complete policy versioning with deployment history
 - **Dynamic Resolution**: Context-aware policy selection and A/B testing
 
 ### **Enterprise Operations**
+
 - **Deployment Strategies**: Controlled rollouts with risk mitigation
 - **Performance Monitoring**: Real-time analytics and optimization insights
 - **Feature Flags**: Environment and context-based policy selection
 
 ### **Business Intelligence**
+
 - **A/B Testing**: Data-driven policy optimization through variant testing
 - **Usage Analytics**: Comprehensive policy performance and success metrics
-- **Optimization Recommendations**: AI-powered suggestions for policy improvements
+- **Optimization Recommendations**: AI-powered suggestions for policy
+  improvements
 
 ## Common Pitfalls
 
 - **❌ Registry Bloat**: Remove unused policy versions to maintain performance
 - **❌ Version Conflicts**: Implement proper version compatibility checking
 - **❌ A/B Test Bias**: Ensure proper randomization and statistical significance
-- **❌ Cache Invalidation**: Handle policy updates across distributed cache layers
+- **❌ Cache Invalidation**: Handle policy updates across distributed cache
+  layers
 
 ## Related Examples
 
-- [Example 1: DI Integration](./example-1.md) - Advanced dependency injection patterns
-- [Basic: Policy Builder](../basic/example-1.md) - Foundation policy creation patterns
-- [Advanced: Policy Mesh](../advanced/example-2.md) - Distributed policy coordination
+- [Example 1: DI Integration](./example-1.md) - Advanced dependency injection
+  patterns
+- [Basic: Policy Builder](../basic/example-1.md) - Foundation policy creation
+  patterns
+- [Advanced: Policy Mesh](../advanced/example-2.md) - Distributed policy
+  coordination

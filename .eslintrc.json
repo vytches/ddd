@@ -223,6 +223,7 @@
                   "scope:core",
                   "scope:domain-primitives",
                   "scope:utils",
+                  "scope:contracts",
                   "scope:logging"
                 ]
               },

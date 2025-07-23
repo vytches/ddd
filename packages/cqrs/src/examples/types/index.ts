@@ -2,15 +2,15 @@
  * @llm-summary Application types for CQRS package examples
  * @llm-domain Integration
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Shared types used across CQRS package examples to demonstrate
  * Command Query Responsibility Segregation patterns and real-world integration scenarios.
- * 
+ *
  * @example
  * ```typescript
  * import { CreateUserCommand, UserQuery, User } from './types';
- * 
+ *
  * const command: CreateUserCommand = {
  *   userId: 'user-123',
  *   email: 'user@example.com',
@@ -18,7 +18,7 @@
  *   role: 'user'
  * };
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */

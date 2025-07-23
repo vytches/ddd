@@ -1,13 +1,17 @@
 # Messaging with Events & Resilience Implementation
 
-**Focus**: Advanced messaging patterns integrated with events system and resilience  
+**Focus**: Advanced messaging patterns integrated with events system and
+resilience  
 **Domain**: Financial Trading Platform  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
+@vytches-ddd/resilience, @vytches-ddd/di
 
 ## Business Context
 
-This example demonstrates advanced messaging patterns for a financial trading platform that requires:
+This example demonstrates advanced messaging patterns for a financial trading
+platform that requires:
+
 - Integration with unified event system for comprehensive observability
 - Resilience patterns for reliable message processing
 - Event-driven outbox processing with circuit breaker protection
@@ -40,7 +44,7 @@ export class TradeExecutedEvent extends DomainEvent {
       side,
       quantity,
       price,
-      executedAt
+      executedAt,
     });
   }
 }
@@ -58,7 +62,7 @@ export class SettlementRequiredEvent extends DomainEvent {
       settlementDate,
       amount,
       currency,
-      counterparty
+      counterparty,
     });
   }
 }
@@ -76,7 +80,7 @@ export class RiskLimitBreachedEvent extends DomainEvent {
       riskType,
       currentValue,
       limitValue,
-      severity
+      severity,
     });
   }
 }
@@ -123,18 +127,18 @@ export interface RiskAlertMessage extends OutboxMessage {
 }
 
 // resilient-outbox-service.ts
-import { 
-  OutboxService, 
-  OutboxMessage, 
+import {
+  OutboxService,
+  OutboxMessage,
   MessageProcessor,
-  OutboxRepository 
+  OutboxRepository,
 } from '@vytches-ddd/messaging';
 import { UnifiedEventBus } from '@vytches-ddd/events';
-import { 
-  CircuitBreaker, 
-  RetryStrategy, 
+import {
+  CircuitBreaker,
+  RetryStrategy,
   TimeoutStrategy,
-  ResiliencePolicyBuilder 
+  ResiliencePolicyBuilder,
 } from '@vytches-ddd/resilience';
 import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
 import { Logger } from '@vytches-ddd/logging';
@@ -143,7 +147,7 @@ import { Result } from '@vytches-ddd/utils';
 // ⭐ Resilient Outbox Service with Events Integration
 @DomainService('resilientOutboxService', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'TradingMessaging'
+  context: 'TradingMessaging',
 })
 export class ResilientOutboxService extends OutboxService {
   private logger = Logger.forContext('ResilientOutboxService');
@@ -171,7 +175,7 @@ export class ResilientOutboxService extends OutboxService {
         monitoringPeriod: 60000,
         onStateChange: (previous, current, reason) => {
           this.handleCircuitBreakerStateChange(previous, current, reason);
-        }
+        },
       })
       .withRetry({
         maxAttempts: 3,
@@ -179,19 +183,21 @@ export class ResilientOutboxService extends OutboxService {
         maxDelay: 10000,
         backoffMultiplier: 2,
         jitter: true,
-        shouldRetry: (error) => {
+        shouldRetry: error => {
           // Retry on transient errors
-          return error.message.includes('timeout') || 
-                 error.message.includes('unavailable') ||
-                 error.message.includes('connection');
-        }
+          return (
+            error.message.includes('timeout') ||
+            error.message.includes('unavailable') ||
+            error.message.includes('connection')
+          );
+        },
       })
       .withTimeout({
-        timeout: 15000
+        timeout: 15000,
       })
       .withBulkhead({
         maxConcurrentCalls: 10,
-        maxQueueSize: 50
+        maxQueueSize: 50,
       })
       .build();
   }
@@ -204,7 +210,7 @@ export class ResilientOutboxService extends OutboxService {
     this.logger.info('Outbox circuit breaker state changed', {
       previousState,
       currentState,
-      reason
+      reason,
     });
 
     // Publish event about circuit breaker state change
@@ -215,8 +221,8 @@ export class ResilientOutboxService extends OutboxService {
         currentState,
         reason,
         serviceName: 'OutboxService',
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
@@ -230,7 +236,7 @@ export class ResilientOutboxService extends OutboxService {
       });
 
       this.logger.info('Message processing completed', {
-        processedCount: result
+        processedCount: result,
       });
 
       // Publish processing metrics
@@ -239,7 +245,7 @@ export class ResilientOutboxService extends OutboxService {
       return Result.success(result);
     } catch (error) {
       this.logger.error('Message processing failed', {
-        error: error.message
+        error: error.message,
       });
 
       // Publish failure event
@@ -247,8 +253,8 @@ export class ResilientOutboxService extends OutboxService {
         eventType: 'OutboxProcessingFailed',
         payload: {
           error: error.message,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       return Result.failure(error);
@@ -257,7 +263,7 @@ export class ResilientOutboxService extends OutboxService {
 
   private async processMessagesWithResilience(): Promise<number> {
     const pendingMessages = await this.getPendingMessages();
-    
+
     if (pendingMessages.isFailure()) {
       throw pendingMessages.error;
     }
@@ -279,7 +285,7 @@ export class ResilientOutboxService extends OutboxService {
         this.logger.error('Message processing failed', {
           messageId: message.id,
           messageType: message.type,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -287,7 +293,9 @@ export class ResilientOutboxService extends OutboxService {
     return processedCount;
   }
 
-  private async processMessageWithResilience(message: OutboxMessage): Promise<Result<void, Error>> {
+  private async processMessageWithResilience(
+    message: OutboxMessage
+  ): Promise<Result<void, Error>> {
     try {
       // Mark message as processing
       await this.markMessageAsProcessing(message.id);
@@ -299,8 +307,8 @@ export class ResilientOutboxService extends OutboxService {
           messageId: message.id,
           messageType: message.type,
           priority: message.priority,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       // Process message with resilience
@@ -311,20 +319,20 @@ export class ResilientOutboxService extends OutboxService {
       if (result.isSuccess()) {
         // Mark as processed
         await this.markMessageAsProcessed(message.id);
-        
+
         // Publish success event
         await this.eventBus.publish({
           eventType: 'OutboxMessageProcessed',
           payload: {
             messageId: message.id,
             messageType: message.type,
-            processedAt: new Date()
-          }
+            processedAt: new Date(),
+          },
         });
 
         this.logger.info('Message processed successfully', {
           messageId: message.id,
-          messageType: message.type
+          messageType: message.type,
         });
       } else {
         // Handle failure
@@ -338,15 +346,18 @@ export class ResilientOutboxService extends OutboxService {
     }
   }
 
-  private async handleMessageProcessingFailure(message: OutboxMessage, error: Error): Promise<void> {
+  private async handleMessageProcessingFailure(
+    message: OutboxMessage,
+    error: Error
+  ): Promise<void> {
     const retryCount = (message.retryCount || 0) + 1;
     const maxRetries = 3;
 
     if (retryCount <= maxRetries) {
       // Schedule retry with exponential backoff
-      const nextRetry = new Date(Date.now() + (retryCount * 30000));
+      const nextRetry = new Date(Date.now() + retryCount * 30000);
       await this.scheduleRetry(message.id, nextRetry, retryCount);
-      
+
       // Publish retry event
       await this.eventBus.publish({
         eventType: 'OutboxMessageRetryScheduled',
@@ -357,20 +368,20 @@ export class ResilientOutboxService extends OutboxService {
           maxRetries,
           nextRetry,
           error: error.message,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       this.logger.warn('Message scheduled for retry', {
         messageId: message.id,
         retryCount,
         maxRetries,
-        nextRetry
+        nextRetry,
       });
     } else {
       // Mark as failed
       await this.markMessageAsFailed(message.id, error.message);
-      
+
       // Publish failure event
       await this.eventBus.publish({
         eventType: 'OutboxMessageFailed',
@@ -379,14 +390,14 @@ export class ResilientOutboxService extends OutboxService {
           messageType: message.type,
           error: error.message,
           retryCount: maxRetries,
-          failedAt: new Date()
-        }
+          failedAt: new Date(),
+        },
       });
 
       this.logger.error('Message failed after maximum retries', {
         messageId: message.id,
         messageType: message.type,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -397,9 +408,11 @@ export class ResilientOutboxService extends OutboxService {
     }, 10000); // Process every 10 seconds
   }
 
-  private async publishProcessingMetrics(processedCount: number): Promise<void> {
+  private async publishProcessingMetrics(
+    processedCount: number
+  ): Promise<void> {
     const metrics = await this.metricsCollector.getMetrics();
-    
+
     await this.eventBus.publish({
       eventType: 'OutboxProcessingMetrics',
       payload: {
@@ -408,8 +421,8 @@ export class ResilientOutboxService extends OutboxService {
         successRate: metrics.successRate,
         averageProcessingTime: metrics.averageProcessingTime,
         circuitBreakerState: this.resiliencePolicy.getCircuitBreakerState(),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
@@ -417,31 +430,31 @@ export class ResilientOutboxService extends OutboxService {
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
     }
-    
+
     // Process remaining messages
     await this.processMessages();
-    
+
     // Publish shutdown event
     await this.eventBus.publish({
       eventType: 'OutboxServiceShutdown',
       payload: {
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 }
 
 // event-driven-trading-service.ts
-import { 
-  TradeExecutedEvent, 
-  SettlementRequiredEvent, 
-  RiskLimitBreachedEvent 
+import {
+  TradeExecutedEvent,
+  SettlementRequiredEvent,
+  RiskLimitBreachedEvent,
 } from './trading-messages';
 
 // ⭐ Event-Driven Trading Service with Messaging
 @DomainService('eventDrivenTradingService', {
   lifetime: ServiceLifetime.Singleton,
-  context: 'TradingPlatform'
+  context: 'TradingPlatform',
 })
 export class EventDrivenTradingService {
   private logger = Logger.forContext('EventDrivenTradingService');
@@ -457,19 +470,28 @@ export class EventDrivenTradingService {
 
   private subscribeToEvents(): void {
     // Subscribe to trade execution events
-    this.eventBus.subscribe('TradeExecuted', async (event: TradeExecutedEvent) => {
-      await this.handleTradeExecuted(event);
-    });
+    this.eventBus.subscribe(
+      'TradeExecuted',
+      async (event: TradeExecutedEvent) => {
+        await this.handleTradeExecuted(event);
+      }
+    );
 
     // Subscribe to settlement required events
-    this.eventBus.subscribe('SettlementRequired', async (event: SettlementRequiredEvent) => {
-      await this.handleSettlementRequired(event);
-    });
+    this.eventBus.subscribe(
+      'SettlementRequired',
+      async (event: SettlementRequiredEvent) => {
+        await this.handleSettlementRequired(event);
+      }
+    );
 
     // Subscribe to risk limit breached events
-    this.eventBus.subscribe('RiskLimitBreached', async (event: RiskLimitBreachedEvent) => {
-      await this.handleRiskLimitBreached(event);
-    });
+    this.eventBus.subscribe(
+      'RiskLimitBreached',
+      async (event: RiskLimitBreachedEvent) => {
+        await this.handleRiskLimitBreached(event);
+      }
+    );
   }
 
   private async handleTradeExecuted(event: TradeExecutedEvent): Promise<void> {
@@ -478,7 +500,7 @@ export class EventDrivenTradingService {
         tradeId: event.tradeId,
         symbol: event.symbol,
         quantity: event.quantity,
-        price: event.price
+        price: event.price,
       });
 
       // Create trade confirmation message
@@ -493,12 +515,12 @@ export class EventDrivenTradingService {
           quantity: event.quantity,
           price: event.price,
           executedAt: event.executedAt,
-          confirmationNumber: this.generateConfirmationNumber()
+          confirmationNumber: this.generateConfirmationNumber(),
         },
         priority: MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
@@ -515,21 +537,22 @@ export class EventDrivenTradingService {
       );
 
       await this.eventBus.publish(settlementEvent);
-
     } catch (error) {
       this.logger.error('Failed to handle trade executed event', {
         tradeId: event.tradeId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
-  private async handleSettlementRequired(event: SettlementRequiredEvent): Promise<void> {
+  private async handleSettlementRequired(
+    event: SettlementRequiredEvent
+  ): Promise<void> {
     try {
       this.logger.info('Handling settlement required event', {
         tradeId: event.tradeId,
         settlementDate: event.settlementDate,
-        amount: event.amount
+        amount: event.amount,
       });
 
       // Create settlement instruction message
@@ -543,31 +566,32 @@ export class EventDrivenTradingService {
           amount: event.amount,
           currency: event.currency,
           counterparty: event.counterparty,
-          instructions: this.generateSettlementInstructions(event)
+          instructions: this.generateSettlementInstructions(event),
         },
         priority: MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(event.settlementDate.getTime() - 86400000), // 1 day before settlement
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
       await this.outboxService.addMessage(instructionMessage);
-
     } catch (error) {
       this.logger.error('Failed to handle settlement required event', {
         tradeId: event.tradeId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
-  private async handleRiskLimitBreached(event: RiskLimitBreachedEvent): Promise<void> {
+  private async handleRiskLimitBreached(
+    event: RiskLimitBreachedEvent
+  ): Promise<void> {
     try {
       this.logger.warn('Handling risk limit breached event', {
         accountId: event.accountId,
         riskType: event.riskType,
-        severity: event.severity
+        severity: event.severity,
       });
 
       // Create risk alert message
@@ -581,21 +605,23 @@ export class EventDrivenTradingService {
           severity: event.severity,
           currentValue: event.currentValue,
           limitValue: event.limitValue,
-          alertedAt: new Date()
+          alertedAt: new Date(),
         },
-        priority: event.severity === 'critical' ? MessagePriority.CRITICAL : MessagePriority.HIGH,
+        priority:
+          event.severity === 'critical'
+            ? MessagePriority.CRITICAL
+            : MessagePriority.HIGH,
         createdAt: new Date(),
         scheduledFor: new Date(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       // Add to outbox
       await this.outboxService.addMessage(alertMessage);
-
     } catch (error) {
       this.logger.error('Failed to handle risk limit breached event', {
         accountId: event.accountId,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -619,7 +645,9 @@ export class EventDrivenTradingService {
     return `ALERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private generateSettlementInstructions(event: SettlementRequiredEvent): string {
+  private generateSettlementInstructions(
+    event: SettlementRequiredEvent
+  ): string {
     return `Settle trade ${event.tradeId} for ${event.amount} ${event.currency} on ${event.settlementDate.toISOString().split('T')[0]} with ${event.counterparty}`;
   }
 }
@@ -639,12 +667,13 @@ export class OutboxMetricsCollector {
   recordSuccess(message: OutboxMessage): void {
     this.totalMessages++;
     this.successfulMessages++;
-    
+
     // Calculate processing time if available
     if (message.updatedAt && message.createdAt) {
-      const processingTime = message.updatedAt.getTime() - message.createdAt.getTime();
+      const processingTime =
+        message.updatedAt.getTime() - message.createdAt.getTime();
       this.processingTimes.push(processingTime);
-      
+
       // Keep only last 1000 processing times
       if (this.processingTimes.length > 1000) {
         this.processingTimes.shift();
@@ -655,11 +684,11 @@ export class OutboxMetricsCollector {
   recordFailure(message: OutboxMessage, error: Error): void {
     this.totalMessages++;
     this.failedMessages++;
-    
+
     this.logger.warn('Message processing failed', {
       messageId: message.id,
       messageType: message.type,
-      error: error.message
+      error: error.message,
     });
   }
 
@@ -670,16 +699,21 @@ export class OutboxMetricsCollector {
     successRate: number;
     averageProcessingTime: number;
   }> {
-    const averageProcessingTime = this.processingTimes.length > 0
-      ? this.processingTimes.reduce((sum, time) => sum + time, 0) / this.processingTimes.length
-      : 0;
+    const averageProcessingTime =
+      this.processingTimes.length > 0
+        ? this.processingTimes.reduce((sum, time) => sum + time, 0) /
+          this.processingTimes.length
+        : 0;
 
     return {
       totalMessages: this.totalMessages,
       successfulMessages: this.successfulMessages,
       failedMessages: this.failedMessages,
-      successRate: this.totalMessages > 0 ? (this.successfulMessages / this.totalMessages) * 100 : 0,
-      averageProcessingTime
+      successRate:
+        this.totalMessages > 0
+          ? (this.successfulMessages / this.totalMessages) * 100
+          : 0,
+      averageProcessingTime,
     };
   }
 
@@ -687,13 +721,13 @@ export class OutboxMetricsCollector {
     // Publish metrics every 30 seconds
     setInterval(async () => {
       const metrics = await this.getMetrics();
-      
+
       await this.eventBus.publish({
         eventType: 'OutboxMetricsSnapshot',
         payload: {
           ...metrics,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
     }, 30000);
   }
@@ -720,7 +754,7 @@ export class ResilientMessageProcessor implements MessageProcessor {
       this.logger.info('Processing message', {
         messageId: message.id,
         messageType: message.type,
-        priority: message.priority
+        priority: message.priority,
       });
 
       // Publish message to external system
@@ -733,13 +767,13 @@ export class ResilientMessageProcessor implements MessageProcessor {
           payload: {
             messageId: message.id,
             messageType: message.type,
-            publishedAt: new Date()
-          }
+            publishedAt: new Date(),
+          },
         });
 
         this.logger.info('Message published successfully', {
           messageId: message.id,
-          messageType: message.type
+          messageType: message.type,
         });
       } else {
         // Publish failure event
@@ -749,8 +783,8 @@ export class ResilientMessageProcessor implements MessageProcessor {
             messageId: message.id,
             messageType: message.type,
             error: result.error.message,
-            failedAt: new Date()
-          }
+            failedAt: new Date(),
+          },
         });
       }
 
@@ -759,7 +793,7 @@ export class ResilientMessageProcessor implements MessageProcessor {
       this.logger.error('Message processing error', {
         messageId: message.id,
         messageType: message.type,
-        error: error.message
+        error: error.message,
       });
 
       return Result.failure(error);
@@ -788,11 +822,13 @@ export class TradingController {
     private eventBus: UnifiedEventBus
   ) {}
 
-  async executeTrade(tradeRequest: TradeRequest): Promise<Result<Trade, Error>> {
+  async executeTrade(
+    tradeRequest: TradeRequest
+  ): Promise<Result<Trade, Error>> {
     try {
       // Execute trade
       const trade = await this.tradeService.execute(tradeRequest);
-      
+
       if (trade.isSuccess()) {
         // Publish trade executed event
         const event = new TradeExecutedEvent(
@@ -804,15 +840,17 @@ export class TradingController {
           trade.value.price,
           trade.value.executedAt
         );
-        
+
         await this.eventBus.publish(event);
-        
+
         // Event-driven service will handle messaging automatically
       }
-      
+
       return trade;
     } catch (error) {
-      return Result.failure(new Error(`Trade execution failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Trade execution failed: ${error.message}`)
+      );
     }
   }
 
@@ -822,14 +860,14 @@ export class TradingController {
     eventBusHealth: any;
   }> {
     const metrics = await this.outboxService.getStatistics();
-    
+
     return {
       outboxMetrics: metrics,
       circuitBreakerState: 'CLOSED', // Get from resilience policy
       eventBusHealth: {
         status: 'healthy',
-        subscriberCount: 3
-      }
+        subscriberCount: 3,
+      },
     };
   }
 }
@@ -837,8 +875,11 @@ export class TradingController {
 
 ## Common Pitfalls
 
-- **Event Ordering**: Consider event ordering when multiple events trigger messages
-- **Circuit Breaker Tuning**: Adjust thresholds based on your system's characteristics
+- **Event Ordering**: Consider event ordering when multiple events trigger
+  messages
+- **Circuit Breaker Tuning**: Adjust thresholds based on your system's
+  characteristics
 - **Message Correlation**: Maintain correlation IDs across events and messages
 - **Retry Logic**: Avoid retry storms with proper backoff strategies
-- **Metrics Overhead**: Monitor the performance impact of comprehensive metrics collection
+- **Metrics Overhead**: Monitor the performance impact of comprehensive metrics
+  collection

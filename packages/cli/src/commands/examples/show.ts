@@ -40,8 +40,14 @@ export const builder = (yargs: any) =>
       default: false,
     })
     .example('$0 examples show order', 'Show base order example')
-    .example('$0 examples show order --framework nestjs', 'Show order example with NestJS integration')
-    .example('$0 examples show order --framework nestjs --components', 'Show available NestJS components')
+    .example(
+      '$0 examples show order --framework nestjs',
+      'Show order example with NestJS integration'
+    )
+    .example(
+      '$0 examples show order --framework nestjs --components',
+      'Show available NestJS components'
+    )
     .example('$0 examples show order --raw', 'Show raw markdown content');
 
 export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
@@ -58,7 +64,11 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
       // Suggest similar examples
       const allExamples = globalDocumentationRegistry.query({});
       const suggestions = allExamples
-        .filter(ex => ex.id.includes(argv.example) || ex.name.toLowerCase().includes(argv.example.toLowerCase()))
+        .filter(
+          ex =>
+            ex.id.includes(argv.example) ||
+            ex.name.toLowerCase().includes(argv.example.toLowerCase())
+        )
         .slice(0, 3);
 
       if (suggestions.length > 0) {
@@ -76,12 +86,16 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
       const availableFrameworks = globalDocumentationRegistry.getAvailableFrameworks(argv.example);
 
       if (!availableFrameworks.includes(argv.framework)) {
-        console.error(`❌ Framework '${argv.framework}' not available for example '${argv.example}'.`);
+        console.error(
+          `❌ Framework '${argv.framework}' not available for example '${argv.example}'.`
+        );
 
         if (availableFrameworks.length > 0) {
           console.log(`\n💡 Available frameworks: ${availableFrameworks.join(', ')}`);
         } else {
-          console.log(`\n💡 This example only has base implementation (no framework integrations).`);
+          console.log(
+            `\n💡 This example only has base implementation (no framework integrations).`
+          );
         }
 
         return;
@@ -90,7 +104,10 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
 
     // Show components if requested
     if (argv.components && argv.framework) {
-      const components = globalDocumentationRegistry.getAvailableComponents(argv.example, argv.framework);
+      const components = globalDocumentationRegistry.getAvailableComponents(
+        argv.example,
+        argv.framework
+      );
 
       console.log(`\n🧩 Available Components for ${argv.framework.toUpperCase()}:\n`);
 
@@ -99,7 +116,9 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
           console.log(`   - ${component}`);
         });
 
-        console.log(`\n💡 Use --only or --exclude with generate command to select specific components.`);
+        console.log(
+          `\n💡 Use --only or --exclude with generate command to select specific components.`
+        );
       } else {
         console.log(`   No components defined for ${argv.framework} integration.`);
       }
@@ -142,7 +161,9 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
       console.log(`📋 Dependencies: ${example.dependencies?.join(', ') || 'none'}`);
 
       if (argv.framework) {
-        const integration = example.frameworkIntegrations?.find(fi => fi.framework === argv.framework);
+        const integration = example.frameworkIntegrations?.find(
+          fi => fi.framework === argv.framework
+        );
         if (integration) {
           console.log(`🚀 Framework: ${argv.framework.toUpperCase()}`);
           console.log(`📦 Additional Dependencies: none`);
@@ -176,16 +197,19 @@ export const handler = async (argv: Arguments<ShowOptions>): Promise<void> => {
 
       if (availableFrameworks.length > 0) {
         console.log(`   # Show with framework integration`);
-        console.log(`   vytches-ddd examples show ${argv.example} --framework ${availableFrameworks[0]}`);
+        console.log(
+          `   vytches-ddd examples show ${argv.example} --framework ${availableFrameworks[0]}`
+        );
 
         console.log(`   # Generate from this example`);
-        console.log(`   vytches-ddd generate --example ${argv.example} --name MyComponent --framework ${availableFrameworks[0]}`);
+        console.log(
+          `   vytches-ddd generate --example ${argv.example} --name MyComponent --framework ${availableFrameworks[0]}`
+        );
       } else {
         console.log(`   # Generate from this example`);
         console.log(`   vytches-ddd generate --example ${argv.example} --name MyComponent`);
       }
     }
-
   } catch (error) {
     console.error('Error showing example:', error);
     process.exit(1);

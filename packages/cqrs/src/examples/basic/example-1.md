@@ -9,27 +9,37 @@
 
 ## Description
 
-Demonstrates the core CQRS command pattern with automatic handler registration. Shows how to create commands that modify application state and handlers that process them with validation, business logic, and error handling.
+Demonstrates the core CQRS command pattern with automatic handler registration.
+Shows how to create commands that modify application state and handlers that
+process them with validation, business logic, and error handling.
 
 ## Business Context
 
-User management is a fundamental requirement in most applications. Commands like CreateUser, UpdateUser, and DeactivateUser represent business intentions that modify system state. The CQRS pattern ensures these operations are handled consistently with proper validation and business rule enforcement.
+User management is a fundamental requirement in most applications. Commands like
+CreateUser, UpdateUser, and DeactivateUser represent business intentions that
+modify system state. The CQRS pattern ensures these operations are handled
+consistently with proper validation and business rule enforcement.
 
 ## Code Example
 
-```typescript
+````typescript
 // user-commands.ts
-import { BaseCommand, CreateUserCommand, UpdateUserCommand, DeactivateUserCommand } from '../types';
+import {
+  BaseCommand,
+  CreateUserCommand,
+  UpdateUserCommand,
+  DeactivateUserCommand,
+} from '../types';
 
 /**
  * @llm-summary Command for creating new users in the system
  * @llm-domain User Management
  * @llm-complexity Simple
- * 
+ *
  * @description
  * Represents the business intention to create a new user account
  * with validation, business rules, and automatic handler processing.
- * 
+ *
  * @example
  * ```typescript
  * const command = new CreateUserCommand({
@@ -37,17 +47,17 @@ import { BaseCommand, CreateUserCommand, UpdateUserCommand, DeactivateUserComman
  *   name: 'John Doe',
  *   role: 'user'
  * });
- * 
+ *
  * const result = await commandBus.execute(command);
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
 export class CreateUserCommand implements CreateUserCommand {
   public readonly commandId: string;
   public readonly timestamp: Date;
-  
+
   constructor(
     public readonly email: string,
     public readonly name: string,
@@ -83,7 +93,7 @@ export class CreateUserCommand implements CreateUserCommand {
         field: 'email',
         message: 'Valid email address is required',
         code: 'INVALID_EMAIL',
-        value: this.email
+        value: this.email,
       });
     }
 
@@ -92,7 +102,7 @@ export class CreateUserCommand implements CreateUserCommand {
         field: 'name',
         message: 'Name must be at least 2 characters long',
         code: 'INVALID_NAME',
-        value: this.name
+        value: this.name,
       });
     }
 
@@ -101,7 +111,7 @@ export class CreateUserCommand implements CreateUserCommand {
         field: 'role',
         message: 'Role must be admin, user, or moderator',
         code: 'INVALID_ROLE',
-        value: this.role
+        value: this.role,
       });
     }
 
@@ -147,7 +157,7 @@ export class UpdateUserCommand implements UpdateUserCommand {
         field: 'userId',
         message: 'User ID is required',
         code: 'MISSING_USER_ID',
-        value: this.userId
+        value: this.userId,
       });
     }
 
@@ -156,7 +166,7 @@ export class UpdateUserCommand implements UpdateUserCommand {
         field: 'email',
         message: 'Valid email address is required',
         code: 'INVALID_EMAIL',
-        value: this.email
+        value: this.email,
       });
     }
 
@@ -165,7 +175,7 @@ export class UpdateUserCommand implements UpdateUserCommand {
         field: 'name',
         message: 'Name must be at least 2 characters long',
         code: 'INVALID_NAME',
-        value: this.name
+        value: this.name,
       });
     }
 
@@ -187,7 +197,13 @@ export class UpdateUserCommand implements UpdateUserCommand {
    * @public
    */
   hasChanges(): boolean {
-    return !!(this.email || this.name || this.role || this.profile || this.preferences);
+    return !!(
+      this.email ||
+      this.name ||
+      this.role ||
+      this.profile ||
+      this.preferences
+    );
   }
 }
 
@@ -225,7 +241,7 @@ export class DeactivateUserCommand implements DeactivateUserCommand {
         field: 'userId',
         message: 'User ID is required',
         code: 'MISSING_USER_ID',
-        value: this.userId
+        value: this.userId,
       });
     }
 
@@ -234,7 +250,7 @@ export class DeactivateUserCommand implements DeactivateUserCommand {
         field: 'reason',
         message: 'Deactivation reason must be at least 10 characters',
         code: 'INVALID_REASON',
-        value: this.reason
+        value: this.reason,
       });
     }
 
@@ -243,25 +259,25 @@ export class DeactivateUserCommand implements DeactivateUserCommand {
         field: 'deactivatedBy',
         message: 'Deactivated by user ID is required',
         code: 'MISSING_DEACTIVATED_BY',
-        value: this.deactivatedBy
+        value: this.deactivatedBy,
       });
     }
 
     return errors;
   }
 }
-```
+````
 
-```typescript
+````typescript
 // user-command-handlers.ts
 import { CommandHandler } from '@vytches-ddd/cqrs';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  CreateUserCommand, 
-  UpdateUserCommand, 
+import {
+  CreateUserCommand,
+  UpdateUserCommand,
   DeactivateUserCommand,
   User,
-  CommandResult 
+  CommandResult,
 } from '../types';
 
 /**
@@ -288,7 +304,7 @@ import {
 @CommandHandler(CreateUserCommand, {
   autoRegister: true,
   timeout: 10000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class CreateUserCommandHandler {
   constructor(
@@ -312,11 +328,11 @@ export class CreateUserCommandHandler {
    * ```typescript
    * const command = new CreateUserCommand(
    *   'user@example.com',
-   *   'John Doe', 
+   *   'John Doe',
    *   'user',
    *   profile
    * );
-   * 
+   *
    * const result = await handler.handle(command);
    * if (result.success) {
    *   console.log('User created:', result.result?.id);
@@ -336,7 +352,7 @@ export class CreateUserCommandHandler {
         return {
           success: false,
           validationErrors,
-          error: 'Command validation failed'
+          error: 'Command validation failed',
         };
       }
 
@@ -346,7 +362,7 @@ export class CreateUserCommandHandler {
         return {
           success: false,
           error: businessValidation.error,
-          validationErrors: businessValidation.validationErrors
+          validationErrors: businessValidation.validationErrors,
         };
       }
 
@@ -359,7 +375,7 @@ export class CreateUserCommandHandler {
         return {
           success: false,
           error: 'Failed to save user',
-          metadata: { repositoryError: saveResult.error }
+          metadata: { repositoryError: saveResult.error },
         };
       }
 
@@ -374,21 +390,20 @@ export class CreateUserCommandHandler {
         metadata: {
           commandId: command.commandId,
           timestamp: command.timestamp,
-          correlationId: command.correlationId
-        }
+          correlationId: command.correlationId,
+        },
       };
-
     } catch (error) {
       console.error(`❌ Failed to create user:`, error);
-      
+
       return {
         success: false,
         error: `User creation failed: ${error.message}`,
         metadata: {
           commandId: command.commandId,
           errorType: error.constructor.name,
-          stack: error.stack
-        }
+          stack: error.stack,
+        },
       };
     }
   }
@@ -408,7 +423,9 @@ export class CreateUserCommandHandler {
    * @since 1.0.0
    * @private
    */
-  private async validateBusinessRules(command: CreateUserCommand): Promise<CommandResult<void>> {
+  private async validateBusinessRules(
+    command: CreateUserCommand
+  ): Promise<CommandResult<void>> {
     const errors: ValidationError[] = [];
 
     // Check email uniqueness
@@ -418,7 +435,7 @@ export class CreateUserCommandHandler {
         field: 'email',
         message: 'Email address is already in use',
         code: 'EMAIL_ALREADY_EXISTS',
-        value: command.email
+        value: command.email,
       });
     }
 
@@ -428,17 +445,20 @@ export class CreateUserCommandHandler {
         field: 'role',
         message: 'Admin users can only be created by existing admins',
         code: 'INSUFFICIENT_PERMISSIONS',
-        value: command.role
+        value: command.role,
       });
     }
 
     // Check profile completeness for certain roles
-    if (command.role === 'moderator' && (!command.profile.bio || command.profile.bio.length < 20)) {
+    if (
+      command.role === 'moderator' &&
+      (!command.profile.bio || command.profile.bio.length < 20)
+    ) {
       errors.push({
         field: 'profile.bio',
         message: 'Moderators must provide a bio of at least 20 characters',
         code: 'INCOMPLETE_MODERATOR_PROFILE',
-        value: command.profile.bio
+        value: command.profile.bio,
       });
     }
 
@@ -446,7 +466,7 @@ export class CreateUserCommandHandler {
       return {
         success: false,
         validationErrors: errors,
-        error: 'Business rule validation failed'
+        error: 'Business rule validation failed',
       };
     }
 
@@ -476,12 +496,12 @@ export class CreateUserCommandHandler {
       notifications: {
         email: true,
         sms: false,
-        push: true
+        push: true,
       },
       language: 'en',
       timezone: 'UTC',
       theme: 'auto',
-      ...command.initialPreferences
+      ...command.initialPreferences,
     };
 
     const user: User = {
@@ -495,11 +515,11 @@ export class CreateUserCommandHandler {
         lastName: command.profile.lastName,
         bio: command.profile.bio,
         location: command.profile.location,
-        phoneNumber: command.profile.phoneNumber
+        phoneNumber: command.profile.phoneNumber,
       },
       preferences: defaultPreferences,
       createdAt: now,
-      version: 1
+      version: 1,
     };
 
     return user;
@@ -522,9 +542,12 @@ export class CreateUserCommandHandler {
    */
   private sendWelcomeEmailAsync(email: string, name: string): void {
     // Fire and forget - don't await
-    this.emailService.sendWelcomeEmail(email, name)
+    this.emailService
+      .sendWelcomeEmail(email, name)
       .then(() => console.log(`📧 Welcome email sent to ${email}`))
-      .catch(error => console.error(`❌ Failed to send welcome email to ${email}:`, error));
+      .catch(error =>
+        console.error(`❌ Failed to send welcome email to ${email}:`, error)
+      );
   }
 }
 
@@ -543,7 +566,7 @@ export class CreateUserCommandHandler {
 @CommandHandler(UpdateUserCommand, {
   autoRegister: true,
   timeout: 8000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class UpdateUserCommandHandler {
   constructor(private readonly userRepository: UserRepository) {}
@@ -573,7 +596,7 @@ export class UpdateUserCommandHandler {
         return {
           success: false,
           validationErrors,
-          error: 'Command validation failed'
+          error: 'Command validation failed',
         };
       }
 
@@ -581,7 +604,7 @@ export class UpdateUserCommandHandler {
       if (!command.hasChanges()) {
         return {
           success: false,
-          error: 'No changes provided in update command'
+          error: 'No changes provided in update command',
         };
       }
 
@@ -590,7 +613,7 @@ export class UpdateUserCommandHandler {
       if (!existingUser) {
         return {
           success: false,
-          error: `User not found: ${command.userId}`
+          error: `User not found: ${command.userId}`,
         };
       }
 
@@ -601,8 +624,8 @@ export class UpdateUserCommandHandler {
           error: 'Concurrency conflict - user was modified by another process',
           metadata: {
             expectedVersion: command.version,
-            currentVersion: existingUser.version
-          }
+            currentVersion: existingUser.version,
+          },
         };
       }
 
@@ -615,7 +638,7 @@ export class UpdateUserCommandHandler {
         return {
           success: false,
           error: 'Failed to save user updates',
-          metadata: { repositoryError: saveResult.error }
+          metadata: { repositoryError: saveResult.error },
         };
       }
 
@@ -627,20 +650,19 @@ export class UpdateUserCommandHandler {
         metadata: {
           commandId: command.commandId,
           previousVersion: existingUser.version,
-          newVersion: updatedUser.version
-        }
+          newVersion: updatedUser.version,
+        },
       };
-
     } catch (error) {
       console.error(`❌ Failed to update user:`, error);
-      
+
       return {
         success: false,
         error: `User update failed: ${error.message}`,
         metadata: {
           commandId: command.commandId,
-          userId: command.userId
-        }
+          userId: command.userId,
+        },
       };
     }
   }
@@ -669,14 +691,14 @@ export class UpdateUserCommandHandler {
       role: command.role ?? existingUser.role,
       profile: {
         ...existingUser.profile,
-        ...command.profile
+        ...command.profile,
       },
       preferences: {
         ...existingUser.preferences,
-        ...command.preferences
+        ...command.preferences,
       },
       updatedAt: new Date(),
-      version: existingUser.version + 1
+      version: existingUser.version + 1,
     };
 
     return updatedUser;
@@ -685,7 +707,7 @@ export class UpdateUserCommandHandler {
 
 /**
  * @llm-summary Command handler for deactivating users
- * @llm-domain User Management  
+ * @llm-domain User Management
  * @llm-complexity Simple
  *
  * @description
@@ -698,7 +720,7 @@ export class UpdateUserCommandHandler {
 @CommandHandler(DeactivateUserCommand, {
   autoRegister: true,
   timeout: 15000,
-  enableMetrics: true
+  enableMetrics: true,
 })
 export class DeactivateUserCommandHandler {
   constructor(
@@ -732,7 +754,7 @@ export class DeactivateUserCommandHandler {
         return {
           success: false,
           validationErrors,
-          error: 'Command validation failed'
+          error: 'Command validation failed',
         };
       }
 
@@ -741,7 +763,7 @@ export class DeactivateUserCommandHandler {
       if (!user) {
         return {
           success: false,
-          error: `User not found: ${command.userId}`
+          error: `User not found: ${command.userId}`,
         };
       }
 
@@ -750,7 +772,7 @@ export class DeactivateUserCommandHandler {
         return {
           success: false,
           error: `User is already ${user.status}`,
-          metadata: { currentStatus: user.status }
+          metadata: { currentStatus: user.status },
         };
       }
 
@@ -759,7 +781,7 @@ export class DeactivateUserCommandHandler {
         ...user,
         status: 'inactive',
         updatedAt: new Date(),
-        version: user.version + 1
+        version: user.version + 1,
       };
 
       // 5. Save deactivated user
@@ -768,7 +790,7 @@ export class DeactivateUserCommandHandler {
         return {
           success: false,
           error: 'Failed to deactivate user',
-          metadata: { repositoryError: saveResult.error }
+          metadata: { repositoryError: saveResult.error },
         };
       }
 
@@ -781,8 +803,11 @@ export class DeactivateUserCommandHandler {
       );
 
       // 7. Trigger cleanup (async)
-      this.cleanupService.cleanupUserResources(command.userId)
-        .catch(error => console.error(`❌ Cleanup failed for user ${command.userId}:`, error));
+      this.cleanupService
+        .cleanupUserResources(command.userId)
+        .catch(error =>
+          console.error(`❌ Cleanup failed for user ${command.userId}:`, error)
+        );
 
       console.log(`✅ User deactivated successfully: ${command.userId}`);
 
@@ -792,20 +817,19 @@ export class DeactivateUserCommandHandler {
         metadata: {
           commandId: command.commandId,
           reason: command.reason,
-          deactivatedBy: command.deactivatedBy
-        }
+          deactivatedBy: command.deactivatedBy,
+        },
       };
-
     } catch (error) {
       console.error(`❌ Failed to deactivate user:`, error);
-      
+
       return {
         success: false,
         error: `User deactivation failed: ${error.message}`,
         metadata: {
           commandId: command.commandId,
-          userId: command.userId
-        }
+          userId: command.userId,
+        },
       };
     }
   }
@@ -823,22 +847,27 @@ interface EmailService {
 }
 
 interface AuditService {
-  logUserDeactivation(userId: string, reason: string, deactivatedBy: string, correlationId?: string): Promise<void>;
+  logUserDeactivation(
+    userId: string,
+    reason: string,
+    deactivatedBy: string,
+    correlationId?: string
+  ): Promise<void>;
 }
 
 interface CleanupService {
   cleanupUserResources(userId: string): Promise<void>;
 }
-```
+````
 
-```typescript
+````typescript
 // command-bus-setup.ts
 import { CommandBus } from '@vytches-ddd/cqrs';
 import { VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   CreateUserCommandHandler,
   UpdateUserCommandHandler,
-  DeactivateUserCommandHandler 
+  DeactivateUserCommandHandler,
 } from '../types';
 
 /**
@@ -886,26 +915,36 @@ export class CommandBusSetup {
       VytchesDDD.registerInstance('commandBus', this.commandBus);
 
       // Register handler dependencies (normally auto-discovered)
-      VytchesDDD.registerInstance('userRepository', new InMemoryUserRepository());
+      VytchesDDD.registerInstance(
+        'userRepository',
+        new InMemoryUserRepository()
+      );
       VytchesDDD.registerInstance('emailService', new MockEmailService());
       VytchesDDD.registerInstance('auditService', new MockAuditService());
       VytchesDDD.registerInstance('cleanupService', new MockCleanupService());
 
       // Register command handlers (normally auto-discovered)
-      VytchesDDD.registerInstance('createUserCommandHandler', new CreateUserCommandHandler(
-        VytchesDDD.resolve('userRepository'),
-        VytchesDDD.resolve('emailService')
-      ));
-      
-      VytchesDDD.registerInstance('updateUserCommandHandler', new UpdateUserCommandHandler(
-        VytchesDDD.resolve('userRepository')
-      ));
-      
-      VytchesDDD.registerInstance('deactivateUserCommandHandler', new DeactivateUserCommandHandler(
-        VytchesDDD.resolve('userRepository'),
-        VytchesDDD.resolve('auditService'),
-        VytchesDDD.resolve('cleanupService')
-      ));
+      VytchesDDD.registerInstance(
+        'createUserCommandHandler',
+        new CreateUserCommandHandler(
+          VytchesDDD.resolve('userRepository'),
+          VytchesDDD.resolve('emailService')
+        )
+      );
+
+      VytchesDDD.registerInstance(
+        'updateUserCommandHandler',
+        new UpdateUserCommandHandler(VytchesDDD.resolve('userRepository'))
+      );
+
+      VytchesDDD.registerInstance(
+        'deactivateUserCommandHandler',
+        new DeactivateUserCommandHandler(
+          VytchesDDD.resolve('userRepository'),
+          VytchesDDD.resolve('auditService'),
+          VytchesDDD.resolve('cleanupService')
+        )
+      );
 
       // Configure auto-discovery (in real applications)
       await VytchesDDD.configure();
@@ -914,7 +953,6 @@ export class CommandBusSetup {
       console.log('  - CreateUserCommandHandler');
       console.log('  - UpdateUserCommandHandler');
       console.log('  - DeactivateUserCommandHandler');
-
     } catch (error) {
       console.error('❌ Failed to initialize command bus:', error);
       throw error;
@@ -943,14 +981,14 @@ export class CommandBusSetup {
 // Demonstration usage
 async function demonstrateCommandHandling(): Promise<void> {
   console.log('🚀 Setting up command bus...');
-  
+
   const setup = new CommandBusSetup();
   await setup.initialize();
-  
+
   const commandBus = setup.getCommandBus();
-  
+
   console.log('\n👤 Creating user...');
-  
+
   // Create user command
   const createCommand = new CreateUserCommand(
     'john.doe@example.com',
@@ -960,19 +998,19 @@ async function demonstrateCommandHandling(): Promise<void> {
       firstName: 'John',
       lastName: 'Doe',
       bio: 'Software developer with passion for clean code',
-      location: 'San Francisco, CA'
+      location: 'San Francisco, CA',
     }
   );
 
   const createResult = await commandBus.execute(createCommand);
-  
+
   if (createResult.success) {
     console.log('✅ User created successfully:', createResult.result?.id);
-    
+
     const userId = createResult.result!.id;
-    
+
     console.log('\n🔄 Updating user...');
-    
+
     // Update user command
     const updateCommand = new UpdateUserCommand(
       userId,
@@ -985,12 +1023,12 @@ async function demonstrateCommandHandling(): Promise<void> {
     );
 
     const updateResult = await commandBus.execute(updateCommand);
-    
+
     if (updateResult.success) {
       console.log('✅ User updated successfully');
-      
+
       console.log('\n🚫 Deactivating user...');
-      
+
       // Deactivate user command
       const deactivateCommand = new DeactivateUserCommand(
         userId,
@@ -999,7 +1037,7 @@ async function demonstrateCommandHandling(): Promise<void> {
       );
 
       const deactivateResult = await commandBus.execute(deactivateCommand);
-      
+
       if (deactivateResult.success) {
         console.log('✅ User deactivated successfully');
       } else {
@@ -1013,33 +1051,44 @@ async function demonstrateCommandHandling(): Promise<void> {
     console.error('Validation errors:', createResult.validationErrors);
   }
 }
-```
+````
 
 ## Key Features
 
-- **🎯 Automatic Registration**: Command handlers automatically discovered and registered through decorators
-- **📝 Built-in Validation**: Commands include validation logic executed before handler processing
-- **🛡️ Error Handling**: Comprehensive error handling with structured error responses
-- **⚡ Performance Monitoring**: Built-in metrics and timing for command execution
-- **🔄 Concurrency Control**: Optimistic concurrency control with version checking
+- **🎯 Automatic Registration**: Command handlers automatically discovered and
+  registered through decorators
+- **📝 Built-in Validation**: Commands include validation logic executed before
+  handler processing
+- **🛡️ Error Handling**: Comprehensive error handling with structured error
+  responses
+- **⚡ Performance Monitoring**: Built-in metrics and timing for command
+  execution
+- **🔄 Concurrency Control**: Optimistic concurrency control with version
+  checking
 - **📊 Audit Support**: Structured logging and audit trail generation
 
 ## Command Design Patterns
 
 1. **Self-Validating Commands**: Commands contain their own validation logic
 2. **Immutable Commands**: Command properties are readonly after construction
-3. **Rich Command Objects**: Commands include metadata like timestamps and correlation IDs
+3. **Rich Command Objects**: Commands include metadata like timestamps and
+   correlation IDs
 4. **Business Intent**: Command names clearly express business intentions
 
 ## Common Pitfalls
 
-- **❌ Large Command Objects**: Keep commands focused on single business operations
+- **❌ Large Command Objects**: Keep commands focused on single business
+  operations
 - **❌ Missing Validation**: Always validate commands before processing
 - **❌ Shared State**: Commands should be immutable and not share state
-- **❌ Complex Logic in Commands**: Business logic belongs in handlers, not commands
+- **❌ Complex Logic in Commands**: Business logic belongs in handlers, not
+  commands
 
 ## Related Examples
 
-- [Example 2: Query Handlers](./example-2.md) - Query handling for data retrieval
-- [Example 3: Middleware Pipeline](./example-3.md) - Cross-cutting concerns with middleware
-- [Intermediate: Event Integration](../intermediate/example-1.md) - Commands that trigger events
+- [Example 2: Query Handlers](./example-2.md) - Query handling for data
+  retrieval
+- [Example 3: Middleware Pipeline](./example-3.md) - Cross-cutting concerns with
+  middleware
+- [Intermediate: Event Integration](../intermediate/example-1.md) - Commands
+  that trigger events

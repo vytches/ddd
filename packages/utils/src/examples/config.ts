@@ -15,20 +15,20 @@ export const packageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic utility patterns'
+      description: 'Basic utility patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced patterns with optional DI'
+      description: 'Advanced patterns with optional DI',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise patterns requiring DI'
-    }
+      description: 'Enterprise patterns requiring DI',
+    },
   },
   frameworks: [
     {
@@ -36,8 +36,8 @@ export const packageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS framework integration',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common']
-    }
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+    },
   ],
 
   examples: [
@@ -264,7 +264,7 @@ export const packageExampleConfig = {
     core: ['utils:basic', 'utils:intermediate', 'utils:advanced'],
     integrations: ['nestjs:basic', 'nestjs:intermediate', 'nestjs:advanced'],
     frameworks: ['nestjs'],
-    patterns: ['result-pattern', 'safe-execution', 'utilities']
+    patterns: ['result-pattern', 'safe-execution', 'utilities'],
   },
 
   contentConfig: {
@@ -274,7 +274,7 @@ export const packageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -282,7 +282,7 @@ export const packageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   sections: ['implementation', 'use-case', 'framework-integration'],
@@ -291,8 +291,7 @@ export const packageExampleConfig = {
     'domain-primitives': {
       priority: 'medium',
       relationship: 'depends-on',
-      integrationExamples: ['basic-result-pattern']
-    }
-  }
-
+      integrationExamples: ['basic-result-pattern'],
+    },
+  },
 };

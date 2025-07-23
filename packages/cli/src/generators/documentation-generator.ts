@@ -55,7 +55,11 @@ export class DocumentationGenerator {
     const examples = await this.findExamples(options, packageConfig);
 
     // 5. Filter examples by DI requirements
-    const filteredExamples = this.filterExamplesByDI(examples, options.diOnly ?? false, complexityLevels);
+    const filteredExamples = this.filterExamplesByDI(
+      examples,
+      options.diOnly ?? false,
+      complexityLevels
+    );
 
     // 6. Apply smart selection and randomization
     const selectedExamples = await this.selectExamples(filteredExamples, options, packageConfig);
@@ -75,7 +79,7 @@ export class DocumentationGenerator {
       relatedExamples,
       llmOptimized: options.llmOptimized,
       timestamp: new Date().toISOString(),
-      seed: options.seed || packageConfig.tagFinder?.seed
+      seed: options.seed || packageConfig.tagFinder?.seed,
     };
 
     const layout = options.llmOptimized ? 'llm-optimized' : 'feature-doc';
@@ -92,7 +96,7 @@ export class DocumentationGenerator {
       packageConfig,
       examplesUsed: selectedExamples.selected,
       randomizedExamples: selectedExamples.randomized,
-      sectionsIncluded
+      sectionsIncluded,
     };
   }
 
@@ -175,7 +179,7 @@ export class DocumentationGenerator {
       maxExamples,
       randomize: options.randomize,
       seed,
-      priorityTags: tagFinderConfig.priorityTags
+      priorityTags: tagFinderConfig.priorityTags,
     });
 
     const randomized = examples.filter(ex => !selected.includes(ex));
@@ -193,7 +197,10 @@ export class DocumentationGenerator {
     // Find examples from other packages that integrate with this package
     for (const complexity of complexityLevels) {
       const integrationTag = `*:integration:${packageName}`;
-      const integrationExamples = await this.tagFinder.findExamplesByTag(integrationTag, complexity);
+      const integrationExamples = await this.tagFinder.findExamplesByTag(
+        integrationTag,
+        complexity
+      );
       relatedExamples.push(...integrationExamples);
     }
 
@@ -212,32 +219,32 @@ export class DocumentationGenerator {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
     const version = packageConfig.version || '1.0.0';
-    
+
     let filename = `${packageConfig.displayName || packageConfig.packageName}-Documentation`;
-    
+
     // Add version information
     filename += `-v${version}`;
-    
+
     // Add framework if specified
     if (options.framework) {
       filename += `-${options.framework}`;
     }
-    
+
     // Add complexity level if single level specified
     if (options.complexityLevels && options.complexityLevels.length === 1) {
       filename += `-${options.complexityLevels[0]}`;
     }
-    
+
     // Add optimization type
     if (options.llmOptimized) {
       filename += '-LLM-Optimized';
     } else {
       filename += '-Standard';
     }
-    
+
     // Add generation date
     filename += `-${dateStr}`;
-    
+
     filename += '.md';
 
     return path.join(process.cwd(), filename);

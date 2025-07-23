@@ -139,16 +139,22 @@ describe('FileSystem', () => {
       const originalError = new Error('Permission denied');
       vi.mocked(fs.promises.mkdir).mockRejectedValue(originalError);
 
-      const [error] = await safeRun(async () => await FileSystem.createDirectory('/path/to/directory'));
+      const [error] = await safeRun(
+        async () => await FileSystem.createDirectory('/path/to/directory')
+      );
 
       expect(error).toBeInstanceOf(CLIError);
-      expect(error?.message).toBe('Failed to create directory /path/to/directory: Permission denied');
+      expect(error?.message).toBe(
+        'Failed to create directory /path/to/directory: Permission denied'
+      );
     });
 
     it('should handle non-Error rejection', async () => {
       vi.mocked(fs.promises.mkdir).mockRejectedValue('String error');
 
-      const [error] = await safeRun(async () => await FileSystem.createDirectory('/path/to/directory'));
+      const [error] = await safeRun(
+        async () => await FileSystem.createDirectory('/path/to/directory')
+      );
 
       expect(error).toBeInstanceOf(CLIError);
       expect(error?.message).toBe('Failed to create directory /path/to/directory: String error');
@@ -196,7 +202,9 @@ describe('FileSystem', () => {
       const originalError = new Error('Write failed');
       vi.mocked(fs.promises.writeFile).mockRejectedValue(originalError);
 
-      const [error] = await safeRun(async () => await FileSystem.writeFile('/path/to/file.txt', 'content'));
+      const [error] = await safeRun(
+        async () => await FileSystem.writeFile('/path/to/file.txt', 'content')
+      );
 
       expect(error).toBeInstanceOf(CLIError);
       expect(error?.message).toBe('Failed to write file /path/to/file.txt: Write failed');
@@ -222,17 +230,23 @@ describe('FileSystem', () => {
       const originalError = new Error('Copy failed');
       vi.mocked(fs.promises.copyFile).mockRejectedValue(originalError);
 
-      const [error] = await safeRun(async () => await FileSystem.copyFile('/source/file.txt', '/dest/path/file.txt'));
+      const [error] = await safeRun(
+        async () => await FileSystem.copyFile('/source/file.txt', '/dest/path/file.txt')
+      );
 
       expect(error).toBeInstanceOf(CLIError);
-      expect(error?.message).toBe('Failed to copy file from /source/file.txt to /dest/path/file.txt: Copy failed');
+      expect(error?.message).toBe(
+        'Failed to copy file from /source/file.txt to /dest/path/file.txt: Copy failed'
+      );
     });
   });
 
   describe('listDirectory method', () => {
     it('should list directory contents successfully', async () => {
-      const files = ['file1.txt', 'file2.txt', 'subdir']  as unknown as fs.Dirent<Buffer<ArrayBufferLike>>[]
-      vi.mocked(fs.promises.readdir).mockResolvedValue(files)
+      const files = ['file1.txt', 'file2.txt', 'subdir'] as unknown as fs.Dirent<
+        Buffer<ArrayBufferLike>
+      >[];
+      vi.mocked(fs.promises.readdir).mockResolvedValue(files);
 
       const result = await FileSystem.listDirectory('/path/to/directory');
 
@@ -244,10 +258,14 @@ describe('FileSystem', () => {
       const originalError = new Error('Directory not found');
       vi.mocked(fs.promises.readdir).mockRejectedValue(originalError);
 
-      const [error] = await safeRun(async () => await FileSystem.listDirectory('/path/to/directory'));
+      const [error] = await safeRun(
+        async () => await FileSystem.listDirectory('/path/to/directory')
+      );
 
       expect(error).toBeInstanceOf(CLIError);
-      expect(error?.message).toBe('Failed to list directory /path/to/directory: Directory not found');
+      expect(error?.message).toBe(
+        'Failed to list directory /path/to/directory: Directory not found'
+      );
     });
   });
 
@@ -275,7 +293,9 @@ describe('FileSystem', () => {
 
   describe('findFiles method', () => {
     it('should find files matching pattern', async () => {
-      const mockItems = ['file1.txt', 'file2.js', 'subdir'] as unknown as fs.Dirent<Buffer<ArrayBufferLike>>[]
+      const mockItems = ['file1.txt', 'file2.js', 'subdir'] as unknown as fs.Dirent<
+        Buffer<ArrayBufferLike>
+      >[];
       const mockStats = [
         { isDirectory: () => false },
         { isDirectory: () => false },
@@ -302,10 +322,8 @@ describe('FileSystem', () => {
     });
 
     it('should recursively search subdirectories', async () => {
-      const mockItems = ['file1.txt'] as unknown as fs.Dirent<Buffer<ArrayBufferLike>>[]
-      const mockStats = [
-        { isDirectory: () => false },
-      ];
+      const mockItems = ['file1.txt'] as unknown as fs.Dirent<Buffer<ArrayBufferLike>>[];
+      const mockStats = [{ isDirectory: () => false }];
 
       vi.mocked(fs.promises.readdir).mockResolvedValue(mockItems);
       vi.mocked(fs.promises.stat).mockResolvedValue(mockStats[0] as any);
@@ -324,7 +342,9 @@ describe('FileSystem', () => {
       const [error] = await safeRun(async () => await FileSystem.findFiles('/test', /\.txt$/));
 
       expect(error).toBeInstanceOf(CLIError);
-      expect(error?.message).toBe('Failed to find files in /test: Failed to list directory /test: Permission denied');
+      expect(error?.message).toBe(
+        'Failed to find files in /test: Failed to list directory /test: Permission denied'
+      );
     });
   });
 

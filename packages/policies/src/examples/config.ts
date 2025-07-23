@@ -4,19 +4,25 @@ export const config: PackageExampleConfig = {
   packageName: 'policies',
   displayName: 'Business Policies',
   version: '2.0.0',
-  description: 'Business Policies V2 provides a unified Promise-based API with rich enterprise features for policy validation and business rule enforcement.',
+  description:
+    'Business Policies V2 provides a unified Promise-based API with rich enterprise features for policy validation and business rule enforcement.',
   domain: 'Validation',
   patterns: ['business-rules', 'policy-pattern', 'specification-pattern', 'validation-pattern'],
   tags: {
     core: ['policies:core', 'policies:validation', 'policies:business-rules'],
-    integrations: ['policies:specifications', 'policies:registry', 'policies:events', 'policies:audit'],
+    integrations: [
+      'policies:specifications',
+      'policies:registry',
+      'policies:events',
+      'policies:audit',
+    ],
     frameworks: ['policies:nestjs', 'policies:express', 'policies:fastify'],
-    patterns: ['policies:builder', 'policies:group', 'policies:behaviors', 'policies:context']
+    patterns: ['policies:builder', 'policies:group', 'policies:behaviors', 'policies:context'],
   },
   dependencies: ['@vytches-ddd/core', '@vytches-ddd/policies', '@vytches-ddd/utils'],
   sections: [
     'hero',
-    'description', 
+    'description',
     'whenToUse',
     'whenNotToUse',
     'examples',
@@ -24,27 +30,28 @@ export const config: PackageExampleConfig = {
     'frameworkIntegration',
     'commonPitfalls',
     'troubleshooting',
-    'performance'
+    'performance',
   ],
   complexityLevels: {
     basic: {
       level: 'basic',
       diSupport: true,
       diRequired: false,
-      description: 'Basic policy validation with simple specifications'
+      description: 'Basic policy validation with simple specifications',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: true,
-      description: 'Advanced policy features with conditional logic and group policies'
+      description: 'Advanced policy features with conditional logic and group policies',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise policy system with behaviors, registry, and event-driven architecture'
-    }
+      description:
+        'Enterprise policy system with behaviors, registry, and event-driven architecture',
+    },
   },
   frameworks: [
     {
@@ -52,15 +59,15 @@ export const config: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'Integration with NestJS framework',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/common', '@nestjs/config']
+      dependencies: ['@nestjs/common', '@nestjs/config'],
     },
     {
       name: 'express',
       displayName: 'Express',
       description: 'Integration with Express framework',
       complexityLevels: ['basic', 'intermediate'],
-      dependencies: ['express']
-    }
+      dependencies: ['express'],
+    },
   ],
   examples: [
     // Basic Examples
@@ -72,7 +79,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Fundamental policy building patterns with fluent API',
-      dependencies: ['@vytches-ddd/policies']
+      dependencies: ['@vytches-ddd/policies'],
     },
     {
       id: 'basic-specification-pattern',
@@ -82,7 +89,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Reusable business rules with specification pattern',
-      dependencies: ['@vytches-ddd/policies']
+      dependencies: ['@vytches-ddd/policies'],
     },
     {
       id: 'basic-implementation',
@@ -92,9 +99,9 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Comprehensive basic policy patterns and usage',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils'],
     },
-    
+
     // Intermediate Examples
     {
       id: 'intermediate-policy-behaviors',
@@ -104,7 +111,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Cross-cutting policy concerns with retry, caching, and temporal behaviors',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils'],
     },
     {
       id: 'intermediate-policy-registry',
@@ -114,7 +121,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Centralized policy management with versioning and A/B testing',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils'],
     },
     {
       id: 'intermediate-external-integration',
@@ -124,7 +131,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Policy integration with external services and resilience patterns',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/resilience']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/resilience'],
     },
     {
       id: 'intermediate-implementation',
@@ -134,9 +141,9 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced policy features with conditional logic and behaviors',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/utils'],
     },
-    
+
     // Advanced Examples
     {
       id: 'advanced-enterprise-orchestration',
@@ -146,7 +153,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Large-scale policy coordination with comprehensive governance workflows',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/events', '@vytches-ddd/messaging']
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/events', '@vytches-ddd/messaging'],
     },
     {
       id: 'advanced-policy-mesh',
@@ -155,8 +162,9 @@ export const config: PackageExampleConfig = {
       tags: ['policies:mesh', 'policies:distributed', 'policies:microservices'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Distributed policy enforcement across microservices with service mesh integration',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/messaging', '@vytches-ddd/resilience']
+      description:
+        'Distributed policy enforcement across microservices with service mesh integration',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/messaging', '@vytches-ddd/resilience'],
     },
     {
       id: 'advanced-ai-optimization',
@@ -165,8 +173,9 @@ export const config: PackageExampleConfig = {
       tags: ['policies:ai', 'policies:optimization', 'policies:machine-learning'],
       complexity: 'advanced',
       priority: 'medium',
-      description: 'Machine learning integration for intelligent policy optimization and adaptive learning',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/analytics', '@vytches-ddd/events']
+      description:
+        'Machine learning integration for intelligent policy optimization and adaptive learning',
+      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/analytics', '@vytches-ddd/events'],
     },
     {
       id: 'advanced-implementation',
@@ -175,10 +184,16 @@ export const config: PackageExampleConfig = {
       tags: ['policies:enterprise', 'policies:behaviors', 'policies:registry', 'events'],
       complexity: 'advanced',
       priority: 'high',
-      description: 'Enterprise policy system with behaviors, registry, and event-driven architecture',
-      dependencies: ['@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/utils', '@vytches-ddd/events']
+      description:
+        'Enterprise policy system with behaviors, registry, and event-driven architecture',
+      dependencies: [
+        '@vytches-ddd/policies',
+        '@vytches-ddd/di',
+        '@vytches-ddd/utils',
+        '@vytches-ddd/events',
+      ],
     },
-    
+
     // Framework Integration Examples
     {
       id: 'nestjs-basic-integration',
@@ -188,7 +203,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic NestJS integration with manual policy setup',
-      dependencies: ['@nestjs/common', '@vytches-ddd/policies']
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies'],
     },
     {
       id: 'nestjs-specification-integration',
@@ -198,7 +213,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'NestJS integration with specification pattern and rule composition',
-      dependencies: ['@nestjs/common', '@vytches-ddd/policies']
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies'],
     },
     {
       id: 'nestjs-di-integration',
@@ -208,7 +223,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced NestJS integration with @vytches-ddd/di and policy behaviors',
-      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di']
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di'],
     },
     {
       id: 'nestjs-registry-integration',
@@ -218,7 +233,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'NestJS integration with policy registry, versioning, and A/B testing',
-      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di']
+      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di'],
     },
     {
       id: 'nestjs-enterprise-orchestration',
@@ -228,8 +243,13 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Enterprise-scale policy orchestration in NestJS with distributed coordination',
-      dependencies: ['@nestjs/common', '@vytches-ddd/policies', '@vytches-ddd/di', '@vytches-ddd/events']
-    }
+      dependencies: [
+        '@nestjs/common',
+        '@vytches-ddd/policies',
+        '@vytches-ddd/di',
+        '@vytches-ddd/events',
+      ],
+    },
   ],
   contentConfig: {
     showImportStatements: true,
@@ -238,30 +258,30 @@ export const config: PackageExampleConfig = {
     showPerformance: true,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
   llmSupport: {
     enabled: true,
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
   relatedPackages: {
-    'validation': {
+    validation: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['specification-integration', 'composite-validation']
+      integrationExamples: ['specification-integration', 'composite-validation'],
     },
-    'events': {
+    events: {
       priority: 'medium',
       relationship: 'publishes-to',
-      integrationExamples: ['policy-events', 'audit-events']
+      integrationExamples: ['policy-events', 'audit-events'],
     },
     'domain-services': {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['business-rule-enforcement']
-    }
-  }
+      integrationExamples: ['business-rule-enforcement'],
+    },
+  },
 };

@@ -41,4 +41,3 @@ export * from './base-domain-service';
 export * from './domain-service.decorator';
 // Legacy implementations removed - use VytchesDDD DI system instead
 export * from './service.errors';
-

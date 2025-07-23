@@ -317,6 +317,7 @@ export interface BusinessRule {
   id: string;
   name: string;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   condition: string | Function;
   errorMessage: string;
   errorCode: string;

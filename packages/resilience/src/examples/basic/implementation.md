@@ -7,8 +7,11 @@
 
 ## Business Context
 
-This example demonstrates basic resilience patterns for a payment processing system:
-- Circuit breaker protects against cascading failures when payment gateway is down
+This example demonstrates basic resilience patterns for a payment processing
+system:
+
+- Circuit breaker protects against cascading failures when payment gateway is
+  down
 - Retry mechanism handles transient network issues
 - Timeout strategy prevents hanging requests
 - Bulkhead isolates critical payment operations
@@ -17,12 +20,12 @@ This example demonstrates basic resilience patterns for a payment processing sys
 
 ```typescript
 // payment-service.ts
-import { 
-  CircuitBreaker, 
-  RetryStrategy, 
+import {
+  CircuitBreaker,
+  RetryStrategy,
   TimeoutStrategy,
   BulkheadStrategy,
-  ResiliencePolicyBuilder 
+  ResiliencePolicyBuilder,
 } from '@vytches-ddd/resilience';
 import { Result } from '@vytches-ddd/utils';
 import { PaymentRequest, PaymentResponse, PaymentGateway } from '../types'; // ALWAYS import from app
@@ -42,43 +45,49 @@ export class PaymentService {
     // Circuit breaker configuration
     this.circuitBreaker = new CircuitBreaker({
       name: 'PaymentGateway',
-      failureThreshold: 5,     // Trip after 5 failures
-      recoveryTimeout: 30000,  // 30 seconds before retry
+      failureThreshold: 5, // Trip after 5 failures
+      recoveryTimeout: 30000, // 30 seconds before retry
       monitoringPeriod: 60000, // 1 minute monitoring window
-      successThreshold: 3      // 3 successes to close circuit
+      successThreshold: 3, // 3 successes to close circuit
     });
 
     // Retry strategy with exponential backoff
     this.retryStrategy = new RetryStrategy({
       maxAttempts: 3,
-      baseDelay: 1000,        // 1 second base delay
-      maxDelay: 10000,        // 10 seconds max delay
-      backoffMultiplier: 2,   // Exponential backoff
-      jitter: true            // Add random jitter
+      baseDelay: 1000, // 1 second base delay
+      maxDelay: 10000, // 10 seconds max delay
+      backoffMultiplier: 2, // Exponential backoff
+      jitter: true, // Add random jitter
     });
 
     // Timeout strategy
     this.timeoutStrategy = new TimeoutStrategy({
-      timeout: 15000          // 15 seconds timeout
+      timeout: 15000, // 15 seconds timeout
     });
 
     // Bulkhead strategy for resource isolation
     this.bulkheadStrategy = new BulkheadStrategy({
-      maxConcurrentCalls: 10,  // Maximum 10 concurrent payment calls
-      maxQueueSize: 50         // Queue up to 50 requests
+      maxConcurrentCalls: 10, // Maximum 10 concurrent payment calls
+      maxQueueSize: 50, // Queue up to 50 requests
     });
   }
 
-  async processPayment(paymentRequest: PaymentRequest): Promise<Result<PaymentResponse, Error>> {
+  async processPayment(
+    paymentRequest: PaymentRequest
+  ): Promise<Result<PaymentResponse, Error>> {
     try {
       // Check circuit breaker state
       if (this.circuitBreaker.isOpen()) {
-        return Result.failure(new Error('Payment gateway is currently unavailable (circuit breaker open)'));
+        return Result.failure(
+          new Error(
+            'Payment gateway is currently unavailable (circuit breaker open)'
+          )
+        );
       }
 
       // Execute payment with all resilience strategies
       const result = await this.executeWithResilience(paymentRequest);
-      
+
       if (result.isSuccess()) {
         // Record success for circuit breaker
         this.circuitBreaker.recordSuccess();
@@ -91,11 +100,15 @@ export class PaymentService {
     } catch (error) {
       // Record failure and return error
       this.circuitBreaker.recordFailure();
-      return Result.failure(new Error(`Payment processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment processing failed: ${error.message}`)
+      );
     }
   }
 
-  private async executeWithResilience(paymentRequest: PaymentRequest): Promise<Result<PaymentResponse, Error>> {
+  private async executeWithResilience(
+    paymentRequest: PaymentRequest
+  ): Promise<Result<PaymentResponse, Error>> {
     // Wrap the payment call with all resilience strategies
     const resilientPayment = async (): Promise<PaymentResponse> => {
       // Apply bulkhead (resource isolation)
@@ -131,7 +144,7 @@ export class PaymentService {
       state: this.circuitBreaker.getState(),
       failureCount: this.circuitBreaker.getFailureCount(),
       successCount: this.circuitBreaker.getSuccessCount(),
-      lastFailureTime: this.circuitBreaker.getLastFailureTime()
+      lastFailureTime: this.circuitBreaker.getLastFailureTime(),
     };
   }
 
@@ -160,14 +173,14 @@ export class PaymentService {
   async shutdown(): Promise<void> {
     // Close bulkhead to prevent new requests
     await this.bulkheadStrategy.shutdown();
-    
+
     // Wait for pending operations to complete
     await this.waitForPendingOperations();
   }
 
   private async waitForPendingOperations(): Promise<void> {
     // Wait for any pending operations to complete
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const checkPending = () => {
         if (this.bulkheadStrategy.getPendingCount() === 0) {
           resolve();
@@ -191,21 +204,21 @@ export class PaymentResiliencePolicy {
         name: 'StandardPayment',
         failureThreshold: 5,
         recoveryTimeout: 30000,
-        monitoringPeriod: 60000
+        monitoringPeriod: 60000,
       })
       .withRetry({
         maxAttempts: 3,
         baseDelay: 1000,
         maxDelay: 10000,
         backoffMultiplier: 2,
-        jitter: true
+        jitter: true,
       })
       .withTimeout({
-        timeout: 15000
+        timeout: 15000,
       })
       .withBulkhead({
         maxConcurrentCalls: 10,
-        maxQueueSize: 50
+        maxQueueSize: 50,
       });
   }
 
@@ -213,23 +226,23 @@ export class PaymentResiliencePolicy {
     return ResiliencePolicyBuilder.create()
       .withCircuitBreaker({
         name: 'HighValuePayment',
-        failureThreshold: 3,      // More sensitive
-        recoveryTimeout: 60000,   // Longer recovery
-        monitoringPeriod: 120000
+        failureThreshold: 3, // More sensitive
+        recoveryTimeout: 60000, // Longer recovery
+        monitoringPeriod: 120000,
       })
       .withRetry({
-        maxAttempts: 5,           // More retries
-        baseDelay: 2000,          // Longer delays
+        maxAttempts: 5, // More retries
+        baseDelay: 2000, // Longer delays
         maxDelay: 30000,
         backoffMultiplier: 2,
-        jitter: true
+        jitter: true,
       })
       .withTimeout({
-        timeout: 30000            // Longer timeout
+        timeout: 30000, // Longer timeout
       })
       .withBulkhead({
-        maxConcurrentCalls: 5,    // More conservative
-        maxQueueSize: 20
+        maxConcurrentCalls: 5, // More conservative
+        maxQueueSize: 20,
       });
   }
 
@@ -239,21 +252,21 @@ export class PaymentResiliencePolicy {
         name: 'RobustPayment',
         failureThreshold: 10,
         recoveryTimeout: 15000,
-        monitoringPeriod: 30000
+        monitoringPeriod: 30000,
       })
       .withRetry({
         maxAttempts: 2,
         baseDelay: 500,
         maxDelay: 5000,
         backoffMultiplier: 1.5,
-        jitter: true
+        jitter: true,
       })
       .withTimeout({
-        timeout: 10000
+        timeout: 10000,
       })
       .withBulkhead({
         maxConcurrentCalls: 20,
-        maxQueueSize: 100
+        maxQueueSize: 100,
       });
   }
 }
@@ -269,16 +282,20 @@ export class AdvancedPaymentService {
   }
 
   private initializePolicies(): void {
-    this.standardPolicy = PaymentResiliencePolicy.createStandardPolicy().build();
-    this.highValuePolicy = PaymentResiliencePolicy.createHighValuePolicy().build();
+    this.standardPolicy =
+      PaymentResiliencePolicy.createStandardPolicy().build();
+    this.highValuePolicy =
+      PaymentResiliencePolicy.createHighValuePolicy().build();
     this.robustPolicy = PaymentResiliencePolicy.createRobustPolicy().build();
   }
 
-  async processPayment(paymentRequest: PaymentRequest): Promise<Result<PaymentResponse, Error>> {
+  async processPayment(
+    paymentRequest: PaymentRequest
+  ): Promise<Result<PaymentResponse, Error>> {
     try {
       // Select appropriate policy based on payment amount
       const policy = this.selectPolicy(paymentRequest);
-      
+
       // Execute payment with selected resilience policy
       const result = await policy.execute(async () => {
         return await this.paymentGateway.processPayment(paymentRequest);
@@ -286,7 +303,9 @@ export class AdvancedPaymentService {
 
       return Result.success(result);
     } catch (error) {
-      return Result.failure(new Error(`Payment processing failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment processing failed: ${error.message}`)
+      );
     }
   }
 
@@ -309,13 +328,18 @@ export class AdvancedPaymentService {
     return {
       standard: this.standardPolicy.getMetrics(),
       highValue: this.highValuePolicy.getMetrics(),
-      robust: this.robustPolicy.getMetrics()
+      robust: this.robustPolicy.getMetrics(),
     };
   }
 }
 
 // resilience-decorators.ts
-import { CircuitBreaker, Retry, Timeout, Bulkhead } from '@vytches-ddd/resilience';
+import {
+  CircuitBreaker,
+  Retry,
+  Timeout,
+  Bulkhead,
+} from '@vytches-ddd/resilience';
 
 // ⭐ Decorator-based Resilience
 export class DecoratorPaymentService {
@@ -324,35 +348,37 @@ export class DecoratorPaymentService {
   @CircuitBreaker({
     name: 'PaymentGateway',
     failureThreshold: 5,
-    recoveryTimeout: 30000
+    recoveryTimeout: 30000,
   })
   @Retry({
     maxAttempts: 3,
     baseDelay: 1000,
-    backoffMultiplier: 2
+    backoffMultiplier: 2,
   })
   @Timeout({
-    timeout: 15000
+    timeout: 15000,
   })
   @Bulkhead({
     maxConcurrentCalls: 10,
-    maxQueueSize: 50
+    maxQueueSize: 50,
   })
-  async processPayment(paymentRequest: PaymentRequest): Promise<PaymentResponse> {
+  async processPayment(
+    paymentRequest: PaymentRequest
+  ): Promise<PaymentResponse> {
     return await this.paymentGateway.processPayment(paymentRequest);
   }
 
   @CircuitBreaker({
     name: 'PaymentValidation',
     failureThreshold: 3,
-    recoveryTimeout: 15000
+    recoveryTimeout: 15000,
   })
   @Retry({
     maxAttempts: 2,
-    baseDelay: 500
+    baseDelay: 500,
   })
   @Timeout({
-    timeout: 5000
+    timeout: 5000,
   })
   async validatePayment(paymentRequest: PaymentRequest): Promise<boolean> {
     return await this.paymentGateway.validatePayment(paymentRequest);
@@ -362,7 +388,8 @@ export class DecoratorPaymentService {
 
 ## Key Features
 
-- **Circuit Breaker**: Protects against cascading failures with configurable thresholds
+- **Circuit Breaker**: Protects against cascading failures with configurable
+  thresholds
 - **Retry Strategy**: Exponential backoff with jitter for transient failures
 - **Timeout Strategy**: Prevents hanging requests with configurable timeouts
 - **Bulkhead Pattern**: Resource isolation with concurrent call limits
@@ -376,29 +403,35 @@ export class DecoratorPaymentService {
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
-  async processPayment(paymentData: PaymentRequest): Promise<Result<PaymentResponse, Error>> {
+  async processPayment(
+    paymentData: PaymentRequest
+  ): Promise<Result<PaymentResponse, Error>> {
     try {
       // Check if payment gateway is available
       const isAvailable = await this.paymentService.isPaymentGatewayAvailable();
-      
+
       if (!isAvailable) {
-        return Result.failure(new Error('Payment gateway is currently unavailable'));
+        return Result.failure(
+          new Error('Payment gateway is currently unavailable')
+        );
       }
 
       // Process payment with resilience
       const result = await this.paymentService.processPayment(paymentData);
-      
+
       if (result.isFailure()) {
         // Log circuit breaker status for debugging
         const status = this.paymentService.getCircuitBreakerStatus();
         console.log('Circuit breaker status:', status);
-        
+
         return Result.failure(result.error);
       }
 
       return Result.success(result.value);
     } catch (error) {
-      return Result.failure(new Error(`Payment controller error: ${error.message}`));
+      return Result.failure(
+        new Error(`Payment controller error: ${error.message}`)
+      );
     }
   }
 
@@ -409,15 +442,15 @@ export class PaymentController {
   }> {
     const isAvailable = await this.paymentService.isPaymentGatewayAvailable();
     const status = this.paymentService.getCircuitBreakerStatus();
-    
+
     return {
       isAvailable,
       circuitBreakerStatus: status,
       metrics: {
         state: status.state,
         failureCount: status.failureCount,
-        successCount: status.successCount
-      }
+        successCount: status.successCount,
+      },
     };
   }
 }
@@ -425,9 +458,12 @@ export class PaymentController {
 
 ## Common Pitfalls
 
-- **Threshold Tuning**: Set appropriate failure thresholds based on your system's characteristics
-- **Timeout Configuration**: Balance between responsiveness and allowing operations to complete
+- **Threshold Tuning**: Set appropriate failure thresholds based on your
+  system's characteristics
+- **Timeout Configuration**: Balance between responsiveness and allowing
+  operations to complete
 - **Bulkhead Sizing**: Configure concurrent limits based on downstream capacity
 - **Retry Logic**: Avoid retry storms by using exponential backoff with jitter
-- **Circuit Breaker States**: Monitor and understand the three states (CLOSED, OPEN, HALF_OPEN)
+- **Circuit Breaker States**: Monitor and understand the three states (CLOSED,
+  OPEN, HALF_OPEN)
 - **Resource Cleanup**: Ensure proper cleanup of resources during shutdown

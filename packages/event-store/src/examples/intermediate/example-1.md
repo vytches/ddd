@@ -1,25 +1,33 @@
 # Event Replay Engine
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-store
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: event-replay, recovery, historical-processing, system-restoration
-**Dependencies**: @vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+intermediate **Domain**: Infrastructure **Patterns**: event-replay, recovery,
+historical-processing, system-restoration **Dependencies**:
+@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils
 
 ## Description
 
-Advanced event replay capabilities for system recovery, historical data processing, and rebuilding projections. This example demonstrates sophisticated replay strategies, batch processing, error handling, and progress tracking for enterprise-grade event replay systems.
+Advanced event replay capabilities for system recovery, historical data
+processing, and rebuilding projections. This example demonstrates sophisticated
+replay strategies, batch processing, error handling, and progress tracking for
+enterprise-grade event replay systems.
 
 ## Business Context
 
-Event replay is essential for disaster recovery, debugging production issues, rebuilding projections after schema changes, and migrating data between systems. A robust replay system allows teams to confidently recover from failures and maintain data consistency across distributed systems.
+Event replay is essential for disaster recovery, debugging production issues,
+rebuilding projections after schema changes, and migrating data between systems.
+A robust replay system allows teams to confidently recover from failures and
+maintain data consistency across distributed systems.
 
 ## Code Example
 
 ```typescript
 // event-replay-engine.ts
-import { EventReplayEngine, InMemoryEventStore, JsonEventSerializer } from '@vytches-ddd/event-store';
+import {
+  EventReplayEngine,
+  InMemoryEventStore,
+  JsonEventSerializer,
+} from '@vytches-ddd/event-store';
 import { DomainEvent, EntityId } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
 import { Logger } from '@vytches-ddd/logging';
@@ -34,7 +42,7 @@ export class AdvancedEventReplayEngine {
   constructor() {
     this.eventStore = new InMemoryEventStore({
       serializer: new JsonEventSerializer(),
-      enableSnapshots: false
+      enableSnapshots: false,
     });
   }
 
@@ -44,7 +52,7 @@ export class AdvancedEventReplayEngine {
   ): Promise<Result<ReplayResult, Error>> {
     try {
       this.logger.info('Starting full event store replay', { options });
-      
+
       const startTime = new Date();
       const result: ReplayResult = {
         totalEventsProcessed: 0,
@@ -52,12 +60,12 @@ export class AdvancedEventReplayEngine {
         failedEvents: 0,
         startTime,
         endTime: new Date(),
-        errors: []
+        errors: [],
       };
 
       // ⭐ FOCUS: Get all streams for replay
       const streamIds = await this.eventStore.getAllStreamIds();
-      
+
       if (streamIds.length === 0) {
         this.logger.warn('No streams found for replay');
         result.endTime = new Date();
@@ -66,18 +74,22 @@ export class AdvancedEventReplayEngine {
 
       // ⭐ FOCUS: Process streams in batches for memory efficiency
       const batchSize = options.batchSize || 10;
-      
+
       for (let i = 0; i < streamIds.length; i += batchSize) {
         const streamBatch = streamIds.slice(i, i + batchSize);
-        
-        const batchResult = await this.replayStreamBatch(streamBatch, handler, options);
-        
+
+        const batchResult = await this.replayStreamBatch(
+          streamBatch,
+          handler,
+          options
+        );
+
         if (batchResult.isFailure()) {
           result.errors.push({
             eventNumber: -1,
             eventType: 'BatchError',
             error: batchResult.error.message,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         } else {
           const batchStats = batchResult.value;
@@ -93,18 +105,22 @@ export class AdvancedEventReplayEngine {
           totalBatches: Math.ceil(streamIds.length / batchSize),
           streamsProcessed: i + streamBatch.length,
           totalStreams: streamIds.length,
-          eventsProcessed: result.totalEventsProcessed
+          eventsProcessed: result.totalEventsProcessed,
         });
       }
 
       result.endTime = new Date();
-      
+
       this.logger.info('Event store replay completed', {
         duration: result.endTime.getTime() - result.startTime.getTime(),
         totalEvents: result.totalEventsProcessed,
-        successRate: result.totalEventsProcessed > 0 
-          ? (result.successfulEvents / result.totalEventsProcessed * 100).toFixed(2) + '%'
-          : '0%'
+        successRate:
+          result.totalEventsProcessed > 0
+            ? (
+                (result.successfulEvents / result.totalEventsProcessed) *
+                100
+              ).toFixed(2) + '%'
+            : '0%',
       });
 
       return Result.ok(result);
@@ -121,7 +137,7 @@ export class AdvancedEventReplayEngine {
   ): Promise<Result<ReplayResult, Error>> {
     try {
       this.logger.info('Starting stream replay', { streamId, options });
-      
+
       const startTime = new Date();
       const result: ReplayResult = {
         totalEventsProcessed: 0,
@@ -129,29 +145,34 @@ export class AdvancedEventReplayEngine {
         failedEvents: 0,
         startTime,
         endTime: new Date(),
-        errors: []
+        errors: [],
       };
 
       // ⭐ FOCUS: Read stream with pagination for memory efficiency
       const readOptions = {
         fromEventNumber: options.fromEventNumber || 0,
-        maxCount: options.toEventNumber ? 
-          (options.toEventNumber - (options.fromEventNumber || 0) + 1) : 
-          undefined
+        maxCount: options.toEventNumber
+          ? options.toEventNumber - (options.fromEventNumber || 0) + 1
+          : undefined,
       };
 
-      const readResult = await this.eventStore.readStream(streamId, readOptions);
-      
+      const readResult = await this.eventStore.readStream(
+        streamId,
+        readOptions
+      );
+
       if (readResult.isFailure()) {
         return Result.fail(readResult.error);
       }
 
       const events = readResult.value.events;
-      
+
       // ⭐ FOCUS: Apply event type filtering
-      const filteredEvents = options.filterEventTypes ? 
-        events.filter(event => options.filterEventTypes!.includes(event.eventType)) :
-        events;
+      const filteredEvents = options.filterEventTypes
+        ? events.filter(event =>
+            options.filterEventTypes!.includes(event.eventType)
+          )
+        : events;
 
       result.totalEventsProcessed = filteredEvents.length;
 
@@ -160,14 +181,15 @@ export class AdvancedEventReplayEngine {
         try {
           await handler(event);
           result.successfulEvents++;
-          
+
           // ⭐ FOCUS: Progress tracking for large streams
           if (index > 0 && index % 100 === 0) {
             this.logger.debug('Stream replay progress', {
               streamId,
               processed: index + 1,
               total: filteredEvents.length,
-              percentage: ((index + 1) / filteredEvents.length * 100).toFixed(1) + '%'
+              percentage:
+                (((index + 1) / filteredEvents.length) * 100).toFixed(1) + '%',
             });
           }
         } catch (error) {
@@ -176,7 +198,7 @@ export class AdvancedEventReplayEngine {
             eventNumber: index,
             eventType: event.eventType,
             error: error.message,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
 
           this.logger.error('Event processing failed during replay', {
@@ -184,24 +206,27 @@ export class AdvancedEventReplayEngine {
             eventNumber: index,
             eventType: event.eventType,
             eventId: event.eventId,
-            error: error.message
+            error: error.message,
           });
         }
       }
 
       result.endTime = new Date();
-      
+
       this.logger.info('Stream replay completed', {
         streamId,
         duration: result.endTime.getTime() - result.startTime.getTime(),
         totalEvents: result.totalEventsProcessed,
         successful: result.successfulEvents,
-        failed: result.failedEvents
+        failed: result.failedEvents,
       });
 
       return Result.ok(result);
     } catch (error) {
-      this.logger.error('Stream replay failed', { streamId, error: error.message });
+      this.logger.error('Stream replay failed', {
+        streamId,
+        error: error.message,
+      });
       return Result.fail(new Error(`Stream replay failed: ${error.message}`));
     }
   }
@@ -217,22 +242,28 @@ export class AdvancedEventReplayEngine {
       failedEvents: 0,
       startTime: new Date(),
       endTime: new Date(),
-      errors: []
+      errors: [],
     };
 
     try {
       // ⭐ FOCUS: Process streams in parallel for better performance
-      const streamPromises = streamIds.map(async (streamId) => {
+      const streamPromises = streamIds.map(async streamId => {
         try {
-          const streamResult = await this.replayStream(streamId, handler, options);
+          const streamResult = await this.replayStream(
+            streamId,
+            handler,
+            options
+          );
           return streamResult;
         } catch (error) {
-          return Result.fail(new Error(`Stream ${streamId} replay failed: ${error.message}`));
+          return Result.fail(
+            new Error(`Stream ${streamId} replay failed: ${error.message}`)
+          );
         }
       });
 
       const streamResults = await Promise.allSettled(streamPromises);
-      
+
       // ⭐ FOCUS: Aggregate batch results
       for (const result of streamResults) {
         if (result.status === 'fulfilled' && result.value.isSuccess()) {
@@ -242,15 +273,16 @@ export class AdvancedEventReplayEngine {
           batchResult.failedEvents += streamStats.failedEvents;
           batchResult.errors.push(...streamStats.errors);
         } else {
-          const error = result.status === 'rejected' ? 
-            result.reason : 
-            (result.value as any).error;
-          
+          const error =
+            result.status === 'rejected'
+              ? result.reason
+              : (result.value as any).error;
+
           batchResult.errors.push({
             eventNumber: -1,
             eventType: 'StreamBatchError',
             error: error.message,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
       }
@@ -268,10 +300,13 @@ export class AdvancedEventReplayEngine {
     options: ReplayOptions = {}
   ): Promise<Result<T, Error>> {
     try {
-      this.logger.info('Starting projection replay', { streamId, projectionType: projectionBuilder.name });
-      
+      this.logger.info('Starting projection replay', {
+        streamId,
+        projectionType: projectionBuilder.name,
+      });
+
       let projection = projectionBuilder.createInitialState();
-      
+
       const handler = async (event: DomainEvent): Promise<void> => {
         if (projectionBuilder.canHandle(event)) {
           projection = await projectionBuilder.apply(projection, event);
@@ -279,31 +314,33 @@ export class AdvancedEventReplayEngine {
       };
 
       // ⭐ FOCUS: Replay specific stream or all streams
-      const replayResult = streamId ? 
-        await this.replayStream(streamId, handler, options) :
-        await this.replayAllStreams(handler, options);
+      const replayResult = streamId
+        ? await this.replayStream(streamId, handler, options)
+        : await this.replayAllStreams(handler, options);
 
       if (replayResult.isFailure()) {
         return Result.fail(replayResult.error);
       }
 
       const stats = replayResult.value;
-      
+
       this.logger.info('Projection rebuilt successfully', {
         projectionType: projectionBuilder.name,
         eventsProcessed: stats.totalEventsProcessed,
         successful: stats.successfulEvents,
         failed: stats.failedEvents,
-        duration: stats.endTime.getTime() - stats.startTime.getTime()
+        duration: stats.endTime.getTime() - stats.startTime.getTime(),
       });
 
       return Result.ok(projection);
     } catch (error) {
-      this.logger.error('Projection replay failed', { 
-        projectionType: projectionBuilder.name, 
-        error: error.message 
+      this.logger.error('Projection replay failed', {
+        projectionType: projectionBuilder.name,
+        error: error.message,
       });
-      return Result.fail(new Error(`Projection replay failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Projection replay failed: ${error.message}`)
+      );
     }
   }
 
@@ -315,32 +352,34 @@ export class AdvancedEventReplayEngine {
     try {
       const checkpointInterval = options.checkpointInterval || 1000;
       let eventCount = 0;
-      
+
       const wrappedHandler = async (event: DomainEvent): Promise<void> => {
         await handler(event);
         eventCount++;
-        
+
         // ⭐ FOCUS: Create checkpoint at intervals
         if (eventCount % checkpointInterval === 0) {
           const checkpoint: ReplayCheckpoint = {
             position: eventCount,
             timestamp: new Date(),
             lastEventId: event.eventId,
-            lastEventType: event.eventType
+            lastEventType: event.eventType,
           };
-          
+
           await checkpointHandler(checkpoint);
-          
+
           this.logger.debug('Replay checkpoint created', {
             position: checkpoint.position,
-            lastEventType: checkpoint.lastEventType
+            lastEventType: checkpoint.lastEventType,
           });
         }
       };
 
       return await this.replayAllStreams(wrappedHandler, options);
     } catch (error) {
-      return Result.fail(new Error(`Checkpoint replay failed: ${error.message}`));
+      return Result.fail(
+        new Error(`Checkpoint replay failed: ${error.message}`)
+      );
     }
   }
 
@@ -349,9 +388,24 @@ export class AdvancedEventReplayEngine {
     const testEvents = [
       new OrderCreatedEvent(EntityId.createUuid(), 'customer-1', 100, 'USD'),
       new OrderStatusChangedEvent(EntityId.createUuid(), 'draft', 'confirmed'),
-      new PaymentProcessedEvent(EntityId.createUuid(), 'payment-1', 100, 'successful'),
-      new ProductCreatedEvent(EntityId.createUuid(), 'Product A', 'Electronics', 299.99),
-      new InventoryAdjustedEvent(EntityId.createUuid(), 50, 50, 'Initial stock')
+      new PaymentProcessedEvent(
+        EntityId.createUuid(),
+        'payment-1',
+        100,
+        'successful'
+      ),
+      new ProductCreatedEvent(
+        EntityId.createUuid(),
+        'Product A',
+        'Electronics',
+        299.99
+      ),
+      new InventoryAdjustedEvent(
+        EntityId.createUuid(),
+        50,
+        50,
+        'Initial stock'
+      ),
     ];
 
     // Create multiple streams for testing
@@ -362,13 +416,13 @@ export class AdvancedEventReplayEngine {
         newEvent.eventId = EntityId.createUuid().value;
         return newEvent as DomainEvent;
       });
-      
+
       await this.eventStore.appendEvents(streamId, streamEvents);
     }
 
-    this.logger.info('Test data seeded successfully', { 
-      streams: 5, 
-      eventsPerStream: testEvents.length 
+    this.logger.info('Test data seeded successfully', {
+      streams: 5,
+      eventsPerStream: testEvents.length,
     });
   }
 }
@@ -382,7 +436,9 @@ export interface ProjectionBuilder<T> {
 }
 
 // ⭐ FOCUS: Sample projection for order summary
-export class OrderSummaryProjectionBuilder implements ProjectionBuilder<OrderSummary> {
+export class OrderSummaryProjectionBuilder
+  implements ProjectionBuilder<OrderSummary>
+{
   name = 'OrderSummaryProjection';
 
   createInitialState(): OrderSummary {
@@ -392,15 +448,20 @@ export class OrderSummaryProjectionBuilder implements ProjectionBuilder<OrderSum
       averageOrderValue: 0,
       ordersByStatus: {},
       currency: 'USD',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
   canHandle(event: DomainEvent): boolean {
-    return ['OrderCreated', 'OrderStatusChanged', 'PaymentProcessed'].includes(event.eventType);
+    return ['OrderCreated', 'OrderStatusChanged', 'PaymentProcessed'].includes(
+      event.eventType
+    );
   }
 
-  async apply(currentState: OrderSummary, event: DomainEvent): Promise<OrderSummary> {
+  async apply(
+    currentState: OrderSummary,
+    event: DomainEvent
+  ): Promise<OrderSummary> {
     const newState = { ...currentState };
 
     switch (event.eventType) {
@@ -408,12 +469,13 @@ export class OrderSummaryProjectionBuilder implements ProjectionBuilder<OrderSum
         const createdEvent = event as OrderCreatedEvent;
         newState.totalOrders++;
         newState.totalRevenue += createdEvent.totalAmount;
-        newState.averageOrderValue = newState.totalRevenue / newState.totalOrders;
+        newState.averageOrderValue =
+          newState.totalRevenue / newState.totalOrders;
         break;
 
       case 'OrderStatusChanged':
         const statusEvent = event as OrderStatusChangedEvent;
-        newState.ordersByStatus[statusEvent.newStatus] = 
+        newState.ordersByStatus[statusEvent.newStatus] =
           (newState.ordersByStatus[statusEvent.newStatus] || 0) + 1;
         break;
 
@@ -504,34 +566,38 @@ export class InventoryAdjustedEvent extends DomainEvent {
 
 ```typescript
 // Complete event replay demonstration
-import { 
-  AdvancedEventReplayEngine, 
-  OrderSummaryProjectionBuilder 
+import {
+  AdvancedEventReplayEngine,
+  OrderSummaryProjectionBuilder,
 } from './event-replay-engine';
 
 async function demonstrateEventReplay() {
   const replayEngine = new AdvancedEventReplayEngine();
-  
+
   // ⭐ FOCUS: Seed test data
   await replayEngine.seedTestData();
-  
+
   console.log('--- Event Replay Engine Demo ---\n');
 
   // ⭐ FOCUS: 1. Simple event handler for logging
   console.log('1. Basic Event Replay:');
   const logHandler = async (event: DomainEvent): Promise<void> => {
-    console.log(`  Processing: ${event.eventType} at ${event.timestamp.toISOString()}`);
+    console.log(
+      `  Processing: ${event.eventType} at ${event.timestamp.toISOString()}`
+    );
   };
 
   const basicReplay = await replayEngine.replayAllStreams(logHandler, {
     batchSize: 2,
-    filterEventTypes: ['OrderCreated', 'ProductCreated']
+    filterEventTypes: ['OrderCreated', 'ProductCreated'],
   });
 
   if (basicReplay.isSuccess()) {
     const result = basicReplay.value;
     console.log(`  Processed ${result.successfulEvents} events successfully`);
-    console.log(`  Duration: ${result.endTime.getTime() - result.startTime.getTime()}ms`);
+    console.log(
+      `  Duration: ${result.endTime.getTime() - result.startTime.getTime()}ms`
+    );
   }
 
   // ⭐ FOCUS: 2. Replay specific stream
@@ -550,25 +616,30 @@ async function demonstrateEventReplay() {
   // ⭐ FOCUS: 3. Build projection from events
   console.log('\n3. Projection Rebuild:');
   const projectionBuilder = new OrderSummaryProjectionBuilder();
-  
-  const projectionResult = await replayEngine.replayToProjection(projectionBuilder);
+
+  const projectionResult =
+    await replayEngine.replayToProjection(projectionBuilder);
 
   if (projectionResult.isSuccess()) {
     const summary = projectionResult.value;
     console.log('  Order Summary Projection:');
     console.log(`    Total Orders: ${summary.totalOrders}`);
     console.log(`    Total Revenue: $${summary.totalRevenue}`);
-    console.log(`    Average Order Value: $${summary.averageOrderValue.toFixed(2)}`);
+    console.log(
+      `    Average Order Value: $${summary.averageOrderValue.toFixed(2)}`
+    );
     console.log(`    Last Updated: ${summary.lastUpdated.toISOString()}`);
   }
 
   // ⭐ FOCUS: 4. Replay with checkpoints
   console.log('\n4. Checkpoint-based Replay:');
   let checkpointCount = 0;
-  
+
   const checkpointHandler = async (checkpoint: any): Promise<void> => {
     checkpointCount++;
-    console.log(`  Checkpoint ${checkpointCount}: Position ${checkpoint.position}, Last event: ${checkpoint.lastEventType}`);
+    console.log(
+      `  Checkpoint ${checkpointCount}: Position ${checkpoint.position}, Last event: ${checkpoint.lastEventType}`
+    );
   };
 
   const eventCounter = { count: 0 };
@@ -584,7 +655,9 @@ async function demonstrateEventReplay() {
 
   if (checkpointReplay.isSuccess()) {
     const result = checkpointReplay.value;
-    console.log(`  Checkpoint replay: ${result.successfulEvents} events, ${checkpointCount} checkpoints`);
+    console.log(
+      `  Checkpoint replay: ${result.successfulEvents} events, ${checkpointCount} checkpoints`
+    );
   }
 
   // ⭐ FOCUS: 5. Error handling demonstration
@@ -600,8 +673,10 @@ async function demonstrateEventReplay() {
 
   if (errorReplay.isSuccess()) {
     const result = errorReplay.value;
-    console.log(`  Error replay: ${result.successfulEvents} successful, ${result.failedEvents} failed`);
-    
+    console.log(
+      `  Error replay: ${result.successfulEvents} successful, ${result.failedEvents} failed`
+    );
+
     if (result.errors.length > 0) {
       console.log('  Errors encountered:');
       result.errors.slice(0, 3).forEach(error => {
@@ -617,8 +692,10 @@ demonstrateEventReplay().catch(console.error);
 
 ## Key Features
 
-- **Full Store Replay**: Replay all events across all streams with batch processing
-- **Stream-Specific Replay**: Target individual streams for focused reconstruction
+- **Full Store Replay**: Replay all events across all streams with batch
+  processing
+- **Stream-Specific Replay**: Target individual streams for focused
+  reconstruction
 - **Projection Rebuilding**: Reconstruct read models and projections from events
 - **Checkpoint System**: Progress tracking with resumable replay capabilities
 - **Error Handling**: Comprehensive error tracking and recovery strategies
@@ -646,7 +723,8 @@ demonstrateEventReplay().catch(console.error);
 ## Performance Considerations
 
 - **Memory Usage**: Process events in batches to avoid memory exhaustion
-- **Progress Tracking**: Implement checkpoints for long-running replay operations
+- **Progress Tracking**: Implement checkpoints for long-running replay
+  operations
 - **Error Recovery**: Plan for partial failures and resumption strategies
 - **Parallelization**: Process independent streams concurrently when possible
 - **Resource Management**: Monitor CPU, memory, and I/O during replay operations
@@ -656,8 +734,10 @@ demonstrateEventReplay().catch(console.error);
 - **Memory Leaks**: Large event volumes can exhaust available memory
 - **Handler Errors**: Unhandled exceptions can stop entire replay process
 - **Version Compatibility**: Event schema changes may break replay handlers
-- **Performance Impact**: Replay operations can impact production system performance
-- **Checkpoint Frequency**: Balance between progress tracking and performance overhead
+- **Performance Impact**: Replay operations can impact production system
+  performance
+- **Checkpoint Frequency**: Balance between progress tracking and performance
+  overhead
 
 ## Related Examples
 

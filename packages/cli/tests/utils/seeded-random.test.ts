@@ -174,8 +174,9 @@ describe('SeededRandom', () => {
       const shuffled2 = random2.shuffle(original);
 
       // At least one of the shuffles should be different from original
-      const isShuffled = !shuffled.every((val, index) => val === original[index]) ||
-                        !shuffled2.every((val, index) => val === original[index]);
+      const isShuffled =
+        !shuffled.every((val, index) => val === original[index]) ||
+        !shuffled2.every((val, index) => val === original[index]);
       expect(isShuffled).toBe(true);
     });
 
@@ -388,7 +389,7 @@ describe('SeededRandom', () => {
         bool: random1.nextBoolean(),
         picked: random1.pick(array),
         shuffled: random1.shuffle([...array]),
-        pickN: random1.pickN(array, 3)
+        pickN: random1.pickN(array, 3),
       };
 
       const results2 = {
@@ -397,7 +398,7 @@ describe('SeededRandom', () => {
         bool: random2.nextBoolean(),
         picked: random2.pick(array),
         shuffled: random2.shuffle([...array]),
-        pickN: random2.pickN(array, 3)
+        pickN: random2.pickN(array, 3),
       };
 
       expect(results1).toEqual(results2);
@@ -420,9 +421,15 @@ describe('SeededRandom', () => {
     it('should work correctly with realistic use case', () => {
       // Simulate selecting random examples for documentation
       const examples = [
-        'basic-aggregate', 'intermediate-aggregate', 'advanced-aggregate',
-        'basic-entity', 'intermediate-entity', 'advanced-entity',
-        'basic-valueobject', 'intermediate-valueobject', 'advanced-valueobject'
+        'basic-aggregate',
+        'intermediate-aggregate',
+        'advanced-aggregate',
+        'basic-entity',
+        'intermediate-entity',
+        'advanced-entity',
+        'basic-valueobject',
+        'intermediate-valueobject',
+        'advanced-valueobject',
       ];
 
       const random = new SeededRandom('doc-generation-seed');

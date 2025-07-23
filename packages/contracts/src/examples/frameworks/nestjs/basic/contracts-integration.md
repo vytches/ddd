@@ -6,7 +6,9 @@
 
 ## Description
 
-This example demonstrates basic integration of VytchesDDD contracts with NestJS, showing how to use EntityId, specifications, and actors in NestJS services with manual instantiation for beginner-friendly patterns.
+This example demonstrates basic integration of VytchesDDD contracts with NestJS,
+showing how to use EntityId, specifications, and actors in NestJS services with
+manual instantiation for beginner-friendly patterns.
 
 ## Service Implementation
 
@@ -27,21 +29,21 @@ export class UserService {
   // ✅ FOCUS: EntityId usage in NestJS service
   async createUser(userData: CreateUserData, actor: IActor): Promise<User> {
     try {
-      this.logger.log('Creating user', { 
-        email: userData.email, 
-        actorId: actor.id 
+      this.logger.log('Creating user', {
+        email: userData.email,
+        actorId: actor.id,
       });
 
       // Create new EntityId for user
       const userId = EntityId.createWithRandomUUID();
-      
+
       // Create user with EntityId
       const user: User = {
         id: userId.getValue(),
         email: userData.email,
         name: userData.name,
         createdAt: new Date(),
-        createdBy: actor.id
+        createdBy: actor.id,
       };
 
       return user;
@@ -56,10 +58,10 @@ export class UserService {
     try {
       // Convert string to EntityId for validation
       const entityId = EntityId.createText(userId);
-      
-      this.logger.log('Finding user', { 
+
+      this.logger.log('Finding user', {
         userId: entityId.getValue(),
-        idType: entityId.getType()
+        idType: entityId.getType(),
       });
 
       // In real implementation, query database with EntityId
@@ -69,7 +71,7 @@ export class UserService {
         email: 'user@example.com',
         name: 'John Doe',
         createdAt: new Date(),
-        createdBy: 'system'
+        createdBy: 'system',
       };
 
       return user;
@@ -80,7 +82,9 @@ export class UserService {
   }
 
   // ✅ FOCUS: Specification pattern in NestJS
-  async validateUser(user: User): Promise<{ valid: boolean; errors: string[] }> {
+  async validateUser(
+    user: User
+  ): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
     try {
@@ -100,21 +104,21 @@ export class UserService {
 
       return {
         valid: errors.length === 0,
-        errors
+        errors,
       };
     } catch (error) {
       this.logger.error('User validation failed', error.message);
       return {
         valid: false,
-        errors: ['Validation error occurred']
+        errors: ['Validation error occurred'],
       };
     }
   }
 
   // ✅ FOCUS: Actor-based operations
   async updateUser(
-    userId: string, 
-    updates: UpdateUserData, 
+    userId: string,
+    updates: UpdateUserData,
     actor: IActor
   ): Promise<User> {
     try {
@@ -124,11 +128,11 @@ export class UserService {
       }
 
       const entityId = EntityId.createText(userId);
-      
+
       this.logger.log('Updating user', {
         userId: entityId.getValue(),
         actorId: actor.id,
-        actorType: actor.type
+        actorType: actor.type,
       });
 
       // Create updated user
@@ -137,7 +141,7 @@ export class UserService {
         email: updates.email || 'current@example.com',
         name: updates.name || 'Current Name',
         createdAt: new Date(),
-        createdBy: actor.id
+        createdBy: actor.id,
       };
 
       return updatedUser;
@@ -151,11 +155,11 @@ export class UserService {
 // ✅ FOCUS: Manual specification implementations
 class EmailValidationSpecification implements ISpecification<string> {
   private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   isSatisfiedBy(email: string): boolean {
     return email && this.emailRegex.test(email);
   }
-  
+
   getFailureReason(email: string): string {
     if (!email) return 'Email is required';
     return 'Invalid email format';
@@ -164,11 +168,11 @@ class EmailValidationSpecification implements ISpecification<string> {
 
 class MinimumLengthSpecification implements ISpecification<string> {
   constructor(private readonly minLength: number) {}
-  
+
   isSatisfiedBy(value: string): boolean {
     return value && value.length >= this.minLength;
   }
-  
+
   getFailureReason(value: string): string {
     return `Value must be at least ${this.minLength} characters`;
   }
@@ -194,31 +198,31 @@ export class UserController {
     // Create system actor for the operation
     const actor = new SystemActor({
       source: 'user-controller',
-      operation: 'createUser'
+      operation: 'createUser',
     });
 
     const user = await this.userService.createUser(userData, actor);
-    
+
     return {
       success: true,
-      data: user
+      data: user,
     };
   }
 
   @Get(':id')
   async getUser(@Param('id') userId: string) {
     const user = await this.userService.findUser(userId);
-    
+
     if (!user) {
       return {
         success: false,
-        error: 'User not found'
+        error: 'User not found',
       };
     }
 
     return {
       success: true,
-      data: user
+      data: user,
     };
   }
 
@@ -228,37 +232,34 @@ export class UserController {
     @Body() updates: UpdateUserData
   ) {
     // Create user actor (in real app, from JWT/session)
-    const actor = new UserActor(
-      'current-user-id',
-      'user',
-      'Current User',
-      { permissions: ['user:update'] }
-    );
+    const actor = new UserActor('current-user-id', 'user', 'Current User', {
+      permissions: ['user:update'],
+    });
 
     const user = await this.userService.updateUser(userId, updates, actor);
-    
+
     return {
       success: true,
-      data: user
+      data: user,
     };
   }
 
   @Post(':id/validate')
   async validateUser(@Param('id') userId: string) {
     const user = await this.userService.findUser(userId);
-    
+
     if (!user) {
       return {
         success: false,
-        error: 'User not found'
+        error: 'User not found',
       };
     }
 
     const validation = await this.userService.validateUser(user);
-    
+
     return {
       success: true,
-      data: validation
+      data: validation,
     };
   }
 }
@@ -269,19 +270,19 @@ export class ActorFactory {
     return new SystemActor({
       source,
       timestamp: new Date(),
-      permissions: ['*'] // System has all permissions
+      permissions: ['*'], // System has all permissions
     });
   }
 
   static createUserActor(
-    userId: string, 
-    userName: string, 
+    userId: string,
+    userName: string,
     permissions: string[]
   ): UserActor {
     return new UserActor(userId, 'user', userName, {
       permissions,
       timestamp: new Date(),
-      source: 'web-application'
+      source: 'web-application',
     });
   }
 }
@@ -298,7 +299,7 @@ import { UserService } from './user.service';
 @Module({
   controllers: [UserController],
   providers: [UserService],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -317,12 +318,12 @@ export class EntityIdUtils {
       if (this.isUuid(param)) {
         return EntityId.createUuid(param);
       }
-      
+
       // Try integer
       if (this.isInteger(param)) {
         return EntityId.createInteger(parseInt(param));
       }
-      
+
       // Default to text
       return EntityId.createText(param);
     } catch (error) {
@@ -332,7 +333,7 @@ export class EntityIdUtils {
 
   static validateIds(ids: string[]): EntityId<string>[] {
     const validIds: EntityId<string>[] = [];
-    
+
     for (const id of ids) {
       try {
         const entityId = this.createFromParam(id);
@@ -342,12 +343,13 @@ export class EntityIdUtils {
         console.warn(`Skipping invalid ID: ${id}`);
       }
     }
-    
+
     return validIds;
   }
 
   private static isUuid(value: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(value);
   }
 
@@ -368,16 +370,19 @@ export class EntityIdUtils {
 
 ## Common Pitfalls
 
-- **Parameter Validation**: Always validate EntityId parameters from HTTP requests
+- **Parameter Validation**: Always validate EntityId parameters from HTTP
+  requests
 - **Actor Context**: Don't forget to create appropriate actors for operations
 - **Specification Reuse**: Create reusable specification classes
 - **Error Messages**: Provide meaningful error messages for validation failures
 
 ## Related Examples
 
-- [Foundation Contracts](../../basic/foundation-contracts.md) - Core contract patterns
+- [Foundation Contracts](../../basic/foundation-contracts.md) - Core contract
+  patterns
 - [EntityId Usage](../../basic/entity-id-usage.md) - Detailed EntityId patterns
-- [Event Interfaces](../intermediate/event-interfaces.md) - Advanced NestJS event patterns
+- [Event Interfaces](../intermediate/event-interfaces.md) - Advanced NestJS
+  event patterns
 
 ## Best Practices
 

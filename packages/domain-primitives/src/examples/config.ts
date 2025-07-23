@@ -1,6 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
-
-export const packageExampleConfig: PackageExampleConfig = {
+export const packageExampleConfig = {
   packageName: 'domain-primitives',
   displayName: 'Domain Primitives',
   description: 'Core building blocks for DDD: errors, actors, and domain interfaces',
@@ -13,20 +11,20 @@ export const packageExampleConfig: PackageExampleConfig = {
       level: 'basic',
       diSupport: false,
       diRequired: false,
-      description: 'Basic domain primitives patterns'
+      description: 'Basic domain primitives patterns',
     },
     intermediate: {
       level: 'intermediate',
       diSupport: true,
       diRequired: false,
-      description: 'Advanced patterns with optional DI'
+      description: 'Advanced patterns with optional DI',
     },
     advanced: {
       level: 'advanced',
       diSupport: true,
       diRequired: true,
-      description: 'Enterprise patterns requiring DI'
-    }
+      description: 'Enterprise patterns requiring DI',
+    },
   },
   frameworks: [
     {
@@ -34,8 +32,8 @@ export const packageExampleConfig: PackageExampleConfig = {
       displayName: 'NestJS',
       description: 'NestJS framework integration',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common']
-    }
+      dependencies: ['@nestjs/core', '@nestjs/common'],
+    },
   ],
 
   examples: [
@@ -259,10 +257,14 @@ export const packageExampleConfig: PackageExampleConfig = {
   ],
 
   tags: {
-    core: ['domain-primitives:basic', 'domain-primitives:intermediate', 'domain-primitives:advanced'],
+    core: [
+      'domain-primitives:basic',
+      'domain-primitives:intermediate',
+      'domain-primitives:advanced',
+    ],
     integrations: ['nestjs:basic', 'nestjs:intermediate', 'nestjs:advanced'],
     frameworks: ['nestjs'],
-    patterns: ['error-handling', 'actors', 'interfaces']
+    patterns: ['error-handling', 'actors', 'interfaces'],
   },
 
   contentConfig: {
@@ -272,7 +274,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     showPerformance: false,
     includeBestPractices: true,
     includeCommonPitfalls: true,
-    showVersionHistory: false
+    showVersionHistory: false,
   },
 
   llmSupport: {
@@ -280,21 +282,21 @@ export const packageExampleConfig: PackageExampleConfig = {
     includePrompts: true,
     includeTips: true,
     includePatterns: true,
-    optimizeForCodeGeneration: true
+    optimizeForCodeGeneration: true,
   },
 
   sections: ['implementation', 'use-case', 'framework-integration'],
 
   relatedPackages: {
-    'utils': {
+    utils: {
       priority: 'high',
       relationship: 'depends-on',
-      integrationExamples: ['basic-errors-simple']
+      integrationExamples: ['basic-errors-simple'],
     },
-    'di': {
+    di: {
       priority: 'medium',
       relationship: 'enables',
-      integrationExamples: ['nestjs-basic-di']
-    }
+      integrationExamples: ['nestjs-basic-di'],
+    },
   },
 };

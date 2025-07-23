@@ -1,36 +1,39 @@
 # Time Period Value Object - Advanced Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced
-**Domain**: Time Management & Scheduling
-**Patterns**: Period Management, Duration Calculations, Overlap Detection
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Advanced **Domain**: Time Management & Scheduling **Patterns**:
+Period Management, Duration Calculations, Overlap Detection **Dependencies**:
+@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **TimePeriod** value object for advanced time management scenarios including recurring periods, conflict detection, and resource scheduling. Shows advanced patterns for time-based value objects with business logic.
+This example demonstrates creating a **TimePeriod** value object for advanced
+time management scenarios including recurring periods, conflict detection, and
+resource scheduling. Shows advanced patterns for time-based value objects with
+business logic.
 
 ## Business Context
 
-TimePeriod is essential for advanced scheduling systems, resource management, booking platforms, and project planning. It provides sophisticated time period operations, conflict resolution, and intelligent scheduling capabilities.
+TimePeriod is essential for advanced scheduling systems, resource management,
+booking platforms, and project planning. It provides sophisticated time period
+operations, conflict resolution, and intelligent scheduling capabilities.
 
 ## Code Example
 
 ```typescript
 // time-period.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  TimePeriodData, 
+import {
+  TimePeriodData,
   RecurrencePattern,
   ConflictResolution,
-  ValueObjectValidationResult 
+  ValueObjectValidationResult,
 } from './types';
-import { 
-  validateRequired, 
+import {
+  validateRequired,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class TimePeriod extends ValueObject<TimePeriodData> {
@@ -50,7 +53,7 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
       endTime: new Date(endTime),
       timezone,
       recurrence,
-      duration: endTime.getTime() - startTime.getTime()
+      duration: endTime.getTime() - startTime.getTime(),
     };
 
     const validation = TimePeriod.validate(data);
@@ -68,8 +71,8 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     pattern: RecurrencePattern,
     timezone?: string
   ): TimePeriod {
-    const endTime = new Date(startTime.getTime() + (duration * 60 * 1000));
-    
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+
     return TimePeriod.create(startTime, endTime, timezone, pattern);
   }
 
@@ -78,7 +81,7 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     const results = [
       validateRequired(data.startTime, 'start time'),
       validateRequired(data.endTime, 'end time'),
-      validateRequired(data.timezone, 'timezone')
+      validateRequired(data.timezone, 'timezone'),
     ];
 
     // Time validity
@@ -119,15 +122,13 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     const thisUTC = this.toUTC();
     const otherUTC = other.toUTC();
 
-    const overlapStart = new Date(Math.max(
-      thisUTC.startTime.getTime(),
-      otherUTC.startTime.getTime()
-    ));
+    const overlapStart = new Date(
+      Math.max(thisUTC.startTime.getTime(), otherUTC.startTime.getTime())
+    );
 
-    const overlapEnd = new Date(Math.min(
-      thisUTC.endTime.getTime(),
-      otherUTC.endTime.getTime()
-    ));
+    const overlapEnd = new Date(
+      Math.min(thisUTC.endTime.getTime(), otherUTC.endTime.getTime())
+    );
 
     return TimePeriod.create(overlapStart, overlapEnd, 'UTC');
   }
@@ -164,7 +165,10 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
   }
 
   // ✅ FOCUS: Recurrence expansion
-  expandRecurrence(untilDate: Date, maxOccurrences: number = 100): TimePeriod[] {
+  expandRecurrence(
+    untilDate: Date,
+    maxOccurrences: number = 100
+  ): TimePeriod[] {
     if (!this.data.recurrence) {
       return [this];
     }
@@ -175,12 +179,10 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
 
     while (currentStart <= untilDate && occurrences < maxOccurrences) {
       const currentEnd = new Date(currentStart.getTime() + this.data.duration);
-      
-      periods.push(TimePeriod.create(
-        currentStart,
-        currentEnd,
-        this.data.timezone
-      ));
+
+      periods.push(
+        TimePeriod.create(currentStart, currentEnd, this.data.timezone)
+      );
 
       currentStart = this.getNextOccurrence(currentStart);
       occurrences++;
@@ -201,8 +203,11 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     const adjustedEnd = new Date(this.data.endTime);
 
     // Adjust start time to business hours
-    if (adjustedStart.getHours() < startHour || 
-        (adjustedStart.getHours() === startHour && adjustedStart.getMinutes() < startMinute)) {
+    if (
+      adjustedStart.getHours() < startHour ||
+      (adjustedStart.getHours() === startHour &&
+        adjustedStart.getMinutes() < startMinute)
+    ) {
       adjustedStart.setHours(startHour, startMinute, 0, 0);
     }
 
@@ -219,7 +224,7 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
 
     // Ensure minimum duration
     if (adjustedEnd <= adjustedStart) {
-      adjustedEnd.setTime(adjustedStart.getTime() + (30 * 60 * 1000)); // 30 minutes
+      adjustedEnd.setTime(adjustedStart.getTime() + 30 * 60 * 1000); // 30 minutes
     }
 
     return TimePeriod.create(adjustedStart, adjustedEnd, this.data.timezone);
@@ -257,12 +262,16 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     }
 
     // Simple timezone conversion (in production use proper timezone library)
-    const startInTarget = new Date(this.data.startTime.toLocaleString('en-US', { 
-      timeZone: targetTimezone 
-    }));
-    const endInTarget = new Date(this.data.endTime.toLocaleString('en-US', { 
-      timeZone: targetTimezone 
-    }));
+    const startInTarget = new Date(
+      this.data.startTime.toLocaleString('en-US', {
+        timeZone: targetTimezone,
+      })
+    );
+    const endInTarget = new Date(
+      this.data.endTime.toLocaleString('en-US', {
+        timeZone: targetTimezone,
+      })
+    );
 
     return TimePeriod.create(startInTarget, endInTarget, targetTimezone);
   }
@@ -270,7 +279,7 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
   private toUTC(): { startTime: Date; endTime: Date } {
     return {
       startTime: new Date(this.data.startTime.toISOString()),
-      endTime: new Date(this.data.endTime.toISOString())
+      endTime: new Date(this.data.endTime.toISOString()),
     };
   }
 
@@ -309,9 +318,9 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
 
   toHumanReadable(): string {
     const duration = this.getDurationInMinutes();
-    const start = this.data.startTime.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    const start = this.data.startTime.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
     if (duration < 60) {
@@ -332,19 +341,21 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
     }
 
     const next = new Date(currentStart);
-    
+
     switch (this.data.recurrence.frequency) {
       case 'daily':
         next.setDate(next.getDate() + (this.data.recurrence.interval || 1));
         break;
       case 'weekly':
-        next.setDate(next.getDate() + (7 * (this.data.recurrence.interval || 1)));
+        next.setDate(next.getDate() + 7 * (this.data.recurrence.interval || 1));
         break;
       case 'monthly':
         next.setMonth(next.getMonth() + (this.data.recurrence.interval || 1));
         break;
       case 'yearly':
-        next.setFullYear(next.getFullYear() + (this.data.recurrence.interval || 1));
+        next.setFullYear(
+          next.getFullYear() + (this.data.recurrence.interval || 1)
+        );
         break;
     }
 
@@ -374,10 +385,13 @@ export class TimePeriod extends ValueObject<TimePeriodData> {
 
   // ✅ FOCUS: Value object equality
   protected isEqualTo(other: TimePeriod): boolean {
-    return this.data.startTime.getTime() === other.data.startTime.getTime() &&
-           this.data.endTime.getTime() === other.data.endTime.getTime() &&
-           this.data.timezone === other.data.timezone &&
-           JSON.stringify(this.data.recurrence) === JSON.stringify(other.data.recurrence);
+    return (
+      this.data.startTime.getTime() === other.data.startTime.getTime() &&
+      this.data.endTime.getTime() === other.data.endTime.getTime() &&
+      this.data.timezone === other.data.timezone &&
+      JSON.stringify(this.data.recurrence) ===
+        JSON.stringify(other.data.recurrence)
+    );
   }
 }
 ```
@@ -423,7 +437,7 @@ const dailyStandup = TimePeriod.createRecurring(
   {
     frequency: 'daily',
     interval: 1,
-    daysOfWeek: [1, 2, 3, 4, 5] // Mon-Fri
+    daysOfWeek: [1, 2, 3, 4, 5], // Mon-Fri
   },
   'America/New_York'
 );
@@ -460,9 +474,13 @@ class ResourceScheduler {
     resourceId: string,
     period: TimePeriod,
     conflictResolution: 'reject' | 'split' | 'adjust' = 'reject'
-  ): { success: boolean; conflicts?: TimePeriod[]; adjustedPeriod?: TimePeriod } {
+  ): {
+    success: boolean;
+    conflicts?: TimePeriod[];
+    adjustedPeriod?: TimePeriod;
+  } {
     const existingReservations = this.reservations.get(resourceId) || [];
-    const conflicts = existingReservations.filter(reservation => 
+    const conflicts = existingReservations.filter(reservation =>
       reservation.conflictsWith(period)
     );
 
@@ -488,7 +506,7 @@ class ResourceScheduler {
 
       case 'adjust':
         const adjustedPeriod = this.findNextAvailableSlot(
-          resourceId, 
+          resourceId,
           period.getDurationInMinutes()
         );
         if (adjustedPeriod) {
@@ -511,8 +529,8 @@ class ResourceScheduler {
     let currentStart = period.startTime;
 
     // Sort conflicts by start time
-    const sortedConflicts = conflicts.sort((a, b) => 
-      a.startTime.getTime() - b.startTime.getTime()
+    const sortedConflicts = conflicts.sort(
+      (a, b) => a.startTime.getTime() - b.startTime.getTime()
     );
 
     for (const conflict of sortedConflicts) {
@@ -530,10 +548,9 @@ class ResourceScheduler {
         }
       }
 
-      currentStart = new Date(Math.max(
-        currentStart.getTime(),
-        conflict.endTime.getTime()
-      ));
+      currentStart = new Date(
+        Math.max(currentStart.getTime(), conflict.endTime.getTime())
+      );
     }
 
     // Check space after all conflicts
@@ -551,7 +568,7 @@ class ResourceScheduler {
 
     return {
       success: availablePeriods.length > 0,
-      periods: availablePeriods.length > 0 ? availablePeriods : undefined
+      periods: availablePeriods.length > 0 ? availablePeriods : undefined,
     };
   }
 
@@ -562,13 +579,16 @@ class ResourceScheduler {
   ): TimePeriod | null {
     const existingReservations = this.reservations.get(resourceId) || [];
     const start = searchStart || new Date();
-    
+
     // Simple implementation: try hourly slots
     let candidate = new Date(start);
     candidate.setMinutes(0, 0, 0); // Round to hour
 
-    for (let i = 0; i < 24 * 7; i++) { // Search up to a week
-      const candidateEnd = new Date(candidate.getTime() + (durationMinutes * 60 * 1000));
+    for (let i = 0; i < 24 * 7; i++) {
+      // Search up to a week
+      const candidateEnd = new Date(
+        candidate.getTime() + durationMinutes * 60 * 1000
+      );
       const candidatePeriod = TimePeriod.create(candidate, candidateEnd);
 
       const hasConflict = existingReservations.some(reservation =>
@@ -585,13 +605,10 @@ class ResourceScheduler {
     return null;
   }
 
-  getAvailability(
-    resourceId: string,
-    date: Date
-  ): TimePeriod[] {
+  getAvailability(resourceId: string, date: Date): TimePeriod[] {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
-    
+
     const dayEnd = new Date(date);
     dayEnd.setHours(23, 59, 59, 999);
 
@@ -611,10 +628,9 @@ class ResourceScheduler {
         const gap = TimePeriod.create(currentStart, reservation.startTime);
         availableSlots.push(gap);
       }
-      currentStart = new Date(Math.max(
-        currentStart.getTime(),
-        reservation.endTime.getTime()
-      ));
+      currentStart = new Date(
+        Math.max(currentStart.getTime(), reservation.endTime.getTime())
+      );
     }
 
     // Add remaining time at end of day
@@ -662,21 +678,29 @@ availability.forEach((slot, index) => {
 
 ## Key Features
 
-- **Advanced Time Operations**: Overlap detection, gap calculation, and conflict resolution
+- **Advanced Time Operations**: Overlap detection, gap calculation, and conflict
+  resolution
 - **Timezone Support**: Full timezone conversion and handling capabilities
-- **Recurring Patterns**: Support for daily, weekly, monthly, and yearly recurrence
-- **Business Logic**: Business hours adjustments and working day calculations  
-- **Resource Scheduling**: Advanced booking system with conflict resolution strategies
+- **Recurring Patterns**: Support for daily, weekly, monthly, and yearly
+  recurrence
+- **Business Logic**: Business hours adjustments and working day calculations
+- **Resource Scheduling**: Advanced booking system with conflict resolution
+  strategies
 - **Flexible Duration**: Support for various duration formats and calculations
 
 ## Common Pitfalls
 
-- **Timezone Complexity**: Always use proper timezone libraries for production systems
-- **Recurrence Edge Cases**: Handle end dates, leap years, and DST transitions carefully
+- **Timezone Complexity**: Always use proper timezone libraries for production
+  systems
+- **Recurrence Edge Cases**: Handle end dates, leap years, and DST transitions
+  carefully
 - **Performance**: Large recurrence expansions can be memory intensive
-- **Business Rules**: Validate business-specific constraints (minimum durations, booking windows)
+- **Business Rules**: Validate business-specific constraints (minimum durations,
+  booking windows)
 
 ## Related Examples
 
-- [Date Range Value Object](../intermediate/example-1.md) - Foundation for time-based calculations
-- [User Profile Composite](../intermediate/example-2.md) - Complex value object composition patterns
+- [Date Range Value Object](../intermediate/example-1.md) - Foundation for
+  time-based calculations
+- [User Profile Composite](../intermediate/example-2.md) - Complex value object
+  composition patterns

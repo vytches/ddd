@@ -1,7 +1,7 @@
 /**
  * Simple integration tests for Domain Services DI metadata
  * (without external DI package dependencies)
- * 
+ *
  * NOTE: DIDomainServiceMetadataRegistry and DomainServiceDiscoveryPlugin
  * have been moved to @vytches-ddd/di package. These tests are preserved
  * for reference but are currently disabled.

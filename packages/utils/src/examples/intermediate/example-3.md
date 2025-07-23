@@ -1,45 +1,48 @@
 # Error Aggregation Patterns
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: Error collection, validation aggregation, bulk processing
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Domain**: Infrastructure **Patterns**: Error collection, validation
+aggregation, bulk processing **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-Advanced error aggregation patterns for collecting, categorizing, and managing multiple errors from batch operations, complex validation scenarios, and multi-step processes. This example demonstrates how to handle scenarios where multiple operations can fail independently.
+Advanced error aggregation patterns for collecting, categorizing, and managing
+multiple errors from batch operations, complex validation scenarios, and
+multi-step processes. This example demonstrates how to handle scenarios where
+multiple operations can fail independently.
 
 ## Business Context
 
 In real-world applications, you often need to:
+
 - Validate multiple fields and collect all errors at once
 - Process bulk data and report all failures
 - Run multiple independent operations and aggregate results
 - Handle partial failures in complex workflows
 - Provide comprehensive error reporting to users
 
-Error aggregation patterns ensure that users receive complete feedback about all issues rather than just the first error encountered.
+Error aggregation patterns ensure that users receive complete feedback about all
+issues rather than just the first error encountered.
 
 ## Code Example
 
 ```typescript
 // error-aggregation-patterns.ts
 import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
-import { 
-  UserData, 
-  ValidationError, 
+import {
+  UserData,
+  ValidationError,
   AggregatedError,
   ServiceResponse,
-  CreateUserRequest 
+  CreateUserRequest,
 } from '../types';
 
 // ✅ FOCUS: Error aggregation and collection patterns
 export class ErrorAggregationPatterns {
-
   // 1. Multi-Field Validation with Error Collection
-  validateUserComprehensively(userData: CreateUserRequest): Result<CreateUserRequest, ValidationError[]> {
+  validateUserComprehensively(
+    userData: CreateUserRequest
+  ): Result<CreateUserRequest, ValidationError[]> {
     const errors: ValidationError[] = [];
 
     // Collect all validation errors instead of stopping at first
@@ -61,7 +64,9 @@ export class ErrorAggregationPatterns {
       });
     }
 
-    const [passwordError] = safeRun(() => this.validatePasswordField(userData.password));
+    const [passwordError] = safeRun(() =>
+      this.validatePasswordField(userData.password)
+    );
     if (passwordError) {
       errors.push({
         field: 'password',
@@ -112,7 +117,9 @@ export class ErrorAggregationPatterns {
       throw new Error('Name cannot exceed 100 characters');
     }
     if (!/^[a-zA-Z\s'-]+$/.test(name)) {
-      throw new Error('Name can only contain letters, spaces, hyphens, and apostrophes');
+      throw new Error(
+        'Name can only contain letters, spaces, hyphens, and apostrophes'
+      );
     }
   }
 
@@ -140,14 +147,17 @@ export class ErrorAggregationPatterns {
     }
   }
 
-  private validateBusinessRules(userData: CreateUserRequest): ValidationError[] {
+  private validateBusinessRules(
+    userData: CreateUserRequest
+  ): ValidationError[] {
     const errors: ValidationError[] = [];
 
     // Business rule: No admin emails for regular signup
     if (userData.email.toLowerCase().includes('admin')) {
       errors.push({
         field: 'email',
-        message: 'Admin email addresses are not allowed for regular registration',
+        message:
+          'Admin email addresses are not allowed for regular registration',
         value: userData.email,
       });
     }
@@ -176,15 +186,20 @@ export class ErrorAggregationPatterns {
   }
 
   // 2. Bulk Data Processing with Error Aggregation
-  processBulkUsers(userRequests: CreateUserRequest[]): ServiceResponse<UserData[]> {
+  processBulkUsers(
+    userRequests: CreateUserRequest[]
+  ): ServiceResponse<UserData[]> {
     const processedUsers: UserData[] = [];
-    const processingErrors: Array<{ index: number; errors: ValidationError[] }> = [];
+    const processingErrors: Array<{
+      index: number;
+      errors: ValidationError[];
+    }> = [];
     let globalErrors: string[] = [];
 
     // Process each user and collect all errors
     userRequests.forEach((userRequest, index) => {
       const validationResult = this.validateUserComprehensively(userRequest);
-      
+
       if (validationResult.isFailure) {
         processingErrors.push({
           index,
@@ -195,7 +210,7 @@ export class ErrorAggregationPatterns {
         });
       } else {
         // Additional processing that might fail
-        const [processingError, processedUser] = safeRun(() => 
+        const [processingError, processedUser] = safeRun(() =>
           this.createProcessedUser(validationResult.value, index)
         );
 
@@ -210,7 +225,7 @@ export class ErrorAggregationPatterns {
     // Aggregate all errors for reporting
     if (processingErrors.length > 0 || globalErrors.length > 0) {
       const allValidationErrors = processingErrors.flatMap(pe => pe.errors);
-      
+
       return {
         success: false,
         error: {
@@ -242,7 +257,10 @@ export class ErrorAggregationPatterns {
     };
   }
 
-  private createProcessedUser(validatedRequest: CreateUserRequest, index: number): UserData {
+  private createProcessedUser(
+    validatedRequest: CreateUserRequest,
+    index: number
+  ): UserData {
     // Simulate processing that might fail for specific cases
     if (validatedRequest.email.includes('processingfail')) {
       throw new Error(`Processing failed for user data at index ${index}`);
@@ -258,7 +276,9 @@ export class ErrorAggregationPatterns {
   }
 
   // 3. Multi-Step Operation with Error Accumulation
-  async processUserAccountSetup(userData: CreateUserRequest): Promise<ServiceResponse<any>> {
+  async processUserAccountSetup(
+    userData: CreateUserRequest
+  ): Promise<ServiceResponse<any>> {
     const errors: string[] = [];
     const warnings: string[] = [];
     const results: any = {};
@@ -266,15 +286,17 @@ export class ErrorAggregationPatterns {
     // Step 1: User validation
     const validationResult = this.validateUserComprehensively(userData);
     if (validationResult.isFailure) {
-      errors.push(...validationResult.error.map(e => `Validation: ${e.message}`));
+      errors.push(
+        ...validationResult.error.map(e => `Validation: ${e.message}`)
+      );
     } else {
       results.validatedData = validationResult.value;
     }
 
     // Step 2: Create user (only if validation passed)
     if (validationResult.isSuccess) {
-      const [userCreationError, createdUser] = await safeRun(async () => 
-        await this.createUserAccount(validationResult.value)
+      const [userCreationError, createdUser] = await safeRun(
+        async () => await this.createUserAccount(validationResult.value)
       );
 
       if (userCreationError) {
@@ -286,8 +308,8 @@ export class ErrorAggregationPatterns {
 
     // Step 3: Set up user profile (continue even if user creation failed)
     if (results.user) {
-      const [profileError, profile] = await safeRun(async () => 
-        await this.setupUserProfile(results.user.id)
+      const [profileError, profile] = await safeRun(
+        async () => await this.setupUserProfile(results.user.id)
       );
 
       if (profileError) {
@@ -299,8 +321,8 @@ export class ErrorAggregationPatterns {
 
     // Step 4: Send welcome email (non-critical)
     if (results.user) {
-      const [emailError] = await safeRun(async () => 
-        await this.sendWelcomeEmail(results.user.email)
+      const [emailError] = await safeRun(
+        async () => await this.sendWelcomeEmail(results.user.email)
       );
 
       if (emailError) {
@@ -341,9 +363,11 @@ export class ErrorAggregationPatterns {
     };
   }
 
-  private async createUserAccount(userData: CreateUserRequest): Promise<UserData> {
+  private async createUserAccount(
+    userData: CreateUserRequest
+  ): Promise<UserData> {
     await LibUtils.sleep(100);
-    
+
     if (userData.email === 'createfail@example.com') {
       throw new Error('Database connection failed during user creation');
     }
@@ -359,7 +383,7 @@ export class ErrorAggregationPatterns {
 
   private async setupUserProfile(userId: string): Promise<any> {
     await LibUtils.sleep(50);
-    
+
     if (userId.includes('profilefail')) {
       throw new Error('Profile service unavailable');
     }
@@ -374,7 +398,7 @@ export class ErrorAggregationPatterns {
 
   private async sendWelcomeEmail(email: string): Promise<void> {
     await LibUtils.sleep(30);
-    
+
     if (email.includes('noemail')) {
       throw new Error('Email service temporarily unavailable');
     }
@@ -383,23 +407,28 @@ export class ErrorAggregationPatterns {
   // 4. Error Categorization and Reporting
   categorizeAndReportErrors(errors: ValidationError[]): any {
     const categorized = {
-      required: errors.filter(e => e.message.toLowerCase().includes('required')),
-      format: errors.filter(e => 
-        e.message.toLowerCase().includes('format') || 
-        e.message.toLowerCase().includes('invalid')
+      required: errors.filter(e =>
+        e.message.toLowerCase().includes('required')
       ),
-      length: errors.filter(e => 
-        e.message.toLowerCase().includes('length') ||
-        e.message.toLowerCase().includes('characters') ||
-        e.message.toLowerCase().includes('too long') ||
-        e.message.toLowerCase().includes('too short')
+      format: errors.filter(
+        e =>
+          e.message.toLowerCase().includes('format') ||
+          e.message.toLowerCase().includes('invalid')
       ),
-      business: errors.filter(e => 
-        !e.message.toLowerCase().includes('required') &&
-        !e.message.toLowerCase().includes('format') &&
-        !e.message.toLowerCase().includes('invalid') &&
-        !e.message.toLowerCase().includes('length') &&
-        !e.message.toLowerCase().includes('characters')
+      length: errors.filter(
+        e =>
+          e.message.toLowerCase().includes('length') ||
+          e.message.toLowerCase().includes('characters') ||
+          e.message.toLowerCase().includes('too long') ||
+          e.message.toLowerCase().includes('too short')
+      ),
+      business: errors.filter(
+        e =>
+          !e.message.toLowerCase().includes('required') &&
+          !e.message.toLowerCase().includes('format') &&
+          !e.message.toLowerCase().includes('invalid') &&
+          !e.message.toLowerCase().includes('length') &&
+          !e.message.toLowerCase().includes('characters')
       ),
     };
 
@@ -418,12 +447,17 @@ export class ErrorAggregationPatterns {
     return { categorized, summary };
   }
 
-  private groupErrorsByField(errors: ValidationError[]): Record<string, number> {
-    return errors.reduce((acc, error) => {
-      const field = error.field.split('[')[0].split('.').pop() || error.field;
-      acc[field] = (acc[field] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  private groupErrorsByField(
+    errors: ValidationError[]
+  ): Record<string, number> {
+    return errors.reduce(
+      (acc, error) => {
+        const field = error.field.split('[')[0].split('.').pop() || error.field;
+        acc[field] = (acc[field] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 
   private generateErrorSuggestions(categorized: any): string[] {
@@ -459,12 +493,12 @@ export class ErrorAggregationPatterns {
     userRequests.forEach(request => {
       // Try standard processing first
       const standardResult = this.validateUserComprehensively(request);
-      
+
       if (standardResult.isSuccess) {
-        const [creationError, user] = safeRun(() => 
+        const [creationError, user] = safeRun(() =>
           this.createProcessedUser(standardResult.value, 0)
         );
-        
+
         if (!creationError && user) {
           results.successful.push(user);
           return;
@@ -474,10 +508,10 @@ export class ErrorAggregationPatterns {
       // Try recovery with relaxed validation
       const recoveryResult = this.tryRecoveryValidation(request);
       if (recoveryResult.isSuccess) {
-        const [recoveryCreationError, recoveredUser] = safeRun(() => 
+        const [recoveryCreationError, recoveredUser] = safeRun(() =>
           this.createProcessedUser(recoveryResult.value, 0)
         );
-        
+
         if (!recoveryCreationError && recoveredUser) {
           results.recovered.push(recoveredUser);
           return;
@@ -506,11 +540,14 @@ export class ErrorAggregationPatterns {
           successRate: totalProcessed / userRequests.length,
         },
       },
-      error: results.failed.length > 0 ? {
-        code: hasPartialSuccess ? 'PARTIAL_FAILURE' : 'PROCESSING_FAILED',
-        message: `${results.failed.length} users failed processing`,
-        details: results.failed,
-      } : undefined,
+      error:
+        results.failed.length > 0
+          ? {
+              code: hasPartialSuccess ? 'PARTIAL_FAILURE' : 'PROCESSING_FAILED',
+              message: `${results.failed.length} users failed processing`,
+              details: results.failed,
+            }
+          : undefined,
       metadata: {
         timestamp: new Date(),
         requestId: LibUtils.getUUID(),
@@ -519,7 +556,9 @@ export class ErrorAggregationPatterns {
     };
   }
 
-  private tryRecoveryValidation(request: CreateUserRequest): Result<CreateUserRequest, ValidationError[]> {
+  private tryRecoveryValidation(
+    request: CreateUserRequest
+  ): Result<CreateUserRequest, ValidationError[]> {
     // Relaxed validation for recovery scenarios
     const errors: ValidationError[] = [];
 
@@ -556,9 +595,11 @@ export class ErrorAggregationPatterns {
 
 ## Key Features
 
-- **Comprehensive Validation**: Collect all validation errors instead of stopping at first
+- **Comprehensive Validation**: Collect all validation errors instead of
+  stopping at first
 - **Bulk Processing**: Handle multiple items with detailed error reporting
-- **Multi-Step Operations**: Continue processing and collect errors from each step
+- **Multi-Step Operations**: Continue processing and collect errors from each
+  step
 - **Error Categorization**: Group errors by type and field for better reporting
 - **Progressive Recovery**: Attempt recovery with relaxed validation
 - **Detailed Reporting**: Provide comprehensive error summaries and suggestions
@@ -574,7 +615,7 @@ const validationResult = processor.validateUserComprehensively(userData);
 
 if (validationResult.isFailure) {
   console.log('Validation errors:', validationResult.error);
-  
+
   // Categorize errors for better reporting
   const report = processor.categorizeAndReportErrors(validationResult.error);
   console.log('Error report:', report.summary);
@@ -600,7 +641,8 @@ console.log('Recovery summary:', recoveryResult.data.summary);
 
 ## Common Pitfalls
 
-- **Stopping at first error**: Always collect all errors for better user experience
+- **Stopping at first error**: Always collect all errors for better user
+  experience
 - **Poor error categorization**: Group errors logically for actionable feedback
 - **No recovery mechanisms**: Provide fallback options for partial failures
 - **Overwhelming error reports**: Summarize and prioritize errors for users

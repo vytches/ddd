@@ -4,32 +4,45 @@
 **Package**: @vytches-ddd/cqrs  
 **Complexity**: intermediate  
 **Domain**: Order Management  
-**Patterns**: event-driven-cqrs, domain-events, integration-events, event-sourcing  
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/utils
+**Patterns**: event-driven-cqrs, domain-events, integration-events,
+event-sourcing  
+**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events, @vytches-ddd/di,
+@vytches-ddd/utils
 
 ## Description
 
-Demonstrates advanced CQRS integration with the event system for automatic event publishing during command processing. Shows how commands can trigger domain events, integration events, and audit events while maintaining separation between command processing and event handling.
+Demonstrates advanced CQRS integration with the event system for automatic event
+publishing during command processing. Shows how commands can trigger domain
+events, integration events, and audit events while maintaining separation
+between command processing and event handling.
 
 ## Business Context
 
-Complex business operations often need to trigger multiple downstream processes: inventory updates, customer notifications, audit logging, and third-party integrations. The event-driven CQRS pattern enables commands to publish events that trigger these processes asynchronously without blocking command execution.
+Complex business operations often need to trigger multiple downstream processes:
+inventory updates, customer notifications, audit logging, and third-party
+integrations. The event-driven CQRS pattern enables commands to publish events
+that trigger these processes asynchronously without blocking command execution.
 
 ## Code Example
 
-```typescript
+````typescript
 // order-commands.ts
-import { BaseCommand, CreateOrderCommand, ProcessPaymentCommand, CancelOrderCommand } from '../types';
+import {
+  BaseCommand,
+  CreateOrderCommand,
+  ProcessPaymentCommand,
+  CancelOrderCommand,
+} from '../types';
 
 /**
  * @llm-summary Command for creating orders with automatic event publishing
  * @llm-domain Order Management
  * @llm-complexity Medium
- * 
+ *
  * @description
  * Represents the business intention to create a new order with automatic
  * event publishing for inventory, payment, and notification processes.
- * 
+ *
  * @example
  * ```typescript
  * const command = new CreateOrderCommand({
@@ -37,11 +50,11 @@ import { BaseCommand, CreateOrderCommand, ProcessPaymentCommand, CancelOrderComm
  *   items: [{ productId: 'product-456', quantity: 2 }],
  *   shippingAddress: address
  * });
- * 
+ *
  * const result = await commandBus.execute(command);
  * // Automatically triggers: OrderCreated, InventoryReserved, PaymentRequested events
  * ```
- * 
+ *
  * @since 1.0.0
  * @public
  */
@@ -84,7 +97,7 @@ export class CreateOrderCommand implements CreateOrderCommand {
         field: 'customerId',
         message: 'Customer ID is required',
         code: 'MISSING_CUSTOMER_ID',
-        value: this.customerId
+        value: this.customerId,
       });
     }
 
@@ -93,7 +106,7 @@ export class CreateOrderCommand implements CreateOrderCommand {
         field: 'items',
         message: 'Order must contain at least one item',
         code: 'EMPTY_ORDER',
-        value: this.items
+        value: this.items,
       });
     }
 
@@ -103,7 +116,7 @@ export class CreateOrderCommand implements CreateOrderCommand {
           field: `items[${index}].productId`,
           message: 'Product ID is required for each item',
           code: 'MISSING_PRODUCT_ID',
-          value: item.productId
+          value: item.productId,
         });
       }
 
@@ -112,7 +125,7 @@ export class CreateOrderCommand implements CreateOrderCommand {
           field: `items[${index}].quantity`,
           message: 'Quantity must be greater than zero',
           code: 'INVALID_QUANTITY',
-          value: item.quantity
+          value: item.quantity,
         });
       }
     });
@@ -122,7 +135,7 @@ export class CreateOrderCommand implements CreateOrderCommand {
         field: 'shippingAddress',
         message: 'Valid shipping address is required',
         code: 'INVALID_SHIPPING_ADDRESS',
-        value: this.shippingAddress
+        value: this.shippingAddress,
       });
     }
 
@@ -147,12 +160,17 @@ export class CreateOrderCommand implements CreateOrderCommand {
   calculateOrderValue(productPrices: Map<string, number>): number {
     return this.items.reduce((total, item) => {
       const price = productPrices.get(item.productId) || 0;
-      return total + (price * item.quantity);
+      return total + price * item.quantity;
     }, 0);
   }
 
   private isValidAddress(address: Address): boolean {
-    return !!(address.street && address.city && address.postalCode && address.country);
+    return !!(
+      address.street &&
+      address.city &&
+      address.postalCode &&
+      address.country
+    );
   }
 }
 
@@ -191,7 +209,7 @@ export class ProcessPaymentCommand implements ProcessPaymentCommand {
         field: 'orderId',
         message: 'Order ID is required',
         code: 'MISSING_ORDER_ID',
-        value: this.orderId
+        value: this.orderId,
       });
     }
 
@@ -200,7 +218,7 @@ export class ProcessPaymentCommand implements ProcessPaymentCommand {
         field: 'amount',
         message: 'Payment amount must be greater than zero',
         code: 'INVALID_AMOUNT',
-        value: this.amount
+        value: this.amount,
       });
     }
 
@@ -209,22 +227,22 @@ export class ProcessPaymentCommand implements ProcessPaymentCommand {
         field: 'paymentMethod',
         message: 'Valid payment method is required',
         code: 'INVALID_PAYMENT_METHOD',
-        value: this.paymentMethod
+        value: this.paymentMethod,
       });
     }
 
     return errors;
   }
 }
-```
+````
 
-```typescript
+````typescript
 // order-command-handlers.ts
 import { CommandHandler } from '@vytches-ddd/cqrs';
 import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
 import { Result } from '@vytches-ddd/utils';
-import { 
-  CreateOrderCommand, 
+import {
+  CreateOrderCommand,
   ProcessPaymentCommand,
   Order,
   CommandResult,
@@ -233,7 +251,7 @@ import {
   PaymentRequestedEvent,
   AuditOrderCreatedEvent,
   PaymentProcessedEvent,
-  OrderStatusUpdatedEvent
+  OrderStatusUpdatedEvent,
 } from '../types';
 
 /**
@@ -260,7 +278,7 @@ import {
   autoRegister: true,
   timeout: 15000,
   enableMetrics: true,
-  enableEvents: true
+  enableEvents: true,
 })
 export class CreateOrderCommandHandler {
   constructor(
@@ -286,7 +304,7 @@ export class CreateOrderCommandHandler {
    * ```typescript
    * const command = new CreateOrderCommand(customerId, items, address);
    * const result = await handler.handle(command);
-   * 
+   *
    * if (result.success) {
    *   console.log('Order created:', result.result?.id);
    *   // Events automatically published:
@@ -310,7 +328,7 @@ export class CreateOrderCommandHandler {
         return {
           success: false,
           validationErrors,
-          error: 'Order validation failed'
+          error: 'Order validation failed',
         };
       }
 
@@ -321,17 +339,22 @@ export class CreateOrderCommandHandler {
       }
 
       // 3. Check inventory availability
-      const inventoryCheck = await this.checkInventoryAvailability(command.items);
+      const inventoryCheck = await this.checkInventoryAvailability(
+        command.items
+      );
       if (!inventoryCheck.success) {
         return {
           success: false,
           error: 'Insufficient inventory for order items',
-          metadata: { inventoryErrors: inventoryCheck.errors }
+          metadata: { inventoryErrors: inventoryCheck.errors },
         };
       }
 
       // 4. Create order entity
-      const order = await this.createOrderEntity(command, inventoryCheck.productPrices);
+      const order = await this.createOrderEntity(
+        command,
+        inventoryCheck.productPrices
+      );
 
       // 5. Save order
       const saveResult = await this.orderRepository.save(order);
@@ -339,7 +362,7 @@ export class CreateOrderCommandHandler {
         return {
           success: false,
           error: 'Failed to save order',
-          metadata: { repositoryError: saveResult.error }
+          metadata: { repositoryError: saveResult.error },
         };
       }
 
@@ -356,23 +379,22 @@ export class CreateOrderCommandHandler {
           correlationId: command.correlationId,
           eventsPublished: [
             'OrderCreated',
-            'InventoryReservationRequested', 
+            'InventoryReservationRequested',
             'PaymentRequested',
-            'AuditOrderCreated'
-          ]
-        }
+            'AuditOrderCreated',
+          ],
+        },
       };
-
     } catch (error) {
       console.error(`❌ Failed to create order:`, error);
-      
+
       return {
         success: false,
         error: `Order creation failed: ${error.message}`,
         metadata: {
           commandId: command.commandId,
-          errorType: error.constructor.name
-        }
+          errorType: error.constructor.name,
+        },
       };
     }
   }
@@ -392,7 +414,9 @@ export class CreateOrderCommandHandler {
    * @since 1.0.0
    * @private
    */
-  private async validateBusinessRules(command: CreateOrderCommand): Promise<CommandResult<void>> {
+  private async validateBusinessRules(
+    command: CreateOrderCommand
+  ): Promise<CommandResult<void>> {
     const errors: ValidationError[] = [];
 
     // Check customer exists and is active
@@ -402,21 +426,21 @@ export class CreateOrderCommandHandler {
         field: 'customerId',
         message: 'Customer not found',
         code: 'CUSTOMER_NOT_FOUND',
-        value: command.customerId
+        value: command.customerId,
       });
     } else if (customer.status !== 'active') {
       errors.push({
         field: 'customerId',
         message: 'Customer account is not active',
         code: 'CUSTOMER_INACTIVE',
-        value: customer.status
+        value: customer.status,
       });
     }
 
     // Validate promotion code if provided
     if (command.promotionCode) {
       const promotionValid = await this.customerService.validatePromotion(
-        command.promotionCode, 
+        command.promotionCode,
         command.customerId
       );
       if (!promotionValid) {
@@ -424,7 +448,7 @@ export class CreateOrderCommandHandler {
           field: 'promotionCode',
           message: 'Invalid or expired promotion code',
           code: 'INVALID_PROMOTION',
-          value: command.promotionCode
+          value: command.promotionCode,
         });
       }
     }
@@ -433,7 +457,7 @@ export class CreateOrderCommandHandler {
       return {
         success: false,
         validationErrors: errors,
-        error: 'Business rule validation failed'
+        error: 'Business rule validation failed',
       };
     }
 
@@ -463,14 +487,16 @@ export class CreateOrderCommandHandler {
     const inventoryResults = await Promise.all(
       items.map(async item => {
         const availability = await this.inventoryService.checkAvailability(
-          item.productId, 
+          item.productId,
           item.quantity
         );
         return {
           productId: item.productId,
           available: availability.available,
           price: availability.price,
-          error: availability.available ? null : `Insufficient stock for ${item.productId}`
+          error: availability.available
+            ? null
+            : `Insufficient stock for ${item.productId}`,
         };
       })
     );
@@ -507,7 +533,7 @@ export class CreateOrderCommandHandler {
    * @private
    */
   private async createOrderEntity(
-    command: CreateOrderCommand, 
+    command: CreateOrderCommand,
     productPrices: Map<string, number>
   ): Promise<Order> {
     const orderId = `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -525,7 +551,7 @@ export class CreateOrderCommandHandler {
       items: command.items.map(item => ({
         ...item,
         unitPrice: productPrices.get(item.productId)!,
-        totalPrice: productPrices.get(item.productId)! * item.quantity
+        totalPrice: productPrices.get(item.productId)! * item.quantity,
       })),
       shippingAddress: command.shippingAddress,
       billingAddress: command.billingAddress || command.shippingAddress,
@@ -537,7 +563,7 @@ export class CreateOrderCommandHandler {
       paymentStatus: 'pending',
       createdAt: now,
       version: 1,
-      correlationId: command.correlationId
+      correlationId: command.correlationId,
     };
 
     return order;
@@ -559,7 +585,10 @@ export class CreateOrderCommandHandler {
    * @since 1.0.0
    * @private
    */
-  private async publishOrderEvents(order: Order, command: CreateOrderCommand): Promise<void> {
+  private async publishOrderEvents(
+    order: Order,
+    command: CreateOrderCommand
+  ): Promise<void> {
     const events = [
       // Domain event for internal business logic
       new OrderCreatedEvent({
@@ -569,7 +598,7 @@ export class CreateOrderCommandHandler {
         items: order.items,
         status: order.status,
         createdAt: order.createdAt,
-        correlationId: command.correlationId
+        correlationId: command.correlationId,
       }),
 
       // Integration event for inventory system
@@ -579,9 +608,9 @@ export class CreateOrderCommandHandler {
         items: order.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          reservationId: `res-${order.id}-${item.productId}`
+          reservationId: `res-${order.id}-${item.productId}`,
         })),
-        correlationId: command.correlationId
+        correlationId: command.correlationId,
       }),
 
       // Integration event for payment system
@@ -591,7 +620,7 @@ export class CreateOrderCommandHandler {
         amount: order.total,
         currency: 'USD',
         paymentMethod: command.paymentMethod,
-        correlationId: command.correlationId
+        correlationId: command.correlationId,
       }),
 
       // Audit event for compliance tracking
@@ -602,8 +631,8 @@ export class CreateOrderCommandHandler {
         timestamp: command.timestamp,
         orderValue: order.total,
         itemCount: order.items.length,
-        correlationId: command.correlationId
-      })
+        correlationId: command.correlationId,
+      }),
     ];
 
     // Publish all events in batch for better performance
@@ -636,7 +665,7 @@ export class CreateOrderCommandHandler {
   autoRegister: true,
   timeout: 20000,
   enableMetrics: true,
-  enableEvents: true
+  enableEvents: true,
 })
 export class ProcessPaymentCommandHandler {
   constructor(
@@ -660,7 +689,9 @@ export class ProcessPaymentCommandHandler {
    * @since 1.0.0
    * @public
    */
-  async handle(command: ProcessPaymentCommand): Promise<CommandResult<PaymentResult>> {
+  async handle(
+    command: ProcessPaymentCommand
+  ): Promise<CommandResult<PaymentResult>> {
     try {
       console.log(`💳 Processing payment command: ${command.commandId}`);
 
@@ -670,7 +701,7 @@ export class ProcessPaymentCommandHandler {
         return {
           success: false,
           validationErrors,
-          error: 'Payment validation failed'
+          error: 'Payment validation failed',
         };
       }
 
@@ -679,7 +710,7 @@ export class ProcessPaymentCommandHandler {
       if (!order) {
         return {
           success: false,
-          error: `Order not found: ${command.orderId}`
+          error: `Order not found: ${command.orderId}`,
         };
       }
 
@@ -690,8 +721,8 @@ export class ProcessPaymentCommandHandler {
           error: 'Payment amount does not match order total',
           metadata: {
             commandAmount: command.amount,
-            orderTotal: order.total
-          }
+            orderTotal: order.total,
+          },
         };
       }
 
@@ -701,16 +732,21 @@ export class ProcessPaymentCommandHandler {
         amount: command.amount,
         currency: command.currency,
         paymentMethod: command.paymentMethod,
-        correlationId: command.correlationId
+        correlationId: command.correlationId,
       });
 
       // 5. Update order status
-      const updatedOrder = await this.updateOrderPaymentStatus(order, paymentResult);
+      const updatedOrder = await this.updateOrderPaymentStatus(
+        order,
+        paymentResult
+      );
 
       // 6. Publish payment events
       await this.publishPaymentEvents(updatedOrder, paymentResult, command);
 
-      console.log(`✅ Payment processed successfully for order ${command.orderId}`);
+      console.log(
+        `✅ Payment processed successfully for order ${command.orderId}`
+      );
 
       return {
         success: true,
@@ -719,20 +755,19 @@ export class ProcessPaymentCommandHandler {
           commandId: command.commandId,
           orderId: command.orderId,
           paymentStatus: paymentResult.status,
-          transactionId: paymentResult.transactionId
-        }
+          transactionId: paymentResult.transactionId,
+        },
       };
-
     } catch (error) {
       console.error(`❌ Payment processing failed:`, error);
-      
+
       return {
         success: false,
         error: `Payment processing failed: ${error.message}`,
         metadata: {
           commandId: command.commandId,
-          orderId: command.orderId
-        }
+          orderId: command.orderId,
+        },
       };
     }
   }
@@ -753,16 +788,20 @@ export class ProcessPaymentCommandHandler {
    * @since 1.0.0
    * @private
    */
-  private async updateOrderPaymentStatus(order: Order, paymentResult: PaymentResult): Promise<Order> {
+  private async updateOrderPaymentStatus(
+    order: Order,
+    paymentResult: PaymentResult
+  ): Promise<Order> {
     const updatedOrder: Order = {
       ...order,
       paymentStatus: paymentResult.status === 'successful' ? 'paid' : 'failed',
-      status: paymentResult.status === 'successful' ? 'confirmed' : 'payment_failed',
+      status:
+        paymentResult.status === 'successful' ? 'confirmed' : 'payment_failed',
       transactionId: paymentResult.transactionId,
       paymentMethod: paymentResult.paymentMethod,
       paidAt: paymentResult.status === 'successful' ? new Date() : undefined,
       updatedAt: new Date(),
-      version: order.version + 1
+      version: order.version + 1,
     };
 
     const saveResult = await this.orderRepository.save(updatedOrder);
@@ -791,8 +830,8 @@ export class ProcessPaymentCommandHandler {
    * @private
    */
   private async publishPaymentEvents(
-    order: Order, 
-    paymentResult: PaymentResult, 
+    order: Order,
+    paymentResult: PaymentResult,
     command: ProcessPaymentCommand
   ): Promise<void> {
     const events = [
@@ -805,7 +844,7 @@ export class ProcessPaymentCommandHandler {
         currency: paymentResult.currency,
         status: paymentResult.status,
         processedAt: new Date(),
-        correlationId: command.correlationId
+        correlationId: command.correlationId,
       }),
 
       // Domain event for order status change
@@ -815,26 +854,33 @@ export class ProcessPaymentCommandHandler {
         previousStatus: 'pending',
         newStatus: order.status,
         updatedAt: order.updatedAt!,
-        reason: paymentResult.status === 'successful' ? 'Payment completed' : 'Payment failed',
-        correlationId: command.correlationId
-      })
+        reason:
+          paymentResult.status === 'successful'
+            ? 'Payment completed'
+            : 'Payment failed',
+        correlationId: command.correlationId,
+      }),
     ];
 
     // Add fulfillment event for successful payments
     if (paymentResult.status === 'successful') {
-      events.push(new FulfillmentRequestedEvent({
-        orderId: order.id,
-        customerId: order.customerId,
-        items: order.items,
-        shippingAddress: order.shippingAddress,
-        priority: order.total > 500 ? 'high' : 'normal',
-        correlationId: command.correlationId
-      }));
+      events.push(
+        new FulfillmentRequestedEvent({
+          orderId: order.id,
+          customerId: order.customerId,
+          items: order.items,
+          shippingAddress: order.shippingAddress,
+          priority: order.total > 500 ? 'high' : 'normal',
+          correlationId: command.correlationId,
+        })
+      );
     }
 
     await this.eventBus.publishMany(events);
 
-    console.log(`📡 Published ${events.length} payment events for order ${order.id}`);
+    console.log(
+      `📡 Published ${events.length} payment events for order ${order.id}`
+    );
   }
 }
 
@@ -850,7 +896,10 @@ interface CustomerService {
 }
 
 interface InventoryService {
-  checkAvailability(productId: string, quantity: number): Promise<{
+  checkAvailability(
+    productId: string,
+    quantity: number
+  ): Promise<{
     available: boolean;
     price: number;
   }>;
@@ -859,12 +908,16 @@ interface InventoryService {
 interface PaymentGateway {
   processPayment(request: PaymentRequest): Promise<PaymentResult>;
 }
-```
+````
 
-```typescript
+````typescript
 // event-projection-handler.ts
 import { EventHandler } from '@vytches-ddd/events';
-import { OrderCreatedEvent, PaymentProcessedEvent, OrderStatusUpdatedEvent } from '../types';
+import {
+  OrderCreatedEvent,
+  PaymentProcessedEvent,
+  OrderStatusUpdatedEvent,
+} from '../types';
 
 /**
  * @llm-summary Event handler for order projections and read models
@@ -888,7 +941,7 @@ import { OrderCreatedEvent, PaymentProcessedEvent, OrderStatusUpdatedEvent } fro
  */
 @EventHandler(OrderCreatedEvent, {
   eventContext: 'order-management',
-  autoRegister: true
+  autoRegister: true,
 })
 export class OrderProjectionHandler {
   constructor(
@@ -913,7 +966,9 @@ export class OrderProjectionHandler {
    */
   async handle(event: OrderCreatedEvent): Promise<void> {
     try {
-      console.log(`📊 Updating projections for order created: ${event.payload.orderId}`);
+      console.log(
+        `📊 Updating projections for order created: ${event.payload.orderId}`
+      );
 
       // 1. Create order summary projection
       const orderSummary = {
@@ -923,20 +978,21 @@ export class OrderProjectionHandler {
         total: event.payload.total,
         itemCount: event.payload.items.length,
         createdAt: event.payload.createdAt,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
 
       await this.orderProjectionRepository.createOrderSummary(orderSummary);
 
       // 2. Update customer statistics
-      await this.customerStatsRepository.incrementOrderCount(event.payload.customerId);
+      await this.customerStatsRepository.incrementOrderCount(
+        event.payload.customerId
+      );
       await this.customerStatsRepository.addToTotalSpent(
-        event.payload.customerId, 
+        event.payload.customerId,
         event.payload.total
       );
 
       console.log(`✅ Order projections updated for ${event.payload.orderId}`);
-
     } catch (error) {
       console.error(`❌ Failed to update order projections:`, error);
       throw error;
@@ -958,7 +1014,7 @@ export class OrderProjectionHandler {
  */
 @EventHandler(PaymentProcessedEvent, {
   eventContext: 'order-management',
-  autoRegister: true
+  autoRegister: true,
 })
 export class PaymentProjectionHandler {
   constructor(
@@ -983,7 +1039,9 @@ export class PaymentProjectionHandler {
    */
   async handle(event: PaymentProcessedEvent): Promise<void> {
     try {
-      console.log(`💳 Updating payment projections for order: ${event.payload.orderId}`);
+      console.log(
+        `💳 Updating payment projections for order: ${event.payload.orderId}`
+      );
 
       // 1. Update order payment status in projection
       await this.orderProjectionRepository.updatePaymentStatus(
@@ -1000,11 +1058,12 @@ export class PaymentProjectionHandler {
         currency: event.payload.currency,
         status: event.payload.status,
         processedAt: event.payload.processedAt,
-        transactionId: event.payload.transactionId
+        transactionId: event.payload.transactionId,
       });
 
-      console.log(`✅ Payment projections updated for ${event.payload.orderId}`);
-
+      console.log(
+        `✅ Payment projections updated for ${event.payload.orderId}`
+      );
     } catch (error) {
       console.error(`❌ Failed to update payment projections:`, error);
       throw error;
@@ -1015,7 +1074,11 @@ export class PaymentProjectionHandler {
 // Repository interfaces
 interface OrderProjectionRepository {
   createOrderSummary(summary: OrderSummary): Promise<void>;
-  updatePaymentStatus(orderId: string, status: string, transactionId: string): Promise<void>;
+  updatePaymentStatus(
+    orderId: string,
+    status: string,
+    transactionId: string
+  ): Promise<void>;
 }
 
 interface CustomerStatsRepository {
@@ -1026,40 +1089,54 @@ interface CustomerStatsRepository {
 interface PaymentAnalyticsRepository {
   recordPayment(payment: PaymentAnalytics): Promise<void>;
 }
-```
+````
 
 ## Key Features
 
-- **🔗 Event-Driven Architecture**: Commands automatically publish events for downstream processing
-- **📡 Multi-Event Publishing**: Single command triggers multiple event types (domain, integration, audit)
-- **🔄 Event Coordination**: Events coordinate complex business processes across bounded contexts
-- **📊 Projection Updates**: Event handlers maintain read-optimized projections automatically
-- **🎯 Loose Coupling**: Commands focus on business logic while events handle side effects
-- **⚡ Async Processing**: Events enable asynchronous processing without blocking commands
+- **🔗 Event-Driven Architecture**: Commands automatically publish events for
+  downstream processing
+- **📡 Multi-Event Publishing**: Single command triggers multiple event types
+  (domain, integration, audit)
+- **🔄 Event Coordination**: Events coordinate complex business processes across
+  bounded contexts
+- **📊 Projection Updates**: Event handlers maintain read-optimized projections
+  automatically
+- **🎯 Loose Coupling**: Commands focus on business logic while events handle
+  side effects
+- **⚡ Async Processing**: Events enable asynchronous processing without
+  blocking commands
 
 ## Event Integration Patterns
 
-1. **Command-Event Coordination**: Commands publish events that trigger downstream processes
-2. **Event-Driven Projections**: Events update read models and analytics automatically
-3. **Cross-Context Communication**: Integration events enable communication between bounded contexts
-4. **Audit Event Sourcing**: Audit events provide complete business process trails
-5. **Compensating Events**: Events can trigger compensating actions for failed operations
+1. **Command-Event Coordination**: Commands publish events that trigger
+   downstream processes
+2. **Event-Driven Projections**: Events update read models and analytics
+   automatically
+3. **Cross-Context Communication**: Integration events enable communication
+   between bounded contexts
+4. **Audit Event Sourcing**: Audit events provide complete business process
+   trails
+5. **Compensating Events**: Events can trigger compensating actions for failed
+   operations
 
 ## Architecture Benefits
 
 ### **Scalability**
+
 - Commands and events can be processed independently
 - Event handlers can scale based on load patterns
 - Async processing prevents blocking on slow operations
 - Multiple event handlers can process same events concurrently
 
 ### **Resilience**
+
 - Failed event processing doesn't affect command success
 - Event replay capabilities for system recovery
 - Compensating events for complex rollback scenarios
 - Circuit breaker patterns for external service calls
 
 ### **Maintainability**
+
 - Clear separation between command processing and side effects
 - Event handlers can be added without modifying existing commands
 - Business logic changes isolated to specific handlers
@@ -1068,13 +1145,20 @@ interface PaymentAnalyticsRepository {
 ## Common Pitfalls
 
 - **❌ Event Ordering**: Don't assume events will be processed in specific order
-- **❌ Event Coupling**: Events should not depend on specific handler implementations
-- **❌ Blocking Event Publishing**: Publish events asynchronously to avoid performance impact
-- **❌ Missing Error Handling**: Always handle event publishing failures gracefully
+- **❌ Event Coupling**: Events should not depend on specific handler
+  implementations
+- **❌ Blocking Event Publishing**: Publish events asynchronously to avoid
+  performance impact
+- **❌ Missing Error Handling**: Always handle event publishing failures
+  gracefully
 
 ## Related Examples
 
-- [Example 1: Command Handlers](../basic/example-1.md) - Basic command handling patterns
-- [Example 2: Query Handlers](../basic/example-2.md) - Query handling with projections
-- [Example 3: Middleware Pipeline](../basic/example-3.md) - Cross-cutting concerns
-- [Advanced: Event Sourcing](../advanced/example-1.md) - Complete event sourcing implementation
+- [Example 1: Command Handlers](../basic/example-1.md) - Basic command handling
+  patterns
+- [Example 2: Query Handlers](../basic/example-2.md) - Query handling with
+  projections
+- [Example 3: Middleware Pipeline](../basic/example-3.md) - Cross-cutting
+  concerns
+- [Advanced: Event Sourcing](../advanced/example-1.md) - Complete event sourcing
+  implementation

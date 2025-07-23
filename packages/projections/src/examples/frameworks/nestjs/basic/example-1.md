@@ -1,19 +1,21 @@
 # Simple Projection - NestJS Manual Setup
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/projections + NestJS
-**Complexity**: basic
-**Framework**: NestJS
-**Integration**: Manual setup
+**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Complexity**: basic **Framework**: NestJS **Integration**: Manual setup
 **Dependencies**: @nestjs/common, @vytches-ddd/projections, @vytches-ddd/events
 
 ## Description
 
-Basic NestJS service implementing simple event projections with manual projection setup and event handling. This example shows how to integrate @vytches-ddd/projections into a NestJS application using standard dependency injection patterns.
+Basic NestJS service implementing simple event projections with manual
+projection setup and event handling. This example shows how to integrate
+@vytches-ddd/projections into a NestJS application using standard dependency
+injection patterns.
 
 ## Business Context
 
-E-commerce applications need real-time user profile updates from various user events (registration, profile updates, preferences changes) to provide personalized experiences and analytics dashboards.
+E-commerce applications need real-time user profile updates from various user
+events (registration, profile updates, preferences changes) to provide
+personalized experiences and analytics dashboards.
 
 ## Service Implementation
 
@@ -25,8 +27,10 @@ import { IDomainEvent } from '@vytches-ddd/events';
 import { UserData } from '../types'; // From your application
 
 @Injectable()
-export class UserProfileProjectionService extends ProjectionBase<any> implements OnModuleInit {
-  
+export class UserProfileProjectionService
+  extends ProjectionBase<any>
+  implements OnModuleInit
+{
   constructor() {
     super('UserProfileProjection', 'v1.0');
     this.initializeProjection();
@@ -44,8 +48,8 @@ export class UserProfileProjectionService extends ProjectionBase<any> implements
       stats: {
         totalUsers: 0,
         activeUsers: 0,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     });
   }
 
@@ -61,18 +65,19 @@ export class UserProfileProjectionService extends ProjectionBase<any> implements
       name: userData.name,
       createdAt: new Date(event.timestamp),
       isActive: true,
-      preferences: userData.preferences || {}
+      preferences: userData.preferences || {},
     };
 
     // Update projection state
     currentState.users.set(user.id, user);
     currentState.stats.totalUsers = currentState.users.size;
-    currentState.stats.activeUsers = Array.from(currentState.users.values())
-      .filter(u => u.isActive).length;
+    currentState.stats.activeUsers = Array.from(
+      currentState.users.values()
+    ).filter(u => u.isActive).length;
     currentState.stats.lastUpdated = new Date();
 
     this.setState(currentState);
-    
+
     console.log(`User profile created: ${user.name} (${user.id})`);
   }
 
@@ -94,8 +99,8 @@ export class UserProfileProjectionService extends ProjectionBase<any> implements
       email: updateData.email || existingUser.email,
       preferences: {
         ...existingUser.preferences,
-        ...(updateData.preferences || {})
-      }
+        ...(updateData.preferences || {}),
+      },
     };
 
     currentState.users.set(updatedUser.id, updatedUser);
@@ -112,15 +117,18 @@ export class UserProfileProjectionService extends ProjectionBase<any> implements
     const user = currentState.users.get(deactivationData.userId);
 
     if (!user) {
-      console.warn(`User ${deactivationData.userId} not found for deactivation`);
+      console.warn(
+        `User ${deactivationData.userId} not found for deactivation`
+      );
       return;
     }
 
     // Mark user as inactive
     user.isActive = false;
     currentState.users.set(user.id, user);
-    currentState.stats.activeUsers = Array.from(currentState.users.values())
-      .filter(u => u.isActive).length;
+    currentState.stats.activeUsers = Array.from(
+      currentState.users.values()
+    ).filter(u => u.isActive).length;
     currentState.stats.lastUpdated = new Date();
 
     this.setState(currentState);
@@ -149,14 +157,18 @@ export class UserProfileProjectionService extends ProjectionBase<any> implements
       totalUsers: state.stats.totalUsers,
       activeUsers: state.stats.activeUsers,
       inactiveUsers: state.stats.totalUsers - state.stats.activeUsers,
-      lastUpdated: state.stats.lastUpdated
+      lastUpdated: state.stats.lastUpdated,
     };
   }
 
-  getUsersByPreference(preferenceKey: string, preferenceValue: any): UserData[] {
+  getUsersByPreference(
+    preferenceKey: string,
+    preferenceValue: any
+  ): UserData[] {
     const state = this.getState();
-    return Array.from(state.users.values())
-      .filter(user => user.preferences[preferenceKey] === preferenceValue);
+    return Array.from(state.users.values()).filter(
+      user => user.preferences[preferenceKey] === preferenceValue
+    );
   }
 
   // ✅ FOCUS: Manual event processing method
@@ -181,7 +193,6 @@ import { UserData } from '../types'; // From your application
 
 @Controller('api/user-profiles')
 export class UserProfileController {
-  
   constructor(
     private readonly userProfileProjection: UserProfileProjectionService
   ) {}
@@ -201,7 +212,10 @@ export class UserProfileController {
     @Query('key') preferenceKey: string,
     @Query('value') preferenceValue: string
   ): UserData[] {
-    return this.userProfileProjection.getUsersByPreference(preferenceKey, preferenceValue);
+    return this.userProfileProjection.getUsersByPreference(
+      preferenceKey,
+      preferenceValue
+    );
   }
 
   @Get(':userId')
@@ -231,7 +245,7 @@ import { UserProfileController } from './user-profile.controller';
 @Module({
   providers: [UserProfileProjectionService],
   controllers: [UserProfileController],
-  exports: [UserProfileProjectionService] // Export for use in other modules
+  exports: [UserProfileProjectionService], // Export for use in other modules
 })
 export class UserProfileModule {}
 ```
@@ -246,7 +260,6 @@ import { IDomainEvent } from '@vytches-ddd/events';
 
 @Injectable()
 export class EventProcessorService {
-  
   constructor(
     private readonly userProfileProjection: UserProfileProjectionService
   ) {}
@@ -265,7 +278,11 @@ export class EventProcessorService {
   }
 
   private isUserEvent(eventType: string): boolean {
-    const userEvents = ['UserRegistered', 'UserProfileUpdated', 'UserDeactivated'];
+    const userEvents = [
+      'UserRegistered',
+      'UserProfileUpdated',
+      'UserDeactivated',
+    ];
     return userEvents.includes(eventType);
   }
 }
@@ -276,7 +293,6 @@ export class EventProcessorService {
 ```typescript
 // In your NestJS application
 export class AppService {
-  
   constructor(
     private readonly eventProcessor: EventProcessorService,
     private readonly userProjection: UserProfileProjectionService
@@ -290,7 +306,7 @@ export class AppService {
       aggregateId: userData.id,
       payload: userData,
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     // Process through projection
@@ -308,7 +324,7 @@ export class AppService {
     return {
       userProfile: user,
       systemStats: stats,
-      relatedUsers: this.userProjection.getActiveUsers().slice(0, 5)
+      relatedUsers: this.userProjection.getActiveUsers().slice(0, 5),
     };
   }
 }
@@ -330,7 +346,9 @@ describe('UserProfileProjectionService', () => {
       providers: [UserProfileProjectionService],
     }).compile();
 
-    service = module.get<UserProfileProjectionService>(UserProfileProjectionService);
+    service = module.get<UserProfileProjectionService>(
+      UserProfileProjectionService
+    );
   });
 
   it('should create user profile on UserRegistered event', async () => {
@@ -341,10 +359,10 @@ describe('UserProfileProjectionService', () => {
       payload: {
         id: 'user-123',
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       },
       timestamp: new Date(),
-      version: 1
+      version: 1,
     };
 
     await service.processEvent(event);
@@ -365,10 +383,10 @@ describe('UserProfileProjectionService', () => {
         payload: {
           id: `user-${i}`,
           name: `User ${i}`,
-          email: `user${i}@example.com`
+          email: `user${i}@example.com`,
         },
         timestamp: new Date(),
-        version: 1
+        version: 1,
       };
       await service.processEvent(event);
     }
@@ -382,7 +400,8 @@ describe('UserProfileProjectionService', () => {
 
 ## Key Features
 
-- **Simple Integration**: Easy NestJS service integration with standard DI patterns
+- **Simple Integration**: Easy NestJS service integration with standard DI
+  patterns
 - **Manual Control**: Full control over projection lifecycle and event handling
 - **Type Safety**: Full TypeScript support with proper typing
 - **Query Methods**: Convenient methods for querying projection state
@@ -401,8 +420,10 @@ describe('UserProfileProjectionService', () => {
 ## Common Pitfalls
 
 - **Missing Initialization**: Forgetting to call projection setup methods
-- **State Mutations**: Directly mutating projection state instead of using setState
-- **Error Propagation**: Not properly handling and propagating event processing errors
+- **State Mutations**: Directly mutating projection state instead of using
+  setState
+- **Error Propagation**: Not properly handling and propagating event processing
+  errors
 - **Memory Leaks**: Not cleaning up event handlers or large state objects
 
 ## Related Examples

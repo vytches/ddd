@@ -1,19 +1,25 @@
 # Enterprise Process Orchestration Platform - Global Coordination System
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/aggregates
-**Complexity**: Advanced
-**Domain**: Enterprise Process Management
-**Patterns**: Process Orchestration, Saga Coordination, Global State Management, AI-Enhanced Decision Making
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Domain**: Enterprise Process Management **Patterns**: Process Orchestration,
+Saga Coordination, Global State Management, AI-Enhanced Decision Making
+**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives,
+@vytches-ddd/contracts
 
 ## Description
 
-This example demonstrates an enterprise-grade process orchestration platform that coordinates complex business processes across multiple systems, domains, and geographical regions. It implements saga patterns, AI-enhanced decision making, and provides global visibility with local autonomy.
+This example demonstrates an enterprise-grade process orchestration platform
+that coordinates complex business processes across multiple systems, domains,
+and geographical regions. It implements saga patterns, AI-enhanced decision
+making, and provides global visibility with local autonomy.
 
 ## Business Context
 
-A multinational corporation needs to orchestrate complex business processes that span multiple subsidiaries, regulatory jurisdictions, and technology systems. The platform must handle cross-border transactions, regulatory compliance variations, real-time risk assessment, and provide comprehensive audit trails while maintaining high availability and performance across global operations.
+A multinational corporation needs to orchestrate complex business processes that
+span multiple subsidiaries, regulatory jurisdictions, and technology systems.
+The platform must handle cross-border transactions, regulatory compliance
+variations, real-time risk assessment, and provide comprehensive audit trails
+while maintaining high availability and performance across global operations.
 
 ## Code Example
 
@@ -22,14 +28,14 @@ A multinational corporation needs to orchestrate complex business processes that
 import { AggregateRoot } from '@vytches-ddd/aggregates';
 import { DomainEvent } from '@vytches-ddd/contracts';
 import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   ProcessDefinition,
   ProcessInstance,
   ProcessStep,
   SagaState,
   GlobalProcessConfig,
   AIDecisionContext,
-  ComplianceRule
+  ComplianceRule,
 } from './types'; // From your application
 
 // Advanced Domain Events
@@ -145,7 +151,10 @@ export class ProcessOrchestrationError extends BaseError {
 
 export class GlobalComplianceViolationError extends BaseError {
   constructor(violation: string, region: string) {
-    super('GLOBAL_COMPLIANCE_VIOLATION', `Compliance violation in ${region}: ${violation}`);
+    super(
+      'GLOBAL_COMPLIANCE_VIOLATION',
+      `Compliance violation in ${region}: ${violation}`
+    );
   }
 }
 
@@ -160,15 +169,25 @@ export class AIDecisionConfidenceError extends BaseError {
 
 export class SagaCompensationFailedError extends BaseError {
   constructor(sagaId: string, step: string) {
-    super('SAGA_COMPENSATION_FAILED', `Compensation failed for saga ${sagaId} at step ${step}`);
+    super(
+      'SAGA_COMPENSATION_FAILED',
+      `Compensation failed for saga ${sagaId} at step ${step}`
+    );
   }
 }
 
 // Advanced Capability Interfaces
 interface IProcessOrchestrationEngine {
-  orchestrateProcess(definition: ProcessDefinition, context: any): Promise<ProcessInstance>;
+  orchestrateProcess(
+    definition: ProcessDefinition,
+    context: any
+  ): Promise<ProcessInstance>;
   executeStep(step: ProcessStep, context: any): Promise<any>;
-  handleStepFailure(step: ProcessStep, error: Error, context: any): Promise<void>;
+  handleStepFailure(
+    step: ProcessStep,
+    error: Error,
+    context: any
+  ): Promise<void>;
   getNextSteps(currentStep: string, result: any): string[];
 }
 
@@ -186,7 +205,10 @@ interface IGlobalComplianceEngine {
     processType: string,
     data: any
   ): Promise<any>;
-  getComplianceRequirements(region: string, processType: string): ComplianceRule[];
+  getComplianceRequirements(
+    region: string,
+    processType: string
+  ): ComplianceRule[];
   reportComplianceViolation(violation: any): Promise<void>;
 }
 
@@ -202,19 +224,22 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
   private models: Map<string, any> = new Map();
   private decisionHistory: any[] = [];
 
-  async makeDecision(decisionPoint: string, context: AIDecisionContext): Promise<any> {
+  async makeDecision(
+    decisionPoint: string,
+    context: AIDecisionContext
+  ): Promise<any> {
     const model = this.getModelForDecisionPoint(decisionPoint);
-    
+
     // Prepare input features from context
     const features = this.extractFeatures(context);
-    
+
     // ML model inference
     const prediction = await this.runModelInference(model, features);
-    
+
     // Calculate confidence and risk scores
     const confidence = this.calculateConfidence(prediction, context);
     const riskScore = this.assessRisk(prediction, context);
-    
+
     const decision = {
       decisionPoint,
       prediction,
@@ -223,12 +248,12 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
       reasoning: this.generateReasoning(prediction, context),
       recommendedActions: this.generateRecommendations(prediction, context),
       modelVersion: model.version,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     // Store for learning
     this.decisionHistory.push(decision);
-    
+
     return decision;
   }
 
@@ -242,7 +267,9 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
 
   async requestHumanOverride(decision: any, reason: string): Promise<boolean> {
     // In real implementation, this would trigger human approval workflow
-    console.log(`Human override requested for decision: ${decision.decisionPoint}. Reason: ${reason}`);
+    console.log(
+      `Human override requested for decision: ${decision.decisionPoint}. Reason: ${reason}`
+    );
     return false; // Simulated response
   }
 
@@ -253,9 +280,9 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
       'routing-decision': 'routing-optimizer-v1',
       'resource-allocation': 'resource-ml-v3',
       'compliance-check': 'compliance-classifier-v1',
-      'cost-optimization': 'cost-optimizer-v2'
+      'cost-optimization': 'cost-optimizer-v2',
     };
-    
+
     const modelName = modelMap[decisionPoint] || 'default-model';
     return this.models.get(modelName) || { version: '1.0', type: 'default' };
   }
@@ -268,80 +295,96 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
       riskFactors: context.riskFactors || [],
       historicalData: context.historicalData || {},
       realTimeMetrics: context.realTimeMetrics || {},
-      complianceContext: context.complianceContext || {}
+      complianceContext: context.complianceContext || {},
     };
   }
 
   private async runModelInference(model: any, features: any): Promise<any> {
     // Simulate ML model inference
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     return {
       primaryRecommendation: 'approve',
       alternativeOptions: ['review', 'escalate'],
       confidenceScores: { approve: 0.85, review: 0.12, escalate: 0.03 },
-      featureImportance: this.calculateFeatureImportance(features)
+      featureImportance: this.calculateFeatureImportance(features),
     };
   }
 
-  private calculateConfidence(prediction: any, context: AIDecisionContext): number {
-    const baseConfidence = prediction.confidenceScores[prediction.primaryRecommendation] || 0.5;
-    
+  private calculateConfidence(
+    prediction: any,
+    context: AIDecisionContext
+  ): number {
+    const baseConfidence =
+      prediction.confidenceScores[prediction.primaryRecommendation] || 0.5;
+
     // Adjust confidence based on context
     let adjustedConfidence = baseConfidence;
-    
-    if (context.historicalData && Object.keys(context.historicalData).length > 10) {
+
+    if (
+      context.historicalData &&
+      Object.keys(context.historicalData).length > 10
+    ) {
       adjustedConfidence += 0.1; // More historical data increases confidence
     }
-    
+
     if (context.riskFactors && context.riskFactors.length > 3) {
       adjustedConfidence -= 0.15; // More risk factors decrease confidence
     }
-    
+
     return Math.max(0, Math.min(1, adjustedConfidence));
   }
 
   private assessRisk(prediction: any, context: AIDecisionContext): number {
     // Risk score from 0-100
     let riskScore = 20; // Base risk
-    
+
     if (context.amount > 1000000) riskScore += 30;
     if (context.riskFactors && context.riskFactors.length > 0) {
       riskScore += context.riskFactors.length * 5;
     }
-    
+
     return Math.min(100, riskScore);
   }
 
-  private generateReasoning(prediction: any, context: AIDecisionContext): string {
+  private generateReasoning(
+    prediction: any,
+    context: AIDecisionContext
+  ): string {
     const factors = [];
-    
+
     if (prediction.confidenceScores[prediction.primaryRecommendation] > 0.8) {
       factors.push('High model confidence');
     }
-    
-    if (context.historicalData && Object.keys(context.historicalData).length > 5) {
+
+    if (
+      context.historicalData &&
+      Object.keys(context.historicalData).length > 5
+    ) {
       factors.push('Sufficient historical precedent');
     }
-    
+
     if (context.riskFactors && context.riskFactors.length === 0) {
       factors.push('No significant risk factors identified');
     }
-    
+
     return factors.join(', ') || 'Standard decision criteria applied';
   }
 
-  private generateRecommendations(prediction: any, context: AIDecisionContext): string[] {
+  private generateRecommendations(
+    prediction: any,
+    context: AIDecisionContext
+  ): string[] {
     const recommendations = [];
-    
+
     if (prediction.primaryRecommendation === 'approve') {
       recommendations.push('Proceed with standard approval workflow');
     }
-    
+
     if (context.amount > 500000) {
       recommendations.push('Consider additional senior review');
     }
-    
+
     return recommendations;
   }
 
@@ -349,9 +392,9 @@ export class EnterpriseAIDecisionEngine implements IAIDecisionEngine {
     return {
       amount: 0.35,
       processType: 0.25,
-      region: 0.20,
+      region: 0.2,
       riskFactors: 0.15,
-      historicalData: 0.05
+      historicalData: 0.05,
     };
   }
 }
@@ -368,12 +411,22 @@ export class GlobalComplianceEngine implements IGlobalComplianceEngine {
     data: any
   ): Promise<any> {
     const validationResults = [];
-    
+
     // Get applicable rules for both jurisdictions
-    const sourceRules = this.getComplianceRequirements(sourceCountry, processType);
-    const targetRules = this.getComplianceRequirements(targetCountry, processType);
-    const crossBorderRules = this.getCrossBorderRules(sourceCountry, targetCountry, processType);
-    
+    const sourceRules = this.getComplianceRequirements(
+      sourceCountry,
+      processType
+    );
+    const targetRules = this.getComplianceRequirements(
+      targetCountry,
+      processType
+    );
+    const crossBorderRules = this.getCrossBorderRules(
+      sourceCountry,
+      targetCountry,
+      processType
+    );
+
     // Validate against all applicable rules
     for (const rule of [...sourceRules, ...targetRules, ...crossBorderRules]) {
       const result = await this.validateRule(rule, data);
@@ -382,13 +435,13 @@ export class GlobalComplianceEngine implements IGlobalComplianceEngine {
         description: rule.description,
         status: result.status,
         details: result.details,
-        requiredActions: result.requiredActions || []
+        requiredActions: result.requiredActions || [],
       });
     }
-    
+
     const overallStatus = this.determineOverallStatus(validationResults);
     const requiredActions = this.consolidateRequiredActions(validationResults);
-    
+
     return {
       sourceCountry,
       targetCountry,
@@ -396,11 +449,14 @@ export class GlobalComplianceEngine implements IGlobalComplianceEngine {
       overallStatus,
       validationResults,
       requiredActions,
-      validatedAt: new Date()
+      validatedAt: new Date(),
     };
   }
 
-  getComplianceRequirements(region: string, processType: string): ComplianceRule[] {
+  getComplianceRequirements(
+    region: string,
+    processType: string
+  ): ComplianceRule[] {
     const key = `${region}-${processType}`;
     return this.complianceRules.get(key) || [];
   }
@@ -410,7 +466,11 @@ export class GlobalComplianceEngine implements IGlobalComplianceEngine {
     console.log('Compliance violation reported:', violation);
   }
 
-  private getCrossBorderRules(source: string, target: string, processType: string): ComplianceRule[] {
+  private getCrossBorderRules(
+    source: string,
+    target: string,
+    processType: string
+  ): ComplianceRule[] {
     // Get rules that apply specifically to cross-border transactions
     const key = `${source}-${target}-${processType}`;
     return this.complianceRules.get(key) || [];
@@ -419,18 +479,21 @@ export class GlobalComplianceEngine implements IGlobalComplianceEngine {
   private async validateRule(rule: ComplianceRule, data: any): Promise<any> {
     // Simulate rule validation
     await new Promise(resolve => setTimeout(resolve, 50));
-    
+
     return {
       status: Math.random() > 0.1 ? 'passed' : 'failed',
       details: `Rule ${rule.id} validation completed`,
-      requiredActions: Math.random() > 0.8 ? ['Additional documentation required'] : []
+      requiredActions:
+        Math.random() > 0.8 ? ['Additional documentation required'] : [],
     };
   }
 
-  private determineOverallStatus(results: any[]): 'passed' | 'failed' | 'conditional' {
+  private determineOverallStatus(
+    results: any[]
+  ): 'passed' | 'failed' | 'conditional' {
     const failed = results.some(r => r.status === 'failed');
     const conditional = results.some(r => r.requiredActions.length > 0);
-    
+
     if (failed) return 'failed';
     if (conditional) return 'conditional';
     return 'passed';
@@ -452,7 +515,13 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
   private currentInstance: ProcessInstance;
   private globalScope: string[];
   private priority: 'low' | 'normal' | 'high' | 'critical';
-  private status: 'initiated' | 'running' | 'paused' | 'completed' | 'failed' | 'compensating';
+  private status:
+    | 'initiated'
+    | 'running'
+    | 'paused'
+    | 'completed'
+    | 'failed'
+    | 'compensating';
   private executedSteps: Map<string, any>;
   private pendingSteps: Set<string>;
   private failedSteps: Map<string, any>;
@@ -464,7 +533,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
   private startedAt: Date;
   private updatedAt: Date;
   private expectedCompletionAt?: Date;
-  
+
   // Enterprise Capabilities
   private orchestrationEngine: IProcessOrchestrationEngine;
   private aiDecisionEngine: IAIDecisionEngine;
@@ -483,7 +552,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     this.businessMetrics = {};
     this.priority = 'normal';
     this.status = 'initiated';
-    
+
     // Initialize enterprise capabilities
     this.aiDecisionEngine = new EnterpriseAIDecisionEngine();
     this.complianceEngine = new GlobalComplianceEngine();
@@ -502,7 +571,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       EntityId.generate(),
       globalConfig
     );
-    
+
     orchestrator.processType = processDefinition.type;
     orchestrator.processDefinition = processDefinition;
     orchestrator.globalScope = globalScope;
@@ -512,7 +581,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     orchestrator.expectedCompletionAt = new Date(
       Date.now() + processDefinition.estimatedDuration * 60 * 1000
     );
-    
+
     // Initialize process instance
     orchestrator.currentInstance = {
       id: orchestrator.id.value,
@@ -520,61 +589,77 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       status: 'running',
       currentStep: processDefinition.initialStep,
       variables: {},
-      startedAt: orchestrator.startedAt
+      startedAt: orchestrator.startedAt,
     };
-    
+
     // Set up initial pending steps
     orchestrator.pendingSteps.add(processDefinition.initialStep);
-    
-    orchestrator.addDomainEvent(new GlobalProcessInitiatedEvent(
-      orchestrator.id.value,
-      processDefinition.type,
-      initiatorId,
-      globalScope,
-      priority,
-      processDefinition.estimatedDuration,
-      processDefinition.complianceRequirements || [],
-      orchestrator.startedAt
-    ));
-    
+
+    orchestrator.addDomainEvent(
+      new GlobalProcessInitiatedEvent(
+        orchestrator.id.value,
+        processDefinition.type,
+        initiatorId,
+        globalScope,
+        priority,
+        processDefinition.estimatedDuration,
+        processDefinition.complianceRequirements || [],
+        orchestrator.startedAt
+      )
+    );
+
     return orchestrator;
   }
 
   // ⭐ Advanced process execution with AI decision making
   async executeNextStep(executorId: string, region: string): Promise<void> {
     if (this.status !== 'running' && this.status !== 'initiated') {
-      throw new ProcessOrchestrationError(this.id.value, `Cannot execute step in status: ${this.status}`);
+      throw new ProcessOrchestrationError(
+        this.id.value,
+        `Cannot execute step in status: ${this.status}`
+      );
     }
-    
+
     const nextStepId = Array.from(this.pendingSteps)[0];
     if (!nextStepId) {
       await this.completeProcess();
       return;
     }
-    
+
     const step = this.findStepById(nextStepId);
     if (!step) {
-      throw new ProcessOrchestrationError(this.id.value, `Step not found: ${nextStepId}`);
+      throw new ProcessOrchestrationError(
+        this.id.value,
+        `Step not found: ${nextStepId}`
+      );
     }
-    
+
     try {
       this.status = 'running';
-      
+
       // AI-enhanced decision making for complex steps
       let aiDecision;
       if (step.requiresAIDecision) {
         aiDecision = await this.makeAIDecision(step, region);
       }
-      
+
       // Cross-border compliance validation
       let complianceResult;
       if (step.requiresComplianceCheck) {
-        complianceResult = await this.validateCrossBorderCompliance(step, region);
+        complianceResult = await this.validateCrossBorderCompliance(
+          step,
+          region
+        );
       }
-      
+
       // Execute the step
-      const stepResult = await this.executeProcessStep(step, executorId, region, aiDecision);
-      
+      const stepResult = await this.executeProcessStep(
+        step,
+        executorId,
+        region,
+        aiDecision
+      );
+
       // Record successful execution
       this.executedSteps.set(nextStepId, {
         step,
@@ -583,41 +668,45 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
         complianceResult,
         executedBy: executorId,
         executedAt: new Date(),
-        region
+        region,
       });
-      
+
       this.pendingSteps.delete(nextStepId);
-      
+
       // Determine next steps
       const nextSteps = this.determineNextSteps(step, stepResult);
       nextSteps.forEach(stepId => this.pendingSteps.add(stepId));
-      
+
       this.updatedAt = new Date();
-      
-      this.addDomainEvent(new ProcessStepExecutedEvent(
-        this.id.value,
-        nextStepId,
-        step.type,
-        executorId,
-        region,
-        stepResult,
-        nextSteps,
-        aiDecision,
-        new Date()
-      ));
-      
+
+      this.addDomainEvent(
+        new ProcessStepExecutedEvent(
+          this.id.value,
+          nextStepId,
+          step.type,
+          executorId,
+          region,
+          stepResult,
+          nextSteps,
+          aiDecision,
+          new Date()
+        )
+      );
+
       // Check for process completion
       if (this.pendingSteps.size === 0) {
         await this.completeProcess();
       }
-      
     } catch (error) {
       await this.handleStepFailure(nextStepId, error, executorId, region);
     }
   }
 
   // ⭐ AI-enhanced decision making
-  private async makeAIDecision(step: ProcessStep, region: string): Promise<any> {
+  private async makeAIDecision(
+    step: ProcessStep,
+    region: string
+  ): Promise<any> {
     const decisionContext: AIDecisionContext = {
       processType: this.processType,
       processId: this.id.value,
@@ -628,111 +717,144 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       riskFactors: this.identifyRiskFactors(step),
       realTimeMetrics: this.gatherRealTimeMetrics(),
       amount: this.currentInstance.variables.amount || 0,
-      complianceContext: this.getComplianceContext(region)
+      complianceContext: this.getComplianceContext(region),
     };
-    
-    const decision = await this.aiDecisionEngine.makeDecision(step.decisionPoint!, decisionContext);
-    
+
+    const decision = await this.aiDecisionEngine.makeDecision(
+      step.decisionPoint!,
+      decisionContext
+    );
+
     // Validate decision confidence
     const confidenceThreshold = this.getConfidenceThreshold(step);
-    if (!this.aiDecisionEngine.validateDecisionConfidence(decision, confidenceThreshold)) {
-      const humanOverrideRequired = await this.aiDecisionEngine.requestHumanOverride(
+    if (
+      !this.aiDecisionEngine.validateDecisionConfidence(
         decision,
-        'Low confidence in AI decision'
-      );
-      
+        confidenceThreshold
+      )
+    ) {
+      const humanOverrideRequired =
+        await this.aiDecisionEngine.requestHumanOverride(
+          decision,
+          'Low confidence in AI decision'
+        );
+
       decision.humanOverrideRequired = humanOverrideRequired;
-      
+
       if (decision.confidence < 0.5) {
-        throw new AIDecisionConfidenceError(decision.confidence, confidenceThreshold);
+        throw new AIDecisionConfidenceError(
+          decision.confidence,
+          confidenceThreshold
+        );
       }
     }
-    
+
     this.aiDecisions.push(decision);
-    
-    this.addDomainEvent(new AIDecisionMadeEvent(
-      this.id.value,
-      step.decisionPoint!,
-      decision.modelVersion,
-      decision,
-      decision.confidence,
-      decision.humanOverrideRequired || false,
-      this.aiDecisionEngine.explainDecision(decision),
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new AIDecisionMadeEvent(
+        this.id.value,
+        step.decisionPoint!,
+        decision.modelVersion,
+        decision,
+        decision.confidence,
+        decision.humanOverrideRequired || false,
+        this.aiDecisionEngine.explainDecision(decision),
+        new Date()
+      )
+    );
+
     return decision;
   }
 
   // ⭐ Cross-border compliance validation
-  private async validateCrossBorderCompliance(step: ProcessStep, region: string): Promise<any> {
+  private async validateCrossBorderCompliance(
+    step: ProcessStep,
+    region: string
+  ): Promise<any> {
     const sourceCountry = region;
     const targetCountry = step.targetRegion || region;
-    
+
     if (sourceCountry === targetCountry) {
       // No cross-border validation needed
       return { status: 'not-applicable' };
     }
-    
-    const complianceResult = await this.complianceEngine.validateCrossBorderCompliance(
-      sourceCountry,
-      targetCountry,
-      this.processType,
-      this.currentInstance.variables
-    );
-    
+
+    const complianceResult =
+      await this.complianceEngine.validateCrossBorderCompliance(
+        sourceCountry,
+        targetCountry,
+        this.processType,
+        this.currentInstance.variables
+      );
+
     this.complianceValidations.push(complianceResult);
-    
-    this.addDomainEvent(new CrossBorderComplianceValidatedEvent(
-      this.id.value,
-      sourceCountry,
-      targetCountry,
-      complianceResult.validationResults,
-      complianceResult.overallStatus,
-      complianceResult.requiredActions,
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new CrossBorderComplianceValidatedEvent(
+        this.id.value,
+        sourceCountry,
+        targetCountry,
+        complianceResult.validationResults,
+        complianceResult.overallStatus,
+        complianceResult.requiredActions,
+        new Date()
+      )
+    );
+
     if (complianceResult.overallStatus === 'failed') {
       throw new GlobalComplianceViolationError(
         'Cross-border compliance validation failed',
         `${sourceCountry} -> ${targetCountry}`
       );
     }
-    
+
     return complianceResult;
   }
 
   // ⭐ Saga compensation handling
-  async triggerSagaCompensation(failedStepId: string, reason: string): Promise<void> {
-    const executedStepsArray = Array.from(this.executedSteps.entries()).reverse();
-    const compensationPlan = this.buildCompensationPlan(executedStepsArray, failedStepId);
-    
+  async triggerSagaCompensation(
+    failedStepId: string,
+    reason: string
+  ): Promise<void> {
+    const executedStepsArray = Array.from(
+      this.executedSteps.entries()
+    ).reverse();
+    const compensationPlan = this.buildCompensationPlan(
+      executedStepsArray,
+      failedStepId
+    );
+
     this.status = 'compensating';
-    
+
     const affectedRegions = new Set<string>();
     executedStepsArray.forEach(([stepId, execution]) => {
       affectedRegions.add(execution.region);
     });
-    
-    this.addDomainEvent(new SagaCompensationTriggeredEvent(
-      this.id.value,
-      failedStepId,
-      compensationPlan,
-      Array.from(affectedRegions),
-      this.estimateRecoveryTime(compensationPlan),
-      new Date()
-    ));
-    
+
+    this.addDomainEvent(
+      new SagaCompensationTriggeredEvent(
+        this.id.value,
+        failedStepId,
+        compensationPlan,
+        Array.from(affectedRegions),
+        this.estimateRecoveryTime(compensationPlan),
+        new Date()
+      )
+    );
+
     // Execute compensation steps
     for (const compensationStep of compensationPlan.steps) {
       try {
         await this.executeCompensationStep(compensationStep);
       } catch (error) {
-        throw new SagaCompensationFailedError(this.id.value, compensationStep.stepId);
+        throw new SagaCompensationFailedError(
+          this.id.value,
+          compensationStep.stepId
+        );
       }
     }
-    
+
     this.status = 'failed';
     this.updatedAt = new Date();
   }
@@ -741,29 +863,31 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
   private async completeProcess(): Promise<void> {
     const executionTime = Date.now() - this.startedAt.getTime();
     const regionsInvolved = new Set<string>();
-    
+
     this.executedSteps.forEach(execution => {
       regionsInvolved.add(execution.region);
     });
-    
+
     const completionStatus = this.failedSteps.size > 0 ? 'partial' : 'success';
     this.status = 'completed';
     this.updatedAt = new Date();
-    
+
     // Calculate business impact metrics
     this.businessMetrics = this.calculateBusinessImpact();
-    
-    this.addDomainEvent(new GlobalProcessCompletedEvent(
-      this.id.value,
-      this.processType,
-      completionStatus,
-      this.processDefinition.steps.length,
-      this.executedSteps.size,
-      executionTime,
-      Array.from(regionsInvolved),
-      this.businessMetrics,
-      new Date()
-    ));
+
+    this.addDomainEvent(
+      new GlobalProcessCompletedEvent(
+        this.id.value,
+        this.processType,
+        completionStatus,
+        this.processDefinition.steps.length,
+        this.executedSteps.size,
+        executionTime,
+        Array.from(regionsInvolved),
+        this.businessMetrics,
+        new Date()
+      )
+    );
   }
 
   // ⭐ Helper methods
@@ -774,15 +898,21 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     aiDecision?: any
   ): Promise<any> {
     // Simulate step execution with potential AI guidance
-    await new Promise(resolve => setTimeout(resolve, step.estimatedDuration || 1000));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, step.estimatedDuration || 1000)
+    );
+
     return {
       stepId: step.id,
       status: 'completed',
-      output: aiDecision?.recommendedActions || [`${step.type} completed successfully`],
+      output: aiDecision?.recommendedActions || [
+        `${step.type} completed successfully`,
+      ],
       executionTime: step.estimatedDuration || 1000,
       region,
-      aiGuidance: aiDecision ? this.aiDecisionEngine.explainDecision(aiDecision) : null
+      aiGuidance: aiDecision
+        ? this.aiDecisionEngine.explainDecision(aiDecision)
+        : null,
     };
   }
 
@@ -797,11 +927,11 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       error: error.message,
       failedAt: new Date(),
       executorId,
-      region
+      region,
     });
-    
+
     this.pendingSteps.delete(stepId);
-    
+
     // Check if compensation is needed
     const step = this.findStepById(stepId);
     if (step?.requiresCompensation) {
@@ -809,7 +939,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     } else {
       this.status = 'failed';
     }
-    
+
     this.updatedAt = new Date();
   }
 
@@ -822,15 +952,18 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     return currentStep.nextSteps || [];
   }
 
-  private buildCompensationPlan(executedSteps: [string, any][], failedStep: string): any {
+  private buildCompensationPlan(
+    executedSteps: [string, any][],
+    failedStep: string
+  ): any {
     return {
       failedStep,
       steps: executedSteps.map(([stepId, execution]) => ({
         stepId,
         compensationAction: `Compensate ${stepId}`,
         region: execution.region,
-        priority: 'high'
-      }))
+        priority: 'high',
+      })),
     };
   }
 
@@ -848,21 +981,21 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     return {
       similarProcesses: 25,
       successRate: 0.92,
-      averageExecutionTime: 1800000 // 30 minutes
+      averageExecutionTime: 1800000, // 30 minutes
     };
   }
 
   private identifyRiskFactors(step: ProcessStep): string[] {
     const riskFactors = [];
-    
+
     if (step.requiresCrossBorderCompliance) {
       riskFactors.push('cross-border-complexity');
     }
-    
+
     if (step.estimatedDuration > 10000) {
       riskFactors.push('long-execution-time');
     }
-    
+
     return riskFactors;
   }
 
@@ -871,7 +1004,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       systemLoad: 0.45,
       networkLatency: 120,
       errorRate: 0.02,
-      concurrentProcesses: 15
+      concurrentProcesses: 15,
     };
   }
 
@@ -879,7 +1012,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
     return {
       region,
       regulations: ['GDPR', 'SOX', 'PCI-DSS'],
-      riskLevel: 'medium'
+      riskLevel: 'medium',
     };
   }
 
@@ -893,7 +1026,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       timeToMarket: '3 days faster',
       complianceScore: 98.5,
       customerSatisfaction: 4.7,
-      operationalEfficiency: '15% improvement'
+      operationalEfficiency: '15% improvement',
     };
   }
 
@@ -914,7 +1047,7 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       startedAt: this.startedAt,
       updatedAt: this.updatedAt,
       expectedCompletionAt: this.expectedCompletionAt,
-      businessMetrics: this.businessMetrics
+      businessMetrics: this.businessMetrics,
     };
   }
 
@@ -924,31 +1057,50 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
       confidence: decision.confidence,
       reasoning: decision.reasoning,
       humanOverrideRequired: decision.humanOverrideRequired,
-      timestamp: decision.timestamp
+      timestamp: decision.timestamp,
     }));
   }
 
   getComplianceStatus(): any {
     return {
       totalValidations: this.complianceValidations.length,
-      passed: this.complianceValidations.filter(v => v.overallStatus === 'passed').length,
-      failed: this.complianceValidations.filter(v => v.overallStatus === 'failed').length,
-      conditional: this.complianceValidations.filter(v => v.overallStatus === 'conditional').length,
-      regionsValidated: [...new Set(this.complianceValidations.map(v => `${v.sourceCountry}-${v.targetCountry}`))]
+      passed: this.complianceValidations.filter(
+        v => v.overallStatus === 'passed'
+      ).length,
+      failed: this.complianceValidations.filter(
+        v => v.overallStatus === 'failed'
+      ).length,
+      conditional: this.complianceValidations.filter(
+        v => v.overallStatus === 'conditional'
+      ).length,
+      regionsValidated: [
+        ...new Set(
+          this.complianceValidations.map(
+            v => `${v.sourceCountry}-${v.targetCountry}`
+          )
+        ),
+      ],
     };
   }
 
   getExecutionMetrics(): any {
-    const executionTimes = Array.from(this.executedSteps.values()).map(e => e.result.executionTime);
-    const avgExecutionTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
-    
+    const executionTimes = Array.from(this.executedSteps.values()).map(
+      e => e.result.executionTime
+    );
+    const avgExecutionTime =
+      executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
+
     return {
       totalExecutionTime: Date.now() - this.startedAt.getTime(),
       averageStepTime: avgExecutionTime || 0,
-      successRate: this.executedSteps.size / (this.executedSteps.size + this.failedSteps.size),
-      regionsInvolved: [...new Set(Array.from(this.executedSteps.values()).map(e => e.region))],
+      successRate:
+        this.executedSteps.size /
+        (this.executedSteps.size + this.failedSteps.size),
+      regionsInvolved: [
+        ...new Set(Array.from(this.executedSteps.values()).map(e => e.region)),
+      ],
       aiDecisionAccuracy: this.calculateAIAccuracy(),
-      complianceSuccessRate: this.calculateComplianceSuccessRate()
+      complianceSuccessRate: this.calculateComplianceSuccessRate(),
     };
   }
 
@@ -959,8 +1111,10 @@ export class EnterpriseProcessOrchestratorAggregate extends AggregateRoot {
 
   private calculateComplianceSuccessRate(): number {
     if (this.complianceValidations.length === 0) return 1.0;
-    
-    const successful = this.complianceValidations.filter(v => v.overallStatus === 'passed').length;
+
+    const successful = this.complianceValidations.filter(
+      v => v.overallStatus === 'passed'
+    ).length;
     return successful / this.complianceValidations.length;
   }
 }
@@ -985,7 +1139,7 @@ export function enterpriseProcessOrchestrationExample(): void {
         decisionPoint: 'compliance-check',
         nextSteps: ['assess-risk'],
         estimatedDuration: 5000,
-        criticalPath: true
+        criticalPath: true,
       },
       {
         id: 'assess-risk',
@@ -994,7 +1148,7 @@ export function enterpriseProcessOrchestrationExample(): void {
         requiresAIDecision: true,
         decisionPoint: 'risk-assessment',
         nextSteps: ['allocate-resources'],
-        estimatedDuration: 3000
+        estimatedDuration: 3000,
       },
       {
         id: 'allocate-resources',
@@ -1003,7 +1157,7 @@ export function enterpriseProcessOrchestrationExample(): void {
         requiresAIDecision: true,
         decisionPoint: 'resource-allocation',
         nextSteps: ['execute-trade'],
-        estimatedDuration: 2000
+        estimatedDuration: 2000,
       },
       {
         id: 'execute-trade',
@@ -1011,16 +1165,16 @@ export function enterpriseProcessOrchestrationExample(): void {
         name: 'Execute Trade Transaction',
         requiresCompensation: true,
         nextSteps: ['finalize-settlement'],
-        estimatedDuration: 10000
+        estimatedDuration: 10000,
       },
       {
         id: 'finalize-settlement',
         type: 'settlement',
         name: 'Finalize Trade Settlement',
         requiresCompensation: true,
-        estimatedDuration: 15000
-      }
-    ]
+        estimatedDuration: 15000,
+      },
+    ],
   };
 
   const globalConfig: GlobalProcessConfig = {
@@ -1029,7 +1183,7 @@ export function enterpriseProcessOrchestrationExample(): void {
     complianceValidationEnabled: true,
     sagaCompensationEnabled: true,
     crossBorderValidationRequired: true,
-    supportedRegions: ['US', 'EU', 'APAC', 'LATAM']
+    supportedRegions: ['US', 'EU', 'APAC', 'LATAM'],
   };
 
   // Create global process orchestrator
@@ -1041,7 +1195,10 @@ export function enterpriseProcessOrchestrationExample(): void {
     globalConfig
   );
 
-  console.log('Process orchestration initiated:', orchestrator.getProcessSummary());
+  console.log(
+    'Process orchestration initiated:',
+    orchestrator.getProcessSummary()
+  );
 
   // Execute process steps with AI decision making
   async function runExample() {
@@ -1060,10 +1217,13 @@ export function enterpriseProcessOrchestrationExample(): void {
       console.log('Domain events:', orchestrator.getUncommittedEvents().length);
     } catch (error) {
       console.error('Process failed:', error.message);
-      
+
       // Trigger compensation if needed
       if (error.message.includes('step failure')) {
-        await orchestrator.triggerSagaCompensation('execute-trade', error.message);
+        await orchestrator.triggerSagaCompensation(
+          'execute-trade',
+          error.message
+        );
       }
     }
   }
@@ -1074,17 +1234,24 @@ export function enterpriseProcessOrchestrationExample(): void {
 
 ## Key Features
 
-- **Global Process Coordination**: Orchestrates complex processes across multiple regions and systems
-- **AI-Enhanced Decision Making**: Machine learning models guide critical business decisions
-- **Cross-Border Compliance**: Automated validation of international regulatory requirements
-- **Saga Pattern Implementation**: Reliable compensation handling for distributed transactions
+- **Global Process Coordination**: Orchestrates complex processes across
+  multiple regions and systems
+- **AI-Enhanced Decision Making**: Machine learning models guide critical
+  business decisions
+- **Cross-Border Compliance**: Automated validation of international regulatory
+  requirements
+- **Saga Pattern Implementation**: Reliable compensation handling for
+  distributed transactions
 - **Real-Time Risk Assessment**: Dynamic risk scoring with adaptive thresholds
-- **Enterprise Scalability**: Handles thousands of concurrent processes with performance optimization
-- **Comprehensive Audit Trails**: Complete visibility into all process execution details
+- **Enterprise Scalability**: Handles thousands of concurrent processes with
+  performance optimization
+- **Comprehensive Audit Trails**: Complete visibility into all process execution
+  details
 
 ## AI Decision Engine Features
 
-1. **Multi-Model Architecture**: Different AI models for different decision types
+1. **Multi-Model Architecture**: Different AI models for different decision
+   types
 2. **Confidence Validation**: Automatic escalation for low-confidence decisions
 3. **Explainable AI**: Human-readable explanations for all decisions
 4. **Continuous Learning**: Historical data integration for improved accuracy

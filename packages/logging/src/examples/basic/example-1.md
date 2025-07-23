@@ -1,35 +1,33 @@
 # Basic Logger Setup
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/logging
-**Complexity**: basic
-**Domain**: Structured Logging
-**Patterns**: Context detection, data masking, configuration
-**Dependencies**: @vytches-ddd/logging
+**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Domain**: Structured Logging **Patterns**: Context detection, data masking,
+configuration **Dependencies**: @vytches-ddd/logging
 
 ## Description
 
-Basic logger setup with automatic context detection, data masking for sensitive information, and foundational configuration. This example demonstrates the core features of @vytches-ddd/logging package for structured application logging.
+Basic logger setup with automatic context detection, data masking for sensitive
+information, and foundational configuration. This example demonstrates the core
+features of @vytches-ddd/logging package for structured application logging.
 
 ## Business Context
 
-Applications need reliable, structured logging that automatically captures relevant context (class names, method names, bounded contexts) while protecting sensitive data through automatic masking. This foundation enables effective debugging, monitoring, and compliance.
+Applications need reliable, structured logging that automatically captures
+relevant context (class names, method names, bounded contexts) while protecting
+sensitive data through automatic masking. This foundation enables effective
+debugging, monitoring, and compliance.
 
 ## Code Example
 
 ```typescript
 // basic-logger-setup.ts
-import { 
-  Logger,
-  LogLevel,
-  LoggerConfiguration
-} from '@vytches-ddd/logging';
-import { 
+import { Logger, LogLevel, LoggerConfiguration } from '@vytches-ddd/logging';
+import {
   UserData,
   OrderData,
   LoggingConfig,
   LogContext,
-  DatabaseConfig 
+  DatabaseConfig,
 } from '../types'; // From your application
 
 // ✅ FOCUS: Basic logger configuration with context detection
@@ -46,14 +44,14 @@ export class BasicLoggerSetup {
       level: 'info',
       enableConsoleOutput: true,
       enableFileOutput: false, // Keep it simple for basic setup
-      
+
       // ⭐ FOCUS: Automatic context detection
       contextDetection: {
         enabled: true,
         stackTraceAnalysis: true,
-        boundedContextDetection: true
+        boundedContextDetection: true,
       },
-      
+
       // ⭐ FOCUS: Data masking configuration
       masking: {
         enabled: true,
@@ -64,7 +62,7 @@ export class BasicLoggerSetup {
           'secret',
           'cardNumber',
           'ssn',
-          'phoneNumber'
+          'phoneNumber',
         ],
         replacement: '[MASKED]',
         customMaskers: {
@@ -72,21 +70,21 @@ export class BasicLoggerSetup {
             // Show first character and domain, mask the rest
             const [local, domain] = email.split('@');
             return `${local[0]}***@${domain}`;
-          }
-        }
+          },
+        },
       },
-      
+
       // Basic formatting
       formatting: {
         colorize: true,
         timestamp: true,
-        prettyPrint: false // Use JSON for production
-      }
+        prettyPrint: false, // Use JSON for production
+      },
     };
 
     // Initialize logger with configuration
     this.logger = Logger.create(config);
-    
+
     console.log('✅ Basic logger configured successfully');
   }
 
@@ -96,21 +94,21 @@ export class BasicLoggerSetup {
     // - Class name: BasicLoggerSetup
     // - Method name: demonstrateContextDetection
     // - Bounded context: from package structure
-    
+
     this.logger.info('Context detection demonstration', {
       feature: 'automatic-context',
-      detectedFrom: 'stack-trace-analysis'
+      detectedFrom: 'stack-trace-analysis',
     });
-    
+
     // Manual context enrichment (optional)
     this.logger
       .withContext({
         userId: 'user-123',
         sessionId: 'session-456',
-        operationName: 'context-demo'
+        operationName: 'context-demo',
       })
       .info('Enhanced context logging', {
-        customData: 'additional information'
+        customData: 'additional information',
       });
   }
 
@@ -126,16 +124,16 @@ export class BasicLoggerSetup {
       sensitiveData: {
         ssn: '123-45-6789',
         phoneNumber: '+1-555-123-4567',
-        address: '123 Main St, City, State 12345'
-      }
+        address: '123 Main St, City, State 12345',
+      },
     };
 
     // ⭐ FOCUS: Automatic data masking
     this.logger.info('User data logged with automatic masking', {
       userData: sensitiveUserData,
-      operation: 'user-registration'
+      operation: 'user-registration',
     });
-    
+
     // Output will show:
     // - email: "j***@example.com"
     // - ssn: "[MASKED]"
@@ -147,14 +145,14 @@ export class BasicLoggerSetup {
       username: 'app_user',
       password: 'super-secret-password',
       database: 'app_db',
-      ssl: true
+      ssl: true,
     };
 
     // ⭐ FOCUS: Configuration logging with masking
     this.logger.info('Database configuration loaded', {
       config: databaseConfig,
       // password will be automatically masked as "[MASKED]"
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -164,28 +162,28 @@ export class BasicLoggerSetup {
     this.logger.error('Critical error occurred', {
       errorCode: 'DB_CONNECTION_FAILED',
       attemptNumber: 3,
-      maxRetries: 5
+      maxRetries: 5,
     });
 
     // Warning with business context
     this.logger.warn('Performance threshold exceeded', {
       responseTime: 2500,
       threshold: 2000,
-      endpoint: '/api/users'
+      endpoint: '/api/users',
     });
 
     // Info for business events
     this.logger.info('User successfully registered', {
       userId: 'user-789',
       registrationMethod: 'email',
-      marketingOptIn: true
+      marketingOptIn: true,
     });
 
     // Debug for development
     this.logger.debug('Processing order items', {
       orderId: 'order-456',
       itemCount: 3,
-      processingStage: 'validation'
+      processingStage: 'validation',
     });
   }
 
@@ -207,7 +205,7 @@ export class BasicLoggerSetup {
       // You can also log just the error message
       this.logger.error(error.message, {
         errorType: error.constructor.name,
-        businessContext: 'payment-processing'
+        businessContext: 'payment-processing',
       });
     }
   }
@@ -228,14 +226,14 @@ export class BasicLoggerSetup {
 
   // ✅ FOCUS: Performance logging
   async logOperationPerformance<T>(
-    operationName: string, 
+    operationName: string,
     operation: () => Promise<T>
   ): Promise<T> {
     const startTime = Date.now();
-    
+
     this.logger.debug(`Starting operation: ${operationName}`, {
       operationName,
-      startTime: new Date()
+      startTime: new Date(),
     });
 
     try {
@@ -246,7 +244,7 @@ export class BasicLoggerSetup {
         operationName,
         duration,
         success: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return result;
@@ -258,7 +256,7 @@ export class BasicLoggerSetup {
         duration,
         success: false,
         error: error,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       throw error;
@@ -274,7 +272,7 @@ export class UserService {
     this.logger.info('Creating new user', {
       email: userData.email, // Will be masked automatically
       role: userData.role,
-      operation: 'user-creation'
+      operation: 'user-creation',
     });
 
     try {
@@ -283,23 +281,22 @@ export class UserService {
         ...userData,
         id: 'user-' + Date.now(),
         createdAt: new Date(),
-        isActive: true
+        isActive: true,
       };
 
       this.logger.info('User created successfully', {
         userId: newUser.id,
         email: newUser.email, // Masked
         role: newUser.role,
-        createdAt: newUser.createdAt
+        createdAt: newUser.createdAt,
       });
 
       return newUser;
-
     } catch (error) {
       this.logger.error('User creation failed', {
         email: userData.email, // Masked
         error: error,
-        operation: 'user-creation'
+        operation: 'user-creation',
       });
       throw error;
     }
@@ -311,7 +308,7 @@ export class UserService {
     try {
       // Simulate user lookup
       const user = await this.mockUserLookup(userId);
-      
+
       if (!user) {
         this.logger.warn('User not found', { userId });
         return null;
@@ -320,15 +317,14 @@ export class UserService {
       this.logger.info('User fetched successfully', {
         userId: user.id,
         email: user.email, // Masked
-        isActive: user.isActive
+        isActive: user.isActive,
       });
 
       return user;
-
     } catch (error) {
       this.logger.error('User fetch failed', {
         userId,
-        error: error
+        error: error,
       });
       throw error;
     }
@@ -339,14 +335,14 @@ export class UserService {
     if (userId === 'user-not-found') {
       return null;
     }
-    
+
     return {
       id: userId,
       name: 'John Doe',
       email: 'john.doe@example.com',
       role: 'user',
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
     };
   }
 }
@@ -363,52 +359,51 @@ export class OrderService {
       itemCount: orderData.items.length,
       totalAmount: orderData.totalAmount,
       // Payment info will be masked automatically
-      paymentMethod: orderData.paymentInfo?.method
+      paymentMethod: orderData.paymentInfo?.method,
     });
 
     const operationLogger = this.logger.withContext({
       orderId: orderData.id,
       customerId: orderData.customerId,
-      operationName: 'order-processing'
+      operationName: 'order-processing',
     });
 
     try {
       // Step 1: Validate order
       operationLogger.debug('Validating order data');
       await this.validateOrder(orderData);
-      
+
       // Step 2: Process payment
       operationLogger.info('Processing payment', {
         amount: orderData.totalAmount,
-        paymentMethod: orderData.paymentInfo?.method
+        paymentMethod: orderData.paymentInfo?.method,
         // cardNumber automatically masked
       });
       await this.processPayment(orderData);
-      
+
       // Step 3: Update inventory
       operationLogger.debug('Updating inventory');
       await this.updateInventory(orderData.items);
-      
+
       // Step 4: Complete order
       const processedOrder = {
         ...orderData,
         status: 'processing' as const,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       operationLogger.info('Order processed successfully', {
         orderId: processedOrder.id,
         newStatus: processedOrder.status,
-        processingTime: Date.now() - orderData.createdAt.getTime()
+        processingTime: Date.now() - orderData.createdAt.getTime(),
       });
 
       return processedOrder;
-
     } catch (error) {
       operationLogger.error('Order processing failed', {
         error: error,
         orderStatus: orderData.status,
-        stage: this.determineFailureStage(error)
+        stage: this.determineFailureStage(error),
       });
       throw error;
     }
@@ -464,7 +459,7 @@ basicSetup.demonstrateErrorLogging();
 basicSetup.logBusinessEvent('UserRegistered', {
   userId: 'user-123',
   email: 'user@example.com', // Will be masked
-  registrationSource: 'web'
+  registrationSource: 'web',
 });
 
 // Performance logging
@@ -476,7 +471,7 @@ await basicSetup.logOperationPerformance('createUser', async () => {
     role: 'user',
     id: '',
     createdAt: new Date(),
-    isActive: true
+    isActive: true,
   });
 });
 
@@ -486,17 +481,23 @@ const order: OrderData = {
   id: 'order-123',
   customerId: 'customer-456',
   items: [
-    { id: '1', productId: 'product-1', name: 'Widget', quantity: 2, price: 10.00 }
+    {
+      id: '1',
+      productId: 'product-1',
+      name: 'Widget',
+      quantity: 2,
+      price: 10.0,
+    },
   ],
-  totalAmount: 20.00,
+  totalAmount: 20.0,
   status: 'pending',
   createdAt: new Date(),
   updatedAt: new Date(),
   paymentInfo: {
     method: 'credit-card',
     cardNumber: '1234-5678-9012-3456', // Will be masked
-    expiryDate: '12/25'
-  }
+    expiryDate: '12/25',
+  },
 };
 
 await orderService.processOrder(order);
@@ -504,12 +505,17 @@ await orderService.processOrder(order);
 
 ## Key Features
 
-- **Automatic Context Detection**: Detects class names, method names, and bounded contexts from stack traces
-- **Data Masking**: Automatically masks sensitive information (passwords, API keys, card numbers, etc.)
-- **Structured Logging**: JSON-based structured logs for better parsing and analysis
-- **Multiple Log Levels**: Error, warn, info, debug levels with appropriate context
+- **Automatic Context Detection**: Detects class names, method names, and
+  bounded contexts from stack traces
+- **Data Masking**: Automatically masks sensitive information (passwords, API
+  keys, card numbers, etc.)
+- **Structured Logging**: JSON-based structured logs for better parsing and
+  analysis
+- **Multiple Log Levels**: Error, warn, info, debug levels with appropriate
+  context
 - **Performance Logging**: Built-in operation timing and performance tracking
-- **Business Event Logging**: Structured logging for business operations and events
+- **Business Event Logging**: Structured logging for business operations and
+  events
 
 ## Configuration Options
 
@@ -519,31 +525,37 @@ const advancedConfig: LoggingConfig = {
   level: 'debug',
   enableConsoleOutput: true,
   enableFileOutput: true,
-  
+
   contextDetection: {
     enabled: true,
     stackTraceAnalysis: true,
-    boundedContextDetection: true
+    boundedContextDetection: true,
   },
-  
+
   masking: {
     enabled: true,
     sensitiveKeys: [
-      'password', 'secret', 'token', 'apiKey',
-      'cardNumber', 'ssn', 'phoneNumber', 'address'
+      'password',
+      'secret',
+      'token',
+      'apiKey',
+      'cardNumber',
+      'ssn',
+      'phoneNumber',
+      'address',
     ],
     replacement: '[REDACTED]',
     customMaskers: {
-      email: (email) => email.replace(/(.{1}).*@/, '$1***@'),
-      phone: (phone) => phone.replace(/\d(?=\d{4})/g, '*')
-    }
+      email: email => email.replace(/(.{1}).*@/, '$1***@'),
+      phone: phone => phone.replace(/\d(?=\d{4})/g, '*'),
+    },
   },
-  
+
   formatting: {
     colorize: process.env.NODE_ENV === 'development',
     timestamp: true,
-    prettyPrint: process.env.NODE_ENV === 'development'
-  }
+    prettyPrint: process.env.NODE_ENV === 'development',
+  },
 };
 ```
 
@@ -551,18 +563,25 @@ const advancedConfig: LoggingConfig = {
 
 - Use `Logger.forContext()` in classes for automatic context detection
 - Configure data masking for all sensitive fields early in development
-- Use appropriate log levels (error for failures, info for business events, debug for development)
-- Include relevant context in log messages (user IDs, operation names, correlation IDs)
+- Use appropriate log levels (error for failures, info for business events,
+  debug for development)
+- Include relevant context in log messages (user IDs, operation names,
+  correlation IDs)
 - Use structured logging with objects rather than string concatenation
 - Log both successful operations and failures for comprehensive auditing
 
 ## Common Pitfalls
 
-- **Logging Sensitive Data**: Always configure masking before production deployment
-- **Over-logging**: Avoid logging at debug level in production without log level filtering
-- **Missing Context**: Include relevant business context (user ID, operation name) in log entries
-- **Performance Impact**: Be mindful of logging performance in high-throughput operations
-- **Log Level Configuration**: Set appropriate log levels for different environments
+- **Logging Sensitive Data**: Always configure masking before production
+  deployment
+- **Over-logging**: Avoid logging at debug level in production without log level
+  filtering
+- **Missing Context**: Include relevant business context (user ID, operation
+  name) in log entries
+- **Performance Impact**: Be mindful of logging performance in high-throughput
+  operations
+- **Log Level Configuration**: Set appropriate log levels for different
+  environments
 
 ## Related Examples
 

@@ -30,7 +30,7 @@ describe('PatternRegistry', () => {
   describe('constructor and factory', () => {
     it('should create instance and initialize built-in patterns', () => {
       expect(registry).toBeInstanceOf(PatternRegistry);
-      
+
       // Verify that built-in patterns are loaded
       const allPatterns = registry.getAllPatterns();
       expect(allPatterns.length).toBeGreaterThan(0);
@@ -38,7 +38,7 @@ describe('PatternRegistry', () => {
 
     it('should create instance using static factory method', () => {
       const factoryRegistry = PatternRegistry.create();
-      
+
       expect(factoryRegistry).toBeInstanceOf(PatternRegistry);
     });
   });
@@ -55,9 +55,7 @@ describe('PatternRegistry', () => {
     });
 
     it('should throw error for non-existent pattern', () => {
-      const [patternError] = safeRun(() => 
-        registry.getPattern('non-existent' as any)
-      );
+      const [patternError] = safeRun(() => registry.getPattern('non-existent' as any));
 
       expect(patternError).toBeInstanceOf(CLIError);
       expect(patternError?.message).toContain('Unknown pattern type: non-existent');
@@ -65,10 +63,10 @@ describe('PatternRegistry', () => {
 
     it('should get all patterns', () => {
       const allPatterns = registry.getAllPatterns();
-      
+
       expect(allPatterns).toBeInstanceOf(Array);
       expect(allPatterns.length).toBeGreaterThan(10);
-      
+
       // Check that key patterns are included
       const patternNames = allPatterns.map(p => p.name);
       expect(patternNames).toContain('aggregate');
@@ -150,7 +148,7 @@ describe('PatternRegistry', () => {
 
       expect(error).toBeUndefined();
       expect(registry.hasPattern('custom-pattern' as any)).toBe(true);
-      
+
       const retrievedPattern = registry.getPattern('custom-pattern' as any);
       expect(retrievedPattern.displayName).toBe('Custom Pattern');
     });
@@ -159,14 +157,14 @@ describe('PatternRegistry', () => {
   describe('dependency management', () => {
     it('should get pattern dependencies', () => {
       const aggregateDeps = registry.getPatternDependencies('aggregate');
-      
+
       expect(aggregateDeps).toContain('entity');
       expect(aggregateDeps).toContain('value-object');
     });
 
     it('should get all dependencies recursively', () => {
       const allDeps = registry.getAllDependencies('aggregate');
-      
+
       expect(allDeps).toBeInstanceOf(Array);
       // Should include direct dependencies
       expect(allDeps).toContain('entity');
@@ -182,31 +180,31 @@ describe('PatternRegistry', () => {
   describe('pattern suggestions', () => {
     it('should suggest repository for aggregate', () => {
       const suggestions = registry.getSuggestions(['aggregate']);
-      
+
       expect(suggestions).toContain('repository');
     });
 
     it('should suggest handler for command', () => {
       const suggestions = registry.getSuggestions(['command']);
-      
+
       expect(suggestions).toContain('handler');
     });
 
     it('should suggest processor for event', () => {
       const suggestions = registry.getSuggestions(['event']);
-      
+
       expect(suggestions).toContain('processor');
     });
 
     it('should suggest saga for aggregate and event combination', () => {
       const suggestions = registry.getSuggestions(['aggregate', 'event']);
-      
+
       expect(suggestions).toContain('saga');
     });
 
     it('should suggest projection for event', () => {
       const suggestions = registry.getSuggestions(['event']);
-      
+
       expect(suggestions).toContain('projection');
     });
   });
@@ -269,12 +267,12 @@ describe('PatternRegistry', () => {
 
       expect(learningPath).toBeInstanceOf(Array);
       expect(learningPath.length).toBeGreaterThan(0);
-      
+
       // Check that basic patterns come first
       const firstLevel = learningPath[0];
       expect(firstLevel).toContain('value-object');
       expect(firstLevel).toContain('entity');
-      
+
       // Check that advanced patterns come later
       const lastLevel = learningPath[learningPath.length - 1];
       expect(lastLevel).toContain('saga');
@@ -283,7 +281,7 @@ describe('PatternRegistry', () => {
 
     it('should provide progressive complexity in learning path', () => {
       const learningPath = registry.getLearningPath();
-      
+
       // Each level should be an array of pattern types
       learningPath.forEach(level => {
         expect(level).toBeInstanceOf(Array);

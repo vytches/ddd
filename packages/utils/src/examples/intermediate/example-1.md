@@ -1,45 +1,49 @@
 # Advanced Result Patterns
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: intermediate
-**Domain**: Infrastructure
-**Patterns**: Result chaining, functional composition, monadic operations
-**Dependencies**: @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Domain**: Infrastructure **Patterns**: Result chaining, functional
+composition, monadic operations **Dependencies**: @vytches-ddd/utils
 
 ## Description
 
-Advanced Result pattern techniques including chaining operations, functional composition, and monadic transformations. This example demonstrates how to build complex data processing pipelines using Result patterns while maintaining type safety and proper error handling.
+Advanced Result pattern techniques including chaining operations, functional
+composition, and monadic transformations. This example demonstrates how to build
+complex data processing pipelines using Result patterns while maintaining type
+safety and proper error handling.
 
 ## Business Context
 
-Complex business operations often involve multiple steps where any step can fail:
+Complex business operations often involve multiple steps where any step can
+fail:
+
 - Data validation pipelines with multiple validation rules
 - Multi-step data transformations
 - Operations that depend on previous successful operations
 - Complex business workflows with branching logic
 
-Advanced Result patterns enable you to compose these operations cleanly while maintaining explicit error handling.
+Advanced Result patterns enable you to compose these operations cleanly while
+maintaining explicit error handling.
 
 ## Code Example
 
 ```typescript
 // advanced-result-patterns.ts
 import { Result } from '@vytches-ddd/utils';
-import { 
-  UserData, 
-  ValidationError, 
-  ChainableOperation, 
+import {
+  UserData,
+  ValidationError,
+  ChainableOperation,
   Pipeline,
   AsyncResult,
-  Railway 
+  Railway,
 } from '../types';
 
 // ✅ FOCUS: Advanced Result pattern composition
 export class AdvancedResultPatterns {
-  
   // 1. Result Chaining with Complex Validation
-  validateUserProfile(userData: Partial<UserData>): Result<UserData, ValidationError> {
+  validateUserProfile(
+    userData: Partial<UserData>
+  ): Result<UserData, ValidationError> {
     return this.validateEmail(userData.email)
       .flatMap(() => this.validateName(userData.name))
       .flatMap(() => this.validateRole(userData.role))
@@ -107,7 +111,7 @@ export class AdvancedResultPatterns {
   private validateRole(role?: string): Result<string, ValidationError> {
     const validRoles = ['admin', 'user', 'moderator', 'guest'];
     const normalizedRole = role?.toLowerCase() || 'user';
-    
+
     if (!validRoles.includes(normalizedRole)) {
       return Result.fail({
         field: 'role',
@@ -167,7 +171,9 @@ export class AdvancedResultPatterns {
   }
 
   // 3. Conditional Result Processing
-  processUserWithBusinessRules(userData: UserData): Result<UserData, ValidationError> {
+  processUserWithBusinessRules(
+    userData: UserData
+  ): Result<UserData, ValidationError> {
     return Result.ok(userData)
       .flatMap(user => {
         // Business rule: Admins must have special email domains
@@ -202,19 +208,21 @@ export class AdvancedResultPatterns {
   }
 
   private capitalizeWords(str: string): string {
-    return str.split(' ')
+    return str
+      .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 
   // 4. Result Aggregation Patterns
-  processMultipleUsers(userDataList: Partial<UserData>[]): Result<UserData[], ValidationError[]> {
-    const results = userDataList.map((userData, index) => 
-      this.validateUserProfile(userData)
-        .mapError(error => ({
-          ...error,
-          field: `users[${index}].${error.field}`,
-        }))
+  processMultipleUsers(
+    userDataList: Partial<UserData>[]
+  ): Result<UserData[], ValidationError[]> {
+    const results = userDataList.map((userData, index) =>
+      this.validateUserProfile(userData).mapError(error => ({
+        ...error,
+        field: `users[${index}].${error.field}`,
+      }))
     );
 
     const successfulUsers: UserData[] = [];
@@ -238,13 +246,17 @@ export class AdvancedResultPatterns {
   // 5. Result Transformation Chains
   createUserDisplayInfo(userData: UserData): Result<string, Error> {
     return Result.ok(userData)
-      .map(user => ({ // Transform to display data
+      .map(user => ({
+        // Transform to display data
         displayName: `${user.name} (${user.role})`,
         emailDomain: user.email.split('@')[1],
         memberSince: user.createdAt.getFullYear(),
       }))
-      .map(display => // Create formatted string
-        `${display.displayName} - ${display.emailDomain} - Member since ${display.memberSince}`
+      .map(
+        (
+          display // Create formatted string
+        ) =>
+          `${display.displayName} - ${display.emailDomain} - Member since ${display.memberSince}`
       )
       .flatMap(displayString => {
         // Validate final output
@@ -256,40 +268,52 @@ export class AdvancedResultPatterns {
   }
 
   // 6. Advanced Error Recovery
-  processUserWithFallback(primaryData: Partial<UserData>, fallbackData: Partial<UserData>): Result<UserData, Error> {
+  processUserWithFallback(
+    primaryData: Partial<UserData>,
+    fallbackData: Partial<UserData>
+  ): Result<UserData, Error> {
     return this.validateUserProfile(primaryData)
       .flatMap(user => Result.ok(user)) // Primary success path
       .match(
         // On success, return the primary result
         user => Result.ok(user),
         // On failure, try fallback
-        _error => this.validateUserProfile(fallbackData)
-          .map(fallbackUser => ({
-            ...fallbackUser,
-            id: `fallback-${fallbackUser.id}`,
-          }))
-          .mapError(fallbackError => 
-            new Error(`Both primary and fallback validation failed: ${fallbackError.message}`)
-          )
+        _error =>
+          this.validateUserProfile(fallbackData)
+            .map(fallbackUser => ({
+              ...fallbackUser,
+              id: `fallback-${fallbackUser.id}`,
+            }))
+            .mapError(
+              fallbackError =>
+                new Error(
+                  `Both primary and fallback validation failed: ${fallbackError.message}`
+                )
+            )
       );
   }
 
   // 7. Compose Complex Operations
   createUserAccount(
-    userData: Partial<UserData>, 
-    preferences: any, 
+    userData: Partial<UserData>,
+    preferences: any,
     permissions: string[]
   ): Result<any, Error> {
     // Chain multiple complex operations
     return this.validateUserProfile(userData)
       .flatMap(user => this.processUserWithBusinessRules(user))
-      .flatMap(processedUser => 
-        this.validatePreferences(preferences)
-          .map(validPrefs => ({ user: processedUser, preferences: validPrefs }))
+      .flatMap(processedUser =>
+        this.validatePreferences(preferences).map(validPrefs => ({
+          user: processedUser,
+          preferences: validPrefs,
+        }))
       )
       .flatMap(({ user, preferences }) =>
-        this.validatePermissions(permissions)
-          .map(validPerms => ({ user, preferences, permissions: validPerms }))
+        this.validatePermissions(permissions).map(validPerms => ({
+          user,
+          preferences,
+          permissions: validPerms,
+        }))
       )
       .map(account => ({
         ...account,
@@ -314,14 +338,16 @@ export class AdvancedResultPatterns {
 
   private validatePermissions(permissions: string[]): Result<string[], Error> {
     const validPermissions = ['read', 'write', 'delete', 'admin'];
-    
+
     if (!Array.isArray(permissions)) {
       return Result.fail(new Error('Permissions must be an array'));
     }
 
     const invalidPerms = permissions.filter(p => !validPermissions.includes(p));
     if (invalidPerms.length > 0) {
-      return Result.fail(new Error(`Invalid permissions: ${invalidPerms.join(', ')}`));
+      return Result.fail(
+        new Error(`Invalid permissions: ${invalidPerms.join(', ')}`)
+      );
     }
 
     return Result.ok(permissions);
@@ -331,12 +357,14 @@ export class AdvancedResultPatterns {
 // Extension to Result class for additional operations
 declare module '@vytches-ddd/utils' {
   interface Result<TValue, TError> {
-    mapError<TNewError>(fn: (error: TError) => TNewError): Result<TValue, TNewError>;
+    mapError<TNewError>(
+      fn: (error: TError) => TNewError
+    ): Result<TValue, TNewError>;
   }
 }
 
 // Implementation of mapError extension (would be in actual utils package)
-Result.prototype.mapError = function<TValue, TError, TNewError>(
+Result.prototype.mapError = function <TValue, TError, TNewError>(
   this: Result<TValue, TError>,
   fn: (error: TError) => TNewError
 ): Result<TValue, TNewError> {
@@ -349,7 +377,8 @@ Result.prototype.mapError = function<TValue, TError, TNewError>(
 
 ## Key Features
 
-- **Complex Validation Chains**: Multiple validation steps with early termination
+- **Complex Validation Chains**: Multiple validation steps with early
+  termination
 - **Data Processing Pipelines**: Multi-step transformations with error handling
 - **Conditional Logic**: Business rule application within Result chains
 - **Error Recovery**: Fallback mechanisms for failed operations
@@ -391,10 +420,13 @@ const aggregateResult = processor.processMultipleUsers(userList);
 
 ## Common Pitfalls
 
-- **Deep nesting**: Avoid excessive flatMap chaining - break into smaller functions
-- **Error context loss**: Use mapError to maintain error context through transformations
+- **Deep nesting**: Avoid excessive flatMap chaining - break into smaller
+  functions
+- **Error context loss**: Use mapError to maintain error context through
+  transformations
 - **Performance**: Consider lazy evaluation for complex chains
-- **Type complexity**: TypeScript inference can struggle with deeply nested Results
+- **Type complexity**: TypeScript inference can struggle with deeply nested
+  Results
 
 ## Related Examples
 

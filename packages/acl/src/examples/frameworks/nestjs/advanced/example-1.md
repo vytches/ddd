@@ -4,25 +4,30 @@
 **Package**: @vytches-ddd/acl  
 **Framework**: NestJS  
 **Complexity**: Advanced  
-**Focus**: Enterprise ACL orchestration with VytchesDDD DI and global coordination
+**Focus**: Enterprise ACL orchestration with VytchesDDD DI and global
+coordination
 
 ## Description
 
-This example demonstrates enterprise-scale ACL orchestration in NestJS with global coordination, AI-powered data transformation, and sophisticated service management using VytchesDDD DI integration.
+This example demonstrates enterprise-scale ACL orchestration in NestJS with
+global coordination, AI-powered data transformation, and sophisticated service
+management using VytchesDDD DI integration.
 
 ## Business Context
 
-A multinational enterprise platform requires coordination across hundreds of external systems with real-time data synchronization, intelligent conflict resolution, and automatic adaptation to changing external schemas.
+A multinational enterprise platform requires coordination across hundreds of
+external systems with real-time data synchronization, intelligent conflict
+resolution, and automatic adaptation to changing external schemas.
 
 ## Code Example
 
 ```typescript
 // enterprise-acl-orchestrator.service.ts - VytchesDDD DI managed service
 import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
-import { 
+import {
   EnterpriseACLOrchestrator,
   GlobalEventMesh,
-  AIIntelligentACL 
+  AIIntelligentACL,
 } from '@vytches-ddd/acl';
 import { Resilience } from '@vytches-ddd/resilience';
 import { Customer, Order, Product } from '../types'; // From your application
@@ -32,7 +37,7 @@ import { Customer, Order, Product } from '../types'; // From your application
   lifetime: ServiceLifetime.Singleton,
   context: 'GlobalIntegration',
   dependencies: ['eventMesh', 'aiTranslator', 'resilienceManager'],
-  timeout: 60000
+  timeout: 60000,
 })
 export class EnterpriseACLOrchestratorService extends EnterpriseACLOrchestrator {
   private globalEventMesh: GlobalEventMesh;
@@ -40,19 +45,22 @@ export class EnterpriseACLOrchestratorService extends EnterpriseACLOrchestrator 
 
   constructor() {
     super();
-    
+
     this.globalEventMesh = VytchesDDD.resolve<GlobalEventMesh>('eventMesh');
-    this.aiIntelligentACL = VytchesDDD.resolve<AIIntelligentACL>('aiTranslator');
+    this.aiIntelligentACL =
+      VytchesDDD.resolve<AIIntelligentACL>('aiTranslator');
   }
 
-  @Resilience({ 
+  @Resilience({
     circuitBreaker: { failureThreshold: 10 },
-    timeout: 300000 // 5 minutes for complex operations
+    timeout: 300000, // 5 minutes for complex operations
   })
-  async orchestrateGlobalIntegration(operation: GlobalIntegrationOperation): Promise<Result<GlobalIntegrationResult, Error>> {
+  async orchestrateGlobalIntegration(
+    operation: GlobalIntegrationOperation
+  ): Promise<Result<GlobalIntegrationResult, Error>> {
     // Execute enterprise-scale integration across multiple regions
     const transactionId = this.generateGlobalTransactionId();
-    
+
     try {
       // Step 1: Global coordination setup
       const coordinationResult = await this.setupGlobalCoordination(operation);
@@ -61,8 +69,9 @@ export class EnterpriseACLOrchestratorService extends EnterpriseACLOrchestrator 
       }
 
       // Step 2: AI-powered system analysis and optimization
-      const optimizationResult = await this.aiIntelligentACL.optimizeIntegrationPlan(operation);
-      
+      const optimizationResult =
+        await this.aiIntelligentACL.optimizeIntegrationPlan(operation);
+
       // Step 3: Execute across all systems with global consistency
       const executionResult = await this.executeGlobalBusinessOperation({
         operationId: transactionId,
@@ -71,17 +80,19 @@ export class EnterpriseACLOrchestratorService extends EnterpriseACLOrchestrator 
         context: operation.context,
         startTime: Date.now(),
         domains: operation.affectedDomains,
-        requirements: operation.requirements
+        requirements: operation.requirements,
       });
 
       return Result.success({
         transactionId,
         affectedSystems: executionResult.value.affectedSystems,
         optimizations: optimizationResult.optimizations,
-        globalConsistency: true
+        globalConsistency: true,
       });
     } catch (error) {
-      return Result.failure(new Error(`Global integration failed: ${error.message}`));
+      return Result.failure(
+        new Error(`Global integration failed: ${error.message}`)
+      );
     }
   }
 }
@@ -98,16 +109,21 @@ export class GlobalIntegrationBridgeService {
 
   constructor() {
     // ⭐ Bridge Pattern: Get VytchesDDD managed instance
-    this.orchestrator = VytchesDDD.resolve<EnterpriseACLOrchestratorService>('enterpriseACLOrchestrator');
+    this.orchestrator = VytchesDDD.resolve<EnterpriseACLOrchestratorService>(
+      'enterpriseACLOrchestrator'
+    );
   }
 
-  async executeGlobalIntegration(operation: GlobalIntegrationOperation): Promise<GlobalIntegrationResult> {
-    const result = await this.orchestrator.orchestrateGlobalIntegration(operation);
-    
+  async executeGlobalIntegration(
+    operation: GlobalIntegrationOperation
+  ): Promise<GlobalIntegrationResult> {
+    const result =
+      await this.orchestrator.orchestrateGlobalIntegration(operation);
+
     if (result.isFailure()) {
       throw new Error(`Global integration failed: ${result.error.message}`);
     }
-    
+
     return result.value;
   }
 }
@@ -127,13 +143,13 @@ export class GlobalIntegrationController {
   async executeGlobalIntegration(@Body() dto: GlobalIntegrationDto) {
     try {
       const result = await this.integrationBridge.executeGlobalIntegration(dto);
-      return { 
-        success: true, 
+      return {
+        success: true,
         data: {
           transactionId: result.transactionId,
           affectedSystems: result.affectedSystems.length,
-          optimizations: result.optimizations
-        }
+          optimizations: result.optimizations,
+        },
       };
     } catch (error) {
       return { success: false, error: error.message };
@@ -150,7 +166,7 @@ import { GlobalIntegrationBridgeService } from './global-integration-bridge.serv
 @Module({
   controllers: [GlobalIntegrationController],
   providers: [GlobalIntegrationBridgeService],
-  exports: [GlobalIntegrationBridgeService]
+  exports: [GlobalIntegrationBridgeService],
 })
 export class EnterpriseIntegrationModule implements OnModuleInit {
   async onModuleInit() {
@@ -162,8 +178,8 @@ export class EnterpriseIntegrationModule implements OnModuleInit {
       enterpriseFeatures: {
         globalTransactions: true,
         intelligentRouting: true,
-        autoReconciliation: true
-      }
+        autoReconciliation: true,
+      },
     });
   }
 }

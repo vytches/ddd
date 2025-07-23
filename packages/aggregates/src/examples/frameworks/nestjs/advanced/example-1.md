@@ -1,7 +1,8 @@
 # Enterprise Process Orchestrator - NestJS Integration
 
-**Focus**: Enterprise process orchestration with AI integration in NestJS
-**Base Example**: [Enterprise Process Orchestration Platform](../../advanced/example-1.md)
+**Focus**: Enterprise process orchestration with AI integration in NestJS **Base
+Example**:
+[Enterprise Process Orchestration Platform](../../advanced/example-1.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
 
 ## Advanced Service Implementation
@@ -11,13 +12,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   ProcessDefinition,
   GlobalProcessContext,
   OrchestrationResult,
   ProcessStep,
   AIDecisionResult,
-  SagaCoordination
+  SagaCoordination,
 } from './types'; // From your application
 
 @Injectable()
@@ -30,19 +31,26 @@ export class EnterpriseOrchestratorService {
     globalContext: GlobalProcessContext
   ): Promise<OrchestrationResult> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+
       // Create orchestrator instance
       const orchestrator = OrchestratorAggregateClass.create({
         aiDecisionEngine: await this.getAIDecisionEngine(),
         sagaCoordinator: await this.getSagaCoordinator(),
-        globalStateManager: await this.getGlobalStateManager()
+        globalStateManager: await this.getGlobalStateManager(),
       });
-      
+
       // Use library orchestration method with AI optimization
-      const result = await orchestrator.orchestrateComplexProcess(processDefinition, globalContext);
-      
-      this.logger.log(`Process orchestrated: ${result.processId}, steps: ${result.totalSteps}`);
+      const result = await orchestrator.orchestrateComplexProcess(
+        processDefinition,
+        globalContext
+      );
+
+      this.logger.log(
+        `Process orchestrated: ${result.processId}, steps: ${result.totalSteps}`
+      );
       return result;
     } catch (error) {
       this.logger.error(`Failed to orchestrate process: ${error.message}`);
@@ -57,13 +65,23 @@ export class EnterpriseOrchestratorService {
     decisionType: string
   ): Promise<AIDecisionResult> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      const orchestrator = await this.loadOrchestrator(processId, OrchestratorAggregateClass);
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadOrchestrator(
+        processId,
+        OrchestratorAggregateClass
+      );
+
       // Use library AI decision method
-      const decision = await orchestrator.makeIntelligentDecision(decisionContext, decisionType);
-      
-      this.logger.log(`AI decision made for process ${processId}: ${decision.recommendation}`);
+      const decision = await orchestrator.makeIntelligentDecision(
+        decisionContext,
+        decisionType
+      );
+
+      this.logger.log(
+        `AI decision made for process ${processId}: ${decision.recommendation}`
+      );
       return decision;
     } catch (error) {
       this.logger.error(`Failed to make AI decision: ${error.message}`);
@@ -78,13 +96,23 @@ export class EnterpriseOrchestratorService {
     compensationRules: any
   ): Promise<SagaCoordination> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      const orchestrator = await this.loadOrchestrator(processId, OrchestratorAggregateClass);
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadOrchestrator(
+        processId,
+        OrchestratorAggregateClass
+      );
+
       // Use library saga coordination method
-      const sagaResult = await orchestrator.coordinateSaga(sagaSteps, compensationRules);
-      
-      this.logger.log(`Saga coordinated for process ${processId}: ${sagaResult.status}`);
+      const sagaResult = await orchestrator.coordinateSaga(
+        sagaSteps,
+        compensationRules
+      );
+
+      this.logger.log(
+        `Saga coordinated for process ${processId}: ${sagaResult.status}`
+      );
       return sagaResult;
     } catch (error) {
       this.logger.error(`Failed to coordinate saga: ${error.message}`);
@@ -99,12 +127,20 @@ export class EnterpriseOrchestratorService {
     consistencyRequirements: any
   ): Promise<void> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      const orchestrator = await this.loadOrchestrator(processId, OrchestratorAggregateClass);
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadOrchestrator(
+        processId,
+        OrchestratorAggregateClass
+      );
+
       // Use library global state management
-      await orchestrator.manageGlobalState(stateChanges, consistencyRequirements);
-      
+      await orchestrator.manageGlobalState(
+        stateChanges,
+        consistencyRequirements
+      );
+
       this.logger.log(`Global state managed for process ${processId}`);
     } catch (error) {
       this.logger.error(`Failed to manage global state: ${error.message}`);
@@ -115,12 +151,17 @@ export class EnterpriseOrchestratorService {
   // ✅ FOCUS: Process monitoring and analytics
   async getProcessMetrics(processId: string): Promise<any> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      const orchestrator = await this.loadOrchestrator(processId, OrchestratorAggregateClass);
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadOrchestrator(
+        processId,
+        OrchestratorAggregateClass
+      );
+
       // Use library metrics method
       const metrics = orchestrator.getProcessMetrics();
-      
+
       return metrics;
     } catch (error) {
       this.logger.error(`Failed to get process metrics: ${error.message}`);
@@ -130,12 +171,17 @@ export class EnterpriseOrchestratorService {
 
   async optimizeProcessPerformance(processId: string): Promise<any> {
     try {
-      const OrchestratorAggregateClass = VytchesDDD.resolve<any>('EnterpriseProcessOrchestratorAggregate');
-      const orchestrator = await this.loadOrchestrator(processId, OrchestratorAggregateClass);
-      
+      const OrchestratorAggregateClass = VytchesDDD.resolve<any>(
+        'EnterpriseProcessOrchestratorAggregate'
+      );
+      const orchestrator = await this.loadOrchestrator(
+        processId,
+        OrchestratorAggregateClass
+      );
+
       // Use library performance optimization
       const optimization = await orchestrator.optimizePerformance();
-      
+
       this.logger.log(`Performance optimized for process ${processId}`);
       return optimization;
     } catch (error) {
@@ -145,7 +191,10 @@ export class EnterpriseOrchestratorService {
   }
 
   // Private helper methods
-  private async loadOrchestrator(processId: string, OrchestratorAggregateClass: any): Promise<any> {
+  private async loadOrchestrator(
+    processId: string,
+    OrchestratorAggregateClass: any
+  ): Promise<any> {
     // Mock implementation - in reality would load from repository
     return OrchestratorAggregateClass.fromSnapshot({
       id: processId,
@@ -157,7 +206,7 @@ export class EnterpriseOrchestratorService {
       aiDecisions: [],
       globalState: {},
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -196,6 +245,7 @@ export class EnterpriseOrchestratorModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Enterprise-scale process orchestration with NestJS integration
 - AI-powered decision making through library capabilities
 - Saga pattern coordination for distributed transactions
@@ -203,14 +253,26 @@ export class EnterpriseOrchestratorModule implements OnModuleInit {
 - Performance optimization and monitoring
 
 **Usage Example:**
+
 ```typescript
 @Controller('orchestrator')
 export class OrchestratorController {
-  constructor(private readonly orchestratorService: EnterpriseOrchestratorService) {}
+  constructor(
+    private readonly orchestratorService: EnterpriseOrchestratorService
+  ) {}
 
   @Post('processes')
-  async orchestrateProcess(@Body() data: { definition: ProcessDefinition; context: GlobalProcessContext }) {
-    return await this.orchestratorService.orchestrateProcess(data.definition, data.context);
+  async orchestrateProcess(
+    @Body()
+    data: {
+      definition: ProcessDefinition;
+      context: GlobalProcessContext;
+    }
+  ) {
+    return await this.orchestratorService.orchestrateProcess(
+      data.definition,
+      data.context
+    );
   }
 
   @Post('processes/:id/decisions')
@@ -218,7 +280,11 @@ export class OrchestratorController {
     @Param('id') id: string,
     @Body() decision: { context: any; type: string }
   ) {
-    return await this.orchestratorService.makeAIDecision(id, decision.context, decision.type);
+    return await this.orchestratorService.makeAIDecision(
+      id,
+      decision.context,
+      decision.type
+    );
   }
 
   @Get('processes/:id/metrics')

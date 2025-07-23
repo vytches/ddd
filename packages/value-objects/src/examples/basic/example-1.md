@@ -1,19 +1,23 @@
 # Money Value Object - Basic Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic
-**Domain**: Financial Domain
-**Patterns**: Value Object, Immutability, Currency Handling
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Basic **Domain**: Financial Domain **Patterns**: Value Object,
+Immutability, Currency Handling **Dependencies**: @vytches-ddd/value-objects,
+@vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **Money** value object that encapsulates amount and currency with immutability, validation, and arithmetic operations. Shows basic value object principles including equality comparison, validation, and formatted display.
+This example demonstrates creating a **Money** value object that encapsulates
+amount and currency with immutability, validation, and arithmetic operations.
+Shows basic value object principles including equality comparison, validation,
+and formatted display.
 
 ## Business Context
 
-Money is a fundamental value object in financial applications. It ensures currency consistency, prevents precision errors with decimal arithmetic, and provides type safety for monetary calculations. Essential for e-commerce, banking, accounting, and any application handling financial transactions.
+Money is a fundamental value object in financial applications. It ensures
+currency consistency, prevents precision errors with decimal arithmetic, and
+provides type safety for monetary calculations. Essential for e-commerce,
+banking, accounting, and any application handling financial transactions.
 
 ## Code Example
 
@@ -21,14 +25,14 @@ Money is a fundamental value object in financial applications. It ensures curren
 // money.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
 import { MoneyData, Currency, ValueObjectValidationResult } from './types';
-import { 
-  validateRequired, 
-  validateNumericRange, 
-  getCurrency, 
+import {
+  validateRequired,
+  validateNumericRange,
+  getCurrency,
   formatCurrency,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class Money extends ValueObject<MoneyData> {
@@ -37,7 +41,11 @@ export class Money extends ValueObject<MoneyData> {
   }
 
   // ✅ FOCUS: Factory method with validation
-  static create(amount: number, currencyCode: string, precision?: number): Money {
+  static create(
+    amount: number,
+    currencyCode: string,
+    precision?: number
+  ): Money {
     const currency = getCurrency(currencyCode);
     if (!currency) {
       throw new Error(`Unsupported currency: ${currencyCode}`);
@@ -46,7 +54,7 @@ export class Money extends ValueObject<MoneyData> {
     const data: MoneyData = {
       amount: Number(amount.toFixed(currency.decimalPlaces)),
       currency: currencyCode.toUpperCase(),
-      precision: precision ?? currency.decimalPlaces
+      precision: precision ?? currency.decimalPlaces,
     };
 
     const validation = Money.validate(data);
@@ -61,17 +69,22 @@ export class Money extends ValueObject<MoneyData> {
   static validate(data: MoneyData): ValueObjectValidationResult {
     const amountValidation = validateRequired(data.amount, 'amount');
     const currencyValidation = validateRequired(data.currency, 'currency');
-    const rangeValidation = validateNumericRange(data.amount, -999999999, 999999999, 'amount');
-    
+    const rangeValidation = validateNumericRange(
+      data.amount,
+      -999999999,
+      999999999,
+      'amount'
+    );
+
     // Validate currency exists
     const currency = getCurrency(data.currency);
-    const currencyExistsResult = currency 
+    const currencyExistsResult = currency
       ? createSuccessResult()
       : createFailureResult([`Currency '${data.currency}' is not supported`]);
 
     return combineValidationResults(
       amountValidation,
-      currencyValidation, 
+      currencyValidation,
       rangeValidation,
       currencyExistsResult
     );
@@ -115,8 +128,10 @@ export class Money extends ValueObject<MoneyData> {
   }
 
   isEqualTo(other: Money): boolean {
-    return this.data.currency === other.data.currency && 
-           this.data.amount === other.data.amount;
+    return (
+      this.data.currency === other.data.currency &&
+      this.data.amount === other.data.amount
+    );
   }
 
   isZero(): boolean {
@@ -133,11 +148,19 @@ export class Money extends ValueObject<MoneyData> {
 
   // ✅ FOCUS: Utility methods
   abs(): Money {
-    return Money.create(Math.abs(this.data.amount), this.data.currency, this.data.precision);
+    return Money.create(
+      Math.abs(this.data.amount),
+      this.data.currency,
+      this.data.precision
+    );
   }
 
   negate(): Money {
-    return Money.create(-this.data.amount, this.data.currency, this.data.precision);
+    return Money.create(
+      -this.data.amount,
+      this.data.currency,
+      this.data.precision
+    );
   }
 
   // ✅ FOCUS: Display and serialization
@@ -175,9 +198,11 @@ export class Money extends ValueObject<MoneyData> {
 
   // ✅ FOCUS: Value object equality implementation
   protected isEqualTo(other: Money): boolean {
-    return this.data.currency === other.data.currency && 
-           this.data.amount === other.data.amount &&
-           this.data.precision === other.data.precision;
+    return (
+      this.data.currency === other.data.currency &&
+      this.data.amount === other.data.amount &&
+      this.data.precision === other.data.precision
+    );
   }
 }
 ```
@@ -190,21 +215,21 @@ import { Money } from './money';
 
 // ✅ Creating money instances
 const price = Money.create(29.99, 'USD');
-const discount = Money.create(5.00, 'USD');
-const tax = Money.create(2.40, 'USD');
+const discount = Money.create(5.0, 'USD');
+const tax = Money.create(2.4, 'USD');
 
 console.log(price.toString()); // "$29.99"
 
 // ✅ Arithmetic operations
-const subtotal = price.subtract(discount);  // $24.99
-const total = subtotal.add(tax);            // $27.39
-const halfPrice = price.divide(2);          // $14.995
+const subtotal = price.subtract(discount); // $24.99
+const total = subtotal.add(tax); // $27.39
+const halfPrice = price.divide(2); // $14.995
 
-console.log(`Subtotal: ${subtotal}`);      // "Subtotal: $24.99"
-console.log(`Total: ${total}`);            // "Total: $27.39"
+console.log(`Subtotal: ${subtotal}`); // "Subtotal: $24.99"
+console.log(`Total: ${total}`); // "Total: $27.39"
 
 // ✅ Comparisons
-const minOrder = Money.create(25.00, 'USD');
+const minOrder = Money.create(25.0, 'USD');
 const canProceed = total.isGreaterThan(minOrder); // true
 
 if (canProceed) {
@@ -222,12 +247,12 @@ try {
 const euroPrice = Money.create(24.99, 'EUR');
 const yenPrice = Money.create(2999, 'JPY');
 
-console.log(euroPrice.toString());  // "€24.99"  
-console.log(yenPrice.toString());   // "¥2,999"
+console.log(euroPrice.toString()); // "€24.99"
+console.log(yenPrice.toString()); // "¥2,999"
 
 // Error handling for different currencies
 try {
-  const invalid = price.add(euroPrice);  // Throws error
+  const invalid = price.add(euroPrice); // Throws error
 } catch (error) {
   console.error(error.message); // "Cannot operate on different currencies: USD and EUR"
 }
@@ -244,15 +269,15 @@ function calculateOrderTotal(
   items: Array<{ price: Money; quantity: number; taxRate: number }>
 ): Money {
   let total = Money.create(0, 'USD');
-  
+
   for (const item of items) {
     const lineTotal = item.price.multiply(item.quantity);
     const taxAmount = lineTotal.multiply(item.taxRate);
     const lineWithTax = lineTotal.add(taxAmount);
-    
+
     total = total.add(lineWithTax);
   }
-  
+
   return total;
 }
 
@@ -260,30 +285,30 @@ function calculateOrderTotal(
 function splitBill(total: Money, numberOfPeople: number): Money[] {
   const baseAmount = total.divide(numberOfPeople);
   const remainder = Money.create(
-    total.amount - (baseAmount.amount * numberOfPeople),
+    total.amount - baseAmount.amount * numberOfPeople,
     total.currency
   );
-  
+
   const splits: Money[] = [];
-  
+
   // Distribute base amount to everyone
   for (let i = 0; i < numberOfPeople; i++) {
     splits.push(baseAmount);
   }
-  
+
   // Add remainder to first person
   if (!remainder.isZero()) {
     splits[0] = splits[0].add(remainder);
   }
-  
+
   return splits;
 }
 
 // Usage examples
 const orderItems = [
   { price: Money.create(15.99, 'USD'), quantity: 2, taxRate: 0.08 },
-  { price: Money.create(8.50, 'USD'), quantity: 1, taxRate: 0.08 },
-  { price: Money.create(12.25, 'USD'), quantity: 3, taxRate: 0.08 }
+  { price: Money.create(8.5, 'USD'), quantity: 1, taxRate: 0.08 },
+  { price: Money.create(12.25, 'USD'), quantity: 3, taxRate: 0.08 },
 ];
 
 const orderTotal = calculateOrderTotal(orderItems);
@@ -298,7 +323,7 @@ billSplit.forEach((amount, index) => {
 ## Key Features
 
 - **Immutability**: All operations return new Money instances
-- **Currency Safety**: Prevents operations between different currencies  
+- **Currency Safety**: Prevents operations between different currencies
 - **Precision Handling**: Respects currency-specific decimal places
 - **Comprehensive Validation**: Validates amount, currency, and precision
 - **Rich Operations**: Arithmetic, comparison, and utility operations
@@ -315,5 +340,6 @@ billSplit.forEach((amount, index) => {
 
 ## Related Examples
 
-- [Email Value Object](./example-2.md) - String-based value object with validation
+- [Email Value Object](./example-2.md) - String-based value object with
+  validation
 - [Address Value Object](./example-3.md) - Complex composite value object

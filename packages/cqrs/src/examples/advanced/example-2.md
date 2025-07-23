@@ -1,30 +1,44 @@
 # AI-Enhanced CQRS with Predictive Analytics
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/cqrs
-**Complexity**: Advanced
-**Domain**: Architecture
-**Patterns**: CQRS, Machine Learning, Predictive Analytics, Real-time Processing
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/resilience, @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Domain**: Architecture **Patterns**: CQRS, Machine Learning, Predictive
+Analytics, Real-time Processing **Dependencies**: @vytches-ddd/cqrs,
+@vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/resilience,
+@vytches-ddd/utils
 
 ## Description
 
-This example demonstrates integrating artificial intelligence and machine learning capabilities with CQRS patterns. It shows how to implement predictive command validation, intelligent query optimization, anomaly detection, and automated decision-making for enterprise applications requiring advanced analytics.
+This example demonstrates integrating artificial intelligence and machine
+learning capabilities with CQRS patterns. It shows how to implement predictive
+command validation, intelligent query optimization, anomaly detection, and
+automated decision-making for enterprise applications requiring advanced
+analytics.
 
 ## Business Context
 
 Modern enterprises leverage AI/ML to enhance decision-making and automation:
-- **E-commerce**: Predict order fraud, optimize inventory, personalize recommendations
-- **Financial Services**: Real-time fraud detection, credit risk assessment, trading strategies
-- **Healthcare**: Patient risk prediction, treatment recommendations, resource optimization
-- **Manufacturing**: Predictive maintenance, quality control, supply chain optimization
+
+- **E-commerce**: Predict order fraud, optimize inventory, personalize
+  recommendations
+- **Financial Services**: Real-time fraud detection, credit risk assessment,
+  trading strategies
+- **Healthcare**: Patient risk prediction, treatment recommendations, resource
+  optimization
+- **Manufacturing**: Predictive maintenance, quality control, supply chain
+  optimization
 - **Smart Cities**: Traffic prediction, resource allocation, incident prevention
 
 ## Code Example
 
 ```typescript
 // ai-enhanced-cqrs.ts
-import { Command, CommandHandler, Query, QueryHandler, CommandBus } from '@vytches-ddd/cqrs';
+import {
+  Command,
+  CommandHandler,
+  Query,
+  QueryHandler,
+  CommandBus,
+} from '@vytches-ddd/cqrs';
 import { EventBus, DomainEvent } from '@vytches-ddd/events';
 import { ProjectionEngine } from '@vytches-ddd/projections';
 import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
@@ -34,13 +48,13 @@ import type {
   PredictionResult,
   ModelMetrics,
   AnomalyReport,
-  MLPipeline
+  MLPipeline,
 } from '../types'; // From your application
 
 // ✅ FOCUS: AI-enhanced command with prediction metadata
 export class ProcessTransactionCommand extends Command {
   public readonly predictionContext: PredictionContext;
-  
+
   constructor(
     public readonly transaction: TransactionData,
     public readonly requiresPrediction: boolean = true
@@ -56,9 +70,9 @@ export class ProcessTransactionCommand extends Command {
         timeOfDay: new Date().getHours(),
         dayOfWeek: new Date().getDay(),
         isWeekend: [0, 6].includes(new Date().getDay()),
-        isHoliday: this.checkHoliday()
+        isHoliday: this.checkHoliday(),
       },
-      riskFactors: this.identifyRiskFactors()
+      riskFactors: this.identifyRiskFactors(),
     };
   }
 
@@ -69,7 +83,7 @@ export class ProcessTransactionCommand extends Command {
       location: this.transaction.location,
       deviceFingerprint: this.transaction.deviceInfo?.fingerprint,
       velocityScore: this.calculateVelocityScore(),
-      behaviorScore: this.calculateBehaviorScore()
+      behaviorScore: this.calculateBehaviorScore(),
     };
   }
 }
@@ -79,7 +93,7 @@ export class ProcessTransactionCommand extends Command {
 export class FraudDetectionMLService {
   private model: IFraudDetectionModel;
   private readonly modelVersion = '2.3.1';
-  
+
   constructor(
     private readonly modelRepository: IModelRepository,
     private readonly featureStore: IFeatureStore,
@@ -88,13 +102,16 @@ export class FraudDetectionMLService {
     this.loadModel();
   }
 
-  async predict(transaction: TransactionData, context: PredictionContext): Promise<PredictionResult> {
+  async predict(
+    transaction: TransactionData,
+    context: PredictionContext
+  ): Promise<PredictionResult> {
     const startTime = process.hrtime.bigint();
-    
+
     try {
       // ✅ FOCUS: Feature engineering pipeline
       const features = await this.enrichFeatures(transaction, context);
-      
+
       // Get historical patterns
       const historicalFeatures = await this.featureStore.getHistoricalFeatures(
         transaction.userId,
@@ -104,15 +121,16 @@ export class FraudDetectionMLService {
 
       // Combine features
       const modelInput = this.prepareModelInput(features, historicalFeatures);
-      
+
       // ✅ FOCUS: ML model inference
       const prediction = await this.model.predict(modelInput);
-      
+
       // Calculate confidence and explain decision
       const explanation = await this.explainPrediction(modelInput, prediction);
-      
-      const executionTime = Number(process.hrtime.bigint() - startTime) / 1_000_000;
-      
+
+      const executionTime =
+        Number(process.hrtime.bigint() - startTime) / 1_000_000;
+
       // Record model performance metrics
       await this.metricsCollector.recordMetrics({
         operation: 'FraudDetection.predict',
@@ -121,8 +139,8 @@ export class FraudDetectionMLService {
         fraudScore: prediction.fraudProbability,
         tags: {
           merchantCategory: transaction.merchantCategory,
-          amountRange: this.getAmountRange(transaction.amount)
-        }
+          amountRange: this.getAmountRange(transaction.amount),
+        },
       });
 
       return {
@@ -132,9 +150,8 @@ export class FraudDetectionMLService {
         explanation: explanation,
         recommendedAction: this.determineAction(prediction),
         modelVersion: this.modelVersion,
-        processingTimeMs: executionTime
+        processingTimeMs: executionTime,
       };
-
     } catch (error) {
       // Fallback to rule-based detection
       return this.fallbackRuleBasedDetection(transaction, context);
@@ -148,14 +165,15 @@ export class FraudDetectionMLService {
     // Real-time feature computation
     const velocityFeatures = await this.computeVelocityFeatures(transaction);
     const networkFeatures = await this.computeNetworkFeatures(transaction);
-    const behavioralFeatures = await this.computeBehavioralFeatures(transaction);
+    const behavioralFeatures =
+      await this.computeBehavioralFeatures(transaction);
 
     return {
       ...context.features,
       velocity: velocityFeatures,
       network: networkFeatures,
       behavioral: behavioralFeatures,
-      crossReference: await this.crossReferenceExternalData(transaction)
+      crossReference: await this.crossReferenceExternalData(transaction),
     };
   }
 
@@ -173,16 +191,16 @@ export class FraudDetectionMLService {
         action: 'BLOCK',
         requiresManualReview: true,
         notifyFraudTeam: true,
-        suggestedMessage: 'Transaction blocked due to high fraud risk'
+        suggestedMessage: 'Transaction blocked due to high fraud risk',
       };
     }
-    
+
     if (prediction.fraudProbability >= 0.7) {
       return {
         action: 'CHALLENGE',
         challengeType: 'MULTI_FACTOR',
         requiresManualReview: false,
-        suggestedMessage: 'Additional verification required'
+        suggestedMessage: 'Additional verification required',
       };
     }
 
@@ -190,7 +208,7 @@ export class FraudDetectionMLService {
       return {
         action: 'MONITOR',
         monitoringLevel: 'ENHANCED',
-        requiresManualReview: false
+        requiresManualReview: false,
       };
     }
 
@@ -209,7 +227,9 @@ export class AIProcessTransactionHandler {
   ) {}
 
   @CircuitBreaker({ failureThreshold: 5, resetTimeout: 30000 })
-  async execute(command: ProcessTransactionCommand): Promise<Result<TransactionResult, TransactionError>> {
+  async execute(
+    command: ProcessTransactionCommand
+  ): Promise<Result<TransactionResult, TransactionError>> {
     // ✅ FOCUS: Pre-transaction ML validation
     if (command.requiresPrediction) {
       const predictionResult = await this.fraudDetectionService.predict(
@@ -218,10 +238,9 @@ export class AIProcessTransactionHandler {
       );
 
       // Log prediction for model training feedback
-      await this.eventBus.publish(new FraudPredictionMadeEvent(
-        command.transaction.id,
-        predictionResult
-      ));
+      await this.eventBus.publish(
+        new FraudPredictionMadeEvent(command.transaction.id, predictionResult)
+      );
 
       // Apply ML-based decision
       if (predictionResult.recommendedAction.action === 'BLOCK') {
@@ -229,7 +248,7 @@ export class AIProcessTransactionHandler {
           type: 'TRANSACTION_BLOCKED',
           reason: 'High fraud risk detected',
           fraudScore: predictionResult.fraudProbability,
-          explanation: predictionResult.explanation
+          explanation: predictionResult.explanation,
         });
       }
 
@@ -243,7 +262,7 @@ export class AIProcessTransactionHandler {
         if (challengeResult.isFailure()) {
           return Result.fail({
             type: 'CHALLENGE_FAILED',
-            reason: 'Additional verification failed'
+            reason: 'Additional verification failed',
           });
         }
       }
@@ -255,7 +274,7 @@ export class AIProcessTransactionHandler {
       {
         sensitivity: 'HIGH',
         compareWithPeers: true,
-        timeWindow: '7d'
+        timeWindow: '7d',
       }
     );
 
@@ -266,25 +285,25 @@ export class AIProcessTransactionHandler {
     // Process transaction
     try {
       const result = await this.transactionService.process(command.transaction);
-      
+
       // ✅ FOCUS: Post-transaction ML feedback
-      await this.eventBus.publish(new TransactionProcessedEvent(
-        command.transaction.id,
-        result,
-        {
-          mlPrediction: command.requiresPrediction ? 
-            await this.fraudDetectionService.predict(command.transaction, command.predictionContext) : 
-            null,
-          anomalies: anomalyCheck.anomalies
-        }
-      ));
+      await this.eventBus.publish(
+        new TransactionProcessedEvent(command.transaction.id, result, {
+          mlPrediction: command.requiresPrediction
+            ? await this.fraudDetectionService.predict(
+                command.transaction,
+                command.predictionContext
+              )
+            : null,
+          anomalies: anomalyCheck.anomalies,
+        })
+      );
 
       return Result.ok(result);
-
     } catch (error) {
       return Result.fail({
         type: 'PROCESSING_FAILED',
-        message: (error as Error).message
+        message: (error as Error).message,
       });
     }
   }
@@ -300,7 +319,7 @@ export class AIProcessTransactionHandler {
           type: 'CRITICAL_ANOMALY',
           transaction: transaction.id,
           anomaly: anomaly,
-          requiresImmediate: true
+          requiresImmediate: true,
         });
       }
 
@@ -328,7 +347,7 @@ export class OptimizedTransactionQuery extends Query<TransactionQueryResult> {
       predictedResultSize: this.predictResultSize(),
       optimalIndexes: this.suggestIndexes(),
       cacheStrategy: this.determineCacheStrategy(),
-      parallelizationFactor: this.calculateParallelization()
+      parallelizationFactor: this.calculateParallelization(),
     };
   }
 }
@@ -343,16 +362,20 @@ export class OptimizedTransactionQueryHandler {
     private readonly projectionEngine: ProjectionEngine
   ) {}
 
-  async execute(query: OptimizedTransactionQuery): Promise<Result<TransactionQueryResult, Error>> {
+  async execute(
+    query: OptimizedTransactionQuery
+  ): Promise<Result<TransactionQueryResult, Error>> {
     // ✅ FOCUS: ML-based query optimization
     if (query.enableMLOptimization) {
       const optimizationPlan = await this.queryOptimizer.optimize(
         query.filters,
         query.mlOptimizationHints,
         {
-          userBehavior: await this.getUserQueryPattern(query.userContext.userId),
+          userBehavior: await this.getUserQueryPattern(
+            query.userContext.userId
+          ),
           systemLoad: await this.getSystemMetrics(),
-          dataDistribution: await this.getDataDistribution()
+          dataDistribution: await this.getDataDistribution(),
         }
       );
 
@@ -372,7 +395,7 @@ export class OptimizedTransactionQueryHandler {
     const cacheKey = this.generateSmartCacheKey(query, plan);
     const cachedResult = await this.cacheService.get(cacheKey, {
       mlPredictedTTL: plan.suggestedCacheTTL,
-      prefetchNext: plan.predictedNextQueries
+      prefetchNext: plan.predictedNextQueries,
     });
 
     if (cachedResult) {
@@ -385,9 +408,9 @@ export class OptimizedTransactionQueryHandler {
         query,
         plan.parallelizationStrategy
       );
-      
+
       const mergedResult = this.mergeParallelResults(parallelResults);
-      
+
       // Update cache with ML-predicted TTL
       await this.cacheService.set(
         cacheKey,
@@ -404,7 +427,7 @@ export class OptimizedTransactionQueryHandler {
       {
         indexes: plan.suggestedIndexes,
         readPreference: plan.readPreference,
-        timeout: plan.timeoutMs
+        timeout: plan.timeoutMs,
       }
     );
 
@@ -413,13 +436,15 @@ export class OptimizedTransactionQueryHandler {
 
   private async getUserQueryPattern(userId: string): Promise<QueryPattern> {
     // Analyze user's historical query patterns
-    const history = await this.queryHistoryService.getUserHistory(userId, { days: 30 });
-    
+    const history = await this.queryHistoryService.getUserHistory(userId, {
+      days: 30,
+    });
+
     return {
       averageResultSize: this.calculateAverageSize(history),
       commonFilters: this.extractCommonFilters(history),
       queryFrequency: this.calculateFrequency(history),
-      peakTimes: this.identifyPeakTimes(history)
+      peakTimes: this.identifyPeakTimes(history),
     };
   }
 }
@@ -453,7 +478,7 @@ export class CQRSMLLearningService {
       transactionId: event.payload.transactionId,
       actualOutcome: event.payload.result,
       prediction: event.payload.mlPrediction,
-      timestamp: event.occurredAt
+      timestamp: event.occurredAt,
     };
 
     // Store feedback for batch training
@@ -461,21 +486,23 @@ export class CQRSMLLearningService {
 
     // Check if retraining is needed
     const performanceMetrics = await this.evaluateModelPerformance();
-    
+
     if (performanceMetrics.accuracy < 0.95 || performanceMetrics.drift > 0.1) {
       await this.triggerRetraining();
     }
   }
 
   private async evaluateModelPerformance(): Promise<ModelMetrics> {
-    const recentFeedback = await this.featureStore.getRecentFeedback({ hours: 24 });
-    
+    const recentFeedback = await this.featureStore.getRecentFeedback({
+      hours: 24,
+    });
+
     return {
       accuracy: this.calculateAccuracy(recentFeedback),
       precision: this.calculatePrecision(recentFeedback),
       recall: this.calculateRecall(recentFeedback),
       f1Score: this.calculateF1Score(recentFeedback),
-      drift: this.calculateDrift(recentFeedback)
+      drift: this.calculateDrift(recentFeedback),
     };
   }
 
@@ -486,10 +513,10 @@ export class CQRSMLLearningService {
         epochs: 50,
         batchSize: 128,
         learningRate: 0.001,
-        validationSplit: 0.2
+        validationSplit: 0.2,
       },
       deploymentStrategy: 'CANARY',
-      rollbackThreshold: 0.9
+      rollbackThreshold: 0.9,
     });
   }
 }
@@ -504,14 +531,14 @@ export class MLModelMonitor {
   async monitorModelPerformance(): Promise<void> {
     setInterval(async () => {
       const metrics = await this.collectModelMetrics();
-      
+
       // Check for model degradation
       if (metrics.accuracy < 0.92) {
         await this.alertingService.sendAlert({
           severity: 'HIGH',
           title: 'Model Performance Degradation',
           message: `Fraud detection model accuracy dropped to ${metrics.accuracy}`,
-          metrics: metrics
+          metrics: metrics,
         });
       }
 
@@ -521,7 +548,7 @@ export class MLModelMonitor {
           severity: 'MEDIUM',
           title: 'High Model Latency',
           message: `P99 latency is ${metrics.p99Latency}ms`,
-          metrics: metrics
+          metrics: metrics,
         });
       }
 
@@ -534,8 +561,8 @@ export class MLModelMonitor {
         throughput: metrics.throughput,
         tags: {
           modelVersion: metrics.modelVersion,
-          environment: process.env.NODE_ENV
-        }
+          environment: process.env.NODE_ENV,
+        },
       });
     }, 60000); // Every minute
   }
@@ -545,7 +572,8 @@ export class MLModelMonitor {
 ## Key Features
 
 - **ML-Powered Fraud Detection**: Real-time fraud prediction with explainable AI
-- **Intelligent Query Optimization**: ML-based query planning and caching strategies
+- **Intelligent Query Optimization**: ML-based query planning and caching
+  strategies
 - **Anomaly Detection**: Automatic detection of unusual patterns and behaviors
 - **Continuous Learning**: Model improvement through production feedback loops
 - **Feature Engineering**: Real-time feature computation and enrichment
@@ -564,22 +592,25 @@ const fraudDetectionService = new FraudDetectionMLService(
 );
 
 const commandBus = new CommandBus();
-commandBus.registerHandler(ProcessTransactionCommand, AIProcessTransactionHandler);
+commandBus.registerHandler(
+  ProcessTransactionCommand,
+  AIProcessTransactionHandler
+);
 
 // Process transaction with AI fraud detection
 const transaction: TransactionData = {
   id: 'txn-123',
   userId: 'user-456',
-  amount: 5000.00,
+  amount: 5000.0,
   currency: 'USD',
   merchantId: 'merchant-789',
   merchantCategory: 'ELECTRONICS',
-  location: { lat: 40.7128, lon: -74.0060 },
+  location: { lat: 40.7128, lon: -74.006 },
   deviceInfo: {
     fingerprint: 'device-abc',
     ip: '192.168.1.1',
-    userAgent: 'Mozilla/5.0...'
-  }
+    userAgent: 'Mozilla/5.0...',
+  },
 };
 
 const command = new ProcessTransactionCommand(transaction, true);
@@ -596,7 +627,7 @@ const query = new OptimizedTransactionQuery(
     userId: 'user-456',
     dateRange: { start: lastMonth, end: today },
     minAmount: 100,
-    categories: ['ELECTRONICS', 'TRAVEL']
+    categories: ['ELECTRONICS', 'TRAVEL'],
   },
   { userId: 'user-456', sessionId: 'session-123' },
   true // Enable ML optimization
@@ -624,11 +655,13 @@ await modelMonitor.monitorModelPerformance();
 - **Latency Budget**: Ensure ML inference doesn't exceed acceptable latencies
 - **Bias Detection**: Regularly audit models for bias and fairness
 - **Fallback Logic**: Always have non-ML fallbacks for critical operations
-- **Privacy Compliance**: Ensure ML features comply with data privacy regulations
+- **Privacy Compliance**: Ensure ML features comply with data privacy
+  regulations
 
 ## Related Examples
 
-- [Enterprise Saga Orchestration](./example-1.md) - Complex distributed transactions
+- [Enterprise Saga Orchestration](./example-1.md) - Complex distributed
+  transactions
 - [Distributed Tracing](../intermediate/example-3.md) - Observability patterns
 - [Policy Authorization](../intermediate/example-2.md) - Security integration
 - [Real-time Analytics](./example-3.md) - Stream processing with CQRS

@@ -30,7 +30,7 @@ export type {
   FrameworkComponentType as ComponentType,
 } from './documentation-types';
 
-export type { 
+export type {
   ExampleDefinition,
   PackageExampleConfig,
   ComplexityLevel,
@@ -38,5 +38,5 @@ export type {
   ContentConfig,
   LLMSupport,
   TagSystem,
-  RelatedPackage
+  RelatedPackage,
 } from '@vytches-ddd/contracts';

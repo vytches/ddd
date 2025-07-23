@@ -1,34 +1,40 @@
 # Enterprise Scheduling Platform - Global Multi-Region Coordination
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Complexity**: advanced
-**Domain**: Infrastructure
-**Patterns**: global-scheduling, multi-region-coordination, enterprise-architecture, disaster-recovery
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+advanced **Domain**: Infrastructure **Patterns**: global-scheduling,
+multi-region-coordination, enterprise-architecture, disaster-recovery
 
 ## Description
 
-Advanced implementation of a global enterprise scheduling platform with multi-region coordination, cross-datacenter failover, global event distribution, and comprehensive disaster recovery for mission-critical applications.
+Advanced implementation of a global enterprise scheduling platform with
+multi-region coordination, cross-datacenter failover, global event distribution,
+and comprehensive disaster recovery for mission-critical applications.
 
 ## Business Context
 
-Global financial services company operating across multiple regions (Americas, Europe, Asia-Pacific) needs a centralized scheduling platform for regulatory compliance reporting, cross-border transaction processing, and synchronized market operations across time zones.
+Global financial services company operating across multiple regions (Americas,
+Europe, Asia-Pacific) needs a centralized scheduling platform for regulatory
+compliance reporting, cross-border transaction processing, and synchronized
+market operations across time zones.
 
 ## Code Example
 
 ```typescript
 // enterprise-scheduling-platform.ts
-import { InMemorySchedulerAdapter, ScheduledEvent } from '@vytches-ddd/event-scheduling';
+import {
+  InMemorySchedulerAdapter,
+  ScheduledEvent,
+} from '@vytches-ddd/event-scheduling';
 import { Logger } from '@vytches-ddd/logging';
 import { Result } from '@vytches-ddd/utils';
-import { 
+import {
   GlobalRegion,
   RegionConfig,
   GlobalSchedulingMetrics,
   CrossRegionEvent,
   DisasterRecoveryConfig,
   ComplianceSchedulingData,
-  GlobalSynchronizationConfig
+  GlobalSynchronizationConfig,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Global enterprise scheduled event with region awareness
@@ -38,7 +44,7 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
   public readonly targetRegions: GlobalRegion[];
   public readonly complianceLevel: 'standard' | 'high' | 'critical';
   public readonly synchronizationRequired: boolean;
-  
+
   constructor(
     aggregateId: string,
     scheduleAt: Date,
@@ -49,9 +55,9 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
   ) {
     super(aggregateId, scheduleAt, payload, {
       maxRetries: complianceLevel === 'critical' ? 10 : 5,
-      backoff: 'exponential'
+      backoff: 'exponential',
     });
-    
+
     this.globalEventId = `global-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     this.originRegion = originRegion;
     this.targetRegions = targetRegions;
@@ -60,7 +66,9 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
   }
 
   // ✅ FOCUS: Calculate optimal execution time across regions
-  getOptimalExecutionTime(regionConfigs: Map<GlobalRegion, RegionConfig>): Date {
+  getOptimalExecutionTime(
+    regionConfigs: Map<GlobalRegion, RegionConfig>
+  ): Date {
     if (!this.synchronizationRequired) {
       return this.scheduleAt;
     }
@@ -78,7 +86,11 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
 
       // Adjust if outside business hours for critical compliance events
       if (this.complianceLevel === 'critical') {
-        const adjustedTime = this.adjustToBusinessHours(regionTime, businessHours, config.timezone);
+        const adjustedTime = this.adjustToBusinessHours(
+          regionTime,
+          businessHours,
+          config.timezone
+        );
         if (adjustedTime > optimalTime) {
           optimalTime = adjustedTime;
         }
@@ -90,8 +102,11 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
 
   // ✅ FOCUS: Check if event requires cross-region coordination
   requiresCrossRegionCoordination(): boolean {
-    return this.targetRegions.length > 1 || 
-           (this.targetRegions.length === 1 && this.targetRegions[0] !== this.originRegion);
+    return (
+      this.targetRegions.length > 1 ||
+      (this.targetRegions.length === 1 &&
+        this.targetRegions[0] !== this.originRegion)
+    );
   }
 
   private convertToRegionTime(utcTime: Date, timezone: string): Date {
@@ -102,20 +117,20 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
       'Asia/Tokyo': 9,
       'America/Los_Angeles': -8,
       'Europe/Frankfurt': 1,
-      'Asia/Singapore': 8
+      'Asia/Singapore': 8,
     };
-    
+
     const offset = timezoneOffsets[timezone] || 0;
-    return new Date(utcTime.getTime() + (offset * 60 * 60 * 1000));
+    return new Date(utcTime.getTime() + offset * 60 * 60 * 1000);
   }
 
   private adjustToBusinessHours(
-    regionTime: Date, 
-    businessHours: { start: number; end: number }, 
+    regionTime: Date,
+    businessHours: { start: number; end: number },
     timezone: string
   ): Date {
     const hour = regionTime.getHours();
-    
+
     if (hour < businessHours.start) {
       const adjusted = new Date(regionTime);
       adjusted.setHours(businessHours.start, 0, 0, 0);
@@ -126,7 +141,7 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
       adjusted.setHours(businessHours.start, 0, 0, 0);
       return adjusted;
     }
-    
+
     return regionTime;
   }
 }
@@ -134,10 +149,11 @@ export class GlobalScheduledEvent<T = any> extends ScheduledEvent<T> {
 // ⭐ FOCUS: Global coordination manager for enterprise scheduling
 export class GlobalCoordinationManager {
   private regions: Map<GlobalRegion, RegionConfig> = new Map();
-  private regionalSchedulers: Map<GlobalRegion, InMemorySchedulerAdapter> = new Map();
+  private regionalSchedulers: Map<GlobalRegion, InMemorySchedulerAdapter> =
+    new Map();
   private crossRegionEvents: Map<string, CrossRegionEvent> = new Map();
   private readonly logger = Logger.forContext('GlobalCoordinationManager');
-  
+
   private synchronizationConfig: GlobalSynchronizationConfig;
   private disasterRecoveryConfig: DisasterRecoveryConfig;
   private healthCheckInterval: NodeJS.Timeout | null = null;
@@ -149,7 +165,7 @@ export class GlobalCoordinationManager {
   ) {
     this.synchronizationConfig = synchronizationConfig;
     this.disasterRecoveryConfig = disasterRecoveryConfig;
-    
+
     this.initializeRegions(regions);
   }
 
@@ -160,8 +176,11 @@ export class GlobalCoordinationManager {
         await scheduler.start();
         this.logger.info('Regional scheduler started', { region });
       } catch (error) {
-        this.logger.error('Failed to start regional scheduler', { region, error: error.message });
-        
+        this.logger.error('Failed to start regional scheduler', {
+          region,
+          error: error.message,
+        });
+
         // Activate disaster recovery for this region
         await this.activateDisasterRecovery(region);
       }
@@ -169,13 +188,13 @@ export class GlobalCoordinationManager {
 
     // Start global health monitoring
     this.startGlobalHealthMonitoring();
-    
+
     // Initialize cross-region synchronization
     await this.initializeCrossRegionSync();
-    
+
     this.logger.info('Global coordination manager started', {
       totalRegions: this.regions.size,
-      activeSchedulers: this.regionalSchedulers.size
+      activeSchedulers: this.regionalSchedulers.size,
     });
   }
 
@@ -191,13 +210,16 @@ export class GlobalCoordinationManager {
           await scheduler.stop();
           this.logger.info('Regional scheduler stopped', { region });
         } catch (error) {
-          this.logger.error('Error stopping regional scheduler', { region, error: error.message });
+          this.logger.error('Error stopping regional scheduler', {
+            region,
+            error: error.message,
+          });
         }
       }
     );
 
     await Promise.allSettled(stopPromises);
-    
+
     this.logger.info('Global coordination manager stopped');
   }
 
@@ -209,48 +231,60 @@ export class GlobalCoordinationManager {
       // Validate regions are available
       const unavailableRegions = this.validateRegionAvailability([
         event.originRegion,
-        ...event.targetRegions
+        ...event.targetRegions,
       ]);
-      
+
       if (unavailableRegions.length > 0) {
-        return Result.fail(new Error(`Regions unavailable: ${unavailableRegions.join(', ')}`));
+        return Result.fail(
+          new Error(`Regions unavailable: ${unavailableRegions.join(', ')}`)
+        );
       }
 
       // Calculate optimal execution time
       const optimalTime = event.getOptimalExecutionTime(this.regions);
-      
+
       // Create cross-region coordination if needed
       let crossRegionEventId: string | null = null;
       if (event.requiresCrossRegionCoordination()) {
-        crossRegionEventId = await this.createCrossRegionCoordination(event, optimalTime);
+        crossRegionEventId = await this.createCrossRegionCoordination(
+          event,
+          optimalTime
+        );
       }
 
       // Schedule in origin region
       const originScheduler = this.regionalSchedulers.get(event.originRegion);
       if (!originScheduler) {
-        return Result.fail(new Error(`No scheduler available for origin region: ${event.originRegion}`));
+        return Result.fail(
+          new Error(
+            `No scheduler available for origin region: ${event.originRegion}`
+          )
+        );
       }
 
-      const adjustedEvent = optimalTime !== event.scheduleAt ? 
-        event.reschedule(optimalTime) as GlobalScheduledEvent<T> : event;
-      
+      const adjustedEvent =
+        optimalTime !== event.scheduleAt
+          ? (event.reschedule(optimalTime) as GlobalScheduledEvent<T>)
+          : event;
+
       const primaryJobId = await originScheduler.schedule(adjustedEvent);
 
       // Schedule replicas in target regions if required
       const replicaJobIds: Record<GlobalRegion, string> = {};
-      
+
       if (event.synchronizationRequired) {
         for (const targetRegion of event.targetRegions) {
           const targetScheduler = this.regionalSchedulers.get(targetRegion);
           if (targetScheduler) {
             try {
-              const replicaJobId = await targetScheduler.schedule(adjustedEvent);
+              const replicaJobId =
+                await targetScheduler.schedule(adjustedEvent);
               replicaJobIds[targetRegion] = replicaJobId;
             } catch (error) {
               this.logger.warn('Failed to schedule replica in target region', {
                 targetRegion,
                 globalEventId: event.globalEventId,
-                error: error.message
+                error: error.message,
               });
             }
           }
@@ -265,20 +299,21 @@ export class GlobalCoordinationManager {
         originRegion: event.originRegion,
         targetRegions: event.targetRegions,
         optimalExecutionTime: optimalTime,
-        complianceLevel: event.complianceLevel
+        complianceLevel: event.complianceLevel,
       };
 
       this.logger.info('Global event scheduled successfully', {
         globalEventId: event.globalEventId,
         primaryJobId,
         replicaCount: Object.keys(replicaJobIds).length,
-        complianceLevel: event.complianceLevel
+        complianceLevel: event.complianceLevel,
       });
 
       return Result.ok(result);
-      
     } catch (error) {
-      return Result.fail(new Error(`Failed to schedule global event: ${error.message}`));
+      return Result.fail(
+        new Error(`Failed to schedule global event: ${error.message}`)
+      );
     }
   }
 
@@ -296,7 +331,7 @@ export class GlobalCoordinationManager {
         reportType,
         ...reportingData,
         timestamp: new Date(),
-        regulatoryDeadline: reportingData.regulatoryDeadline
+        regulatoryDeadline: reportingData.regulatoryDeadline,
       },
       reportingData.originRegion,
       targetRegions,
@@ -315,7 +350,7 @@ export class GlobalCoordinationManager {
     processingDelay: number = 300000 // 5 minutes default
   ): Promise<Result<GlobalSchedulingResult, Error>> {
     const scheduleAt = new Date(Date.now() + processingDelay);
-    
+
     const event = new GlobalScheduledEvent(
       transactionId,
       scheduleAt,
@@ -324,7 +359,7 @@ export class GlobalCoordinationManager {
         ...transactionData,
         sourceRegion,
         destinationRegion,
-        initiatedAt: new Date()
+        initiatedAt: new Date(),
       },
       sourceRegion,
       [destinationRegion],
@@ -337,7 +372,7 @@ export class GlobalCoordinationManager {
   // ✅ FOCUS: Get global scheduling metrics
   async getGlobalMetrics(): Promise<GlobalSchedulingMetrics> {
     const regionalMetrics = new Map<GlobalRegion, any>();
-    
+
     for (const [region, scheduler] of this.regionalSchedulers) {
       try {
         const stats = await scheduler.getStats();
@@ -362,33 +397,38 @@ export class GlobalCoordinationManager {
 
     return {
       totalRegions: this.regions.size,
-      activeRegions: Array.from(regionalMetrics.values()).filter(stats => stats !== null).length,
+      activeRegions: Array.from(regionalMetrics.values()).filter(
+        stats => stats !== null
+      ).length,
       globalEventCount: this.crossRegionEvents.size,
       totalScheduled,
       totalCompleted,
       totalFailed,
-      successRate: totalCompleted + totalFailed > 0 ? (totalCompleted / (totalCompleted + totalFailed)) * 100 : 0,
+      successRate:
+        totalCompleted + totalFailed > 0
+          ? (totalCompleted / (totalCompleted + totalFailed)) * 100
+          : 0,
       regionalBreakdown: Object.fromEntries(regionalMetrics),
       crossRegionCoordination: {
         activeCoordinations: this.crossRegionEvents.size,
-        averageRegionsPerEvent: this.calculateAverageRegionsPerEvent()
+        averageRegionsPerEvent: this.calculateAverageRegionsPerEvent(),
       },
       disasterRecoveryStatus: this.getDisasterRecoveryStatus(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private initializeRegions(regionConfigs: RegionConfig[]): void {
     for (const config of regionConfigs) {
       this.regions.set(config.region, config);
-      
+
       // Create scheduler for each region
       const scheduler = new InMemorySchedulerAdapter({
         defaultMaxRetries: config.defaultMaxRetries || 5,
         defaultTimeout: config.defaultTimeout || 60000,
-        enableLogging: true
+        enableLogging: true,
       });
-      
+
       this.regionalSchedulers.set(config.region, scheduler);
     }
   }
@@ -403,7 +443,7 @@ export class GlobalCoordinationManager {
   private isRegionHealthy(region: GlobalRegion): boolean {
     const config = this.regions.get(region);
     if (!config) return false;
-    
+
     // Check if region is in disaster recovery mode
     return !config.isInDisasterRecovery;
   }
@@ -413,7 +453,7 @@ export class GlobalCoordinationManager {
     executionTime: Date
   ): Promise<string> {
     const crossRegionId = `cross-${event.globalEventId}`;
-    
+
     const crossRegionEvent: CrossRegionEvent = {
       id: crossRegionId,
       globalEventId: event.globalEventId,
@@ -421,7 +461,7 @@ export class GlobalCoordinationManager {
       targetRegions: event.targetRegions,
       coordinatedExecutionTime: executionTime,
       synchronizationBarriers: new Map(),
-      status: 'coordinating'
+      status: 'coordinating',
     };
 
     this.crossRegionEvents.set(crossRegionId, crossRegionEvent);
@@ -429,7 +469,7 @@ export class GlobalCoordinationManager {
     this.logger.info('Cross-region coordination created', {
       crossRegionId,
       globalEventId: event.globalEventId,
-      regionsCount: event.targetRegions.length
+      regionsCount: event.targetRegions.length,
     });
 
     return crossRegionId;
@@ -440,15 +480,15 @@ export class GlobalCoordinationManager {
     if (!config) return;
 
     config.isInDisasterRecovery = true;
-    
+
     // Redirect traffic to backup region if configured
     const backupRegion = this.disasterRecoveryConfig.backupMappings.get(region);
     if (backupRegion) {
       this.logger.warn('Activating disaster recovery', {
         failedRegion: region,
-        backupRegion
+        backupRegion,
       });
-      
+
       // Additional disaster recovery logic would go here
     }
   }
@@ -464,20 +504,22 @@ export class GlobalCoordinationManager {
       try {
         // Perform basic health check on regional scheduler
         await scheduler.getStats();
-        
+
         // Update region health status
         const config = this.regions.get(region);
         if (config && config.isInDisasterRecovery) {
           // Check if region has recovered
           config.isInDisasterRecovery = false;
-          this.logger.info('Region recovered from disaster recovery', { region });
+          this.logger.info('Region recovered from disaster recovery', {
+            region,
+          });
         }
       } catch (error) {
-        this.logger.warn('Regional health check failed', { 
-          region, 
-          error: error.message 
+        this.logger.warn('Regional health check failed', {
+          region,
+          error: error.message,
         });
-        
+
         await this.activateDisasterRecovery(region);
       }
     }
@@ -490,10 +532,12 @@ export class GlobalCoordinationManager {
 
   private calculateAverageRegionsPerEvent(): number {
     if (this.crossRegionEvents.size === 0) return 0;
-    
-    const totalRegions = Array.from(this.crossRegionEvents.values())
-      .reduce((sum, event) => sum + event.targetRegions.length + 1, 0); // +1 for origin
-    
+
+    const totalRegions = Array.from(this.crossRegionEvents.values()).reduce(
+      (sum, event) => sum + event.targetRegions.length + 1,
+      0
+    ); // +1 for origin
+
     return totalRegions / this.crossRegionEvents.size;
   }
 
@@ -505,7 +549,7 @@ export class GlobalCoordinationManager {
     return {
       regionsInDisasterRecovery: regionsInDR,
       totalBackupMappings: this.disasterRecoveryConfig.backupMappings.size,
-      automaticFailoverEnabled: this.disasterRecoveryConfig.automaticFailover
+      automaticFailoverEnabled: this.disasterRecoveryConfig.automaticFailover,
     };
   }
 }
@@ -546,7 +590,7 @@ export class EnterpriseSchedulingService {
   ): Promise<Result<GlobalSchedulingResult, Error>> {
     // Schedule 24 hours before deadline for preparation
     const scheduleAt = new Date(deadline.getTime() - 24 * 60 * 60 * 1000);
-    
+
     const reportingData: ComplianceSchedulingData = {
       regulationType,
       regulatoryDeadline: deadline,
@@ -554,7 +598,7 @@ export class EnterpriseSchedulingService {
       dataRequirements: complianceData.requirements || [],
       auditTrail: true,
       encryptionRequired: true,
-      retentionPeriod: complianceData.retentionYears || 7
+      retentionPeriod: complianceData.retentionYears || 7,
     };
 
     return await this.coordinationManager.scheduleComplianceReporting(
@@ -580,7 +624,7 @@ export class EnterpriseSchedulingService {
         marketEvent,
         ...marketData,
         synchronizationRequired: true,
-        precision: 'millisecond' // High precision for market events
+        precision: 'millisecond', // High precision for market events
       },
       marketRegions[0],
       marketRegions.slice(1),
@@ -593,25 +637,27 @@ export class EnterpriseSchedulingService {
   // ✅ FOCUS: Get enterprise metrics
   async getEnterpriseMetrics(): Promise<EnterpriseMetrics> {
     const globalMetrics = await this.coordinationManager.getGlobalMetrics();
-    
+
     return {
       global: globalMetrics,
       compliance: {
         activeComplianceJobs: this.calculateActiveComplianceJobs(globalMetrics),
         upcomingDeadlines: await this.getUpcomingComplianceDeadlines(),
-        complianceSuccessRate: globalMetrics.successRate
+        complianceSuccessRate: globalMetrics.successRate,
       },
       disaster_recovery: globalMetrics.disasterRecoveryStatus,
       performance: {
         globalLatency: await this.calculateGlobalLatency(),
         regionLatencies: await this.calculateRegionLatencies(),
-        crossRegionSyncLatency: await this.calculateCrossRegionSyncLatency()
+        crossRegionSyncLatency: await this.calculateCrossRegionSyncLatency(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
-  private calculateActiveComplianceJobs(metrics: GlobalSchedulingMetrics): number {
+  private calculateActiveComplianceJobs(
+    metrics: GlobalSchedulingMetrics
+  ): number {
     // Estimate compliance jobs from regional breakdown
     return Math.floor(metrics.totalScheduled * 0.3); // Assume 30% are compliance
   }
@@ -619,9 +665,21 @@ export class EnterpriseSchedulingService {
   private async getUpcomingComplianceDeadlines(): Promise<any[]> {
     // Return upcoming compliance deadlines
     return [
-      { type: 'SOX-404', deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), regions: ['us-east-1'] },
-      { type: 'GDPR-Report', deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), regions: ['eu-west-1'] },
-      { type: 'APAC-Compliance', deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), regions: ['ap-southeast-1'] }
+      {
+        type: 'SOX-404',
+        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        regions: ['us-east-1'],
+      },
+      {
+        type: 'GDPR-Report',
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        regions: ['eu-west-1'],
+      },
+      {
+        type: 'APAC-Compliance',
+        deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+        regions: ['ap-southeast-1'],
+      },
     ];
   }
 
@@ -635,7 +693,7 @@ export class EnterpriseSchedulingService {
     return {
       'us-east-1': 50,
       'eu-west-1': 80,
-      'ap-southeast-1': 120
+      'ap-southeast-1': 120,
     };
   }
 
@@ -650,9 +708,9 @@ export class EnterpriseSchedulingService {
 
 ```typescript
 // usage-example.ts
-import { 
+import {
   EnterpriseSchedulingService,
-  GlobalScheduledEvent
+  GlobalScheduledEvent,
 } from './enterprise-scheduling-platform';
 
 async function demonstrateEnterpriseScheduling() {
@@ -664,7 +722,7 @@ async function demonstrateEnterpriseScheduling() {
       businessHours: { start: 9, end: 17 },
       defaultMaxRetries: 5,
       defaultTimeout: 60000,
-      isInDisasterRecovery: false
+      isInDisasterRecovery: false,
     },
     {
       region: 'eu-west-1' as GlobalRegion,
@@ -672,7 +730,7 @@ async function demonstrateEnterpriseScheduling() {
       businessHours: { start: 9, end: 17 },
       defaultMaxRetries: 5,
       defaultTimeout: 60000,
-      isInDisasterRecovery: false
+      isInDisasterRecovery: false,
     },
     {
       region: 'ap-southeast-1' as GlobalRegion,
@@ -680,8 +738,8 @@ async function demonstrateEnterpriseScheduling() {
       businessHours: { start: 9, end: 17 },
       defaultMaxRetries: 5,
       defaultTimeout: 60000,
-      isInDisasterRecovery: false
-    }
+      isInDisasterRecovery: false,
+    },
   ];
 
   // Configure global synchronization
@@ -689,7 +747,7 @@ async function demonstrateEnterpriseScheduling() {
     healthCheckInterval: 30000,
     crossRegionTimeout: 10000,
     synchronizationProtocol: 'consensus' as const,
-    conflictResolution: 'latest-write-wins' as const
+    conflictResolution: 'latest-write-wins' as const,
   };
 
   // Configure disaster recovery
@@ -697,73 +755,77 @@ async function demonstrateEnterpriseScheduling() {
     backupMappings: new Map([
       ['us-east-1' as GlobalRegion, 'us-west-2' as GlobalRegion],
       ['eu-west-1' as GlobalRegion, 'eu-central-1' as GlobalRegion],
-      ['ap-southeast-1' as GlobalRegion, 'ap-northeast-1' as GlobalRegion]
+      ['ap-southeast-1' as GlobalRegion, 'ap-northeast-1' as GlobalRegion],
     ]),
     automaticFailover: true,
     recoveryTimeObjective: 300000, // 5 minutes
-    recoveryPointObjective: 60000   // 1 minute
+    recoveryPointObjective: 60000, // 1 minute
   };
 
   const enterpriseScheduler = new EnterpriseSchedulingService(
-    regions, 
-    syncConfig, 
+    regions,
+    syncConfig,
     drConfig
   );
-  
+
   await enterpriseScheduler.start();
-  
+
   try {
     // Schedule regulatory compliance reporting
     console.log('🏛️ Scheduling regulatory compliance reports...');
-    
+
     const complianceResults = await Promise.all([
       // SOX compliance for US markets
       enterpriseScheduler.scheduleRegulatoryCompliance(
         'SOX-404',
-        { 
+        {
           requirements: ['financial-accuracy', 'internal-controls'],
-          retentionYears: 7
+          retentionYears: 7,
         },
         new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         ['us-east-1']
       ),
-      
+
       // GDPR compliance for EU markets
       enterpriseScheduler.scheduleRegulatoryCompliance(
         'GDPR-Report',
         {
           requirements: ['data-protection', 'privacy-controls'],
-          retentionYears: 5
+          retentionYears: 5,
         },
         new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
         ['eu-west-1']
       ),
-      
+
       // APAC regulatory compliance
       enterpriseScheduler.scheduleRegulatoryCompliance(
         'APAC-Compliance',
         {
           requirements: ['anti-money-laundering', 'trade-reporting'],
-          retentionYears: 10
+          retentionYears: 10,
         },
         new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days
         ['ap-southeast-1']
-      )
+      ),
     ]);
 
     console.log('Compliance scheduling results:');
     complianceResults.forEach((result, index) => {
       const types = ['SOX-404', 'GDPR-Report', 'APAC-Compliance'];
-      console.log(`  ${types[index]}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`);
+      console.log(
+        `  ${types[index]}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`
+      );
       if (result.isSuccess()) {
         console.log(`    Global Event ID: ${result.value.globalEventId}`);
-        console.log(`    Target Regions: ${result.value.targetRegions.join(', ')}`);
+        console.log(
+          `    Target Regions: ${result.value.targetRegions.join(', ')}`
+        );
       }
     });
 
     // Schedule cross-border financial transactions
     console.log('\n💰 Scheduling cross-border transactions...');
-    
+
     const transactionResults = await Promise.all([
       // US to EU transaction
       enterpriseScheduler.coordinationManager.scheduleCrossBorderTransaction(
@@ -773,14 +835,14 @@ async function demonstrateEnterpriseScheduling() {
           currency: 'USD',
           targetCurrency: 'EUR',
           type: 'wire-transfer',
-          complianceChecks: ['AML', 'KYC', 'OFAC']
+          complianceChecks: ['AML', 'KYC', 'OFAC'],
         },
         'us-east-1',
         'eu-west-1',
         600000 // 10 minutes processing delay
       ),
-      
-      // EU to APAC transaction  
+
+      // EU to APAC transaction
       enterpriseScheduler.coordinationManager.scheduleCrossBorderTransaction(
         'TXN-EU-APAC-002',
         {
@@ -788,83 +850,104 @@ async function demonstrateEnterpriseScheduling() {
           currency: 'EUR',
           targetCurrency: 'SGD',
           type: 'swift-transfer',
-          complianceChecks: ['Trade-Finance', 'Export-Control']
+          complianceChecks: ['Trade-Finance', 'Export-Control'],
         },
         'eu-west-1',
         'ap-southeast-1',
         900000 // 15 minutes processing delay
-      )
+      ),
     ]);
 
     console.log('Cross-border transaction results:');
     transactionResults.forEach((result, index) => {
       const txns = ['US→EU Transaction', 'EU→APAC Transaction'];
-      console.log(`  ${txns[index]}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`);
+      console.log(
+        `  ${txns[index]}: ${result.isSuccess() ? 'Scheduled' : 'Failed'}`
+      );
     });
 
     // Schedule global market synchronization
     console.log('\n📈 Scheduling market synchronization events...');
-    
+
     const marketSyncTime = new Date();
     marketSyncTime.setHours(marketSyncTime.getHours() + 1, 0, 0, 0); // Next hour, exact timing
-    
-    const marketSyncResult = await enterpriseScheduler.scheduleMarketSynchronization(
-      'daily-market-close',
-      {
-        markets: ['NYSE', 'LSE', 'SGX'],
-        synchronizationType: 'hard-sync',
-        toleranceMs: 100 // 100ms tolerance for market events
-      },
-      marketSyncTime,
-      ['us-east-1', 'eu-west-1', 'ap-southeast-1']
-    );
 
-    console.log('Market synchronization:', marketSyncResult.isSuccess() ? 'Scheduled' : 'Failed');
+    const marketSyncResult =
+      await enterpriseScheduler.scheduleMarketSynchronization(
+        'daily-market-close',
+        {
+          markets: ['NYSE', 'LSE', 'SGX'],
+          synchronizationType: 'hard-sync',
+          toleranceMs: 100, // 100ms tolerance for market events
+        },
+        marketSyncTime,
+        ['us-east-1', 'eu-west-1', 'ap-southeast-1']
+      );
+
+    console.log(
+      'Market synchronization:',
+      marketSyncResult.isSuccess() ? 'Scheduled' : 'Failed'
+    );
     if (marketSyncResult.isSuccess()) {
-      console.log(`  Global Market Sync ID: ${marketSyncResult.value.globalEventId}`);
-      console.log(`  Synchronized Regions: ${marketSyncResult.value.targetRegions.length + 1} regions`);
+      console.log(
+        `  Global Market Sync ID: ${marketSyncResult.value.globalEventId}`
+      );
+      console.log(
+        `  Synchronized Regions: ${marketSyncResult.value.targetRegions.length + 1} regions`
+      );
     }
 
     // Monitor enterprise metrics
     const monitorMetrics = async () => {
       const metrics = await enterpriseScheduler.getEnterpriseMetrics();
-      
+
       console.log('\n📊 Enterprise Scheduling Metrics:');
       console.log('  Global Overview:');
       console.log(`    Total Regions: ${metrics.global.totalRegions}`);
       console.log(`    Active Regions: ${metrics.global.activeRegions}`);
-      console.log(`    Success Rate: ${metrics.global.successRate.toFixed(2)}%`);
+      console.log(
+        `    Success Rate: ${metrics.global.successRate.toFixed(2)}%`
+      );
       console.log(`    Global Events: ${metrics.global.globalEventCount}`);
-      
+
       console.log('  Compliance:');
-      console.log(`    Active Jobs: ${metrics.compliance.activeComplianceJobs}`);
-      console.log(`    Upcoming Deadlines: ${metrics.compliance.upcomingDeadlines.length}`);
-      
+      console.log(
+        `    Active Jobs: ${metrics.compliance.activeComplianceJobs}`
+      );
+      console.log(
+        `    Upcoming Deadlines: ${metrics.compliance.upcomingDeadlines.length}`
+      );
+
       console.log('  Performance:');
       console.log(`    Global Latency: ${metrics.performance.globalLatency}ms`);
-      console.log(`    Cross-Region Sync: ${metrics.performance.crossRegionSyncLatency}ms`);
-      
+      console.log(
+        `    Cross-Region Sync: ${metrics.performance.crossRegionSyncLatency}ms`
+      );
+
       console.log('  Disaster Recovery:');
-      console.log(`    Regions in DR: ${metrics.disaster_recovery.regionsInDisasterRecovery.length}`);
-      console.log(`    Auto Failover: ${metrics.disaster_recovery.automaticFailoverEnabled}`);
+      console.log(
+        `    Regions in DR: ${metrics.disaster_recovery.regionsInDisasterRecovery.length}`
+      );
+      console.log(
+        `    Auto Failover: ${metrics.disaster_recovery.automaticFailoverEnabled}`
+      );
     };
 
     // Monitor every 45 seconds
     const metricsInterval = setInterval(monitorMetrics, 45000);
-    
+
     // Initial metrics
     await monitorMetrics();
-    
+
     // Run enterprise platform for 3 minutes
     console.log('\n⏱️ Running enterprise platform for 3 minutes...');
     await new Promise(resolve => setTimeout(resolve, 180000));
-    
+
     clearInterval(metricsInterval);
-    
+
     // Final metrics
     console.log('\n📈 Final Enterprise Metrics:');
     await monitorMetrics();
-    
   } finally {
     await enterpriseScheduler.stop();
   }
@@ -875,26 +958,42 @@ demonstrateEnterpriseScheduling().catch(console.error);
 
 ## Key Features
 
-- **Multi-Region Coordination**: Seamless scheduling across global regions with timezone awareness
-- **Disaster Recovery**: Automatic failover and backup region coordination for business continuity  
-- **Compliance Integration**: Built-in support for regulatory compliance with audit trails and retention policies
-- **Global Synchronization**: Cross-region event coordination with millisecond precision for market operations
-- **Enterprise Metrics**: Comprehensive monitoring with global, regional, and cross-region performance insights
-- **Business Hours Optimization**: Intelligent scheduling that considers business hours across multiple regions
-- **High Availability**: Automatic health monitoring with graceful degradation and recovery
-- **Cross-Border Processing**: Specialized handling for financial transactions with compliance checkpoints
+- **Multi-Region Coordination**: Seamless scheduling across global regions with
+  timezone awareness
+- **Disaster Recovery**: Automatic failover and backup region coordination for
+  business continuity
+- **Compliance Integration**: Built-in support for regulatory compliance with
+  audit trails and retention policies
+- **Global Synchronization**: Cross-region event coordination with millisecond
+  precision for market operations
+- **Enterprise Metrics**: Comprehensive monitoring with global, regional, and
+  cross-region performance insights
+- **Business Hours Optimization**: Intelligent scheduling that considers
+  business hours across multiple regions
+- **High Availability**: Automatic health monitoring with graceful degradation
+  and recovery
+- **Cross-Border Processing**: Specialized handling for financial transactions
+  with compliance checkpoints
 
 ## Common Pitfalls
 
-- **Clock Synchronization**: Ensure all regions have synchronized atomic clocks for precise timing
-- **Network Latency**: Account for variable cross-region network latency in synchronization timing
-- **Regulatory Compliance**: Different regions have varying compliance requirements that must be handled correctly
-- **Disaster Recovery Testing**: Regularly test failover scenarios to ensure disaster recovery mechanisms work
-- **Resource Scaling**: Plan for regional capacity differences and peak hour variations across time zones
+- **Clock Synchronization**: Ensure all regions have synchronized atomic clocks
+  for precise timing
+- **Network Latency**: Account for variable cross-region network latency in
+  synchronization timing
+- **Regulatory Compliance**: Different regions have varying compliance
+  requirements that must be handled correctly
+- **Disaster Recovery Testing**: Regularly test failover scenarios to ensure
+  disaster recovery mechanisms work
+- **Resource Scaling**: Plan for regional capacity differences and peak hour
+  variations across time zones
 
 ## Related Examples
 
-- [Distributed Event Scheduling](../intermediate/example-1.md) - Multi-node coordination foundations
-- [High Availability Scheduling](./example-2.md) - Clustering and fault tolerance patterns
+- [Distributed Event Scheduling](../intermediate/example-1.md) - Multi-node
+  coordination foundations
+- [High Availability Scheduling](./example-2.md) - Clustering and fault
+  tolerance patterns
 - [Basic Event Scheduling](../basic/example-1.md) - Simple scheduling concepts
-- [NestJS Enterprise Integration](../frameworks/nestjs/advanced/example-1.md) - Framework integration patterns
+- [NestJS Enterprise Integration](../frameworks/nestjs/advanced/example-1.md) -
+  Framework integration patterns

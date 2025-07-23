@@ -1,7 +1,7 @@
 # Banking Account with Capabilities - NestJS Integration
 
-**Focus**: Banking account with capability separation in NestJS
-**Base Example**: [Banking Account with Capabilities](../../intermediate/example-2.md)
+**Focus**: Banking account with capability separation in NestJS **Base
+Example**: [Banking Account with Capabilities](../../intermediate/example-2.md)
 **Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
 
 ## Service Implementation
@@ -11,13 +11,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VytchesDDD } from '@vytches-ddd/di';
 import { EntityId } from '@vytches-ddd/domain-primitives';
-import { 
+import {
   BankingAccount,
   CreateAccountData,
   Transaction,
   RiskAssessment,
   ComplianceCheck,
-  AccountBalance
+  AccountBalance,
 } from './types'; // From your application
 
 @Injectable()
@@ -25,10 +25,14 @@ export class BankingAccountService {
   private readonly logger = new Logger(BankingAccountService.name);
 
   // ✅ FOCUS: Account creation with capability initialization
-  async createBankingAccount(accountData: CreateAccountData): Promise<BankingAccount> {
+  async createBankingAccount(
+    accountData: CreateAccountData
+  ): Promise<BankingAccount> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+
       // Use library factory method with capabilities
       const accountAggregate = BankingAccountAggregateClass.create(
         accountData.customerId,
@@ -36,10 +40,12 @@ export class BankingAccountService {
         accountData.initialDeposit,
         accountData.currency
       );
-      
+
       const account = accountAggregate.toSnapshot();
-      
-      this.logger.log(`Banking account created: ${account.accountNumber} for customer ${accountData.customerId}`);
+
+      this.logger.log(
+        `Banking account created: ${account.accountNumber} for customer ${accountData.customerId}`
+      );
       return account;
     } catch (error) {
       this.logger.error(`Failed to create banking account: ${error.message}`);
@@ -48,17 +54,27 @@ export class BankingAccountService {
   }
 
   // ✅ FOCUS: Transaction processing with risk and compliance capabilities
-  async processTransaction(accountId: string, transaction: Transaction): Promise<BankingAccount> {
+  async processTransaction(
+    accountId: string,
+    transaction: Transaction
+  ): Promise<BankingAccount> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      const accountAggregate = await this.loadBankingAccount(accountId, BankingAccountAggregateClass);
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+      const accountAggregate = await this.loadBankingAccount(
+        accountId,
+        BankingAccountAggregateClass
+      );
+
       // Use library method with integrated capabilities
       await accountAggregate.processTransaction(transaction);
-      
+
       const updatedAccount = accountAggregate.toSnapshot();
-      
-      this.logger.log(`Transaction processed for account ${accountId}: ${transaction.amount} ${transaction.type}`);
+
+      this.logger.log(
+        `Transaction processed for account ${accountId}: ${transaction.amount} ${transaction.type}`
+      );
       return updatedAccount;
     } catch (error) {
       this.logger.error(`Failed to process transaction: ${error.message}`);
@@ -67,15 +83,26 @@ export class BankingAccountService {
   }
 
   // ✅ FOCUS: Risk assessment through capability
-  async assessTransactionRisk(accountId: string, transaction: Transaction): Promise<RiskAssessment> {
+  async assessTransactionRisk(
+    accountId: string,
+    transaction: Transaction
+  ): Promise<RiskAssessment> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      const accountAggregate = await this.loadBankingAccount(accountId, BankingAccountAggregateClass);
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+      const accountAggregate = await this.loadBankingAccount(
+        accountId,
+        BankingAccountAggregateClass
+      );
+
       // Use library risk capability
-      const riskAssessment = await accountAggregate.assessTransactionRisk(transaction);
-      
-      this.logger.log(`Risk assessment completed for account ${accountId}: ${riskAssessment.riskLevel}`);
+      const riskAssessment =
+        await accountAggregate.assessTransactionRisk(transaction);
+
+      this.logger.log(
+        `Risk assessment completed for account ${accountId}: ${riskAssessment.riskLevel}`
+      );
       return riskAssessment;
     } catch (error) {
       this.logger.error(`Failed to assess transaction risk: ${error.message}`);
@@ -84,15 +111,26 @@ export class BankingAccountService {
   }
 
   // ✅ FOCUS: Compliance validation through capability
-  async validateCompliance(accountId: string, transaction: Transaction): Promise<ComplianceCheck> {
+  async validateCompliance(
+    accountId: string,
+    transaction: Transaction
+  ): Promise<ComplianceCheck> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      const accountAggregate = await this.loadBankingAccount(accountId, BankingAccountAggregateClass);
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+      const accountAggregate = await this.loadBankingAccount(
+        accountId,
+        BankingAccountAggregateClass
+      );
+
       // Use library compliance capability
-      const complianceCheck = await accountAggregate.validateCompliance(transaction);
-      
-      this.logger.log(`Compliance validation completed for account ${accountId}: ${complianceCheck.status}`);
+      const complianceCheck =
+        await accountAggregate.validateCompliance(transaction);
+
+      this.logger.log(
+        `Compliance validation completed for account ${accountId}: ${complianceCheck.status}`
+      );
       return complianceCheck;
     } catch (error) {
       this.logger.error(`Failed to validate compliance: ${error.message}`);
@@ -103,11 +141,16 @@ export class BankingAccountService {
   // ✅ FOCUS: Account balance operations
   async getAccountBalance(accountId: string): Promise<AccountBalance> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      const accountAggregate = await this.loadBankingAccount(accountId, BankingAccountAggregateClass);
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+      const accountAggregate = await this.loadBankingAccount(
+        accountId,
+        BankingAccountAggregateClass
+      );
+
       const balance = accountAggregate.getBalance();
-      
+
       return balance;
     } catch (error) {
       this.logger.error(`Failed to get account balance: ${error.message}`);
@@ -115,16 +158,24 @@ export class BankingAccountService {
     }
   }
 
-  async freezeAccount(accountId: string, reason: string): Promise<BankingAccount> {
+  async freezeAccount(
+    accountId: string,
+    reason: string
+  ): Promise<BankingAccount> {
     try {
-      const BankingAccountAggregateClass = VytchesDDD.resolve<any>('BankingAccountAggregate');
-      const accountAggregate = await this.loadBankingAccount(accountId, BankingAccountAggregateClass);
-      
+      const BankingAccountAggregateClass = VytchesDDD.resolve<any>(
+        'BankingAccountAggregate'
+      );
+      const accountAggregate = await this.loadBankingAccount(
+        accountId,
+        BankingAccountAggregateClass
+      );
+
       // Use library method
       accountAggregate.freeze(reason);
-      
+
       const updatedAccount = accountAggregate.toSnapshot();
-      
+
       this.logger.log(`Account frozen: ${accountId}, reason: ${reason}`);
       return updatedAccount;
     } catch (error) {
@@ -134,7 +185,10 @@ export class BankingAccountService {
   }
 
   // Helper method for aggregate loading
-  private async loadBankingAccount(accountId: string, BankingAccountAggregateClass: any): Promise<any> {
+  private async loadBankingAccount(
+    accountId: string,
+    BankingAccountAggregateClass: any
+  ): Promise<any> {
     // Mock implementation - in reality would load from repository
     return BankingAccountAggregateClass.fromSnapshot({
       id: accountId,
@@ -146,7 +200,7 @@ export class BankingAccountService {
       status: 'active',
       transactionHistory: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }
@@ -169,12 +223,14 @@ export class BankingAccountModule implements OnModuleInit {
 ```
 
 **Key Points:**
+
 - Capability-based architecture with separated concerns
 - Risk assessment and compliance validation through dedicated capabilities
 - Transaction processing with integrated business rule validation
 - Clean separation between NestJS service and domain logic
 
 **Usage Example:**
+
 ```typescript
 @Controller('accounts')
 export class AccountController {
@@ -189,10 +245,7 @@ export class AccountController {
   }
 
   @Get(':id/risk/:transactionId')
-  async assessRisk(
-    @Param('id') id: string,
-    @Body() transaction: Transaction
-  ) {
+  async assessRisk(@Param('id') id: string, @Body() transaction: Transaction) {
     return await this.accountService.assessTransactionRisk(id, transaction);
   }
 }

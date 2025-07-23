@@ -1,11 +1,9 @@
 # Advanced Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced
-**Framework**: NestJS
-**Focus**: Manual advanced value object integration with sophisticated business operations
-**Base Example**: [TimePeriod Value Object](../../../advanced/example-1.md)
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Advanced **Framework**: NestJS **Focus**: Manual advanced value
+object integration with sophisticated business operations **Base Example**:
+[TimePeriod Value Object](../../../advanced/example-1.md)
 
 ## Service Implementation
 
@@ -13,29 +11,37 @@
 // time-period.service.ts
 import { Injectable } from '@nestjs/common';
 import { TimePeriod, RecurrencePattern } from '@vytches-ddd/value-objects';
-import { 
-  CreateTimePeriodDto, 
+import {
+  CreateTimePeriodDto,
   TimePeriodResponse,
   ScheduleOptimizationDto,
-  ConflictAnalysisDto
+  ConflictAnalysisDto,
 } from './types'; // From your application
 
 @Injectable()
 export class TimePeriodService {
   private readonly supportedTimezones = [
-    'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 
-    'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo'
+    'UTC',
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Los_Angeles',
+    'Europe/London',
+    'Europe/Paris',
+    'Asia/Tokyo',
   ];
 
   // ✅ FOCUS: Create sophisticated time periods with recurrence
   createTimePeriod(dto: CreateTimePeriodDto): TimePeriodResponse {
     try {
-      const recurrence: RecurrencePattern | undefined = dto.recurrence ? {
-        frequency: dto.recurrence.frequency,
-        interval: dto.recurrence.interval,
-        daysOfWeek: dto.recurrence.daysOfWeek,
-        monthlyPattern: dto.recurrence.monthlyPattern
-      } : undefined;
+      const recurrence: RecurrencePattern | undefined = dto.recurrence
+        ? {
+            frequency: dto.recurrence.frequency,
+            interval: dto.recurrence.interval,
+            daysOfWeek: dto.recurrence.daysOfWeek,
+            monthlyPattern: dto.recurrence.monthlyPattern,
+          }
+        : undefined;
 
       const timePeriod = TimePeriod.create(
         new Date(dto.startTime),
@@ -54,13 +60,18 @@ export class TimePeriodService {
           humanReadable: timePeriod.toHumanReadable(),
           recurrence: timePeriod.recurrence,
           isBusinessHours: timePeriod.isWithinBusinessHours(),
-          nextOccurrence: recurrence ? timePeriod.getNextOccurrence() : undefined
-        }
+          nextOccurrence: recurrence
+            ? timePeriod.getNextOccurrence()
+            : undefined,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create time period'
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create time period',
       };
     }
   }
@@ -78,7 +89,7 @@ export class TimePeriodService {
   } {
     try {
       // Create time periods from input
-      const originalPeriods = dto.timeSlots.map(slot => 
+      const originalPeriods = dto.timeSlots.map(slot =>
         TimePeriod.create(
           new Date(slot.startTime),
           new Date(slot.endTime),
@@ -99,8 +110,14 @@ export class TimePeriodService {
       );
 
       // Calculate improvements
-      const originalDuration = originalPeriods.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
-      const optimizedDuration = optimizedPeriods.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
+      const originalDuration = originalPeriods.reduce(
+        (sum, p) => sum + p.getDurationInMinutes(),
+        0
+      );
+      const optimizedDuration = optimizedPeriods.reduce(
+        (sum, p) => sum + p.getDurationInMinutes(),
+        0
+      );
       const timeReduction = originalDuration - optimizedDuration;
 
       const recommendations = this.generateOptimizationRecommendations(
@@ -110,17 +127,26 @@ export class TimePeriodService {
       );
 
       return {
-        originalSchedule: originalPeriods.map(p => this.mapTimePeriodToResponse(p)),
-        optimizedSchedule: optimizedPeriods.map(p => this.mapTimePeriodToResponse(p)),
+        originalSchedule: originalPeriods.map(p =>
+          this.mapTimePeriodToResponse(p)
+        ),
+        optimizedSchedule: optimizedPeriods.map(p =>
+          this.mapTimePeriodToResponse(p)
+        ),
         improvements: {
           timeReduction,
           conflictsEliminated: conflicts.length,
-          utilizationImprovement: this.calculateUtilizationImprovement(originalPeriods, optimizedPeriods)
+          utilizationImprovement: this.calculateUtilizationImprovement(
+            originalPeriods,
+            optimizedPeriods
+          ),
         },
-        recommendations
+        recommendations,
       };
     } catch (error) {
-      throw new Error(`Failed to optimize schedule: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to optimize schedule: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -138,7 +164,7 @@ export class TimePeriodService {
     autoResolutionPossible: boolean;
   } {
     try {
-      const periods = dto.timePeriods.map(tp => 
+      const periods = dto.timePeriods.map(tp =>
         TimePeriod.create(
           new Date(tp.startTime),
           new Date(tp.endTime),
@@ -157,39 +183,56 @@ export class TimePeriodService {
 
           if (period1.conflictsWith(period2)) {
             const overlap = period1.getOverlap(period2);
-            const overlapDuration = overlap ? overlap.getDurationInMinutes() : 0;
+            const overlapDuration = overlap
+              ? overlap.getDurationInMinutes()
+              : 0;
             totalOverlapMinutes += overlapDuration;
 
-            const severity = this.determineSeverity(overlapDuration, period1, period2);
-            const strategies = this.generateResolutionStrategies(period1, period2, severity);
+            const severity = this.determineSeverity(
+              overlapDuration,
+              period1,
+              period2
+            );
+            const strategies = this.generateResolutionStrategies(
+              period1,
+              period2,
+              severity
+            );
 
             conflicts.push({
               period1: this.mapTimePeriodToResponse(period1),
               period2: this.mapTimePeriodToResponse(period2),
               overlapDuration,
               severity,
-              resolutionStrategies: strategies
+              resolutionStrategies: strategies,
             });
           }
         }
       }
 
       // Calculate overall metrics
-      const totalDuration = periods.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
-      const overallConflictScore = totalDuration > 0 ? (totalOverlapMinutes / totalDuration) * 100 : 0;
-      
+      const totalDuration = periods.reduce(
+        (sum, p) => sum + p.getDurationInMinutes(),
+        0
+      );
+      const overallConflictScore =
+        totalDuration > 0 ? (totalOverlapMinutes / totalDuration) * 100 : 0;
+
       const resolutionComplexity = this.assessResolutionComplexity(conflicts);
-      const autoResolutionPossible = conflicts.every(c => c.severity !== 'critical') && 
-                                    conflicts.length <= 5;
+      const autoResolutionPossible =
+        conflicts.every(c => c.severity !== 'critical') &&
+        conflicts.length <= 5;
 
       return {
         conflicts,
         overallConflictScore: Math.round(overallConflictScore * 100) / 100,
         resolutionComplexity,
-        autoResolutionPossible
+        autoResolutionPossible,
       };
     } catch (error) {
-      throw new Error(`Failed to analyze conflicts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to analyze conflicts: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -216,22 +259,32 @@ export class TimePeriodService {
       let adjusted = original;
       let adjustmentMade = false;
       let adjustmentType = 'none';
-      let businessReasoning = 'No adjustment needed - already within business hours';
+      let businessReasoning =
+        'No adjustment needed - already within business hours';
 
       // Check if adjustment is needed
-      if (!original.isWithinBusinessHours(businessHoursStart, businessHoursEnd)) {
+      if (
+        !original.isWithinBusinessHours(businessHoursStart, businessHoursEnd)
+      ) {
         switch (adjustmentStrategy) {
           case 'shift':
-            adjusted = original.adjustToBusinessHours(businessHoursStart, businessHoursEnd);
+            adjusted = original.adjustToBusinessHours(
+              businessHoursStart,
+              businessHoursEnd
+            );
             adjustmentType = 'time-shift';
-            businessReasoning = 'Time period shifted to align with business hours while maintaining duration';
+            businessReasoning =
+              'Time period shifted to align with business hours while maintaining duration';
             adjustmentMade = true;
             break;
 
           case 'split':
             // For periods spanning multiple days, split across business days
             if (original.spansDays()) {
-              const businessDayPeriods = original.splitToBusinessDays(businessHoursStart, businessHoursEnd);
+              const businessDayPeriods = original.splitToBusinessDays(
+                businessHoursStart,
+                businessHoursEnd
+              );
               adjusted = businessDayPeriods[0]; // Take first business day period
               adjustmentType = 'multi-day-split';
               businessReasoning = `Long period split across ${businessDayPeriods.length} business days`;
@@ -241,11 +294,22 @@ export class TimePeriodService {
 
           case 'compress':
             // Compress period to fit within single business day
-            const businessDayStart = this.createBusinessDayStart(original.startTime, businessHoursStart);
-            const businessDayEnd = this.createBusinessDayEnd(original.startTime, businessHoursEnd);
-            adjusted = TimePeriod.create(businessDayStart, businessDayEnd, original.timezone);
+            const businessDayStart = this.createBusinessDayStart(
+              original.startTime,
+              businessHoursStart
+            );
+            const businessDayEnd = this.createBusinessDayEnd(
+              original.startTime,
+              businessHoursEnd
+            );
+            adjusted = TimePeriod.create(
+              businessDayStart,
+              businessDayEnd,
+              original.timezone
+            );
             adjustmentType = 'duration-compression';
-            businessReasoning = 'Period compressed to fit within single business day';
+            businessReasoning =
+              'Period compressed to fit within single business day';
             adjustmentMade = true;
             break;
         }
@@ -256,10 +320,12 @@ export class TimePeriodService {
         adjusted: this.mapTimePeriodToResponse(adjusted),
         adjustmentMade,
         adjustmentType,
-        businessReasoning
+        businessReasoning,
       };
     } catch (error) {
-      throw new Error(`Failed to adjust to business hours: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to adjust to business hours: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -280,7 +346,11 @@ export class TimePeriodService {
   ): {
     allocations: Array<{
       timePeriod: TimePeriodResponse['data'];
-      allocatedResources: Array<{ resourceId: string; allocated: number; cost: number }>;
+      allocatedResources: Array<{
+        resourceId: string;
+        allocated: number;
+        cost: number;
+      }>;
       totalCost: number;
       utilization: number;
     }>;
@@ -293,8 +363,12 @@ export class TimePeriodService {
     }>;
   } {
     try {
-      const periods = timePeriods.map(tp => 
-        TimePeriod.create(new Date(tp.startTime), new Date(tp.endTime), tp.timezone)
+      const periods = timePeriods.map(tp =>
+        TimePeriod.create(
+          new Date(tp.startTime),
+          new Date(tp.endTime),
+          tp.timezone
+        )
       );
 
       const allocations = [];
@@ -303,14 +377,20 @@ export class TimePeriodService {
 
       // Process each time period
       periods.forEach((period, periodIndex) => {
-        const requirement = requirements.find(req => req.periodIndex === periodIndex);
+        const requirement = requirements.find(
+          req => req.periodIndex === periodIndex
+        );
         if (!requirement) return;
 
         const allocation = {
           timePeriod: this.mapTimePeriodToResponse(period),
-          allocatedResources: [] as Array<{ resourceId: string; allocated: number; cost: number }>,
+          allocatedResources: [] as Array<{
+            resourceId: string;
+            allocated: number;
+            cost: number;
+          }>,
           totalCost: 0,
-          utilization: 0
+          utilization: 0,
         };
 
         let remainingNeed = requirement.resourcesNeeded;
@@ -318,19 +398,22 @@ export class TimePeriodService {
         // Sort resources by cost-effectiveness (capacity/cost ratio)
         const sortedResources = [...resources]
           .filter(resource => this.isResourceAvailable(resource, period))
-          .sort((a, b) => (b.capacity / b.cost) - (a.capacity / a.cost));
+          .sort((a, b) => b.capacity / b.cost - a.capacity / a.cost);
 
         // Allocate resources
         for (const resource of sortedResources) {
           if (remainingNeed <= 0) break;
 
           const allocated = Math.min(remainingNeed, resource.capacity);
-          const cost = (allocated / resource.capacity) * resource.cost * period.getDurationInHours();
+          const cost =
+            (allocated / resource.capacity) *
+            resource.cost *
+            period.getDurationInHours();
 
           allocation.allocatedResources.push({
             resourceId: resource.id,
             allocated,
-            cost: Math.round(cost * 100) / 100
+            cost: Math.round(cost * 100) / 100,
           });
 
           allocation.totalCost += cost;
@@ -338,8 +421,13 @@ export class TimePeriodService {
         }
 
         // Calculate utilization
-        const totalAllocated = allocation.allocatedResources.reduce((sum, ar) => sum + ar.allocated, 0);
-        allocation.utilization = Math.round((totalAllocated / requirement.resourcesNeeded) * 100);
+        const totalAllocated = allocation.allocatedResources.reduce(
+          (sum, ar) => sum + ar.allocated,
+          0
+        );
+        allocation.utilization = Math.round(
+          (totalAllocated / requirement.resourcesNeeded) * 100
+        );
 
         allocations.push(allocation);
         totalCost += allocation.totalCost;
@@ -349,23 +437,27 @@ export class TimePeriodService {
           unmetRequirements.push({
             periodIndex,
             shortfall: remainingNeed,
-            priority: requirement.priority
+            priority: requirement.priority,
           });
         }
       });
 
-      const averageUtilization = allocations.length > 0 
-        ? allocations.reduce((sum, a) => sum + a.utilization, 0) / allocations.length
-        : 0;
+      const averageUtilization =
+        allocations.length > 0
+          ? allocations.reduce((sum, a) => sum + a.utilization, 0) /
+            allocations.length
+          : 0;
 
       return {
         allocations,
         totalCost: Math.round(totalCost * 100) / 100,
         averageUtilization: Math.round(averageUtilization),
-        unmetRequirements
+        unmetRequirements,
       };
     } catch (error) {
-      throw new Error(`Failed to allocate resources: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to allocate resources: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -402,25 +494,43 @@ export class TimePeriodService {
       );
 
       const converted = original.convertTimezone(targetTimezone);
-      
+
       // Calculate time difference in hours
-      const timeDifference = this.calculateTimezoneOffset(dto.timezone, targetTimezone);
-      
+      const timeDifference = this.calculateTimezoneOffset(
+        dto.timezone,
+        targetTimezone
+      );
+
       // DST warnings
       const dstWarnings = [];
       if (considerDST) {
         const originalDST = this.isDSTActive(original.startTime, dto.timezone);
-        const convertedDST = this.isDSTActive(converted.startTime, targetTimezone);
-        
+        const convertedDST = this.isDSTActive(
+          converted.startTime,
+          targetTimezone
+        );
+
         if (originalDST !== convertedDST) {
           dstWarnings.push('DST differences detected between timezones');
         }
-        
-        if (this.isDSTTransitionPeriod(original.startTime, original.endTime, dto.timezone)) {
+
+        if (
+          this.isDSTTransitionPeriod(
+            original.startTime,
+            original.endTime,
+            dto.timezone
+          )
+        ) {
           dstWarnings.push('Period spans DST transition in source timezone');
         }
-        
-        if (this.isDSTTransitionPeriod(converted.startTime, converted.endTime, targetTimezone)) {
+
+        if (
+          this.isDSTTransitionPeriod(
+            converted.startTime,
+            converted.endTime,
+            targetTimezone
+          )
+        ) {
           dstWarnings.push('Period spans DST transition in target timezone');
         }
       }
@@ -430,25 +540,29 @@ export class TimePeriodService {
           timezone: dto.timezone,
           startTime: original.startTime,
           endTime: original.endTime,
-          isDST: this.isDSTActive(original.startTime, dto.timezone)
+          isDST: this.isDSTActive(original.startTime, dto.timezone),
         },
         converted: {
           timezone: targetTimezone,
           startTime: converted.startTime,
           endTime: converted.endTime,
-          isDST: this.isDSTActive(converted.startTime, targetTimezone)
+          isDST: this.isDSTActive(converted.startTime, targetTimezone),
         },
         timeDifference,
-        dstWarnings
+        dstWarnings,
       };
     } catch (error) {
-      throw new Error(`Failed to handle timezone conversion: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to handle timezone conversion: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
-  private findScheduleConflicts(periods: TimePeriod[]): Array<{ period1: TimePeriod; period2: TimePeriod }> {
+  private findScheduleConflicts(
+    periods: TimePeriod[]
+  ): Array<{ period1: TimePeriod; period2: TimePeriod }> {
     const conflicts = [];
-    
+
     for (let i = 0; i < periods.length; i++) {
       for (let j = i + 1; j < periods.length; j++) {
         if (periods[i].conflictsWith(periods[j])) {
@@ -456,25 +570,28 @@ export class TimePeriodService {
         }
       }
     }
-    
+
     return conflicts;
   }
 
   private findScheduleGaps(
-    periods: TimePeriod[], 
+    periods: TimePeriod[],
     workingHours: { start: string; end: string }
   ): TimePeriod[] {
     // Simple implementation - find gaps between consecutive periods
-    const sorted = periods.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+    const sorted = periods.sort(
+      (a, b) => a.startTime.getTime() - b.startTime.getTime()
+    );
     const gaps: TimePeriod[] = [];
-    
+
     for (let i = 0; i < sorted.length - 1; i++) {
       const gap = sorted[i].gap(sorted[i + 1]);
-      if (gap && gap.getDurationInMinutes() > 30) { // Only consider gaps > 30 minutes
+      if (gap && gap.getDurationInMinutes() > 30) {
+        // Only consider gaps > 30 minutes
         gaps.push(gap);
       }
     }
-    
+
     return gaps;
   }
 
@@ -486,40 +603,51 @@ export class TimePeriodService {
   ): TimePeriod[] {
     // Simple conflict resolution - shift conflicting periods
     const resolved = [...originalPeriods];
-    
+
     conflicts.forEach(conflict => {
       const index1 = resolved.indexOf(conflict.period1);
       const index2 = resolved.indexOf(conflict.period2);
-      
+
       if (index1 !== -1 && index2 !== -1) {
         // Shift the second period to end after the first
         const shiftedPeriod = TimePeriod.create(
           conflict.period1.endTime,
-          new Date(conflict.period1.endTime.getTime() + conflict.period2.getDurationInMinutes() * 60000),
+          new Date(
+            conflict.period1.endTime.getTime() +
+              conflict.period2.getDurationInMinutes() * 60000
+          ),
           conflict.period2.timezone
         );
         resolved[index2] = shiftedPeriod;
       }
     });
-    
+
     return resolved;
   }
 
-  private calculateUtilizationImprovement(original: TimePeriod[], optimized: TimePeriod[]): number {
+  private calculateUtilizationImprovement(
+    original: TimePeriod[],
+    optimized: TimePeriod[]
+  ): number {
     const originalEfficiency = this.calculateScheduleEfficiency(original);
     const optimizedEfficiency = this.calculateScheduleEfficiency(optimized);
-    
+
     return Math.round((optimizedEfficiency - originalEfficiency) * 100) / 100;
   }
 
   private calculateScheduleEfficiency(periods: TimePeriod[]): number {
     if (periods.length === 0) return 0;
-    
-    const totalDuration = periods.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
-    const timeSpan = periods.length > 1 
-      ? periods[periods.length - 1].endTime.getTime() - periods[0].startTime.getTime()
-      : periods[0].getDurationInMinutes() * 60000;
-    
+
+    const totalDuration = periods.reduce(
+      (sum, p) => sum + p.getDurationInMinutes(),
+      0
+    );
+    const timeSpan =
+      periods.length > 1
+        ? periods[periods.length - 1].endTime.getTime() -
+          periods[0].startTime.getTime()
+        : periods[0].getDurationInMinutes() * 60000;
+
     return (totalDuration * 60000) / timeSpan;
   }
 
@@ -529,36 +657,45 @@ export class TimePeriodService {
     conflictsResolved: number
   ): string[] {
     const recommendations = [];
-    
+
     if (conflictsResolved > 0) {
-      recommendations.push(`Resolved ${conflictsResolved} scheduling conflicts`);
+      recommendations.push(
+        `Resolved ${conflictsResolved} scheduling conflicts`
+      );
     }
-    
-    const originalDuration = original.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
-    const optimizedDuration = optimized.reduce((sum, p) => sum + p.getDurationInMinutes(), 0);
-    
+
+    const originalDuration = original.reduce(
+      (sum, p) => sum + p.getDurationInMinutes(),
+      0
+    );
+    const optimizedDuration = optimized.reduce(
+      (sum, p) => sum + p.getDurationInMinutes(),
+      0
+    );
+
     if (optimizedDuration < originalDuration) {
       const saved = originalDuration - optimizedDuration;
       recommendations.push(`Saved ${saved} minutes through optimization`);
     }
-    
+
     if (optimized.length < original.length) {
-      recommendations.push(`Consolidated ${original.length - optimized.length} time periods`);
+      recommendations.push(
+        `Consolidated ${original.length - optimized.length} time periods`
+      );
     }
-    
+
     return recommendations;
   }
 
   private determineSeverity(
-    overlapMinutes: number, 
-    period1: TimePeriod, 
+    overlapMinutes: number,
+    period1: TimePeriod,
     period2: TimePeriod
   ): 'low' | 'medium' | 'high' | 'critical' {
-    const overlapPercentage = overlapMinutes / Math.min(
-      period1.getDurationInMinutes(),
-      period2.getDurationInMinutes()
-    );
-    
+    const overlapPercentage =
+      overlapMinutes /
+      Math.min(period1.getDurationInMinutes(), period2.getDurationInMinutes());
+
     if (overlapPercentage >= 0.8) return 'critical';
     if (overlapPercentage >= 0.5) return 'high';
     if (overlapPercentage >= 0.25) return 'medium';
@@ -571,7 +708,7 @@ export class TimePeriodService {
     severity: string
   ): string[] {
     const strategies = [];
-    
+
     switch (severity) {
       case 'critical':
         strategies.push('Reschedule one period to a different day');
@@ -589,19 +726,23 @@ export class TimePeriodService {
         strategies.push('Minor timing adjustments');
         break;
     }
-    
+
     return strategies;
   }
 
   private assessResolutionComplexity(
     conflicts: Array<{ severity: string }>
   ): 'simple' | 'moderate' | 'complex' | 'very-complex' {
-    const criticalCount = conflicts.filter(c => c.severity === 'critical').length;
+    const criticalCount = conflicts.filter(
+      c => c.severity === 'critical'
+    ).length;
     const highCount = conflicts.filter(c => c.severity === 'high').length;
-    
+
     if (criticalCount > 3 || conflicts.length > 10) return 'very-complex';
-    if (criticalCount > 1 || highCount > 3 || conflicts.length > 5) return 'complex';
-    if (criticalCount > 0 || highCount > 1 || conflicts.length > 2) return 'moderate';
+    if (criticalCount > 1 || highCount > 3 || conflicts.length > 5)
+      return 'complex';
+    if (criticalCount > 0 || highCount > 1 || conflicts.length > 2)
+      return 'moderate';
     return 'simple';
   }
 
@@ -631,45 +772,59 @@ export class TimePeriodService {
     });
   }
 
-  private calculateTimezoneOffset(sourceTimezone: string, targetTimezone: string): number {
+  private calculateTimezoneOffset(
+    sourceTimezone: string,
+    targetTimezone: string
+  ): number {
     // Simplified timezone offset calculation
     const timezoneOffsets: Record<string, number> = {
-      'UTC': 0,
+      UTC: 0,
       'America/New_York': -5,
       'America/Chicago': -6,
       'America/Denver': -7,
       'America/Los_Angeles': -8,
       'Europe/London': 0,
       'Europe/Paris': 1,
-      'Asia/Tokyo': 9
+      'Asia/Tokyo': 9,
     };
-    
+
     const sourceOffset = timezoneOffsets[sourceTimezone] || 0;
     const targetOffset = timezoneOffsets[targetTimezone] || 0;
-    
+
     return targetOffset - sourceOffset;
   }
 
   private isDSTActive(date: Date, timezone: string): boolean {
     // Simplified DST detection - in production use proper timezone library
     const month = date.getMonth();
-    const dstTimezones = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles'];
-    
+    const dstTimezones = [
+      'America/New_York',
+      'America/Chicago',
+      'America/Denver',
+      'America/Los_Angeles',
+    ];
+
     if (!dstTimezones.includes(timezone)) return false;
-    
+
     // DST typically runs March to November in US
     return month >= 2 && month <= 10;
   }
 
-  private isDSTTransitionPeriod(startDate: Date, endDate: Date, timezone: string): boolean {
+  private isDSTTransitionPeriod(
+    startDate: Date,
+    endDate: Date,
+    timezone: string
+  ): boolean {
     // Check if period spans DST transition dates
     const march = startDate.getMonth() <= 2 && endDate.getMonth() >= 2;
     const november = startDate.getMonth() <= 10 && endDate.getMonth() >= 10;
-    
+
     return (march || november) && timezone.startsWith('America/');
   }
 
-  private mapTimePeriodToResponse(period: TimePeriod): TimePeriodResponse['data'] {
+  private mapTimePeriodToResponse(
+    period: TimePeriod
+  ): TimePeriodResponse['data'] {
     return {
       startTime: period.startTime,
       endTime: period.endTime,
@@ -678,7 +833,9 @@ export class TimePeriodService {
       humanReadable: period.toHumanReadable(),
       recurrence: period.recurrence,
       isBusinessHours: period.isWithinBusinessHours(),
-      nextOccurrence: period.recurrence ? period.getNextOccurrence() : undefined
+      nextOccurrence: period.recurrence
+        ? period.getNextOccurrence()
+        : undefined,
     };
   }
 }
@@ -690,19 +847,24 @@ export class TimePeriodService {
 // color.service.ts
 import { Injectable } from '@nestjs/common';
 import { Color } from '@vytches-ddd/value-objects';
-import { 
-  CreateColorDto, 
+import {
+  CreateColorDto,
   ColorResponse,
   ColorPaletteDto,
-  ColorAnalysisDto
+  ColorAnalysisDto,
 } from './types'; // From your application
 
 @Injectable()
 export class ColorService {
   private readonly standardColorNames = new Map([
-    ['red', '#FF0000'], ['green', '#00FF00'], ['blue', '#0000FF'],
-    ['white', '#FFFFFF'], ['black', '#000000'], ['yellow', '#FFFF00'],
-    ['cyan', '#00FFFF'], ['magenta', '#FF00FF']
+    ['red', '#FF0000'],
+    ['green', '#00FF00'],
+    ['blue', '#0000FF'],
+    ['white', '#FFFFFF'],
+    ['black', '#000000'],
+    ['yellow', '#FFFF00'],
+    ['cyan', '#00FFFF'],
+    ['magenta', '#FF00FF'],
   ]);
 
   // ✅ FOCUS: Advanced color creation and validation
@@ -743,14 +905,16 @@ export class ColorService {
           luminance: color.getLuminance(),
           isLight: color.isLight(),
           isDark: color.isDark(),
-          contrastRatio: dto.backgroundHex ? 
-            color.getContrastRatio(Color.fromHex(dto.backgroundHex)) : undefined
-        }
+          contrastRatio: dto.backgroundHex
+            ? color.getContrastRatio(Color.fromHex(dto.backgroundHex))
+            : undefined,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create color'
+        error:
+          error instanceof Error ? error.message : 'Failed to create color',
       };
     }
   }
@@ -772,7 +936,7 @@ export class ColorService {
   } {
     try {
       const baseColor = Color.fromHex(dto.baseColorHex);
-      
+
       // Generate color harmony schemes
       const complementary = baseColor.getComplementary();
       const triadic = baseColor.getTriadic();
@@ -781,20 +945,22 @@ export class ColorService {
       const tetradic = baseColor.getTetradic();
 
       // Find accessible color combinations
-      const backgroundColor = dto.backgroundHex ? Color.fromHex(dto.backgroundHex) : Color.fromHex('#FFFFFF');
+      const backgroundColor = dto.backgroundHex
+        ? Color.fromHex(dto.backgroundHex)
+        : Color.fromHex('#FFFFFF');
       const allColors = [
         complementary,
         ...triadic,
         ...analogous,
         ...monochromatic,
-        ...tetradic
+        ...tetradic,
       ];
 
-      const wcagAACompliant = allColors.filter(color => 
+      const wcagAACompliant = allColors.filter(color =>
         color.meetsWCAGContrastAA(backgroundColor, false)
       );
 
-      const wcagAAACompliant = allColors.filter(color => 
+      const wcagAAACompliant = allColors.filter(color =>
         color.meetsWCAGContrastAAA(backgroundColor, false)
       );
 
@@ -804,16 +970,24 @@ export class ColorService {
           complementary: this.mapColorToResponse(complementary),
           triadic: triadic.map(color => this.mapColorToResponse(color)),
           analogous: analogous.map(color => this.mapColorToResponse(color)),
-          monochromatic: monochromatic.map(color => this.mapColorToResponse(color)),
-          tetradic: tetradic.map(color => this.mapColorToResponse(color))
+          monochromatic: monochromatic.map(color =>
+            this.mapColorToResponse(color)
+          ),
+          tetradic: tetradic.map(color => this.mapColorToResponse(color)),
         },
         accessibility: {
-          wcagAACompliant: wcagAACompliant.map(color => this.mapColorToResponse(color)),
-          wcagAAACompliant: wcagAAACompliant.map(color => this.mapColorToResponse(color))
-        }
+          wcagAACompliant: wcagAACompliant.map(color =>
+            this.mapColorToResponse(color)
+          ),
+          wcagAAACompliant: wcagAAACompliant.map(color =>
+            this.mapColorToResponse(color)
+          ),
+        },
       };
     } catch (error) {
-      throw new Error(`Failed to generate palette: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate palette: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -865,42 +1039,47 @@ export class ColorService {
       const lightnessLevel = this.analyzeLightnessLevel(hsl.lightness);
 
       // Accessibility analysis
-      const backgroundContrasts = dto.backgroundColors?.map(bgHex => {
-        const bgColor = Color.fromHex(bgHex);
-        const contrastRatio = color.getContrastRatio(bgColor);
-        
-        return {
-          backgroundColor: bgHex,
-          contrastRatio: Math.round(contrastRatio * 100) / 100,
-          wcagAA: {
-            normal: color.meetsWCAGContrastAA(bgColor, false),
-            large: color.meetsWCAGContrastAA(bgColor, true)
-          },
-          wcagAAA: {
-            normal: color.meetsWCAGContrastAAA(bgColor, false),
-            large: color.meetsWCAGContrastAAA(bgColor, true)
-          }
-        };
-      }) || [];
+      const backgroundContrasts =
+        dto.backgroundColors?.map(bgHex => {
+          const bgColor = Color.fromHex(bgHex);
+          const contrastRatio = color.getContrastRatio(bgColor);
+
+          return {
+            backgroundColor: bgHex,
+            contrastRatio: Math.round(contrastRatio * 100) / 100,
+            wcagAA: {
+              normal: color.meetsWCAGContrastAA(bgColor, false),
+              large: color.meetsWCAGContrastAA(bgColor, true),
+            },
+            wcagAAA: {
+              normal: color.meetsWCAGContrastAAA(bgColor, false),
+              large: color.meetsWCAGContrastAAA(bgColor, true),
+            },
+          };
+        }) || [];
 
       // Color blindness simulation
       const colorBlindness = {
         protanopia: {
           visible: this.isVisibleToColorBlind(color, 'protanopia'),
-          alternative: this.suggestColorBlindAlternative(color, 'protanopia')
+          alternative: this.suggestColorBlindAlternative(color, 'protanopia'),
         },
         deuteranopia: {
           visible: this.isVisibleToColorBlind(color, 'deuteranopia'),
-          alternative: this.suggestColorBlindAlternative(color, 'deuteranopia')
+          alternative: this.suggestColorBlindAlternative(color, 'deuteranopia'),
         },
         tritanopia: {
           visible: this.isVisibleToColorBlind(color, 'tritanopia'),
-          alternative: this.suggestColorBlindAlternative(color, 'tritanopia')
-        }
+          alternative: this.suggestColorBlindAlternative(color, 'tritanopia'),
+        },
       };
 
       // Color psychology analysis
-      const psychology = this.analyzeColorPsychology(hsl.hue, saturationLevel, lightnessLevel);
+      const psychology = this.analyzeColorPsychology(
+        hsl.hue,
+        saturationLevel,
+        lightnessLevel
+      );
 
       // Generate recommendations
       const recommendations = this.generateColorRecommendations(
@@ -919,39 +1098,49 @@ export class ColorService {
           luminance: color.getLuminance(),
           temperature,
           saturationLevel,
-          lightnessLevel
+          lightnessLevel,
         },
         accessibility: {
           backgroundContrasts,
-          colorBlindness
+          colorBlindness,
         },
         psychology,
-        recommendations
+        recommendations,
       };
     } catch (error) {
-      throw new Error(`Failed to analyze color: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to analyze color: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
-  private parseRGBString(rgb: string): { red: number; green: number; blue: number } {
+  private parseRGBString(rgb: string): {
+    red: number;
+    green: number;
+    blue: number;
+  } {
     const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (!match) throw new Error('Invalid RGB format');
-    
+
     return {
       red: parseInt(match[1]),
       green: parseInt(match[2]),
-      blue: parseInt(match[3])
+      blue: parseInt(match[3]),
     };
   }
 
-  private parseHSLString(hsl: string): { hue: number; saturation: number; lightness: number } {
+  private parseHSLString(hsl: string): {
+    hue: number;
+    saturation: number;
+    lightness: number;
+  } {
     const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     if (!match) throw new Error('Invalid HSL format');
-    
+
     return {
       hue: parseInt(match[1]),
       saturation: parseInt(match[2]),
-      lightness: parseInt(match[3])
+      lightness: parseInt(match[3]),
     };
   }
 
@@ -961,21 +1150,25 @@ export class ColorService {
     return 'neutral';
   }
 
-  private analyzeSaturationLevel(saturation: number): 'muted' | 'moderate' | 'vibrant' {
+  private analyzeSaturationLevel(
+    saturation: number
+  ): 'muted' | 'moderate' | 'vibrant' {
     if (saturation < 30) return 'muted';
     if (saturation < 70) return 'moderate';
     return 'vibrant';
   }
 
-  private analyzeLightnessLevel(lightness: number): 'dark' | 'medium' | 'light' {
+  private analyzeLightnessLevel(
+    lightness: number
+  ): 'dark' | 'medium' | 'light' {
     if (lightness < 30) return 'dark';
     if (lightness < 70) return 'medium';
     return 'light';
   }
 
   private analyzeColorPsychology(
-    hue: number, 
-    saturationLevel: string, 
+    hue: number,
+    saturationLevel: string,
     lightnessLevel: string
   ): {
     emotions: string[];
@@ -985,17 +1178,17 @@ export class ColorService {
   } {
     // Simplified color psychology mapping
     const hueBasedPsychology = this.getHueBasedPsychology(hue);
-    
+
     // Modify based on saturation and lightness
     let emotions = [...hueBasedPsychology.emotions];
     let associations = [...hueBasedPsychology.associations];
-    
+
     if (saturationLevel === 'muted') {
       emotions.push('calm', 'sophisticated');
     } else if (saturationLevel === 'vibrant') {
       emotions.push('energetic', 'attention-grabbing');
     }
-    
+
     if (lightnessLevel === 'light') {
       emotions.push('gentle', 'airy');
     } else if (lightnessLevel === 'dark') {
@@ -1006,7 +1199,7 @@ export class ColorService {
       emotions,
       associations,
       culturalMeanings: hueBasedPsychology.culturalMeanings,
-      brandPersonality: hueBasedPsychology.brandPersonality
+      brandPersonality: hueBasedPsychology.brandPersonality,
     };
   }
 
@@ -1016,33 +1209,37 @@ export class ColorService {
     culturalMeanings: string[];
     brandPersonality: string[];
   } {
-    if (hue >= 0 && hue < 60) { // Red-Orange
+    if (hue >= 0 && hue < 60) {
+      // Red-Orange
       return {
         emotions: ['passionate', 'energetic', 'urgent'],
         associations: ['fire', 'love', 'danger'],
         culturalMeanings: ['luck (China)', 'celebration', 'warning'],
-        brandPersonality: ['bold', 'exciting', 'youthful']
+        brandPersonality: ['bold', 'exciting', 'youthful'],
       };
-    } else if (hue >= 60 && hue < 120) { // Yellow-Green
+    } else if (hue >= 60 && hue < 120) {
+      // Yellow-Green
       return {
         emotions: ['happy', 'optimistic', 'natural'],
         associations: ['sun', 'nature', 'growth'],
         culturalMeanings: ['prosperity', 'harmony', 'renewal'],
-        brandPersonality: ['friendly', 'organic', 'innovative']
+        brandPersonality: ['friendly', 'organic', 'innovative'],
       };
-    } else if (hue >= 120 && hue < 240) { // Blue-Cyan
+    } else if (hue >= 120 && hue < 240) {
+      // Blue-Cyan
       return {
         emotions: ['calm', 'trustworthy', 'professional'],
         associations: ['sky', 'ocean', 'technology'],
         culturalMeanings: ['stability', 'loyalty', 'wisdom'],
-        brandPersonality: ['reliable', 'corporate', 'secure']
+        brandPersonality: ['reliable', 'corporate', 'secure'],
       };
-    } else { // Purple-Magenta
+    } else {
+      // Purple-Magenta
       return {
         emotions: ['creative', 'luxurious', 'spiritual'],
         associations: ['royalty', 'mystery', 'magic'],
         culturalMeanings: ['nobility', 'creativity', 'transformation'],
-        brandPersonality: ['premium', 'artistic', 'innovative']
+        brandPersonality: ['premium', 'artistic', 'innovative'],
       };
     }
   }
@@ -1086,7 +1283,9 @@ export class ColorService {
     }
 
     // Accessibility improvements
-    const poorContrasts = backgroundContrasts.filter(bg => bg.contrastRatio < 4.5);
+    const poorContrasts = backgroundContrasts.filter(
+      bg => bg.contrastRatio < 4.5
+    );
     if (poorContrasts.length > 0) {
       suggestions.push('Improve contrast ratios for better accessibility');
     }
@@ -1095,14 +1294,14 @@ export class ColorService {
       bestUseCase,
       pairing,
       avoidWith,
-      improvementSuggestions: suggestions
+      improvementSuggestions: suggestions,
     };
   }
 
   private isVisibleToColorBlind(color: Color, type: string): boolean {
     // Simplified color blindness check
     const rgb = color.toRGB();
-    
+
     switch (type) {
       case 'protanopia': // Red-blind
         return rgb.green > 100 || rgb.blue > 100;
@@ -1118,7 +1317,7 @@ export class ColorService {
   private suggestColorBlindAlternative(color: Color, type: string): string {
     // Simple alternative suggestion
     const hsl = color.toHSL();
-    
+
     switch (type) {
       case 'protanopia':
         return Color.fromHSL(200, hsl.saturation, hsl.lightness).toHex();
@@ -1138,7 +1337,7 @@ export class ColorService {
       hsl: color.toHSL(),
       luminance: color.getLuminance(),
       isLight: color.isLight(),
-      isDark: color.isDark()
+      isDark: color.isDark(),
     };
   }
 }
@@ -1162,16 +1361,22 @@ export class AdvancedValueObjectsModule {}
 
 ## Key Points
 
-- **Advanced Business Logic**: Complex scheduling, optimization, and conflict resolution
-- **Sophisticated Analysis**: Deep color analysis with psychology and accessibility insights
-- **Performance Optimization**: Resource allocation and schedule optimization algorithms
-- **Comprehensive Validation**: Multi-layered validation with business rule enforcement
+- **Advanced Business Logic**: Complex scheduling, optimization, and conflict
+  resolution
+- **Sophisticated Analysis**: Deep color analysis with psychology and
+  accessibility insights
+- **Performance Optimization**: Resource allocation and schedule optimization
+  algorithms
+- **Comprehensive Validation**: Multi-layered validation with business rule
+  enforcement
 - **Rich Domain Operations**: Advanced mathematical and business operations
-- **Enterprise Features**: Timezone handling, DST awareness, and cultural considerations
+- **Enterprise Features**: Timezone handling, DST awareness, and cultural
+  considerations
 
 ## Benefits
 
-- **Complex Problem Solving**: Handles sophisticated business scenarios and edge cases
+- **Complex Problem Solving**: Handles sophisticated business scenarios and edge
+  cases
 - **Rich Analytics**: Provides deep insights into domain data and patterns
 - **Business Intelligence**: Supports data-driven decision making
 - **Scalable Operations**: Efficient algorithms for resource optimization

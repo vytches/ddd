@@ -77,12 +77,12 @@ describe('Domain Services DI Integration', () => {
     container.register('testIntegrationService', TestIntegrationService, {
       lifetime: ServiceLifetime.Singleton,
     });
-    
+
     // For context-specific service, register in the appropriate context
     contextContainer.register('contextSpecificService', ContextSpecificService, {
       lifetime: ServiceLifetime.Singleton,
     });
-    
+
     // Also register in global container since the test expects to resolve without context
     container.register('contextSpecificService', ContextSpecificService, {
       lifetime: ServiceLifetime.Singleton,
@@ -102,7 +102,10 @@ describe('Domain Services DI Integration', () => {
     });
 
     it('should resolve services from context-specific containers', () => {
-      const service = VytchesDDD.resolve<ContextSpecificService>('contextSpecificService', 'TestContext');
+      const service = VytchesDDD.resolve<ContextSpecificService>(
+        'contextSpecificService',
+        'TestContext'
+      );
 
       expect(service).toBeInstanceOf(ContextSpecificService);
       expect(service.processWithDependency()).toBe('processed-with-context-dependency');
@@ -161,12 +164,10 @@ describe('Domain Services DI Integration', () => {
     it('should discover correct number of DI-enhanced services', async () => {
       // const plugin = new DomainServiceDiscoveryPlugin();
       // const handlers = await plugin.discoverHandlers();
-
       // // Should find TestIntegrationService and ContextSpecificService
       // // but NOT LegacyIntegrationService (no DI options)
       // const domainServiceHandlers = handlers.filter((h: any) => h.type === 'domain-service');
       // expect(domainServiceHandlers).toHaveLength(2);
-
       // const serviceIds = domainServiceHandlers.map((h: any) => h.metadata.serviceId);
       // expect(serviceIds).toContain('testIntegrationService');
       // expect(serviceIds).toContain('contextSpecificService');
@@ -176,7 +177,6 @@ describe('Domain Services DI Integration', () => {
     it('should include correct metadata in discovered handlers', async () => {
       // const plugin = new DomainServiceDiscoveryPlugin();
       // const handlers = await plugin.discoverHandlers();
-
       // const testServiceHandler = handlers.find(
       //   (h: any) => h.metadata.serviceId === 'testIntegrationService'
       // );

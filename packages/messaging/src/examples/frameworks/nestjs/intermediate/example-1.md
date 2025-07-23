@@ -8,11 +8,15 @@
 
 ## Description
 
-This example demonstrates advanced integration of saga orchestration with NestJS using @vytches-ddd/di service locator pattern, showcasing the bridge pattern for enterprise-grade dependency management.
+This example demonstrates advanced integration of saga orchestration with NestJS
+using @vytches-ddd/di service locator pattern, showcasing the bridge pattern for
+enterprise-grade dependency management.
 
 ## Business Context
 
-A travel booking platform orchestrates complex multi-service transactions (flights, hotels, cars) using sagas with VytchesDDD DI for enterprise-grade service management and cross-cutting concerns.
+A travel booking platform orchestrates complex multi-service transactions
+(flights, hotels, cars) using sagas with VytchesDDD DI for enterprise-grade
+service management and cross-cutting concerns.
 
 ## Code Example
 
@@ -27,7 +31,12 @@ import { TravelBookingData } from './types'; // From your application
   serviceId: 'travelBookingSaga',
   lifetime: ServiceLifetime.Transient,
   context: 'TravelBooking',
-  dependencies: ['flightService', 'hotelService', 'carService', 'paymentService']
+  dependencies: [
+    'flightService',
+    'hotelService',
+    'carService',
+    'paymentService',
+  ],
 })
 export class TravelBookingSagaService extends BaseSaga {
   constructor() {
@@ -38,48 +47,54 @@ export class TravelBookingSagaService extends BaseSaga {
   protected defineSteps(): void {
     this.addStep({
       name: 'ReserveFlight',
-      handler: async (ctx) => {
-        const flightService = VytchesDDD.resolve<IFlightService>('flightService');
-        const reservation = await flightService.reserve(ctx.sagaData.flightData);
-        
+      handler: async ctx => {
+        const flightService =
+          VytchesDDD.resolve<IFlightService>('flightService');
+        const reservation = await flightService.reserve(
+          ctx.sagaData.flightData
+        );
+
         return {
           success: true,
-          updatedData: { 
-            ...ctx.sagaData, 
-            flightReservationId: reservation.id 
+          updatedData: {
+            ...ctx.sagaData,
+            flightReservationId: reservation.id,
           },
-          events: [{ 
-            eventType: 'FlightReserved', 
-            payload: reservation 
-          }]
+          events: [
+            {
+              eventType: 'FlightReserved',
+              payload: reservation,
+            },
+          ],
         };
       },
-      compensator: async (ctx) => {
-        const flightService = VytchesDDD.resolve<IFlightService>('flightService');
+      compensator: async ctx => {
+        const flightService =
+          VytchesDDD.resolve<IFlightService>('flightService');
         await flightService.cancel(ctx.sagaData.flightReservationId);
         return { success: true };
-      }
+      },
     });
 
     this.addStep({
       name: 'ReserveHotel',
-      handler: async (ctx) => {
+      handler: async ctx => {
         const hotelService = VytchesDDD.resolve<IHotelService>('hotelService');
         const reservation = await hotelService.reserve(ctx.sagaData.hotelData);
-        
+
         return {
           success: true,
-          updatedData: { 
-            ...ctx.sagaData, 
-            hotelReservationId: reservation.id 
-          }
+          updatedData: {
+            ...ctx.sagaData,
+            hotelReservationId: reservation.id,
+          },
         };
       },
-      compensator: async (ctx) => {
+      compensator: async ctx => {
         const hotelService = VytchesDDD.resolve<IHotelService>('hotelService');
         await hotelService.cancel(ctx.sagaData.hotelReservationId);
         return { success: true };
-      }
+      },
     });
   }
 }
@@ -96,23 +111,26 @@ export class TravelBookingService {
 
   constructor() {
     // ⭐ Bridge Pattern: Get VytchesDDD managed instance
-    this.sagaService = VytchesDDD.resolve<TravelBookingSagaService>('travelBookingSaga');
+    this.sagaService =
+      VytchesDDD.resolve<TravelBookingSagaService>('travelBookingSaga');
   }
 
-  async bookTravel(request: TravelBookingRequest): Promise<Result<BookingConfirmation, Error>> {
+  async bookTravel(
+    request: TravelBookingRequest
+  ): Promise<Result<BookingConfirmation, Error>> {
     try {
       // Delegate to VytchesDDD managed saga service
       const result = await this.sagaService.executeSaga({
         correlationId: request.id,
         sagaData: request,
-        timeout: 300000
+        timeout: 300000,
       });
 
       if (result.success) {
         return Result.success({
           bookingId: result.sagaId,
           status: 'completed',
-          confirmations: result.completedSteps
+          confirmations: result.completedSteps,
         });
       }
 
@@ -130,24 +148,22 @@ import { BookTravelDto } from './dto'; // From your application
 
 @Controller('travel')
 export class TravelBookingController {
-  constructor(
-    private readonly bookingService: TravelBookingService
-  ) {}
+  constructor(private readonly bookingService: TravelBookingService) {}
 
   @Post('book')
   async bookTravel(@Body() dto: BookTravelDto) {
     const result = await this.bookingService.bookTravel(dto);
-    
+
     if (result.isSuccess()) {
       return {
         success: true,
-        booking: result.getValue()
+        booking: result.getValue(),
       };
     }
 
     return {
       success: false,
-      error: result.getError().message
+      error: result.getError().message,
     };
   }
 }
@@ -158,7 +174,7 @@ import { Resilience } from '@vytches-ddd/resilience';
 
 @DomainService('flightService', {
   lifetime: ServiceLifetime.Singleton,
-  timeout: 30000
+  timeout: 30000,
 })
 export class FlightService implements IFlightService {
   @Resilience({ circuitBreaker: true, retry: { maxAttempts: 3 } })
@@ -174,7 +190,7 @@ export class FlightService implements IFlightService {
 
 @DomainService('hotelService', {
   lifetime: ServiceLifetime.Singleton,
-  dependencies: ['hotelApiClient']
+  dependencies: ['hotelApiClient'],
 })
 export class HotelService implements IHotelService {
   async reserve(hotelData: HotelData): Promise<HotelReservation> {
@@ -196,7 +212,7 @@ import { TravelBookingService } from './travel-booking.service';
 
 @Module({
   controllers: [TravelBookingController],
-  providers: [TravelBookingService]
+  providers: [TravelBookingService],
 })
 export class TravelModule implements OnModuleInit {
   async onModuleInit() {
@@ -208,9 +224,11 @@ export class TravelModule implements OnModuleInit {
 
 ## Key Features
 
-- **VytchesDDD DI Integration**: Use @DomainService decorators for enterprise service management
+- **VytchesDDD DI Integration**: Use @DomainService decorators for enterprise
+  service management
 - **Bridge Pattern**: NestJS services delegate to VytchesDDD managed instances
-- **Cross-Cutting Concerns**: Automatic timeout, resilience, and dependency management
+- **Cross-Cutting Concerns**: Automatic timeout, resilience, and dependency
+  management
 - **Service Locator**: Resolve dependencies through VytchesDDD.resolve()
 - **Enterprise Architecture**: Single source of truth for business services
 

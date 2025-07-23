@@ -1,38 +1,42 @@
 # Color Value Object - Advanced Example
 
-**Version**: 2025-01-21
-**Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced
-**Domain**: Design Systems & Graphics
-**Patterns**: Color Representation, Format Conversion, Color Theory
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Complexity**: Advanced **Domain**: Design Systems & Graphics **Patterns**:
+Color Representation, Format Conversion, Color Theory **Dependencies**:
+@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
 
 ## Description
 
-This example demonstrates creating a **Color** value object that handles multiple color formats (RGB, HSL, HSV, HEX), color theory calculations, and accessibility features. Shows advanced patterns for design system value objects with format conversions.
+This example demonstrates creating a **Color** value object that handles
+multiple color formats (RGB, HSL, HSV, HEX), color theory calculations, and
+accessibility features. Shows advanced patterns for design system value objects
+with format conversions.
 
 ## Business Context
 
-Color is essential for design systems, theming, accessibility compliance, and brand management. It provides color format conversions, contrast calculations, and palette generation. Critical for UI components, design tokens, and accessibility validation.
+Color is essential for design systems, theming, accessibility compliance, and
+brand management. It provides color format conversions, contrast calculations,
+and palette generation. Critical for UI components, design tokens, and
+accessibility validation.
 
 ## Code Example
 
 ```typescript
 // color.ts
 import { ValueObject } from '@vytches-ddd/value-objects';
-import { 
-  ColorData, 
+import {
+  ColorData,
   RGBColor,
   HSLColor,
   HSVColor,
   ColorFormat,
-  ValueObjectValidationResult 
+  ValueObjectValidationResult,
 } from './types';
-import { 
-  validateRequired, 
+import {
+  validateRequired,
   createSuccessResult,
   createFailureResult,
-  combineValidationResults
+  combineValidationResults,
 } from '../shared';
 
 export class Color extends ValueObject<ColorData> {
@@ -41,12 +45,17 @@ export class Color extends ValueObject<ColorData> {
   }
 
   // ✅ FOCUS: Multiple factory methods for different formats
-  static fromRGB(red: number, green: number, blue: number, alpha: number = 1): Color {
+  static fromRGB(
+    red: number,
+    green: number,
+    blue: number,
+    alpha: number = 1
+  ): Color {
     const data: ColorData = {
       red: Math.round(Math.max(0, Math.min(255, red))),
       green: Math.round(Math.max(0, Math.min(255, green))),
       blue: Math.round(Math.max(0, Math.min(255, blue))),
-      alpha: Math.max(0, Math.min(1, alpha))
+      alpha: Math.max(0, Math.min(1, alpha)),
     };
 
     const validation = Color.validate(data);
@@ -59,7 +68,7 @@ export class Color extends ValueObject<ColorData> {
 
   static fromHex(hex: string, alpha: number = 1): Color {
     const cleanHex = hex.replace('#', '').toUpperCase();
-    
+
     if (!/^[0-9A-F]{6}$/.test(cleanHex)) {
       throw new Error(`Invalid hex color format: ${hex}`);
     }
@@ -71,7 +80,12 @@ export class Color extends ValueObject<ColorData> {
     return Color.fromRGB(red, green, blue, alpha);
   }
 
-  static fromHSL(hue: number, saturation: number, lightness: number, alpha: number = 1): Color {
+  static fromHSL(
+    hue: number,
+    saturation: number,
+    lightness: number,
+    alpha: number = 1
+  ): Color {
     // Normalize values
     const h = ((hue % 360) + 360) % 360; // 0-359
     const s = Math.max(0, Math.min(100, saturation)) / 100; // 0-1
@@ -79,10 +93,12 @@ export class Color extends ValueObject<ColorData> {
 
     // Convert HSL to RGB
     const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     const m = l - c / 2;
 
-    let r = 0, g = 0, b = 0;
+    let r = 0,
+      g = 0,
+      b = 0;
 
     if (0 <= h && h < 60) {
       [r, g, b] = [c, x, 0];
@@ -109,18 +125,18 @@ export class Color extends ValueObject<ColorData> {
   // ✅ FOCUS: Named color factory
   static fromName(colorName: string): Color {
     const namedColors: Record<string, string> = {
-      'red': '#FF0000',
-      'green': '#008000',
-      'blue': '#0000FF',
-      'white': '#FFFFFF',
-      'black': '#000000',
-      'yellow': '#FFFF00',
-      'cyan': '#00FFFF',
-      'magenta': '#FF00FF',
-      'gray': '#808080',
-      'orange': '#FFA500',
-      'purple': '#800080',
-      'brown': '#A52A2A'
+      red: '#FF0000',
+      green: '#008000',
+      blue: '#0000FF',
+      white: '#FFFFFF',
+      black: '#000000',
+      yellow: '#FFFF00',
+      cyan: '#00FFFF',
+      magenta: '#FF00FF',
+      gray: '#808080',
+      orange: '#FFA500',
+      purple: '#800080',
+      brown: '#A52A2A',
     };
 
     const hex = namedColors[colorName.toLowerCase()];
@@ -151,7 +167,7 @@ export class Color extends ValueObject<ColorData> {
       errors.push('Alpha value must be between 0 and 1');
     }
 
-    return errors.length > 0 
+    return errors.length > 0
       ? { isValid: false, errors }
       : { isValid: true, errors: [] };
   }
@@ -162,7 +178,7 @@ export class Color extends ValueObject<ColorData> {
       red: this.data.red,
       green: this.data.green,
       blue: this.data.blue,
-      alpha: this.data.alpha
+      alpha: this.data.alpha,
     };
   }
 
@@ -173,7 +189,7 @@ export class Color extends ValueObject<ColorData> {
     };
 
     let hex = `#${toHex(this.data.red)}${toHex(this.data.green)}${toHex(this.data.blue)}`;
-    
+
     if (includeAlpha && this.data.alpha < 1) {
       hex += toHex(this.data.alpha * 255);
     }
@@ -218,7 +234,7 @@ export class Color extends ValueObject<ColorData> {
       hue: Math.round(h * 360),
       saturation: Math.round(s * 100),
       lightness: Math.round(l * 100),
-      alpha: this.data.alpha
+      alpha: this.data.alpha,
     };
   }
 
@@ -250,8 +266,8 @@ export class Color extends ValueObject<ColorData> {
     // Relative luminance calculation for accessibility
     const toLinear = (value: number): number => {
       const normalized = value / 255;
-      return normalized <= 0.03928 
-        ? normalized / 12.92 
+      return normalized <= 0.03928
+        ? normalized / 12.92
         : Math.pow((normalized + 0.055) / 1.055, 2.4);
     };
 
@@ -273,13 +289,19 @@ export class Color extends ValueObject<ColorData> {
   }
 
   // ✅ FOCUS: Accessibility methods
-  meetsWCAGContrastAA(backgroundColor: Color, isLargeText: boolean = false): boolean {
+  meetsWCAGContrastAA(
+    backgroundColor: Color,
+    isLargeText: boolean = false
+  ): boolean {
     const contrast = this.getContrastRatio(backgroundColor);
     const requiredContrast = isLargeText ? 3 : 4.5;
     return contrast >= requiredContrast;
   }
 
-  meetsWCAGContrastAAA(backgroundColor: Color, isLargeText: boolean = false): boolean {
+  meetsWCAGContrastAAA(
+    backgroundColor: Color,
+    isLargeText: boolean = false
+  ): boolean {
     const contrast = this.getContrastRatio(backgroundColor);
     const requiredContrast = isLargeText ? 4.5 : 7;
     return contrast >= requiredContrast;
@@ -289,31 +311,56 @@ export class Color extends ValueObject<ColorData> {
   lighten(amount: number): Color {
     const hsl = this.toHSL();
     const newLightness = Math.min(100, hsl.lightness + amount);
-    return Color.fromHSL(hsl.hue, hsl.saturation, newLightness, this.data.alpha);
+    return Color.fromHSL(
+      hsl.hue,
+      hsl.saturation,
+      newLightness,
+      this.data.alpha
+    );
   }
 
   darken(amount: number): Color {
     const hsl = this.toHSL();
     const newLightness = Math.max(0, hsl.lightness - amount);
-    return Color.fromHSL(hsl.hue, hsl.saturation, newLightness, this.data.alpha);
+    return Color.fromHSL(
+      hsl.hue,
+      hsl.saturation,
+      newLightness,
+      this.data.alpha
+    );
   }
 
   saturate(amount: number): Color {
     const hsl = this.toHSL();
     const newSaturation = Math.min(100, hsl.saturation + amount);
-    return Color.fromHSL(hsl.hue, newSaturation, hsl.lightness, this.data.alpha);
+    return Color.fromHSL(
+      hsl.hue,
+      newSaturation,
+      hsl.lightness,
+      this.data.alpha
+    );
   }
 
   desaturate(amount: number): Color {
     const hsl = this.toHSL();
     const newSaturation = Math.max(0, hsl.saturation - amount);
-    return Color.fromHSL(hsl.hue, newSaturation, hsl.lightness, this.data.alpha);
+    return Color.fromHSL(
+      hsl.hue,
+      newSaturation,
+      hsl.lightness,
+      this.data.alpha
+    );
   }
 
   adjustHue(degrees: number): Color {
     const hsl = this.toHSL();
     const newHue = (hsl.hue + degrees) % 360;
-    return Color.fromHSL(newHue, hsl.saturation, hsl.lightness, this.data.alpha);
+    return Color.fromHSL(
+      newHue,
+      hsl.saturation,
+      hsl.lightness,
+      this.data.alpha
+    );
   }
 
   withAlpha(alpha: number): Color {
@@ -326,24 +373,15 @@ export class Color extends ValueObject<ColorData> {
   }
 
   getTriadic(): [Color, Color] {
-    return [
-      this.adjustHue(120),
-      this.adjustHue(240)
-    ];
+    return [this.adjustHue(120), this.adjustHue(240)];
   }
 
   getAnalogous(): [Color, Color] {
-    return [
-      this.adjustHue(30),
-      this.adjustHue(-30)
-    ];
+    return [this.adjustHue(30), this.adjustHue(-30)];
   }
 
   getSplitComplementary(): [Color, Color] {
-    return [
-      this.adjustHue(150),
-      this.adjustHue(-150)
-    ];
+    return [this.adjustHue(150), this.adjustHue(-150)];
   }
 
   // ✅ FOCUS: Palette generation
@@ -377,13 +415,21 @@ export class Color extends ValueObject<ColorData> {
 
     for (let i = 1; i < count; i++) {
       // Vary lightness and saturation slightly
-      const lightnessVariation = (i * 15) - 30; // -30 to +45
-      const saturationVariation = (i * 10) - 20; // -20 to +30
+      const lightnessVariation = i * 15 - 30; // -30 to +45
+      const saturationVariation = i * 10 - 20; // -20 to +30
 
-      const newLightness = Math.max(0, Math.min(100, baseHSL.lightness + lightnessVariation));
-      const newSaturation = Math.max(0, Math.min(100, baseHSL.saturation + saturationVariation));
+      const newLightness = Math.max(
+        0,
+        Math.min(100, baseHSL.lightness + lightnessVariation)
+      );
+      const newSaturation = Math.max(
+        0,
+        Math.min(100, baseHSL.saturation + saturationVariation)
+      );
 
-      colors.push(Color.fromHSL(baseHSL.hue, newSaturation, newLightness, this.data.alpha));
+      colors.push(
+        Color.fromHSL(baseHSL.hue, newSaturation, newLightness, this.data.alpha)
+      );
     }
 
     return colors;
@@ -399,12 +445,14 @@ export class Color extends ValueObject<ColorData> {
   }
 
   isGrayscale(): boolean {
-    return this.data.red === this.data.green && this.data.green === this.data.blue;
+    return (
+      this.data.red === this.data.green && this.data.green === this.data.blue
+    );
   }
 
   getDominantChannel(): 'red' | 'green' | 'blue' {
     const { red, green, blue } = this.data;
-    
+
     if (red >= green && red >= blue) return 'red';
     if (green >= blue) return 'green';
     return 'blue';
@@ -421,17 +469,27 @@ export class Color extends ValueObject<ColorData> {
   }
 
   // ✅ FOCUS: Getters
-  get red(): number { return this.data.red; }
-  get green(): number { return this.data.green; }
-  get blue(): number { return this.data.blue; }
-  get alpha(): number { return this.data.alpha; }
+  get red(): number {
+    return this.data.red;
+  }
+  get green(): number {
+    return this.data.green;
+  }
+  get blue(): number {
+    return this.data.blue;
+  }
+  get alpha(): number {
+    return this.data.alpha;
+  }
 
   // ✅ FOCUS: Value object equality
   protected isEqualTo(other: Color): boolean {
-    return this.data.red === other.data.red &&
-           this.data.green === other.data.green &&
-           this.data.blue === other.data.blue &&
-           this.data.alpha === other.data.alpha;
+    return (
+      this.data.red === other.data.red &&
+      this.data.green === other.data.green &&
+      this.data.blue === other.data.blue &&
+      this.data.alpha === other.data.alpha
+    );
   }
 }
 ```
@@ -548,7 +606,11 @@ class ColorPalette {
     invalidColors: Array<{ name: string; contrast: number; required: number }>;
   } {
     const validColors: string[] = [];
-    const invalidColors: Array<{ name: string; contrast: number; required: number }> = [];
+    const invalidColors: Array<{
+      name: string;
+      contrast: number;
+      required: number;
+    }> = [];
 
     this.colors.forEach((color, name) => {
       const contrast = color.getContrastRatio(backgroundColor);
@@ -560,7 +622,7 @@ class ColorPalette {
         invalidColors.push({
           name,
           contrast: parseFloat(contrast.toFixed(2)),
-          required: requiredContrast
+          required: requiredContrast,
         });
       }
     });
@@ -571,23 +633,23 @@ class ColorPalette {
   // ✅ Export color tokens
   toCSSVariables(): string {
     let css = ':root {\n';
-    
+
     this.colors.forEach((color, name) => {
       const varName = `--color-${name.replace(/\s+/g, '-').toLowerCase()}`;
       css += `  ${varName}: ${color.toHex()};\n`;
-      
+
       // Also include RGB values for alpha manipulation
       const rgb = color.toRGB();
       css += `  ${varName}-rgb: ${rgb.red}, ${rgb.green}, ${rgb.blue};\n`;
     });
-    
+
     css += '}';
     return css;
   }
 
   toDesignTokens(): Record<string, any> {
     const tokens: Record<string, any> = {};
-    
+
     this.colors.forEach((color, name) => {
       const tokenName = name.replace(/\s+/g, '-').toLowerCase();
       tokens[tokenName] = {
@@ -595,10 +657,10 @@ class ColorPalette {
         type: 'color',
         rgb: color.toRGB(),
         hsl: color.toHSL(),
-        luminance: color.getLuminance()
+        luminance: color.getLuminance(),
       };
     });
-    
+
     return tokens;
   }
 
@@ -615,33 +677,33 @@ class ColorPalette {
 class ThemeBuilder {
   static createLightTheme(primaryColor: Color): ColorPalette {
     const palette = new ColorPalette();
-    
+
     // Generate base palette
     const generated = palette.generatePalette(primaryColor);
-    
+
     // Add theme-specific colors
     generated.registerBrandColor('background', Color.fromHex('#FFFFFF'));
     generated.registerBrandColor('surface', Color.fromHex('#F8F9FA'));
     generated.registerBrandColor('text-primary', Color.fromHex('#212529'));
     generated.registerBrandColor('text-secondary', Color.fromHex('#6C757D'));
     generated.registerBrandColor('border', Color.fromHex('#E9ECEF'));
-    
+
     return generated;
   }
 
   static createDarkTheme(primaryColor: Color): ColorPalette {
     const palette = new ColorPalette();
-    
+
     // Generate base palette (colors work in dark theme)
     const generated = palette.generatePalette(primaryColor);
-    
+
     // Add dark theme-specific colors
     generated.registerBrandColor('background', Color.fromHex('#121212'));
     generated.registerBrandColor('surface', Color.fromHex('#1E1E1E'));
     generated.registerBrandColor('text-primary', Color.fromHex('#FFFFFF'));
     generated.registerBrandColor('text-secondary', Color.fromHex('#B3B3B3'));
     generated.registerBrandColor('border', Color.fromHex('#333333'));
-    
+
     return generated;
   }
 }
@@ -653,10 +715,14 @@ const lightTheme = ThemeBuilder.createLightTheme(brandBlue);
 const darkTheme = ThemeBuilder.createDarkTheme(brandBlue);
 
 // Validate accessibility
-const lightValidation = lightTheme.validatePalette(lightTheme.getColor('background')!);
+const lightValidation = lightTheme.validatePalette(
+  lightTheme.getColor('background')!
+);
 console.log('Light theme validation:', lightValidation);
 
-const darkValidation = darkTheme.validatePalette(darkTheme.getColor('background')!);
+const darkValidation = darkTheme.validatePalette(
+  darkTheme.getColor('background')!
+);
 console.log('Dark theme validation:', darkValidation);
 
 // Export CSS variables
@@ -671,16 +737,18 @@ console.log('Design tokens:', JSON.stringify(tokens, null, 2));
 ## Key Features
 
 - **Multi-Format Support**: RGB, HSL, HSV, HEX, and named color formats
-- **Color Theory**: Complementary, triadic, analogous color relationships  
+- **Color Theory**: Complementary, triadic, analogous color relationships
 - **Accessibility**: WCAG contrast ratio calculations and compliance checking
 - **Color Manipulation**: Lighten, darken, saturate, hue adjustments
-- **Palette Generation**: Automatic shade, tint, and monochromatic palette creation
+- **Palette Generation**: Automatic shade, tint, and monochromatic palette
+  creation
 - **Design System Integration**: CSS variables, design tokens, theme generation
 
 ## Common Pitfalls
 
 - **Color Space Precision**: Floating-point precision issues in conversions
-- **Accessibility Assumptions**: Always test actual contrast in target environments  
+- **Accessibility Assumptions**: Always test actual contrast in target
+  environments
 - **Color Perception**: Consider color blindness and different display devices
 - **Performance**: Color calculations can be expensive for large datasets
 

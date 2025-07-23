@@ -27,14 +27,17 @@ export class HybridTemplateEngine {
     });
 
     // Helper to load framework-specific content
-    this.hbs.registerHelper('loadFrameworkExample', (packageName: string, framework: string, complexity: string) => {
-      const frameworkPath = `frameworks/${framework}/${complexity}`;
-      const content = this.loadFrameworkContent(packageName, frameworkPath);
-      return new this.hbs.SafeString(content);
-    });
+    this.hbs.registerHelper(
+      'loadFrameworkExample',
+      (packageName: string, framework: string, complexity: string) => {
+        const frameworkPath = `frameworks/${framework}/${complexity}`;
+        const content = this.loadFrameworkContent(packageName, frameworkPath);
+        return new this.hbs.SafeString(content);
+      }
+    );
 
     // Helper for conditional sections
-    this.hbs.registerHelper('ifSection', function(this: any, sectionName: string, options: any) {
+    this.hbs.registerHelper('ifSection', function (this: any, sectionName: string, options: any) {
       const sections = this.sections || [];
       if (sections.includes(sectionName)) {
         return options.fn(this);
@@ -43,7 +46,7 @@ export class HybridTemplateEngine {
     });
 
     // Helper for complexity filtering
-    this.hbs.registerHelper('ifComplexity', function(this: any, complexity: string, options: any) {
+    this.hbs.registerHelper('ifComplexity', function (this: any, complexity: string, options: any) {
       const complexityLevels = this.complexityLevels || [];
       if (complexityLevels.includes(complexity)) {
         return options.fn(this);
@@ -52,7 +55,7 @@ export class HybridTemplateEngine {
     });
 
     // Helper for framework filtering
-    this.hbs.registerHelper('ifFramework', function(this: any, framework: string, options: any) {
+    this.hbs.registerHelper('ifFramework', function (this: any, framework: string, options: any) {
       if (this.framework === framework) {
         return options.fn(this);
       }
@@ -92,18 +95,16 @@ export class HybridTemplateEngine {
     });
 
     // Helper to load cross-package examples
-    this.hbs.registerHelper('loadCrossPackageExample', (
-      sourcePackage: string,
-      targetPackage: string,
-      complexity: string,
-      exampleId: string
-    ) => {
-      const content = this.loadMarkdownContent(
-        sourcePackage,
-        `cross-package/${targetPackage}/${complexity}/${exampleId}.md`
-      );
-      return new this.hbs.SafeString(content);
-    });
+    this.hbs.registerHelper(
+      'loadCrossPackageExample',
+      (sourcePackage: string, targetPackage: string, complexity: string, exampleId: string) => {
+        const content = this.loadMarkdownContent(
+          sourcePackage,
+          `cross-package/${targetPackage}/${complexity}/${exampleId}.md`
+        );
+        return new this.hbs.SafeString(content);
+      }
+    );
   }
 
   async render(layout: string, data: any): Promise<string> {
@@ -141,7 +142,6 @@ export class HybridTemplateEngine {
     this.contentCache.set(cacheKey, content);
     return content;
   }
-
 
   private loadFrameworkContent(packageName: string, frameworkPath: string): string {
     const cacheKey = `${packageName}:${frameworkPath}`;

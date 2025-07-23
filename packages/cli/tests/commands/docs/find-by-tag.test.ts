@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches-ddd/utils';
-import type { FindByTagArgs} from '../../../src/commands/docs/find-by-tag';
+import type { FindByTagArgs } from '../../../src/commands/docs/find-by-tag';
 import { findByTagCommand } from '../../../src/commands/docs/find-by-tag';
 import { SmartTagFinder } from '../../../src/core/smart-tag-finder';
 import { logger } from '../../../src/core/utils/logger';
@@ -32,13 +32,23 @@ describe('find-by-tag command', () => {
     vi.mocked(SmartTagFinder).mockImplementation(() => mockTagFinder);
 
     // Mock logger
-    vi.mocked(logger.success).mockImplementation(() => { return });
-    vi.mocked(logger.info).mockImplementation(() => { return });
-    vi.mocked(logger.warn).mockImplementation(() => { return });
-    vi.mocked(logger.error).mockImplementation(() => { return });
+    vi.mocked(logger.success).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.info).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.warn).mockImplementation(() => {
+      return;
+    });
+    vi.mocked(logger.error).mockImplementation(() => {
+      return;
+    });
 
     // Mock console.table
-    mockConsoleTable = vi.spyOn(console, 'table').mockImplementation(() => { return });
+    mockConsoleTable = vi.spyOn(console, 'table').mockImplementation(() => {
+      return;
+    });
 
     // Mock process.exit
     mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -145,7 +155,9 @@ describe('find-by-tag command', () => {
           Tags: 'policies:advanced, enterprise',
         },
       ]);
-      expect(logger.info).toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(logger.info).toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should handle all search options', async () => {
@@ -162,14 +174,20 @@ describe('find-by-tag command', () => {
 
       await findByTagCommand.handler(argv);
 
-      expect(mockTagFinder.findExamplesByTag).toHaveBeenCalledWith('policies:advanced', 'intermediate', {
-        framework: 'nestjs',
-        maxExamples: 5,
-        randomize: false,
-        seed: 'test-seed',
-      });
+      expect(mockTagFinder.findExamplesByTag).toHaveBeenCalledWith(
+        'policies:advanced',
+        'intermediate',
+        {
+          framework: 'nestjs',
+          maxExamples: 5,
+          randomize: false,
+          seed: 'test-seed',
+        }
+      );
 
-      expect(logger.info).not.toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should save results to file when output option is provided', async () => {
@@ -224,7 +242,9 @@ describe('find-by-tag command', () => {
 
       await findByTagCommand.handler(argv);
 
-      expect(logger.warn).toHaveBeenCalledWith('⚠️  No examples found for tag pattern: policies:invalid');
+      expect(logger.warn).toHaveBeenCalledWith(
+        '⚠️  No examples found for tag pattern: policies:invalid'
+      );
       expect(mockTagFinder.suggestSimilarTags).toHaveBeenCalledWith('policies:invalid');
       expect(logger.info).toHaveBeenCalledWith('💡 Did you mean:');
       expect(logger.info).toHaveBeenCalledWith('   - policies:core');
@@ -242,7 +262,9 @@ describe('find-by-tag command', () => {
 
       await findByTagCommand.handler(argv);
 
-      expect(logger.warn).toHaveBeenCalledWith('⚠️  No examples found for tag pattern: invalid:tag');
+      expect(logger.warn).toHaveBeenCalledWith(
+        '⚠️  No examples found for tag pattern: invalid:tag'
+      );
       expect(mockTagFinder.suggestSimilarTags).toHaveBeenCalledWith('invalid:tag');
       expect(logger.info).not.toHaveBeenCalledWith('💡 Did you mean:');
       expect(mockConsoleTable).not.toHaveBeenCalled();
@@ -258,7 +280,9 @@ describe('find-by-tag command', () => {
 
       await findByTagCommand.handler(argv);
 
-      expect(logger.info).not.toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should not show randomization message when no examples found', async () => {
@@ -271,7 +295,9 @@ describe('find-by-tag command', () => {
 
       await findByTagCommand.handler(argv);
 
-      expect(logger.info).not.toHaveBeenCalledWith('🎲 Results were randomized. Use --no-randomize for deterministic results');
+      expect(logger.info).not.toHaveBeenCalledWith(
+        '🎲 Results were randomized. Use --no-randomize for deterministic results'
+      );
     });
 
     it('should handle optional parameters correctly', async () => {
@@ -385,7 +411,9 @@ describe('find-by-tag command', () => {
 
       expect(error).toBeInstanceOf(Error);
       expect(error?.message).toBe('process.exit called');
-      expect(logger.error).toHaveBeenCalledWith('❌ Failed to find examples: SmartTagFinder initialization failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        '❌ Failed to find examples: SmartTagFinder initialization failed'
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
@@ -409,7 +437,7 @@ describe('find-by-tag command', () => {
   });
 
   describe('console table formatting', () => {
-        const mockExamples = [
+    const mockExamples = [
       {
         id: 'example-1',
         name: 'Basic Policy',
@@ -452,10 +480,12 @@ describe('find-by-tag command', () => {
     });
 
     it('should join tags correctly in console table', async () => {
-      const exampleWithManyTags = [{
-        ...mockExamples[0],
-        tags: ['tag1', 'tag2', 'tag3'],
-      }];
+      const exampleWithManyTags = [
+        {
+          ...mockExamples[0],
+          tags: ['tag1', 'tag2', 'tag3'],
+        },
+      ];
       mockTagFinder.findExamplesByTag.mockResolvedValue(exampleWithManyTags);
 
       const argv = {

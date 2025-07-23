@@ -18,7 +18,7 @@ export interface OrderItem {
   price: number;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
   | 'payment_processing'
   | 'payment_completed'

@@ -3,34 +3,30 @@
 **Package**: @vytches-ddd/validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
-**Focus**: Real-time global data quality monitoring with streaming analytics and automated remediation
+**Focus**: Real-time global data quality monitoring with streaming analytics and
+automated remediation
 
 ## Overview
 
-This example demonstrates advanced real-time global data quality monitoring in NestJS using VytchesDDD DI for streaming data processing, automated quality degradation detection, and intelligent remediation workflows with enterprise-scale monitoring capabilities.
+This example demonstrates advanced real-time global data quality monitoring in
+NestJS using VytchesDDD DI for streaming data processing, automated quality
+degradation detection, and intelligent remediation workflows with
+enterprise-scale monitoring capabilities.
 
 ## Implementation
 
 ```typescript
 // real-time-quality-monitor.service.ts
 import { Injectable } from '@nestjs/common';
-import { 
-  DomainService, 
-  ServiceLifetime, 
-  VytchesDDD 
-} from '@vytches-ddd/di';
-import { 
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import {
   GlobalDataQualityMonitor,
   StreamingQualityProcessor,
   QualityPredictor,
   DataQualityMetrics,
-  ValidationMetrics 
+  ValidationMetrics,
 } from '@vytches-ddd/validation';
-import { 
-  QualityStreamConfig,
-  QualityAlert,
-  RemediationAction 
-} from './types'; // From your application
+import { QualityStreamConfig, QualityAlert, RemediationAction } from './types'; // From your application
 
 // Real-time quality monitoring service with VytchesDDD DI
 @DomainService({
@@ -43,11 +39,11 @@ import {
     'alertManager',
     'remediationEngine',
     'eventBus',
-    'metricsCollector'
+    'metricsCollector',
   ],
   timeout: 30000,
   middleware: ['logging', 'resilience', 'streaming'],
-  autoRegister: true
+  autoRegister: true,
 })
 export class RealTimeQualityMonitorService {
   private globalMonitor: GlobalDataQualityMonitor;
@@ -64,19 +60,21 @@ export class RealTimeQualityMonitorService {
     this.initializeRealTimeMonitoring();
   }
 
-  async startGlobalMonitoring(config: GlobalMonitoringConfig): Promise<MonitoringSession> {
+  async startGlobalMonitoring(
+    config: GlobalMonitoringConfig
+  ): Promise<MonitoringSession> {
     const sessionId = `session-${Date.now()}`;
-    
+
     // Initialize monitoring streams for all configured sources
-    const streamPromises = config.dataSources.map(source => 
+    const streamPromises = config.dataSources.map(source =>
       this.createQualityStream(source, sessionId)
     );
 
     const streams = await Promise.all(streamPromises);
-    
+
     // Start global coordination
     await this.globalMonitor.startGlobalMonitoring();
-    
+
     // Begin predictive analysis
     const predictionProcess = this.startPredictiveMonitoring(sessionId);
 
@@ -86,7 +84,7 @@ export class RealTimeQualityMonitorService {
       activeStreams: streams.length,
       monitoredSources: config.dataSources.length,
       predictionEnabled: true,
-      globalCoordinationActive: true
+      globalCoordinationActive: true,
     };
   }
 
@@ -131,7 +129,7 @@ export class RealTimeQualityMonitorService {
       qualityPrediction,
       remediationActions,
       processingTime,
-      streamHealth: await this.assessStreamHealth(sourceId)
+      streamHealth: await this.assessStreamHealth(sourceId),
     };
   }
 
@@ -149,7 +147,10 @@ export class RealTimeQualityMonitorService {
       trendingIssues: qualityTrends.decliningSources,
       improvingSources: qualityTrends.improvingSources,
       criticalSources: allMetrics.criticalSources,
-      globalHealthScore: this.calculateGlobalHealthScore(allMetrics, activeAlerts)
+      globalHealthScore: this.calculateGlobalHealthScore(
+        allMetrics,
+        activeAlerts
+      ),
     };
   }
 
@@ -157,14 +158,17 @@ export class RealTimeQualityMonitorService {
     sourceId: string,
     thresholds: QualityThresholdConfig
   ): Promise<ThresholdConfigResult> {
-    return await this.globalMonitor.updateQualityThresholds(sourceId, thresholds);
+    return await this.globalMonitor.updateQualityThresholds(
+      sourceId,
+      thresholds
+    );
   }
 
   async getQualityAnalytics(
     analyticsRequest: QualityAnalyticsRequest
   ): Promise<QualityAnalyticsResult> {
     const timeRange = analyticsRequest.timeRange || this.getDefaultTimeRange();
-    
+
     const analytics = await this.metricsCollector.generateAnalytics(
       timeRange,
       analyticsRequest.sources,
@@ -182,8 +186,13 @@ export class RealTimeQualityMonitorService {
       trends: analytics.trends,
       patterns,
       anomalies: analytics.anomalies,
-      recommendations: await this.generateAnalyticsRecommendations(analytics, patterns),
-      exportData: analyticsRequest.includeExport ? analytics.rawData : undefined
+      recommendations: await this.generateAnalyticsRecommendations(
+        analytics,
+        patterns
+      ),
+      exportData: analyticsRequest.includeExport
+        ? analytics.rawData
+        : undefined,
     };
   }
 
@@ -191,18 +200,22 @@ export class RealTimeQualityMonitorService {
     // Real-time components resolved through VytchesDDD DI
     const eventBus = VytchesDDD.resolve('eventBus');
     const validationService = VytchesDDD.resolve('validationService');
-    
+
     this.globalMonitor = new GlobalDataQualityMonitor(
       eventBus,
       validationService,
       VytchesDDD.resolve('qualityAnalyzer')
     );
 
-    this.streamProcessor = VytchesDDD.resolve<StreamingQualityProcessor>('streamProcessor');
-    this.qualityPredictor = VytchesDDD.resolve<QualityPredictor>('qualityPredictor');
+    this.streamProcessor =
+      VytchesDDD.resolve<StreamingQualityProcessor>('streamProcessor');
+    this.qualityPredictor =
+      VytchesDDD.resolve<QualityPredictor>('qualityPredictor');
     this.alertManager = VytchesDDD.resolve<QualityAlertManager>('alertManager');
-    this.remediationEngine = VytchesDDD.resolve<AutomatedRemediationEngine>('remediationEngine');
-    this.metricsCollector = VytchesDDD.resolve<QualityMetricsCollector>('metricsCollector');
+    this.remediationEngine =
+      VytchesDDD.resolve<AutomatedRemediationEngine>('remediationEngine');
+    this.metricsCollector =
+      VytchesDDD.resolve<QualityMetricsCollector>('metricsCollector');
   }
 
   private async createQualityStream(
@@ -215,12 +228,12 @@ export class RealTimeQualityMonitorService {
       processingMode: 'real_time',
       batchSize: source.batchSize || 100,
       windowSize: source.windowSize || 60000, // 1 minute
-      qualityThresholds: source.qualityThresholds
+      qualityThresholds: source.qualityThresholds,
     };
 
     const stream = await this.streamProcessor.createStream(streamConfig);
     this.activeStreams.set(source.sourceId, stream);
-    
+
     return stream;
   }
 
@@ -229,11 +242,11 @@ export class RealTimeQualityMonitorService {
     sourceId: string
   ): Promise<QualityDegradationAlert | null> {
     const baseline = await this.metricsCollector.getQualityBaseline(sourceId);
-    
+
     if (!baseline) return null;
 
     const degradation = this.calculateDegradation(metrics, baseline);
-    
+
     if (degradation.severity !== 'none') {
       const alert: QualityDegradationAlert = {
         alertId: `degradation-${sourceId}-${Date.now()}`,
@@ -243,7 +256,10 @@ export class RealTimeQualityMonitorService {
         baseline,
         degradationFactors: degradation.factors,
         timestamp: new Date(),
-        estimatedImpact: await this.estimateQualityImpact(degradation, sourceId)
+        estimatedImpact: await this.estimateQualityImpact(
+          degradation,
+          sourceId
+        ),
       };
 
       await this.alertManager.raiseAlert(alert);
@@ -264,11 +280,15 @@ export class RealTimeQualityMonitorService {
       const metricKey = key as keyof DataQualityMetrics;
       const currentValue = current[metricKey];
       const baselineValue = baseline[metricKey];
-      
-      if (typeof currentValue === 'number' && typeof baselineValue === 'number') {
+
+      if (
+        typeof currentValue === 'number' &&
+        typeof baselineValue === 'number'
+      ) {
         const degradation = (baselineValue - currentValue) / baselineValue;
-        
-        if (degradation > 0.02) { // 2% threshold
+
+        if (degradation > 0.02) {
+          // 2% threshold
           factors.push(`${key}: ${(degradation * 100).toFixed(1)}% decline`);
           maxDegradation = Math.max(maxDegradation, degradation);
         }
@@ -276,8 +296,8 @@ export class RealTimeQualityMonitorService {
     });
 
     let severity = 'none';
-    if (maxDegradation >= 0.20) severity = 'critical';
-    else if (maxDegradation >= 0.10) severity = 'high';
+    if (maxDegradation >= 0.2) severity = 'critical';
+    else if (maxDegradation >= 0.1) severity = 'high';
     else if (maxDegradation >= 0.05) severity = 'medium';
     else if (maxDegradation >= 0.02) severity = 'low';
 
@@ -324,13 +344,15 @@ export class RealTimeQualityMonitorService {
 
     // Handle immediate quality issues
     if (alert && alert.severity === 'critical') {
-      const immediateActions = await this.remediationEngine.generateImmediateActions(alert);
+      const immediateActions =
+        await this.remediationEngine.generateImmediateActions(alert);
       actions.push(...immediateActions);
     }
 
     // Handle predicted issues
     if (prediction.riskLevel === 'high') {
-      const preventiveActions = await this.remediationEngine.generatePreventiveActions(prediction);
+      const preventiveActions =
+        await this.remediationEngine.generatePreventiveActions(prediction);
       actions.push(...preventiveActions);
     }
 
@@ -340,7 +362,10 @@ export class RealTimeQualityMonitorService {
         try {
           await this.remediationEngine.executeAction(action);
         } catch (error) {
-          console.error(`Failed to execute remediation action ${action.actionId}:`, error);
+          console.error(
+            `Failed to execute remediation action ${action.actionId}:`,
+            error
+          );
         }
       }
     }
@@ -348,7 +373,9 @@ export class RealTimeQualityMonitorService {
     return actions;
   }
 
-  private async assessStreamHealth(sourceId: string): Promise<StreamHealthMetrics> {
+  private async assessStreamHealth(
+    sourceId: string
+  ): Promise<StreamHealthMetrics> {
     const stream = this.activeStreams.get(sourceId);
     if (!stream) {
       return { status: 'inactive', healthScore: 0 };
@@ -364,7 +391,7 @@ export class RealTimeQualityMonitorService {
       processingRate,
       errorRate,
       uptime: stream.getUptime(),
-      lastProcessed: stream.getLastProcessedTime()
+      lastProcessed: stream.getLastProcessedTime(),
     };
   }
 
@@ -374,8 +401,9 @@ export class RealTimeQualityMonitorService {
   ): number {
     const baseScore = metrics.global.overallScore;
     const alertPenalty = alerts.length * 0.05; // 5% penalty per active alert
-    const criticalPenalty = alerts.filter(a => a.severity === 'critical').length * 0.15;
-    
+    const criticalPenalty =
+      alerts.filter(a => a.severity === 'critical').length * 0.15;
+
     return Math.max(0, baseScore - alertPenalty - criticalPenalty);
   }
 
@@ -387,7 +415,7 @@ export class RealTimeQualityMonitorService {
       affectedSystems: await this.identifyAffectedSystems(sourceId),
       businessImpact: degradation.severity === 'critical' ? 'high' : 'medium',
       estimatedRecoveryTime: degradation.severity === 'critical' ? 30 : 15, // minutes
-      riskLevel: degradation.severity
+      riskLevel: degradation.severity,
     };
   }
 
@@ -406,9 +434,13 @@ export class RealTimeQualityMonitorService {
       recommendations.push('Implement stricter quality controls');
     }
 
-    const decliningTrends = analytics.trends.filter(t => t.direction === 'declining');
+    const decliningTrends = analytics.trends.filter(
+      t => t.direction === 'declining'
+    );
     if (decliningTrends.length > 0) {
-      recommendations.push('Address declining quality trends in affected sources');
+      recommendations.push(
+        'Address declining quality trends in affected sources'
+      );
     }
 
     const frequentPatterns = patterns.filter(p => p.frequency > 0.1);
@@ -433,17 +465,19 @@ export class RealTimeQualityBridgeService {
 
   constructor() {
     // ⭐ FOCUS: Bridge pattern with real-time VytchesDDD DI
-    this.qualityMonitorService = VytchesDDD.resolve<RealTimeQualityMonitorService>(
-      'realTimeQualityMonitor'
-    );
+    this.qualityMonitorService =
+      VytchesDDD.resolve<RealTimeQualityMonitorService>(
+        'realTimeQualityMonitor'
+      );
   }
 
   async initializeMonitoring(
     config: MonitoringInitRequest
   ): Promise<MonitoringInitResponse> {
     try {
-      const session = await this.qualityMonitorService.startGlobalMonitoring(config);
-      
+      const session =
+        await this.qualityMonitorService.startGlobalMonitoring(config);
+
       return {
         success: true,
         sessionId: session.sessionId,
@@ -455,19 +489,20 @@ export class RealTimeQualityBridgeService {
             realTimeProcessing: true,
             predictiveAnalytics: session.predictionEnabled,
             globalCoordination: session.globalCoordinationActive,
-            automaticRemediation: true
-          }
+            automaticRemediation: true,
+          },
         },
         endpoints: {
           qualityStream: `/quality/stream/${session.sessionId}`,
           analytics: `/quality/analytics`,
           alerts: `/quality/alerts`,
-          health: `/quality/health`
-        }
+          health: `/quality/health`,
+        },
       };
-
     } catch (error) {
-      throw new Error(`Failed to initialize quality monitoring: ${error.message}`);
+      throw new Error(
+        `Failed to initialize quality monitoring: ${error.message}`
+      );
     }
   }
 
@@ -486,84 +521,90 @@ export class RealTimeQualityBridgeService {
         sourceId: result.sourceId,
         timestamp: result.timestamp,
         overallScore: result.qualityMetrics.overallScore,
-        qualityGrade: this.calculateQualityGrade(result.qualityMetrics.overallScore),
-        streamHealth: result.streamHealth
+        qualityGrade: this.calculateQualityGrade(
+          result.qualityMetrics.overallScore
+        ),
+        streamHealth: result.streamHealth,
       },
       alerts: result.degradationAlert ? [result.degradationAlert] : [],
       predictions: {
         riskLevel: result.qualityPrediction.riskLevel,
         timeHorizon: result.qualityPrediction.timeHorizon,
-        predictedIssues: result.qualityPrediction.predictedIssues
+        predictedIssues: result.qualityPrediction.predictedIssues,
       },
       remediationActions: result.remediationActions.map(action => ({
         actionId: action.actionId,
         type: action.type,
         executed: action.executed,
-        result: action.result
-      }))
+        result: action.result,
+      })),
     };
   }
 
   async getQualityDashboard(): Promise<QualityDashboardData> {
-    const snapshot = await this.qualityMonitorService.getGlobalQualitySnapshot();
-    
+    const snapshot =
+      await this.qualityMonitorService.getGlobalQualitySnapshot();
+
     return {
       globalOverview: {
         overallHealth: snapshot.globalHealthScore,
         overallQuality: snapshot.overallQuality,
         activeAlerts: snapshot.activeAlerts,
-        monitoredSources: Object.keys(snapshot.sourceBreakdown).length
+        monitoredSources: Object.keys(snapshot.sourceBreakdown).length,
       },
-      regionalStatus: Object.entries(snapshot.regionalBreakdown).map(([region, metrics]) => ({
-        region,
-        qualityScore: metrics.overallScore,
-        status: metrics.overallScore > 0.9 ? 'healthy' : 'warning',
-        sources: metrics.sourceCount
-      })),
+      regionalStatus: Object.entries(snapshot.regionalBreakdown).map(
+        ([region, metrics]) => ({
+          region,
+          qualityScore: metrics.overallScore,
+          status: metrics.overallScore > 0.9 ? 'healthy' : 'warning',
+          sources: metrics.sourceCount,
+        })
+      ),
       criticalIssues: snapshot.criticalSources.map(source => ({
         sourceId: source.sourceId,
         issueType: source.primaryIssue,
         severity: source.severity,
-        duration: source.duration
+        duration: source.duration,
       })),
       trends: {
         declining: snapshot.trendingIssues.length,
         improving: snapshot.improvingSources.length,
-        stable: snapshot.regionalBreakdown.length - snapshot.trendingIssues.length - snapshot.improvingSources.length
-      }
+        stable:
+          snapshot.regionalBreakdown.length -
+          snapshot.trendingIssues.length -
+          snapshot.improvingSources.length,
+      },
     };
   }
 
   private calculateQualityGrade(score: number): string {
     if (score >= 0.95) return 'A+';
-    if (score >= 0.90) return 'A';
+    if (score >= 0.9) return 'A';
     if (score >= 0.85) return 'B+';
-    if (score >= 0.80) return 'B';
+    if (score >= 0.8) return 'B';
     if (score >= 0.75) return 'C+';
-    if (score >= 0.70) return 'C';
+    if (score >= 0.7) return 'C';
     return 'D';
   }
 }
 
 // quality-monitoring.controller.ts
-import { 
-  Controller, 
-  Post, 
-  Body, 
+import {
+  Controller,
+  Post,
+  Body,
   BadRequestException,
   HttpStatus,
   HttpCode,
   Get,
   Param,
-  Query 
+  Query,
 } from '@nestjs/common';
 import { RealTimeQualityBridgeService } from './real-time-quality-bridge.service';
 
 @Controller('quality')
 export class QualityMonitoringController {
-  constructor(
-    private readonly qualityService: RealTimeQualityBridgeService
-  ) {}
+  constructor(private readonly qualityService: RealTimeQualityBridgeService) {}
 
   @Post('initialize')
   @HttpCode(HttpStatus.CREATED)
@@ -581,14 +622,13 @@ export class QualityMonitoringController {
         instructions: [
           'Send data streams to the quality stream endpoint',
           'Monitor alerts via the alerts endpoint',
-          'Access analytics through the analytics endpoint'
-        ]
+          'Access analytics through the analytics endpoint',
+        ],
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Failed to initialize monitoring',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -609,23 +649,22 @@ export class QualityMonitoringController {
           timestamp: new Date(),
           processingTime: result.processingTime,
           qualityGrade: result.qualityAssessment.qualityGrade,
-          overallScore: result.qualityAssessment.overallScore
+          overallScore: result.qualityAssessment.overallScore,
         },
         realTimeStatus: {
           streamHealth: result.qualityAssessment.streamHealth,
           alerts: result.alerts.length,
-          remediationActions: result.remediationActions.length
+          remediationActions: result.remediationActions.length,
         },
         predictions: result.predictions,
         immediateActions: result.remediationActions
           .filter(a => a.executed)
-          .map(a => ({ type: a.type, result: a.result }))
+          .map(a => ({ type: a.type, result: a.result })),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Quality stream processing failed',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -642,13 +681,12 @@ export class QualityMonitoringController {
         timestamp: new Date(),
         dashboard,
         refreshInterval: 30, // seconds
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
-
     } catch (error) {
       throw new BadRequestException({
         message: 'Failed to retrieve quality dashboard',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -663,7 +701,7 @@ import { VytchesDDD } from '@vytches-ddd/di';
 @Module({
   controllers: [QualityMonitoringController],
   providers: [RealTimeQualityBridgeService],
-  exports: [RealTimeQualityBridgeService]
+  exports: [RealTimeQualityBridgeService],
 })
 export class QualityMonitoringModule implements OnModuleInit {
   async onModuleInit() {
@@ -676,13 +714,13 @@ export class QualityMonitoringModule implements OnModuleInit {
         realTimeAnalytics: true,
         automaticRemediation: true,
         predictiveMonitoring: true,
-        globalCoordination: true
+        globalCoordination: true,
       },
       streaming: {
         maxConcurrentStreams: 1000,
         bufferSize: 10000,
-        processingMode: 'real_time'
-      }
+        processingMode: 'real_time',
+      },
     });
   }
 }
@@ -690,11 +728,15 @@ export class QualityMonitoringModule implements OnModuleInit {
 
 ## Key Points
 
-- **Real-time Processing**: Continuous quality monitoring with streaming data processing
-- **Predictive Analytics**: Forward-looking quality prediction and trend analysis
+- **Real-time Processing**: Continuous quality monitoring with streaming data
+  processing
+- **Predictive Analytics**: Forward-looking quality prediction and trend
+  analysis
 - **Automated Remediation**: Intelligent automatic response to quality issues
-- **Global Coordination**: Enterprise-scale quality coordination across multiple sources
-- **VytchesDDD DI Integration**: Advanced dependency injection for streaming services
+- **Global Coordination**: Enterprise-scale quality coordination across multiple
+  sources
+- **VytchesDDD DI Integration**: Advanced dependency injection for streaming
+  services
 
 ## Usage Examples
 

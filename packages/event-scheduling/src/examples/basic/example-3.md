@@ -1,29 +1,34 @@
 # Event Scheduling with Priority and Queuing - Basic Implementation
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/event-scheduling
-**Complexity**: basic
-**Domain**: Scheduling
-**Patterns**: priority-queuing, job-prioritization, resource-management
+**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+basic **Domain**: Scheduling **Patterns**: priority-queuing, job-prioritization,
+resource-management
 
 ## Description
 
-Basic implementation of priority-based event scheduling with queuing mechanisms for handling different priority levels and resource constraints in scheduled event execution.
+Basic implementation of priority-based event scheduling with queuing mechanisms
+for handling different priority levels and resource constraints in scheduled
+event execution.
 
 ## Business Context
 
-Customer support system needs to schedule various notifications and follow-up actions with different priority levels - urgent customer issues need immediate attention while routine maintenance can be deferred.
+Customer support system needs to schedule various notifications and follow-up
+actions with different priority levels - urgent customer issues need immediate
+attention while routine maintenance can be deferred.
 
 ## Code Example
 
 ```typescript
 // priority-scheduling.ts
-import { InMemorySchedulerAdapter, ScheduledEvent } from '@vytches-ddd/event-scheduling';
+import {
+  InMemorySchedulerAdapter,
+  ScheduledEvent,
+} from '@vytches-ddd/event-scheduling';
 import { SchedulePriority, JobStatus } from '@vytches-ddd/contracts';
-import { 
-  CustomerIssueData, 
-  MaintenanceTaskData, 
-  NotificationData 
+import {
+  CustomerIssueData,
+  MaintenanceTaskData,
+  NotificationData,
 } from './types'; // From your app
 
 // ⭐ FOCUS: Priority-aware scheduled events
@@ -40,19 +45,22 @@ export class PriorityScheduledEvent<T = any> extends ScheduledEvent<T> {
   ) {
     super(aggregateId, scheduleAt, payload, {
       maxRetries: priority === SchedulePriority.CRITICAL ? 5 : 3,
-      backoff: 'exponential'
+      backoff: 'exponential',
     });
-    
+
     this.priority = priority;
     this.queueName = queueName;
   }
 
   // ✅ FOCUS: Priority comparison for sorting
-  static comparePriority(a: PriorityScheduledEvent, b: PriorityScheduledEvent): number {
+  static comparePriority(
+    a: PriorityScheduledEvent,
+    b: PriorityScheduledEvent
+  ): number {
     // Higher priority values come first
     const priorityDiff = b.priority - a.priority;
     if (priorityDiff !== 0) return priorityDiff;
-    
+
     // If same priority, earlier scheduled time comes first
     return a.scheduleAt.getTime() - b.scheduleAt.getTime();
   }
@@ -65,16 +73,18 @@ export class UrgentCustomerIssueEvent extends PriorityScheduledEvent<CustomerIss
     issueData: CustomerIssueData,
     scheduleAt: Date = new Date() // Immediate by default
   ) {
-    super(customerId, scheduleAt, issueData, SchedulePriority.CRITICAL, 'customer-support');
+    super(
+      customerId,
+      scheduleAt,
+      issueData,
+      SchedulePriority.CRITICAL,
+      'customer-support'
+    );
   }
 }
 
 export class RoutineMaintenanceEvent extends PriorityScheduledEvent<MaintenanceTaskData> {
-  constructor(
-    taskId: string,
-    taskData: MaintenanceTaskData,
-    scheduleAt: Date
-  ) {
+  constructor(taskId: string, taskData: MaintenanceTaskData, scheduleAt: Date) {
     super(taskId, scheduleAt, taskData, SchedulePriority.LOW, 'maintenance');
   }
 }
@@ -85,7 +95,13 @@ export class StandardNotificationEvent extends PriorityScheduledEvent<Notificati
     notificationData: NotificationData,
     scheduleAt: Date
   ) {
-    super(userId, scheduleAt, notificationData, SchedulePriority.NORMAL, 'notifications');
+    super(
+      userId,
+      scheduleAt,
+      notificationData,
+      SchedulePriority.NORMAL,
+      'notifications'
+    );
   }
 }
 
@@ -102,18 +118,18 @@ export class PriorityQueueManager {
   // ✅ FOCUS: Add event to priority queue
   addToQueue(event: PriorityScheduledEvent, jobId: string): void {
     const queueName = event.queueName;
-    
+
     if (!this.queues.has(queueName)) {
       this.queues.set(queueName, new PriorityQueue(queueName));
     }
-    
+
     const queue = this.queues.get(queueName)!;
     queue.enqueue({ event, jobId, addedAt: new Date() });
-    
+
     console.log(`Event queued: ${jobId}`, {
       queue: queueName,
       priority: event.priority,
-      queueSize: queue.size()
+      queueSize: queue.size(),
     });
   }
 
@@ -161,8 +177,8 @@ export class PriorityQueueManager {
         [SchedulePriority.CRITICAL]: 0,
         [SchedulePriority.HIGH]: 0,
         [SchedulePriority.NORMAL]: 0,
-        [SchedulePriority.LOW]: 0
-      }
+        [SchedulePriority.LOW]: 0,
+      },
     };
 
     for (const [queueName, queue] of this.queues) {
@@ -183,13 +199,15 @@ export class PriorityQueueManager {
 // ⭐ FOCUS: Priority queue implementation
 class PriorityQueue {
   private items: QueueItem[] = [];
-  
+
   constructor(public readonly name: string) {}
 
   enqueue(item: QueueItem): void {
     this.items.push(item);
     // Sort by priority (highest first, then by schedule time)
-    this.items.sort((a, b) => PriorityScheduledEvent.comparePriority(a.event, b.event));
+    this.items.sort((a, b) =>
+      PriorityScheduledEvent.comparePriority(a.event, b.event)
+    );
   }
 
   dequeue(): QueueItem | null {
@@ -219,9 +237,9 @@ export class PrioritySchedulerService {
     this.scheduler = new InMemorySchedulerAdapter({
       defaultMaxRetries: 3,
       defaultTimeout: 30000,
-      enableLogging: true
+      enableLogging: true,
     });
-    
+
     this.queueManager = new PriorityQueueManager(maxConcurrentJobs);
   }
 
@@ -244,15 +262,15 @@ export class PrioritySchedulerService {
     event: PriorityScheduledEvent<T>
   ): Promise<string> {
     const jobId = await this.scheduler.schedule(event);
-    
+
     // Add to priority queue for processing
     this.queueManager.addToQueue(event, jobId);
-    
+
     console.log(`Priority event scheduled: ${jobId}`, {
       eventType: event.constructor.name,
       priority: event.priority,
       queue: event.queueName,
-      scheduledAt: event.scheduleAt
+      scheduledAt: event.scheduleAt,
     });
 
     return jobId;
@@ -265,8 +283,12 @@ export class PrioritySchedulerService {
     delayMinutes: number = 0
   ): Promise<string> {
     const scheduleAt = new Date(Date.now() + delayMinutes * 60 * 1000);
-    const event = new UrgentCustomerIssueEvent(customerId, issueData, scheduleAt);
-    
+    const event = new UrgentCustomerIssueEvent(
+      customerId,
+      issueData,
+      scheduleAt
+    );
+
     return await this.schedulePriorityEvent(event);
   }
 
@@ -277,7 +299,7 @@ export class PrioritySchedulerService {
     scheduleAt: Date
   ): Promise<string> {
     const event = new RoutineMaintenanceEvent(taskId, taskData, scheduleAt);
-    
+
     return await this.schedulePriorityEvent(event);
   }
 
@@ -288,8 +310,12 @@ export class PrioritySchedulerService {
     delayMinutes: number = 5
   ): Promise<string> {
     const scheduleAt = new Date(Date.now() + delayMinutes * 60 * 1000);
-    const event = new StandardNotificationEvent(userId, notificationData, scheduleAt);
-    
+    const event = new StandardNotificationEvent(
+      userId,
+      notificationData,
+      scheduleAt
+    );
+
     return await this.schedulePriorityEvent(event);
   }
 
@@ -298,11 +324,11 @@ export class PrioritySchedulerService {
     return this.queueManager.getQueueStats();
   }
 
-  // ✅ FOCUS: Get scheduler statistics  
+  // ✅ FOCUS: Get scheduler statistics
   async getSchedulerStats(): Promise<SchedulerStats> {
     const schedulerStats = await this.scheduler.getStats();
     const queueStats = this.queueManager.getQueueStats();
-    
+
     return {
       scheduled: schedulerStats.scheduled + schedulerStats.pending,
       completed: schedulerStats.completed,
@@ -311,7 +337,7 @@ export class PrioritySchedulerService {
       queued: queueStats.totalQueued,
       processing: queueStats.processing,
       queueBreakdown: queueStats.byQueue,
-      priorityBreakdown: queueStats.byPriority
+      priorityBreakdown: queueStats.byPriority,
     };
   }
 
@@ -324,7 +350,7 @@ export class PrioritySchedulerService {
   private async processQueuedEvents(): Promise<void> {
     while (this.queueManager.canProcessMoreJobs()) {
       const nextItem = this.queueManager.getNextEvent();
-      
+
       if (!nextItem) {
         break; // No more items to process
       }
@@ -338,10 +364,13 @@ export class PrioritySchedulerService {
 
       // Mark as processing and execute
       this.queueManager.markProcessing(nextItem.jobId);
-      
+
       // Process asynchronously
       this.executeQueuedEvent(nextItem).catch(error => {
-        console.error(`Failed to execute queued event: ${nextItem.jobId}`, error);
+        console.error(
+          `Failed to execute queued event: ${nextItem.jobId}`,
+          error
+        );
         this.queueManager.markCompleted(nextItem.jobId);
       });
     }
@@ -350,19 +379,18 @@ export class PrioritySchedulerService {
   private async executeQueuedEvent(item: QueueItem): Promise<void> {
     try {
       const job = await this.scheduler.getJob(item.jobId);
-      
+
       if (!job || job.status !== JobStatus.SCHEDULED) {
         return; // Job was cancelled or already processed
       }
 
       // Execute the scheduled job
       await this.processScheduledJob(job);
-      
+
       console.log(`Priority event executed: ${item.jobId}`, {
         priority: item.event.priority,
-        waitTime: Date.now() - item.addedAt.getTime()
+        waitTime: Date.now() - item.addedAt.getTime(),
       });
-      
     } finally {
       this.queueManager.markCompleted(item.jobId);
     }
@@ -376,53 +404,71 @@ export class PrioritySchedulerService {
 
   private setupEventHandlers(): void {
     // Handle urgent customer issues
-    this.scheduler.onEvent('UrgentCustomerIssueEvent', async (event: UrgentCustomerIssueEvent) => {
-      await this.handleUrgentCustomerIssue(event);
-    });
+    this.scheduler.onEvent(
+      'UrgentCustomerIssueEvent',
+      async (event: UrgentCustomerIssueEvent) => {
+        await this.handleUrgentCustomerIssue(event);
+      }
+    );
 
     // Handle routine maintenance
-    this.scheduler.onEvent('RoutineMaintenanceEvent', async (event: RoutineMaintenanceEvent) => {
-      await this.handleMaintenanceTask(event);
-    });
+    this.scheduler.onEvent(
+      'RoutineMaintenanceEvent',
+      async (event: RoutineMaintenanceEvent) => {
+        await this.handleMaintenanceTask(event);
+      }
+    );
 
     // Handle standard notifications
-    this.scheduler.onEvent('StandardNotificationEvent', async (event: StandardNotificationEvent) => {
-      await this.handleNotification(event);
-    });
+    this.scheduler.onEvent(
+      'StandardNotificationEvent',
+      async (event: StandardNotificationEvent) => {
+        await this.handleNotification(event);
+      }
+    );
   }
 
-  private async handleUrgentCustomerIssue(event: UrgentCustomerIssueEvent): Promise<void> {
+  private async handleUrgentCustomerIssue(
+    event: UrgentCustomerIssueEvent
+  ): Promise<void> {
     const issueData = event.payload;
-    
-    console.log(`🚨 URGENT: Processing customer issue for ${event.aggregateId}`, {
-      issueType: issueData.type,
-      priority: issueData.priority,
-      description: issueData.description
-    });
+
+    console.log(
+      `🚨 URGENT: Processing customer issue for ${event.aggregateId}`,
+      {
+        issueType: issueData.type,
+        priority: issueData.priority,
+        description: issueData.description,
+      }
+    );
 
     // Simulate urgent processing
     await this.escalateToSupport(issueData);
     await this.notifyManager(issueData);
   }
 
-  private async handleMaintenanceTask(event: RoutineMaintenanceEvent): Promise<void> {
+  private async handleMaintenanceTask(
+    event: RoutineMaintenanceEvent
+  ): Promise<void> {
     const taskData = event.payload;
-    
+
     console.log(`🔧 Processing maintenance task: ${event.aggregateId}`, {
       taskType: taskData.type,
-      estimatedDuration: taskData.estimatedDuration
+      estimatedDuration: taskData.estimatedDuration,
     });
 
     // Simulate maintenance processing
     await this.performMaintenance(taskData);
   }
 
-  private async handleNotification(event: StandardNotificationEvent): Promise<void> {
+  private async handleNotification(
+    event: StandardNotificationEvent
+  ): Promise<void> {
     const notificationData = event.payload;
-    
+
     console.log(`📢 Sending notification to ${event.aggregateId}`, {
       type: notificationData.type,
-      channel: notificationData.channel
+      channel: notificationData.channel,
     });
 
     // Simulate notification sending
@@ -441,14 +487,18 @@ export class PrioritySchedulerService {
     console.log('Manager notified of urgent issue');
   }
 
-  private async performMaintenance(taskData: MaintenanceTaskData): Promise<void> {
+  private async performMaintenance(
+    taskData: MaintenanceTaskData
+  ): Promise<void> {
     // Simulate maintenance work
     const duration = taskData.estimatedDuration || 5000;
     await new Promise(resolve => setTimeout(resolve, duration));
     console.log('Maintenance task completed');
   }
 
-  private async sendNotification(notificationData: NotificationData): Promise<void> {
+  private async sendNotification(
+    notificationData: NotificationData
+  ): Promise<void> {
     // Simulate notification sending
     await new Promise(resolve => setTimeout(resolve, 200));
     console.log('Notification sent successfully');
@@ -460,86 +510,97 @@ export class PrioritySchedulerService {
 
 ```typescript
 // usage-example.ts
-import { 
+import {
   PrioritySchedulerService,
   UrgentCustomerIssueEvent,
   RoutineMaintenanceEvent,
-  StandardNotificationEvent
+  StandardNotificationEvent,
 } from './priority-scheduling';
 
 async function demonstratePriorityScheduling() {
   const scheduler = new PrioritySchedulerService(5); // Max 5 concurrent jobs
-  
+
   await scheduler.start();
-  
+
   try {
     // Schedule various events with different priorities
-    
+
     // 1. Urgent customer issue (CRITICAL priority)
     const urgentIssueId = await scheduler.scheduleUrgentIssue('CUSTOMER-123', {
       type: 'billing-dispute',
       priority: 'critical',
       description: 'Customer unable to access paid features',
       reportedAt: new Date(),
-      customerTier: 'premium'
+      customerTier: 'premium',
     });
-    
+
     // 2. Routine maintenance (LOW priority) - scheduled for tonight
     const tonight = new Date();
     tonight.setHours(23, 0, 0, 0);
-    
-    const maintenanceId = await scheduler.scheduleMaintenanceTask('MAINT-456', {
-      type: 'database-cleanup',
-      estimatedDuration: 30000, // 30 seconds
-      resources: ['database', 'storage'],
-      maintainer: 'system'
-    }, tonight);
-    
+
+    const maintenanceId = await scheduler.scheduleMaintenanceTask(
+      'MAINT-456',
+      {
+        type: 'database-cleanup',
+        estimatedDuration: 30000, // 30 seconds
+        resources: ['database', 'storage'],
+        maintainer: 'system',
+      },
+      tonight
+    );
+
     // 3. Standard notification (NORMAL priority)
-    const notificationId = await scheduler.scheduleNotification('USER-789', {
-      type: 'welcome-email',
-      channel: 'email',
-      recipient: 'user@example.com',
-      template: 'welcome-template',
-      data: { userName: 'John Doe' }
-    }, 10); // 10 minutes delay
-    
+    const notificationId = await scheduler.scheduleNotification(
+      'USER-789',
+      {
+        type: 'welcome-email',
+        channel: 'email',
+        recipient: 'user@example.com',
+        template: 'welcome-template',
+        data: { userName: 'John Doe' },
+      },
+      10
+    ); // 10 minutes delay
+
     // 4. Another urgent issue (should be processed before notification)
-    const anotherUrgentId = await scheduler.scheduleUrgentIssue('CUSTOMER-456', {
-      type: 'service-outage',
-      priority: 'critical',
-      description: 'Customer reporting complete service unavailability',
-      reportedAt: new Date(),
-      customerTier: 'enterprise'
-    }, 5); // 5 minutes delay
-    
+    const anotherUrgentId = await scheduler.scheduleUrgentIssue(
+      'CUSTOMER-456',
+      {
+        type: 'service-outage',
+        priority: 'critical',
+        description: 'Customer reporting complete service unavailability',
+        reportedAt: new Date(),
+        customerTier: 'enterprise',
+      },
+      5
+    ); // 5 minutes delay
+
     console.log('All events scheduled:', {
       urgentIssue1: urgentIssueId,
       maintenance: maintenanceId,
       notification: notificationId,
-      urgentIssue2: anotherUrgentId
+      urgentIssue2: anotherUrgentId,
     });
-    
+
     // Monitor queue statistics
     const monitorStats = async () => {
       const stats = await scheduler.getSchedulerStats();
       const queueStats = scheduler.getPriorityQueueStats();
-      
+
       console.log('📊 Scheduler Statistics:', stats);
       console.log('🔄 Queue Statistics:', queueStats);
     };
-    
+
     // Monitor every 10 seconds
     const statsInterval = setInterval(monitorStats, 10000);
-    
+
     // Let it run for a minute to see processing
     await new Promise(resolve => setTimeout(resolve, 60000));
-    
+
     clearInterval(statsInterval);
-    
+
     // Final statistics
     await monitorStats();
-    
   } finally {
     await scheduler.stop();
   }
@@ -550,23 +611,30 @@ demonstratePriorityScheduling().catch(console.error);
 
 ## Key Features
 
-- **Priority Levels**: Support for CRITICAL, HIGH, NORMAL, and LOW priority events
-- **Queue Management**: Separate queues for different types of events with priority ordering
+- **Priority Levels**: Support for CRITICAL, HIGH, NORMAL, and LOW priority
+  events
+- **Queue Management**: Separate queues for different types of events with
+  priority ordering
 - **Concurrent Processing**: Configurable maximum concurrent job execution
-- **Resource Control**: Prevents system overload by limiting concurrent executions
-- **Priority Sorting**: Higher priority events are processed before lower priority ones
+- **Resource Control**: Prevents system overload by limiting concurrent
+  executions
+- **Priority Sorting**: Higher priority events are processed before lower
+  priority ones
 - **Queue Statistics**: Monitoring and metrics for queue performance
 - **Backpressure Handling**: Graceful handling of queue buildup
 
 ## Common Pitfalls
 
 - **Priority Starvation**: Ensure low-priority jobs eventually get processed
-- **Resource Exhaustion**: Monitor concurrent job limits to prevent system overload  
+- **Resource Exhaustion**: Monitor concurrent job limits to prevent system
+  overload
 - **Queue Buildup**: Implement alerting for growing queue sizes
 - **Priority Abuse**: Prevent overuse of high priority levels
 
 ## Related Examples
 
-- [Basic Event Scheduling](./example-1.md) - Simple event scheduling without priorities
+- [Basic Event Scheduling](./example-1.md) - Simple event scheduling without
+  priorities
 - [Recurring Events](./example-2.md) - Periodic task scheduling with priorities
-- [Advanced Queue Management](../advanced/example-2.md) - Enterprise-scale queue management
+- [Advanced Queue Management](../advanced/example-2.md) - Enterprise-scale queue
+  management

@@ -1,19 +1,13 @@
-// Basic Domain Service Implementation
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
+// Basic Domain Service Implementation import { BaseDomainService } from
+'@vytches-ddd/domain-services'; import { Result } from '@vytches-ddd/utils';
 import { User, CreateUserCommand } from '../types';
 
-export class UserManagementService extends BaseDomainService {
-  constructor() {
-    super('UserManagementService');
-  }
+export class UserManagementService extends BaseDomainService { constructor() {
+super('UserManagementService'); }
 
-  async createUser(command: CreateUserCommand): Promise<Result<User, Error>> {
-    try {
-      // Validate
-      if (!command.email?.includes('@')) {
-        return Result.failure(new Error('Invalid email'));
-      }
+async createUser(command: CreateUserCommand): Promise<Result<User, Error>> { try
+{ // Validate if (!command.email?.includes('@')) { return Result.failure(new
+Error('Invalid email')); }
 
       // Create user
       const user: User = {
@@ -33,5 +27,5 @@ export class UserManagementService extends BaseDomainService {
     } catch (error) {
       return Result.failure(new Error(`Failed to create user: ${error.message}`));
     }
-  }
-}
+
+} }

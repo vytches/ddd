@@ -2,7 +2,8 @@
 
 **Focus**: Production-ready logging infrastructure with NestJS integration
 **Base Example**: [Enterprise Observability](../../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/logging, @vytches-ddd/di, winston, pino
+**Dependencies**: @nestjs/common, @vytches-ddd/logging, @vytches-ddd/di,
+winston, pino
 
 ## Service Implementation
 
@@ -15,7 +16,7 @@ import type {
   LoggingInfrastructure,
   ProductionLogConfig,
   AlertingConfig,
-  MetricsConfig
+  MetricsConfig,
 } from './types'; // From your application
 
 @Injectable()
@@ -27,12 +28,13 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
 
   constructor() {
     // ⭐ FOCUS: @vytches-ddd/di integration for enterprise logging
-    this.infrastructure = VytchesDDD.resolve<LoggingInfrastructure>('loggingInfrastructure');
-    this.logger = Logger.forContext('ProductionLoggingService')
-      .withContext({
-        service: 'nestjs-app',
-        environment: process.env.NODE_ENV || 'production'
-      });
+    this.infrastructure = VytchesDDD.resolve<LoggingInfrastructure>(
+      'loggingInfrastructure'
+    );
+    this.logger = Logger.forContext('ProductionLoggingService').withContext({
+      service: 'nestjs-app',
+      environment: process.env.NODE_ENV || 'production',
+    });
   }
 
   async onModuleInit(): Promise<void> {
@@ -40,13 +42,13 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
     await this.initializeProductionLogging();
     await this.setupHealthMonitoring();
     await this.configureAlertingRules();
-    
+
     this.logger.info('Production logging infrastructure initialized', {
       logLevel: process.env.LOG_LEVEL || 'info',
       outputFormat: process.env.LOG_FORMAT || 'json',
       enabledTransports: this.infrastructure.getEnabledTransports(),
       healthCheckInterval: 30000,
-      metricsInterval: 10000
+      metricsInterval: 10000,
     });
   }
 
@@ -79,7 +81,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         httpStatusCode: statusCode,
         responseTimeMs: responseTime,
         userAgent: userContext?.userAgent,
-        clientIP: userContext?.clientIP
+        clientIP: userContext?.clientIP,
       });
 
     // ✅ FOCUS: Structured HTTP request logging
@@ -90,7 +92,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         endpoint: `${method} ${url}`,
         responseTimeMs: responseTime,
         impact: 'HIGH',
-        requiresInvestigation: true
+        requiresInvestigation: true,
       });
     } else if (statusCode >= 400) {
       requestLogger.warn('HTTP client error', {
@@ -98,17 +100,19 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         errorCode: statusCode,
         endpoint: `${method} ${url}`,
         responseTimeMs: responseTime,
-        userContext: userContext ? {
-          userId: userContext.userId,
-          sessionId: userContext.sessionId
-        } : undefined
+        userContext: userContext
+          ? {
+              userId: userContext.userId,
+              sessionId: userContext.sessionId,
+            }
+          : undefined,
       });
     } else {
       requestLogger.info('HTTP request completed', {
         endpoint: `${method} ${url}`,
         statusCode,
         responseTimeMs: responseTime,
-        performance: this.classifyPerformance(responseTime)
+        performance: this.classifyPerformance(responseTime),
       });
     }
 
@@ -119,7 +123,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       statusCode,
       responseTimeMs: responseTime,
       timestamp: new Date(),
-      userId: userContext?.userId
+      userId: userContext?.userId,
     });
   }
 
@@ -137,7 +141,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         transactionType,
         businessDomain: details.domain,
         transactionValue: details.value,
-        currency: details.currency
+        currency: details.currency,
       });
 
     businessLogger.business('Business transaction logged', {
@@ -149,7 +153,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       businessContext: {
         domain: details.domain,
         category: details.category,
-        priority: details.priority
+        priority: details.priority,
       },
       auditTrail: {
         initiatedBy: userId,
@@ -158,14 +162,14 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         compliance: {
           auditRequired: details.auditRequired,
           retentionPeriod: details.retentionPeriod,
-          dataClassification: details.dataClassification
-        }
+          dataClassification: details.dataClassification,
+        },
       },
       businessMetrics: {
         conversionFunnel: details.conversionStep,
         customerSegment: details.customerSegment,
-        acquisitionChannel: details.acquisitionChannel
-      }
+        acquisitionChannel: details.acquisitionChannel,
+      },
     });
 
     // ✅ FOCUS: Business intelligence data collection
@@ -177,7 +181,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         currency: details.currency,
         customerSegment: details.customerSegment,
         timestamp: new Date(),
-        metadata: details.businessIntelligence
+        metadata: details.businessIntelligence,
       });
     }
   }
@@ -197,7 +201,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         threatSeverity: severity,
         sourceIP: details.sourceIP,
         userAgent: details.userAgent,
-        endpoint: request?.url
+        endpoint: request?.url,
       });
 
     // ✅ FOCUS: Advanced threat intelligence integration
@@ -206,7 +210,10 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       sourceIP: details.sourceIP,
       userAgent: details.userAgent,
       behaviorPattern: details.behaviorPattern,
-      historicalContext: await this.getSecurityHistory(details.userId, details.sourceIP)
+      historicalContext: await this.getSecurityHistory(
+        details.userId,
+        details.sourceIP
+      ),
     });
 
     securityLogger.security('Security event detected', {
@@ -217,38 +224,56 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         ip: details.sourceIP,
         userAgent: details.userAgent,
         geoLocation: threatIntelligence.geoLocation,
-        reputation: threatIntelligence.ipReputation
+        reputation: threatIntelligence.ipReputation,
       },
       threatAnalysis: {
         riskScore: threatIntelligence.riskScore,
         threatCategory: threatIntelligence.category,
         confidenceLevel: threatIntelligence.confidence,
         similarIncidents: threatIntelligence.similarIncidents.length,
-        recommendedActions: threatIntelligence.recommendations
+        recommendedActions: threatIntelligence.recommendations,
       },
-      userContext: details.userId ? {
-        userId: details.userId,
-        accountAge: await this.calculateAccountAge(details.userId),
-        previousViolations: await this.getPreviousViolations(details.userId),
-        riskProfile: await this.getUserRiskProfile(details.userId)
-      } : undefined,
+      userContext: details.userId
+        ? {
+            userId: details.userId,
+            accountAge: await this.calculateAccountAge(details.userId),
+            previousViolations: await this.getPreviousViolations(
+              details.userId
+            ),
+            riskProfile: await this.getUserRiskProfile(details.userId),
+          }
+        : undefined,
       systemImpact: {
         affectedServices: this.identifyAffectedServices(eventType),
         dataAtRisk: this.assessDataAtRisk(eventType, details),
-        businessImpact: this.assessBusinessImpact(severity, eventType)
-      }
+        businessImpact: this.assessBusinessImpact(severity, eventType),
+      },
     });
 
     // ✅ FOCUS: Automated security response
     if (severity === 'CRITICAL' || threatIntelligence.riskScore > 0.8) {
-      await this.triggerSecurityResponse(eventType, details, threatIntelligence);
-      
-      securityLogger.critical('Critical security event triggered automated response', {
+      await this.triggerSecurityResponse(
         eventType,
-        responseActions: await this.getTriggeredActions(eventType),
-        escalationLevel: this.calculateEscalationLevel(severity, threatIntelligence.riskScore),
-        notificationsSent: await this.sendSecurityNotifications(eventType, severity, details)
-      });
+        details,
+        threatIntelligence
+      );
+
+      securityLogger.critical(
+        'Critical security event triggered automated response',
+        {
+          eventType,
+          responseActions: await this.getTriggeredActions(eventType),
+          escalationLevel: this.calculateEscalationLevel(
+            severity,
+            threatIntelligence.riskScore
+          ),
+          notificationsSent: await this.sendSecurityNotifications(
+            eventType,
+            severity,
+            details
+          ),
+        }
+      );
     }
   }
 
@@ -261,38 +286,47 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     const performanceLogger = this.logger.withContext({
       performanceMonitoring: true,
-      operation: operationName
+      operation: operationName,
     });
 
     const performanceData = {
       operation: operationName,
       timing: {
         executionTimeMs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       resources: {
         memoryUsageMB,
         cpuUsage: additionalMetrics?.cpuUsage,
         activeConnections: additionalMetrics?.activeConnections,
-        queueDepth: additionalMetrics?.queueDepth
+        queueDepth: additionalMetrics?.queueDepth,
       },
       thresholds: {
-        warningThresholdMs: this.getPerformanceThreshold(operationName, 'warning'),
+        warningThresholdMs: this.getPerformanceThreshold(
+          operationName,
+          'warning'
+        ),
         errorThresholdMs: this.getPerformanceThreshold(operationName, 'error'),
-        memoryThresholdMB: this.getMemoryThreshold(operationName)
-      }
+        memoryThresholdMB: this.getMemoryThreshold(operationName),
+      },
     };
 
     // ✅ FOCUS: Performance threshold analysis
     const violations = this.analyzePerformanceViolations(performanceData);
-    
+
     if (violations.length > 0) {
       performanceLogger.warn('Performance thresholds violated', {
         ...performanceData,
         violations,
         impact: this.assessPerformanceImpact(violations),
-        recommendations: this.generatePerformanceRecommendations(violations, additionalMetrics),
-        trendAnalysis: await this.analyzePerformanceTrend(operationName, executionTimeMs)
+        recommendations: this.generatePerformanceRecommendations(
+          violations,
+          additionalMetrics
+        ),
+        trendAnalysis: await this.analyzePerformanceTrend(
+          operationName,
+          executionTimeMs
+        ),
       });
 
       // Trigger performance alerts
@@ -300,13 +334,13 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         operation: operationName,
         violations,
         currentMetrics: performanceData,
-        severity: this.calculatePerformanceSeverity(violations)
+        severity: this.calculatePerformanceSeverity(violations),
       });
     } else {
       performanceLogger.debug('Performance metrics recorded', {
         ...performanceData,
         healthStatus: 'HEALTHY',
-        efficiencyScore: this.calculateEfficiencyScore(performanceData)
+        efficiencyScore: this.calculateEfficiencyScore(performanceData),
       });
     }
 
@@ -315,7 +349,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       operation: operationName,
       metrics: performanceData,
       timestamp: new Date(),
-      healthScore: this.calculateHealthScore(performanceData, violations)
+      healthScore: this.calculateHealthScore(performanceData, violations),
     });
   }
 
@@ -331,7 +365,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       .withContext({
         errorType: error.name,
         errorCategory: this.categorizeError(error),
-        severity: this.calculateErrorSeverity(error, context)
+        severity: this.calculateErrorSeverity(error, context),
       });
 
     // ✅ FOCUS: Advanced error analysis
@@ -340,7 +374,10 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       context,
       stackTrace: error.stack,
       systemState: await this.captureSystemState(),
-      correlatedErrors: await this.findCorrelatedErrors(context.correlationId, '1h')
+      correlatedErrors: await this.findCorrelatedErrors(
+        context.correlationId,
+        '1h'
+      ),
     });
 
     errorLogger.error('Application error occurred', {
@@ -348,14 +385,14 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         name: error.name,
         message: error.message,
         stack: this.sanitizeStackTrace(error.stack),
-        fingerprint: this.generateErrorFingerprint(error)
+        fingerprint: this.generateErrorFingerprint(error),
       },
       context: {
         operation: context.operation,
         component: context.component,
         userAction: context.userAction,
         sessionId: context.sessionId,
-        requestId: context.requestId
+        requestId: context.requestId,
       },
       analysis: {
         category: errorAnalysis.category,
@@ -363,31 +400,38 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
         frequency: errorAnalysis.frequency,
         pattern: errorAnalysis.pattern,
         rootCause: errorAnalysis.rootCause,
-        resolution: errorAnalysis.suggestedResolution
+        resolution: errorAnalysis.suggestedResolution,
       },
       impact: {
         usersAffected: errorAnalysis.usersAffected,
         businessImpact: errorAnalysis.businessImpact,
-        serviceAvailability: errorAnalysis.serviceAvailability
+        serviceAvailability: errorAnalysis.serviceAvailability,
       },
       systemContext: {
         environment: process.env.NODE_ENV,
         serviceVersion: process.env.SERVICE_VERSION,
         nodeVersion: process.version,
         uptime: process.uptime(),
-        memoryUsage: process.memoryUsage()
-      }
+        memoryUsage: process.memoryUsage(),
+      },
     });
 
     // ✅ FOCUS: Error escalation and notification
     if (errorAnalysis.severity === 'CRITICAL' || errorAnalysis.frequency > 10) {
       await this.escalateError(error, context, errorAnalysis);
-      
+
       errorLogger.critical('Critical error requires immediate attention', {
-        escalationLevel: this.calculateEscalationLevel(errorAnalysis.severity, errorAnalysis.frequency),
+        escalationLevel: this.calculateEscalationLevel(
+          errorAnalysis.severity,
+          errorAnalysis.frequency
+        ),
         onCallEngineer: await this.getOnCallEngineer(),
-        automatedActions: await this.triggerErrorResponse(error, context, errorAnalysis),
-        incidentId: await this.createIncident(error, context, errorAnalysis)
+        automatedActions: await this.triggerErrorResponse(
+          error,
+          context,
+          errorAnalysis
+        ),
+        incidentId: await this.createIncident(error, context, errorAnalysis),
       });
     }
   }
@@ -399,35 +443,38 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
       transports: {
         console: {
           enabled: process.env.CONSOLE_LOGGING !== 'false',
-          colorize: process.env.NODE_ENV !== 'production'
+          colorize: process.env.NODE_ENV !== 'production',
         },
         file: {
           enabled: process.env.FILE_LOGGING === 'true',
           filename: process.env.LOG_FILE || '/var/log/nestjs-app.log',
           maxsize: parseInt(process.env.LOG_MAX_SIZE || '100000000'), // 100MB
           maxFiles: parseInt(process.env.LOG_MAX_FILES || '5'),
-          compress: true
+          compress: true,
         },
         elasticsearch: {
           enabled: process.env.ELASTICSEARCH_LOGGING === 'true',
           host: process.env.ELASTICSEARCH_HOST || 'localhost:9200',
           index: process.env.ELASTICSEARCH_INDEX || 'nestjs-logs',
-          type: '_doc'
+          type: '_doc',
         },
         datadog: {
           enabled: process.env.DATADOG_LOGGING === 'true',
           apiKey: process.env.DATADOG_API_KEY,
           service: process.env.DATADOG_SERVICE || 'nestjs-app',
           source: 'nodejs',
-          tags: [`env:${process.env.NODE_ENV}`, `version:${process.env.SERVICE_VERSION}`]
-        }
+          tags: [
+            `env:${process.env.NODE_ENV}`,
+            `version:${process.env.SERVICE_VERSION}`,
+          ],
+        },
       },
       sampling: {
         debug: parseFloat(process.env.DEBUG_SAMPLING || '0.1'),
         info: parseFloat(process.env.INFO_SAMPLING || '1.0'),
         warn: parseFloat(process.env.WARN_SAMPLING || '1.0'),
-        error: parseFloat(process.env.ERROR_SAMPLING || '1.0')
-      }
+        error: parseFloat(process.env.ERROR_SAMPLING || '1.0'),
+      },
     };
 
     await this.infrastructure.initialize(config);
@@ -436,13 +483,13 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
   private async setupHealthMonitoring(): Promise<void> {
     this.healthCheckInterval = setInterval(async () => {
       const healthMetrics = await this.infrastructure.getHealthMetrics();
-      
+
       if (healthMetrics.status !== 'HEALTHY') {
         this.logger.warn('Logging infrastructure health degraded', {
           status: healthMetrics.status,
           issues: healthMetrics.issues,
           transportHealth: healthMetrics.transportHealth,
-          recommendations: healthMetrics.recommendations
+          recommendations: healthMetrics.recommendations,
         });
       }
     }, 30000); // Every 30 seconds
@@ -454,9 +501,10 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
 
   private sanitizeEndpoint(url: string): string {
     // Remove sensitive parameters and normalize dynamic segments
-    return url.replace(/\/\d+/g, '/:id')
-              .replace(/[?&]token=[^&]*/g, '')
-              .replace(/[?&]api_key=[^&]*/g, '');
+    return url
+      .replace(/\/\d+/g, '/:id')
+      .replace(/[?&]token=[^&]*/g, '')
+      .replace(/[?&]api_key=[^&]*/g, '');
   }
 
   private classifyPerformance(responseTime: number): string {
@@ -480,12 +528,8 @@ import { LoggingMiddleware } from './logging.middleware';
 
 @Global()
 @Module({
-  providers: [
-    ProductionLoggingService,
-    LoggingInterceptor,
-    LoggingMiddleware
-  ],
-  exports: [ProductionLoggingService]
+  providers: [ProductionLoggingService, LoggingInterceptor, LoggingMiddleware],
+  exports: [ProductionLoggingService],
 })
 export class ProductionLoggingModule {}
 ```
@@ -507,7 +551,7 @@ export class LoggingMiddleware implements NestMiddleware {
 
     res.on('finish', async () => {
       const responseTime = Date.now() - startTime;
-      
+
       await this.loggingService.logRequest(
         req.method,
         req.originalUrl,
@@ -517,7 +561,7 @@ export class LoggingMiddleware implements NestMiddleware {
           userId: req.user?.id,
           sessionId: req.session?.id,
           userAgent: req.get('user-agent'),
-          clientIP: req.ip
+          clientIP: req.ip,
         }
       );
     });
@@ -529,26 +573,39 @@ export class LoggingMiddleware implements NestMiddleware {
 
 ## Key Features
 
-- **Production-Ready Infrastructure**: Enterprise logging with multiple transport options
-- **Real-time Health Monitoring**: Continuous monitoring of logging system health
-- **Advanced Threat Intelligence**: Security event analysis with automated responses
-- **Performance Threshold Management**: Configurable performance monitoring with alerting
-- **Error Correlation & Analysis**: Sophisticated error tracking with root cause analysis
-- **Business Intelligence Integration**: Business transaction logging for analytics
-- **Compliance & Audit Support**: Comprehensive audit trails with retention policies
+- **Production-Ready Infrastructure**: Enterprise logging with multiple
+  transport options
+- **Real-time Health Monitoring**: Continuous monitoring of logging system
+  health
+- **Advanced Threat Intelligence**: Security event analysis with automated
+  responses
+- **Performance Threshold Management**: Configurable performance monitoring with
+  alerting
+- **Error Correlation & Analysis**: Sophisticated error tracking with root cause
+  analysis
+- **Business Intelligence Integration**: Business transaction logging for
+  analytics
+- **Compliance & Audit Support**: Comprehensive audit trails with retention
+  policies
 - **Automated Incident Response**: Integration with incident management systems
 
 ## Common Pitfalls
 
-- **Log Volume Management**: Monitor and control log volume in production environments
-- **Sensitive Data Exposure**: Ensure proper sanitization of sensitive information
+- **Log Volume Management**: Monitor and control log volume in production
+  environments
+- **Sensitive Data Exposure**: Ensure proper sanitization of sensitive
+  information
 - **Performance Impact**: Balance logging detail with application performance
-- **Transport Reliability**: Implement fallback mechanisms for log transport failures
+- **Transport Reliability**: Implement fallback mechanisms for log transport
+  failures
 - **Storage Costs**: Implement cost-effective retention and archival policies
-- **Alert Fatigue**: Configure meaningful thresholds to avoid excessive notifications
+- **Alert Fatigue**: Configure meaningful thresholds to avoid excessive
+  notifications
 
 ## Related Examples
 
-- [Enterprise Observability](../../../advanced/example-1.md) - Advanced observability patterns
+- [Enterprise Observability](../../../advanced/example-1.md) - Advanced
+  observability patterns
 - [Basic NestJS Integration](../basic/example-1.md) - Foundation patterns
-- [Intermediate Context Management](../intermediate/example-1.md) - Context enrichment
+- [Intermediate Context Management](../intermediate/example-1.md) - Context
+  enrichment

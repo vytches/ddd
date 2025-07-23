@@ -1,25 +1,27 @@
 # Result Pattern Fundamentals
 
-**Version**: 1.0.0
-**Package**: @vytches-ddd/utils
-**Complexity**: basic
-**Domain**: Infrastructure
-**Patterns**: Result pattern, functional error handling, type safety
-**Dependencies**: None
+**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Domain**: Infrastructure **Patterns**: Result pattern, functional error
+handling, type safety **Dependencies**: None
 
 ## Description
 
-The Result pattern is a functional programming approach to error handling that makes errors explicit and forces proper error handling without throwing exceptions. This example demonstrates the fundamentals of using the Result class for type-safe error handling.
+The Result pattern is a functional programming approach to error handling that
+makes errors explicit and forces proper error handling without throwing
+exceptions. This example demonstrates the fundamentals of using the Result class
+for type-safe error handling.
 
 ## Business Context
 
 Traditional exception-based error handling can lead to:
+
 - Hidden control flow paths
 - Forgotten error handling
 - Runtime crashes from unhandled exceptions
 - Difficulty in understanding what operations might fail
 
-The Result pattern solves these problems by making success and failure explicit in the type system, ensuring errors are always handled.
+The Result pattern solves these problems by making success and failure explicit
+in the type system, ensuring errors are always handled.
 
 ## Code Example
 
@@ -54,14 +56,14 @@ export class UserValidationService {
   // Working with Result pattern
   processUserRegistration(userData: UserData): Result<string, ValidationError> {
     const validationResult = this.validateUser(userData);
-    
+
     if (validationResult.isFailure) {
       return Result.fail(validationResult.error);
     }
 
     const validUser = validationResult.value;
     const userId = `user-${Date.now()}`;
-    
+
     return Result.ok(`User ${validUser.name} registered with ID: ${userId}`);
   }
 
@@ -76,10 +78,10 @@ export class UserValidationService {
   // Pattern matching with Result
   formatUserInfo(userData: UserData): string {
     const result = this.validateUser(userData);
-    
+
     return result.match(
-      (user) => `Valid user: ${user.name} (${user.email})`,
-      (error) => `Validation failed: ${error.message}`
+      user => `Valid user: ${user.name} (${user.email})`,
+      error => `Validation failed: ${error.message}`
     );
   }
 
@@ -92,13 +94,12 @@ export class UserValidationService {
 
   // Multiple operations with flatMap
   processAndFormatUser(userData: UserData): Result<string, ValidationError> {
-    return this.validateUser(userData)
-      .flatMap(user => {
-        if (user.role === 'admin') {
-          return Result.ok(`ADMIN: ${user.name}`);
-        }
-        return Result.ok(`USER: ${user.name}`);
-      });
+    return this.validateUser(userData).flatMap(user => {
+      if (user.role === 'admin') {
+        return Result.ok(`ADMIN: ${user.name}`);
+      }
+      return Result.ok(`USER: ${user.name}`);
+    });
   }
 }
 ```
@@ -109,7 +110,8 @@ export class UserValidationService {
 - **Type Safety**: TypeScript enforces proper error handling
 - **Functional Composition**: Chain operations safely with `map` and `flatMap`
 - **Pattern Matching**: Handle success and failure cases explicitly
-- **Exception Wrapping**: Convert throwing code to Result pattern with `Result.try`
+- **Exception Wrapping**: Convert throwing code to Result pattern with
+  `Result.try`
 
 ## Usage Examples
 
@@ -135,7 +137,8 @@ if (result.isSuccess) {
 
 // Chaining operations
 const displayResult = service.getUserDisplayName(userData);
-displayResult.tap(name => console.log('Display name:', name))
+displayResult
+  .tap(name => console.log('Display name:', name))
   .tapError(error => console.error('Failed:', error.message));
 ```
 
@@ -143,7 +146,8 @@ displayResult.tap(name => console.log('Display name:', name))
 
 - **Forgetting to check `isSuccess`**: Always check before accessing `value`
 - **Accessing value on failure**: Will throw an error - use type guards
-- **Mixing exceptions with Result**: Be consistent - either use Result or exceptions
+- **Mixing exceptions with Result**: Be consistent - either use Result or
+  exceptions
 - **Not using `Result.try`**: Wrap throwing code properly
 
 ## Related Examples

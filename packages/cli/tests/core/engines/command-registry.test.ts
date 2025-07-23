@@ -25,8 +25,12 @@ describe('CommandRegistry', () => {
     vi.clearAllMocks();
 
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => { return });
-    vi.spyOn(console, 'error').mockImplementation(() => { return });
+    vi.spyOn(console, 'log').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      return;
+    });
     vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
     vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
 
@@ -46,10 +50,10 @@ describe('CommandRegistry', () => {
       projectStructure: 'clean-architecture',
       framework: 'nestjs',
       patterns: [],
-      plugins: []
+      plugins: [],
     };
 
-    registry = new CommandRegistry({...mockConfig});
+    registry = new CommandRegistry({ ...mockConfig });
   });
 
   afterEach(() => {
@@ -128,10 +132,7 @@ describe('CommandRegistry', () => {
       const mockCommand = {
         name: 'test-examples',
         description: 'Test command with examples',
-        examples: [
-          'vytches-ddd test-examples --type basic',
-          'vytches-ddd test-examples --verbose',
-        ],
+        examples: ['vytches-ddd test-examples --type basic', 'vytches-ddd test-examples --verbose'],
         action: vi.fn().mockResolvedValue(undefined),
       };
 
@@ -190,8 +191,8 @@ describe('CommandRegistry', () => {
       registry.registerCommand(testCommand);
 
       // Simulate command execution
-      const [error] = await safeRun(async () =>
-        await registry.execute(['node', 'cli.js', 'exec-test'])
+      const [error] = await safeRun(
+        async () => await registry.execute(['node', 'cli.js', 'exec-test'])
       );
 
       expect(error).toBeUndefined();
@@ -213,8 +214,8 @@ describe('CommandRegistry', () => {
         throw new Error('process.exit called');
       });
 
-      const [execError] = await safeRun(async () =>
-        await registry.execute(['node', 'cli.js', 'failing-command'])
+      const [execError] = await safeRun(
+        async () => await registry.execute(['node', 'cli.js', 'failing-command'])
       );
 
       expect(execError?.message).toBe('process.exit called');
@@ -232,8 +233,8 @@ describe('CommandRegistry', () => {
 
       registry.registerCommand(debugCommand);
 
-      const [error] = await safeRun(async () =>
-        await registry.execute(['node', 'cli.js', 'debug-test', '--debug'])
+      const [error] = await safeRun(
+        async () => await registry.execute(['node', 'cli.js', 'debug-test', '--debug'])
       );
 
       expect(error).toBeUndefined();

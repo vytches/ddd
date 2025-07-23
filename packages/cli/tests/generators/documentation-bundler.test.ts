@@ -3,7 +3,10 @@ import { safeRun } from '@vytches-ddd/utils';
 import { DocumentationBundler } from '../../src/generators/documentation-bundler';
 import { DocumentationGenerator } from '../../src/generators/documentation-generator';
 import { PackageConfigLoader } from '../../src/core/package-config-loader';
-import type { BundleOptions, DocumentationBundle } from '../../src/generators/documentation-bundler';
+import type {
+  BundleOptions,
+  DocumentationBundle,
+} from '../../src/generators/documentation-bundler';
 import type { PackageExampleConfig, ExampleDefinition } from '../../src/types/example-types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -38,7 +41,7 @@ describe('DocumentationBundler', () => {
     diSupport: false,
     frameworkIntegrations: [],
     dependencies: [],
-    priority: 'medium'
+    priority: 'medium',
   };
 
   const mockPackageConfig: PackageExampleConfig = {
@@ -54,14 +57,14 @@ describe('DocumentationBundler', () => {
         level: 'basic',
         diSupport: false,
         diRequired: false,
-        description: 'Basic implementation'
+        description: 'Basic implementation',
       },
       advanced: {
         level: 'advanced',
         diSupport: true,
         diRequired: false,
-        description: 'Advanced implementation'
-      }
+        description: 'Advanced implementation',
+      },
     },
     frameworks: [],
     sections: ['core', 'integration'],
@@ -70,7 +73,7 @@ describe('DocumentationBundler', () => {
       core: ['domain-services:core'],
       integrations: ['domain-services:integration'],
       frameworks: ['domain-services:nestjs'],
-      patterns: ['domain-services:patterns']
+      patterns: ['domain-services:patterns'],
     },
     contentConfig: {
       showImportStatements: true,
@@ -79,14 +82,14 @@ describe('DocumentationBundler', () => {
       showPerformance: false,
       includeBestPractices: true,
       includeCommonPitfalls: false,
-      showVersionHistory: false
+      showVersionHistory: false,
     },
     llmSupport: {
       enabled: true,
       includePrompts: false,
       includeTips: true,
       includePatterns: true,
-      optimizeForCodeGeneration: false
+      optimizeForCodeGeneration: false,
     },
     relatedPackages: {},
     tagFinder: {
@@ -94,7 +97,7 @@ describe('DocumentationBundler', () => {
       seed: 'test-seed',
       priorityTags: ['basic'],
     },
-  }
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -111,7 +114,7 @@ describe('DocumentationBundler', () => {
 
     // Mock path operations
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
-    vi.mocked(path.dirname).mockImplementation((p) => p.split('/').slice(0, -1).join('/'));
+    vi.mocked(path.dirname).mockImplementation(p => p.split('/').slice(0, -1).join('/'));
 
     // Mock fs operations
     vi.mocked(fs.access).mockResolvedValue(undefined);
@@ -157,11 +160,13 @@ describe('DocumentationBundler', () => {
         ...mockPackageConfig,
         packageName: 'di',
         displayName: 'Dependency Injection',
-        examples: [{
-          ...mockExampleDefinition,
-          id: 'di-example-1',
-          tags: ['di:core'],
-        }],
+        examples: [
+          {
+            ...mockExampleDefinition,
+            id: 'di-example-1',
+            tags: ['di:core'],
+          },
+        ],
       };
 
       mockConfigLoader.loadPackageConfig
@@ -226,7 +231,11 @@ describe('DocumentationBundler', () => {
       // Should include both: NestJS example + core basic example (due to framework filter logic)
       expect(result.examples).toHaveLength(2);
       expect(result.examples.some(e => e.tags.includes('domain-services:nestjs'))).toBe(true);
-      expect(result.examples.some(e => e.tags.includes('domain-services:core') && e.complexity === 'basic')).toBe(true);
+      expect(
+        result.examples.some(
+          e => e.tags.includes('domain-services:core') && e.complexity === 'basic'
+        )
+      ).toBe(true);
     });
 
     it('should include core examples when filtering by framework', async () => {
@@ -539,7 +548,9 @@ describe('DocumentationBundler', () => {
       expect(result.examples).toHaveLength(0);
       // When no examples, the package section won't be generated
       expect(result.content).toContain('# domain-services Documentation Bundle');
-      expect(result.content).toContain('This documentation bundle combines examples from multiple packages.');
+      expect(result.content).toContain(
+        'This documentation bundle combines examples from multiple packages.'
+      );
     });
   });
 });
