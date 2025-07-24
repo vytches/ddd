@@ -1,6 +1,6 @@
 {
   "name": "@vytches-ddd/event-scheduling",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Event scheduling and delayed processing",
   "type": "module",
   "main": "./dist/index.cjs",
