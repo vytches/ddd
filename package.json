@@ -233,5 +233,95 @@
   },
   "nx": {
     "includedScripts": []
+  },
+  "exports": {
+    ".": {
+      "types": "./packages/core/src/index.ts",
+      "default": "./packages/core/src/index.ts"
+    },
+    "./acl": {
+      "types": "./packages/acl/src/index.ts",
+      "default": "./packages/acl/src/index.ts"
+    },
+    "./aggregates": {
+      "types": "./packages/aggregates/src/index.ts",
+      "default": "./packages/aggregates/src/index.ts"
+    },
+    "./cli": {
+      "types": "./packages/cli/src/index.ts",
+      "default": "./packages/cli/src/index.ts"
+    },
+    "./contracts": {
+      "types": "./packages/contracts/src/index.ts",
+      "default": "./packages/contracts/src/index.ts"
+    },
+    "./core": {
+      "types": "./packages/core/src/index.ts",
+      "default": "./packages/core/src/index.ts"
+    },
+    "./cqrs": {
+      "types": "./packages/cqrs/src/index.ts",
+      "default": "./packages/cqrs/src/index.ts"
+    },
+    "./di": {
+      "types": "./packages/di/src/index.ts",
+      "default": "./packages/di/src/index.ts"
+    },
+    "./domain-primitives": {
+      "types": "./packages/domain-primitives/src/index.ts",
+      "default": "./packages/domain-primitives/src/index.ts"
+    },
+    "./domain-services": {
+      "types": "./packages/domain-services/src/index.ts",
+      "default": "./packages/domain-services/src/index.ts"
+    },
+    "./event-scheduling": {
+      "types": "./packages/event-scheduling/src/index.ts",
+      "default": "./packages/event-scheduling/src/index.ts"
+    },
+    "./event-store": {
+      "types": "./packages/event-store/src/index.ts",
+      "default": "./packages/event-store/src/index.ts"
+    },
+    "./events": {
+      "types": "./packages/events/src/index.ts",
+      "default": "./packages/events/src/index.ts"
+    },
+    "./logging": {
+      "types": "./packages/logging/src/index.ts",
+      "default": "./packages/logging/src/index.ts"
+    },
+    "./messaging": {
+      "types": "./packages/messaging/src/index.ts",
+      "default": "./packages/messaging/src/index.ts"
+    },
+    "./policies": {
+      "types": "./packages/policies/src/index.ts",
+      "default": "./packages/policies/src/index.ts"
+    },
+    "./projections": {
+      "types": "./packages/projections/src/index.ts",
+      "default": "./packages/projections/src/index.ts"
+    },
+    "./repositories": {
+      "types": "./packages/repositories/src/index.ts",
+      "default": "./packages/repositories/src/index.ts"
+    },
+    "./resilience": {
+      "types": "./packages/resilience/src/index.ts",
+      "default": "./packages/resilience/src/index.ts"
+    },
+    "./utils": {
+      "types": "./packages/utils/src/index.ts",
+      "default": "./packages/utils/src/index.ts"
+    },
+    "./validation": {
+      "types": "./packages/validation/src/index.ts",
+      "default": "./packages/validation/src/index.ts"
+    },
+    "./value-objects": {
+      "types": "./packages/value-objects/src/index.ts",
+      "default": "./packages/value-objects/src/index.ts"
+    }
   }
 }
