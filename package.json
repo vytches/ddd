@@ -127,6 +127,8 @@
     "adr:status": "npx madr status",
     "adr:generate": "npx madr generate",
     "adr:export": "npx madr export html",
+    "// === GITHUB INSTALLATION SCRIPTS ===": "",
+    "postinstall": "node scripts/github-install.js",
     "// === RELEASE WORKFLOWS ===": "",
     "prerelease": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality && pnpm security:audit",
     "prerelease:fast": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality",
@@ -146,7 +148,7 @@
     "release:quick": "pnpm build && pnpm test && pnpm release:version",
     "release:collect": "git log --oneline --grep='feat\\|fix\\|BREAKING' --since='$(git describe --tags --abbrev=0 2>/dev/null || echo \"1 week ago\")' --format='%h %s'",
     "// === GIT HOOKS ===": "",
-    "prepare": "husky install",
+    "prepare": "husky install && pnpm build",
     "commit": "git-cz"
   },
   "devDependencies": {
@@ -234,94 +236,186 @@
   "nx": {
     "includedScripts": []
   },
+  "typesVersions": {
+    "*": {
+      "core": [
+        "./packages/core/dist/index.d.ts"
+      ],
+      "acl": [
+        "./packages/acl/dist/index.d.ts"
+      ],
+      "aggregates": [
+        "./packages/aggregates/dist/index.d.ts"
+      ],
+      "cli": [
+        "./packages/cli/dist/index.d.ts"
+      ],
+      "contracts": [
+        "./packages/contracts/dist/index.d.ts"
+      ],
+      "cqrs": [
+        "./packages/cqrs/dist/index.d.ts"
+      ],
+      "di": [
+        "./packages/di/dist/index.d.ts"
+      ],
+      "domain-primitives": [
+        "./packages/domain-primitives/dist/index.d.ts"
+      ],
+      "domain-services": [
+        "./packages/domain-services/dist/index.d.ts"
+      ],
+      "event-scheduling": [
+        "./packages/event-scheduling/dist/index.d.ts"
+      ],
+      "event-store": [
+        "./packages/event-store/dist/index.d.ts"
+      ],
+      "events": [
+        "./packages/events/dist/index.d.ts"
+      ],
+      "logging": [
+        "./packages/logging/dist/index.d.ts"
+      ],
+      "messaging": [
+        "./packages/messaging/dist/index.d.ts"
+      ],
+      "policies": [
+        "./packages/policies/dist/index.d.ts"
+      ],
+      "projections": [
+        "./packages/projections/dist/index.d.ts"
+      ],
+      "repositories": [
+        "./packages/repositories/dist/index.d.ts"
+      ],
+      "resilience": [
+        "./packages/resilience/dist/index.d.ts"
+      ],
+      "utils": [
+        "./packages/utils/dist/index.d.ts"
+      ],
+      "validation": [
+        "./packages/validation/dist/index.d.ts"
+      ],
+      "value-objects": [
+        "./packages/value-objects/dist/index.d.ts"
+      ],
+      "*": [
+        "./packages/*/dist/index.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
-      "types": "./packages/core/src/index.ts",
-      "default": "./packages/core/src/index.ts"
+      "types": "./packages/core/dist/index.d.ts",
+      "import": "./packages/core/dist/index.js",
+      "require": "./packages/core/dist/index.cjs"
     },
     "./acl": {
-      "types": "./packages/acl/src/index.ts",
-      "default": "./packages/acl/src/index.ts"
+      "types": "./packages/acl/dist/index.d.ts",
+      "import": "./packages/acl/dist/index.js",
+      "require": "./packages/acl/dist/index.cjs"
     },
     "./aggregates": {
-      "types": "./packages/aggregates/src/index.ts",
-      "default": "./packages/aggregates/src/index.ts"
+      "types": "./packages/aggregates/dist/index.d.ts",
+      "import": "./packages/aggregates/dist/index.js",
+      "require": "./packages/aggregates/dist/index.cjs"
     },
     "./cli": {
-      "types": "./packages/cli/src/index.ts",
-      "default": "./packages/cli/src/index.ts"
+      "types": "./packages/cli/dist/index.d.ts",
+      "import": "./packages/cli/dist/index.js",
+      "require": "./packages/cli/dist/index.cjs"
     },
     "./contracts": {
-      "types": "./packages/contracts/src/index.ts",
-      "default": "./packages/contracts/src/index.ts"
+      "types": "./packages/contracts/dist/index.d.ts",
+      "import": "./packages/contracts/dist/index.js",
+      "require": "./packages/contracts/dist/index.cjs"
     },
     "./core": {
-      "types": "./packages/core/src/index.ts",
-      "default": "./packages/core/src/index.ts"
+      "types": "./packages/core/dist/index.d.ts",
+      "import": "./packages/core/dist/index.js",
+      "require": "./packages/core/dist/index.cjs"
     },
     "./cqrs": {
-      "types": "./packages/cqrs/src/index.ts",
-      "default": "./packages/cqrs/src/index.ts"
+      "types": "./packages/cqrs/dist/index.d.ts",
+      "import": "./packages/cqrs/dist/index.js",
+      "require": "./packages/cqrs/dist/index.cjs"
     },
     "./di": {
-      "types": "./packages/di/src/index.ts",
-      "default": "./packages/di/src/index.ts"
+      "types": "./packages/di/dist/index.d.ts",
+      "import": "./packages/di/dist/index.js",
+      "require": "./packages/di/dist/index.cjs"
     },
     "./domain-primitives": {
-      "types": "./packages/domain-primitives/src/index.ts",
-      "default": "./packages/domain-primitives/src/index.ts"
+      "types": "./packages/domain-primitives/dist/index.d.ts",
+      "import": "./packages/domain-primitives/dist/index.js",
+      "require": "./packages/domain-primitives/dist/index.cjs"
     },
     "./domain-services": {
-      "types": "./packages/domain-services/src/index.ts",
-      "default": "./packages/domain-services/src/index.ts"
+      "types": "./packages/domain-services/dist/index.d.ts",
+      "import": "./packages/domain-services/dist/index.js",
+      "require": "./packages/domain-services/dist/index.cjs"
     },
     "./event-scheduling": {
-      "types": "./packages/event-scheduling/src/index.ts",
-      "default": "./packages/event-scheduling/src/index.ts"
+      "types": "./packages/event-scheduling/dist/index.d.ts",
+      "import": "./packages/event-scheduling/dist/index.js",
+      "require": "./packages/event-scheduling/dist/index.cjs"
     },
     "./event-store": {
-      "types": "./packages/event-store/src/index.ts",
-      "default": "./packages/event-store/src/index.ts"
+      "types": "./packages/event-store/dist/index.d.ts",
+      "import": "./packages/event-store/dist/index.js",
+      "require": "./packages/event-store/dist/index.cjs"
     },
     "./events": {
-      "types": "./packages/events/src/index.ts",
-      "default": "./packages/events/src/index.ts"
+      "types": "./packages/events/dist/index.d.ts",
+      "import": "./packages/events/dist/index.js",
+      "require": "./packages/events/dist/index.cjs"
     },
     "./logging": {
-      "types": "./packages/logging/src/index.ts",
-      "default": "./packages/logging/src/index.ts"
+      "types": "./packages/logging/dist/index.d.ts",
+      "import": "./packages/logging/dist/index.js",
+      "require": "./packages/logging/dist/index.cjs"
     },
     "./messaging": {
-      "types": "./packages/messaging/src/index.ts",
-      "default": "./packages/messaging/src/index.ts"
+      "types": "./packages/messaging/dist/index.d.ts",
+      "import": "./packages/messaging/dist/index.js",
+      "require": "./packages/messaging/dist/index.cjs"
     },
     "./policies": {
-      "types": "./packages/policies/src/index.ts",
-      "default": "./packages/policies/src/index.ts"
+      "types": "./packages/policies/dist/index.d.ts",
+      "import": "./packages/policies/dist/index.js",
+      "require": "./packages/policies/dist/index.cjs"
     },
     "./projections": {
-      "types": "./packages/projections/src/index.ts",
-      "default": "./packages/projections/src/index.ts"
+      "types": "./packages/projections/dist/index.d.ts",
+      "import": "./packages/projections/dist/index.js",
+      "require": "./packages/projections/dist/index.cjs"
     },
     "./repositories": {
-      "types": "./packages/repositories/src/index.ts",
-      "default": "./packages/repositories/src/index.ts"
+      "types": "./packages/repositories/dist/index.d.ts",
+      "import": "./packages/repositories/dist/index.js",
+      "require": "./packages/repositories/dist/index.cjs"
     },
     "./resilience": {
-      "types": "./packages/resilience/src/index.ts",
-      "default": "./packages/resilience/src/index.ts"
+      "types": "./packages/resilience/dist/index.d.ts",
+      "import": "./packages/resilience/dist/index.js",
+      "require": "./packages/resilience/dist/index.cjs"
     },
     "./utils": {
-      "types": "./packages/utils/src/index.ts",
-      "default": "./packages/utils/src/index.ts"
+      "types": "./packages/utils/dist/index.d.ts",
+      "import": "./packages/utils/dist/index.js",
+      "require": "./packages/utils/dist/index.cjs"
     },
     "./validation": {
-      "types": "./packages/validation/src/index.ts",
-      "default": "./packages/validation/src/index.ts"
+      "types": "./packages/validation/dist/index.d.ts",
+      "import": "./packages/validation/dist/index.js",
+      "require": "./packages/validation/dist/index.cjs"
     },
     "./value-objects": {
-      "types": "./packages/value-objects/src/index.ts",
-      "default": "./packages/value-objects/src/index.ts"
+      "types": "./packages/value-objects/dist/index.d.ts",
+      "import": "./packages/value-objects/dist/index.js",
+      "require": "./packages/value-objects/dist/index.cjs"
     }
   }
 }
