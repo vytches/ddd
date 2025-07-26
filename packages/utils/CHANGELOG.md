@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.3.6 (2025-07-26)
+
+### Bug Fixes
+
+- adding meta-type generator
+  ([a75cac6](https://github.com/vytches/ddd/commit/a75cac67acf93cae1bc6940a136f4d0ca60c6c20))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.3.5 (2025-07-26)
 
 **Note:** Version bump only for package @vytches/ddd-utils

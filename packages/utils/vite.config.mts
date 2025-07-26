@@ -148,12 +148,17 @@ export function createFoundationConfig(packagePath: string = __dirname) {
 
   return defineConfig({
     plugins: [
-      dts({
-        insertTypesEntry: true,
-        exclude: ['**/*.spec.ts', '**/*.test.ts'],
-        outDir: 'dist',
-        entryRoot: 'src',
-      }),
+      // Only generate DTS for non-meta packages
+      ...(isMetaPackage
+        ? []
+        : [
+            dts({
+              insertTypesEntry: true,
+              exclude: ['**/*.spec.ts', '**/*.test.ts'],
+              outDir: 'dist',
+              entryRoot: 'src',
+            }),
+          ]),
     ],
     resolve: {
       alias: {

@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Complete Domain-Driven Design framework for TypeScript",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -32,7 +32,7 @@
     "directory": "packages/enterprise"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node ../../scripts/generate-meta-types.js",
     "dev": "vite build --watch",
     "clean": "rm -rf dist .tsbuildinfo",
     "test": "vitest run",
