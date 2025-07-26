@@ -448,12 +448,57 @@ importers:
 
   packages/enterprise:
     dependencies:
+      '@vytches/ddd-acl':
+        specifier: workspace:*
+        version: link:../acl
+      '@vytches/ddd-aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
+      '@vytches/ddd-cqrs':
+        specifier: workspace:*
+        version: link:../cqrs
+      '@vytches/ddd-di':
+        specifier: workspace:*
+        version: link:../di
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../events
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
+      '@vytches/ddd-messaging':
+        specifier: workspace:*
+        version: link:../messaging
       '@vytches/ddd-policies':
         specifier: workspace:*
         version: link:../policies
+      '@vytches/ddd-projections':
+        specifier: workspace:*
+        version: link:../projections
+      '@vytches/ddd-repositories':
+        specifier: workspace:*
+        version: link:../repositories
+      '@vytches/ddd-resilience':
+        specifier: workspace:*
+        version: link:../resilience
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@vytches/ddd-validation':
+        specifier: workspace:*
+        version: link:../validation
+      '@vytches/ddd-value-objects':
+        specifier: workspace:*
+        version: link:../value-objects
     devDependencies:
       typescript:
         specifier: ^5.0.0

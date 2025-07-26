@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-projections",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Event projections and read model capabilities",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -46,11 +46,11 @@
     "@vytches/ddd-events": "workspace:*"
   },
   "devDependencies": {
+    "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^2.0.0",
-    "@vytches/ddd-testing": "workspace:*"
+    "vitest": "^2.0.0"
   },
   "nx": {
     "tags": [

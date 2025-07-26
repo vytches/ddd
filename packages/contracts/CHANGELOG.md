@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.4.3 (2025-07-26)
+
+### Bug Fixes
+
+- transfering personal to organisation repository
+  ([b0f3a7f](https://github.com/vytches/ddd/commit/b0f3a7ff215955f0721a7665a09f487dc397aade))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.4.2 (2025-07-24)
 
 **Note:** Version bump only for package @vytches/ddd-contracts
