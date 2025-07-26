@@ -66,11 +66,28 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Debug GitHub Token Permissions
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          echo "Testing GITHUB_TOKEN permissions..."
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }} | jq '.permissions // "No permissions field"'
+
+          echo "Repository info:"
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }} | jq '{name, private, permissions}'
+
       - name: Configure Git
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+          echo "Testing Git push permissions..."
+          git ls-remote origin || echo "❌ Git remote access failed"
 
       - name: Version packages
         if: steps.changes.outputs.has_changes == 'true'

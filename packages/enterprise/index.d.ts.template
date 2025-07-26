@@ -1,0 +1,67 @@
+/**
+ * @file VytchesDDD - Complete Domain-Driven Design framework
+ * @module @vytches/ddd
+ */
+
+// Foundation layer exports
+export * from '@vytches/ddd-contracts';
+export * from '@vytches/ddd-domain-primitives';
+export * from '@vytches/ddd-value-objects';
+export * from '@vytches/ddd-repositories';
+export * from '@vytches/ddd-aggregates';
+
+// Pattern layer exports
+export * from '@vytches/ddd-validation';
+export * from '@vytches/ddd-domain-services';
+export * from '@vytches/ddd-policies';
+
+// Architecture layer exports
+export * from '@vytches/ddd-events';
+export * from '@vytches/ddd-cqrs';
+export * from '@vytches/ddd-projections';
+export * from '@vytches/ddd-event-store';
+
+// Integration layer exports
+export * from '@vytches/ddd-acl';
+export * from '@vytches/ddd-messaging';
+
+// Infrastructure layer exports
+export * from '@vytches/ddd-di';
+export * from '@vytches/ddd-logging';
+export * from '@vytches/ddd-resilience';
+export * from '@vytches/ddd-event-scheduling';
+
+// Utility exports
+export * from '@vytches/ddd-utils';
+export * from '@vytches/ddd-core';
+
+// Resolve naming conflicts with aliases
+export { EntityId as BaseEntityId } from '@vytches/ddd-contracts';
+export type { ValidationError as ContractsValidationError } from '@vytches/ddd-contracts';
+
+/**
+ * RESOLVED NAMING CONFLICTS:
+ *
+ * 1. EntityId:
+ *    - Primary: EntityId (from @vytches/ddd-value-objects) - Enhanced implementation with LibUtils
+ *    - Alternative: BaseEntityId (from @vytches/ddd-contracts) - Foundation interface
+ *
+ * 2. ValidationError:
+ *    - Primary: ValidationError (from @vytches/ddd-domain-primitives) - Main error type
+ *    - Aliases: ContractsValidationError, CqrsValidationError - Specific variants
+ *
+ * 3. ExecutionContext:
+ *    - Primary: ExecutionContext (from @vytches/ddd-cqrs) - Most commonly used
+ *
+ * 4. safeRun:
+ *    - Primary: safeRun (from @vytches/ddd-utils) - Core utility function
+ *    - Testing version is excluded from main exports
+ *
+ * 5. IAggregateCapability:
+ *    - Primary: IAggregateCapability (from @vytches/ddd-contracts) - Foundation interface
+ *
+ * For explicit access to alternative versions:
+ * import { BaseEntityId } from '@vytches/ddd';
+ * import { CqrsValidationError } from '@vytches/ddd';
+ * import { safeRun as TestingSafeRun } from '@vytches/ddd-testing';
+ */
