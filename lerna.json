@@ -8,14 +8,15 @@
       "registry": "https://npm.pkg.github.com",
       "conventionalCommits": true,
       "message": "chore: publish releases",
-      "allowBranch": ["main", "master"],
+      "allowBranch": ["main", "master", "release/*"],
       "ignoreChanges": ["**/*.md", "**/*.test.ts", "**/*.spec.ts", "**/tests/**"]
     },
     "version": {
       "conventionalCommits": true,
       "changelogPreset": "angular",
-      "createRelease": "github",
-      "exact": true
+      "createRelease": false,
+      "exact": true,
+      "allowBranch": ["main", "master", "release/*"]
     }
   },
   "changelogPreset": "angular",
