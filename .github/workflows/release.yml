@@ -32,7 +32,7 @@ jobs:
       - name: Generate GitHub App Token
         id: generate_token
         uses: tibdex/github-app-token@v1
-        if: ${{ secrets.APP_ID }}
+        if: secrets.APP_ID != ''
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
