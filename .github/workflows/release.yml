@@ -37,7 +37,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
           installation_id: ${{ secrets.APP_INSTALLATION_ID }}
-      
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
