@@ -138,7 +138,29 @@ export * from '@vytches/ddd-domain-services';
 export * from '@vytches/ddd-policies';
 
 // ===== ARCHITECTURE LAYER =====
-export * from '@vytches/ddd-events';
+// Events exports with explicit key classes
+export {
+  UniversalEventDispatcher,
+  UnifiedEventBus,
+  BaseEventBus,
+  CUSTOM_MIDDLEWARE_SYMBOL,
+  DomainEvent,
+  IntegrationEvent,
+  IntegrationEventProcessor,
+  DomainToIntegrationTransformer,
+  EventHandler,
+  EventDiscoveryPlugin,
+  eventDiscoveryPlugin,
+} from '@vytches/ddd-events';
+
+export type {
+  IDomainEventBus,
+  IIntegrationEventBus,
+  IAuditEventBus,
+  UnifiedEventHandler,
+  EventHandlerOptions,
+  DIHandlerMetadata,
+} from '@vytches/ddd-events';
 
 // CQRS exports with ExecutionContext resolution
 export {
