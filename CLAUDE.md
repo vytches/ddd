@@ -423,7 +423,7 @@ describe('UserService', () => {
 ### TypeScript Typing Guidelines
 
 **CRITICAL**: When creating functionality, avoid using the `any` type whenever
-possible.
+possible
 
 - ❌ **AVOID**: Using `any` type unless there's a strong business justification
 - ✅ **PREFER**: Proper typing with specific interfaces, types, or generics
