@@ -46,7 +46,7 @@ jobs:
           node-version: "20.x"
           cache: "pnpm"
           registry-url: "https://npm.pkg.github.com"
-          scope: "@vytches/ddd"
+          scope: "@vytches"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -111,7 +111,7 @@ jobs:
           node-version: "20.x"
           cache: "pnpm"
           registry-url: "https://npm.pkg.github.com"
-          scope: "@vytches/ddd"
+          scope: "@vytches"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

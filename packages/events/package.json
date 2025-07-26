@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-events",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Unified event system with context-aware routing",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -40,12 +40,6 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "@vytches/ddd-aggregates": "workspace:*",
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-domain-primitives": "workspace:*",
-    "@vytches/ddd-value-objects": "workspace:*"
   },
   "dependencies": {
     "@vytches/ddd-aggregates": "workspace:*",

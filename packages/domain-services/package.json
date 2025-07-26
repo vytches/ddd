@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-domain-services",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Domain services and domain logic coordination",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -40,11 +40,6 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-validation": "workspace:*"
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",

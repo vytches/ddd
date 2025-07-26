@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-policies",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Business policies and policy builder patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -41,11 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
-    "@vytches/ddd-validation": "workspace:*"
-  },
   "devDependencies": {
     "@vytches/ddd-testing": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
@@ -64,5 +59,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
+  },
+  "dependencies": {
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   }
 }

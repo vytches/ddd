@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-cqrs",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Command Query Responsibility Segregation patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -41,10 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-events": "workspace:*"
-  },
   "devDependencies": {
     "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
@@ -62,5 +58,9 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
+  },
+  "dependencies": {
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-events": "workspace:*"
   }
 }

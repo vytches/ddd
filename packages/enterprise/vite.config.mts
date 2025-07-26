@@ -105,13 +105,11 @@ export default defineConfig({
     rollupOptions: {
       external: id => {
         if (isMetaPackage) {
-          // Meta-packages should bundle all their @vytches/ddd-* dependencies
-          // Only externalize true external dependencies (nodejs modules, npm packages)
+          // Meta-packages should externalize all @vytches/ddd-* dependencies
+          // They are re-exports, not bundled code
           return (
-            !id.startsWith('@vytches/ddd-') &&
-            !id.includes('src/') &&
-            !id.startsWith('./') &&
-            !id.startsWith('../')
+            id.startsWith('@vytches/ddd-') ||
+            (!id.includes('src/') && !id.startsWith('./') && !id.startsWith('../'))
           );
         } else {
           // Regular packages bundle all @vytches/ddd-* dependencies

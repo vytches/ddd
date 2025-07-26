@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-cli",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Code generation tools and CLI framework",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -46,13 +46,11 @@
     "cli": "tsx src/cli.ts"
   },
   "dependencies": {
+    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-logging": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^11.0.0",
     "handlebars": "^4.7.8"
-  },
-  "peerDependencies": {
-    "@vytches/ddd-core": "workspace:*"
   },
   "devDependencies": {
     "@types/handlebars": "^4.1.0",

@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-validation",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Business rules and specifications for domain validation",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -41,9 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-core": "workspace:*"
-  },
   "devDependencies": {
     "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
@@ -61,5 +58,8 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
+  },
+  "dependencies": {
+    "@vytches/ddd-core": "workspace:*"
   }
 }
