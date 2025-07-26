@@ -1,6 +1,6 @@
 // Domain Service with Event Integration import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { IEventBus, DomainEvent } from
-'@vytches-ddd/events'; import { Result } from '@vytches-ddd/utils'; import {
+'@vytches/ddd-domain-services'; import { IEventBus, DomainEvent } from
+'@vytches/ddd-events'; import { Result } from '@vytches/ddd-utils'; import {
 User, UserCreatedEvent, UserUpdatedEvent } from '../types';
 
 export class UserManagementService extends BaseDomainService { constructor(

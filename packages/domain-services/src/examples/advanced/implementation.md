@@ -1,9 +1,9 @@
 // Advanced Domain Service Implementation with Saga Pattern import {
-BaseDomainService } from '@vytches-ddd/domain-services'; import { Result } from
-'@vytches-ddd/utils'; import { DomainError } from
-'@vytches-ddd/domain-primitives'; import { IUnitOfWork } from
-'@vytches-ddd/repositories'; import { DomainEvent, IEventBus } from
-'@vytches-ddd/events'; import { Logger } from '@vytches-ddd/logging'; import {
+BaseDomainService } from '@vytches/ddd-domain-services'; import { Result } from
+'@vytches/ddd-utils'; import { DomainError } from
+'@vytches/ddd-domain-primitives'; import { IUnitOfWork } from
+'@vytches/ddd-repositories'; import { DomainEvent, IEventBus } from
+'@vytches/ddd-events'; import { Logger } from '@vytches/ddd-logging'; import {
 LoanApplication, LoanApprovalCommand, CreditCheckService, CollateralService,
 RiskAssessmentService, ComplianceService, LoanRepository, ApprovalWorkflow,
 LoanApprovedEvent, LoanRejectedEvent } from '../types';

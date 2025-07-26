@@ -1,15 +1,15 @@
 # NestJS Saga Orchestration with VytchesDDD DI Integration
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Intermediate  
-**Focus**: Advanced DI integration using @vytches-ddd/di with saga orchestration
+**Focus**: Advanced DI integration using @vytches/ddd-di with saga orchestration
 
 ## Description
 
 This example demonstrates advanced integration of saga orchestration with NestJS
-using @vytches-ddd/di service locator pattern, showcasing the bridge pattern for
+using @vytches/ddd-di service locator pattern, showcasing the bridge pattern for
 enterprise-grade dependency management.
 
 ## Business Context
@@ -22,9 +22,9 @@ service management and cross-cutting concerns.
 
 ```typescript
 // travel-booking-saga.service.ts - VytchesDDD DI managed
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { BaseSaga, ISagaExecutionContext } from '@vytches-ddd/messaging';
-import { Result } from '@vytches-ddd/utils';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { BaseSaga, ISagaExecutionContext } from '@vytches/ddd-messaging';
+import { Result } from '@vytches/ddd-utils';
 import { TravelBookingData } from './types'; // From your application
 
 @DomainService({
@@ -101,8 +101,8 @@ export class TravelBookingSagaService extends BaseSaga {
 
 // travel-booking.service.ts - NestJS bridge service
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Result } from '@vytches-ddd/utils';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Result } from '@vytches/ddd-utils';
 import { TravelBookingRequest, BookingConfirmation } from './types'; // From your application
 
 @Injectable()
@@ -169,8 +169,8 @@ export class TravelBookingController {
 }
 
 // domain-services.ts - VytchesDDD managed domain services
-import { DomainService, VytchesDDD } from '@vytches-ddd/di';
-import { Resilience } from '@vytches-ddd/resilience';
+import { DomainService, VytchesDDD } from '@vytches/ddd-di';
+import { Resilience } from '@vytches/ddd-resilience';
 
 @DomainService('flightService', {
   lifetime: ServiceLifetime.Singleton,
@@ -206,7 +206,7 @@ export class HotelService implements IHotelService {
 
 // travel.module.ts - NestJS module with VytchesDDD integration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { TravelBookingController } from './travel-booking.controller';
 import { TravelBookingService } from './travel-booking.service';
 

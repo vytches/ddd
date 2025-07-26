@@ -1,9 +1,9 @@
 # Advanced Utils Integration - NestJS Intermediate
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: Intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: Intermediate
 **Framework**: NestJS **Base Example**:
 [Async Result Patterns](../../intermediate/example-2.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/utils, @vytches-ddd/di
+@nestjs/common, @vytches/ddd-utils, @vytches/ddd-di
 
 ## Business Context
 
@@ -19,8 +19,8 @@ validation.
 ```typescript
 // advanced-utils.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Result, safeRun } from '@vytches-ddd/utils';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Result, safeRun } from '@vytches/ddd-utils';
 import type {
   BusinessOperation,
   ValidationContext,
@@ -36,7 +36,7 @@ export class AdvancedUtilsService {
   private readonly asyncOperationManager: IAsyncOperationManager;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for utility services
+    // ⭐ FOCUS: @vytches/ddd-di integration for utility services
     this.configurationManager = VytchesDDD.resolve<IConfigurationManager>(
       'configurationManager'
     );
@@ -316,7 +316,7 @@ export class AdvancedUtilsService {
 ```typescript
 // advanced-utils.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { AdvancedUtilsService } from './advanced-utils.service';
 
 @Module({

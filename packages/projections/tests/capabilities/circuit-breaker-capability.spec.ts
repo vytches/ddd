@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { safeRun } from '@vytches/ddd-utils';
 import { CircuitBreakerCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
 import type { ICapabilityContext, ICircuitBreakerConfig } from '../../src/projection-interfaces';

@@ -3,15 +3,15 @@
  * (without external DI package dependencies)
  *
  * NOTE: DIDomainServiceMetadataRegistry and DomainServiceDiscoveryPlugin
- * have been moved to @vytches-ddd/di package. These tests are preserved
+ * have been moved to @vytches/ddd-di package. These tests are preserved
  * for reference but are currently disabled.
  */
 
 import { describe, it, expect } from 'vitest';
 
 describe.skip('Domain Services DI Metadata Integration', () => {
-  it('DI integration functionality has been moved to @vytches-ddd/di package', () => {
-    // All DI integration tests should be performed in the @vytches-ddd/di package
+  it('DI integration functionality has been moved to @vytches/ddd-di package', () => {
+    // All DI integration tests should be performed in the @vytches/ddd-di package
     // This file is kept for reference only
     expect(true).toBe(true);
   });
@@ -21,13 +21,13 @@ describe.skip('Domain Services DI Metadata Integration', () => {
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  // DomainServiceDiscoveryPlugin, // Moved to @vytches-ddd/di
-  // DIDomainServiceMetadataRegistry, // Moved to @vytches-ddd/di
+  // DomainServiceDiscoveryPlugin, // Moved to @vytches/ddd-di
+  // DIDomainServiceMetadataRegistry, // Moved to @vytches/ddd-di
   DomainService,
   getDIDomainServiceMetadata,
   isDomainServicePendingDIRegistration,
 } from '../../src';
-import { ServiceLifetime } from '@vytches-ddd/di';
+import { ServiceLifetime } from '@vytches/ddd-di';
 
 // Simple test base class
 class TestDomainService {

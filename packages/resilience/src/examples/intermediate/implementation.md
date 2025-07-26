@@ -4,8 +4,8 @@
 observability  
 **Domain**: E-commerce Order Processing  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/events, @vytches-ddd/di,
-@vytches-ddd/utils
+**Dependencies**: @vytches/ddd-resilience, @vytches/ddd-events, @vytches/ddd-di,
+@vytches/ddd-utils
 
 ## Business Context
 
@@ -22,7 +22,7 @@ events system for a comprehensive e-commerce order processing platform:
 
 ```typescript
 // resilience-events.ts
-import { DomainEvent, IntegrationEvent } from '@vytches-ddd/events';
+import { DomainEvent, IntegrationEvent } from '@vytches/ddd-events';
 import { CircuitBreakerState, ResilienceMetrics } from '../types'; // ALWAYS import from app
 
 // Resilience domain events
@@ -119,11 +119,11 @@ import {
   BulkheadStrategy,
   ResiliencePolicyBuilder,
   ResilienceContext,
-} from '@vytches-ddd/resilience';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-resilience';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Event-Aware Circuit Breaker
 export class EventAwareCircuitBreaker extends CircuitBreaker {

@@ -1,16 +1,16 @@
-# @vytches-ddd/cqrs
+# @vytches/ddd-cqrs
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/cqrs
+Package: @vytches/ddd-cqrs
 Category: Architecture
 Purpose: Command Query Responsibility Segregation (CQRS) implementation with decorators, middleware, and execution context
-Dependencies: @vytches-ddd/domain-primitives, @vytches-ddd/utils, @vytches-ddd/di
+Dependencies: @vytches/ddd-domain-primitives, @vytches/ddd-utils, @vytches/ddd-di
 Complexity: High
 DDD Patterns: Command Pattern, Query Pattern, CQRS, Handler Pattern, Mediator Pattern
-Integration Points: @vytches-ddd/di, @vytches-ddd/events, @vytches-ddd/logging, @vytches-ddd/validation
+Integration Points: @vytches/ddd-di, @vytches/ddd-events, @vytches/ddd-logging, @vytches/ddd-validation
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcqrs.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fcqrs)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-cqrs.svg)](https://badge.fury.io/js/%40vytches%2Fddd-cqrs)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ and seamless integration with dependency injection.
 
 ```bash
 # npm
-npm install @vytches-ddd/cqrs
+npm install @vytches/ddd-cqrs
 
 # yarn
-yarn add @vytches-ddd/cqrs
+yarn add @vytches/ddd-cqrs
 
 # pnpm
-pnpm add @vytches-ddd/cqrs
+pnpm add @vytches/ddd-cqrs
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/utils @vytches-ddd/di
+npm install @vytches/ddd-domain-primitives @vytches/ddd-utils @vytches/ddd-di
 ```
 
 ## ✨ Key Features
@@ -72,14 +72,14 @@ npm install @vytches-ddd/domain-primitives @vytches-ddd/utils @vytches-ddd/di
 
 - **Execution Context**: Rich context propagation with correlation tracking
 - **Performance Monitoring**: Built-in execution timing and metrics
-- **Validation Integration**: Seamless validation with @vytches-ddd/validation
-- **Logging Integration**: Automatic logging with @vytches-ddd/logging
+- **Validation Integration**: Seamless validation with @vytches/ddd-validation
+- **Logging Integration**: Automatic logging with @vytches/ddd-logging
 
 ### Developer Experience
 
 - **Decorator-Based**: Simple @CommandHandler and @QueryHandler decorators
 - **Type Safety**: Full TypeScript support with generic typing
-- **DI Integration**: Automatic dependency injection with @vytches-ddd/di
+- **DI Integration**: Automatic dependency injection with @vytches/ddd-di
 - **Testing Support**: Built-in testing utilities and mocks
 
 ## 🎯 Core Concepts
@@ -155,8 +155,8 @@ interface IQueryBus {
 ### 1. Basic Command Setup
 
 ```typescript
-import { ICommand, CommandHandler, ICommandHandler } from '@vytches-ddd/cqrs';
-import { ExecutionContext } from '@vytches-ddd/cqrs';
+import { ICommand, CommandHandler, ICommandHandler } from '@vytches/ddd-cqrs';
+import { ExecutionContext } from '@vytches/ddd-cqrs';
 
 // Define a command
 class CreateUserCommand implements ICommand {
@@ -208,7 +208,7 @@ export class CreateUserCommandHandler
 ### 2. Basic Query Setup
 
 ```typescript
-import { IQuery, QueryHandler, IQueryHandler } from '@vytches-ddd/cqrs';
+import { IQuery, QueryHandler, IQueryHandler } from '@vytches/ddd-cqrs';
 
 // Define a query
 class GetUserByIdQuery implements IQuery<UserDto> {
@@ -262,8 +262,8 @@ export class GetUserByIdQueryHandler
 ### 3. Using the Buses
 
 ```typescript
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 // Setup (typically in your application bootstrap)
 const commandBus = VytchesDDD.resolve<CommandBus>('CommandBus');
@@ -285,7 +285,7 @@ console.log('User:', user);
 ### Command Definition
 
 ```typescript
-import { ICommand } from '@vytches-ddd/cqrs';
+import { ICommand } from '@vytches/ddd-cqrs';
 
 class UpdateUserProfileCommand implements ICommand {
   readonly type = 'UpdateUserProfileCommand';
@@ -309,9 +309,9 @@ class UpdateUserProfileCommand implements ICommand {
 ### Command Handler with Validation
 
 ```typescript
-import { CommandHandler, ICommandHandler } from '@vytches-ddd/cqrs';
-import { LogCommands } from '@vytches-ddd/cqrs';
-import { Validate } from '@vytches-ddd/validation';
+import { CommandHandler, ICommandHandler } from '@vytches/ddd-cqrs';
+import { LogCommands } from '@vytches/ddd-cqrs';
+import { Validate } from '@vytches/ddd-validation';
 
 @CommandHandler(UpdateUserProfileCommand)
 @LogCommands({ includePayload: true, logLevel: 'info' })
@@ -367,7 +367,7 @@ export class UpdateUserProfileCommandHandler
 ### Batch Command Processing
 
 ```typescript
-import { CommandBus } from '@vytches-ddd/cqrs';
+import { CommandBus } from '@vytches/ddd-cqrs';
 
 const commandBus = VytchesDDD.resolve<CommandBus>('CommandBus');
 
@@ -390,7 +390,7 @@ await commandBus.executeMany(commands, {
 ### Query Definition
 
 ```typescript
-import { IQuery } from '@vytches-ddd/cqrs';
+import { IQuery } from '@vytches/ddd-cqrs';
 
 class GetUsersByRoleQuery implements IQuery<UserDto[]> {
   readonly type = 'GetUsersByRoleQuery';
@@ -411,9 +411,9 @@ class GetUsersByRoleQuery implements IQuery<UserDto[]> {
 ### Query Handler with Caching
 
 ```typescript
-import { QueryHandler, IQueryHandler } from '@vytches-ddd/cqrs';
-import { LogQueries } from '@vytches-ddd/cqrs';
-import { Cacheable } from '@vytches-ddd/caching';
+import { QueryHandler, IQueryHandler } from '@vytches/ddd-cqrs';
+import { LogQueries } from '@vytches/ddd-cqrs';
+import { Cacheable } from '@vytches/ddd-caching';
 
 @QueryHandler(GetUsersByRoleQuery)
 @LogQueries({ logLevel: 'debug' })
@@ -528,7 +528,7 @@ import {
   LoggingMiddleware,
   PerformanceMiddleware,
   AuthorizationMiddleware,
-} from '@vytches-ddd/cqrs';
+} from '@vytches/ddd-cqrs';
 
 // Configure middleware pipeline
 const commandBus = new CommandBus([
@@ -542,7 +542,7 @@ const commandBus = new CommandBus([
 ### Custom Middleware
 
 ```typescript
-import { ICommandMiddleware, IQueryMiddleware } from '@vytches-ddd/cqrs';
+import { ICommandMiddleware, IQueryMiddleware } from '@vytches/ddd-cqrs';
 
 // Command middleware
 export class AuditMiddleware implements ICommandMiddleware {
@@ -599,7 +599,7 @@ export class CachingMiddleware implements IQueryMiddleware {
 ### Enhanced Command Handler Decorator
 
 ```typescript
-import { CommandHandler } from '@vytches-ddd/cqrs';
+import { CommandHandler } from '@vytches/ddd-cqrs';
 
 @CommandHandler(CreateOrderCommand, {
   // DI options
@@ -634,7 +634,7 @@ export class CreateOrderCommandHandler {
 ### Enhanced Query Handler Decorator
 
 ```typescript
-import { QueryHandler } from '@vytches-ddd/cqrs';
+import { QueryHandler } from '@vytches/ddd-cqrs';
 
 @QueryHandler(GetOrderDetailsQuery, {
   // DI options
@@ -670,7 +670,7 @@ export class GetOrderDetailsQueryHandler {
 ### Logging Decorators
 
 ```typescript
-import { LogCommands, LogQueries, LogCQRS } from '@vytches-ddd/cqrs';
+import { LogCommands, LogQueries, LogCQRS } from '@vytches/ddd-cqrs';
 
 // Command-specific logging
 @LogCommands({
@@ -803,8 +803,8 @@ export class CreateOrderCommandHandler {
 ### Automatic Handler Registration
 
 ```typescript
-import { VytchesDDD } from '@vytches-ddd/di';
-import { CQRSDiscoveryPlugin } from '@vytches-ddd/cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { CQRSDiscoveryPlugin } from '@vytches/ddd-cqrs';
 
 // Register the CQRS discovery plugin
 VytchesDDD.registerDiscoveryPlugin(new CQRSDiscoveryPlugin());
@@ -1018,7 +1018,7 @@ export class GetProductCatalogQueryHandler {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createMockExecutionContext } from '@vytches-ddd/cqrs/testing';
+import { createMockExecutionContext } from '@vytches/ddd-cqrs/testing';
 
 describe('CreateUserCommandHandler', () => {
   let handler: CreateUserCommandHandler;
@@ -1074,7 +1074,7 @@ describe('CreateUserCommandHandler', () => {
 ### Integration Testing
 
 ```typescript
-import { TestCommandBus, TestQueryBus } from '@vytches-ddd/cqrs/testing';
+import { TestCommandBus, TestQueryBus } from '@vytches/ddd-cqrs/testing';
 
 describe('Order Management Integration', () => {
   let commandBus: TestCommandBus;
@@ -1114,7 +1114,7 @@ describe('Order Management Integration', () => {
 import {
   createMockCommandBus,
   createMockQueryBus,
-} from '@vytches-ddd/cqrs/testing';
+} from '@vytches/ddd-cqrs/testing';
 
 // Mock command bus
 const mockCommandBus = createMockCommandBus();
@@ -1349,20 +1349,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/cqrs
+pnpm build --filter=@vytches/ddd-cqrs
 
 # Run tests
-pnpm test --filter=@vytches-ddd/cqrs
+pnpm test --filter=@vytches/ddd-cqrs
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/cqrs
+pnpm dev --filter=@vytches/ddd-cqrs
 ```
 
 ## 📄 License
@@ -1372,7 +1372,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

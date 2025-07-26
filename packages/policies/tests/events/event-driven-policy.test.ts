@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import type { Result } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
+import type { Result } from '@vytches/ddd-utils';
 import {
   EventDrivenPolicy,
   EventDrivenPolicyFactory,

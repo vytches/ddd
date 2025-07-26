@@ -1,9 +1,9 @@
 # Enterprise Resilience Orchestration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Advanced
 **Domain**: Global Enterprise Architecture **Patterns**: Orchestrated
 Resilience, Global Coordination, Predictive Adaptation **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -29,7 +29,7 @@ import {
   PredictiveAdaptationEngine,
   ResilienceMetrics,
   SystemTopology,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   Customer,
   Order,

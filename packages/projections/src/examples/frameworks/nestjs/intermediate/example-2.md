@@ -1,14 +1,14 @@
 # Multi-Tenant Projection System - NestJS DI Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + @vytches-ddd/di +
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + @vytches/ddd-di +
 NestJS **Complexity**: intermediate **Framework**: NestJS **Integration**:
 VytchesDDD DI integration with multi-tenancy **Dependencies**: @nestjs/common,
-@vytches-ddd/projections, @vytches-ddd/di, @vytches-ddd/events, @vytches-ddd/acl
+@vytches/ddd-projections, @vytches/ddd-di, @vytches/ddd-events, @vytches/ddd-acl
 
 ## Description
 
 Advanced NestJS service implementing multi-tenant projections with
-@vytches-ddd/di integration, tenant isolation, configuration-driven behavior,
+@vytches/ddd-di integration, tenant isolation, configuration-driven behavior,
 and compliance support. This example demonstrates enterprise-grade multi-tenant
 architecture with seamless NestJS integration.
 
@@ -23,16 +23,16 @@ high performance.
 
 ```typescript
 // multi-tenant-user-projection.domain-service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   ProjectionBase,
   TenantIsolationCapability,
   TenantConfigurationCapability,
   CheckpointCapability,
   CircuitBreakerCapability,
-} from '@vytches-ddd/projections';
-import { TenantContextACL } from '@vytches-ddd/acl';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { TenantContextACL } from '@vytches/ddd-acl';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   TenantContext,
   TenantConfiguration,
@@ -753,9 +753,9 @@ export class MultiTenantUserProjectionDomainService extends ProjectionBase<any> 
 ```typescript
 // multi-tenant-user-projection.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { MultiTenantUserProjectionDomainService } from './multi-tenant-user-projection.domain-service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   TenantId,
   TenantConfiguration,
@@ -817,7 +817,7 @@ export class MultiTenantUserProjectionService implements OnModuleInit {
 ```typescript
 // multi-tenant-projection.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { MultiTenantUserProjectionService } from './multi-tenant-user-projection.service';
 import { MultiTenantProjectionController } from './multi-tenant-projection.controller';
 

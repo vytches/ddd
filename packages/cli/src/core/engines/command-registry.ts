@@ -62,7 +62,7 @@ export class CommandRegistry {
    */
   private setupProgram(): void {
     this.program
-      .name('vytches-ddd')
+      .name('ddd')
       .description('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder')
       .version('1.0.0')
       .option('-d, --debug', 'Enable debug output', false)

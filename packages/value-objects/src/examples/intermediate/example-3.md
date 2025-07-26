@@ -1,9 +1,9 @@
 # Measurement Value Object - Intermediate Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Domain**: Scientific & Engineering **Patterns**:
 Unit Conversion, Measurement Systems, Precision Handling **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ sensor data, laboratory systems, manufacturing QC, and engineering calculations.
 
 ```typescript
 // measurement.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   MeasurementData,
   MeasurementMetadata,

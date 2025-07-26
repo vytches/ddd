@@ -1,16 +1,16 @@
-# @vytches-ddd/acl
+# @vytches/ddd-acl
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/acl
+Package: @vytches/ddd-acl
 Category: Integration
 Purpose: Anti-Corruption Layer for external system integration with domain model protection, translation, and middleware support
-Dependencies: @vytches-ddd/core, @vytches-ddd/validation
+Dependencies: @vytches/ddd-core, @vytches/ddd-validation
 Complexity: High
 DDD Patterns: Anti-Corruption Layer, Model Translation, Adapter Pattern, Integration Layer
 Integration Points: Protects domain model from external systems; integrates with repositories, CQRS, and domain services
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Facl.svg)](https://badge.fury.io/js/%40vytches-ddd%2Facl)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-acl.svg)](https://badge.fury.io/js/%40vytches%2Fddd-acl)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -45,20 +45,20 @@ from external system changes.
 
 ```bash
 # npm
-npm install @vytches-ddd/acl
+npm install @vytches/ddd-acl
 
 # yarn
-yarn add @vytches-ddd/acl
+yarn add @vytches/ddd-acl
 
 # pnpm
-pnpm add @vytches-ddd/acl
+pnpm add @vytches/ddd-acl
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependencies
-npm install @vytches-ddd/core @vytches-ddd/validation
+npm install @vytches/ddd-core @vytches/ddd-validation
 ```
 
 ## ✨ Key Features
@@ -159,8 +159,8 @@ interface IExternalAPI<TExternalModel, TResult> {
 ### Basic ACL Adapter Setup
 
 ```typescript
-import { SimpleACLAdapter, BaseModelTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { SimpleACLAdapter, BaseModelTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 
 // Domain model
 interface User {
@@ -258,7 +258,7 @@ const userAdapter = SimpleACLAdapter.create<User, ExternalUser>(
 ### Using the ACL Adapter
 
 ```typescript
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 // Create user through ACL
 const user: User = {
@@ -295,7 +295,7 @@ if (fetchError) {
 ### Base ACL Adapter
 
 ```typescript
-import { BaseACLAdapter } from '@vytches-ddd/acl';
+import { BaseACLAdapter } from '@vytches/ddd-acl';
 
 class CustomACLAdapter<TDomain, TExternal> extends BaseACLAdapter<
   TDomain,
@@ -334,7 +334,7 @@ class CustomACLAdapter<TDomain, TExternal> extends BaseACLAdapter<
 ### Enhanced ACL Adapter
 
 ```typescript
-import { EnhancedACLAdapter } from '@vytches-ddd/acl';
+import { EnhancedACLAdapter } from '@vytches/ddd-acl';
 
 // Create enhanced adapter with middleware support
 const enhancedAdapter = EnhancedACLAdapter.create<User, ExternalUser>(
@@ -372,7 +372,7 @@ const [error, result] = await safeRun(async () => {
 ### Basic Translation
 
 ```typescript
-import { BaseModelTranslator } from '@vytches-ddd/acl';
+import { BaseModelTranslator } from '@vytches/ddd-acl';
 
 class OrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
   toExternal(order: Order): ExternalOrder {
@@ -410,8 +410,8 @@ class OrderTranslator extends BaseModelTranslator<Order, ExternalOrder> {
 ### Translation with Validation
 
 ```typescript
-import { BaseModelTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { BaseModelTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 
 class ValidatedOrderTranslator extends BaseModelTranslator<
   Order,
@@ -462,7 +462,7 @@ class ValidatedOrderTranslator extends BaseModelTranslator<
 ### Basic Middleware
 
 ```typescript
-import { BaseACLMiddleware } from '@vytches-ddd/acl';
+import { BaseACLMiddleware } from '@vytches/ddd-acl';
 
 class LoggingMiddleware extends BaseACLMiddleware {
   async execute<T>(
@@ -503,8 +503,8 @@ class LoggingMiddleware extends BaseACLMiddleware {
 ### Retry Middleware
 
 ```typescript
-import { BaseACLMiddleware } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { BaseACLMiddleware } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 
 class RetryMiddleware extends BaseACLMiddleware {
   constructor(
@@ -569,8 +569,8 @@ class RetryMiddleware extends BaseACLMiddleware {
 ### Validation Middleware
 
 ```typescript
-import { BaseACLMiddleware } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { BaseACLMiddleware } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 
 class ValidationMiddleware extends BaseACLMiddleware {
   async execute<T>(
@@ -655,7 +655,7 @@ class ValidationMiddleware extends BaseACLMiddleware {
 ### Basic Registry Usage
 
 ```typescript
-import { ACLRegistry } from '@vytches-ddd/acl';
+import { ACLRegistry } from '@vytches/ddd-acl';
 
 const registry = new ACLRegistry();
 
@@ -682,7 +682,7 @@ const [error, result] = await safeRun(async () => {
 ### Context-Specific Registry
 
 ```typescript
-import { ContextACLRegistry } from '@vytches-ddd/acl';
+import { ContextACLRegistry } from '@vytches/ddd-acl';
 
 const contextRegistry = new ContextACLRegistry();
 
@@ -714,7 +714,7 @@ const userACL = contextRegistry.resolveForContext<User, ExternalUser>(
 ### Versioned Registry
 
 ```typescript
-import { VersionedACLRegistry } from '@vytches-ddd/acl';
+import { VersionedACLRegistry } from '@vytches/ddd-acl';
 
 const versionedRegistry = new VersionedACLRegistry();
 
@@ -743,7 +743,7 @@ const [error, result] = await safeRun(async () => {
 ### Basic Typed Operations
 
 ```typescript
-import { TypedOperation } from '@vytches-ddd/acl';
+import { TypedOperation } from '@vytches/ddd-acl';
 
 // Define typed operation
 const createUserOperation = new TypedOperation<
@@ -830,7 +830,7 @@ import {
   ACLError,
   TranslationError,
   AdapterNotFoundError,
-} from '@vytches-ddd/acl';
+} from '@vytches/ddd-acl';
 
 // Handle specific error types
 const [error, result] = await safeRun(async () => {
@@ -902,7 +902,7 @@ class CustomUserAdapter extends BaseACLAdapter<User, ExternalUser> {
 ### Basic Application Service
 
 ```typescript
-import { BaseApplicationService } from '@vytches-ddd/acl';
+import { BaseApplicationService } from '@vytches/ddd-acl';
 
 class UserApplicationService extends BaseApplicationService {
   constructor(
@@ -1104,7 +1104,7 @@ class UserRepositoryWithACL implements IUserRepository {
 ### Event-Driven Integration
 
 ```typescript
-import { DomainEventHandler } from '@vytches-ddd/events';
+import { DomainEventHandler } from '@vytches/ddd-events';
 
 @DomainEventHandler(UserCreatedEvent)
 class UserCreatedEventHandler {
@@ -1145,7 +1145,7 @@ class UserUpdatedEventHandler {
 ### CQRS Integration
 
 ```typescript
-import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
 
 @CommandHandler(CreateUserCommand)
 class CreateUserCommandHandler {
@@ -1227,7 +1227,7 @@ class GetUserQueryHandler {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches/ddd-testing';
 
 describe('UserACLAdapter', () => {
   let adapter: SimpleACLAdapter<User, ExternalUser>;
@@ -1336,7 +1336,7 @@ describe('UserACLAdapter', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SimpleTestHarness } from '@vytches-ddd/testing';
+import { SimpleTestHarness } from '@vytches/ddd-testing';
 
 describe('User Integration with External System', () => {
   let harness: SimpleTestHarness;
@@ -1458,8 +1458,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

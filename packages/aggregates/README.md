@@ -1,6 +1,6 @@
-# @vytches-ddd/aggregates
+# @vytches/ddd-aggregates
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Faggregates.svg)](https://badge.fury.io/js/%40vytches-ddd%2Faggregates)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-aggregates.svg)](https://badge.fury.io/js/%40vytches%2Fddd-aggregates)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,20 +29,20 @@ strong consistency boundaries.
 
 ```bash
 # npm
-npm install @vytches-ddd/aggregates
+npm install @vytches/ddd-aggregates
 
 # yarn
-yarn add @vytches-ddd/aggregates
+yarn add @vytches/ddd-aggregates
 
 # pnpm
-pnpm add @vytches-ddd/aggregates
+pnpm add @vytches/ddd-aggregates
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/events @vytches-ddd/utils
+npm install @vytches/ddd-domain-primitives @vytches/ddd-events @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -142,9 +142,9 @@ interface IAggregateCapability {
 ### 1. Basic Aggregate Root
 
 ```typescript
-import { AggregateRoot, EntityId } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { AggregateRoot, EntityId } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 
 // Domain events
 class OrderCreatedEvent extends DomainEvent<{
@@ -320,7 +320,7 @@ if (addResult.isSuccess()) {
 import {
   EventSourcedAggregate,
   EventHandlerMap,
-} from '@vytches-ddd/aggregates';
+} from '@vytches/ddd-aggregates';
 
 class BankAccountAggregate extends EventSourcedAggregate {
   private balance: number = 0;
@@ -453,7 +453,7 @@ import {
   AuditCapability,
   CacheCapability,
   ValidationCapability,
-} from '@vytches-ddd/aggregates';
+} from '@vytches/ddd-aggregates';
 
 class ProductAggregate extends AggregateRoot {
   private name: string;
@@ -1264,7 +1264,7 @@ class AggregateRoot {
 ### Aggregate Testing Utilities
 
 ```typescript
-import { AggregateTestBuilder } from '@vytches-ddd/aggregates/testing';
+import { AggregateTestBuilder } from '@vytches/ddd-aggregates/testing';
 
 // Aggregate builder for tests
 const orderBuilder = new AggregateTestBuilder(OrderAggregate)
@@ -1303,7 +1303,7 @@ const order = new AggregateTestBuilder(OrderAggregate)
 ### Event Testing
 
 ```typescript
-import { EventTestHarness } from '@vytches-ddd/aggregates/testing';
+import { EventTestHarness } from '@vytches/ddd-aggregates/testing';
 
 describe('Order Events', () => {
   let eventHarness: EventTestHarness;
@@ -1340,20 +1340,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build aggregates package
-pnpm build --filter=@vytches-ddd/aggregates
+pnpm build --filter=@vytches/ddd-aggregates
 
 # Run tests
-pnpm test --filter=@vytches-ddd/aggregates
+pnpm test --filter=@vytches/ddd-aggregates
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/aggregates
+pnpm dev --filter=@vytches/ddd-aggregates
 ```
 
 ## 📄 License
@@ -1363,7 +1363,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

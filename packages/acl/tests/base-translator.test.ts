@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result, safeRun } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches/ddd-utils';
 import { BaseModelTranslator } from '../src/base-translator';
 import { TranslationError } from '../src/acl-errors';
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 /**
  * @llm-summary Contract for resilience context functionality

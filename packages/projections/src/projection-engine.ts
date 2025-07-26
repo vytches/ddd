@@ -6,9 +6,9 @@ import type {
   IEventStore,
   IReplayFilter,
   IReplayResult,
-} from '@vytches-ddd/contracts';
-import { CapabilityRegistry } from '@vytches-ddd/contracts';
-import { LibUtils } from '@vytches-ddd/utils';
+} from '@vytches/ddd-contracts';
+import { CapabilityRegistry } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 
 import { ProjectionError } from './projection-errors';
 import type {

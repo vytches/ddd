@@ -1,12 +1,12 @@
 # Basic Aggregate Implementation Overview
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Basic
 **Domain**: Core Domain-Driven Design Patterns
 
 ## Overview
 
 This document provides implementation guidance for basic aggregate root patterns
-using @vytches-ddd/aggregates. These patterns form the foundation of
+using @vytches/ddd-aggregates. These patterns form the foundation of
 domain-driven design and ensure proper encapsulation, consistency, and event
 handling.
 
@@ -328,7 +328,7 @@ static fromSnapshot(id: EntityId, data: UserData): UserAggregate {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { UserAggregate } from '../src/user.aggregate';
 
 describe('UserAggregate', () => {

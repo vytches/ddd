@@ -1,6 +1,6 @@
 # Result Pattern Fundamentals
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: Result pattern, functional error
 handling, type safety **Dependencies**: None
 
@@ -27,7 +27,7 @@ in the type system, ensuring errors are always handled.
 
 ```typescript
 // result-basics.ts
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import { UserData, ValidationError, ApiResponse } from '../types';
 
 // ✅ FOCUS: Basic Result pattern usage

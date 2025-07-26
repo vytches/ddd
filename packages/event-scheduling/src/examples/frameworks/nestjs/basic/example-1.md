@@ -1,6 +1,6 @@
 # NestJS Basic Scheduling Integration - Manual Setup and Service Injection
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling  
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling  
 **Framework**: NestJS **Complexity**: basic **Integration**: Manual scheduler
 setup with standard NestJS dependency injection
 
@@ -29,8 +29,8 @@ import {
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Result } from '@vytches/ddd-utils';
 import {
   OrderData,
   NotificationData,
@@ -369,7 +369,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { OrderSchedulingService } from './order-scheduling.service';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import {
   ScheduleOrderReminderDto,
   SchedulePaymentDto,

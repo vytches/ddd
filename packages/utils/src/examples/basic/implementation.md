@@ -1,8 +1,8 @@
 # Basic Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: Implementation patterns, service
-integration, basic setup **Dependencies**: @vytches-ddd/utils
+integration, basic setup **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -27,7 +27,7 @@ architecture.
 
 ```typescript
 // basic-implementation.ts
-import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
+import { Result, safeRun, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

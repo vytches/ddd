@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const domainServicesExampleConfig: PackageExampleConfig = {
   packageName: 'domain-services',
@@ -9,7 +9,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
   domain: 'Domain-Driven Design',
   patterns: ['domain-service', 'orchestration', 'coordination', 'business-logic'],
 
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-utils'],
 
   complexityLevels: {
     basic: {
@@ -52,7 +52,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Simple domain service for user management operations',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-utils'],
       validation: { fileExists: true },
     },
     {
@@ -63,7 +63,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Domain service coordinating multiple repositories',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/repositories'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-repositories'],
       validation: { fileExists: true },
     },
     {
@@ -74,7 +74,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Domain service with event publishing capabilities',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-events'],
       validation: { fileExists: true },
     },
     {
@@ -85,7 +85,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Business policy enforcement within domain services',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/policies'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-policies'],
       validation: { fileExists: true },
     },
     {
@@ -96,7 +96,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Domain service orchestrating multiple aggregates',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/aggregates'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-aggregates'],
       validation: { fileExists: true },
     },
     {
@@ -107,7 +107,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Complex long-running business processes with saga orchestration',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/messaging'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-messaging'],
       validation: { fileExists: true },
     },
     {
@@ -118,7 +118,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Domain service with circuit breaker and retry patterns',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/resilience'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-resilience'],
       validation: { fileExists: true },
     },
     {
@@ -129,7 +129,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Production-ready domain service with monitoring and observability',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/logging'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-logging'],
       validation: { fileExists: true },
     },
     {
@@ -141,7 +141,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'high',
       description: 'Manual setup of domain services in NestJS',
-      dependencies: ['@nestjs/core', '@vytches-ddd/core'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-core'],
       validation: { fileExists: true },
     },
     {
@@ -153,7 +153,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'medium',
       description: 'Simple domain service integration in NestJS',
-      dependencies: ['@nestjs/core', '@vytches-ddd/core'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-core'],
       validation: { fileExists: true },
     },
     {
@@ -164,8 +164,8 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       framework: 'nestjs',
       priority: 'high',
-      description: 'Advanced DI integration with @vytches-ddd/di',
-      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/di'],
+      description: 'Advanced DI integration with @vytches/ddd-di',
+      dependencies: ['@nestjs/core', '@vytches/ddd-core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -177,7 +177,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'medium',
       description: 'Event-driven domain services in NestJS',
-      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/events'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-core', '@vytches/ddd-events'],
       validation: { fileExists: true },
     },
     {
@@ -189,7 +189,7 @@ export const domainServicesExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'high',
       description: 'Complete enterprise setup with monitoring and observability',
-      dependencies: ['@nestjs/core', '@vytches-ddd/core', '@vytches-ddd/logging'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-core', '@vytches/ddd-logging'],
       validation: { fileExists: true },
     },
   ],

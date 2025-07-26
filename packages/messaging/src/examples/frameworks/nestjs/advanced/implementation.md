@@ -1,13 +1,13 @@
 # NestJS Advanced Messaging Implementation Overview
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise messaging architecture with VytchesDDD DI integration
 
 ## Implementation Philosophy
 
-Advanced NestJS integration with @vytches-ddd/messaging focuses on
+Advanced NestJS integration with @vytches/ddd-messaging focuses on
 enterprise-scale patterns using the VytchesDDD DI container for sophisticated
 service management, global coordination, and cross-cutting concerns.
 

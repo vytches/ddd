@@ -1,8 +1,8 @@
 # Async Result Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: intermediate
 **Domain**: Infrastructure **Patterns**: Asynchronous operations, Promise
-integration, concurrent processing **Dependencies**: @vytches-ddd/utils
+integration, concurrent processing **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ level of error safety and composability as synchronous operations.
 
 ```typescript
 // async-result-patterns.ts
-import { Result, LibUtils } from '@vytches-ddd/utils';
+import { Result, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ApiResponse,

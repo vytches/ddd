@@ -5,7 +5,7 @@
  * with VytchesDDD dependency injection system.
  */
 
-import type { IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
+import type { IDomainEvent, IEventHandler } from '@vytches/ddd-contracts';
 import { EventHandler } from './event-handler.decorator';
 
 // Example domain events

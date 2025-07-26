@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { PatternRegistry } from '../../../src/core/engines/pattern-registry';
 import { CLIError } from '../../../src/types';
 

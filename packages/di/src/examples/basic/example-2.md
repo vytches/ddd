@@ -1,11 +1,11 @@
 # Service Lifetimes - Beginner Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: beginner  
 **Domain**: Order Management  
 **Patterns**: Service Lifetimes, Lifecycle Management  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -24,7 +24,7 @@ resource usage and prevents memory leaks.
 
 ```typescript
 // order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Order, CreateOrderData } from '../types'; // Import from application
 
 /**
@@ -94,7 +94,7 @@ export class OrderService {
 
 ```typescript
 // order-processor.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Order, Payment } from '../types'; // Import from application
 
 /**
@@ -160,7 +160,7 @@ export class OrderProcessorService {
 
 ```typescript
 // database.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { DatabaseConnection } from '../types'; // Import from application
 
 /**
@@ -223,7 +223,7 @@ export class DatabaseService {
 
 ```typescript
 // app.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { OrderService } from './order.service';
 import { OrderProcessorService } from './order-processor.service';
 import { DatabaseService } from './database.service';

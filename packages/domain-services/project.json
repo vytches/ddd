@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/domain-services",
+  "name": "@vytches/ddd-domain-services",
   "projectType": "library",
   "sourceRoot": "packages/domain-services/src",
   "targets": {

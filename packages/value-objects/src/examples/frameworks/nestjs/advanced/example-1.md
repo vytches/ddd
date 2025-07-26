@@ -1,6 +1,6 @@
 # Advanced Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Framework**: NestJS **Focus**: Manual advanced value
 object integration with sophisticated business operations **Base Example**:
 [TimePeriod Value Object](../../../advanced/example-1.md)
@@ -10,7 +10,7 @@ object integration with sophisticated business operations **Base Example**:
 ```typescript
 // time-period.service.ts
 import { Injectable } from '@nestjs/common';
-import { TimePeriod, RecurrencePattern } from '@vytches-ddd/value-objects';
+import { TimePeriod, RecurrencePattern } from '@vytches/ddd-value-objects';
 import {
   CreateTimePeriodDto,
   TimePeriodResponse,
@@ -846,7 +846,7 @@ export class TimePeriodService {
 ```typescript
 // color.service.ts
 import { Injectable } from '@nestjs/common';
-import { Color } from '@vytches-ddd/value-objects';
+import { Color } from '@vytches/ddd-value-objects';
 import {
   CreateColorDto,
   ColorResponse,

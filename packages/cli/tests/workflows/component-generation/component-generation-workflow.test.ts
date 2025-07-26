@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { ComponentGenerationWorkflow } from '../../../src/workflows/component-generation/component-generation-workflow';
 import type { ComponentGenerationOptions } from '../../../src/workflows/types';
 import { Colors } from '../../../src/core/utils/colors';

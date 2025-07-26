@@ -1,4 +1,4 @@
-import type { IDependencyContainer } from '@vytches-ddd/di';
+import type { IDependencyContainer } from '@vytches/ddd-di';
 import type { ICommand } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { CommandBus } from './command-bus';

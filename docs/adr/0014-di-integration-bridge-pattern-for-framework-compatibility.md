@@ -6,7 +6,7 @@
 
 ## Context
 
-The `@vytches-ddd/di` package provides a global service locator with
+The `@vytches/ddd-di` package provides a global service locator with
 business-focused decorators (`@DomainService`, `@Resilience`, `@CommandHandler`)
 that offer critical functionality for domain-driven design. However, integrating
 with popular frameworks like NestJS presents the **Double Instance Risk** -

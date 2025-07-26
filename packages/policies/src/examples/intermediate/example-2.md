@@ -1,12 +1,12 @@
 # Policy Registry and Dynamic Rule Management
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Enterprise Rule Management  
 **Patterns**: registry-pattern, dynamic-rules, policy-versioning  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/di,
-@vytches-ddd/validation
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-di,
+@vytches/ddd-validation
 
 ## Description
 
@@ -30,8 +30,8 @@ import {
   PolicyRegistry,
   PolicyMetadata,
   PolicyVersion,
-} from '@vytches-ddd/policies';
-import { VytchesDDD } from '@vytches-ddd/di';
+} from '@vytches/ddd-policies';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { LoanApplication, InsuranceQuote, UserRegistration } from '../types';
 
 /**
@@ -562,7 +562,7 @@ export class EnterprisePolicyRegistry {
 ```typescript
 // dynamic-policy-management.ts
 import { EnterprisePolicyRegistry } from './policy-registry-setup';
-import { PolicyContext } from '@vytches-ddd/policies';
+import { PolicyContext } from '@vytches/ddd-policies';
 
 /**
  * @llm-summary Dynamic policy management with runtime updates and A/B testing

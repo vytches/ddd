@@ -1,12 +1,12 @@
 # Basic Value Objects - Implementation Overview
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Focus**: Implementation patterns and best practices
 
 ## Overview
 
 This document provides comprehensive guidance for implementing basic value
-objects using the @vytches-ddd/value-objects package. It covers fundamental
+objects using the @vytches/ddd-value-objects package. It covers fundamental
 patterns, common implementations, and best practices for creating robust value
 objects.
 
@@ -15,7 +15,7 @@ objects.
 ### **Base Value Object Structure**
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import { ValueObjectValidationResult } from './types';
 
 // ✅ Standard value object implementation pattern
@@ -692,7 +692,7 @@ export class CreditCardNumber extends ValueObject<{
 ```typescript
 // value-object.test.ts
 import { Money } from './money';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('Money Value Object', () => {
   describe('creation', () => {

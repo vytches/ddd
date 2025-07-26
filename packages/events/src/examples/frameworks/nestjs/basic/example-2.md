@@ -1,13 +1,13 @@
 # Event System - NestJS DI Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: basic
 **Domain**: Integration **Patterns**: dependency-injection, service-locator,
 event-publishing, nestjs-di **Dependencies**: @nestjs/common,
-@vytches-ddd/events, @vytches-ddd/di
+@vytches/ddd-events, @vytches/ddd-di
 
 ## Description
 
-NestJS integration using @vytches-ddd/di service locator pattern for
+NestJS integration using @vytches/ddd-di service locator pattern for
 enterprise-grade dependency injection. This example demonstrates the bridge
 pattern to avoid double instance risk while leveraging the VytchesDDD container
 for advanced event handling capabilities.
@@ -15,7 +15,7 @@ for advanced event handling capabilities.
 ## Business Context
 
 Enterprise applications need sophisticated dependency injection with features
-like context isolation, service lifetimes, and decorators. The @vytches-ddd/di
+like context isolation, service lifetimes, and decorators. The @vytches/ddd-di
 package provides these capabilities while maintaining compatibility with
 NestJS's existing DI system through the bridge pattern.
 
@@ -23,8 +23,8 @@ NestJS's existing DI system through the bridge pattern.
 
 ```typescript
 // order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 import { Order, CreateOrderData, OrderStatus } from './types'; // From your app
 
 // ⭐ FOCUS: Domain service with VytchesDDD DI
@@ -75,7 +75,7 @@ export class OrderService {
 }
 
 // payment.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { PaymentData, PaymentResult } from './types'; // From your app
 
 @DomainService({
@@ -108,7 +108,7 @@ export class PaymentService {
 
 // order.controller.ts
 import { Controller, Post, Put, Body, Param, Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { OrderService } from './order.service';
 import { CreateOrderData, OrderStatus } from './types'; // From your app
 
@@ -138,7 +138,7 @@ export class OrderController {
 }
 
 // inventory.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { InventoryItem, ReservationRequest } from './types'; // From your app
 
 @DomainService('inventoryService', {
@@ -173,7 +173,7 @@ export class InventoryService {
 
 // order.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { OrderController } from './order.controller';
 
 @Module({
@@ -190,8 +190,8 @@ export class OrderModule implements OnModuleInit {
 }
 
 // event-handler.service.ts
-import { DomainService } from '@vytches-ddd/di';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { DomainService } from '@vytches/ddd-di';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 import { OrderCreatedEvent, OrderStatusChangedEvent } from './types'; // From your app
 
 @DomainService('eventHandlerService')
@@ -263,7 +263,7 @@ export class AppModule {}
 
 ## Key Features
 
-- **Enterprise DI Integration**: Uses @vytches-ddd/di with NestJS bridge pattern
+- **Enterprise DI Integration**: Uses @vytches/ddd-di with NestJS bridge pattern
 - **Context Isolation**: Services can be isolated by bounded context
 - **Service Lifetimes**: Support for Transient, Singleton, and Scoped services
 - **Auto-Discovery**: Services automatically registered through decorators

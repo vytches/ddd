@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const packageExampleConfig: PackageExampleConfig = {
   // === REQUIRED BASIC PROPERTIES ===
@@ -16,10 +16,10 @@ export const packageExampleConfig: PackageExampleConfig = {
     'delayed-execution',
   ],
   dependencies: [
-    '@vytches-ddd/contracts',
-    '@vytches-ddd/events',
-    '@vytches-ddd/domain-primitives',
-    '@vytches-ddd/utils',
+    '@vytches/ddd-contracts',
+    '@vytches/ddd-events',
+    '@vytches/ddd-domain-primitives',
+    '@vytches/ddd-utils',
   ],
 
   // === REQUIRED COMPLEXITY LEVELS ===
@@ -207,7 +207,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       description:
         'Advanced NestJS integration with VytchesDDD DI and comprehensive scheduling features',
       file: 'frameworks/nestjs/intermediate/example-1.md',
-      tags: ['nestjs:intermediate', 'event-scheduling:di', 'vytches-ddd:integration'],
+      tags: ['nestjs:intermediate', 'event-scheduling:di', 'vytches:ddd:integration'],
       complexity: 'intermediate',
       priority: 'high',
       framework: 'nestjs',

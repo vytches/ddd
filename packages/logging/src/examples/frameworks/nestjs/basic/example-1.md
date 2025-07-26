@@ -1,8 +1,8 @@
 # NestJS Basic Manual Setup
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging + NestJS **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging + NestJS **Complexity**:
 basic **Framework**: NestJS **Integration**: Manual setup with standard NestJS
-DI **Dependencies**: @nestjs/common, @vytches-ddd/logging
+DI **Dependencies**: @nestjs/common, @vytches/ddd-logging
 
 ## Description
 
@@ -24,7 +24,7 @@ requirements.
 ```typescript
 // logging.service.ts - NestJS service wrapper
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Logger, LoggerConfiguration } from '@vytches-ddd/logging';
+import { Logger, LoggerConfiguration } from '@vytches/ddd-logging';
 import {
   UserData,
   OrderData,

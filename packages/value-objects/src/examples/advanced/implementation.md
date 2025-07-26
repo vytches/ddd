@@ -1,6 +1,6 @@
 # Advanced Value Objects - Implementation Overview
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Focus**: Advanced implementation patterns and
 architectural considerations
 
@@ -19,7 +19,7 @@ Advanced value objects should maintain single responsibility while providing
 rich, domain-specific behavior:
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 
 // ✅ Rich behavior while maintaining single responsibility
 export class AdvancedValueObject extends ValueObject<AdvancedData> {
@@ -709,7 +709,7 @@ interface ProcessingResult<T> {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('AdvancedValueObject - Property-Based Tests', () => {
   // ✅ Property-based testing for mathematical operations

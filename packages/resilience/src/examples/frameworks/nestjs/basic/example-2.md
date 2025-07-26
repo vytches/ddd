@@ -1,9 +1,9 @@
 # Retry Pattern with Exponential Backoff - NestJS Basic Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Basic **Domain**: External API Integration **Patterns**: Retry
 with Exponential Backoff, Manual Setup **Dependencies**: @nestjs/common,
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -26,7 +26,7 @@ import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import {
   ResiliencePolicyBuilder,
   RetryStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   InventoryRequest,
   ShippingRequest,

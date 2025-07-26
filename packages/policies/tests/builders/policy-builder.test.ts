@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import type { ISpecification } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches/ddd-utils';
+import type { ISpecification } from '@vytches/ddd-contracts';
 import {
   PolicyBuilder,
   PolicyGroup,

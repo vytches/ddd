@@ -1,6 +1,6 @@
 # NestJS Product Validation - Manual Setup
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Product validation with business rules and manual configuration
@@ -22,7 +22,7 @@ import {
   FieldValidator,
   BusinessRule,
   DataQualityValidator,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { Product, ValidationContext } from './types'; // From your application
 
 @Injectable()

@@ -12,10 +12,10 @@ const packageName = packageJson.name?.split('/')[1] || 'unknown';
 
 // Common dependencies that should be available in test environment
 const commonTestAliases = {
-  '@vytches-ddd/utils': resolve(__dirname, '../utils/src/index.ts'),
-  '@vytches-ddd/contracts': resolve(__dirname, '../contracts/src/index.ts'),
-  '@vytches-ddd/domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
-  '@vytches-ddd/logging': resolve(__dirname, '../logging/src/index.ts'),
+  '@vytches/ddd-utils': resolve(__dirname, '../utils/src/index.ts'),
+  '@vytches/ddd-contracts': resolve(__dirname, '../contracts/src/index.ts'),
+  '@vytches/ddd-domain-primitives': resolve(__dirname, '../domain-primitives/src/index.ts'),
+  '@vytches/ddd-logging': resolve(__dirname, '../logging/src/index.ts'),
 };
 
 // Determine required dependencies based on package type
@@ -35,17 +35,17 @@ function getPackageDependencies(): Record<string, string> {
   ];
   if (foundationPackages.includes(packageName)) {
     return {
-      '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
-      '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
+      '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
+      '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
     };
   }
 
   // Higher-level packages (need core + specific dependencies)
   return {
-    '@vytches-ddd/core': resolve(__dirname, '../core/src/index.ts'),
-    '@vytches-ddd/contracts': commonTestAliases['@vytches-ddd/contracts'],
-    '@vytches-ddd/logging': commonTestAliases['@vytches-ddd/logging'],
-    '@vytches-ddd/utils': commonTestAliases['@vytches-ddd/utils'],
+    '@vytches/ddd-core': resolve(__dirname, '../core/src/index.ts'),
+    '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
+    '@vytches/ddd-logging': commonTestAliases['@vytches/ddd-logging'],
+    '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
   };
 }
 
@@ -74,7 +74,7 @@ export default defineConfig({
     rollupOptions: {
       external: id => {
         // External all @vytches-ddd packages that are not source files
-        return id.startsWith('@vytches-ddd/') && !id.includes('src/');
+        return id.startsWith('@vytches/ddd-') && !id.includes('src/');
       },
     },
     sourcemap: false, // Disable source maps for production builds
@@ -93,7 +93,7 @@ export default defineConfig({
       // All packages need all common aliases for testing
       ...commonTestAliases,
       // Add current package alias for self-imports in tests
-      [`@vytches-ddd/${packageName}`]: resolve(__dirname, 'src/index.ts'),
+      [`@vytches/ddd-${packageName}`]: resolve(__dirname, 'src/index.ts'),
     },
   },
 });

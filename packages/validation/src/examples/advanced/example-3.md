@@ -1,10 +1,10 @@
 # Real-time Global Data Quality Monitoring
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**: Advanced
 **Domain**: Global Data Governance **Patterns**: Real-time Monitoring, Global
 Coordination, Streaming Analytics, Predictive Quality Management
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/events,
-@vytches-ddd/messaging, @vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-events,
+@vytches/ddd-messaging, @vytches/ddd-resilience
 
 ## Description
 
@@ -32,17 +32,17 @@ import {
   DataQualityMetrics,
   ValidationMetrics,
   BatchValidationResult,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import {
   UnifiedEventBus,
   UniversalEventDispatcher,
   DomainEvent,
-} from '@vytches-ddd/events';
-import { OutboxPattern, EventMeshService } from '@vytches-ddd/messaging';
+} from '@vytches/ddd-events';
+import { OutboxPattern, EventMeshService } from '@vytches/ddd-messaging';
 import {
   CircuitBreakerStrategy,
   ResiliencePolicyBuilder,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Real-time quality monitoring events
 export class QualityDegradationDetectedEvent implements DomainEvent {

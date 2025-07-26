@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // enhanced-acl-adapter.ts
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import { ACLError } from './acl-errors';
 import { SimpleACLAdapter } from './base-acl-adapter';
 import type {

@@ -1,7 +1,7 @@
 # NestJS Enterprise Event Mesh with Global Coordination
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise event mesh architecture with VytchesDDD DI and global
@@ -23,13 +23,13 @@ compliance across different markets with enterprise-grade service management.
 
 ```typescript
 // global-event-mesh.service.ts - VytchesDDD DI managed service
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   EventMesh,
   GlobalSagaCoordinator,
   StreamProcessor,
-} from '@vytches-ddd/messaging';
-import { Resilience } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-messaging';
+import { Resilience } from '@vytches/ddd-resilience';
 import { TradeRequest, RiskMetrics } from './types'; // From your application
 
 @DomainService({
@@ -79,7 +79,7 @@ export class GlobalEventMeshService {
 
 // trade-coordination.service.ts - NestJS bridge service
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { TradeExecutionRequest } from './types'; // From your application
 
 @Injectable()
@@ -121,7 +121,7 @@ export class TradingController {
 
 // trading.module.ts - NestJS module with VytchesDDD integration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { TradingController } from './trading.controller';
 import { TradeCoordinationService } from './trade-coordination.service';
 

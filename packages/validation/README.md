@@ -1,16 +1,16 @@
-# @vytches-ddd/validation
+# @vytches/ddd-validation
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/validation
+Package: @vytches/ddd-validation
 Category: Patterns
 Purpose: Comprehensive validation framework with specifications, rules, and domain-specific validators
-Dependencies: @vytches-ddd/domain-primitives, @vytches-ddd/utils
+Dependencies: @vytches/ddd-domain-primitives, @vytches/ddd-utils
 Complexity: Medium
 DDD Patterns: Specification Pattern, Validation Rules, Domain Validators
-Integration Points: @vytches-ddd/policies, @vytches-ddd/cqrs, @vytches-ddd/value-objects
+Integration Points: @vytches/ddd-policies, @vytches/ddd-cqrs, @vytches/ddd-value-objects
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fvalidation.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fvalidation)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-validation.svg)](https://badge.fury.io/js/%40vytches%2Fddd-validation)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ reporting. Designed for complex domain validation scenarios.
 
 ```bash
 # npm
-npm install @vytches-ddd/validation
+npm install @vytches/ddd-validation
 
 # yarn
-yarn add @vytches-ddd/validation
+yarn add @vytches/ddd-validation
 
 # pnpm
-pnpm add @vytches-ddd/validation
+pnpm add @vytches/ddd-validation
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/utils
+npm install @vytches/ddd-domain-primitives @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -147,7 +147,7 @@ interface ValidationError {
 ### 1. Basic Specification Usage
 
 ```typescript
-import { Specification } from '@vytches-ddd/validation';
+import { Specification } from '@vytches/ddd-validation';
 
 // Create a simple specification
 class AgeSpecification extends Specification<User> {
@@ -179,7 +179,7 @@ console.log('User is valid:', isValid);
 ### 2. Fluent Rules
 
 ```typescript
-import { Rules } from '@vytches-ddd/validation';
+import { Rules } from '@vytches/ddd-validation';
 
 // Create fluent rules
 const nameRule = Rules.forString()
@@ -206,7 +206,7 @@ console.log('Age valid:', ageValidation.isValid);
 ### 3. Domain Validators
 
 ```typescript
-import { DomainValidator } from '@vytches-ddd/validation';
+import { DomainValidator } from '@vytches/ddd-validation';
 
 // Create domain validator
 const userValidator = DomainValidator.create<User>()
@@ -232,7 +232,7 @@ if (!validation.isValid) {
 ### Basic Specifications
 
 ```typescript
-import { Specification } from '@vytches-ddd/validation';
+import { Specification } from '@vytches/ddd-validation';
 
 // User age specification
 class UserAgeSpecification extends Specification<User> {
@@ -342,7 +342,7 @@ const recentEuUsers = recentUsers.and(euUsers);
 ### String Rules
 
 ```typescript
-import { Rules } from '@vytches-ddd/validation';
+import { Rules } from '@vytches/ddd-validation';
 
 // String validation rules
 const nameRule = Rules.forString()
@@ -501,7 +501,7 @@ const userValidation = userRule.validate(user);
 ### Entity Validators
 
 ```typescript
-import { DomainValidator } from '@vytches-ddd/validation';
+import { DomainValidator } from '@vytches/ddd-validation';
 
 // User entity validator
 const userValidator = DomainValidator.create<User>()
@@ -606,7 +606,7 @@ const orderAggregateValidation =
 ### Async Specifications
 
 ```typescript
-import { AsyncSpecification } from '@vytches-ddd/validation';
+import { AsyncSpecification } from '@vytches/ddd-validation';
 
 // Email uniqueness specification
 class EmailUniquenessSpecification extends AsyncSpecification<User> {
@@ -705,7 +705,7 @@ if (!validation.isValid) {
 ### Context Creation
 
 ```typescript
-import { ValidationContext } from '@vytches-ddd/validation';
+import { ValidationContext } from '@vytches/ddd-validation';
 
 // Create validation context
 const context = ValidationContext.create()
@@ -1119,7 +1119,7 @@ export class GetUsersByAgeRangeQueryHandler {
 
 ```typescript
 // Validation with policies
-import { PolicyBuilder } from '@vytches-ddd/policies';
+import { PolicyBuilder } from '@vytches/ddd-policies';
 
 // Create policy with validation
 const userCreationPolicy = PolicyBuilder.create<User>()
@@ -1399,20 +1399,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/validation
+pnpm build --filter=@vytches/ddd-validation
 
 # Run tests
-pnpm test --filter=@vytches-ddd/validation
+pnpm test --filter=@vytches/ddd-validation
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/validation
+pnpm dev --filter=@vytches/ddd-validation
 ```
 
 ## 📄 License
@@ -1422,7 +1422,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

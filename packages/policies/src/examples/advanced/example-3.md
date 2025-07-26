@@ -1,13 +1,13 @@
 # AI-Powered Policy Optimization and Learning
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Machine Learning and AI  
 **Patterns**: ai-policy-optimization, adaptive-learning,
 intelligent-automation  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/analytics,
-@vytches-ddd/events, @vytches-ddd/messaging
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-analytics,
+@vytches/ddd-events, @vytches/ddd-messaging
 
 ## Description
 
@@ -35,11 +35,11 @@ import {
   PolicyPerformanceAnalyzer,
   IntelligentPolicyRecommendations,
   AdaptivePolicyBehavior,
-} from '@vytches-ddd/policies';
-import { AnalyticsEngine, MLModelManager } from '@vytches-ddd/analytics';
-import { DomainEvent, EventBus } from '@vytches-ddd/events';
-import { OutboxPattern } from '@vytches-ddd/messaging';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-policies';
+import { AnalyticsEngine, MLModelManager } from '@vytches/ddd-analytics';
+import { DomainEvent, EventBus } from '@vytches/ddd-events';
+import { OutboxPattern } from '@vytches/ddd-messaging';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary AI-powered policy optimization system with machine learning capabilities

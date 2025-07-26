@@ -2,15 +2,15 @@
 
 **Focus**: Multi-tenant loan workflow management in NestJS **Base Example**:
 [Multi-Tenant Loan Application](../../intermediate/example-3.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // loan-application.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   LoanApplication,
   CreateLoanData,
@@ -312,7 +312,7 @@ export class LoanApplicationService {
 
 // loan-application.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { LoanApplicationService } from './loan-application.service';
 
 @Module({

@@ -1,6 +1,6 @@
 {
-  "name": "vytches-ddd",
-  "version": "0.0.1",
+  "name": "@vytches/ddd",
+  "version": "0.0.0",
   "private": true,
   "description": "VytchesDDD - Enterprise-grade TypeScript library implementing Domain-Driven Design patterns",
   "keywords": [
@@ -11,16 +11,24 @@
     "event-sourcing",
     "anti-corruption-layer"
   ],
-  "author": "Pawel Gozdz",
+  "author": "Vytches Organization",
   "license": "MIT",
-  "homepage": "https://github.com/PawelGozdz/vytches-ddd#readme",
+  "homepage": "https://github.com/vytches/ddd#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PawelGozdz/vytches-ddd.git"
+    "url": "git+https://github.com/vytches/ddd.git"
   },
   "bugs": {
-    "url": "https://github.com/PawelGozdz/vytches-ddd/issues"
+    "url": "https://github.com/vytches/ddd/issues"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "packageManager": "pnpm@8.15.0",
   "engines": {
     "node": ">=18.0.0",
@@ -42,8 +50,8 @@
     "// === PACKAGE-SPECIFIC SHORTCUTS ===": "",
     "cli": "tsx packages/cli/src/cli.ts",
     "// === CLI DEVELOPMENT SHORTCUTS ===": "",
-    "cli:generate": "pnpm -F @vytches-ddd/cli build && pnpm cli generate",
-    "cli:domain": "pnpm -F @vytches-ddd/cli build && pnpm cli domain",
+    "cli:generate": "pnpm -F @vytches/ddd-cli build && pnpm cli generate",
+    "cli:domain": "pnpm -F @vytches/ddd-cli build && pnpm cli domain",
     "// === CLI DOCUMENTATION SHORTCUTS ===": "",
     "docs": "pnpm cli examples",
     "docs:generate": "pnpm cli examples generate",
@@ -127,25 +135,19 @@
     "adr:status": "npx madr status",
     "adr:generate": "npx madr generate",
     "adr:export": "npx madr export html",
-    "// === GITHUB INSTALLATION SCRIPTS ===": "",
-    "postinstall": "node scripts/github-install.js",
+    "// === LERNA PUBLISHING ===": "",
+    "publish:check": "lerna changed",
+    "publish:dry-run": "lerna publish --no-git-tag-version --no-push --yes",
     "// === RELEASE WORKFLOWS ===": "",
     "prerelease": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality && pnpm security:audit",
     "prerelease:fast": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality",
     "release:preview": "bash scripts/preview-release.sh",
-    "release:changed": "NX_DAEMON=false pnpm lerna changed",
-    "release:diff": "NX_DAEMON=false pnpm lerna diff",
-    "release:dry": "NX_DAEMON=false pnpm lerna version --conventional-commits --no-push --no-git-tag-version --dry-run",
-    "release:version": "NX_DAEMON=false pnpm lerna version --conventional-commits --no-push",
-    "release:publish": "pnpm lerna publish from-git --yes",
-    "release:major": "NX_DAEMON=false pnpm lerna version major --conventional-commits --no-push",
-    "release:minor": "NX_DAEMON=false pnpm lerna version minor --conventional-commits --no-push",
-    "release:patch": "NX_DAEMON=false pnpm lerna version patch --conventional-commits --no-push",
-    "release:prerelease": "NX_DAEMON=false pnpm lerna version prerelease --conventional-commits --no-push --preid=alpha",
-    "release:graduate": "NX_DAEMON=false pnpm lerna version --conventional-commits --conventional-graduate --no-push",
-    "release": "pnpm prerelease && pnpm release:version && pnpm release:publish",
-    "release:hotfix": "pnpm prerelease:fast && pnpm release:patch",
-    "release:quick": "pnpm build && pnpm test && pnpm release:version",
+    "release": "lerna publish",
+    "release:changed": "lerna changed",
+    "release:version": "lerna version",
+    "release:publish": "lerna publish from-package",
+    "release:alpha": "lerna publish prerelease --preid alpha",
+    "release:beta": "lerna publish prerelease --preid beta",
     "release:collect": "git log --oneline --grep='feat\\|fix\\|BREAKING' --since='$(git describe --tags --abbrev=0 2>/dev/null || echo \"1 week ago\")' --format='%h %s'",
     "// === GIT HOOKS ===": "",
     "prepare": "husky install && pnpm build",
@@ -173,7 +175,7 @@
     "@typescript-eslint/parser": "^8.34.1",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
-    "@vytches-ddd/testing": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
     "chokidar": "^3.5.3",
     "commitizen": "^4.3.0",
     "concurrently": "^8.2.2",
@@ -235,187 +237,5 @@
   },
   "nx": {
     "includedScripts": []
-  },
-  "typesVersions": {
-    "*": {
-      "core": [
-        "./packages/core/dist/index.d.ts"
-      ],
-      "acl": [
-        "./packages/acl/dist/index.d.ts"
-      ],
-      "aggregates": [
-        "./packages/aggregates/dist/index.d.ts"
-      ],
-      "cli": [
-        "./packages/cli/dist/index.d.ts"
-      ],
-      "contracts": [
-        "./packages/contracts/dist/index.d.ts"
-      ],
-      "cqrs": [
-        "./packages/cqrs/dist/index.d.ts"
-      ],
-      "di": [
-        "./packages/di/dist/index.d.ts"
-      ],
-      "domain-primitives": [
-        "./packages/domain-primitives/dist/index.d.ts"
-      ],
-      "domain-services": [
-        "./packages/domain-services/dist/index.d.ts"
-      ],
-      "event-scheduling": [
-        "./packages/event-scheduling/dist/index.d.ts"
-      ],
-      "event-store": [
-        "./packages/event-store/dist/index.d.ts"
-      ],
-      "events": [
-        "./packages/events/dist/index.d.ts"
-      ],
-      "logging": [
-        "./packages/logging/dist/index.d.ts"
-      ],
-      "messaging": [
-        "./packages/messaging/dist/index.d.ts"
-      ],
-      "policies": [
-        "./packages/policies/dist/index.d.ts"
-      ],
-      "projections": [
-        "./packages/projections/dist/index.d.ts"
-      ],
-      "repositories": [
-        "./packages/repositories/dist/index.d.ts"
-      ],
-      "resilience": [
-        "./packages/resilience/dist/index.d.ts"
-      ],
-      "utils": [
-        "./packages/utils/dist/index.d.ts"
-      ],
-      "validation": [
-        "./packages/validation/dist/index.d.ts"
-      ],
-      "value-objects": [
-        "./packages/value-objects/dist/index.d.ts"
-      ],
-      "*": [
-        "./packages/*/dist/index.d.ts"
-      ]
-    }
-  },
-  "exports": {
-    ".": {
-      "types": "./packages/core/dist/index.d.ts",
-      "import": "./packages/core/dist/index.js",
-      "require": "./packages/core/dist/index.cjs"
-    },
-    "./acl": {
-      "types": "./packages/acl/dist/index.d.ts",
-      "import": "./packages/acl/dist/index.js",
-      "require": "./packages/acl/dist/index.cjs"
-    },
-    "./aggregates": {
-      "types": "./packages/aggregates/dist/index.d.ts",
-      "import": "./packages/aggregates/dist/index.js",
-      "require": "./packages/aggregates/dist/index.cjs"
-    },
-    "./cli": {
-      "types": "./packages/cli/dist/index.d.ts",
-      "import": "./packages/cli/dist/index.js",
-      "require": "./packages/cli/dist/index.cjs"
-    },
-    "./contracts": {
-      "types": "./packages/contracts/dist/index.d.ts",
-      "import": "./packages/contracts/dist/index.js",
-      "require": "./packages/contracts/dist/index.cjs"
-    },
-    "./core": {
-      "types": "./packages/core/dist/index.d.ts",
-      "import": "./packages/core/dist/index.js",
-      "require": "./packages/core/dist/index.cjs"
-    },
-    "./cqrs": {
-      "types": "./packages/cqrs/dist/index.d.ts",
-      "import": "./packages/cqrs/dist/index.js",
-      "require": "./packages/cqrs/dist/index.cjs"
-    },
-    "./di": {
-      "types": "./packages/di/dist/index.d.ts",
-      "import": "./packages/di/dist/index.js",
-      "require": "./packages/di/dist/index.cjs"
-    },
-    "./domain-primitives": {
-      "types": "./packages/domain-primitives/dist/index.d.ts",
-      "import": "./packages/domain-primitives/dist/index.js",
-      "require": "./packages/domain-primitives/dist/index.cjs"
-    },
-    "./domain-services": {
-      "types": "./packages/domain-services/dist/index.d.ts",
-      "import": "./packages/domain-services/dist/index.js",
-      "require": "./packages/domain-services/dist/index.cjs"
-    },
-    "./event-scheduling": {
-      "types": "./packages/event-scheduling/dist/index.d.ts",
-      "import": "./packages/event-scheduling/dist/index.js",
-      "require": "./packages/event-scheduling/dist/index.cjs"
-    },
-    "./event-store": {
-      "types": "./packages/event-store/dist/index.d.ts",
-      "import": "./packages/event-store/dist/index.js",
-      "require": "./packages/event-store/dist/index.cjs"
-    },
-    "./events": {
-      "types": "./packages/events/dist/index.d.ts",
-      "import": "./packages/events/dist/index.js",
-      "require": "./packages/events/dist/index.cjs"
-    },
-    "./logging": {
-      "types": "./packages/logging/dist/index.d.ts",
-      "import": "./packages/logging/dist/index.js",
-      "require": "./packages/logging/dist/index.cjs"
-    },
-    "./messaging": {
-      "types": "./packages/messaging/dist/index.d.ts",
-      "import": "./packages/messaging/dist/index.js",
-      "require": "./packages/messaging/dist/index.cjs"
-    },
-    "./policies": {
-      "types": "./packages/policies/dist/index.d.ts",
-      "import": "./packages/policies/dist/index.js",
-      "require": "./packages/policies/dist/index.cjs"
-    },
-    "./projections": {
-      "types": "./packages/projections/dist/index.d.ts",
-      "import": "./packages/projections/dist/index.js",
-      "require": "./packages/projections/dist/index.cjs"
-    },
-    "./repositories": {
-      "types": "./packages/repositories/dist/index.d.ts",
-      "import": "./packages/repositories/dist/index.js",
-      "require": "./packages/repositories/dist/index.cjs"
-    },
-    "./resilience": {
-      "types": "./packages/resilience/dist/index.d.ts",
-      "import": "./packages/resilience/dist/index.js",
-      "require": "./packages/resilience/dist/index.cjs"
-    },
-    "./utils": {
-      "types": "./packages/utils/dist/index.d.ts",
-      "import": "./packages/utils/dist/index.js",
-      "require": "./packages/utils/dist/index.cjs"
-    },
-    "./validation": {
-      "types": "./packages/validation/dist/index.d.ts",
-      "import": "./packages/validation/dist/index.js",
-      "require": "./packages/validation/dist/index.cjs"
-    },
-    "./value-objects": {
-      "types": "./packages/value-objects/dist/index.d.ts",
-      "import": "./packages/value-objects/dist/index.js",
-      "require": "./packages/value-objects/dist/index.cjs"
-    }
   }
 }

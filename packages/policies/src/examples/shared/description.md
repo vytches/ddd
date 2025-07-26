@@ -1,7 +1,7 @@
 # Policies Package - Comprehensive Business Rules Engine
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Domain**: Business Rules & Validation  
 **Architecture**: Policy Pattern, Specification Pattern, Builder Pattern
 
@@ -134,13 +134,13 @@ and maintained.
 
 ### **Core Dependencies**
 
-- **@vytches-ddd/validation**: Specification pattern integration for complex
+- **@vytches/ddd-validation**: Specification pattern integration for complex
   validation logic
-- **@vytches-ddd/events**: Event-driven policy evaluation and audit trail
+- **@vytches/ddd-events**: Event-driven policy evaluation and audit trail
   generation
-- **@vytches-ddd/logging**: Comprehensive structured logging for policy
+- **@vytches/ddd-logging**: Comprehensive structured logging for policy
   operations
-- **@vytches-ddd/di**: Dependency injection for service resolution and
+- **@vytches/ddd-di**: Dependency injection for service resolution and
   configuration
 
 ### **Framework Integrations**

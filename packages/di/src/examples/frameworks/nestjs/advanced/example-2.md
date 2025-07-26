@@ -1,11 +1,11 @@
 # NestJS Production Monitoring - Expert Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: expert  
 **Domain**: Production Operations  
 **Patterns**: Production Monitoring, Health Checks, Metrics, Observability  
-**Dependencies**: @vytches-ddd/di, @nestjs/common, @nestjs/terminus,
+**Dependencies**: @vytches/ddd-di, @nestjs/common, @nestjs/terminus,
 @nestjs/microservices
 
 ## Description
@@ -32,7 +32,7 @@ import {
   HealthIndicatorResult,
   HealthCheckError,
 } from '@nestjs/terminus';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Custom health indicator for VytchesDDD services
@@ -181,7 +181,7 @@ export class VytchesDDDHealthIndicator extends HealthIndicator {
 ```typescript
 // monitoring/metrics.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Metrics collection service for VytchesDDD
@@ -356,7 +356,7 @@ export class VytchesDDDMetricsService {
 ```typescript
 // monitoring/tracing.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Distributed tracing service for VytchesDDD
@@ -553,7 +553,7 @@ export class VytchesDDDTracingService {
 ```typescript
 // monitoring/debug.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Debug service for VytchesDDD troubleshooting

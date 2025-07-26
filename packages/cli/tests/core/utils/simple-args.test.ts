@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { SimpleArgsParser } from '../../../src/core/utils/simple-args';
 
 describe('SimpleArgsParser', () => {

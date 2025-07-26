@@ -1,11 +1,11 @@
 # Multi-System Integration with Composite ACL
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Intermediate  
 **Domain**: E-commerce Platform  
 **Patterns**: Composite ACL, System Orchestration, Data Aggregation  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/events, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-events, @vytches/ddd-core
 
 ## Description
 
@@ -23,9 +23,9 @@ various carriers, all through a unified interface.
 
 ```typescript
 // composite-ecommerce.acl.ts
-import { CompositeACL, IDataAggregator } from '@vytches-ddd/acl';
-import { DomainEvent, EventBus } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { CompositeACL, IDataAggregator } from '@vytches/ddd-acl';
+import { DomainEvent, EventBus } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   Product,
   PaymentResult,

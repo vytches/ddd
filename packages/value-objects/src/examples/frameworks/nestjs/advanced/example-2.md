@@ -1,7 +1,7 @@
 # Advanced Value Objects - NestJS DI Integration
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
-**Complexity**: Advanced **Framework**: NestJS **Focus**: @vytches-ddd/di
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
+**Complexity**: Advanced **Framework**: NestJS **Focus**: @vytches/ddd-di
 integration with AI-enhanced and enterprise-scale capabilities **Base Example**:
 [TimePeriod Value Object](../../../advanced/example-1.md)
 
@@ -10,7 +10,7 @@ integration with AI-enhanced and enterprise-scale capabilities **Base Example**:
 ```typescript
 // time-period.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   CreateTimePeriodDto,
   TimePeriodResponse,
@@ -475,7 +475,7 @@ export class TimePeriodService {
 ```typescript
 // color.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   CreateColorDto,
   ColorResponse,
@@ -996,7 +996,7 @@ export class ColorService {
 ```typescript
 // app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { AdvancedTimePeriodModule } from './time-period/time-period.module';
 import { AdvancedColorModule } from './color/color.module';
 

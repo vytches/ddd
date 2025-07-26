@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 import { PolicyRetryBehavior, PolicyRetryBehaviorFactory } from '../../src/decorators/retry-policy';
 import { BaseBusinessPolicy } from '../../src/core/base/base-business-policy';
 import type { PolicyViolation } from '../../src/core/models/policy-violation';

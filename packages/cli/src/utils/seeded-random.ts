@@ -13,7 +13,15 @@ export class SeededRandom {
    * Generate next random number between 0 and 1
    */
   next(): number {
+    // Park and Miller LCG with improved precision handling
     this.seed = (this.seed * 16807) % 2147483647;
+
+    // Ensure seed never becomes 0 (which would break the sequence)
+    if (this.seed <= 0) {
+      this.seed = 1;
+    }
+
+    // Return value in range [0, 1) with better precision
     return (this.seed - 1) / 2147483646;
   }
 
@@ -74,6 +82,9 @@ export class SeededRandom {
       hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    return Math.abs(hash);
+
+    // Ensure we never return 0 (which would break the LCG)
+    const result = Math.abs(hash);
+    return result === 0 ? 1 : result;
   }
 }

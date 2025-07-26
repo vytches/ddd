@@ -1,4 +1,4 @@
-import type { IDomainEvent } from '@vytches-ddd/contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { UnifiedEventBus } from './unified-event-bus';
 
 /**

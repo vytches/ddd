@@ -42,7 +42,7 @@ We will adopt a monorepo architecture using:
 ### Repository Structure
 
 ```text
-vytches-ddd/
+ddd/
 ├── packages/          # All library packages
 │   ├── core/          # Meta-package for stable API
 │   ├── domain-primitives/

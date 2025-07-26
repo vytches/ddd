@@ -2,7 +2,7 @@
 
 **Focus**: Advanced repository patterns in NestJS with manual instantiation
 **Base Example**: [Unit of Work Pattern](../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches/ddd-repositories
 
 ## Service Implementation
 
@@ -13,7 +13,7 @@ import {
   UnitOfWork,
   BaseRepository,
   SpecificationRegistry,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import {
@@ -369,6 +369,6 @@ export class FinancialController {
 - Unit of Work for transaction management across multiple repositories
 - Specification Pattern for complex business rule validation
 - Batch processing for high-performance scenarios
-- All business logic uses @vytches-ddd/repositories capabilities
+- All business logic uses @vytches/ddd-repositories capabilities
 - Clean integration with NestJS transaction management
 - Demonstrates repository coordination without complex DI setup

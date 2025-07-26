@@ -1,16 +1,16 @@
 # Basic Repository - NestJS DI Integration
 
-**Focus**: Basic IRepository usage with @vytches-ddd/di integration **Base
+**Focus**: Basic IRepository usage with @vytches/ddd-di integration **Base
 Example**: [Basic Generic Repository](../../basic/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/repositories, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-repositories, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // user.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { BaseRepository } from '@vytches-ddd/repositories';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { BaseRepository } from '@vytches/ddd-repositories';
 import { User, CreateUserData, UpdateUserData } from './types'; // From your app
 
 @Injectable()
@@ -18,7 +18,7 @@ export class UserService {
   private readonly userRepository: BaseRepository<User>;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for repository access
+    // ⭐ FOCUS: @vytches/ddd-di integration for repository access
     this.userRepository =
       VytchesDDD.resolve<BaseRepository<User>>('userRepository');
   }
@@ -82,8 +82,8 @@ export class UserService {
 
 ```typescript
 // user-di.setup.ts
-import { VytchesDDD, DomainService } from '@vytches-ddd/di';
-import { BaseRepository } from '@vytches-ddd/repositories';
+import { VytchesDDD, DomainService } from '@vytches/ddd-di';
+import { BaseRepository } from '@vytches/ddd-repositories';
 
 @DomainService('userRepository')
 export class UserRepositoryConfig {
@@ -126,7 +126,7 @@ export class UserValidatorConfig {
 ```typescript
 // user.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 
@@ -215,13 +215,13 @@ export class UserController {
 
 ```typescript
 // enhanced-user-di.setup.ts
-import { VytchesDDD, DomainService } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService } from '@vytches/ddd-di';
 import {
   BaseRepository,
   CacheService,
   ValidationService,
   AuditService,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 
 // Primary repository with advanced features
 @DomainService('enhancedUserRepository')
@@ -287,13 +287,13 @@ export class UserAuditServiceConfig {
 ```typescript
 // enhanced-user.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   BaseRepository,
   CacheService,
   ValidationService,
   AuditService,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 import { User, CreateUserData, UpdateUserData } from './types';
 
 @Injectable()
@@ -439,11 +439,11 @@ export class EnhancedUserService {
 
 ## Key Points
 
-- Basic @vytches-ddd/di integration for repository access
+- Basic @vytches/ddd-di integration for repository access
 - Service locator pattern for clean dependency management
 - Enhanced functionality through coordinated DI services
 - VytchesDDD initialization before NestJS module initialization
 - Clean separation between framework concerns and domain logic
 - Caching, validation, and auditing through DI-managed services
 - No complex NestJS DI configuration required
-- Focus on @vytches-ddd capabilities rather than framework integration
+- Focus on @vytches/ddd-core capabilities rather than framework integration

@@ -1,14 +1,14 @@
 # NestJS Outbox Pattern Integration - Manual Setup
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Manual setup of outbox pattern with NestJS dependency injection
 
 ## Description
 
-This example shows how to manually integrate the @vytches-ddd/messaging outbox
+This example shows how to manually integrate the @vytches/ddd-messaging outbox
 pattern with NestJS using standard framework patterns and manual service
 instantiation.
 
@@ -27,7 +27,7 @@ import {
   OutboxMessageHandler,
   OutboxMessage,
   MessagePriority,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { Order } from './types'; // From your application

@@ -1,9 +1,9 @@
 # Batch Validation with Performance Optimization
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**:
 Intermediate **Domain**: Data Processing **Patterns**: Batch Processing,
 Performance Optimization, Parallel Validation, Caching Strategies
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/utils, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-utils, @vytches/ddd-core
 
 ## Description
 
@@ -29,8 +29,8 @@ import {
   BatchValidationRequest,
   BatchValidationResult,
   ValidationMetrics,
-} from '@vytches-ddd/validation';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { Result } from '@vytches/ddd-utils';
 import { EventEmitter } from 'events';
 
 // Performance optimization configuration

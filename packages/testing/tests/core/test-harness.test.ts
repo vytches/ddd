@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { TestHarness, SimpleTestHarness, TestResourceBuilder } from '../../src';
 
 describe('TestHarness', () => {

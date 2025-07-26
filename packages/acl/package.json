@@ -1,5 +1,5 @@
 {
-  "name": "@vytches-ddd/acl",
+  "name": "@vytches/ddd-acl",
   "version": "0.3.2",
   "description": "Anti-Corruption Layer for external system integration",
   "type": "module",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/acl"
   },
   "scripts": {
@@ -42,19 +42,19 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*"
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   },
   "devDependencies": {
-    "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/testing": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   },
   "nx": {
     "tags": [

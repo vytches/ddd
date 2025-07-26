@@ -1,4 +1,4 @@
-import type { IDomainEvent } from '@vytches-ddd/contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IEventProcessor } from '../event-processor';
 import type { UnifiedEventBus } from '../unified-event-bus';
 import type { IntegrationEventTransformerRegistry } from './integration-event-transformer-registry';

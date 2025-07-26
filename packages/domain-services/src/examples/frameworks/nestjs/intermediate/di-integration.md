@@ -1,17 +1,17 @@
 # DI Integration with VytchesDDD - NestJS Intermediate
 
-**Focus**: Advanced @vytches-ddd/domain-services usage with @vytches-ddd/di
+**Focus**: Advanced @vytches/ddd-domain-services usage with @vytches/ddd-di
 integration **Base Example**:
 [Event-Driven Domain Service](../../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/core, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-core, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // order-fulfillment.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Result } from '@vytches-ddd/utils';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   OrderCreatedEvent,
@@ -25,7 +25,7 @@ export class OrderFulfillmentService {
   private readonly orderFulfillmentDomainService: OrderFulfillmentDomainService;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration
+    // ⭐ FOCUS: @vytches/ddd-di integration
     this.orderFulfillmentDomainService =
       VytchesDDD.resolve<OrderFulfillmentDomainService>(
         'orderFulfillmentService'
@@ -77,10 +77,10 @@ export class OrderFulfillmentService {
 
 ```typescript
 // order-fulfillment-domain.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { EventHandler } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { EventHandler } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   OrderCreatedEvent,
   PaymentProcessedEvent,
@@ -369,7 +369,7 @@ export class OrderFulfillmentController {
 ```typescript
 // order-fulfillment.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { OrderFulfillmentController } from './order-fulfillment.controller';
 import { OrderFulfillmentService } from './order-fulfillment.service';
 import { OrderFulfillmentDomainService } from './order-fulfillment-domain.service';
@@ -389,7 +389,7 @@ export class OrderFulfillmentModule implements OnModuleInit {
 
 ## Key Points
 
-- **@vytches-ddd/di Integration**: Uses VytchesDDD.resolve() for service
+- **@vytches/ddd-di Integration**: Uses VytchesDDD.resolve() for service
   location
 - **Domain Service Decorators**: @DomainService decorator for automatic
   registration

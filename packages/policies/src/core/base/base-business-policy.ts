@@ -1,5 +1,5 @@
-import { Result } from '@vytches-ddd/utils';
-import type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import { Result } from '@vytches/ddd-utils';
+import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 import type {
   IBusinessPolicy,
   IPolicyComposer,

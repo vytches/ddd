@@ -1,6 +1,6 @@
 # Distributed Event Scheduling - Multi-Node Coordination
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 intermediate **Domain**: Infrastructure **Patterns**: distributed-scheduling,
 leader-election, partition-management, node-coordination
 
@@ -23,9 +23,9 @@ are executed reliably even when individual nodes fail.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   ClusterNode,
   SchedulingPartition,

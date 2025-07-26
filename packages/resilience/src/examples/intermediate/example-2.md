@@ -1,9 +1,9 @@
 # Composite Resilience Strategy with Policy Chaining
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**:
 Intermediate **Domain**: Financial Trading Platform **Patterns**: Composite
 Strategy, Policy Chaining, Advanced Configuration **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -32,7 +32,7 @@ import {
   RetryStrategy,
   BulkheadStrategy,
   TimeoutStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   PaymentRequest,
   ExternalServiceConfig,

@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestScheduledEvent, TestEventFactory, BaseSchedulerAdapter } from '../../src';
-import { JobStatus, BackoffStrategy } from '@vytches-ddd/contracts';
+import { JobStatus, BackoffStrategy } from '@vytches/ddd-contracts';
 import type {
   IScheduledEvent,
   IScheduledJob,
   IJobQueryResult,
   IJobFilter,
   IScheduleOptions,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Create a concrete implementation for testing
 class TestSchedulerAdapter extends BaseSchedulerAdapter {

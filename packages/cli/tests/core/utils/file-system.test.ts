@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { FileSystem } from '../../../src/core/utils/file-system';
 import { CLIError } from '../../../src/types';
 import * as fs from 'fs';

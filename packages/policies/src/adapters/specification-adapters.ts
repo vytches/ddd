@@ -1,6 +1,6 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
-import type { Result } from '@vytches-ddd/utils';
-import type { BusinessRuleValidator } from '@vytches-ddd/validation';
+import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+import type { Result } from '@vytches/ddd-utils';
+import type { BusinessRuleValidator } from '@vytches/ddd-validation';
 import {
   BaseBusinessPolicy,
   SpecificationPolicy,

@@ -1,14 +1,14 @@
 # Event-Sourced Repository - Event Stream Management
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 beginner **Domain**: product-management **Patterns**: event-sourcing,
 event-store, aggregate-reconstruction **Dependencies**:
-@vytches-ddd/repositories, @vytches-ddd/events
+@vytches/ddd-repositories, @vytches/ddd-events
 
 ## Description
 
 Event-sourced repository implementation showing how to persist and reconstruct
-aggregates from event streams using the @vytches-ddd/repositories event store
+aggregates from event streams using the @vytches/ddd-repositories event store
 capabilities.
 
 ## Business Context
@@ -21,8 +21,8 @@ queries for business analytics.
 
 ```typescript
 // product-event-repository.ts
-import { EventSourcedRepository } from '@vytches-ddd/repositories';
-import { EntityId, DomainEvent } from '@vytches-ddd/domain-primitives';
+import { EventSourcedRepository } from '@vytches/ddd-repositories';
+import { EntityId, DomainEvent } from '@vytches/ddd-domain-primitives';
 import { Product, CreateProductData, StoredEvent, EventStream } from './types'; // From your application
 
 // ✅ FOCUS: Event-sourced repository using library EventSourcedRepository

@@ -1,16 +1,16 @@
-# @vytches-ddd/core
+# @vytches/ddd-core
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/core
+Package: @vytches/ddd-core
 Category: Meta-Package
 Purpose: Enterprise API stability meta-package providing unified access to core DDD building blocks with stable interface
-Dependencies: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/value-objects, @vytches-ddd/repositories, @vytches-ddd/contracts, @vytches-ddd/utils, @vytches-ddd/logging
+Dependencies: @vytches/ddd-aggregates, @vytches/ddd-domain-primitives, @vytches/ddd-value-objects, @vytches/ddd-repositories, @vytches/ddd-contracts, @vytches/ddd-utils, @vytches/ddd-logging
 Complexity: Low (Meta-package)
 DDD Patterns: Meta-package Pattern, Enterprise API Stability, Core Building Blocks, Foundation Layer
 Integration Points: Single entry point for core DDD patterns; provides stable API for external consumers and other packages
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcore.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fcore)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-core.svg)](https://badge.fury.io/js/%40vytches%2Fddd-core)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,13 +43,13 @@ and error handling across your entire application.
 
 ```bash
 # npm
-npm install @vytches-ddd/core
+npm install @vytches/ddd-core
 
 # yarn
-yarn add @vytches-ddd/core
+yarn add @vytches/ddd-core
 
 # pnpm
-pnpm add @vytches-ddd/core
+pnpm add @vytches/ddd-core
 ```
 
 ### Automatic Dependencies
@@ -59,13 +59,13 @@ The core package automatically pulls in all necessary dependencies:
 ```json
 {
   "peerDependencies": {
-    "@vytches-ddd/aggregates": "workspace:*",
-    "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/domain-primitives": "workspace:*",
-    "@vytches-ddd/logging": "workspace:*",
-    "@vytches-ddd/repositories": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/value-objects": "workspace:*"
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-repositories": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*"
   }
 }
 ```
@@ -109,46 +109,46 @@ The core package automatically pulls in all necessary dependencies:
 The core package aggregates specialized packages:
 
 ```typescript
-// From @vytches-ddd/aggregates
+// From @vytches/ddd-aggregates
 export {
   AggregateRoot,
   AggregateBuilder,
   AggregateError,
-} from '@vytches-ddd/aggregates';
+} from '@vytches/ddd-aggregates';
 
-// From @vytches-ddd/contracts (Foundation)
-export { EntityId } from '@vytches-ddd/contracts';
+// From @vytches/ddd-contracts (Foundation)
+export { EntityId } from '@vytches/ddd-contracts';
 
-// From @vytches-ddd/domain-primitives
+// From @vytches/ddd-domain-primitives
 export {
   BaseError,
   InvalidParameterError,
   NotFoundError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 
-// From @vytches-ddd/value-objects
-export { BaseValueObject } from '@vytches-ddd/value-objects';
+// From @vytches/ddd-value-objects
+export { BaseValueObject } from '@vytches/ddd-value-objects';
 
-// From @vytches-ddd/repositories
-export { IBaseRepository, VersionError } from '@vytches-ddd/repositories';
+// From @vytches/ddd-repositories
+export { IBaseRepository, VersionError } from '@vytches/ddd-repositories';
 ```
 
 ### Dependency Graph
 
 ```
-@vytches-ddd/core
-├── @vytches-ddd/aggregates
-│   ├── @vytches-ddd/contracts
-│   ├── @vytches-ddd/domain-primitives
-│   └── @vytches-ddd/value-objects
-├── @vytches-ddd/domain-primitives
-│   └── @vytches-ddd/contracts
-├── @vytches-ddd/value-objects
-│   └── @vytches-ddd/contracts
-├── @vytches-ddd/repositories
-│   ├── @vytches-ddd/contracts
-│   └── @vytches-ddd/domain-primitives
-└── @vytches-ddd/utils
+@vytches/ddd-core
+├── @vytches/ddd-aggregates
+│   ├── @vytches/ddd-contracts
+│   ├── @vytches/ddd-domain-primitives
+│   └── @vytches/ddd-value-objects
+├── @vytches/ddd-domain-primitives
+│   └── @vytches/ddd-contracts
+├── @vytches/ddd-value-objects
+│   └── @vytches/ddd-contracts
+├── @vytches/ddd-repositories
+│   ├── @vytches/ddd-contracts
+│   └── @vytches/ddd-domain-primitives
+└── @vytches/ddd-utils
 ```
 
 ## 🚀 Quick Start
@@ -163,7 +163,7 @@ import {
   IBaseRepository,
   BaseError,
   InvalidParameterError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // Create Entity ID
 const orderId = EntityId.createWithRandomUUID();
@@ -238,7 +238,7 @@ import {
   IBaseRepository,
   BaseError,
   IActor,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // Value Objects
 class Email extends BaseValueObject<{ value: string }> {
@@ -357,7 +357,7 @@ interface ICustomerRepository extends IBaseRepository<Customer> {
 The foundation of domain aggregates:
 
 ```typescript
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 
 class Product extends AggregateRoot {
   private constructor(
@@ -418,7 +418,7 @@ class Product extends AggregateRoot {
 Enterprise-grade entity identification:
 
 ```typescript
-import { EntityId, IdType } from '@vytches-ddd/core';
+import { EntityId, IdType } from '@vytches/ddd-core';
 
 // Different ID types
 const uuidId = EntityId.createWithRandomUUID();
@@ -455,7 +455,7 @@ console.log(customerId.getType()); // 'text'
 Immutable value objects with validation:
 
 ```typescript
-import { BaseValueObject, InvalidParameterError } from '@vytches-ddd/core';
+import { BaseValueObject, InvalidParameterError } from '@vytches/ddd-core';
 
 class PhoneNumber extends BaseValueObject<{
   countryCode: string;
@@ -503,7 +503,7 @@ console.log(phone.fullNumber); // '+1234567890'
 Repository interfaces and implementations:
 
 ```typescript
-import { IBaseRepository, EntityId } from '@vytches-ddd/core';
+import { IBaseRepository, EntityId } from '@vytches/ddd-core';
 
 interface IProductRepository extends IBaseRepository<Product> {
   findByName(name: string): Promise<Product[]>;
@@ -572,7 +572,7 @@ import {
   NotFoundError,
   DuplicateError,
   MissingValueError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 class OrderService {
   constructor(
@@ -658,12 +658,12 @@ changes:
 
 ```typescript
 // ✅ Stable - Will not change in breaking ways
-import { AggregateRoot, EntityId, BaseValueObject } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId, BaseValueObject } from '@vytches/ddd-core';
 
 // ❌ Unstable - Internal package APIs may change
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EntityId } from '@vytches-ddd/contracts';
-import { BaseValueObject } from '@vytches-ddd/value-objects';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-contracts';
+import { BaseValueObject } from '@vytches/ddd-value-objects';
 ```
 
 ### Version Coordination
@@ -673,7 +673,7 @@ The core package coordinates versions across all dependencies:
 ```json
 {
   "dependencies": {
-    "@vytches-ddd/core": "^0.1.4"
+    "@vytches/ddd-core": "^0.1.4"
   }
 }
 ```
@@ -686,7 +686,7 @@ The core package evolves with backward compatibility:
 
 ```typescript
 // v0.1.x
-export { AggregateRoot, EntityId } from '@vytches-ddd/core';
+export { AggregateRoot, EntityId } from '@vytches/ddd-core';
 
 // v0.2.x (backward compatible)
 export {
@@ -695,7 +695,7 @@ export {
   // New additions
   EnhancedAggregate,
   CompositeEntityId,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // v1.0.x (breaking changes handled gracefully)
 export {
@@ -703,7 +703,7 @@ export {
   EntityId,
   // Deprecated items still available
   LegacyAggregate, // @deprecated Use AggregateRoot instead
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 ```
 
 ## 📦 Bundle Size Optimization
@@ -714,11 +714,11 @@ The core package provides optimal bundle sizes:
 
 ```typescript
 // Before: Multiple package imports
-import { AggregateRoot } from '@vytches-ddd/aggregates'; // 82KB
-import { EntityId } from '@vytches-ddd/contracts'; // 2KB
-import { BaseValueObject } from '@vytches-ddd/value-objects'; // 36KB
-import { IBaseRepository } from '@vytches-ddd/repositories'; // 40KB
-import { BaseError } from '@vytches-ddd/domain-primitives'; // 40KB
+import { AggregateRoot } from '@vytches/ddd-aggregates'; // 82KB
+import { EntityId } from '@vytches/ddd-contracts'; // 2KB
+import { BaseValueObject } from '@vytches/ddd-value-objects'; // 36KB
+import { IBaseRepository } from '@vytches/ddd-repositories'; // 40KB
+import { BaseError } from '@vytches/ddd-domain-primitives'; // 40KB
 // Total: 200KB
 
 // After: Single core import
@@ -728,7 +728,7 @@ import {
   BaseValueObject,
   IBaseRepository,
   BaseError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 // Total: 1.4KB meta-package + tree-shaken dependencies
 ```
 
@@ -738,11 +738,11 @@ The core package is optimized for tree shaking:
 
 ```typescript
 // Only imports what you use
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 // Result: Only aggregate and entity-id code is bundled
 
 // vs. importing everything
-import * as Core from '@vytches-ddd/core';
+import * as Core from '@vytches/ddd-core';
 // Result: Entire core package is bundled
 ```
 
@@ -752,11 +752,11 @@ import * as Core from '@vytches-ddd/core';
 
 ```typescript
 // Before: Individual package imports
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EntityId } from '@vytches-ddd/contracts';
-import { BaseValueObject } from '@vytches-ddd/value-objects';
-import { IBaseRepository } from '@vytches-ddd/repositories';
-import { BaseError } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-contracts';
+import { BaseValueObject } from '@vytches/ddd-value-objects';
+import { IBaseRepository } from '@vytches/ddd-repositories';
+import { BaseError } from '@vytches/ddd-domain-primitives';
 
 // After: Single core import
 import {
@@ -765,7 +765,7 @@ import {
   BaseValueObject,
   IBaseRepository,
   BaseError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 ```
 
 ### Package.json Updates
@@ -774,14 +774,14 @@ import {
 {
   "dependencies": {
     // Remove individual packages
-    // "@vytches-ddd/aggregates": "^0.1.0",
-    // "@vytches-ddd/contracts": "^0.1.0",
-    // "@vytches-ddd/value-objects": "^0.1.0",
-    // "@vytches-ddd/repositories": "^0.1.0",
-    // "@vytches-ddd/domain-primitives": "^0.1.0",
+    // "@vytches/ddd-aggregates": "^0.1.0",
+    // "@vytches/ddd-contracts": "^0.1.0",
+    // "@vytches/ddd-value-objects": "^0.1.0",
+    // "@vytches/ddd-repositories": "^0.1.0",
+    // "@vytches/ddd-domain-primitives": "^0.1.0",
 
     // Add core package
-    "@vytches-ddd/core": "^0.1.4"
+    "@vytches/ddd-core": "^0.1.4"
   }
 }
 ```
@@ -793,11 +793,11 @@ import {
 // Use find-and-replace or automated tools
 
 // From:
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EntityId } from '@vytches-ddd/contracts';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-contracts';
 
 // To:
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 ```
 
 ## 📥 Import Strategies
@@ -812,26 +812,26 @@ import {
   BaseValueObject,
   IBaseRepository,
   BaseError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // ✅ Also good: Specific imports for single use
-import { AggregateRoot } from '@vytches-ddd/core';
-import { EntityId } from '@vytches-ddd/core';
+import { AggregateRoot } from '@vytches/ddd-core';
+import { EntityId } from '@vytches/ddd-core';
 ```
 
 ### Avoid These Patterns
 
 ```typescript
 // ❌ Avoid: Namespace imports (poor tree shaking)
-import * as Core from '@vytches-ddd/core';
+import * as Core from '@vytches/ddd-core';
 const aggregate = new Core.AggregateRoot();
 
 // ❌ Avoid: Default imports (not supported)
-import Core from '@vytches-ddd/core';
+import Core from '@vytches/ddd-core';
 
 // ❌ Avoid: Mixed imports (inconsistent)
-import { AggregateRoot } from '@vytches-ddd/core';
-import { SomeClass } from '@vytches-ddd/aggregates';
+import { AggregateRoot } from '@vytches/ddd-core';
+import { SomeClass } from '@vytches/ddd-aggregates';
 ```
 
 ### Type-Only Imports
@@ -842,7 +842,7 @@ import type {
   IAggregateRoot,
   IBaseRepository,
   DomainErrorOptions,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // ✅ Good: Mixed imports with type imports
 import {
@@ -850,7 +850,7 @@ import {
   EntityId,
   type IAggregateRoot,
   type IBaseRepository,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 ```
 
 ## 🌳 Tree Shaking
@@ -861,11 +861,11 @@ The core package is designed for maximum tree shaking:
 
 ```typescript
 // Each export is individually tree-shakeable
-export { AggregateRoot } from '@vytches-ddd/aggregates';
-export { EntityId } from '@vytches-ddd/contracts';
-export { BaseValueObject } from '@vytches-ddd/value-objects';
-export { IBaseRepository } from '@vytches-ddd/repositories';
-export { BaseError } from '@vytches-ddd/domain-primitives';
+export { AggregateRoot } from '@vytches/ddd-aggregates';
+export { EntityId } from '@vytches/ddd-contracts';
+export { BaseValueObject } from '@vytches/ddd-value-objects';
+export { IBaseRepository } from '@vytches/ddd-repositories';
+export { BaseError } from '@vytches/ddd-domain-primitives';
 ```
 
 ### Bundle Analysis
@@ -886,7 +886,7 @@ npm install --save-dev rollup-plugin-analyzer
 
 ```typescript
 // ✅ Good: Import only what you need
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 
 class Order extends AggregateRoot {
   constructor(id: EntityId) {
@@ -896,7 +896,7 @@ class Order extends AggregateRoot {
 
 // ✅ Good: Conditional imports
 async function loadAdvancedFeatures() {
-  const { AdvancedAggregate } = await import('@vytches-ddd/core');
+  const { AdvancedAggregate } = await import('@vytches/ddd-core');
   return AdvancedAggregate;
 }
 ```
@@ -911,7 +911,7 @@ import {
   EntityId,
   IBaseRepository,
   BaseError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // Domain layer
 class Order extends AggregateRoot {
@@ -957,7 +957,7 @@ class OrderService {
 ```typescript
 // NestJS integration
 import { Injectable } from '@nestjs/common';
-import { AggregateRoot, EntityId, IBaseRepository } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId, IBaseRepository } from '@vytches/ddd-core';
 
 @Injectable()
 export class OrderService {
@@ -971,7 +971,7 @@ export class OrderService {
 
 // Express integration
 import express from 'express';
-import { EntityId, BaseError } from '@vytches-ddd/core';
+import { EntityId, BaseError } from '@vytches/ddd-core';
 
 const app = express();
 
@@ -998,7 +998,7 @@ app.get('/orders/:id', async (req, res) => {
 
 ### Import Consistency
 
-1. **Use Core Package**: Always import from `@vytches-ddd/core` for core
+1. **Use Core Package**: Always import from `@vytches/ddd-core` for core
    patterns
 2. **Named Imports**: Use named imports for better tree shaking
 3. **Type Imports**: Use type-only imports for interfaces
@@ -1013,12 +1013,12 @@ import {
   BaseValueObject,
   type IAggregateRoot,
   type IBaseRepository,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 // ❌ Bad: Mixed package imports
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EntityId } from '@vytches-ddd/contracts';
-import { BaseValueObject } from '@vytches-ddd/value-objects';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-contracts';
+import { BaseValueObject } from '@vytches/ddd-value-objects';
 ```
 
 ### Bundle Optimization
@@ -1030,10 +1030,10 @@ import { BaseValueObject } from '@vytches-ddd/value-objects';
 
 ```typescript
 // ✅ Good: Optimized imports
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 
 // ✅ Good: Lazy loading
-const loadAdvancedFeatures = () => import('@vytches-ddd/advanced');
+const loadAdvancedFeatures = () => import('@vytches/ddd-advanced');
 
 // ✅ Good: Code splitting
 const OrderModule = lazy(() => import('./order-module'));
@@ -1052,7 +1052,7 @@ import {
   AggregateRoot,
   EntityId,
   type IAggregateRoot,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 class Order extends AggregateRoot implements IAggregateRoot {
   constructor(id: EntityId) {
@@ -1079,7 +1079,7 @@ import {
   BaseError,
   InvalidParameterError,
   NotFoundError,
-} from '@vytches-ddd/core';
+} from '@vytches/ddd-core';
 
 class OrderService {
   async processOrder(orderId: EntityId): Promise<void> {
@@ -1113,7 +1113,7 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
+git clone https://github.com/vytches/ddd.git
 
 # Install dependencies
 pnpm install
@@ -1130,5 +1130,5 @@ pnpm build
 **Built with ❤️ by the VytchesDDD Team**
 
 _The stable foundation of the
-[@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your
+[@vytches/ddd-core](https://github.com/vytches/vytches-ddd) ecosystem - Your
 enterprise-grade API for Domain-Driven Design_

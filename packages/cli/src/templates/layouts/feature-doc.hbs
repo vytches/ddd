@@ -4,7 +4,7 @@
 {{loadMarkdown packageConfig.packageName "shared/hero.md"}}
 
 **Version**: {{packageConfig.version}}  
-**Package**: @vytches-ddd/{{packageConfig.packageName}}  
+**Package**: @vytches/ddd-{{packageConfig.packageName}}  
 {{#if packageConfig.domain}}**Domain**: {{packageConfig.domain}}{{/if}}  
 {{#if packageConfig.patterns}}**Patterns**: {{#each packageConfig.patterns}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}  
 {{#if packageConfig.tags.core}}**Tags**: {{#each packageConfig.tags.core}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
@@ -72,7 +72,7 @@
 ### Required Imports
 
 ```typescript
-import { {{packageConfig.displayName}} } from '@vytches-ddd/{{packageConfig.packageName}}';
+import { {{packageConfig.displayName}} } from '@vytches/ddd-{{packageConfig.packageName}}';
 {{#each packageConfig.dependencies}}
 import { ... } from '{{this}}';
 {{/each}}
@@ -99,5 +99,5 @@ import { ... } from '{{this}}';
 
 ---
 
-*Generated with @vytches-ddd/cli on {{timestamp}}*  
+*Generated with @vytches/ddd-cli on {{timestamp}}*  
 {{#if llmOptimized}}*Optimized for LLM code generation*{{/if}}

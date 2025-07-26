@@ -1,7 +1,7 @@
 # Events Package - Basic Use Cases
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Domain**: Multiple  
 **Patterns**: event-driven-architecture, repository-pattern,
@@ -199,10 +199,10 @@ Payment Initiated → Save Aggregate → Auto-publish Events →
 
 ## Related Packages
 
-- **@vytches-ddd/repositories**: Foundation for automatic event publishing
+- **@vytches/ddd-repositories**: Foundation for automatic event publishing
   pattern
-- **@vytches-ddd/aggregates**: Source of domain events through business
+- **@vytches/ddd-aggregates**: Source of domain events through business
   operations
-- **@vytches-ddd/di**: Automatic handler discovery and registration system
-- **@vytches-ddd/event-store**: Event persistence for event sourcing scenarios
-- **@vytches-ddd/projections**: Read model updates from published domain events
+- **@vytches/ddd-di**: Automatic handler discovery and registration system
+- **@vytches/ddd-event-store**: Event persistence for event sourcing scenarios
+- **@vytches/ddd-projections**: Read model updates from published domain events

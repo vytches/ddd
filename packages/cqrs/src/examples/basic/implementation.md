@@ -1,7 +1,7 @@
 # CQRS - Implementation Overview
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: command-query-responsibility-segregation, mediator-pattern,
@@ -30,8 +30,8 @@ const user = await queryBus.execute(new GetUserByIdQuery(userId));
 ## Basic Command Implementation
 
 ```typescript
-import { CommandHandler, CommandBus } from '@vytches-ddd/cqrs';
-import { Result } from '@vytches-ddd/utils';
+import { CommandHandler, CommandBus } from '@vytches/ddd-cqrs';
+import { Result } from '@vytches/ddd-utils';
 
 // Command represents business intention
 class CreateUserCommand {
@@ -85,7 +85,7 @@ const result = await commandBus.execute(command);
 ## Basic Query Implementation
 
 ```typescript
-import { QueryHandler, QueryBus } from '@vytches-ddd/cqrs';
+import { QueryHandler, QueryBus } from '@vytches/ddd-cqrs';
 
 // Query represents data request
 class GetUserByIdQuery {
@@ -160,7 +160,7 @@ import {
   ValidationMiddleware,
   LoggingMiddleware,
   PerformanceMiddleware,
-} from '@vytches-ddd/cqrs';
+} from '@vytches/ddd-cqrs';
 
 // Setup middleware pipeline
 const commandBus = new CommandBus();
@@ -183,7 +183,7 @@ const result = await commandBus.execute(command);
 ## Automatic Handler Registration
 
 ```typescript
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 // Handlers registered automatically through decorators
 @CommandHandler(CreateUserCommand, { autoRegister: true })

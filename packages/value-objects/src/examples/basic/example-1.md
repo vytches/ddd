@@ -1,9 +1,9 @@
 # Money Value Object - Basic Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Domain**: Financial Domain **Patterns**: Value Object,
-Immutability, Currency Handling **Dependencies**: @vytches-ddd/value-objects,
-@vytches-ddd/domain-primitives
+Immutability, Currency Handling **Dependencies**: @vytches/ddd-value-objects,
+@vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ banking, accounting, and any application handling financial transactions.
 
 ```typescript
 // money.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import { MoneyData, Currency, ValueObjectValidationResult } from './types';
 import {
   validateRequired,

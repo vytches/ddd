@@ -2,7 +2,7 @@
 
 > 🚀 Enterprise-grade Domain-Driven Design CLI with AI-powered domain modeling
 
-[![npm version](https://img.shields.io/npm/v/@vytches-ddd/cli.svg)](https://www.npmjs.com/package/@vytches-ddd/cli)
+[![npm version](https://img.shields.io/npm/v/@vytches/ddd-cli.svg)](https://www.npmjs.com/package/@vytches/ddd-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
@@ -35,26 +35,26 @@ generation for enterprise-grade applications.
 
 ```bash
 # Using npm
-npm install -g @vytches-ddd/cli
+npm install -g @vytches/ddd-cli
 
 # Using pnpm
-pnpm add -g @vytches-ddd/cli
+pnpm add -g @vytches/ddd-cli
 
 # Using yarn
-yarn global add @vytches-ddd/cli
+yarn global add @vytches/ddd-cli
 ```
 
 ### Local Installation
 
 ```bash
 # Add to your project
-npm install --save-dev @vytches-ddd/cli
+npm install --save-dev @vytches/ddd-cli
 
 # Or with pnpm
-pnpm add -D @vytches-ddd/cli
+pnpm add -D @vytches/ddd-cli
 
 # Or with yarn
-yarn add -D @vytches-ddd/cli
+yarn add -D @vytches/ddd-cli
 ```
 
 ## Usage
@@ -113,12 +113,12 @@ Run directly without installation:
 
 ```bash
 # Latest version
-npx @vytches-ddd/cli --help
-npx @vytches-ddd/cli generate
-npx @vytches-ddd/cli domain
+npx @vytches/ddd-cli --help
+npx @vytches/ddd-cli generate
+npx @vytches/ddd-cli domain
 
 # Specific version
-npx @vytches-ddd/cli@1.0.0 generate
+npx @vytches/ddd-cli@1.0.0 generate
 ```
 
 ## Commands
@@ -323,7 +323,7 @@ Create custom templates in your project:
 
 ```typescript
 // my-templates/aggregate.ts.template
-import { AggregateRoot, EntityId, DomainEvent } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId, DomainEvent } from '@vytches/ddd-core';
 
 export class {{className}} extends AggregateRoot {
   private constructor(
@@ -351,7 +351,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - run: npm install -g @vytches-ddd/cli
+      - run: npm install -g @vytches/ddd-cli
       - run: vytches-ddd analyze --path ./src
 ```
 
@@ -437,7 +437,7 @@ vytches-ddd domain \
 
    ```bash
    # Use sudo for global installation
-   sudo npm install -g @vytches-ddd/cli
+   sudo npm install -g @vytches/ddd-cli
    ```
 
 3. **Template Not Found**
@@ -457,10 +457,10 @@ MIT © VytchesDDD Team
 
 ## Support
 
-- 📚 [Documentation](https://github.com/vytches-ddd/vytches-ddd)
-- 🐛 [Issue Tracker](https://github.com/vytches-ddd/vytches-ddd/issues)
-- 💬 [Discussions](https://github.com/vytches-ddd/vytches-ddd/discussions)
-- 📧 [Email Support](mailto:support@vytches-ddd.com)
+- 📚 [Documentation](https://github.com/ddd/vytches-ddd)
+- 🐛 [Issue Tracker](https://github.com/ddd/ddd/issues)
+- 💬 [Discussions](https://github.com/ddd/ddd/discussions)
+- 📧 [Email Support](mailto:support@vytches/ddd-core.com)
 
 ---
 

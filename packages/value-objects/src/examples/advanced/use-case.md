@@ -1,6 +1,6 @@
 # Advanced Value Objects - Use Cases
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Focus**: Real-world business scenarios and advanced
 applications
 

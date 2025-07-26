@@ -1,10 +1,10 @@
 # Enterprise Utility Platform - NestJS Advanced Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: Advanced
 **Framework**: NestJS **Base Example**:
 [Performance-Optimized Async Operations](../../advanced/example-3.md)
-**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches-ddd/utils,
-@vytches-ddd/di, @vytches-ddd/logging, @vytches-ddd/resilience
+**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches/ddd-utils,
+@vytches/ddd-di, @vytches/ddd-logging, @vytches/ddd-resilience
 
 ## Business Context
 
@@ -21,10 +21,10 @@ comprehensive observability.
 // enterprise-utility-platform.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
-import { Result, safeRun } from '@vytches-ddd/utils';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { CircuitBreaker, Retry } from '@vytches/ddd-resilience';
+import { Result, safeRun } from '@vytches/ddd-utils';
 import type {
   IEnterpriseUtilityPlatform,
   PerformanceMetrics,
@@ -492,7 +492,7 @@ export class EnterpriseUtilityPlatformService
 // enterprise-utility-platform.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseUtilityPlatformService } from './enterprise-utility-platform.service';
 
 @Module({

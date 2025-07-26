@@ -1,6 +1,6 @@
 # Safe Execution with safeRun
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: Safe execution, testing utilities,
 error containment **Dependencies**: None
 
@@ -27,7 +27,7 @@ safe execution.
 
 ```typescript
 // safe-execution.ts
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

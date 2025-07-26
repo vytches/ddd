@@ -1,6 +1,6 @@
 // Domain Service with Repository Integration import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { IBaseRepository } from
-'@vytches-ddd/repositories'; import { Result } from '@vytches-ddd/utils'; import
+'@vytches/ddd-domain-services'; import { IBaseRepository } from
+'@vytches/ddd-repositories'; import { Result } from '@vytches/ddd-utils'; import
 { User, Order, CreateOrderCommand } from '../types';
 
 export class OrderManagementService extends BaseDomainService { constructor(

@@ -3,7 +3,7 @@
 **Focus**: E-commerce order validation with basic business rules  
 **Domain**: E-commerce  
 **Complexity**: Basic  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-utils
 
 ## Business Context
 
@@ -18,8 +18,8 @@ orders must meet certain criteria before processing:
 
 ```typescript
 // order-validation-policy.ts
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
+import { Result } from '@vytches/ddd-utils';
 import { Order, Customer, InventoryItem } from '../types'; // ALWAYS import from app
 
 // Basic specifications for order validation

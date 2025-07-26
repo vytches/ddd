@@ -1,10 +1,10 @@
 # AI-Enhanced Microservices Resilience - NestJS Advanced Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Advanced **Domain**: AI-Driven Microservices Platform
 **Patterns**: Machine Learning Integration, Cross-Service Coordination,
 VytchesDDD DI **Dependencies**: @nestjs/common, @nestjs/microservices,
-@vytches-ddd/resilience, @vytches-ddd/di
+@vytches/ddd-resilience, @vytches/ddd-di
 
 ## Description
 
@@ -25,13 +25,13 @@ maintaining high availability and performance.
 ```typescript
 // ai-resilience-coordinator.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   AIResilienceManager,
   MachineLearningPredictor,
   MicroservicesCoordinator,
   CrossServiceBulkhead,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   MicroserviceHealth,
   PredictionResult,
@@ -586,7 +586,7 @@ export class AIResilienceCoordinatorBridgeService {
 
 // microservices-health.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 @DomainService({
   serviceId: 'microservicesHealthMonitor',
@@ -728,7 +728,7 @@ export class AIResilienceController {
 
 // ai-resilience.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { AIResilienceController } from './ai-resilience.controller';
 import { AIResilienceCoordinatorBridgeService } from './ai-resilience-coordinator.service';
 import { MicroservicesHealthService } from './microservices-health.service';

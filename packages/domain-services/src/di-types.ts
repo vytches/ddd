@@ -5,7 +5,7 @@
  * to integrate with the VytchesDDD dependency injection system.
  */
 
-import type { ServiceLifetime } from '@vytches-ddd/di';
+import type { ServiceLifetime } from '@vytches/ddd-di';
 
 /**
  * @llm-summary Type definition for context resolution strategy

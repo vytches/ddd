@@ -1,11 +1,11 @@
 # Inventory Data Translation with ACL
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Basic  
 **Domain**: Product Management  
 **Patterns**: Data Translation, Schema Mapping  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-core
 
 ## Description
 
@@ -23,8 +23,8 @@ representation regardless of the source system.
 
 ```typescript
 // inventory-data.translator.ts
-import { IDataTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { IDataTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 import { Product, LegacyInventoryData } from '../types'; // From your application
 
 export class InventoryDataTranslator
@@ -102,7 +102,7 @@ export class InventoryDataTranslator
 }
 
 // inventory.acl.ts
-import { AntiCorruptionLayer } from '@vytches-ddd/acl';
+import { AntiCorruptionLayer } from '@vytches/ddd-acl';
 import { Product, LegacyInventoryData, ProductSyncRequest } from '../types'; // From your application
 
 export class InventoryACL extends AntiCorruptionLayer<

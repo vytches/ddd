@@ -1,9 +1,9 @@
 # Enterprise Observability with Distributed Tracing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging **Complexity**: Advanced
 **Domain**: Infrastructure **Patterns**: Distributed tracing, Observability,
 Correlation tracking, Performance monitoring **Dependencies**:
-@vytches-ddd/logging, @vytches-ddd/utils, @vytches-ddd/resilience
+@vytches/ddd-logging, @vytches/ddd-utils, @vytches/ddd-resilience
 
 ## Description
 
@@ -31,9 +31,9 @@ Enterprise systems require advanced observability for:
 
 ```typescript
 // enterprise-observability.ts
-import { Logger, LoggerConfig, LogContext } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
-import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
+import { Logger, LoggerConfig, LogContext } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
+import { CircuitBreaker, Retry } from '@vytches/ddd-resilience';
 import type {
   TraceContext,
   SpanContext,

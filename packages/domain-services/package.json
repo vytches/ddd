@@ -1,5 +1,5 @@
 {
-  "name": "@vytches-ddd/domain-services",
+  "name": "@vytches/ddd-domain-services",
   "version": "0.3.2",
   "description": "Domain services and domain logic coordination",
   "type": "module",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/domain-services"
   },
   "scripts": {
@@ -42,22 +42,22 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*"
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   },
   "dependencies": {
-    "@vytches-ddd/contracts": "workspace:*",
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*"
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   },
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "@vytches/ddd-testing": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
   },
   "nx": {
     "tags": [

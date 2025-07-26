@@ -1,11 +1,11 @@
 # VytchesDDD Global Service Locator - Beginner Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: beginner  
 **Domain**: Payment Processing  
 **Patterns**: Service Locator, Global Access  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -25,7 +25,7 @@ services while maintaining type safety and avoiding tight coupling.
 
 ```typescript
 // payment.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { Payment, ProcessPaymentData, PaymentStatus } from '../types'; // Import from application
 
 /**
@@ -83,7 +83,7 @@ export class PaymentService {
 
 ```typescript
 // notification.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { EmailNotificationData } from '../types'; // Import from application
 
 /**
@@ -124,7 +124,7 @@ export class NotificationService {
 
 ```typescript
 // order-fulfillment.service.ts
-import { DomainService, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, VytchesDDD } from '@vytches/ddd-di';
 import { PaymentService } from './payment.service';
 import { NotificationService } from './notification.service';
 import { Order, ProcessPaymentData, PaymentMethod } from '../types'; // Import from application
@@ -201,7 +201,7 @@ export class OrderFulfillmentService {
 
 ```typescript
 // app.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { OrderFulfillmentService } from './order-fulfillment.service';
 import { Order, OrderStatus } from '../types'; // Import from application
 
@@ -254,7 +254,7 @@ demonstrateServiceLocator().catch(console.error);
 
 ```typescript
 // utility.ts
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { NotificationService } from './notification.service';
 
 /**

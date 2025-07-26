@@ -1,9 +1,9 @@
 # Timeout Strategy with Adaptive Configuration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**:
 Intermediate **Domain**: Multi-Service Integration **Patterns**: Timeout
 Strategy, Adaptive Configuration, Performance Monitoring **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -29,7 +29,7 @@ import {
   ResiliencePolicyBuilder,
   ResilienceContext,
   PerformanceMetrics,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { ExternalServiceConfig, SystemResourceMetrics } from './types'; // From your application
 
 // Adaptive timeout manager with learning capabilities

@@ -2,14 +2,14 @@
 
 **Focus**: Basic IRepository usage in NestJS with manual instantiation **Base
 Example**: [Basic Generic Repository](../../basic/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches/ddd-repositories
 
 ## Service Implementation
 
 ```typescript
 // user.service.ts
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '@vytches-ddd/repositories';
+import { BaseRepository } from '@vytches/ddd-repositories';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { User, CreateUserData, UpdateUserData } from './types'; // From your app
@@ -138,7 +138,7 @@ export class UserController {
 ## Key Points
 
 - Simple manual instantiation for beginners
-- Focus on @vytches-ddd/repositories usage, not DI complexity
+- Focus on @vytches/ddd-repositories usage, not DI complexity
 - Standard NestJS patterns for framework integration
 - Minimal setup required - just inject TypeORM connection
 - All business logic delegates to repository methods

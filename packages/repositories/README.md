@@ -1,16 +1,16 @@
-# @vytches-ddd/repositories
+# @vytches/ddd-repositories
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/repositories
+Package: @vytches/ddd-repositories
 Category: Foundation
 Purpose: Repository pattern implementations with UnitOfWork, specifications, and automatic event publishing
-Dependencies: @vytches-ddd/domain-primitives, @vytches-ddd/events, @vytches-ddd/utils
+Dependencies: @vytches/ddd-domain-primitives, @vytches/ddd-events, @vytches/ddd-utils
 Complexity: High
 DDD Patterns: Repository, Unit of Work, Specification, Aggregate Persistence
-Integration Points: @vytches-ddd/aggregates, @vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/validation
+Integration Points: @vytches/ddd-aggregates, @vytches/ddd-events, @vytches/ddd-di, @vytches/ddd-validation
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Frepositories.svg)](https://badge.fury.io/js/%40vytches-ddd%2Frepositories)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-repositories.svg)](https://badge.fury.io/js/%40vytches%2Fddd-repositories)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -42,20 +42,20 @@ Designed for complex domain models with transactional consistency.
 
 ```bash
 # npm
-npm install @vytches-ddd/repositories
+npm install @vytches/ddd-repositories
 
 # yarn
-yarn add @vytches-ddd/repositories
+yarn add @vytches/ddd-repositories
 
 # pnpm
-pnpm add @vytches-ddd/repositories
+pnpm add @vytches/ddd-repositories
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/events @vytches-ddd/utils
+npm install @vytches/ddd-domain-primitives @vytches/ddd-events @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -147,7 +147,7 @@ interface ISpecification<T> {
 ### 1. Basic Repository Usage
 
 ```typescript
-import { BaseRepository } from '@vytches-ddd/repositories';
+import { BaseRepository } from '@vytches/ddd-repositories';
 import { User } from './domain/User';
 
 // Define user repository interface
@@ -197,7 +197,7 @@ await userRepository.save(user);
 ### 2. Unit of Work Pattern
 
 ```typescript
-import { UnitOfWork } from '@vytches-ddd/repositories';
+import { UnitOfWork } from '@vytches/ddd-repositories';
 
 // Create unit of work
 const unitOfWork = new UnitOfWork(eventBus);
@@ -238,7 +238,7 @@ async function processUserOrder(
 ### 3. Specification Pattern
 
 ```typescript
-import { Specification } from '@vytches-ddd/repositories';
+import { Specification } from '@vytches/ddd-repositories';
 
 // Define specifications
 class ActiveUserSpecification extends Specification<User> {
@@ -282,7 +282,7 @@ const activeAdminUsers =
 ### Base Repository Implementation
 
 ```typescript
-import { BaseRepository } from '@vytches-ddd/repositories';
+import { BaseRepository } from '@vytches/ddd-repositories';
 
 abstract class BaseRepository<T extends IAggregateRoot>
   implements IRepository<T>
@@ -1388,7 +1388,7 @@ class DatabaseTransactionManager implements ITransactionManager {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { InMemoryStorageAdapter } from '@vytches-ddd/repositories/testing';
+import { InMemoryStorageAdapter } from '@vytches/ddd-repositories/testing';
 
 describe('UserRepository', () => {
   let repository: UserRepository;
@@ -1624,20 +1624,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/repositories
+pnpm build --filter=@vytches/ddd-repositories
 
 # Run tests
-pnpm test --filter=@vytches-ddd/repositories
+pnpm test --filter=@vytches/ddd-repositories
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/repositories
+pnpm dev --filter=@vytches/ddd-repositories
 ```
 
 ## 📄 License
@@ -1647,7 +1647,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

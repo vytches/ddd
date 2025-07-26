@@ -1,7 +1,7 @@
 # Basic NestJS Implementation Patterns
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: basic  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -9,7 +9,7 @@
 
 ## Overview
 
-Basic implementation patterns for integrating @vytches-ddd/policies with NestJS
+Basic implementation patterns for integrating @vytches/ddd-policies with NestJS
 applications using manual setup and straightforward service injection. This
 approach provides clear, understandable policy integration suitable for most
 application scenarios.

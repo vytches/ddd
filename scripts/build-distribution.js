@@ -56,15 +56,15 @@ function fixImportsInFile(filePath) {
 
   let content = readFileSync(filePath, 'utf-8');
 
-  // Replace @vytches-ddd/package imports with relative paths to dist
+  // Replace @vytches/ddd-package imports with relative paths to dist
   packages.forEach(pkg => {
-    const importRegex = new RegExp(`from "vytches-ddd/${pkg}"`, 'g');
-    const requireRegex = new RegExp(`require\\("vytches-ddd/${pkg}"\\)`, 'g');
-    const dynamicImportRegex = new RegExp(`import\\("vytches-ddd/${pkg}"\\)`, 'g');
+    const importRegex = new RegExp(`from "@vytches/ddd-${pkg}"`, 'g');
+    const requireRegex = new RegExp(`require\\("@vytches/ddd-${pkg}"\\)`, 'g');
+    const dynamicImportRegex = new RegExp(`import\\("@vytches/ddd-${pkg}"\\)`, 'g');
 
-    content = content.replace(importRegex, `from "vytches-ddd/${pkg}"`);
-    content = content.replace(requireRegex, `require("vytches-ddd/${pkg}")`);
-    content = content.replace(dynamicImportRegex, `import("vytches-ddd/${pkg}")`);
+    content = content.replace(importRegex, `from "@vytches/ddd-${pkg}"`);
+    content = content.replace(requireRegex, `require("@vytches/ddd-${pkg}")`);
+    content = content.replace(dynamicImportRegex, `import("@vytches/ddd-${pkg}")`);
   });
 
   writeFileSync(filePath, content);

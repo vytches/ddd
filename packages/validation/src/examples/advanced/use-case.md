@@ -1,6 +1,6 @@
 # Advanced Enterprise Validation Use Cases
 
-**Package**: @vytches-ddd/validation **Complexity**: Advanced **Focus**:
+**Package**: @vytches/ddd-validation **Complexity**: Advanced **Focus**:
 Enterprise-scale validation orchestration, AI-powered adaptive systems, and
 global data quality management
 
@@ -21,14 +21,14 @@ regulations. The system processes 50M+ transactions daily with zero tolerance
 for compliance failures, requiring AI-powered adaptive validation that learns
 from regulatory changes and market conditions.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 import {
   EnterpriseValidationOrchestrator,
   AIEnhancedValidationSpecification,
   GlobalDataQualityMonitor,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 
 class GlobalComplianceOrchestrator {
   private validationOrchestrator: EnterpriseValidationOrchestrator;
@@ -105,7 +105,7 @@ data integrity across different EMR systems, regulatory environments, and
 medical standards. Real-time validation prevents medical errors while
 maintaining HIPAA/GDPR compliance across regions.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class HealthcareDataOrchestrator {
@@ -192,7 +192,7 @@ real-time quality validation of incoming materials and components. AI-powered
 validation adapts to quality patterns, predicts defects, and coordinates global
 quality standards while managing supplier variations.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class GlobalManufacturingQualityOrchestrator {
@@ -280,7 +280,7 @@ towers across 80 countries. Real-time validation ensures network quality,
 predicts outages, and maintains service level agreements while adapting to
 different regional network conditions and regulations.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class TelecomNetworkOrchestrator {
@@ -375,7 +375,7 @@ countries needs real-time validation that adapts to local regulations, payment
 methods, and fraud patterns while maintaining sub-second response times and
 preventing revenue loss.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class GlobalEcommerceOrchestrator {

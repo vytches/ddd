@@ -1,6 +1,6 @@
-# @vytches-ddd/di
+# @vytches/ddd-di
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fdi.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fdi)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-di.svg)](https://badge.fury.io/js/%40vytches%2Fddd-di)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -30,20 +30,20 @@ following MediatR pattern.
 
 ```bash
 # npm
-npm install @vytches-ddd/di
+npm install @vytches/ddd-di
 
 # yarn
-yarn add @vytches-ddd/di
+yarn add @vytches/ddd-di
 
 # pnpm
-pnpm add @vytches-ddd/di
+pnpm add @vytches/ddd-di
 ```
 
 ## ✨ Key Features
 
 ### Hybrid Dependency Injection Architecture
 
-The `@vytches-ddd/di` package implements a **hybrid dependency injection
+The `@vytches/ddd-di` package implements a **hybrid dependency injection
 architecture** that provides:
 
 1. **Global service locator by default** (following MediatR pattern)
@@ -102,7 +102,7 @@ export class ComplexBusinessLogicHandler {
 ### Context-Enhanced Usage (DDD scenarios)
 
 ```typescript
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 // Setup global container
 const globalContainer = new SimpleContainer();
@@ -195,7 +195,7 @@ class VytchesDDD {
 Built-in container for testing and simple scenarios:
 
 ```typescript
-import { SimpleContainer, ServiceLifetime } from '@vytches-ddd/di';
+import { SimpleContainer, ServiceLifetime } from '@vytches/ddd-di';
 
 const container = new SimpleContainer();
 
@@ -220,7 +220,7 @@ container.registerInstance('Config', { connectionString: 'localhost' });
 ### Container Builder (Fluent API)
 
 ```typescript
-import { ContainerBuilder, ServiceLifetime } from '@vytches-ddd/di';
+import { ContainerBuilder, ServiceLifetime } from '@vytches/ddd-di';
 
 const container = new ContainerBuilder()
   .register('UserRepository', UserRepository, {
@@ -321,8 +321,8 @@ interface HandlerInfo {
 ### CQRS Plugin Integration (✅ Implemented)
 
 ```typescript
-import { VytchesDDD } from '@vytches-ddd/di';
-import { CQRSDiscoveryPlugin } from '@vytches-ddd/cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { CQRSDiscoveryPlugin } from '@vytches/ddd-cqrs';
 
 // Register the CQRS plugin
 VytchesDDD.registerDiscoveryPlugin(new CQRSDiscoveryPlugin());
@@ -379,7 +379,7 @@ import {
   ServiceAlreadyRegisteredError,
   ContainerConfigurationError,
   ContainerDisposedError,
-} from '@vytches-ddd/di';
+} from '@vytches/ddd-di';
 
 try {
   const service = VytchesDDD.resolve<UnknownService>('UnknownService');
@@ -395,7 +395,7 @@ try {
 ### Test Isolation
 
 ```typescript
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 describe('UserService', () => {
   let container: SimpleContainer;
@@ -680,14 +680,14 @@ export class ProcessOrderHandler {
 
 The DI package integrates seamlessly with other VytchesDDD packages:
 
-- **@vytches-ddd/cqrs**: Command/Query handlers use service locator internally
+- **@vytches/ddd-cqrs**: Command/Query handlers use service locator internally
   for routing
-- **@vytches-ddd/events**: Event bus and handler registration with context
+- **@vytches/ddd-events**: Event bus and handler registration with context
   awareness
-- **@vytches-ddd/domain-services**: Domain service registration and
+- **@vytches/ddd-domain-services**: Domain service registration and
   context-aware resolution
-- **@vytches-ddd/logging**: Structured logging throughout DI operations
-- **@vytches-ddd/validation**: Validator service registration with context
+- **@vytches/ddd-logging**: Structured logging throughout DI operations
+- **@vytches/ddd-validation**: Validator service registration with context
   support
 
 ## Roadmap

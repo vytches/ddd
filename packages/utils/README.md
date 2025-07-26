@@ -1,7 +1,7 @@
-# @vytches-ddd/utils
+# @vytches/ddd-utils
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/utils
+Package: @vytches/ddd-utils
 Category: Utility
 Purpose: Common utilities and helper functions including Result pattern, safeRun testing utility, and LibUtils for validation and type checking
 Dependencies: uuid
@@ -10,7 +10,7 @@ DDD Patterns: Result Pattern, Functional Error Handling, Utility Functions
 Integration Points: All packages use these utilities for error handling and validation
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Futils.svg)](https://badge.fury.io/js/%40vytches-ddd%2Futils)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-utils.svg)](https://badge.fury.io/js/%40vytches%2Fddd-utils)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,13 +43,13 @@ ecosystem.
 
 ```bash
 # npm
-npm install @vytches-ddd/utils
+npm install @vytches/ddd-utils
 
 # yarn
-yarn add @vytches-ddd/utils
+yarn add @vytches/ddd-utils
 
 # pnpm
-pnpm add @vytches-ddd/utils
+pnpm add @vytches/ddd-utils
 ```
 
 ### Dependencies
@@ -158,7 +158,7 @@ class LibUtils {
 ### Basic Result Usage
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 // Creating results
 const success = Result.ok('Hello, World!');
@@ -186,7 +186,7 @@ if (result.isSuccess) {
 ### Basic SafeRun Usage
 
 ```typescript
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 // Synchronous error handling
 const [error, result] = safeRun(() => {
@@ -215,7 +215,7 @@ if (asyncError) {
 ### Basic LibUtils Usage
 
 ```typescript
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 // UUID generation and validation
 const id = LibUtils.getUUID();
@@ -238,7 +238,7 @@ console.log(LibUtils.isValidTextId('user_123')); // true
 ### Creating Results
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 // Success results
 const successResult = Result.ok('Success value');
@@ -263,7 +263,7 @@ const asyncResult = await Result.tryAsync(async () => {
 ### Transforming Results
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 // Map transforms success values
 const numberResult = Result.ok(42);
@@ -285,7 +285,7 @@ const message = numberResult.match(
 ### Async Result Operations
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 // Async transformation
 const dataResult = Result.ok({ id: 123 });
@@ -308,7 +308,7 @@ const processedResult = await dataResult.flatMapAsync(async data => {
 ### Side Effects
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 const result = Result.ok('Success value');
 
@@ -335,7 +335,7 @@ result
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('UserService', () => {
   it('should create user successfully', () => {
@@ -366,7 +366,7 @@ describe('UserService', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('UserRepository', () => {
   it('should save user to database', async () => {
@@ -394,7 +394,7 @@ describe('UserRepository', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('PaymentService', () => {
   it('should process payment with retry logic', async () => {
@@ -429,7 +429,7 @@ describe('PaymentService', () => {
 ### UUID Operations
 
 ```typescript
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 // Generate UUIDs
 const uuid = LibUtils.getUUID(); // Default v4
@@ -459,7 +459,7 @@ class User {
 ### Validation Functions
 
 ```typescript
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 // Integer validation
 const isValidAge = LibUtils.isValidInteger(25); // true
@@ -495,7 +495,7 @@ class EntityId {
 ### Type Checking Functions
 
 ```typescript
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 // Empty checking
 console.log(LibUtils.isEmpty('')); // true
@@ -528,7 +528,7 @@ console.log(LibUtils.isFalsy(undefined)); // true
 ### Utility Functions
 
 ```typescript
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 // Sleep utility
 async function delayedOperation(): Promise<void> {
@@ -569,8 +569,8 @@ class EntityId {
 ### Repository Pattern with Result
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
-import { LibUtils } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 interface IUserRepository {
   findById(id: string): Promise<Result<User, Error>>;
@@ -604,7 +604,7 @@ class UserRepository implements IUserRepository {
 ### Domain Service with Validation
 
 ```typescript
-import { Result, LibUtils } from '@vytches-ddd/utils';
+import { Result, LibUtils } from '@vytches/ddd-utils';
 
 class UserRegistrationService {
   async registerUser(
@@ -645,8 +645,8 @@ class UserRegistrationService {
 ### Command Handler with Result Pattern
 
 ```typescript
-import { Result } from '@vytches-ddd/utils';
-import { CommandHandler } from '@vytches-ddd/cqrs';
+import { Result } from '@vytches/ddd-utils';
+import { CommandHandler } from '@vytches/ddd-cqrs';
 
 @CommandHandler(CreateUserCommand)
 class CreateUserHandler {
@@ -693,7 +693,7 @@ class CreateUserHandler {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 describe('Result', () => {
   describe('creation', () => {
@@ -760,7 +760,7 @@ describe('Result', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('safeRun', () => {
   describe('synchronous operations', () => {
@@ -811,7 +811,7 @@ describe('safeRun', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 describe('LibUtils', () => {
   describe('UUID operations', () => {
@@ -915,8 +915,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

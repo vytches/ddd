@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches-ddd/domain-primitives';
+import { BaseError } from '@vytches/ddd-domain-primitives';
 
 /**
  * @llm-summary SagaError class for saga error operations

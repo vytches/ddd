@@ -1,22 +1,22 @@
 /**
  * @file Enterprise package - Meta-package for enterprise features
- * @module @vytches-ddd/enterprise
+ * @module @vytches/ddd-enterprise
  */
 
 // This is a placeholder enterprise package
 // TODO: Implement enterprise features like health checks, monitoring, etc.
 
-export * from '@vytches-ddd/core';
-export * from '@vytches-ddd/events';
-export * from '@vytches-ddd/cqrs';
-export * from '@vytches-ddd/acl';
-export * from '@vytches-ddd/messaging';
-export * from '@vytches-ddd/validation';
-export * from '@vytches-ddd/projections';
-export * from '@vytches-ddd/di';
+export * from '@vytches/ddd-core';
+export * from '@vytches/ddd-events';
+export * from '@vytches/ddd-cqrs';
+export * from '@vytches/ddd-acl';
+export * from '@vytches/ddd-messaging';
+export * from '@vytches/ddd-validation';
+export * from '@vytches/ddd-projections';
+export * from '@vytches/ddd-di';
 
 // Resolve naming conflicts by using qualified exports
-export { RetryPolicy as ResilienceRetryPolicy } from '@vytches-ddd/resilience';
+export { RetryPolicy as ResilienceRetryPolicy } from '@vytches/ddd-resilience';
 
 // Export all policies except conflicting RetryPolicy names
 export {
@@ -111,4 +111,4 @@ export {
   EventDrivenPolicy,
   EventDrivenPolicyFactory,
   withEvents,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';

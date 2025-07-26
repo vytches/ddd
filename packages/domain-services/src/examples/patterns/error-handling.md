@@ -1,6 +1,6 @@
 // Error Handling Pattern for Domain Services import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { Result } from '@vytches-ddd/utils';
-import { DomainError } from '@vytches-ddd/domain-primitives';
+'@vytches/ddd-domain-services'; import { Result } from '@vytches/ddd-utils';
+import { DomainError } from '@vytches/ddd-domain-primitives';
 
 export class OrderProcessingService extends BaseDomainService { async
 processOrder(orderId: string): Promise<Result<Order, Error>> { try { // Step 1:

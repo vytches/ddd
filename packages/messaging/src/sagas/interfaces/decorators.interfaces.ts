@@ -1,4 +1,4 @@
-import type { Constructor } from '@vytches-ddd/di';
+import type { Constructor } from '@vytches/ddd-di';
 import type { ISagaExecutionContext } from './saga.interfaces';
 
 /**

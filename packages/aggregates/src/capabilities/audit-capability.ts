@@ -1,5 +1,5 @@
-import { Capability } from '@vytches-ddd/contracts';
-import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches/ddd-contracts';
+import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**

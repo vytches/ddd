@@ -5,13 +5,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   IBaseDomainService,
-  // DIDomainServiceMetadataRegistry, // Moved to @vytches-ddd/di
-  // DomainServiceDiscoveryPlugin, // Moved to @vytches-ddd/di
+  // DIDomainServiceMetadataRegistry, // Moved to @vytches/ddd-di
+  // DomainServiceDiscoveryPlugin, // Moved to @vytches/ddd-di
   DomainService,
   getDIDomainServiceMetadata,
   isDomainServicePendingDIRegistration,
 } from '../../src';
-import { ServiceLifetime } from '@vytches-ddd/di';
+import { ServiceLifetime } from '@vytches/ddd-di';
 
 // Simple test base class
 class TestDomainService extends IBaseDomainService {
@@ -22,7 +22,7 @@ class TestDomainService extends IBaseDomainService {
 
 describe('Domain Service DI Integration', () => {
   beforeEach(() => {
-    // DIDomainServiceMetadataRegistry.clear(); // Moved to @vytches-ddd/di
+    // DIDomainServiceMetadataRegistry.clear(); // Moved to @vytches/ddd-di
   });
 
   describe('@DomainService decorator with DI options', () => {
@@ -82,7 +82,7 @@ describe('Domain Service DI Integration', () => {
     });
 
     it.skip('should register metadata in DIDomainServiceMetadataRegistry', () => {
-      // This functionality has been moved to @vytches-ddd/di
+      // This functionality has been moved to @vytches/ddd-di
       // @DomainService({
       //   serviceId: 'registryService',
       //   lifetime: ServiceLifetime.Singleton,
@@ -96,7 +96,7 @@ describe('Domain Service DI Integration', () => {
   });
 
   describe.skip('DomainServiceDiscoveryPlugin', () => {
-    // This functionality has been moved to @vytches-ddd/di
+    // This functionality has been moved to @vytches/ddd-di
     // let plugin: DomainServiceDiscoveryPlugin;
 
     // beforeEach(() => {
@@ -151,7 +151,7 @@ describe('Domain Service DI Integration', () => {
   });
 
   describe.skip('DIDomainServiceMetadataRegistry', () => {
-    // This functionality has been moved to @vytches-ddd/di
+    // This functionality has been moved to @vytches/ddd-di
     // beforeEach(() => {
     //   DIDomainServiceMetadataRegistry.clear();
     // });

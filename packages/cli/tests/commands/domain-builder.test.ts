@@ -1,6 +1,6 @@
 import type { MockedClass } from 'vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { domainBuilderCommand } from '../../src/commands/domain-builder';
 import { DomainBuilderWorkflow } from '../../src/workflows/domain-builder/domain-builder-workflow';
 import { Performance } from '../../src/core/utils/performance';

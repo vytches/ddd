@@ -1,11 +1,11 @@
 # Message Retry and Dead Letter Queue
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Basic  
 **Domain**: Payment Processing  
 **Patterns**: Retry Pattern, Dead Letter Queue, Exponential Backoff  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-core
 
 ## Description
 
@@ -31,8 +31,8 @@ import {
   RetryableMessage,
   DeadLetterQueue,
   ExponentialBackoff,
-} from '@vytches-ddd/messaging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-messaging';
+import { Result } from '@vytches/ddd-utils';
 import { PaymentDetails, ExternalApiResponse } from './types';
 
 // Message processor with retry logic

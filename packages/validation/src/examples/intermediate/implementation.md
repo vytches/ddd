@@ -4,8 +4,8 @@
 events  
 **Domain**: Financial Services KYC (Know Your Customer)  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies,
-@vytches-ddd/events, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-policies,
+@vytches/ddd-events, @vytches/ddd-di
 
 ## Business Context
 
@@ -26,13 +26,13 @@ import {
   ISpecification,
   IAsyncSpecification,
   CompositeSpecification,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import {
   PolicyBuilder,
   PolicyContext,
   ISpecification as IPolicySpecification,
-} from '@vytches-ddd/policies';
-import { DomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-policies';
+import { DomainEvent } from '@vytches/ddd-events';
 import { Customer, KYCDocument, RiskProfile, ComplianceCheck } from '../types'; // ALWAYS import from app
 
 // KYC domain events
@@ -297,11 +297,11 @@ import {
   CompositeSpecification,
   BusinessRuleValidator,
   ValidationFacade,
-} from '@vytches-ddd/validation';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Composite KYC Validator with Policy Integration
 @DomainService('compositeKYCValidator', {

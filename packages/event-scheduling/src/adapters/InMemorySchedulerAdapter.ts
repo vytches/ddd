@@ -6,9 +6,9 @@ import type {
   IJobFilter,
   IJobQueryResult,
   ISchedulerConfig,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
-import { JobStatus } from '@vytches-ddd/contracts';
+import { JobStatus } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary InMemorySchedulerAdapter class for in memory scheduler adapter operations

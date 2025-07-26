@@ -1,6 +1,6 @@
 # Complex Scheduling Patterns - Conditional Execution and Dynamic Rescheduling
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 intermediate **Domain**: Scheduling **Patterns**: conditional-execution,
 dynamic-rescheduling, intelligent-scheduling, adaptive-timing
 
@@ -23,10 +23,10 @@ automatic rescheduling based on real-time market data and trading rules.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { JobStatus, SchedulePriority } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   SchedulingRule,
   EventSchedulingContext,

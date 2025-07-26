@@ -1,4 +1,4 @@
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 
 /**
  * @llm-summary TypedOperation class for typed operation operations

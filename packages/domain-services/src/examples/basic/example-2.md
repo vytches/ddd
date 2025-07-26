@@ -1,9 +1,9 @@
 # Domain Service with Repository - Beginner Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 beginner **Domain**: order-management **Patterns**: domain-service,
-repository-coordination **Dependencies**: @vytches-ddd/core,
-@vytches-ddd/repositories
+repository-coordination **Dependencies**: @vytches/ddd-core,
+@vytches/ddd-repositories
 
 ## Description
 
@@ -21,8 +21,8 @@ while maintaining transactional consistency and domain boundaries.
 
 ````typescript
 // order-processing.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   Product,

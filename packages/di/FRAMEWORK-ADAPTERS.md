@@ -1,6 +1,6 @@
 # Framework Integration Adapters
 
-This document provides comprehensive guidance for integrating `@vytches-ddd/di`
+This document provides comprehensive guidance for integrating `@vytches/ddd-di`
 with popular dependency injection frameworks.
 
 ## Supported Frameworks
@@ -18,7 +18,7 @@ with popular dependency injection frameworks.
 ### Installation
 
 ```bash
-pnpm add @vytches-ddd/di @nestjs/core @nestjs/common
+pnpm add @vytches/ddd-di @nestjs/core @nestjs/common
 ```
 
 ### NestJS Container Adapter
@@ -27,14 +27,14 @@ pnpm add @vytches-ddd/di @nestjs/core @nestjs/common
 // src/di/nestjs-container-adapter.ts
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { BaseContainerAdapter } from '@vytches-ddd/di';
+import { BaseContainerAdapter } from '@vytches/ddd-di';
 import {
   ServiceToken,
   Constructor,
   ServiceFactory,
   ServiceDescriptor,
   ServiceRegistrationOptions,
-} from '@vytches-ddd/di';
+} from '@vytches/ddd-di';
 
 @Injectable()
 export class NestJSContainerAdapter extends BaseContainerAdapter {
@@ -130,7 +130,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
 // src/modules/di.module.ts
 import { Module, Global } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { NestJSContainerAdapter } from '../di/nestjs-container-adapter';
 
 @Global()
@@ -156,7 +156,7 @@ export class DIModule {}
 ```typescript
 // src/services/user.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Injectable()
 export class UserService {
@@ -206,7 +206,7 @@ export class UserModule {}
 ### Installation
 
 ```bash
-pnpm add @vytches-ddd/di inversify reflect-metadata
+pnpm add @vytches/ddd-di inversify reflect-metadata
 ```
 
 ### InversifyJS Setup
@@ -214,7 +214,7 @@ pnpm add @vytches-ddd/di inversify reflect-metadata
 ```typescript
 // src/di/inversify.config.ts
 import { Container } from 'inversify';
-import { InversifyContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
+import { InversifyContainerAdapter, VytchesDDD } from '@vytches/ddd-di';
 import 'reflect-metadata';
 
 // Create and configure Inversify container
@@ -278,7 +278,7 @@ export class OrderService {
 ```typescript
 // src/di/context-containers.ts
 import { Container } from 'inversify';
-import { InversifyContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
+import { InversifyContainerAdapter, VytchesDDD } from '@vytches/ddd-di';
 
 // Order Management Context
 const orderContainer = new Container();
@@ -306,7 +306,7 @@ VytchesDDD.configureContext('UserManagement', userAdapter);
 ### Installation
 
 ```bash
-pnpm add @vytches-ddd/di tsyringe reflect-metadata
+pnpm add @vytches/ddd-di tsyringe reflect-metadata
 ```
 
 ### TSyringe Setup
@@ -314,7 +314,7 @@ pnpm add @vytches-ddd/di tsyringe reflect-metadata
 ```typescript
 // src/di/tsyringe.config.ts
 import { container } from 'tsyringe';
-import { TSyringeContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
+import { TSyringeContainerAdapter, VytchesDDD } from '@vytches/ddd-di';
 import 'reflect-metadata';
 
 // Register services with TSyringe
@@ -376,14 +376,14 @@ container.register('DatabaseService', {
 ### Installation
 
 ```bash
-pnpm add @vytches-ddd/di awilix
+pnpm add @vytches/ddd-di awilix
 ```
 
 ### Custom Awilix Adapter
 
 ```typescript
 // src/di/awilix-container-adapter.ts
-import { BaseContainerAdapter } from '@vytches-ddd/di';
+import { BaseContainerAdapter } from '@vytches/ddd-di';
 import { AwilixContainer } from 'awilix';
 
 export class AwilixContainerAdapter extends BaseContainerAdapter {
@@ -450,7 +450,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
 ```typescript
 // src/di/awilix.config.ts
 import { createContainer, asClass, asFunction, asValue } from 'awilix';
-import { AwilixContainerAdapter, VytchesDDD } from '@vytches-ddd/di';
+import { AwilixContainerAdapter, VytchesDDD } from '@vytches/ddd-di';
 
 const container = createContainer();
 
@@ -478,7 +478,7 @@ VytchesDDD.configure(adapter);
 
 ```typescript
 // src/di/my-framework-adapter.ts
-import { BaseContainerAdapter } from '@vytches-ddd/di';
+import { BaseContainerAdapter } from '@vytches/ddd-di';
 
 export class MyFrameworkAdapter extends BaseContainerAdapter {
   private readonly services = new Map<string, ServiceDescriptor>();
@@ -709,7 +709,7 @@ console.log('VytchesDDD registered:', VytchesDDD.isRegistered('ServiceName'));
 ### Debug Logging
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Enable debug logging for DI operations
 Logger.configure({

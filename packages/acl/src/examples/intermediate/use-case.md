@@ -1,6 +1,6 @@
 # Intermediate ACL Use Cases
 
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Intermediate  
 **Focus**: Advanced integration patterns with resilience, caching, and
 multi-system orchestration

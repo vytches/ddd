@@ -4,10 +4,10 @@ import type {
   IDomainEvent,
   IEventProcessor,
   IAggregateWithEvents,
-} from '@vytches-ddd/contracts';
-import { IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
+import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary UniversalEventDispatcher class for universal event dispatcher operations

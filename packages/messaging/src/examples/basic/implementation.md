@@ -4,7 +4,7 @@
 systems  
 **Domain**: E-commerce Order Processing  
 **Complexity**: Basic  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-utils
 
 ## Business Context
 
@@ -22,7 +22,7 @@ e-commerce system:
 
 ```typescript
 // outbox-message.ts
-import { OutboxMessage, MessagePriority } from '@vytches-ddd/messaging';
+import { OutboxMessage, MessagePriority } from '@vytches/ddd-messaging';
 import { Order, Customer, Product } from '../types'; // ALWAYS import from app
 
 // Domain-specific outbox messages
@@ -83,8 +83,8 @@ import {
   MessagePriority,
   OutboxRepository,
   MessageProcessor,
-} from '@vytches-ddd/messaging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-messaging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Basic Outbox Service Implementation
 export class OrderOutboxService {
@@ -561,7 +561,7 @@ export class SimpleMessagePublisher implements MessagePublisher {
 }
 
 // outbox-repository.ts
-import { OutboxMessage } from '@vytches-ddd/messaging';
+import { OutboxMessage } from '@vytches/ddd-messaging';
 
 // In-memory outbox repository for demonstration
 export class InMemoryOutboxRepository implements OutboxRepository {

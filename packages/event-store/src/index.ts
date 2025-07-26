@@ -46,4 +46,4 @@ export type {
   IStreamMetadata,
   IEventSerializer,
   IEventStoreAdapter,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';

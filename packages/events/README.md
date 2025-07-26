@@ -1,6 +1,6 @@
-# @vytches-ddd/events
+# @vytches/ddd-events
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fevents.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fevents)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-events.svg)](https://badge.fury.io/js/%40vytches%2Fddd-events)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,20 +29,20 @@ transaction safety and optimistic concurrency control.
 
 ```bash
 # npm
-npm install @vytches-ddd/events
+npm install @vytches/ddd-events
 
 # yarn
-yarn add @vytches-ddd/events
+yarn add @vytches/ddd-events
 
 # pnpm
-pnpm add @vytches-ddd/events
+pnpm add @vytches/ddd-events
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/utils
+npm install @vytches/ddd-domain-primitives @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -144,7 +144,7 @@ import {
   UnifiedEventBus,
   DomainEvent,
   EventHandler,
-} from '@vytches-ddd/events';
+} from '@vytches/ddd-events';
 
 // Define domain event
 class OrderCreatedEvent extends DomainEvent<{
@@ -201,8 +201,8 @@ eventBus.subscribe('OrderCreated', new OrderCreatedHandler());
 ### 3. Repository Integration
 
 ```typescript
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { IBaseRepository } from '@vytches-ddd/repositories';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { IBaseRepository } from '@vytches/ddd-repositories';
 
 class Order extends AggregateRoot {
   static create(customerId: string, items: OrderItem[]): Order {
@@ -810,7 +810,7 @@ eventBus.onError((error, event) => {
 ### Unit Testing
 
 ```typescript
-import { UnifiedEventBus, EventTestHarness } from '@vytches-ddd/events';
+import { UnifiedEventBus, EventTestHarness } from '@vytches/ddd-events';
 import { describe, it, expect } from 'vitest';
 
 describe('OrderCreatedHandler', () => {
@@ -868,7 +868,7 @@ describe('OrderCreatedHandler', () => {
 ### Integration Testing
 
 ```typescript
-import { EventIntegrationTestHarness } from '@vytches-ddd/events';
+import { EventIntegrationTestHarness } from '@vytches/ddd-events';
 
 describe('Order Processing Integration', () => {
   let testHarness: EventIntegrationTestHarness;
@@ -954,7 +954,7 @@ the unified event system:
 1. **Update Dependencies**
 
    ```bash
-   npm install @vytches-ddd/events@^2.0.0
+   npm install @vytches/ddd-events@^2.0.0
    ```
 
 2. **Replace Event Bus Instances**
@@ -997,7 +997,7 @@ the unified event system:
 
 ```typescript
 // Migration helper utility
-import { EventBusMigrationHelper } from '@vytches-ddd/events/migration';
+import { EventBusMigrationHelper } from '@vytches/ddd-events/migration';
 
 const migrationHelper = new EventBusMigrationHelper();
 
@@ -1024,20 +1024,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build events package
-pnpm build --filter=@vytches-ddd/events
+pnpm build --filter=@vytches/ddd-events
 
 # Run tests
-pnpm test --filter=@vytches-ddd/events
+pnpm test --filter=@vytches/ddd-events
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/events
+pnpm dev --filter=@vytches/ddd-events
 ```
 
 ### Code Style
@@ -1054,7 +1054,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

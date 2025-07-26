@@ -1,6 +1,6 @@
-import type { IEventSerializer, IStoredDomainEvent } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
-import type { ILogger } from '@vytches-ddd/logging';
+import type { IEventSerializer, IStoredDomainEvent } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
+import type { ILogger } from '@vytches/ddd-logging';
 import { EventSerializationError, EventDeserializationError } from '../errors';
 
 /**

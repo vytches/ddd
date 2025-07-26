@@ -1,4 +1,4 @@
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 import { describe, it, expect } from 'vitest';
 import { BusinessRuleValidator } from '../../src';
 import '../../src/business-rules/business-rule-validator-extension'; // Import extension to add methods to prototype

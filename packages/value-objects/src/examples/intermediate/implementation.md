@@ -1,13 +1,13 @@
 # Intermediate Value Objects - Implementation Overview
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Focus**: Advanced patterns and complex value
 object implementations
 
 ## Overview
 
 This document provides comprehensive guidance for implementing
-intermediate-level value objects using the @vytches-ddd/value-objects package.
+intermediate-level value objects using the @vytches/ddd-value-objects package.
 It covers advanced patterns including composite structures, range operations,
 complex validations, and intelligent business logic.
 
@@ -19,7 +19,7 @@ Composite value objects aggregate multiple simpler value objects with
 intelligent coordination:
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import { ValueObjectValidationResult } from './types';
 
 export class ContactInformation extends ValueObject<ContactInformationData> {
@@ -787,7 +787,7 @@ const complexVO = ComplexValueObjectBuilder.create()
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { ContactInformation } from './contact-information';
 
 describe('ContactInformation - Intermediate Value Object', () => {

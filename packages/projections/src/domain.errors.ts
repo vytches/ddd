@@ -1,5 +1,5 @@
-import type { DomainErrorOptions } from '@vytches-ddd/core';
-import { DomainErrorCode, IDomainError } from '@vytches-ddd/core';
+import type { DomainErrorOptions } from '@vytches/ddd-core';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary VersionError class for version error operations

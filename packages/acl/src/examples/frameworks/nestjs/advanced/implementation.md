@@ -1,13 +1,13 @@
 # NestJS Advanced ACL Implementation Overview
 
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise ACL architecture with VytchesDDD DI integration
 
 ## Implementation Philosophy
 
-Advanced NestJS integration with @vytches-ddd/acl focuses on enterprise-scale
+Advanced NestJS integration with @vytches/ddd-acl focuses on enterprise-scale
 patterns using VytchesDDD DI for sophisticated service management, global
 coordination, and AI-enhanced data transformation.
 

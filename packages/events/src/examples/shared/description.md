@@ -1,7 +1,7 @@
 # Unified Event System - Package Overview
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Domain**: Architecture  
 **Patterns**: event-driven-architecture, domain-events, integration-events,
 repository-pattern
@@ -95,14 +95,14 @@ through dependency injection.
 
 ## Integration Patterns
 
-The package integrates seamlessly with other @vytches-ddd packages:
+The package integrates seamlessly with other @vytches/ddd-core packages:
 
-- **@vytches-ddd/repositories**: Automatic event publishing during save
+- **@vytches/ddd-repositories**: Automatic event publishing during save
   operations
-- **@vytches-ddd/aggregates**: Event collection and management within aggregates
-- **@vytches-ddd/di**: Automatic handler discovery and registration
-- **@vytches-ddd/event-store**: Event persistence for event sourcing scenarios
-- **@vytches-ddd/projections**: Read model updates from domain events
+- **@vytches/ddd-aggregates**: Event collection and management within aggregates
+- **@vytches/ddd-di**: Automatic handler discovery and registration
+- **@vytches/ddd-event-store**: Event persistence for event sourcing scenarios
+- **@vytches/ddd-projections**: Read model updates from domain events
 
 ## Performance Characteristics
 

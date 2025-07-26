@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   ContextAwarePromptEngine,
   SmartPrompts,
@@ -7,9 +7,6 @@ import {
 import type {
   ProjectAnalysis,
   ProjectStructureInfo,
-  DetectedPattern,
-  DependencyInfo,
-  FrameworkInfo,
   PromptSuggestion,
   ContextAwarePrompt,
   PromptConfig,
@@ -570,7 +567,7 @@ describe('ContextAwarePromptEngine', () => {
         dependencies: {
           '@nestjs/core': '^9.0.0',
           express: '^4.18.0',
-          '@vytches-ddd/core': '^1.0.0',
+          '@vytches/ddd-core': '^1.0.0',
         },
         devDependencies: {
           '@types/node': '^18.0.0',
@@ -597,7 +594,7 @@ describe('ContextAwarePromptEngine', () => {
       expect(vitestDep?.type).toBe('development');
       expect(vitestDep?.category).toBe('testing');
 
-      const vytchesDep = analysis?.dependencies.find(d => d.name === '@vytches-ddd/core');
+      const vytchesDep = analysis?.dependencies.find(d => d.name === '@vytches/ddd-core');
       expect(vytchesDep?.category).toBe('ddd');
     });
 
@@ -855,9 +852,10 @@ describe('ContextAwarePromptEngine', () => {
 
       it('should categorize DDD dependencies', () => {
         const categorize = (engine as any).categorizeDependency.bind(engine);
+        console.log('categorize', categorize);
 
-        expect(categorize('@vytches-ddd/core')).toBe('ddd');
-        expect(categorize('@vytches-ddd/events')).toBe('ddd');
+        expect(categorize('@vytches/ddd-core')).toBe('ddd');
+        expect(categorize('@vytches/ddd-events')).toBe('ddd');
       });
 
       it('should categorize utility dependencies', () => {

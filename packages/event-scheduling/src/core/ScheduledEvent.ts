@@ -1,6 +1,6 @@
-import { DomainEvent } from '@vytches-ddd/events';
-import type { IScheduledEvent, IScheduleOptions } from '@vytches-ddd/contracts';
-import type { IEventMetadata } from '@vytches-ddd/contracts';
+import { DomainEvent } from '@vytches/ddd-events';
+import type { IScheduledEvent, IScheduleOptions } from '@vytches/ddd-contracts';
+import type { IEventMetadata } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary ScheduledEvent class for scheduled event operations

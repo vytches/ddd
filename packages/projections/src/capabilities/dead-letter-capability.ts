@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches-ddd/contracts';
-import { Capability } from '@vytches-ddd/contracts';
-import { LibUtils } from '@vytches-ddd/utils';
+import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
+import { Capability } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 
 import type { ProjectionError } from '../projection-errors';
 import type {

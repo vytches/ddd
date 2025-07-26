@@ -1,8 +1,8 @@
 # Intermediate Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: intermediate
 **Domain**: Infrastructure **Patterns**: Enterprise scenarios, complex
-workflows, system integration **Dependencies**: @vytches-ddd/utils
+workflows, system integration **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ maintaining reliability and observability.
 
 ```typescript
 // intermediate-use-cases.ts
-import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
+import { Result, safeRun, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

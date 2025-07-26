@@ -1,7 +1,7 @@
 # Basic Repository Use Cases - Real-World Business Scenarios
 
 This document outlines practical business scenarios where basic repository
-patterns are applied using the @vytches-ddd/repositories package.
+patterns are applied using the @vytches/ddd-repositories package.
 
 ## Use Case 1: E-Commerce Product Catalog
 
@@ -331,6 +331,6 @@ class ContentManagementService {
 3. **Event Store Scaling**: Event stream partitioning by aggregate ID
 4. **Read Replicas**: Route read operations to dedicated database instances
 
-These use cases demonstrate how the @vytches-ddd/repositories patterns can be
+These use cases demonstrate how the @vytches/ddd-repositories patterns can be
 combined to address real-world business requirements while maintaining
 performance, consistency, and auditability.

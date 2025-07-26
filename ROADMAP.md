@@ -1,4 +1,4 @@
-# @vytches-ddd Library Roadmap
+# @vytches/ddd-core Library Roadmap
 
 ## Current State (Q4 2025)
 
@@ -87,7 +87,7 @@
 
 ### 📋 Enterprise Package Development
 
-#### 2.1 @vytches-ddd/monitoring-pro
+#### 2.1 @vytches/ddd-monitoring-pro
 
 ```typescript
 // Advanced monitoring and observability
@@ -99,7 +99,7 @@
 - Advanced analytics and reporting
 ```
 
-#### 2.2 @vytches-ddd/security-enterprise
+#### 2.2 @vytches/ddd-security-enterprise
 
 ```typescript
 // Enterprise security features
@@ -111,7 +111,7 @@
 - Advanced authentication patterns
 ```
 
-#### 2.3 @vytches-ddd/scalability-pro
+#### 2.3 @vytches/ddd-scalability-pro
 
 ```typescript
 // High-scale enterprise features
@@ -123,7 +123,7 @@
 - Performance optimization recommendations
 ```
 
-#### 2.4 @vytches-ddd/integration-enterprise
+#### 2.4 @vytches/ddd-integration-enterprise
 
 ```typescript
 // Enterprise integration patterns
@@ -170,28 +170,28 @@
 
 #### 3.1 Framework Integrations
 
-- [ ] **@vytches-ddd/nestjs-pro**: Advanced NestJS integration with enterprise
+- [ ] **@vytches/ddd-nestjs-pro**: Advanced NestJS integration with enterprise
       features
-- [ ] **@vytches-ddd/express-enterprise**: Express.js enterprise patterns
-- [ ] **@vytches-ddd/fastify-pro**: High-performance Fastify integration
-- [ ] **@vytches-ddd/next-ddd**: Next.js full-stack DDD patterns
-- [ ] **@vytches-ddd/react-ddd**: React frontend DDD patterns
+- [ ] **@vytches/ddd-express-enterprise**: Express.js enterprise patterns
+- [ ] **@vytches/ddd-fastify-pro**: High-performance Fastify integration
+- [ ] **@vytches/ddd-next-ddd**: Next.js full-stack DDD patterns
+- [ ] **@vytches/ddd-react-ddd**: React frontend DDD patterns
 
 #### 3.2 Database Integrations
 
-- [ ] **@vytches-ddd/postgresql-enterprise**: Advanced PostgreSQL patterns
-- [ ] **@vytches-ddd/mongodb-pro**: MongoDB event sourcing and aggregates
-- [ ] **@vytches-ddd/elasticsearch-ddd**: Advanced search and analytics
-- [ ] **@vytches-ddd/redis-enterprise**: Distributed caching and state
+- [ ] **@vytches/ddd-postgresql-enterprise**: Advanced PostgreSQL patterns
+- [ ] **@vytches/ddd-mongodb-pro**: MongoDB event sourcing and aggregates
+- [ ] **@vytches/ddd-elasticsearch-ddd**: Advanced search and analytics
+- [ ] **@vytches/ddd-redis-enterprise**: Distributed caching and state
       management
-- [ ] **@vytches-ddd/cassandra-ddd**: Large-scale distributed patterns
+- [ ] **@vytches/ddd-cassandra-ddd**: Large-scale distributed patterns
 
 #### 3.3 Cloud Platform Integrations
 
-- [ ] **@vytches-ddd/aws-enterprise**: AWS-native DDD patterns
-- [ ] **@vytches-ddd/azure-pro**: Azure integration with enterprise features
-- [ ] **@vytches-ddd/gcp-ddd**: Google Cloud Platform optimizations
-- [ ] **@vytches-ddd/kubernetes-enterprise**: K8s deployment and scaling
+- [ ] **@vytches/ddd-aws-enterprise**: AWS-native DDD patterns
+- [ ] **@vytches/ddd-azure-pro**: Azure integration with enterprise features
+- [ ] **@vytches/ddd-gcp-ddd**: Google Cloud Platform optimizations
+- [ ] **@vytches/ddd-kubernetes-enterprise**: K8s deployment and scaling
       patterns
 
 #### 3.4 Professional Services
@@ -214,7 +214,7 @@
 
 ### 📋 Platform Features
 
-#### 4.1 @vytches-ddd/studio (Visual Development Platform)
+#### 4.1 @vytches/ddd-studio (Visual Development Platform)
 
 ```typescript
 // Visual DDD modeling and code generation
@@ -226,7 +226,7 @@
 - Integration with popular design tools
 ```
 
-#### 4.2 @vytches-ddd/insights (Analytics Platform)
+#### 4.2 @vytches/ddd-insights (Analytics Platform)
 
 ```typescript
 // Business intelligence for DDD applications
@@ -238,7 +238,7 @@
 - Custom reporting and data export
 ```
 
-#### 4.3 @vytches-ddd/governance (Enterprise Governance)
+#### 4.3 @vytches/ddd-governance (Enterprise Governance)
 
 ```typescript
 // Enterprise governance and compliance
@@ -365,7 +365,7 @@
 
 ## Conclusion
 
-The @vytches-ddd library is positioned to become the definitive
+The @vytches/ddd-core library is positioned to become the definitive
 TypeScript/Node.js solution for Domain-Driven Design. With a solid foundation of
 21 production-ready packages, we're ready to scale into enterprise markets while
 maintaining our open-source roots.
@@ -387,7 +387,7 @@ maintaining our open-source roots.
 - **Q4 2026-Q1 2027**: Ecosystem Expansion
 - **Q2-Q4 2027**: Platform Evolution & Scale
 
-This roadmap positions @vytches-ddd as the market leader in enterprise
+This roadmap positions @vytches/ddd-core as the market leader in enterprise
 TypeScript DDD solutions while maintaining its open-source foundation and
 community-driven development model.
 

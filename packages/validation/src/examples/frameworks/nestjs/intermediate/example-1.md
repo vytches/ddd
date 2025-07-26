@@ -1,6 +1,6 @@
 # NestJS Advanced Validation with VytchesDDD DI Integration
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Intermediate  
 **Focus**: VytchesDDD DI integration with enterprise validation patterns
@@ -16,12 +16,12 @@ enterprise-grade service management.
 ```typescript
 // enterprise-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   EnterpriseValidationOrchestrator,
   AIEnhancedValidationSpecification,
   DataQualityValidator,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User, ValidationContext } from './types'; // From your application
 
 // Domain service managed by VytchesDDD
@@ -303,7 +303,7 @@ export class UserController {
 import { Module, OnModuleInit } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserValidationBridgeService } from './user-validation-bridge.service';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Module({
   controllers: [UserController],

@@ -1,6 +1,6 @@
 # NestJS AI-Powered Adaptive Validation - VytchesDDD DI
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: AI-powered adaptive validation with machine learning enhancement and
@@ -18,14 +18,14 @@ and real-time data analysis.
 ```typescript
 // ai-adaptive-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   AIEnhancedValidationSpecification,
   AdaptiveValidationEngine,
   PredictiveValidationAnalyzer,
   ValidationMetrics,
   SpecificationResult,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { MLModelService, PredictionRequest, AdaptationRequest } from './types'; // From your application
 
 // AI-powered validation service with VytchesDDD DI
@@ -595,7 +595,7 @@ export class AIValidationController {
 import { Module, OnModuleInit } from '@nestjs/common';
 import { AIValidationController } from './ai-validation.controller';
 import { AIAdaptiveValidationBridgeService } from './ai-adaptive-validation-bridge.service';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Module({
   controllers: [AIValidationController],

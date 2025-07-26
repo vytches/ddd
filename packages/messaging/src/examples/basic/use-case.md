@@ -1,13 +1,13 @@
 # Messaging Package - Basic Use Cases
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Basic  
 **Focus**: Real-world applications of basic messaging patterns
 
 ## Overview
 
 This document presents real-world use cases for basic messaging patterns in the
-@vytches-ddd/messaging package. These examples demonstrate practical
+@vytches/ddd-messaging package. These examples demonstrate practical
 applications in various business domains.
 
 ## Use Case 1: E-commerce Order Fulfillment
@@ -18,11 +18,11 @@ An online retailer needs to coordinate multiple services when processing orders:
 inventory management, payment processing, shipping, and customer notifications.
 Message reliability is crucial to prevent lost orders or duplicate charges.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // order-fulfillment.service.ts
-import { OutboxMessageHandler, MessagePriority } from '@vytches-ddd/messaging';
+import { OutboxMessageHandler, MessagePriority } from '@vytches/ddd-messaging';
 import { Order, InventoryItem, ShippingDetails } from './types';
 
 export class OrderFulfillmentService {
@@ -84,7 +84,7 @@ A payment processor handles millions of transactions daily, requiring guaranteed
 delivery of transaction records to multiple systems: fraud detection,
 accounting, regulatory reporting, and merchant notifications.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // transaction-processor.service.ts
@@ -92,7 +92,7 @@ import {
   MessageProcessor,
   RetryableMessage,
   DeadLetterQueue,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 import { PaymentDetails, ExternalApiResponse } from './types';
 
 export class TransactionProcessor {
@@ -161,7 +161,7 @@ An IoT platform collects sensor data from thousands of devices. Messages must be
 processed reliably despite network instability and varying data volumes. Failed
 messages need special handling based on data criticality.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // iot-data-pipeline.service.ts
@@ -169,7 +169,7 @@ import {
   OutboxMessageHandler,
   MessageBatch,
   MessagePriority,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 export class IoTDataPipeline {
   constructor(

@@ -1,5 +1,5 @@
-import type { DomainErrorOptions } from '@vytches-ddd/domain-primitives';
-import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
+import type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
+import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
 
 /**
  * @llm-summary AggregateError class for aggregate error operations

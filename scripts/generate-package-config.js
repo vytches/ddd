@@ -45,50 +45,50 @@ const PACKAGE_LAYERS = {
 const LAYER_DEPENDENCIES = {
   foundation: {
     contracts: [],
-    'domain-primitives': ['@vytches-ddd/utils'],
-    'value-objects': ['@vytches-ddd/contracts', '@vytches-ddd/utils'],
-    repositories: ['@vytches-ddd/contracts', '@vytches-ddd/domain-primitives'],
+    'domain-primitives': ['@vytches/ddd-utils'],
+    'value-objects': ['@vytches/ddd-contracts', '@vytches/ddd-utils'],
+    repositories: ['@vytches/ddd-contracts', '@vytches/ddd-domain-primitives'],
     aggregates: [
-      '@vytches-ddd/contracts',
-      '@vytches-ddd/domain-primitives',
-      '@vytches-ddd/value-objects',
+      '@vytches/ddd-contracts',
+      '@vytches/ddd-domain-primitives',
+      '@vytches/ddd-value-objects',
     ],
     core: [
-      '@vytches-ddd/domain-primitives',
-      '@vytches-ddd/value-objects',
-      '@vytches-ddd/repositories',
-      '@vytches-ddd/aggregates',
-      '@vytches-ddd/utils',
-      '@vytches-ddd/contracts',
-      '@vytches-ddd/logging',
+      '@vytches/ddd-domain-primitives',
+      '@vytches/ddd-value-objects',
+      '@vytches/ddd-repositories',
+      '@vytches/ddd-aggregates',
+      '@vytches/ddd-utils',
+      '@vytches/ddd-contracts',
+      '@vytches/ddd-logging',
     ],
-    di: ['@vytches-ddd/contracts', '@vytches-ddd/logging'],
+    di: ['@vytches/ddd-contracts', '@vytches/ddd-logging'],
     utils: [],
-    logging: ['@vytches-ddd/contracts'],
+    logging: ['@vytches/ddd-contracts'],
   },
   patterns: {
-    validation: ['@vytches-ddd/core'],
-    policies: ['@vytches-ddd/core'],
-    'domain-services': ['@vytches-ddd/core'],
+    validation: ['@vytches/ddd-core'],
+    policies: ['@vytches/ddd-core'],
+    'domain-services': ['@vytches/ddd-core'],
   },
   architecture: {
-    events: ['@vytches-ddd/core'],
-    cqrs: ['@vytches-ddd/core', '@vytches-ddd/events'],
-    projections: ['@vytches-ddd/core', '@vytches-ddd/events'],
+    events: ['@vytches/ddd-core'],
+    cqrs: ['@vytches/ddd-core', '@vytches/ddd-events'],
+    projections: ['@vytches/ddd-core', '@vytches/ddd-events'],
   },
   integration: {
-    acl: ['@vytches-ddd/core'],
-    messaging: ['@vytches-ddd/core', '@vytches-ddd/events'],
+    acl: ['@vytches/ddd-core'],
+    messaging: ['@vytches/ddd-core', '@vytches/ddd-events'],
   },
   infrastructure: {
-    resilience: ['@vytches-ddd/core'],
-    enterprise: ['@vytches-ddd/core'],
-    'event-store': ['@vytches-ddd/core', '@vytches-ddd/logging'],
-    'event-scheduling': ['@vytches-ddd/core', '@vytches-ddd/events'],
+    resilience: ['@vytches/ddd-core'],
+    enterprise: ['@vytches/ddd-core'],
+    'event-store': ['@vytches/ddd-core', '@vytches/ddd-logging'],
+    'event-scheduling': ['@vytches/ddd-core', '@vytches/ddd-events'],
   },
   tooling: {
-    testing: ['@vytches-ddd/utils'],
-    cli: ['@vytches-ddd/core'],
+    testing: ['@vytches/ddd-utils'],
+    cli: ['@vytches/ddd-core'],
   },
 };
 
@@ -126,7 +126,7 @@ function generatePackageConfig(packageName, options = {}) {
     dryRun = false,
   } = options;
 
-  console.log(`\n🔧 Generating configuration for package: @vytches-ddd/${packageName}`);
+  console.log(`\n🔧 Generating configuration for package: @vytches/ddd-${packageName}`);
 
   // Get package metadata
   const layer = PACKAGE_LAYERS[packageName];

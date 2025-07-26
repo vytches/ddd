@@ -1,7 +1,7 @@
 # Business Use Cases for Policy Pattern
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: beginner  
 **Domain**: Cross-Domain Applications  
 **Patterns**: policy-pattern, business-rules, domain-modeling

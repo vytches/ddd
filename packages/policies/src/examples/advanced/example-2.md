@@ -1,12 +1,12 @@
 # Policy Mesh Architecture for Distributed Systems
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Distributed Systems Architecture  
 **Patterns**: policy-mesh, service-mesh-integration, distributed-governance  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/messaging,
-@vytches-ddd/events, @vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-messaging,
+@vytches/ddd-events, @vytches/ddd-resilience
 
 ## Description
 
@@ -34,11 +34,11 @@ import {
   MeshPolicyRegistry,
   PolicyProxyController,
   ServiceMeshIntegration,
-} from '@vytches-ddd/policies';
-import { OutboxPattern, MessageBus } from '@vytches-ddd/messaging';
-import { DomainEvent, EventBus } from '@vytches-ddd/events';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-policies';
+import { OutboxPattern, MessageBus } from '@vytches/ddd-messaging';
+import { DomainEvent, EventBus } from '@vytches/ddd-events';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary Policy Mesh Architecture for distributed microservices systems

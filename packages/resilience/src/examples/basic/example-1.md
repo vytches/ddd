@@ -1,8 +1,8 @@
 # Circuit Breaker Pattern for Payment Processing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Basic
 **Domain**: Payment Processing **Patterns**: Circuit Breaker Pattern, Fault
-Tolerance, Service Protection **Dependencies**: @vytches-ddd/resilience
+Tolerance, Service Protection **Dependencies**: @vytches/ddd-resilience
 
 ## Description
 
@@ -27,7 +27,7 @@ import {
   CircuitBreakerStrategy,
   ResiliencePolicyBuilder,
   ResilienceContext,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { PaymentRequest, PaymentResponse } from './types'; // From your application
 
 // Payment service with circuit breaker protection

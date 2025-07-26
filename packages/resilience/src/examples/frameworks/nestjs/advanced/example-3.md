@@ -1,10 +1,10 @@
 # Global Resilience Orchestration Platform - NestJS Advanced Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Advanced **Domain**: Global Infrastructure Management
 **Patterns**: Global Coordination, Multi-Region Orchestration, VytchesDDD DI
 **Dependencies**: @nestjs/common, @nestjs/microservices, @nestjs/websockets,
-@vytches-ddd/resilience, @vytches-ddd/di
+@vytches/ddd-resilience, @vytches/ddd-di
 
 ## Description
 
@@ -26,14 +26,14 @@ massive scale events.
 ```typescript
 // global-resilience-orchestrator.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   GlobalResilienceOrchestrator,
   MultiRegionCoordinator,
   DisasterRecoveryManager,
   GlobalHealthMonitor,
   RegionalFailoverManager,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   GlobalOperation,
   RegionalHealth,
@@ -858,7 +858,7 @@ export class GlobalResilienceController {
 
 // global-resilience.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { GlobalResilienceController } from './global-resilience.controller';
 import { GlobalResilienceGateway } from './global-resilience.gateway';
 import { GlobalResilienceBridgeService } from './global-resilience-orchestrator.service';

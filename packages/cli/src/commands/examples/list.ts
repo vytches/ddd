@@ -94,7 +94,7 @@ export const handler = async (argv: Arguments<ListOptions>): Promise<void> => {
 
         console.log(`🔹 ${example.name}`);
         console.log(`   ID: ${example.id}`);
-        console.log(`   Package: @vytches-ddd/${example.package}`);
+        console.log(`   Package: @vytches/ddd-${example.package}`);
         console.log(`   Complexity: ${example.complexity}`);
         console.log(`   Domain: ${example.domain || 'none'}`);
         console.log(`   Patterns: ${example.patterns?.join(', ') || 'none'}`);

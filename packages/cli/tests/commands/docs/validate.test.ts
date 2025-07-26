@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { validateCommand } from '../../../src/commands/docs/validate';
 import { ExampleValidator } from '../../../src/validators/example-validator';
 import { logger } from '../../../src/core/utils/logger';

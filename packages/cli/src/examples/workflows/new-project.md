@@ -12,7 +12,7 @@ from initial setup to a working application with multiple bounded contexts.
 
 ```bash
 # Install VytchesDDD CLI
-npm install -g @vytches-ddd/cli
+npm install -g @vytches/ddd-cli
 
 # Verify installation
 vytches-ddd --version
@@ -29,7 +29,7 @@ cd my-ddd-project
 npm init -y
 
 # Install VytchesDDD dependencies
-npm install @vytches-ddd/core @vytches-ddd/cqrs @vytches-ddd/events
+npm install @vytches/ddd-core @vytches/ddd-cqrs @vytches/ddd-events
 npm install -D typescript @types/node ts-node
 ```
 
@@ -45,9 +45,9 @@ npm install -D typescript @types/node ts-node
     "test": "jest"
   },
   "dependencies": {
-    "@vytches-ddd/core": "^1.0.0",
-    "@vytches-ddd/cqrs": "^1.0.0",
-    "@vytches-ddd/events": "^1.0.0"
+    "@vytches/ddd-core": "^1.0.0",
+    "@vytches/ddd-cqrs": "^1.0.0",
+    "@vytches/ddd-events": "^1.0.0"
   }
 }
 ```
@@ -196,7 +196,7 @@ vytches-ddd generate command-handler ProcessPayment --domain OrderManagement
 
 ```typescript
 // src/application/user-management/handlers/register-user.handler.ts
-import { CommandHandler, ICommandHandler } from '@vytches-ddd/cqrs';
+import { CommandHandler, ICommandHandler } from '@vytches/ddd-cqrs';
 import { RegisterUserCommand } from '@domain/user-management/commands/register-user.command';
 
 @CommandHandler(RegisterUserCommand)
@@ -270,8 +270,8 @@ touch src/index.ts
 **src/index.ts:**
 
 ```typescript
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { EventBus } from '@vytches-ddd/events';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { EventBus } from '@vytches/ddd-events';
 import { RegisterUserHandler } from './application/user-management/handlers/register-user.handler';
 import { CreateOrderHandler } from './application/order-management/handlers/create-order.handler';
 import { InMemoryUserRepository } from './infrastructure/user-management/user.repository';

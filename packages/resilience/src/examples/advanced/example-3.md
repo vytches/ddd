@@ -1,9 +1,9 @@
 # Microservices Resilience Coordination
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Advanced
 **Domain**: Microservices Architecture **Patterns**: Distributed Resilience,
 Service Mesh Integration, Cross-Service Coordination **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -31,7 +31,7 @@ import {
   DistributedCircuitBreaker,
   ServiceDependencyManager,
   CrossServiceBulkhead,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   ServiceRegistry,
   BusinessProcess,

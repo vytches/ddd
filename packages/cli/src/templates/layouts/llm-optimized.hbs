@@ -2,7 +2,7 @@
 
 ## 🤖 CONTEXT FOR CODE GENERATION
 
-This document provides complete implementation guidance for @vytches-ddd/{{packageConfig.packageName}}{{#if framework}} in {{framework}} applications{{/if}}.  
+This document provides complete implementation guidance for @vytches/ddd-{{packageConfig.packageName}}{{#if framework}} in {{framework}} applications{{/if}}.  
 **Use this as a reference for generating production-ready code.**
 
 ## 📦 REQUIRED DEPENDENCIES
@@ -10,7 +10,7 @@ This document provides complete implementation guidance for @vytches-ddd/{{packa
 ```json
 {
   "dependencies": {
-    "@vytches-ddd/{{packageConfig.packageName}}": "^{{packageConfig.version}}"{{#if packageConfig.dependencies}}{{#each packageConfig.dependencies}},
+    "@vytches/ddd-{{packageConfig.packageName}}": "^{{packageConfig.version}}"{{#if packageConfig.dependencies}}{{#each packageConfig.dependencies}},
     "{{this}}": "^{{../packageConfig.version}}"{{/each}}{{/if}}
   }
 }
@@ -120,6 +120,6 @@ This document provides complete implementation guidance for @vytches-ddd/{{packa
 
 ---
 
-**Generated for LLM Code Generation** | {{timestamp}} | @vytches-ddd/{{packageConfig.packageName}} v{{packageConfig.version}}
+**Generated for LLM Code Generation** | {{timestamp}} | @vytches/ddd-{{packageConfig.packageName}} v{{packageConfig.version}}
 
 > **Tip**: Copy relevant sections to your LLM prompt along with your specific requirements for best results.

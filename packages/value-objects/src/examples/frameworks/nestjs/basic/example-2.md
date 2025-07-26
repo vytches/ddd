@@ -1,7 +1,7 @@
 # Basic Value Objects - NestJS DI Integration
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
-**Complexity**: Basic **Framework**: NestJS **Focus**: @vytches-ddd/di
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
+**Complexity**: Basic **Framework**: NestJS **Focus**: @vytches/ddd-di
 integration with enhanced service management **Base Example**:
 [Money Value Object](../../../basic/example-1.md)
 
@@ -10,7 +10,7 @@ integration with enhanced service management **Base Example**:
 ```typescript
 // money.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CreateMoneyDto, MoneyResponse, CurrencyConversionDto } from './types'; // From your application
 
 @Injectable()
@@ -20,7 +20,7 @@ export class MoneyService {
   private readonly validationService: ValidationService;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for enhanced capabilities
+    // ⭐ FOCUS: @vytches/ddd-di integration for enhanced capabilities
     this.moneyFactory = VytchesDDD.resolve<MoneyFactory>('moneyFactory');
     this.currencyService =
       VytchesDDD.resolve<CurrencyService>('currencyService');
@@ -256,7 +256,7 @@ export class MoneyService {
 ```typescript
 // email.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CreateEmailDto, EmailResponse } from './types'; // From your application
 
 @Injectable()
@@ -363,7 +363,7 @@ export class EmailService {
 ```typescript
 // address.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CreateAddressDto, AddressResponse } from './types'; // From your application
 
 @Injectable()
@@ -482,7 +482,7 @@ export class AddressService {
 ```typescript
 // app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { MoneyModule } from './money/money.module';
 import { EmailModule } from './email/email.module';
 import { AddressModule } from './address/address.module';
@@ -614,7 +614,7 @@ export class OrderService {
 
 ## Key Points
 
-- **@vytches-ddd/di Integration**: Uses service locator pattern for enhanced
+- **@vytches/ddd-di Integration**: Uses service locator pattern for enhanced
   capabilities
 - **Enterprise Services**: Advanced validation, geocoding, currency conversion
 - **Service Composition**: Rich functionality through composed DI services

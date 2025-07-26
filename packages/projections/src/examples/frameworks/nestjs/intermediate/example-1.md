@@ -1,13 +1,13 @@
 # Advanced Projection Engine - NestJS DI Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + @vytches-ddd/di +
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + @vytches/ddd-di +
 NestJS **Complexity**: intermediate **Framework**: NestJS **Integration**:
 VytchesDDD DI integration **Dependencies**: @nestjs/common,
-@vytches-ddd/projections, @vytches-ddd/di, @vytches-ddd/events
+@vytches/ddd-projections, @vytches/ddd-di, @vytches/ddd-events
 
 ## Description
 
-Advanced NestJS service implementing projection engine with @vytches-ddd/di
+Advanced NestJS service implementing projection engine with @vytches/ddd-di
 integration, automatic service discovery, and enterprise-grade projection
 management. This example shows the bridge pattern between NestJS and VytchesDDD
 dependency injection systems.
@@ -23,7 +23,7 @@ advanced capabilities.
 
 ```typescript
 // projection-engine.domain-service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   ProjectionEngine,
   ProjectionBase,
@@ -32,8 +32,8 @@ import {
   CheckpointCapability,
   CircuitBreakerCapability,
   DeadLetterCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventBus } from '@vytches/ddd-events';
 import {
   ProjectionEngineConfig,
   ProjectionMetrics,
@@ -525,9 +525,9 @@ export class ProjectionEngineDomainService extends ProjectionEngine {
 ```typescript
 // projection-engine.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { ProjectionEngineDomainService } from './projection-engine.domain-service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 import { ServiceResponse } from '../types'; // From your application
 
 @Injectable()
@@ -588,7 +588,7 @@ export class ProjectionEngineService implements OnModuleInit, OnModuleDestroy {
 // projection-management.controller.ts
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { ProjectionEngineService } from './projection-engine.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Controller('api/projections')
 export class ProjectionManagementController {
@@ -625,7 +625,7 @@ export class ProjectionManagementController {
 ```typescript
 // projection-management.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { ProjectionEngineDomainService } from './projection-engine.domain-service';
 import { ProjectionEngineService } from './projection-engine.service';
 import { ProjectionManagementController } from './projection-management.controller';
@@ -660,7 +660,7 @@ export class ProjectionManagementModule implements OnModuleInit {
 // app.service.ts
 import { Injectable } from '@nestjs/common';
 import { ProjectionEngineService } from './projection-management/projection-engine.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class AppService {

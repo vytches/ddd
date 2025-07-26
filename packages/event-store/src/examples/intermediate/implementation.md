@@ -1,6 +1,6 @@
 # Intermediate Event Store Implementation
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 intermediate **Domain**: Infrastructure **Patterns**: advanced-implementation,
 enterprise-patterns, production-ready
 
@@ -16,8 +16,8 @@ enterprise-grade features for production environments.
 
 ```typescript
 // advanced-serialization.ts
-import { IEventSerializer } from '@vytches-ddd/event-store';
-import { DomainEvent } from '@vytches-ddd/events';
+import { IEventSerializer } from '@vytches/ddd-event-store';
+import { DomainEvent } from '@vytches/ddd-events';
 
 export class ProductionEventSerializer implements IEventSerializer {
   private readonly compressionThreshold = 1024; // 1KB
@@ -148,8 +148,8 @@ export class ProductionEventSerializer implements IEventSerializer {
 ```typescript
 // projection-system.ts
 import { EventVersioningManager } from './event-versioning-manager';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 export abstract class BaseProjection<T> {
   protected abstract readonly projectionName: string;
@@ -396,11 +396,11 @@ interface OrderSummary {
 
 ```typescript
 // enterprise-event-store.service.ts
-import { InMemoryEventStore } from '@vytches-ddd/event-store';
+import { InMemoryEventStore } from '@vytches/ddd-event-store';
 import { ProjectionEngine } from './projection-system';
 import { EventVersioningManager } from './event-versioning-manager';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 export class EnterpriseEventStoreService {
   private readonly eventStore: InMemoryEventStore;

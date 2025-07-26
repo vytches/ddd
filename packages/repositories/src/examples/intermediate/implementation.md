@@ -1,7 +1,7 @@
 # Intermediate Repository Implementation Patterns
 
 This document provides comprehensive guidance on implementing advanced
-repository patterns using the @vytches-ddd/repositories package, focusing on
+repository patterns using the @vytches/ddd-repositories package, focusing on
 enterprise-grade patterns and sophisticated data access scenarios.
 
 ## Advanced Unit of Work Implementation
@@ -16,8 +16,8 @@ import {
   UnitOfWork,
   IRepository,
   TransactionContext,
-} from '@vytches-ddd/repositories';
-import { EntityId, DomainEvent } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId, DomainEvent } from '@vytches/ddd-domain-primitives';
 
 export abstract class EnterpriseUnitOfWork extends UnitOfWork {
   protected repositories = new Map<string, IRepository<any>>();
@@ -246,7 +246,7 @@ import {
   BaseSpecification,
   CompositeSpecification,
   QueryOptions,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 
 export abstract class EnterpriseSpecification<T> extends BaseSpecification<T> {
   protected cacheKey?: string;

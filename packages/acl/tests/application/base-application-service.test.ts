@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result, safeRun } from '@vytches-ddd/utils';
-import { BusinessRuleValidator } from '@vytches-ddd/validation';
-import { ValidationError, ValidationErrors } from '@vytches-ddd/validation';
+import { Result, safeRun } from '@vytches/ddd-utils';
+import { BusinessRuleValidator } from '@vytches/ddd-validation';
+import { ValidationError, ValidationErrors } from '@vytches/ddd-validation';
 import { BaseApplicationService, ApplicationError, type IApplicationService } from '../../src';
 
 // Test request/response types

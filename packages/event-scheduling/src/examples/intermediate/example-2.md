@@ -1,6 +1,6 @@
 # Advanced Queue Management - Dead Letter Queues and Backpressure
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 intermediate **Domain**: Infrastructure **Patterns**: dead-letter-queue,
 backpressure-handling, advanced-queuing, error-recovery
 
@@ -23,10 +23,10 @@ to ensure no events are lost while maintaining system stability.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { JobStatus, SchedulePriority } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   DeadLetterQueueItem,
   SchedulingMetrics,

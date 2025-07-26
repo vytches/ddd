@@ -9,13 +9,13 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import type { IDomainEvent, IEventBus } from '@vytches-ddd/contracts';
-import type { IUnitOfWork } from '@vytches-ddd/core';
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
-import type { IAggregateRoot, IRepository } from '@vytches-ddd/core';
-import { LibUtils } from '@vytches-ddd/utils';
-import { safeRun } from '@vytches-ddd/utils';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
+import type { IUnitOfWork } from '@vytches/ddd-core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
+import type { IAggregateRoot, IRepository } from '@vytches/ddd-core';
+import { LibUtils } from '@vytches/ddd-utils';
+import { safeRun } from '@vytches/ddd-utils';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 import {
   DomainService,
   EventAwareDomainService,

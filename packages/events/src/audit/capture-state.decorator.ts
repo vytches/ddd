@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ISpecification } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
+import type { ISpecification } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import type { IAuditable } from './audible.interface';
 
 /**

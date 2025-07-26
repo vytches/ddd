@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IRepository, IActor } from '@vytches-ddd/core';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IRepository, IActor } from '@vytches/ddd-core';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IEventProcessor } from '../event-processor';
 import type { IAuditEvent, IAuditEventMetadata } from './audit-event.interface';

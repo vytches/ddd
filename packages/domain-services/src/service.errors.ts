@@ -1,6 +1,6 @@
-import { IDomainError, DomainErrorCode } from '@vytches-ddd/core';
+import { IDomainError, DomainErrorCode } from '@vytches/ddd-core';
 
-import type { DomainErrorOptions } from '@vytches-ddd/core';
+import type { DomainErrorOptions } from '@vytches/ddd-core';
 
 /**
  * @llm-summary ServiceDuplicateError class for service duplicate error operations

@@ -2,15 +2,15 @@
 
 **Focus**: AI-powered financial risk management with NestJS **Base Example**:
 [AI-Powered Global Financial Risk Management](../../advanced/example-2.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Advanced Service Implementation
 
 ```typescript
 // ai-risk-management.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   RiskManagementResult,
   GlobalRiskAssessment,
@@ -298,7 +298,7 @@ export class AIRiskManagementService {
 
 // ai-risk-management.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { AIRiskManagementService } from './ai-risk-management.service';
 
 @Module({

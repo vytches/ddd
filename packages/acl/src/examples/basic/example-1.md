@@ -1,11 +1,11 @@
 # Basic Anti-Corruption Layer Implementation
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Basic  
 **Domain**: Customer Management  
 **Patterns**: Anti-Corruption Layer, Data Translation  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-core
 
 ## Description
 
@@ -23,8 +23,8 @@ model from external system changes and provides a clean translation layer.
 
 ```typescript
 // customer-management.acl.ts
-import { AntiCorruptionLayer, IDataTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { AntiCorruptionLayer, IDataTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 import { Customer, ExternalCustomerData } from '../types'; // From your application
 
 // Data translator for customer conversion

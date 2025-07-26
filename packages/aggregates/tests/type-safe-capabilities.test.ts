@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 import { AggregateRoot } from '../src/aggregate-root';
 import { aggregateBuilder } from '../src/aggregate-root.builder';
 import { SnapshotCapability } from '../src/capabilities/snapshot-capability';

@@ -40,7 +40,7 @@ Every package README should include structured metadata at the top:
 
 ```markdown
 <!-- LLM-METADATA
-Package: @vytches-ddd/package-name
+Package: @vytches/ddd-package-name
 Category: Foundation|Patterns|Architecture|Integration|Infrastructure|Utility
 Purpose: Brief description of what the package does
 Dependencies: List of key dependencies
@@ -113,7 +113,7 @@ Every concept should be documented using this pattern:
 
 ```typescript
 // Complete, runnable example
-import { ExampleClass } from '@vytches-ddd/package-name';
+import { ExampleClass } from '@vytches/ddd-package-name';
 
 // Setup
 const instance = new ExampleClass();
@@ -161,9 +161,9 @@ Show how each package integrates with others:
 
 ```typescript
 // Pattern: Show imports first
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/events';
-import { CommandHandler } from '@vytches-ddd/cqrs';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-events';
+import { CommandHandler } from '@vytches/ddd-cqrs';
 
 // Pattern: Show the relationship
 class Order extends AggregateRoot {
@@ -198,10 +198,10 @@ All code examples should be complete and runnable:
 
 ```typescript
 // ✅ Good: Complete example with all necessary imports
-import { OrderAggregate, OrderItem } from '@vytches-ddd/aggregates';
-import { Money } from '@vytches-ddd/value-objects';
-import { EntityId } from '@vytches-ddd/core';
-import { Result } from '@vytches-ddd/utils';
+import { OrderAggregate, OrderItem } from '@vytches/ddd-aggregates';
+import { Money } from '@vytches/ddd-value-objects';
+import { EntityId } from '@vytches/ddd-core';
+import { Result } from '@vytches/ddd-utils';
 
 // Complete working example
 const order = OrderAggregate.create(EntityId.create());

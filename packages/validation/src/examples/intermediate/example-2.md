@@ -1,9 +1,9 @@
 # Advanced Data Quality Validation with Metrics
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**:
 Intermediate **Domain**: Data Management **Patterns**: Data Quality Assessment,
 Metrics Collection, Batch Validation, Quality Scoring **Dependencies**:
-@vytches-ddd/validation, @vytches-ddd/core, @vytches-ddd/utils
+@vytches/ddd-validation, @vytches/ddd-core, @vytches/ddd-utils
 
 ## Description
 
@@ -31,8 +31,8 @@ import {
   DataQualityReport,
   DataQualityIssue,
   BatchValidationResult,
-} from '@vytches-ddd/validation';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { Result } from '@vytches/ddd-utils';
 import { User, Product, Order } from './types'; // From your application
 
 // Data quality dimensions interface

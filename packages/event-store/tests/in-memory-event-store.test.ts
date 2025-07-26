@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import type { IStoredDomainEvent } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches/ddd-utils';
+import type { IStoredDomainEvent } from '@vytches/ddd-contracts';
 import {
   InMemoryEventStore,
   EventStoreConcurrencyError,

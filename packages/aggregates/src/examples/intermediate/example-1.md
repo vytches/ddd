@@ -1,9 +1,9 @@
 # Event Sourced Shopping Cart - Advanced State Reconstruction
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**:
 Intermediate **Domain**: E-commerce Event Sourcing **Patterns**: Event Sourcing,
 Aggregate Root, Snapshot Strategy, Temporal Queries **Dependencies**:
-@vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+@vytches/ddd-aggregates, @vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -23,9 +23,9 @@ enables complete shopping history reconstruction and advanced analytics.
 
 ```typescript
 // shopping-cart.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import { ShoppingCartData, CartItem } from './types'; // From your application
 
 // Domain Events for Event Sourcing

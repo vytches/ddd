@@ -1,11 +1,11 @@
 # NestJS Module Configuration - Beginner Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: beginner  
 **Domain**: Multi-Module Application  
 **Patterns**: Module Configuration, Shared Services, Module Initialization  
-**Dependencies**: @vytches-ddd/di, @nestjs/common
+**Dependencies**: @vytches/ddd-di, @nestjs/common
 
 ## Description
 
@@ -23,7 +23,7 @@ properly configure VytchesDDD services in a multi-module NestJS application.
 
 ```typescript
 // shared/shared-domain.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { AuditLogEntry } from '../types'; // Import from application
 
 /**
@@ -66,7 +66,7 @@ export class SharedDomainService {
 
 ```typescript
 // users/user-domain.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
 
 /**
@@ -118,7 +118,7 @@ export class UserDomainService {
 
 ```typescript
 // orders/order-domain.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { Order, CreateOrderData } from '../types'; // Import from application
 
 /**
@@ -187,7 +187,7 @@ export class OrderDomainService {
 ```typescript
 // shared/shared.module.ts
 import { Module, OnModuleInit, Global } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { SharedService } from './shared.service';
 
 /**
@@ -217,7 +217,7 @@ export class SharedModule implements OnModuleInit {
 ```typescript
 // shared/shared.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { SharedDomainService } from './shared-domain.service';
 import { AuditLogEntry } from '../types'; // Import from application
 
@@ -256,7 +256,7 @@ export class SharedService {
 ```typescript
 // users/user.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserDomainService } from './user-domain.service';
 import { SharedService } from '../shared/shared.service';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
@@ -383,7 +383,7 @@ export class UserModule {
 ```typescript
 // orders/order.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { OrderDomainService } from './order-domain.service';
 import { SharedService } from '../shared/shared.service';
 import { Order, CreateOrderData } from '../types'; // Import from application

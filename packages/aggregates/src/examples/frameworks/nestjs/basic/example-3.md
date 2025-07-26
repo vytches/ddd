@@ -2,15 +2,15 @@
 
 **Focus**: Product inventory management with stock tracking in NestJS **Base
 Example**: [Basic Product Inventory Aggregate](../../basic/example-3.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // product-inventory.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   ProductInventory,
   CreateProductData,
@@ -475,7 +475,7 @@ export class ProductInventoryService {
 
 // product-inventory.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { ProductInventoryService } from './product-inventory.service';
 
 @Module({

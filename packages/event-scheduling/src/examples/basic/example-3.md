@@ -1,6 +1,6 @@
 # Event Scheduling with Priority and Queuing - Basic Implementation
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 basic **Domain**: Scheduling **Patterns**: priority-queuing, job-prioritization,
 resource-management
 
@@ -23,8 +23,8 @@ attention while routine maintenance can be deferred.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { SchedulePriority, JobStatus } from '@vytches-ddd/contracts';
+} from '@vytches/ddd-event-scheduling';
+import { SchedulePriority, JobStatus } from '@vytches/ddd-contracts';
 import {
   CustomerIssueData,
   MaintenanceTaskData,

@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches-ddd/domain-primitives';
+import { BaseError } from '@vytches/ddd-domain-primitives';
 import type { ServiceToken } from './types';
 
 /**

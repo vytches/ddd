@@ -1,6 +1,6 @@
 # NestJS Enterprise Scheduling Platform - Distributed Scheduling and Monitoring
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Framework**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Framework**:
 NestJS **Complexity**: advanced **Integration**: Complete enterprise platform
 with distributed scheduling, monitoring, and observability
 
@@ -28,14 +28,14 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   EnterpriseSchedulingService,
   UltraHighPerformanceScheduler,
   HASchedulingService,
   GlobalCoordinationManager,
-} from '@vytches-ddd/event-scheduling';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Result } from '@vytches/ddd-utils';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   EnterprisePlatformConfig,
@@ -938,7 +938,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterprisePlatformService } from './enterprise-platform.service';
 import {
   ScheduleMissionCriticalEventDto,
@@ -1106,7 +1106,7 @@ export class EnterprisePlatformController {
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ModuleRef } from '@nestjs/core';
-import { VytchesDDD, NestJSContainerAdapter } from '@vytches-ddd/di';
+import { VytchesDDD, NestJSContainerAdapter } from '@vytches/ddd-di';
 import { EnterprisePlatformService } from './enterprise-platform.service';
 import { EnterprisePlatformController } from './enterprise-platform.controller';
 import {

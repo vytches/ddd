@@ -3,15 +3,15 @@
 **Focus**: Enterprise process orchestration with AI integration in NestJS **Base
 Example**:
 [Enterprise Process Orchestration Platform](../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Advanced Service Implementation
 
 ```typescript
 // enterprise-orchestrator.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   ProcessDefinition,
   GlobalProcessContext,
@@ -228,7 +228,7 @@ export class EnterpriseOrchestratorService {
 
 // enterprise-orchestrator.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { EnterpriseOrchestratorService } from './enterprise-orchestrator.service';
 
 @Module({

@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const diExampleConfig: PackageExampleConfig = {
   packageName: 'di',
@@ -9,7 +9,7 @@ export const diExampleConfig: PackageExampleConfig = {
   domain: 'Infrastructure',
   patterns: ['dependency-injection', 'service-locator', 'auto-discovery', 'context-isolation'],
 
-  dependencies: ['@vytches-ddd/utils', '@vytches-ddd/contracts'],
+  dependencies: ['@vytches/ddd-utils', '@vytches/ddd-contracts'],
 
   complexityLevels: {
     basic: {
@@ -52,7 +52,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Simple service registration and resolution patterns',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -63,7 +63,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Understanding and configuring service lifetimes',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -74,7 +74,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Using the global service locator pattern',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -85,7 +85,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Automatic service discovery with decorators',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -96,7 +96,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Bounded context isolation for DDD scenarios',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -107,7 +107,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Automatic registration of CQRS handlers',
-      dependencies: ['@vytches-ddd/di', '@vytches-ddd/cqrs'],
+      dependencies: ['@vytches/ddd-di', '@vytches/ddd-cqrs'],
       validation: { fileExists: true },
     },
     {
@@ -118,7 +118,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Advanced framework integration with bridge pattern',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -129,7 +129,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Building custom container implementations',
-      dependencies: ['@vytches-ddd/di'],
+      dependencies: ['@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -140,7 +140,7 @@ export const diExampleConfig: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Production-ready DI patterns with monitoring',
-      dependencies: ['@vytches-ddd/di', '@vytches-ddd/logging'],
+      dependencies: ['@vytches/ddd-di', '@vytches/ddd-logging'],
       validation: { fileExists: true },
     },
     {
@@ -152,7 +152,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'high',
       description: 'Basic NestJS integration with manual setup',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -164,7 +164,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'medium',
       description: 'Configuring NestJS modules with VytchesDDD',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -176,7 +176,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'high',
       description: 'Bridge pattern to avoid double instance risk',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -188,7 +188,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'medium',
       description: 'Custom provider factory for complex scenarios',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -200,7 +200,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'high',
       description: 'Multi-context architecture for large applications',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di'],
       validation: { fileExists: true },
     },
     {
@@ -212,7 +212,7 @@ export const diExampleConfig: PackageExampleConfig = {
       framework: 'nestjs',
       priority: 'medium',
       description: 'Production monitoring and diagnostics',
-      dependencies: ['@nestjs/core', '@vytches-ddd/di', '@vytches-ddd/logging'],
+      dependencies: ['@nestjs/core', '@vytches/ddd-di', '@vytches/ddd-logging'],
       validation: { fileExists: true },
     },
   ],

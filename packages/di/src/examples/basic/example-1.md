@@ -1,11 +1,11 @@
 # Basic Service Registration - Beginner Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: Service Registration, Decorator Pattern  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -25,7 +25,7 @@ management, leading to cleaner, more maintainable code.
 
 ```typescript
 // user.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { User, CreateUserData } from '../types'; // Import from application
 
 /**
@@ -80,7 +80,7 @@ export class UserService {
 
 ```typescript
 // app.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { UserService } from './user.service';
 import { CreateUserData } from '../types'; // Import from application
 

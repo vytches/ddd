@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import { ACLError, BaseACLAdapter, SimpleACLAdapter } from '../src';
 import type {
   IModelTranslator,

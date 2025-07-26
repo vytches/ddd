@@ -2,7 +2,7 @@
 
 **Focus**: Advanced event interface patterns with NestJS integration **Base
 Example**: [Event Interface Architecture](../../basic/event-interfaces.md)
-**Dependencies**: @nestjs/common, @nestjs/cqrs, @vytches-ddd/contracts
+**Dependencies**: @nestjs/common, @nestjs/cqrs, @vytches/ddd-contracts
 
 ## Description
 
@@ -19,7 +19,7 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import {
   IDomainEvent,
   IEventHandler as VytchesEventHandler,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 import {
   UserRegisteredEvent,
   UserProfileUpdatedEvent,
@@ -181,7 +181,7 @@ export class UserProfileEventHandler
 // domain-event.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { IEventBus, IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
+import { IEventBus, IDomainEvent, IEventHandler } from '@vytches/ddd-contracts';
 
 @Injectable()
 export class DomainEventService implements IEventBus {
@@ -294,7 +294,7 @@ export class DomainEventService implements IEventBus {
 // event-publisher.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { DomainEventService } from './domain-event.service';
-import { IDomainEvent, EntityId, IActor } from '@vytches-ddd/contracts';
+import { IDomainEvent, EntityId, IActor } from '@vytches/ddd-contracts';
 import {
   UserRegisteredEvent,
   UserProfileUpdatedEvent,
@@ -447,7 +447,7 @@ export class EventPublisherService {
 ```typescript
 // user-application.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { EntityId, IActor } from '@vytches-ddd/contracts';
+import { EntityId, IActor } from '@vytches/ddd-contracts';
 import { EventPublisherService } from './event-publisher.service';
 import { User, CreateUserData, UpdateUserData, UserRepository } from './types'; // From your app
 

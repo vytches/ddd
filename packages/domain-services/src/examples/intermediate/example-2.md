@@ -1,9 +1,9 @@
 # Domain Service with Policy Integration - Intermediate Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 intermediate **Domain**: order-management **Patterns**: domain-service,
-policy-enforcement, business-rules **Dependencies**: @vytches-ddd/core,
-@vytches-ddd/policies
+policy-enforcement, business-rules **Dependencies**: @vytches/ddd-core,
+@vytches/ddd-policies
 
 ## Description
 
@@ -22,13 +22,13 @@ integrity.
 
 ````typescript
 // order-validation.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
 import {
   PolicyBuilder,
   PolicyContext,
   PolicyRegistry,
-} from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-policies';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   Customer,
@@ -383,7 +383,7 @@ export class OrderValidationService extends BaseDomainService {
 
 ## Key Features
 
-- **Policy Integration**: Seamlessly integrates with @vytches-ddd/policies
+- **Policy Integration**: Seamlessly integrates with @vytches/ddd-policies
 - **Business Rules**: Enforces complex business rules through policies
 - **Dynamic Policies**: Creates policies based on runtime conditions
 - **Conditional Logic**: Uses when/then patterns for complex business logic

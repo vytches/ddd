@@ -1,6 +1,6 @@
 # Basic Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Framework**: NestJS **Focus**: Manual value object
 integration with standard NestJS patterns **Base Example**:
 [Money Value Object](../../../basic/example-1.md)
@@ -10,7 +10,7 @@ integration with standard NestJS patterns **Base Example**:
 ```typescript
 // money.service.ts
 import { Injectable } from '@nestjs/common';
-import { Money } from '@vytches-ddd/value-objects';
+import { Money } from '@vytches/ddd-value-objects';
 import { CreateMoneyDto, MoneyResponse, CurrencyConversionDto } from './types'; // From your application
 
 @Injectable()
@@ -190,7 +190,7 @@ export class MoneyModule {}
 ```typescript
 // email.service.ts
 import { Injectable } from '@nestjs/common';
-import { Email } from '@vytches-ddd/value-objects';
+import { Email } from '@vytches/ddd-value-objects';
 import { CreateEmailDto, EmailResponse } from './types'; // From your application
 
 @Injectable()
@@ -272,7 +272,7 @@ export class EmailService {
 ```typescript
 // address.service.ts
 import { Injectable } from '@nestjs/common';
-import { Address } from '@vytches-ddd/value-objects';
+import { Address } from '@vytches/ddd-value-objects';
 import { CreateAddressDto, AddressResponse } from './types'; // From your application
 
 @Injectable()

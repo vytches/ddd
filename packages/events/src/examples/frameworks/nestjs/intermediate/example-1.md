@@ -1,9 +1,9 @@
 # Event System - NestJS Intermediate Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: intermediate
 **Domain**: Integration **Patterns**: batch-processing, context-filtering,
 event-middleware, resilience **Dependencies**: @nestjs/common,
-@vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/resilience
+@vytches/ddd-events, @vytches/ddd-di, @vytches/ddd-resilience
 
 ## Description
 
@@ -23,9 +23,9 @@ system resilience during peak loads or service failures.
 
 ```typescript
 // batch-order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
 import { BatchOrderRequest, Order, ProcessingResult } from './types'; // From your app
 
 @DomainService({
@@ -142,8 +142,8 @@ export class BatchOrderService {
 }
 
 // context-aware-event.handler.ts
-import { DomainService } from '@vytches-ddd/di';
-import { UnifiedEventBus, EventHandler } from '@vytches-ddd/events';
+import { DomainService } from '@vytches/ddd-di';
+import { UnifiedEventBus, EventHandler } from '@vytches/ddd-events';
 import { OrderCreatedEvent, PaymentProcessedEvent } from './types'; // From your app
 
 @DomainService('contextEventHandler')
@@ -248,9 +248,9 @@ export class ContextAwareEventHandler {
 }
 
 // event-middleware.service.ts
-import { DomainService } from '@vytches-ddd/di';
-import { UnifiedEventBus, DomainEvent } from '@vytches-ddd/events';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService } from '@vytches/ddd-di';
+import { UnifiedEventBus, DomainEvent } from '@vytches/ddd-events';
+import { Logger } from '@vytches/ddd-logging';
 
 @DomainService('eventMiddleware')
 export class EventMiddlewareService {
@@ -352,7 +352,7 @@ export class EventMiddlewareService {
 
 // batch-order.controller.ts
 import { Controller, Post, Body, Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { BatchOrderService } from './batch-order.service';
 import { BatchOrderRequest } from './types'; // From your app
 
@@ -408,7 +408,7 @@ export class BatchOrderController {
 
 // order.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { BatchOrderController } from './batch-order.controller';
 
 @Module({

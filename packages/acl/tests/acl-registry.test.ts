@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import type { ImportOptions, IACLAdapter, ACLContextInfo, IEnhancedACLAdapter } from '../src';
 import { ACLRegistry, ContextACLRegistry } from '../src';
 

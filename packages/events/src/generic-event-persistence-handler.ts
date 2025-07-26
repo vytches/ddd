@@ -1,4 +1,4 @@
-import type { IDomainEvent, IEventPersistenceHandler } from '@vytches-ddd/contracts';
+import type { IDomainEvent, IEventPersistenceHandler } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary GenericEventPersistenceHandler class for generic event persistence handler operations

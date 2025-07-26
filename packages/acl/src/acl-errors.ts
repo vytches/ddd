@@ -1,4 +1,4 @@
-import { IDomainError } from '@vytches-ddd/core';
+import { IDomainError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary ACLError class for a c l error operations

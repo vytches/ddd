@@ -1,6 +1,6 @@
 # NestJS Enterprise Validation Orchestration - VytchesDDD DI
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise-scale validation orchestration with global coordination
@@ -18,14 +18,14 @@ and fault tolerance.
 ```typescript
 // enterprise-validation-orchestrator.service.ts
 import { Injectable } from '@nestjs/common';
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   EnterpriseValidationOrchestrator,
   AIEnhancedValidationSpecification,
   GlobalDataQualityMonitor,
   ValidationMetrics,
   GlobalValidationResult,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User, ValidationContext, EnterpriseValidationRequest } from './types'; // From your application
 
 // Enterprise domain service with VytchesDDD DI
@@ -487,7 +487,7 @@ export class EnterpriseValidationController {
 import { Module, OnModuleInit } from '@nestjs/common';
 import { EnterpriseValidationController } from './enterprise-validation.controller';
 import { EnterpriseValidationBridgeService } from './enterprise-validation-bridge.service';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Module({
   controllers: [EnterpriseValidationController],

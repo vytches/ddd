@@ -1,9 +1,9 @@
 # Event Replay Engine
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 intermediate **Domain**: Infrastructure **Patterns**: event-replay, recovery,
 historical-processing, system-restoration **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils
+@vytches/ddd-event-store, @vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -27,10 +27,10 @@ import {
   EventReplayEngine,
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 import { ReplayOptions, ReplayResult, ReplayError } from './types'; // From your app
 
 // ⭐ FOCUS: Advanced event replay with comprehensive error handling

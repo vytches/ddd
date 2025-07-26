@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { WorkflowEngine } from '../../../src/core/engines/workflow-engine';
 import type { WorkflowStep } from '../../../src/types';
 import { CLIError } from '../../../src/types';

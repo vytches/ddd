@@ -1,5 +1,5 @@
-import type { Constructor } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import type { Constructor } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import type { SagaMetadata } from '../interfaces';
 import { isSagaClass, getSagaMetadata, getSagaType } from '../decorators';
 import { SagaDiscoveryError } from '../errors';

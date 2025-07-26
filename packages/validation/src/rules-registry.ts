@@ -1,4 +1,4 @@
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 
 import type { BusinessRuleValidator } from './business-rules/business-rule-validator';
 

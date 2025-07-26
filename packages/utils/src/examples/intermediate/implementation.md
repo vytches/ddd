@@ -1,8 +1,8 @@
 # Intermediate Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: intermediate
 **Domain**: Infrastructure **Patterns**: Advanced implementation strategies,
-architectural patterns, system integration **Dependencies**: @vytches-ddd/utils
+architectural patterns, system integration **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ enterprise scale.
 
 ```typescript
 // intermediate-implementation.ts
-import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
+import { Result, safeRun, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

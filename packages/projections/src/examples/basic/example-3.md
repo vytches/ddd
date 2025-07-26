@@ -1,9 +1,9 @@
 # Projection Engine Setup
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**: basic
 **Domain**: Event Sourcing **Patterns**: Projection engine, orchestration,
-multi-projection management **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events
+multi-projection management **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events
 
 ## Description
 
@@ -35,8 +35,8 @@ import {
   ProjectionEngine,
   ProjectionRegistry,
   ProjectionProcessor,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventBus } from '@vytches/ddd-events';
 import {
   UserData,
   OrderData,

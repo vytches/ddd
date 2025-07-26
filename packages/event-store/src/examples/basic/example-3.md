@@ -1,9 +1,9 @@
 # Event Stream Operations
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: stream-management, event-reading,
-pagination, filtering **Dependencies**: @vytches-ddd/event-store,
-@vytches-ddd/events
+pagination, filtering **Dependencies**: @vytches/ddd-event-store,
+@vytches/ddd-events
 
 ## Description
 
@@ -25,9 +25,9 @@ performance and scalability in event-driven systems.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { EventQuery, QueryResult, StreamInfo } from './types'; // From your app
 
 // ⭐ FOCUS: Advanced event stream manager

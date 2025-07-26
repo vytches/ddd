@@ -1,10 +1,10 @@
-import { LibUtils } from '@vytches-ddd/utils';
-import { InvalidParameterError, MissingValueError } from '@vytches-ddd/domain-primitives';
+import { LibUtils } from '@vytches/ddd-utils';
+import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
 import {
   EntityId as BaseEntityId,
   type IEntityIdFactory,
   type IdType,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary EntityId class for entity id operations

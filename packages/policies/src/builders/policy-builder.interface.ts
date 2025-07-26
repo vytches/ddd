@@ -1,4 +1,4 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 

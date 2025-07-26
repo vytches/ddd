@@ -1,9 +1,9 @@
 # Composite Validation with Policy Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**:
 Intermediate **Domain**: Financial Services **Patterns**: Composite Validation,
 Policy Integration, Async Specifications, Conditional Logic **Dependencies**:
-@vytches-ddd/validation, @vytches-ddd/policies, @vytches-ddd/core
+@vytches/ddd-validation, @vytches/ddd-policies, @vytches/ddd-core
 
 ## Description
 
@@ -30,8 +30,8 @@ import {
   ValidationResult,
   ValidationPolicy,
   PolicyRule,
-} from '@vytches-ddd/validation';
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+} from '@vytches/ddd-validation';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
 import { LoanApplication, CreditCheckResult } from './types'; // From your application
 
 // Async credit score specification

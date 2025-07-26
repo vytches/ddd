@@ -1,4 +1,4 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
 import {
   BaseBusinessPolicy,
@@ -17,7 +17,7 @@ import { PolicyGroup } from './policy-group';
 import { ConditionalPolicyBuilder } from './conditional-policy-builder';
 import type { PolicyViolationSeverity, PolicyViolation } from '../core/models/policy-violation';
 import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 
 /**
  * @llm-summary PolicyBuilder class for policy builder operations

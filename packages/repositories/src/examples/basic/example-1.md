@@ -1,14 +1,14 @@
 # Generic Repository Pattern - Basic CRUD Operations
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 beginner **Domain**: user-management **Patterns**: repository-pattern,
-crud-operations, entity-management **Dependencies**: @vytches-ddd/repositories,
-@vytches-ddd/domain-primitives
+crud-operations, entity-management **Dependencies**: @vytches/ddd-repositories,
+@vytches/ddd-domain-primitives
 
 ## Description
 
 Basic repository implementation demonstrating fundamental CRUD operations with
-the @vytches-ddd/repositories package. Shows entity management, simple queries,
+the @vytches/ddd-repositories package. Shows entity management, simple queries,
 and basic persistence operations.
 
 ## Business Context
@@ -21,8 +21,8 @@ between domain and data access concerns.
 
 ```typescript
 // user-repository.ts
-import { BaseRepository } from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { BaseRepository } from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import { User, CreateUserData, UpdateUserData, QueryOptions } from './types'; // From your application
 
 // ✅ FOCUS: Basic repository extending library BaseRepository
@@ -165,7 +165,7 @@ async function demonstrateBasicCrud() {
 
 ## Key Features
 
-- Basic CRUD operations using @vytches-ddd/repositories BaseRepository
+- Basic CRUD operations using @vytches/ddd-repositories BaseRepository
 - Entity ID management with EntityId from domain-primitives
 - Simple query operations with where clauses and ordering
 - Count and existence check operations

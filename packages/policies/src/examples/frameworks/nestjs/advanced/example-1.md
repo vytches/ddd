@@ -1,14 +1,14 @@
 # Enterprise Policy Orchestration in NestJS
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
 **Patterns**: enterprise-orchestration, distributed-coordination,
 advanced-governance  
-**Dependencies**: @nestjs/common, @vytches-ddd/policies, @vytches-ddd/di,
-@vytches-ddd/events, @vytches-ddd/messaging
+**Dependencies**: @nestjs/common, @vytches/ddd-policies, @vytches/ddd-di,
+@vytches/ddd-events, @vytches/ddd-messaging
 
 ## Description
 
@@ -28,16 +28,16 @@ for maximum scalability and governance.
 ```typescript
 // enterprise-policy-orchestrator.service.ts - Main Orchestration Service
 import { Injectable } from '@nestjs/common';
-import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches/ddd-di';
 import {
   EnterprisePolicyOrchestrationPlatform,
   PolicyOrchestrator,
   PolicyGovernanceWorkflow,
   PolicyAnalyticsEngine,
   PolicyResult,
-} from '@vytches-ddd/policies';
-import { EventBus, DomainEvent } from '@vytches-ddd/events';
-import { OutboxPattern } from '@vytches-ddd/messaging';
+} from '@vytches/ddd-policies';
+import { EventBus, DomainEvent } from '@vytches/ddd-events';
+import { OutboxPattern } from '@vytches/ddd-messaging';
 import {
   PolicyRequest,
   OrchestrationContext,

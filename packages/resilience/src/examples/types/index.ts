@@ -1,6 +1,6 @@
 /**
  * @fileoverview Application-specific types for resilience package examples
- * @package @vytches-ddd/resilience
+ * @package @vytches/ddd-resilience
  * @version 1.0.0
  */
 

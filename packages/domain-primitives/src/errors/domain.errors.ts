@@ -1,4 +1,4 @@
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 import type { ErrorOptions } from './base.error';
 import { BaseError } from './base.error';

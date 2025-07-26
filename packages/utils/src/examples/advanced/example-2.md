@@ -1,8 +1,8 @@
 # Railway-Oriented Programming
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: advanced
 **Domain**: Infrastructure **Patterns**: Railway programming, functional
-pipelines, composable operations **Dependencies**: @vytches-ddd/utils
+pipelines, composable operations **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -30,7 +30,7 @@ tracking.
 
 ```typescript
 // railway-programming.ts
-import { Result, LibUtils } from '@vytches-ddd/utils';
+import { Result, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

@@ -25,7 +25,7 @@ routing. The old separate bus implementations have been removed.
 **Core Concept**:
 
 ```typescript
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 
 // Create a unified event bus
 const eventBus = new UnifiedEventBus();
@@ -505,7 +505,7 @@ UnifiedEventBus is the new consolidated event bus that handles domain,
 integration, and audit events in a single implementation with advanced features:
 
 ```typescript
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 
 const eventBus = new UnifiedEventBus({
   enableLogging: true,

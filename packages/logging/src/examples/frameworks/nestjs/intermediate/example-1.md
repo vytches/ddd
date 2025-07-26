@@ -1,9 +1,9 @@
 # NestJS Advanced DI Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/di + NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging + @vytches/ddd-di + NestJS
 **Complexity**: intermediate **Framework**: NestJS **Integration**: VytchesDDD
 DI integration with bridge pattern **Dependencies**: @nestjs/common,
-@vytches-ddd/logging, @vytches-ddd/di
+@vytches/ddd-logging, @vytches/ddd-di
 
 ## Description
 
@@ -24,12 +24,12 @@ maintaining NestJS framework benefits.
 
 ```typescript
 // logging.domain-service.ts - VytchesDDD domain service
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   Logger,
   LoggerConfiguration,
   CQRSLoggingOptions,
-} from '@vytches-ddd/logging';
+} from '@vytches/ddd-logging';
 import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 
 @DomainService({
@@ -604,9 +604,9 @@ export class EnterpriseLoggingDomainService
 
 // logging-bridge.service.ts - NestJS Bridge Service
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseLoggingDomainService } from './logging.domain-service';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 @Injectable()
 export class LoggingBridgeService implements OnModuleInit {
@@ -679,7 +679,7 @@ export class LoggingBridgeService implements OnModuleInit {
 // Example enterprise service using the bridge
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { LoggingBridgeService } from '../logging/logging-bridge.service';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 @Injectable()
 export class EnterpriseUserService implements OnModuleInit {
@@ -810,7 +810,7 @@ export class EnterpriseUserService implements OnModuleInit {
 
 // enterprise-logging.module.ts - Module configuration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { LoggingBridgeService } from './logging-bridge.service';
 import { EnterpriseUserService } from '../user/enterprise-user.service';
 

@@ -1,9 +1,9 @@
 # Cross-Package Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**: Advanced
 **Domain**: Foundation **Patterns**: cross-package-integration,
 enterprise-architecture, domain-boundaries **Dependencies**:
-@vytches-ddd/contracts
+@vytches/ddd-contracts
 
 ## Description
 
@@ -32,7 +32,7 @@ import {
   IActor,
   IEventBus,
   IEventHandler,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Cross-domain entity contracts
 export interface DomainEntity {

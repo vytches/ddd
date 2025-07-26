@@ -1,11 +1,11 @@
 # Custom Container Implementation - Advanced Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: advanced  
 **Domain**: Custom Infrastructure  
 **Patterns**: Custom Container, Plugin Architecture, Extensibility  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -29,7 +29,7 @@ import {
   IContainer,
   ServiceRegistration,
   ServiceLifetime,
-} from '@vytches-ddd/di';
+} from '@vytches/ddd-di';
 import { User } from '../types'; // Import from application
 
 /**
@@ -511,7 +511,7 @@ export class CachingPlugin implements IContainerPlugin {
 
 ```typescript
 // services/tenant-user.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { User, CreateUserData } from '../types'; // Import from application
 
 /**
@@ -570,7 +570,7 @@ import { LoggingPlugin } from './plugins/logging-plugin';
 import { SecurityPlugin } from './plugins/security-plugin';
 import { CachingPlugin } from './plugins/caching-plugin';
 import { TenantUserService } from './services/tenant-user.service';
-import { VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, ServiceLifetime } from '@vytches/ddd-di';
 import { CreateUserData } from '../types'; // Import from application
 
 /**

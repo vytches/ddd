@@ -1,5 +1,5 @@
 {
-  "name": "@vytches-ddd/utils",
+  "name": "@vytches/ddd-utils",
   "version": "0.3.2",
   "description": "Common utilities and helper functions",
   "type": "module",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/utils"
   },
   "scripts": {

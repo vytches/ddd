@@ -1,4 +1,4 @@
-// import { Logger, type ILogger } from '@vytches-ddd/logging';
+// import { Logger, type ILogger } from '@vytches/ddd-logging';
 
 // Temporary mock logger for testing
 interface ILogger {
@@ -35,9 +35,9 @@ import type {
   IJobQueryResult,
   ISchedulerConfig,
   ISchedulerLifecycle,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
-import { JobStatus } from '@vytches-ddd/contracts';
+import { JobStatus } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary BaseSchedulerAdapter class for base scheduler adapter operations

@@ -1,17 +1,17 @@
 # Manual Domain Service Setup - NestJS Basic
 
-**Focus**: Basic @vytches-ddd/domain-services usage in NestJS with manual
+**Focus**: Basic @vytches/ddd-domain-services usage in NestJS with manual
 instantiation **Base Example**:
 [Basic Domain Service](../../../basic/example-1.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/core
+@nestjs/common, @vytches/ddd-core
 
 ## Service Implementation
 
 ```typescript
 // user-management.service.ts
 import { Injectable } from '@nestjs/common';
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { Result } from '@vytches/ddd-utils';
 import { User, CreateUserCommand, UserCreatedEvent } from '../types';
 
 @Injectable()
@@ -143,7 +143,7 @@ export class UserModule {}
 - **Manual Setup**: Simple manual instantiation of domain service
 - **Standard NestJS DI**: Uses standard NestJS dependency injection
 - **Direct Library Usage**: Extends BaseDomainService from
-  @vytches-ddd/domain-services
+  @vytches/ddd-domain-services
 - **Simple Integration**: Minimal configuration required
 - **Framework Pattern**: Follows standard NestJS service patterns
 

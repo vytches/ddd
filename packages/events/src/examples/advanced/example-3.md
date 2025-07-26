@@ -1,10 +1,10 @@
 # Enterprise Event Mesh Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: advanced
 **Domain**: Architecture **Patterns**: event-mesh, distributed-events,
 cross-service-communication, event-routing **Dependencies**:
-@vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/logging,
-@vytches-ddd/messaging
+@vytches/ddd-events, @vytches/ddd-resilience, @vytches/ddd-logging,
+@vytches/ddd-messaging
 
 ## Description
 
@@ -29,11 +29,11 @@ import {
   DomainEvent,
   UnifiedEventBus,
   IEventHandler,
-} from '@vytches-ddd/events';
-import { EntityId } from '@vytches-ddd/value-objects';
-import { Result, AsyncResult } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-value-objects';
+import { Result, AsyncResult } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
 
 // Cross-service domain events
 export class CustomerCreatedEvent extends DomainEvent {

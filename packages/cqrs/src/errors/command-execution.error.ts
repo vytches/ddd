@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches-ddd/core';
+import { BaseError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary CommandExecutionError class for command execution error operations

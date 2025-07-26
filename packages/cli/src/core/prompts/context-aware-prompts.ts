@@ -583,7 +583,7 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
     if (name.includes('typeorm') || name.includes('prisma') || name.includes('mongoose')) {
       return 'database';
     }
-    if (name.includes('@vytches-ddd')) {
+    if (name.includes('@vytches/ddd')) {
       return 'ddd';
     }
     if (name.includes('lodash') || name.includes('uuid') || name.includes('moment')) {

@@ -1,7 +1,7 @@
 # CQRS Package - Basic Use Cases
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: beginner  
 **Domain**: Multiple  
 **Patterns**: command-query-responsibility-segregation, mediator-pattern,
@@ -239,13 +239,13 @@ Tenant Queries:    GetTenantDataQuery → TenantCache → IsolatedResults
 
 ## Integration with Other Packages
 
-- **@vytches-ddd/events**: Commands can trigger domain events automatically
-- **@vytches-ddd/validation**: Command validation through middleware pipeline
-- **@vytches-ddd/logging**: Comprehensive operation logging with correlation
+- **@vytches/ddd-events**: Commands can trigger domain events automatically
+- **@vytches/ddd-validation**: Command validation through middleware pipeline
+- **@vytches/ddd-logging**: Comprehensive operation logging with correlation
   tracking
-- **@vytches-ddd/di**: Automatic handler discovery and registration
-- **@vytches-ddd/caching**: Query result caching for performance optimization
-- **@vytches-ddd/resilience**: Circuit breaker and retry patterns for external
+- **@vytches/ddd-di**: Automatic handler discovery and registration
+- **@vytches/ddd-caching**: Query result caching for performance optimization
+- **@vytches/ddd-resilience**: Circuit breaker and retry patterns for external
   dependencies
 
 ## Performance Considerations

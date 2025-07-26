@@ -1,9 +1,9 @@
 # Multi-Tenant Projections
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 intermediate **Domain**: Event Sourcing **Patterns**: Multi-tenancy, tenant
-isolation, shared resources **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events, @vytches-ddd/acl
+isolation, shared resources **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events, @vytches/ddd-acl
 
 ## Description
 
@@ -36,9 +36,9 @@ import {
   TenantIsolationCapability,
   TenantConfigurationCapability,
   ProjectionRegistry,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
-import { TenantContextACL } from '@vytches-ddd/acl';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
+import { TenantContextACL } from '@vytches/ddd-acl';
 import {
   TenantContext,
   TenantConfiguration,

@@ -68,7 +68,7 @@ following these principles:
 
 ```html
 <!-- LLM-METADATA
-Package: @vytches-ddd/package-name
+Package: @vytches/ddd-package-name
 Category: Foundation|Patterns|Architecture|Integration|Infrastructure|Utility
 Purpose: Brief description of package purpose
 Dependencies: List of key dependencies
@@ -115,8 +115,8 @@ Integration Points: Related packages and frameworks
 - ✅ Main project README with comprehensive overview
 - ✅ Package documentation template creation
 - ✅ LLM-friendly documentation guidelines
-- ✅ Example implementations for key packages (@vytches-ddd/events,
-  @vytches-ddd/aggregates, @vytches-ddd/di)
+- ✅ Example implementations for key packages (@vytches/ddd-events,
+  @vytches/ddd-aggregates, @vytches/ddd-di)
 
 ### Phase 2: Package Documentation (In Progress)
 

@@ -2,15 +2,15 @@
 
 **Focus**: Simple domain service integration with NestJS **Base Example**:
 [Domain Service with Repository](../../../basic/example-2.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/core
+@nestjs/common, @vytches/ddd-core
 
 ## Service Implementation
 
 ```typescript
 // order-processing.service.ts
 import { Injectable } from '@nestjs/common';
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   CreateOrderCommand,

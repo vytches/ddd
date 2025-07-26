@@ -1,7 +1,7 @@
 // Intermediate ACL Implementation with Multi-Provider Support import {
-BaseModelTranslator, EnhancedACLAdapter } from '@vytches-ddd/acl'; import {
-DomainService, ServiceLifetime } from '@vytches-ddd/di'; import { Result } from
-'@vytches-ddd/utils'; import { Logger } from '@vytches-ddd/logging'; import {
+BaseModelTranslator, EnhancedACLAdapter } from '@vytches/ddd-acl'; import {
+DomainService, ServiceLifetime } from '@vytches/ddd-di'; import { Result } from
+'@vytches/ddd-utils'; import { Logger } from '@vytches/ddd-logging'; import {
 User, ExternalUserData, CreateUserData, UpdateUserData, Provider, UserSyncResult
 } from '../types';
 

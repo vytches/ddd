@@ -11,8 +11,8 @@ import type {
   Capability,
   CapabilityConstructor,
   EntityId,
-} from '@vytches-ddd/contracts';
-import { createDomainEvent, CapabilityRegistry } from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
+import { createDomainEvent, CapabilityRegistry } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary AggregateRoot class for aggregate root operations

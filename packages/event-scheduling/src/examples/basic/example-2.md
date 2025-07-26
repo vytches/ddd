@@ -1,6 +1,6 @@
 # Recurring Events and Cron Scheduling - Basic Implementation
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 basic **Domain**: Scheduling **Patterns**: recurring-events, cron-scheduling,
 periodic-tasks
 
@@ -22,8 +22,8 @@ flexible timing patterns.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { JobStatus } from '@vytches-ddd/contracts';
+} from '@vytches/ddd-event-scheduling';
+import { JobStatus } from '@vytches/ddd-contracts';
 import { ReportData, BackupData, BillingData } from './types'; // From your app
 
 // ⭐ FOCUS: Recurring event implementation

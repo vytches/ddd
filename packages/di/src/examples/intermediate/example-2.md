@@ -1,11 +1,11 @@
 # Context Isolation - Intermediate Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: intermediate  
 **Domain**: Multi-Tenant E-commerce  
 **Patterns**: Context Isolation, Bounded Context, Multi-Tenancy  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -25,7 +25,7 @@ context maintains its own configuration and state.
 
 ```typescript
 // order-management/order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Order, CreateOrderData } from '../types'; // Import from application
 
 /**
@@ -97,7 +97,7 @@ export class OrderManagementOrderService {
 
 ```typescript
 // billing/order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Order } from '../types'; // Import from application
 
 /**
@@ -156,7 +156,7 @@ export class BillingOrderService {
 
 ```typescript
 // payment/payment.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Payment, ProcessPaymentData } from '../types'; // Import from application
 
 /**
@@ -218,7 +218,7 @@ export class PaymentProcessingService {
 
 ```typescript
 // shared/audit.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { AuditLogEntry } from '../types'; // Import from application
 
 /**
@@ -273,7 +273,7 @@ export class SharedAuditService {
 
 ```typescript
 // context-configuration.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 /**
  * Context isolation configuration
@@ -321,7 +321,7 @@ export class ContextConfiguration {
 
 ```typescript
 // app.ts
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { ContextConfiguration } from './context-configuration';
 import { OrderManagementOrderService } from './order-management/order.service';
 import { BillingOrderService } from './billing/order.service';

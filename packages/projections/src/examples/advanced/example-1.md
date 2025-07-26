@@ -1,10 +1,10 @@
 # Distributed Event Projections
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 advanced **Domain**: Event Sourcing **Patterns**: Distributed systems, consensus
 algorithms, coordination, global orchestration **Dependencies**:
-@vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/resilience,
-@vytches-ddd/messaging
+@vytches/ddd-projections, @vytches/ddd-events, @vytches/ddd-resilience,
+@vytches/ddd-messaging
 
 ## Description
 
@@ -41,10 +41,10 @@ import {
   RegionalCoordinator,
   ProjectionReplicationManager,
   GlobalStateManager,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventStore } from '@vytches-ddd/events';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { MessageBus, OutboxPattern } from '@vytches-ddd/messaging';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventStore } from '@vytches/ddd-events';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { MessageBus, OutboxPattern } from '@vytches/ddd-messaging';
 import {
   DistributedProjectionConfig,
   RegionConfig,

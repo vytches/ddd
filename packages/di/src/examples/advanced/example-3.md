@@ -1,11 +1,11 @@
 # Enterprise Production Patterns - Expert Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: expert  
 **Domain**: Enterprise Production Environment  
 **Patterns**: Production Patterns, Monitoring, Performance, Resilience  
-**Dependencies**: @vytches-ddd/di, @vytches-ddd/resilience, @vytches-ddd/logging
+**Dependencies**: @vytches/ddd-di, @vytches/ddd-resilience, @vytches/ddd-logging
 
 ## Description
 
@@ -25,7 +25,7 @@ VytchesDDD's DI system with production-ready features.
 
 ```typescript
 // production/health-check.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { ServiceMetrics } from '../types'; // Import from application
 
 /**
@@ -154,8 +154,8 @@ interface HealthStatus {
 
 ```typescript
 // production/circuit-breaker.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { CircuitBreaker } from '@vytches-ddd/resilience';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { CircuitBreaker } from '@vytches/ddd-resilience';
 
 /**
  * Circuit breaker service for production resilience
@@ -233,8 +233,8 @@ export class CircuitBreakerService {
 
 ```typescript
 // production/monitoring.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * Production monitoring service
@@ -369,7 +369,7 @@ interface AlertAction {
 
 ```typescript
 // production/graceful-degradation.service.ts
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { MonitoringService } from './monitoring.service';
 import { User, CreateUserData } from '../types'; // Import from application
@@ -601,7 +601,7 @@ interface BulkResult<T> {
 
 ```typescript
 // production/production-configuration.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { HealthCheckService } from './health-check.service';
 import { MonitoringService } from './monitoring.service';
 import { CircuitBreakerService } from './circuit-breaker.service';
@@ -756,7 +756,7 @@ import { ProductionConfiguration } from './production/production-configuration';
 import { UserServiceWithDegradation } from './production/graceful-degradation.service';
 import { HealthCheckService } from './production/health-check.service';
 import { MonitoringService } from './production/monitoring.service';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CreateUserData } from '../types'; // Import from application
 
 /**

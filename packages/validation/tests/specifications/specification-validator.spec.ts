@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import type { ISpecification } from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+import type { ISpecification } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 
 import { Specification, SpecificationValidator } from '../../src';
 

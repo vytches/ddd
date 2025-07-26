@@ -68,7 +68,7 @@ async function processCustomerOrder(customerId: string, cartItems: CartItem[]) {
 
 ```typescript
 // Listen for domain events published by the service
-import { EventBus } from '@vytches-ddd/events';
+import { EventBus } from '@vytches/ddd-events';
 
 const eventBus = new EventBus();
 

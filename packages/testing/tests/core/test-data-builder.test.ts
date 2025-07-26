@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { TestDataBuilder, EntityIdBuilder, UserBuilder, DomainEventBuilder } from '../../src';
 
 describe('TestDataBuilder', () => {

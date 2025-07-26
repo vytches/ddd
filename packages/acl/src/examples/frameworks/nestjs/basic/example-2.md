@@ -1,7 +1,7 @@
 # NestJS Order Processing ACL - Manual Setup
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Order processing with external payment and inventory systems
@@ -23,8 +23,8 @@ from external system variations.
 ```typescript
 // order-processing-acl.service.ts - Order processing ACL
 import { Injectable } from '@nestjs/common';
-import { AntiCorruptionLayer, IDataTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { AntiCorruptionLayer, IDataTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   ThirdPartyOrderData,

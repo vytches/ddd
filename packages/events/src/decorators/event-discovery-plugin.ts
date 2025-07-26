@@ -5,7 +5,7 @@
  * that are decorated with the @EventHandler decorator and have DI integration enabled.
  */
 
-// import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches-ddd/di';
+// import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches/ddd-di';
 // Temporarily mocked for testing
 interface IHandlerDiscoveryPlugin {
   readonly name: string;

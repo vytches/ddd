@@ -1,9 +1,9 @@
 # High-Performance Repository - Extreme Throughput Optimization
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 advanced **Domain**: high-frequency-trading **Patterns**:
 high-performance-optimization, memory-pooling, batch-processing, async-pipelines
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/performance
+**Dependencies**: @vytches/ddd-repositories, @vytches/ddd-performance
 
 ## Description
 
@@ -26,8 +26,8 @@ import {
   MemoryPool,
   BatchProcessor,
   AsyncPipeline,
-} from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   MarketData,
   TradingOrder,

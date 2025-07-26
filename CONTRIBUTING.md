@@ -29,7 +29,7 @@ We welcome contributions in many forms:
 # 1. Fork the repository on GitHub
 # 2. Clone your fork
 git clone git@github.com:YOUR_USERNAME/vytches-ddd.git
-cd vytches-ddd
+cd ddd
 
 # 3. Add upstream remote
 git remote add upstream git@github.com:vytches/vytches-ddd.git
@@ -139,7 +139,7 @@ export class OrderAggregate extends AggregateRoot {
 
 - **Coverage**: Minimum 80% code coverage for new code
 - **Test Types**: Unit tests for all public APIs
-- **Error Testing**: Use `safeRun` from `@vytches-ddd/utils` for error scenarios
+- **Error Testing**: Use `safeRun` from `@vytches/ddd-utils` for error scenarios
 - **File Location**: All tests in `tests/` directory (NOT in `src/`)
 
 ### Test Naming Convention
@@ -159,9 +159,9 @@ packages/core/tests/user-service.spec.ts  # Wrong extension
 ```typescript
 // user-service.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { UserService } from '../src/user-service';
-import { ValidationError } from '@vytches-ddd/domain-primitives';
+import { ValidationError } from '@vytches/ddd-domain-primitives';
 
 describe('UserService', () => {
   let service: UserService;
@@ -361,7 +361,7 @@ Brief description of changes
 
 When creating new packages:
 
-1. **Follow naming convention**: `@vytches-ddd/package-name`
+1. **Follow naming convention**: `@vytches/ddd-package-name`
 2. **Use package template**: Copy from existing package structure
 3. **Update workspace**: Add to root `package.json` and `nx.json`
 4. **Create comprehensive README**: Follow established patterns

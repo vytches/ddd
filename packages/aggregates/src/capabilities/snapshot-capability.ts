@@ -1,5 +1,5 @@
-import { Capability } from '@vytches-ddd/contracts';
-import type { ISnapshotCapability, IAggregateSnapshot } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches/ddd-contracts';
+import type { ISnapshotCapability, IAggregateSnapshot } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 

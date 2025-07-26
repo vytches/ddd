@@ -1,11 +1,11 @@
 # Auto-Discovery System - Intermediate Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: intermediate  
 **Domain**: E-commerce Platform  
 **Patterns**: Auto-Discovery, Enhanced Decorators, Plugin System  
-**Dependencies**: @vytches-ddd/di
+**Dependencies**: @vytches/ddd-di
 
 ## Description
 
@@ -25,7 +25,7 @@ reducing the risk of missing registrations during deployments.
 
 ```typescript
 // product.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { User, Product } from '../types'; // Import from application
 
 /**
@@ -79,7 +79,7 @@ export class ProductService {
 
 ```typescript
 // inventory.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 /**
  * Inventory service with auto-discovery
@@ -132,7 +132,7 @@ export class InventoryService {
 
 ```typescript
 // audit.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { AuditLogEntry } from '../types'; // Import from application
 
 /**
@@ -184,7 +184,7 @@ export class AuditService {
 
 ```typescript
 // cache.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { CacheConfig } from '../types'; // Import from application
 
 /**
@@ -244,7 +244,7 @@ export class CacheService {
 
 ```typescript
 // discovery-configuration.ts
-import { VytchesDDD, SimpleContainer, DiscoveryOptions } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer, DiscoveryOptions } from '@vytches/ddd-di';
 
 /**
  * Auto-discovery configuration
@@ -294,7 +294,7 @@ export class DiscoveryConfiguration {
 
 ```typescript
 // app.ts
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { DiscoveryConfiguration } from './discovery-configuration';
 import { ProductService } from './product.service';
 import { InventoryService } from './inventory.service';

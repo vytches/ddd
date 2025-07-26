@@ -1,7 +1,7 @@
 # Intermediate NestJS Use Cases
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -9,7 +9,7 @@
 
 ## Description
 
-Enterprise use cases demonstrating intermediate @vytches-ddd/policies
+Enterprise use cases demonstrating intermediate @vytches/ddd-policies
 integration with NestJS for complex business scenarios including financial
 services, SaaS platforms, and e-commerce systems requiring advanced policy
 management.
@@ -618,6 +618,6 @@ export class DynamicPricingService {
 - **Revenue Optimization**: 15% increase through dynamic pricing
 - **System Reliability**: 99.9% pricing service availability
 
-These intermediate use cases demonstrate how advanced @vytches-ddd/policies
+These intermediate use cases demonstrate how advanced @vytches/ddd-policies
 integration with NestJS enables sophisticated business scenarios while
 maintaining high performance, reliability, and operational excellence.

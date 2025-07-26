@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import 'reflect-metadata';
-import type { IDependencyContainer, ServiceToken } from '@vytches-ddd/di';
+import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import { IQueryBus } from '../abstracts';
 import type { IQuery, IQueryHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';

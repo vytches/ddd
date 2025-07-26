@@ -234,7 +234,7 @@ export class CommandSuggester {
         !analysis.dependencies.some(d => d.name.includes('event')),
       suggestions: [
         {
-          command: 'pnpm add @vytches-ddd/events',
+          command: 'pnpm add @vytches/ddd-events',
           description: 'Add event bus for domain events',
           reason: 'Domain events found but no event bus implementation',
           priority: 'medium',
@@ -304,7 +304,7 @@ export class CommandSuggester {
     if (analysis.patterns.some(p => p.name === 'Event Sourcing')) {
       if (!analysis.dependencies.some(d => d.name.includes('event-store'))) {
         suggestions.push({
-          command: 'pnpm add @vytches-ddd/event-store',
+          command: 'pnpm add @vytches/ddd-event-store',
           description: 'Add event store for Event Sourcing',
           reason: 'Event Sourcing pattern detected but no event store',
           priority: 'high',
@@ -411,7 +411,7 @@ export class CommandSuggester {
       const packageJson = JSON.parse(await FileSystem.readFile(packageJsonPath));
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
-      return !Object.keys(deps).some(dep => dep.includes('@vytches-ddd'));
+      return !Object.keys(deps).some(dep => dep.includes('@vytches/ddd'));
     } catch {
       return true;
     }

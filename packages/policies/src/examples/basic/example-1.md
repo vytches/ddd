@@ -1,13 +1,13 @@
 # Fluent Policy Builder with Business Rules
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: policy-pattern, fluent-builder, specification-pattern,
 business-rules  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/validation,
-@vytches-ddd/utils
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-validation,
+@vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ application code.
 
 ````typescript
 // user-specifications.ts
-import { ISpecification, IAsyncSpecification } from '@vytches-ddd/validation';
+import { ISpecification, IAsyncSpecification } from '@vytches/ddd-validation';
 import { User } from '../types';
 
 /**
@@ -162,8 +162,8 @@ export class SubscriptionEligibilitySpecification
 
 ````typescript
 // user-policies.ts
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
+import { Result } from '@vytches/ddd-utils';
 import {
   AgeSpecification,
   EmailSpecification,
@@ -415,7 +415,7 @@ async function getCountryFromIP(ipAddress: string): Promise<string> {
 
 ```typescript
 // policy-usage-examples.ts
-import { PolicyContext } from '@vytches-ddd/policies';
+import { PolicyContext } from '@vytches/ddd-policies';
 import {
   createUserRegistrationPolicy,
   createUserProfileUpdatePolicy,

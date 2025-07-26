@@ -1,7 +1,7 @@
 # Events - Implementation Overview
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Domain**: Order Management  
 **Patterns**: repository-pattern, domain-events, automatic-publishing
@@ -31,8 +31,8 @@ await orderRepository.save(orderAggregate);
 ## Basic Event Publishing
 
 ```typescript
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { AggregateRoot, DomainEvent } from '@vytches-ddd/aggregates';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { AggregateRoot, DomainEvent } from '@vytches/ddd-aggregates';
 
 // Domain Event
 class OrderCreatedEvent extends DomainEvent<{
@@ -97,7 +97,7 @@ async function basicExample(): Promise<void> {
 ## Event Handlers
 
 ```typescript
-import { EventHandler } from '@vytches-ddd/events';
+import { EventHandler } from '@vytches/ddd-events';
 
 @EventHandler(OrderCreatedEvent, {
   autoRegister: true,
@@ -125,7 +125,7 @@ class OrderNotificationHandler {
 ## Complete System Setup
 
 ```typescript
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 // Initialize event system with dependency injection
 async function setupEventSystem(): Promise<void> {
@@ -183,4 +183,4 @@ For detailed implementation examples, see:
   implementations
 
 This foundational pattern forms the basis for all advanced event-driven
-architecture features in the @vytches-ddd library.
+architecture features in the @vytches/ddd-core library.

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { DomainErrorCode } from '@vytches-ddd/core';
+import { safeRun } from '@vytches/ddd-utils';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { DomainErrorCode } from '@vytches/ddd-core';
 import { DeadLetterCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
 import type {

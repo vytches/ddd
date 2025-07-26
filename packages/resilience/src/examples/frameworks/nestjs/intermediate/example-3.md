@@ -1,9 +1,9 @@
 # Performance-Driven Resilience Strategy - NestJS Intermediate Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Intermediate **Domain**: Performance-Optimized Service Platform
 **Patterns**: Performance Monitoring, Dynamic Adaptation, Resource Optimization
-**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches-ddd/resilience
+**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches/ddd-resilience
 
 ## Description
 
@@ -31,7 +31,7 @@ import {
   LoadAwareCircuitBreaker,
   PerformanceBasedTimeout,
   DynamicRetryStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { PerformanceRequest, PerformanceMetrics, LoadCondition } from './types'; // From your application
 
 @Injectable()

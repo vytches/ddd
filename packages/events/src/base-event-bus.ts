@@ -6,8 +6,8 @@ import type {
   BaseEventBusOptions,
   EventBusMiddleware,
   IDomainEvent,
-} from '@vytches-ddd/contracts';
-// import { VytchesDDD } from '@vytches-ddd/di';
+} from '@vytches/ddd-contracts';
+// import { VytchesDDD } from '@vytches/ddd-di';
 const VytchesDDD = {
   resolve: (
     _identifier: string | symbol | (new (...args: unknown[]) => unknown),
@@ -19,8 +19,8 @@ const VytchesDDD = {
     context?: string
   ) => unknown | null;
 }; // Temporarily disabled for testing
-import { IEventBus, isEventHandler } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
+import { IEventBus, isEventHandler } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary CUSTOM_MIDDLEWARE_SYMBOL constant

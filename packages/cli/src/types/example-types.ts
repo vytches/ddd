@@ -10,7 +10,7 @@
  * @example
  * ```typescript
  * // Import from new location instead
- * import type { ExampleDefinition } from '@vytches-ddd/contracts';
+ * import type { ExampleDefinition } from '@vytches/ddd-contracts';
  * import type { ParsedDocumentationSet } from './documentation-types';
  * ```
  *
@@ -39,4 +39,4 @@ export type {
   LLMSupport,
   TagSystem,
   RelatedPackage,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';

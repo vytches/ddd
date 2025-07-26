@@ -1,13 +1,13 @@
 # NestJS Basic Validation Integration - Manual Setup
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Manual integration with standard NestJS patterns
 
 ## Overview
 
-This example demonstrates basic integration of @vytches-ddd/validation with
+This example demonstrates basic integration of @vytches/ddd-validation with
 NestJS using manual setup and standard dependency injection patterns. Perfect
 for beginners wanting to understand the fundamentals of validation integration.
 
@@ -21,7 +21,7 @@ import {
   IValidator,
   ValidationResult,
   FieldValidator,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User, ValidationContext } from './types'; // From your application
 
 // Email validation specification
@@ -292,7 +292,7 @@ export class AppModule {}
   and services
 - **Standard NestJS Patterns**: Uses familiar Injectable decorators and
   dependency injection
-- **Library Integration**: Shows core @vytches-ddd/validation usage in NestJS
+- **Library Integration**: Shows core @vytches/ddd-validation usage in NestJS
   context
 - **Error Handling**: Proper HTTP error responses with validation details
 - **Batch Support**: Demonstrates handling multiple validation requests

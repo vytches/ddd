@@ -1,16 +1,16 @@
 # Distributed Event-Sourced Repository - Global Scale Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 advanced **Domain**: global-financial-system **Patterns**:
 distributed-event-sourcing, global-consistency, cross-region-replication,
-saga-coordination **Dependencies**: @vytches-ddd/repositories,
-@vytches-ddd/events, @vytches-ddd/messaging
+saga-coordination **Dependencies**: @vytches/ddd-repositories,
+@vytches/ddd-events, @vytches/ddd-messaging
 
 ## Description
 
 Enterprise-scale distributed event sourcing implementation with global
 consistency, cross-region replication, and sophisticated conflict resolution
-using advanced @vytches-ddd/repositories capabilities.
+using advanced @vytches/ddd-repositories capabilities.
 
 ## Business Context
 
@@ -26,8 +26,8 @@ import {
   DistributedEventSourcedRepository,
   GlobalConsistencyManager,
   CrossRegionReplicator,
-} from '@vytches-ddd/repositories';
-import { EntityId, DomainEvent } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId, DomainEvent } from '@vytches/ddd-domain-primitives';
 import {
   GlobalTradingAccount,
   TradingEvent,

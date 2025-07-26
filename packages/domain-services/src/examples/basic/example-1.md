@@ -1,8 +1,8 @@
 # Basic Domain Service - Beginner Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 beginner **Domain**: user-management **Patterns**: domain-service, orchestration
-**Dependencies**: @vytches-ddd/core, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-core, @vytches/ddd-utils
 
 ## Description
 
@@ -21,8 +21,8 @@ violating domain boundaries.
 
 ````typescript
 // user-management.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { Result } from '@vytches/ddd-utils';
 import { User, CreateUserCommand, UserCreatedEvent } from '../types';
 
 /**

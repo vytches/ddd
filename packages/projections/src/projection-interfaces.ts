@@ -5,7 +5,7 @@ import type {
   Capability,
   CapabilityConstructor,
   IProjectionCapability,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 import type { ProjectionError } from './projection-errors';
 
 /**
@@ -64,7 +64,7 @@ export interface IProjectionStore<TReadModel> {
 }
 
 // Re-export from contracts for convenience
-export type { IProjectionCapability } from '@vytches-ddd/contracts';
+export type { IProjectionCapability } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary Contract for capability context functionality

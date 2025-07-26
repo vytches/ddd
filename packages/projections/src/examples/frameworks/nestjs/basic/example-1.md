@@ -1,14 +1,14 @@
 # Simple Projection - NestJS Manual Setup
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + NestJS
 **Complexity**: basic **Framework**: NestJS **Integration**: Manual setup
-**Dependencies**: @nestjs/common, @vytches-ddd/projections, @vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-projections, @vytches/ddd-events
 
 ## Description
 
 Basic NestJS service implementing simple event projections with manual
 projection setup and event handling. This example shows how to integrate
-@vytches-ddd/projections into a NestJS application using standard dependency
+@vytches/ddd-projections into a NestJS application using standard dependency
 injection patterns.
 
 ## Business Context
@@ -22,8 +22,8 @@ personalized experiences and analytics dashboards.
 ```typescript
 // user-profile-projection.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import { UserData } from '../types'; // From your application
 
 @Injectable()
@@ -256,7 +256,7 @@ export class UserProfileModule {}
 // event-processor.service.ts
 import { Injectable } from '@nestjs/common';
 import { UserProfileProjectionService } from './user-profile-projection.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class EventProcessorService {
@@ -336,7 +336,7 @@ export class AppService {
 // user-profile-projection.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserProfileProjectionService } from './user-profile-projection.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 describe('UserProfileProjectionService', () => {
   let service: UserProfileProjectionService;

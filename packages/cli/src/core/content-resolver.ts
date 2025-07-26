@@ -253,15 +253,15 @@ export class ContentResolver {
   }
 
   private static generateImportsPattern(packageName: string): string {
-    return `// Standard Import Pattern for @vytches-ddd/${packageName}
+    return `// Standard Import Pattern for @vytches/ddd-${packageName}
 
 // Core imports
-import { ${this.getMainExport(packageName)} } from '@vytches-ddd/${packageName}';
-import { Result } from '@vytches-ddd/utils';
-import { DomainError } from '@vytches-ddd/domain-primitives';
+import { ${this.getMainExport(packageName)} } from '@vytches/ddd-${packageName}';
+import { Result } from '@vytches/ddd-utils';
+import { DomainError } from '@vytches/ddd-domain-primitives';
 
 // Type imports (prefer type imports for tree-shaking)
-import type { I${this.getMainExport(packageName)} } from '@vytches-ddd/${packageName}';
+import type { I${this.getMainExport(packageName)} } from '@vytches/ddd-${packageName}';
 
 // Domain imports (always from your application)
 import { User, Order, Product } from '../domain';
@@ -269,16 +269,16 @@ import type { CreateUserCommand, UpdateOrderCommand } from '../types';
 
 // Framework imports (only when needed)
 import { Injectable } from '@nestjs/common'; // For NestJS integration
-import { VytchesDDD } from '@vytches-ddd/di'; // For DI integration`;
+import { VytchesDDD } from '@vytches/ddd-di'; // For DI integration`;
   }
 
   private static generateErrorHandlingPattern(packageName: string): string {
     const mainClass = this.getMainExport(packageName);
 
-    return `// Error Handling Pattern for @vytches-ddd/${packageName}
-import { ${mainClass} } from '@vytches-ddd/${packageName}';
-import { Result } from '@vytches-ddd/utils';
-import { DomainError } from '@vytches-ddd/domain-primitives';
+    return `// Error Handling Pattern for @vytches/ddd-${packageName}
+import { ${mainClass} } from '@vytches/ddd-${packageName}';
+import { Result } from '@vytches/ddd-utils';
+import { DomainError } from '@vytches/ddd-domain-primitives';
 
 export class Enhanced${mainClass} extends ${mainClass} {
   async execute(command: Command): Promise<Result<Response, Error>> {
@@ -357,10 +357,10 @@ export class Enhanced${mainClass} extends ${mainClass} {
   private static generateTestingPattern(packageName: string): string {
     const mainClass = this.getMainExport(packageName);
 
-    return `// Testing Pattern for @vytches-ddd/${packageName}
+    return `// Testing Pattern for @vytches/ddd-${packageName}
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import { ${mainClass} } from '@vytches-ddd/${packageName}';
+import { safeRun } from '@vytches/ddd-utils';
+import { ${mainClass} } from '@vytches/ddd-${packageName}';
 
 describe('${mainClass}', () => {
   let instance: ${mainClass};
@@ -999,11 +999,11 @@ Properly dispose of services when no longer needed.
   private static getDefaultContent(packageName: string, requestedPath: string): string {
     // Provide sensible defaults based on the path pattern
     if (requestedPath.includes('implementation')) {
-      return `// Implementation example for @vytches-ddd/${packageName}
+      return `// Implementation example for @vytches/ddd-${packageName}
 // This is a placeholder - actual example content not found
 
-import { ${this.getMainExport(packageName)} } from '@vytches-ddd/${packageName}';
-import { Result } from '@vytches-ddd/utils';
+import { ${this.getMainExport(packageName)} } from '@vytches/ddd-${packageName}';
+import { Result } from '@vytches/ddd-utils';
 
 export class Example${this.getMainExport(packageName)} extends ${this.getMainExport(packageName)} {
   async execute(input: any): Promise<Result<any, Error>> {
@@ -1018,12 +1018,12 @@ export class Example${this.getMainExport(packageName)} extends ${this.getMainExp
     }
 
     if (requestedPath.includes('use-case')) {
-      return `## Use Case Example for @vytches-ddd/${packageName}
+      return `## Use Case Example for @vytches/ddd-${packageName}
 
 This example shows how to use the ${packageName} package in your application:
 
 \`\`\`typescript
-import { ${this.getMainExport(packageName)} } from '@vytches-ddd/${packageName}';
+import { ${this.getMainExport(packageName)} } from '@vytches/ddd-${packageName}';
 
 // Initialize the service
 const service = new ${this.getMainExport(packageName)}();

@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const packageExampleConfig: PackageExampleConfig = {
   packageName: 'projections',
@@ -8,7 +8,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     'Event projections system with capabilities, engines, and advanced orchestration patterns',
   domain: 'Architecture',
   patterns: ['projection-pattern', 'event-sourcing', 'cqrs'],
-  dependencies: ['@vytches-ddd/events', '@vytches-ddd/domain-primitives'],
+  dependencies: ['@vytches/ddd-events', '@vytches/ddd-domain-primitives'],
 
   complexityLevels: {
     basic: {

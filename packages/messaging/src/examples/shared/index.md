@@ -1,6 +1,6 @@
 # Messaging Package - Shared Resources
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Purpose**: Common utilities, patterns, and documentation for messaging
 examples
 
@@ -26,12 +26,12 @@ All messaging examples use standardized types from `./types/index.ts`:
 
 - **NestJS Manual Setup**: Full control over configuration
 - **VytchesDDD DI**: Enterprise-grade dependency management
-- **Event Integration**: Seamless integration with @vytches-ddd/events
+- **Event Integration**: Seamless integration with @vytches/ddd-events
 
 ## Quick Start
 
 ```typescript
-import { OutboxMessageHandler } from '@vytches-ddd/messaging';
+import { OutboxMessageHandler } from '@vytches/ddd-messaging';
 import { Order } from './types';
 
 const handler = new OutboxMessageHandler(config);

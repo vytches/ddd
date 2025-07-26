@@ -1,15 +1,15 @@
 # Cached Repository - Performance Optimization
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 beginner **Domain**: order-management **Patterns**: repository-pattern,
 caching-layer, performance-optimization **Dependencies**:
-@vytches-ddd/repositories, @vytches-ddd/caching
+@vytches/ddd-repositories, @vytches/ddd-caching
 
 ## Description
 
 Repository implementation with integrated caching layer for improved
 performance. Shows cache-aside pattern, cache invalidation strategies, and
-optimized data access using the @vytches-ddd/repositories caching capabilities.
+optimized data access using the @vytches/ddd-repositories caching capabilities.
 
 ## Business Context
 
@@ -21,8 +21,8 @@ accessed order data while maintaining data consistency.
 
 ```typescript
 // order-cached-repository.ts
-import { CachedRepository } from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { CachedRepository } from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import { Order, CreateOrderData, OrderStatus, CacheOptions } from './types'; // From your application
 
 // ✅ FOCUS: Cached repository extending library CachedRepository

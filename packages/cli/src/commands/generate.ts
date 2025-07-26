@@ -1276,8 +1276,8 @@ class ComponentGenerator {
       FileSystem.joinPath(currentDir, '../templates'), // Source: src/commands/../templates
       FileSystem.joinPath(currentDir, '../../templates'), // Dist: dist/commands/../../templates
       FileSystem.joinPath(process.cwd(), 'templates'), // Current working directory
-      FileSystem.joinPath(process.cwd(), 'node_modules/@vytches-ddd/cli/templates'),
-      FileSystem.joinPath(process.cwd(), 'node_modules/@vytches-ddd/cli/dist/templates'),
+      FileSystem.joinPath(process.cwd(), 'node_modules/@vytches/ddd-cli/templates'),
+      FileSystem.joinPath(process.cwd(), 'node_modules/@vytches/ddd-cli/dist/templates'),
     ];
 
     let templatesDir: string | null = null;

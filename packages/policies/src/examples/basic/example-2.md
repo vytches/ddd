@@ -1,12 +1,12 @@
 # Policy Groups with OR Logic
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: beginner  
 **Domain**: Financial Services  
 **Patterns**: policy-group-pattern, or-logic, alternative-pathways  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/validation,
-@vytches-ddd/utils
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-validation,
+@vytches/ddd-utils
 
 ## Description
 
@@ -26,8 +26,8 @@ with OR logic enable clean modeling of these alternative approval pathways.
 
 ````typescript
 // loan-approval-paths.ts
-import { PolicyGroup, PolicyBuilder } from '@vytches-ddd/policies';
-import { IAsyncSpecification } from '@vytches-ddd/validation';
+import { PolicyGroup, PolicyBuilder } from '@vytches/ddd-policies';
+import { IAsyncSpecification } from '@vytches/ddd-validation';
 import { LoanApplication } from '../types';
 
 /**
@@ -245,7 +245,7 @@ export function createMultiPathLoanApprovalPolicy() {
 
 ```typescript
 // policy-group-usage.ts
-import { PolicyContext } from '@vytches-ddd/policies';
+import { PolicyContext } from '@vytches/ddd-policies';
 import { createMultiPathLoanApprovalPolicy } from './loan-approval-paths';
 import { LoanApplication, PolicyResult } from '../types';
 

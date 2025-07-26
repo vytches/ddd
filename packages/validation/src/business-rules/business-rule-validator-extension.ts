@@ -1,5 +1,5 @@
-import type { ISpecification } from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+import type { ISpecification } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 
 import { CompositeSpecification as Specification } from '../specifications/composite-specification';
 import { ValidationErrors, ValidationError } from '../validation-error';

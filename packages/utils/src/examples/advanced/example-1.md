@@ -1,8 +1,8 @@
 # Monadic Operations
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: advanced
 **Domain**: Infrastructure **Patterns**: Functional programming, monads,
-category theory **Dependencies**: @vytches-ddd/utils
+category theory **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ while maintaining type safety and explicit error handling.
 
 ```typescript
 // monadic-operations.ts
-import { Result, LibUtils } from '@vytches-ddd/utils';
+import { Result, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,
@@ -517,7 +517,7 @@ class ResultMonad<T, E> implements Monad<T> {
 }
 
 // Extension methods for Result to support advanced monadic operations
-declare module '@vytches-ddd/utils' {
+declare module '@vytches/ddd-utils' {
   interface Result<TValue, TError> {
     sequence<U>(results: Result<U, TError>[]): Result<U[], TError>;
     traverse<U>(fn: (value: TValue) => Result<U, TError>): Result<U[], TError>;

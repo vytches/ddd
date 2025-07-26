@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/utils",
+  "name": "@vytches/ddd-utils",
   "projectType": "library",
   "sourceRoot": "packages/utils/src",
   "targets": {

@@ -1,11 +1,11 @@
 # NestJS Custom Provider Factory - Intermediate Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: intermediate  
 **Domain**: Multi-Tenant E-commerce  
 **Patterns**: Custom Provider Factory, Dynamic Provider, Tenant Isolation  
-**Dependencies**: @vytches-ddd/di, @nestjs/common
+**Dependencies**: @vytches/ddd-di, @nestjs/common
 
 ## Description
 
@@ -25,7 +25,7 @@ between NestJS and VytchesDDD concerns.
 
 ```typescript
 // domain/tenant-user.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
 
 /**
@@ -106,7 +106,7 @@ export class TenantUserService {
 
 ```typescript
 // domain/notification.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { EmailNotificationData } from '../types'; // Import from application
 
 /**
@@ -160,7 +160,7 @@ export class NotificationService {
 ```typescript
 // factories/vytches-ddd-provider.factory.ts
 import { FactoryProvider, Scope } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { TenantUserService } from '../domain/tenant-user.service';
 import { NotificationService } from '../domain/notification.service';
 
@@ -501,7 +501,7 @@ export class TenantContextService {
 ```typescript
 // nestjs/dynamic-user.module.ts
 import { Module, DynamicModule, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { VytchesDDDProviderFactory } from '../factories/vytches-ddd-provider.factory';
 import { TenantUserService } from '../domain/tenant-user.service';
 import { NotificationService } from '../domain/notification.service';

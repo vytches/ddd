@@ -57,7 +57,7 @@ following the same principles as our successful DI system implementation.
 ### Architecture
 
 ```typescript
-// Core scheduling interfaces in @vytches-ddd/contracts
+// Core scheduling interfaces in @vytches/ddd-contracts
 interface IEventScheduler {
   schedule(event: IScheduledEvent, options?: IScheduleOptions): Promise<string>;
   cancel(jobId: string): Promise<void>;
@@ -80,7 +80,7 @@ interface IScheduledEvent extends IDomainEvent {
 }
 
 // Event scheduling package structure
-@vytches-ddd/event-scheduling/
+@vytches/ddd-event-scheduling/
 ├── src/
 │   ├── core/
 │   │   ├── EventScheduler.ts           // Main scheduler facade
@@ -226,7 +226,7 @@ class EventScheduling {
 
 ### Neutral
 
-1. **New Package**: Creates @vytches-ddd/event-scheduling package
+1. **New Package**: Creates @vytches/ddd-event-scheduling package
 2. **Documentation**: Requires comprehensive docs and examples
 3. **Migration Path**: Existing code continues to work unchanged
 

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IDomainEvent, IEventProcessor, IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { LibUtils } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+import type { IDomainEvent, IEventProcessor, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 import type { IProjectionEngine } from './projection-interfaces';
 import type { ProjectionEngineRegistry } from './projection-registry';

@@ -1,9 +1,9 @@
 # Event Serialization Strategies
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: event-serialization, data-formats,
 json-serialization, custom-serializers **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/utils
+@vytches/ddd-event-store, @vytches/ddd-utils
 
 ## Description
 
@@ -26,9 +26,9 @@ optimization based on specific business needs while maintaining data integrity.
 import {
   JsonEventSerializer,
   IEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { SerializationStrategy, EventMetadata } from './types'; // From your app
 
 // ⭐ FOCUS: Enhanced JSON serializer with validation

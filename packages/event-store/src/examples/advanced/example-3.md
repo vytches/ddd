@@ -1,10 +1,10 @@
 # Event Store Clustering and Replication
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 advanced **Domain**: Infrastructure **Patterns**: clustering, replication,
 consensus, fault-tolerance, high-availability **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/resilience,
-@vytches-ddd/logging
+@vytches/ddd-event-store, @vytches/ddd-events, @vytches/ddd-resilience,
+@vytches/ddd-logging
 
 ## Description
 
@@ -28,11 +28,11 @@ is not acceptable and data integrity is paramount.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
 import {
   ClusterNode,
   ConsensusProtocol,

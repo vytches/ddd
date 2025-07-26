@@ -1,4 +1,4 @@
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
   PolicyRequest,

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. See
 
 ## 0.3.2 (2025-07-24)
 
-**Note:** Version bump only for package @vytches-ddd/core
+**Note:** Version bump only for package @vytches/ddd-core
 
 # Change Log
 
@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file. See
 
 ## 0.3.1 (2025-07-24)
 
-**Note:** Version bump only for package @vytches-ddd/core
+**Note:** Version bump only for package @vytches/ddd-core
 
 # Change Log
 
@@ -26,9 +26,9 @@ All notable changes to this project will be documented in this file. See
 ### ✨ Features
 
 - **cli:** generating docs from cli
-  ([bdb20eb](https://github.com/vytches/vytches-ddd/commit/bdb20ebb3d162bd95342491192319f3c2ff6621f))
+  ([bdb20eb](https://github.com/vytches/ddd/commit/bdb20ebb3d162bd95342491192319f3c2ff6621f))
 - **docs:** all docs added
-  ([20b4c32](https://github.com/vytches/vytches-ddd/commit/20b4c3201f19fdc5734c1171102fd482e82f0038))
+  ([20b4c32](https://github.com/vytches/ddd/commit/20b4c3201f19fdc5734c1171102fd482e82f0038))
 
 # Change Log
 
@@ -40,12 +40,12 @@ All notable changes to this project will be documented in this file. See
 ### ✨ Features
 
 - **docs:** documentationimplemented
-  ([55f8ac8](https://github.com/vytches/vytches-ddd/commit/55f8ac88e75615a99dd31b7fab65e4eaac2623b4))
+  ([55f8ac8](https://github.com/vytches/ddd/commit/55f8ac88e75615a99dd31b7fab65e4eaac2623b4))
 
 ### 📚 Documentation
 
 - documentations created
-  ([d1c1302](https://github.com/vytches/vytches-ddd/commit/d1c13027d3c88fd21e12f3829055216d5138293a))
+  ([d1c1302](https://github.com/vytches/ddd/commit/d1c13027d3c88fd21e12f3829055216d5138293a))
 
 # Change Log
 
@@ -54,19 +54,19 @@ All notable changes to this project will be documented in this file. See
 
 ## 0.1.4 (2025-07-14)
 
-**Note:** Version bump only for package @vytches-ddd/core
+**Note:** Version bump only for package @vytches/ddd-core
 
 # Change Log
 
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.1.3](https://github.com/vytches/vytches-ddd/compare/@vytches-ddd/core@0.1.2...@vytches-ddd/core@0.1.3) (2025-07-13)
+## [0.1.3](https://github.com/vytches/ddd/compare/@vytches/ddd-core@0.1.2...@vytches/ddd-core@0.1.3) (2025-07-13)
 
 ### 🚨 Tests
 
 - add test comment to check lerna behavior
-  ([eb736c7](https://github.com/vytches/vytches-ddd/commit/eb736c74c6dd28037644225cd22405b1d7c5b432))
+  ([eb736c7](https://github.com/vytches/ddd/commit/eb736c74c6dd28037644225cd22405b1d7c5b432))
 
 # Change Log
 
@@ -75,7 +75,7 @@ All notable changes to this project will be documented in this file. See
 
 ## 0.1.2 (2025-07-13)
 
-**Note:** Version bump only for package @vytches-ddd/core
+**Note:** Version bump only for package @vytches/ddd-core
 
 # Change Log
 
@@ -87,4 +87,4 @@ All notable changes to this project will be documented in this file. See
 ### 📚 Documentation
 
 - updated adrs and package.json
-  ([9757e39](https://github.com/vytches/vytches-ddd/commit/9757e393317f592e66af10644268b089fd35756b))
+  ([9757e39](https://github.com/vytches/ddd/commit/9757e393317f592e66af10644268b089fd35756b))

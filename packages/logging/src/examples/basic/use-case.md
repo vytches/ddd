@@ -1,8 +1,8 @@
 # Common Logging Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging **Complexity**: basic
 **Domain**: Practical Applications **Patterns**: Real-world scenarios, problem
-solving **Dependencies**: @vytches-ddd/logging
+solving **Dependencies**: @vytches/ddd-logging
 
 ## Overview
 
@@ -22,7 +22,7 @@ issues, and monitoring suspicious activity.
 
 ```typescript
 // auth.service.ts
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { UserData, LoginRequest, AuthResult } from './types';
 
 export class AuthenticationService {
@@ -199,7 +199,7 @@ payment processing, inventory management, and shipping.
 
 ```typescript
 // order-processing.service.ts
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { OrderData, OrderItem, PaymentInfo, ShippingInfo } from './types';
 
 export class OrderProcessingService {
@@ -471,7 +471,7 @@ security and performance analysis.
 
 ```typescript
 // api-monitoring.service.ts
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { ApiRequest, RateLimitInfo, ApiMetrics } from './types';
 
 export class ApiMonitoringService {
@@ -739,7 +739,7 @@ ensure jobs complete successfully.
 
 ```typescript
 // job-processor.service.ts
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { Job, JobResult, JobStatus } from './types';
 
 export class JobProcessorService {

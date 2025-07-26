@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import type {
   CapabilityConstructor,
   Capability,
   IAggregateCapability,
   IAggregateSnapshot,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 import { AggregateError } from './aggregate-errors';
 import type { IAggregateRoot } from './aggregate-interfaces';
 

@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const config: PackageExampleConfig = {
   packageName: 'cqrs',
@@ -27,7 +27,7 @@ export const config: PackageExampleConfig = {
       'cqrs:logging',
     ],
   },
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/cqrs', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-cqrs', '@vytches/ddd-utils'],
   sections: [
     'hero',
     'description',
@@ -87,7 +87,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Command handlers with automatic registration, validation, and business logic processing',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/di', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-cqrs', '@vytches/ddd-di', '@vytches/ddd-utils'],
     },
     {
       id: 'query-handlers-caching-optimization',
@@ -98,7 +98,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Query handlers with intelligent caching, pagination, and performance optimization strategies',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/di', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-cqrs', '@vytches/ddd-di', '@vytches/ddd-utils'],
     },
     {
       id: 'middleware-pipeline-cross-cutting-concerns',
@@ -109,7 +109,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Middleware pipeline for validation, logging, performance monitoring, and error handling',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/logging', '@vytches-ddd/validation'],
+      dependencies: ['@vytches/ddd-cqrs', '@vytches/ddd-logging', '@vytches/ddd-validation'],
     },
     {
       id: 'event-integration-cqrs-operations',
@@ -121,10 +121,10 @@ export const config: PackageExampleConfig = {
       description:
         'Advanced CQRS integration with event publishing, projections, and cross-context communication',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/events',
-        '@vytches-ddd/di',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-events',
+        '@vytches/ddd-di',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -137,10 +137,10 @@ export const config: PackageExampleConfig = {
       description:
         'Integrating policy-based authorization with CQRS patterns for secure command and query processing',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/policies',
-        '@vytches-ddd/di',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-policies',
+        '@vytches/ddd-di',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -153,10 +153,10 @@ export const config: PackageExampleConfig = {
       description:
         'Implementing comprehensive observability for CQRS operations in distributed systems',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/logging',
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-logging',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -167,7 +167,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Basic CQRS integration with NestJS using manual command and query bus setup',
-      dependencies: ['@nestjs/common', '@vytches-ddd/cqrs'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-cqrs'],
     },
     {
       id: 'nestjs-di-integration',
@@ -177,12 +177,12 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description:
-        'Advanced NestJS integration with @vytches-ddd/di for automatic handler discovery',
+        'Advanced NestJS integration with @vytches/ddd-di for automatic handler discovery',
       dependencies: [
         '@nestjs/common',
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/di',
-        '@vytches-ddd/events',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-di',
+        '@vytches/ddd-events',
       ],
     },
     {
@@ -194,7 +194,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       description:
         'Comprehensive overview of CQRS implementation patterns and foundational concepts',
-      dependencies: ['@vytches-ddd/cqrs', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-cqrs', '@vytches/ddd-utils'],
     },
     {
       id: 'enterprise-saga-orchestration',
@@ -206,11 +206,11 @@ export const config: PackageExampleConfig = {
       description:
         'Enterprise-grade CQRS with saga orchestration for managing complex distributed transactions',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/messaging',
-        '@vytches-ddd/events',
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/di',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-messaging',
+        '@vytches/ddd-events',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-di',
       ],
     },
     {
@@ -223,11 +223,11 @@ export const config: PackageExampleConfig = {
       description:
         'Integrating artificial intelligence and machine learning capabilities with CQRS patterns',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/events',
-        '@vytches-ddd/projections',
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-events',
+        '@vytches/ddd-projections',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -240,11 +240,11 @@ export const config: PackageExampleConfig = {
       description:
         'Real-time analytics using CQRS patterns with stream processing and complex event processing',
       dependencies: [
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/events',
-        '@vytches-ddd/projections',
-        '@vytches-ddd/event-store',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-events',
+        '@vytches/ddd-projections',
+        '@vytches/ddd-event-store',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -258,9 +258,9 @@ export const config: PackageExampleConfig = {
         'Enterprise-grade NestJS integration with distributed CQRS, saga orchestration, and compensation patterns',
       dependencies: [
         '@nestjs/common',
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/messaging',
-        '@vytches-ddd/di',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-messaging',
+        '@vytches/ddd-di',
       ],
     },
     {
@@ -272,7 +272,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       description:
         'Real-world use cases and business scenarios where CQRS patterns provide significant value',
-      dependencies: ['@vytches-ddd/cqrs'],
+      dependencies: ['@vytches/ddd-cqrs'],
     },
   ],
   contentConfig: {

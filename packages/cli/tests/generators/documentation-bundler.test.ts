@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { DocumentationBundler } from '../../src/generators/documentation-bundler';
 import { DocumentationGenerator } from '../../src/generators/documentation-generator';
 import { PackageConfigLoader } from '../../src/core/package-config-loader';
@@ -51,7 +51,7 @@ describe('DocumentationBundler', () => {
     description: 'Domain services package',
     domain: 'core',
     patterns: ['service-pattern'],
-    dependencies: ['@vytches-ddd/core'],
+    dependencies: ['@vytches/ddd-core'],
     complexityLevels: {
       basic: {
         level: 'basic',

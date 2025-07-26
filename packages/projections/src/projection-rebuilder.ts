@@ -4,8 +4,8 @@ import type {
   IReplayConfig,
   IReplayResult,
   IExtendedDomainEvent,
-} from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
 import { ProjectionError } from './projection-errors';
 

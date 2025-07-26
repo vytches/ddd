@@ -1,7 +1,7 @@
 /**
  * @fileoverview Application-specific types for Aggregate examples
  * @version 1.0.0
- * @package @vytches-ddd/aggregates
+ * @package @vytches/ddd-aggregates
  * @description Type definitions used in aggregate examples to maintain standalone functionality
  */
 

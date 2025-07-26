@@ -1,8 +1,8 @@
 // Advanced ACL Implementation with Enterprise Features import {
-BaseModelTranslator, EnhancedACLAdapter } from '@vytches-ddd/acl'; import {
-DomainService, ServiceLifetime } from '@vytches-ddd/di'; import { Result } from
-'@vytches-ddd/utils'; import { Logger } from '@vytches-ddd/logging'; import {
-CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience'; import { User,
+BaseModelTranslator, EnhancedACLAdapter } from '@vytches/ddd-acl'; import {
+DomainService, ServiceLifetime } from '@vytches/ddd-di'; import { Result } from
+'@vytches/ddd-utils'; import { Logger } from '@vytches/ddd-logging'; import {
+CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience'; import { User,
 ExternalUserData, CreateUserData, UpdateUserData, Provider, UserSyncResult,
 FederationConfig, SecurityPolicy, AuditEvent } from '../types';
 

@@ -1,6 +1,6 @@
 # Basic ACL Use Cases
 
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Basic  
 **Focus**: Fundamental anti-corruption layer patterns for external system
 integration

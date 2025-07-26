@@ -96,9 +96,9 @@ vytches-ddd examples bundle --packages cqrs,events --framework nestjs
 
 ## Package Overview
 
-- @vytches-ddd/cqrs: Command Query Responsibility Segregation
-- @vytches-ddd/events: Domain event handling
-- @vytches-ddd/projections: Event-driven projections
+- @vytches/ddd-cqrs: Command Query Responsibility Segregation
+- @vytches/ddd-events: Domain event handling
+- @vytches/ddd-projections: Event-driven projections
 
 ## Integration Examples
 
@@ -126,15 +126,15 @@ vytches-ddd examples find-by-tag "nestjs:enterprise" --complexity advanced
 Found 3 examples matching "cqrs:saga":
 
 1. Enterprise Saga Orchestration (advanced)
-   Package: @vytches-ddd/cqrs
+   Package: @vytches/ddd-cqrs
    File: packages/cqrs/src/examples/advanced/example-1.md
 
 2. NestJS Saga Integration (intermediate)
-   Package: @vytches-ddd/cqrs
+   Package: @vytches/ddd-cqrs
    File: packages/cqrs/src/examples/frameworks/nestjs/intermediate/example-2.md
 
 3. Distributed Transaction Patterns (advanced)
-   Package: @vytches-ddd/messaging
+   Package: @vytches/ddd-messaging
    File: packages/messaging/src/examples/advanced/example-1.md
 ```
 

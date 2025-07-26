@@ -1,4 +1,4 @@
-import type { IValidationError, IValidationErrors } from '@vytches-ddd/contracts';
+import type { IValidationError, IValidationErrors } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary ValidationError class for validation error operations

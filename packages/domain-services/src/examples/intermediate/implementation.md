@@ -1,6 +1,6 @@
 // Intermediate Domain Service Implementation import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { Result } from '@vytches-ddd/utils';
-import { DomainEvent } from '@vytches-ddd/events'; import { Order, OrderItem,
+'@vytches/ddd-domain-services'; import { Result } from '@vytches/ddd-utils';
+import { DomainEvent } from '@vytches/ddd-events'; import { Order, OrderItem,
 CreateOrderCommand, OrderCreatedEvent, InventoryService, PricingService,
 OrderRepository } from '../types';
 

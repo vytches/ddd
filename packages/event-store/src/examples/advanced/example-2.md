@@ -1,10 +1,10 @@
 # High-Performance Event Store
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 advanced **Domain**: Infrastructure **Patterns**: high-performance,
 optimization, caching, partitioning, concurrent-processing **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils,
-@vytches-ddd/logging
+@vytches/ddd-event-store, @vytches/ddd-events, @vytches/ddd-utils,
+@vytches/ddd-logging
 
 ## Description
 
@@ -25,10 +25,10 @@ analytics systems.
 
 ```typescript
 // high-performance-event-store.ts
-import { InMemoryEventStore, IEventSerializer } from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+import { InMemoryEventStore, IEventSerializer } from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 import {
   PerformanceOptimizer,
   CacheManager,

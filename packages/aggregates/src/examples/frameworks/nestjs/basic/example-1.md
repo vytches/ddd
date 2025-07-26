@@ -2,22 +2,22 @@
 
 **Focus**: Basic UserAggregate integration with NestJS dependency injection
 **Base Example**: [Basic User Aggregate](../../basic/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // user-aggregate.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import { User, CreateUserData, UpdateUserData, UserPreferences } from './types'; // From your application
 
 @Injectable()
 export class UserAggregateService {
   private readonly logger = new Logger(UserAggregateService.name);
 
-  // ✅ FOCUS: Thin wrapper around @vytches-ddd/aggregates
+  // ✅ FOCUS: Thin wrapper around @vytches/ddd-aggregates
   async createUser(userData: CreateUserData): Promise<User> {
     try {
       // Get UserAggregate instance through VytchesDDD service locator
@@ -166,7 +166,7 @@ export class UserAggregateService {
 
 // user.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { UserAggregateService } from './user-aggregate.service';
 
 @Module({
@@ -184,7 +184,7 @@ export class UserModule implements OnModuleInit {
 
 **Key Points:**
 
-- Service acts as thin wrapper around @vytches-ddd/aggregates
+- Service acts as thin wrapper around @vytches/ddd-aggregates
 - Uses VytchesDDD service locator for dependency injection
 - Maintains separation between framework and domain logic
 - Provides logging and error handling for NestJS integration

@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/event-scheduling",
+  "name": "@vytches/ddd-event-scheduling",
   "projectType": "library",
   "sourceRoot": "packages/event-scheduling/src",
   "targets": {

@@ -1,13 +1,13 @@
 # Real-time Stream Processing with Complex Event Processing
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Advanced  
 **Domain**: IoT and Smart City Infrastructure  
 **Patterns**: Complex Event Processing (CEP), Stream Processing, Pattern
 Detection  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
-@vytches-ddd/policies
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-events,
+@vytches/ddd-policies
 
 ## Description
 
@@ -31,8 +31,8 @@ import {
   EventPattern,
   WindowedAggregator,
   PatternMatcher,
-} from '@vytches-ddd/messaging';
-import { PolicyEngine } from '@vytches-ddd/policies';
+} from '@vytches/ddd-messaging';
+import { PolicyEngine } from '@vytches/ddd-policies';
 
 export class ComplexEventProcessor {
   private patterns: Map<string, EventPattern> = new Map();

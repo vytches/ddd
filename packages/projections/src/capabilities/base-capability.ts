@@ -1,5 +1,5 @@
-import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches-ddd/contracts';
-import { Capability } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
+import { Capability } from '@vytches/ddd-contracts';
 
 import type { ICapabilityContext, IProjectionLifecycleCapability } from '../projection-interfaces';
 import { ProjectionError } from '../projection-errors';

@@ -16,9 +16,9 @@ export type {
   IScheduleOptions,
   IJobFilter,
   IJobQueryResult,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
-export { SchedulePriority, BackoffStrategy, JobStatus } from '@vytches-ddd/contracts';
+export { SchedulePriority, BackoffStrategy, JobStatus } from '@vytches/ddd-contracts';
 
 export {
   FailingScheduledEvent,

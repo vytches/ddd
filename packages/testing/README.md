@@ -1,16 +1,16 @@
-# @vytches-ddd/testing
+# @vytches/ddd-testing
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/testing
+Package: @vytches/ddd-testing
 Category: Testing
 Purpose: Comprehensive testing utilities and DDD-specific testing helpers for Domain-Driven Design patterns
-Dependencies: @vytches-ddd/utils
+Dependencies: @vytches/ddd-utils
 Complexity: Medium
 DDD Patterns: Test Harness, Test Data Builders, Time Control, Safe Execution
 Integration Points: All packages use testing utilities; special patterns for aggregates, domain events, CQRS, and repositories
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Ftesting.svg)](https://badge.fury.io/js/%40vytches-ddd%2Ftesting)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-testing.svg)](https://badge.fury.io/js/%40vytches%2Fddd-testing)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -44,20 +44,20 @@ aggregates, domain events, CQRS operations, and repositories.
 
 ```bash
 # npm
-npm install @vytches-ddd/testing
+npm install @vytches/ddd-testing
 
 # yarn
-yarn add @vytches-ddd/testing
+yarn add @vytches/ddd-testing
 
 # pnpm
-pnpm add @vytches-ddd/testing
+pnpm add @vytches/ddd-testing
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependency
-npm install @vytches-ddd/utils
+npm install @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -193,7 +193,7 @@ class EntityIdBuilder {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/testing';
+import { safeRun } from '@vytches/ddd-testing';
 
 describe('UserService', () => {
   it('should create user successfully', () => {
@@ -224,7 +224,7 @@ describe('UserService', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SimpleTestHarness } from '@vytches-ddd/testing';
+import { SimpleTestHarness } from '@vytches/ddd-testing';
 
 describe('OrderService', () => {
   let harness: SimpleTestHarness;
@@ -269,7 +269,7 @@ describe('OrderService', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, expectError, expectSuccess } from '@vytches-ddd/testing';
+import { safeRun, expectError, expectSuccess } from '@vytches/ddd-testing';
 
 describe('ValidationService', () => {
   it('should validate email format', () => {
@@ -297,7 +297,7 @@ describe('ValidationService', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, safeRunTest, expectError } from '@vytches-ddd/testing';
+import { safeRun, safeRunTest, expectError } from '@vytches/ddd-testing';
 
 describe('UserRepository', () => {
   it('should save user to database', async () => {
@@ -329,7 +329,7 @@ describe('UserRepository', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRunWithTimeout, expectError } from '@vytches-ddd/testing';
+import { safeRunWithTimeout, expectError } from '@vytches/ddd-testing';
 
 describe('ExternalService', () => {
   it('should timeout on slow operations', async () => {
@@ -366,7 +366,7 @@ describe('ExternalService', () => {
 ### Custom Test Harness
 
 ```typescript
-import { TestHarness, TestResourceBuilder } from '@vytches-ddd/testing';
+import { TestHarness, TestResourceBuilder } from '@vytches/ddd-testing';
 
 class DatabaseTestHarness extends TestHarness {
   private database: Database | null = null;
@@ -489,7 +489,7 @@ describe('User Integration Tests', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { TestClock, withTestClock } from '@vytches-ddd/testing';
+import { TestClock, withTestClock } from '@vytches/ddd-testing';
 
 describe('TimeBasedService', () => {
   it('should handle time-based operations', () => {
@@ -529,7 +529,7 @@ describe('TimeBasedService', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { TimeScenarioBuilder } from '@vytches-ddd/testing';
+import { TimeScenarioBuilder } from '@vytches/ddd-testing';
 
 describe('ScheduledTaskService', () => {
   it('should process scheduled tasks over time', () => {
@@ -568,7 +568,7 @@ import {
   EntityIdBuilder,
   UserBuilder,
   TestDataBuilder,
-} from '@vytches-ddd/testing';
+} from '@vytches/ddd-testing';
 
 describe('User Management', () => {
   it('should create users with different ID types', () => {
@@ -625,7 +625,7 @@ describe('User Management', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { DomainEventBuilder } from '@vytches-ddd/testing';
+import { DomainEventBuilder } from '@vytches/ddd-testing';
 
 describe('Domain Events', () => {
   it('should create domain events with builder', () => {
@@ -666,7 +666,7 @@ describe('Domain Events', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, expectError, expectSuccess } from '@vytches-ddd/testing';
+import { safeRun, expectError, expectSuccess } from '@vytches/ddd-testing';
 
 describe('OrderAggregate', () => {
   it('should create order with valid data', () => {
@@ -720,7 +720,7 @@ describe('OrderAggregate', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun, expectSuccess, TestHarness } from '@vytches-ddd/testing';
+import { safeRun, expectSuccess, TestHarness } from '@vytches/ddd-testing';
 
 describe('UserRepository', () => {
   let harness: TestHarness;
@@ -778,7 +778,7 @@ describe('UserRepository', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, expectSuccess, expectError } from '@vytches-ddd/testing';
+import { safeRun, expectSuccess, expectError } from '@vytches/ddd-testing';
 
 describe('CreateUserHandler', () => {
   it('should handle valid command', async () => {
@@ -849,7 +849,7 @@ import {
   SimpleTestHarness,
   safeRun,
   expectSuccess,
-} from '@vytches-ddd/testing';
+} from '@vytches/ddd-testing';
 
 describe('Order Processing E2E', () => {
   let harness: SimpleTestHarness;
@@ -920,7 +920,7 @@ describe('Order Processing E2E', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, DomainEventBuilder } from '@vytches-ddd/testing';
+import { safeRun, DomainEventBuilder } from '@vytches/ddd-testing';
 
 describe('Event-Driven Workflow', () => {
   it('should handle event chain', async () => {
@@ -969,7 +969,7 @@ describe('Event-Driven Workflow', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRun, expectError } from '@vytches-ddd/testing';
+import { safeRun, expectError } from '@vytches/ddd-testing';
 
 class CustomBusinessError extends Error {
   constructor(
@@ -1003,7 +1003,7 @@ describe('Custom Error Handling', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { safeRunWithTimeout, TestClock } from '@vytches-ddd/testing';
+import { safeRunWithTimeout, TestClock } from '@vytches/ddd-testing';
 
 describe('Performance Testing', () => {
   it('should complete operations within time limit', async () => {
@@ -1097,7 +1097,7 @@ import {
   DomainEventBuilder,
   TestClock,
   withTestClock,
-} from '@vytches-ddd/testing';
+} from '@vytches/ddd-testing';
 
 describe('User Domain - Complete Test Suite', () => {
   let harness: SimpleTestHarness;
@@ -1240,8 +1240,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

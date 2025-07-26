@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
-import type { IDomainEvent } from '@vytches-ddd/contracts';
-import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches-ddd/contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches/ddd-contracts';
 import type { EventHandlerOptions, DIHandlerMetadata } from './di-types';
 
 // Re-export for compatibility

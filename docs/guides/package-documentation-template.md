@@ -25,9 +25,9 @@ packages/[package-name]/
 ## README.md Template
 
 ````markdown
-# @vytches-ddd/[package-name]
+# @vytches/ddd-[package-name]
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2F[package-name].svg)](https://badge.fury.io/js/%40vytches-ddd%2F[package-name])
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-[package-name].svg)](https://badge.fury.io/js/%40vytches%2Fddd-[package-name])
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -54,13 +54,13 @@ key benefits]
 
 ```bash
 # npm
-npm install @vytches-ddd/[package-name]
+npm install @vytches/ddd-[package-name]
 
 # yarn
-yarn add @vytches-ddd/[package-name]
+yarn add @vytches/ddd-[package-name]
 
 # pnpm
-pnpm add @vytches-ddd/[package-name]
+pnpm add @vytches/ddd-[package-name]
 ```
 ````
 
@@ -131,7 +131,7 @@ class ConceptImplementation implements IConcept {
 
 ```typescript
 // Import statements
-import { MainClass, ImportantType } from '@vytches-ddd/[package-name]';
+import { MainClass, ImportantType } from '@vytches/ddd-[package-name]';
 
 // Basic usage example
 const example = new MainClass();
@@ -262,7 +262,7 @@ const benchmarks = {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { MainClass } from '@vytches-ddd/[package-name]';
+import { MainClass } from '@vytches/ddd-[package-name]';
 
 describe('MainClass', () => {
   it('should work correctly', () => {
@@ -292,20 +292,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/[package-name]
+pnpm build --filter=@vytches/ddd-[package-name]
 
 # Run tests
-pnpm test --filter=@vytches-ddd/[package-name]
+pnpm test --filter=@vytches/ddd-[package-name]
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/[package-name]
+pnpm dev --filter=@vytches/ddd-[package-name]
 ```
 
 ## 📄 License
@@ -315,8 +315,7 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).
 
@@ -378,7 +377,7 @@ Add structured metadata at the beginning of README files:
 
 ```markdown
 <!-- LLM-METADATA
-Package: @vytches-ddd/[package-name]
+Package: @vytches/ddd-[package-name]
 Category: [Foundation|Patterns|Architecture|Integration|Infrastructure|Utility]
 Purpose: [Brief description]
 Dependencies: [List of peer dependencies]
@@ -392,7 +391,7 @@ Use consistent patterns that LLMs can recognize:
 
 ```typescript
 // Always use this pattern for examples
-import { MainClass } from '@vytches-ddd/package-name';
+import { MainClass } from '@vytches/ddd-package-name';
 
 // Setup
 const instance = new MainClass(config);
@@ -414,9 +413,9 @@ Always show integration with other VytchesDDD packages:
 
 ```typescript
 // Show how packages work together
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EventBus } from '@vytches-ddd/events';
-import { CommandHandler } from '@vytches-ddd/cqrs';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EventBus } from '@vytches/ddd-events';
+import { CommandHandler } from '@vytches/ddd-cqrs';
 
 // Integration example
 @CommandHandler(SomeCommand)

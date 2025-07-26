@@ -1,8 +1,8 @@
 # Retry Pattern with Exponential Backoff
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Basic
 **Domain**: Order Processing **Patterns**: Retry Pattern, Exponential Backoff,
-Jitter Strategy **Dependencies**: @vytches-ddd/resilience
+Jitter Strategy **Dependencies**: @vytches/ddd-resilience
 
 ## Description
 
@@ -30,7 +30,7 @@ import {
   ResiliencePolicyBuilder,
   ResilienceContext,
   RetryResult,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { Order, InventoryItem, NotificationRequest } from './types'; // From your application
 
 // Order processing service with retry strategies

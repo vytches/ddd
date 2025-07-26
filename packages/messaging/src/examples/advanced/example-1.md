@@ -1,12 +1,12 @@
 # Enterprise Event Mesh Architecture
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Advanced  
 **Domain**: Global Financial Services  
 **Patterns**: Event Mesh, Multi-Region Saga, Event Streaming, CQRS Integration  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
-@vytches-ddd/cqrs, @vytches-ddd/event-store
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-events,
+@vytches/ddd-cqrs, @vytches/ddd-event-store
 
 ## Description
 
@@ -30,9 +30,9 @@ import {
   MeshNode,
   StreamProcessor,
   GlobalSagaCoordinator,
-} from '@vytches-ddd/messaging';
-import { EventStore, EventStream } from '@vytches-ddd/event-store';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+} from '@vytches/ddd-messaging';
+import { EventStore, EventStream } from '@vytches/ddd-event-store';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 
 export class GlobalEventMesh {
   private nodes: Map<string, MeshNode> = new Map();

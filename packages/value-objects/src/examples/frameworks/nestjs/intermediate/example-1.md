@@ -1,6 +1,6 @@
 # Intermediate Value Objects - NestJS Manual Setup
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Framework**: NestJS **Focus**: Manual setup for
 complex composite value objects **Base Example**:
 [User Profile Composite](../../../intermediate/example-2.md)
@@ -14,9 +14,9 @@ import {
   UserProfile,
   PersonName,
   PhoneNumber,
-} from '@vytches-ddd/value-objects';
-import { Email } from '@vytches-ddd/value-objects';
-import { Address } from '@vytches-ddd/value-objects';
+} from '@vytches/ddd-value-objects';
+import { Email } from '@vytches/ddd-value-objects';
+import { Address } from '@vytches/ddd-value-objects';
 import {
   CreateUserProfileDto,
   UpdateProfileDto,
@@ -384,7 +384,7 @@ export class UserProfileService {
 ```typescript
 // date-range.service.ts
 import { Injectable } from '@nestjs/common';
-import { DateRange } from '@vytches-ddd/value-objects';
+import { DateRange } from '@vytches/ddd-value-objects';
 import {
   CreateDateRangeDto,
   DateRangeResponse,

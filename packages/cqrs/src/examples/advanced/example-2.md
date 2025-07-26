@@ -1,10 +1,10 @@
 # AI-Enhanced CQRS with Predictive Analytics
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-cqrs **Complexity**: Advanced
 **Domain**: Architecture **Patterns**: CQRS, Machine Learning, Predictive
-Analytics, Real-time Processing **Dependencies**: @vytches-ddd/cqrs,
-@vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/resilience,
-@vytches-ddd/utils
+Analytics, Real-time Processing **Dependencies**: @vytches/ddd-cqrs,
+@vytches/ddd-events, @vytches/ddd-projections, @vytches/ddd-resilience,
+@vytches/ddd-utils
 
 ## Description
 
@@ -38,11 +38,11 @@ import {
   Query,
   QueryHandler,
   CommandBus,
-} from '@vytches-ddd/cqrs';
-import { EventBus, DomainEvent } from '@vytches-ddd/events';
-import { ProjectionEngine } from '@vytches-ddd/projections';
-import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-cqrs';
+import { EventBus, DomainEvent } from '@vytches/ddd-events';
+import { ProjectionEngine } from '@vytches/ddd-projections';
+import { CircuitBreaker, Retry } from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 import type {
   TransactionData,
   PredictionResult,

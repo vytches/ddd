@@ -907,7 +907,7 @@ Moduł zawiera bazową klasę `BaseValidationAdapter` która ułatwia tworzenie
 adapterów dla zewnętrznych bibliotek walidacji:
 
 ```typescript
-import { BaseValidationAdapter, AdapterUtils } from '@vytches-ddd/validation';
+import { BaseValidationAdapter, AdapterUtils } from '@vytches/ddd-validation';
 
 export abstract class BaseValidationAdapter<T, TSchema = any>
   implements IValidator<T>
@@ -935,7 +935,7 @@ export abstract class BaseValidationAdapter<T, TSchema = any>
 
 ```typescript
 import { z } from 'zod';
-import { BaseValidationAdapter } from '@vytches-ddd/validation';
+import { BaseValidationAdapter } from '@vytches/ddd-validation';
 
 export class ZodAdapter<T> extends BaseValidationAdapter<T, z.ZodSchema<T>> {
   validate(value: T): Result<T, IValidationErrors> {
@@ -998,7 +998,7 @@ import {
   validate,
   ValidationError as ClassValidationError,
 } from 'class-validator';
-import { BaseValidationAdapter } from '@vytches-ddd/validation';
+import { BaseValidationAdapter } from '@vytches/ddd-validation';
 
 export class ClassValidatorAdapter<T> extends BaseValidationAdapter<
   T,
@@ -1069,7 +1069,7 @@ const validator = Validation.combine(
 
 ```typescript
 import * as Joi from 'joi';
-import { BaseValidationAdapter } from '@vytches-ddd/validation';
+import { BaseValidationAdapter } from '@vytches/ddd-validation';
 
 export class JoiAdapter<T> extends BaseValidationAdapter<T, Joi.Schema> {
   validate(value: T): Result<T, IValidationErrors> {
@@ -1121,7 +1121,7 @@ Moduł udostępnia również utility functions do łatwego tworzenia prostych
 adapterów:
 
 ```typescript
-import { AdapterUtils } from '@vytches-ddd/validation';
+import { AdapterUtils } from '@vytches/ddd-validation';
 
 // Prosty adapter z funkcji
 const customValidator = AdapterUtils.create<User>(user => ({

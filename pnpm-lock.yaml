@@ -83,7 +83,7 @@ importers:
       '@vitest/ui':
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4)
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:packages/testing
       chokidar:
@@ -188,20 +188,20 @@ importers:
 
   packages/acl:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
-      '@vytches-ddd/validation':
+      '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
       typescript:
@@ -219,17 +219,17 @@ importers:
 
   packages/aggregates:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/domain-primitives':
+      '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches-ddd/value-objects':
+      '@vytches/ddd-value-objects':
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -247,10 +247,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/logging':
+      '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
       chalk:
@@ -269,7 +269,7 @@ importers:
       '@types/yargs':
         specifier: ^17.0.33
         version: 17.0.33
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       eslint-plugin-jsdoc:
@@ -308,25 +308,25 @@ importers:
 
   packages/core:
     dependencies:
-      '@vytches-ddd/aggregates':
+      '@vytches/ddd-aggregates':
         specifier: workspace:*
         version: link:../aggregates
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/domain-primitives':
+      '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches-ddd/logging':
+      '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
-      '@vytches-ddd/repositories':
+      '@vytches/ddd-repositories':
         specifier: workspace:*
         version: link:../repositories
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
-      '@vytches-ddd/value-objects':
+      '@vytches/ddd-value-objects':
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
@@ -345,14 +345,14 @@ importers:
 
   packages/cqrs:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
+      '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -370,14 +370,14 @@ importers:
 
   packages/di:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/logging':
+      '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -395,10 +395,10 @@ importers:
 
   packages/domain-primitives:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
@@ -417,20 +417,20 @@ importers:
 
   packages/domain-services:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/validation':
+      '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
       typescript:
@@ -448,10 +448,10 @@ importers:
 
   packages/enterprise:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/policies':
+      '@vytches/ddd-policies':
         specifier: workspace:*
         version: link:../policies
     devDependencies:
@@ -470,14 +470,14 @@ importers:
 
   packages/event-scheduling:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
+      '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -495,14 +495,14 @@ importers:
 
   packages/event-store:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/logging':
+      '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -520,20 +520,20 @@ importers:
 
   packages/events:
     dependencies:
-      '@vytches-ddd/aggregates':
+      '@vytches/ddd-aggregates':
         specifier: workspace:*
         version: link:../aggregates
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/domain-primitives':
+      '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches-ddd/value-objects':
+      '@vytches/ddd-value-objects':
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -551,11 +551,11 @@ importers:
 
   packages/logging:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -573,14 +573,14 @@ importers:
 
   packages/messaging:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
+      '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -598,17 +598,17 @@ importers:
 
   packages/policies:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/validation':
+      '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
       typescript:
@@ -626,14 +626,14 @@ importers:
 
   packages/projections:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
-      '@vytches-ddd/events':
+      '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -651,14 +651,14 @@ importers:
 
   packages/repositories:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/domain-primitives':
+      '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -676,14 +676,14 @@ importers:
 
   packages/resilience:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -701,7 +701,7 @@ importers:
 
   packages/testing:
     dependencies:
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
@@ -735,11 +735,11 @@ importers:
 
   packages/validation:
     dependencies:
-      '@vytches-ddd/core':
+      '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:
@@ -757,14 +757,14 @@ importers:
 
   packages/value-objects:
     dependencies:
-      '@vytches-ddd/contracts':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches-ddd/utils':
+      '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@vytches-ddd/testing':
+      '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
       typescript:

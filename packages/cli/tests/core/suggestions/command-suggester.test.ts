@@ -152,7 +152,7 @@ describe('CommandSuggester', () => {
 
       const suggestions = await suggester.getSuggestions();
 
-      const eventBusSuggestion = suggestions.find(s => s.command.includes('@vytches-ddd/events'));
+      const eventBusSuggestion = suggestions.find(s => s.command.includes('@vytches/ddd-events'));
       expect(eventBusSuggestion).toBeDefined();
       expect(eventBusSuggestion!.category).toBe('improvement');
     });
@@ -223,7 +223,7 @@ describe('CommandSuggester', () => {
       const suggestions = await suggester.getSuggestions();
 
       const eventStoreSuggestion = suggestions.find(s =>
-        s.command.includes('@vytches-ddd/event-store')
+        s.command.includes('@vytches/ddd-event-store')
       );
       expect(eventStoreSuggestion).toBeDefined();
       expect(eventStoreSuggestion!.priority).toBe('high');
@@ -461,7 +461,7 @@ describe('CommandSuggester', () => {
       (FileSystem.readFile as any).mockResolvedValue(
         JSON.stringify({
           dependencies: {
-            '@vytches-ddd/core': '^1.0.0',
+            '@vytches/ddd-core': '^1.0.0',
           },
         })
       );
@@ -485,7 +485,7 @@ describe('CommandSuggester', () => {
       (FileSystem.exists as any).mockReturnValue(true);
       (FileSystem.readFile as any).mockResolvedValue(
         JSON.stringify({
-          dependencies: { '@vytches-ddd/core': '^1.0.0' },
+          dependencies: { '@vytches/ddd-core': '^1.0.0' },
         })
       );
 

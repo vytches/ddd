@@ -1,14 +1,14 @@
 # Result Pattern with NestJS - Basic Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: Basic
 **Framework**: NestJS **Base Example**:
 [Result Pattern Fundamentals](../../basic/example-1.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/utils
+@nestjs/common, @vytches/ddd-utils
 
 ## Business Context
 
 This example demonstrates basic integration of the Result pattern from
-@vytches-ddd/utils with NestJS services. It shows manual setup and configuration
+@vytches/ddd-utils with NestJS services. It shows manual setup and configuration
 without complex dependency injection patterns, making it ideal for teams
 starting with functional error handling in NestJS applications. Perfect for user
 validation services, API response handling, and basic business operations.
@@ -18,7 +18,7 @@ validation services, API response handling, and basic business operations.
 ```typescript
 // user-validation.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import type {
   UserData,
   ValidationError,

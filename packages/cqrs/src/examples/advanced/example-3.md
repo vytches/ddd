@@ -1,10 +1,10 @@
 # Real-time Analytics CQRS with Stream Processing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-cqrs **Complexity**: Advanced
 **Domain**: Architecture **Patterns**: CQRS, Stream Processing, Real-time
-Analytics, Complex Event Processing **Dependencies**: @vytches-ddd/cqrs,
-@vytches-ddd/events, @vytches-ddd/projections, @vytches-ddd/event-store,
-@vytches-ddd/utils
+Analytics, Complex Event Processing **Dependencies**: @vytches/ddd-cqrs,
+@vytches/ddd-events, @vytches/ddd-projections, @vytches/ddd-event-store,
+@vytches/ddd-utils
 
 ## Description
 
@@ -37,11 +37,11 @@ import {
   CommandHandler,
   Query,
   QueryHandler,
-} from '@vytches-ddd/cqrs';
-import { EventBus, DomainEvent, EventStream } from '@vytches-ddd/events';
-import { ProjectionEngine, StreamProjection } from '@vytches-ddd/projections';
-import { EventStore } from '@vytches-ddd/event-store';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-cqrs';
+import { EventBus, DomainEvent, EventStream } from '@vytches/ddd-events';
+import { ProjectionEngine, StreamProjection } from '@vytches/ddd-projections';
+import { EventStore } from '@vytches/ddd-event-store';
+import { Result } from '@vytches/ddd-utils';
 import type {
   AnalyticsEvent,
   TimeWindow,

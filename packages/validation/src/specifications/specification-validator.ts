@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Result } from '@vytches-ddd/utils';
-import type { IValidator, ISpecification } from '@vytches-ddd/contracts';
+import { Result } from '@vytches/ddd-utils';
+import type { IValidator, ISpecification } from '@vytches/ddd-contracts';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
 

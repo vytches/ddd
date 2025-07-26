@@ -3,11 +3,11 @@ import type {
   IEventReplay,
   IAdvancedEventReplay,
   IAdvancedEventStore,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 import { EventReplayEngine } from './event-replay-engine';
-import { Logger } from '@vytches-ddd/logging';
-import type { ILogger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
+import type { ILogger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary EventReplayFactory class for event replay factory operations

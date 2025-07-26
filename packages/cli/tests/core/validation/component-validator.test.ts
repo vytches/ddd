@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { ComponentValidator } from '../../../src/core/validation/component-validator';
 import { FileSystem } from '../../../src/core/utils/file-system';
 import type { ComponentType, ValidationContext } from '../../../src/types';

@@ -1,13 +1,13 @@
 # Result Pattern Logging
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/utils
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging + @vytches/ddd-utils
 **Complexity**: basic **Domain**: Result Pattern Integration **Patterns**:
 Success/failure tracking, error context, extensions **Dependencies**:
-@vytches-ddd/logging, @vytches-ddd/utils
+@vytches/ddd-logging, @vytches/ddd-utils
 
 ## Description
 
-Integration between @vytches-ddd/logging and @vytches-ddd/utils Result pattern
+Integration between @vytches/ddd-logging and @vytches/ddd-utils Result pattern
 for automatic success/failure tracking. This example demonstrates how to extend
 Result pattern with logging capabilities for comprehensive operation tracking
 and error analysis.
@@ -28,8 +28,8 @@ import {
   LogLevel,
   withLogging,
   ResultLogger,
-} from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   UserData,
   OrderData,

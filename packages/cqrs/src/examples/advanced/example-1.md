@@ -1,10 +1,10 @@
 # Enterprise CQRS with Saga Orchestration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-cqrs **Complexity**: Advanced
 **Domain**: Architecture **Patterns**: CQRS, Saga orchestration, Distributed
-transactions, Compensation **Dependencies**: @vytches-ddd/cqrs,
-@vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/resilience,
-@vytches-ddd/di
+transactions, Compensation **Dependencies**: @vytches/ddd-cqrs,
+@vytches/ddd-messaging, @vytches/ddd-events, @vytches/ddd-resilience,
+@vytches/ddd-di
 
 ## Description
 
@@ -39,12 +39,12 @@ import {
   CommandBus,
   Query,
   QueryHandler,
-} from '@vytches-ddd/cqrs';
-import { BaseSaga, SagaStep, SagaContext } from '@vytches-ddd/messaging';
-import { DomainEvent, EventBus } from '@vytches-ddd/events';
-import { CircuitBreaker, Retry, Timeout } from '@vytches-ddd/resilience';
-import { DomainService, Injectable } from '@vytches-ddd/di';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-cqrs';
+import { BaseSaga, SagaStep, SagaContext } from '@vytches/ddd-messaging';
+import { DomainEvent, EventBus } from '@vytches/ddd-events';
+import { CircuitBreaker, Retry, Timeout } from '@vytches/ddd-resilience';
+import { DomainService, Injectable } from '@vytches/ddd-di';
+import { Result } from '@vytches/ddd-utils';
 import type {
   OrderData,
   PaymentData,

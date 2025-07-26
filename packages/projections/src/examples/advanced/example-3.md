@@ -1,10 +1,10 @@
 # High-Performance Stream Processing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 advanced **Domain**: Event Sourcing **Patterns**: High-throughput processing,
 extreme optimization, parallel execution, memory efficiency **Dependencies**:
-@vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/utils,
-@vytches-ddd/resilience
+@vytches/ddd-projections, @vytches/ddd-events, @vytches/ddd-utils,
+@vytches/ddd-resilience
 
 ## Description
 
@@ -39,10 +39,10 @@ import {
   MemoryPoolManager,
   LockFreeDataStructures,
   OptimizedSerializer,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { CircuitBreaker } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { CircuitBreaker } from '@vytches/ddd-resilience';
 import {
   HighPerformanceConfig,
   ProcessingBatch,

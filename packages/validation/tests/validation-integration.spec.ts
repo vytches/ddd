@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 import { CoreRules, RulesRegistry } from '../src/rules-registry';
 import { BusinessRuleValidator } from '../src/business-rules';
 

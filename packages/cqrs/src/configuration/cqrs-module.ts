@@ -1,6 +1,6 @@
 import { CQRSConfiguration } from './cqrs-configuration';
 import type { CQRSOptions } from './cqrs-options.interface';
-import type { IDependencyContainer } from '@vytches-ddd/di';
+import type { IDependencyContainer } from '@vytches/ddd-di';
 
 /**
  * @llm-summary CQRSModule class for c q r s module operations

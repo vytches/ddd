@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { DefaultResilienceContext, RetryPolicy, MaxRetriesExceededError } from '../../src';
 
 describe('RetryPolicy', () => {

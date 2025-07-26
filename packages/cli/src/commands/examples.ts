@@ -238,7 +238,7 @@ async function findByTag(tagPattern: string, options: ExamplesOptions): Promise<
     examples.forEach(example => {
       console.log(Colors.green(`🔹 ${example.id}`));
       console.log(`   Name: ${example.name}`);
-      console.log(`   Package: ${Colors.dim('@vytches-ddd/')}${example.package}`);
+      console.log(`   Package: ${Colors.dim('@vytches/ddd-')}${example.package}`);
       console.log(`   Complexity: ${getComplexityIcon(example.complexity)} ${example.complexity}`);
       console.log(`   DI Support: ${example.diSupport ? '✅' : '❌'}`);
       console.log(`   Tags: ${example.tags.join(', ')}`);

@@ -6,10 +6,10 @@
 
 **Enterprise-Grade TypeScript Domain-Driven Design Framework**
 
-[![CI](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/ci.yml/badge.svg)](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/ci.yml)
-[![Release](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/release.yml/badge.svg)](https://github.com/PawelGozdz/vytches-ddd/actions/workflows/release.yml)
-[![codecov](https://codecov.io/gh/PawelGozdz/vytches-ddd/branch/main/graph/badge.svg)](https://codecov.io/gh/PawelGozdz/vytches-ddd)
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcore.svg)](https://www.npmjs.com/org/vytches-ddd)
+[![CI](https://github.com/vytches/ddd/actions/workflows/ci.yml/badge.svg)](https://github.com/vytches/ddd/actions/workflows/ci.yml)
+[![Release](https://github.com/vytches/ddd/actions/workflows/release.yml/badge.svg)](https://github.com/vytches/ddd/actions/workflows/release.yml)
+[![codecov](https://codecov.io/gh/vytches/ddd/branch/main/graph/badge.svg)](https://codecov.io/gh/vytches/ddd)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-core.svg)](https://www.npmjs.com/org/vytches)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -122,58 +122,58 @@ The library is organized into focused, single-responsibility packages:
 
 | Package                                                          | Description                           | Size  | Dependencies         |
 | ---------------------------------------------------------------- | ------------------------------------- | ----- | -------------------- |
-| [`@vytches-ddd/contracts`](./packages/contracts)                 | Core interfaces and contracts         | ~5KB  | None                 |
-| [`@vytches-ddd/domain-primitives`](./packages/domain-primitives) | Base DDD classes (Entity, VO, etc.)   | ~40KB | contracts            |
-| [`@vytches-ddd/value-objects`](./packages/value-objects)         | Enhanced value object implementations | ~36KB | domain-primitives    |
-| [`@vytches-ddd/repositories`](./packages/repositories)           | Repository pattern & Unit of Work     | ~40KB | domain-primitives    |
-| [`@vytches-ddd/aggregates`](./packages/aggregates)               | Aggregate roots with capabilities     | ~82KB | repositories, events |
+| [`@vytches/ddd-contracts`](./packages/contracts)                 | Core interfaces and contracts         | ~5KB  | None                 |
+| [`@vytches/ddd-domain-primitives`](./packages/domain-primitives) | Base DDD classes (Entity, VO, etc.)   | ~40KB | contracts            |
+| [`@vytches/ddd-value-objects`](./packages/value-objects)         | Enhanced value object implementations | ~36KB | domain-primitives    |
+| [`@vytches/ddd-repositories`](./packages/repositories)           | Repository pattern & Unit of Work     | ~40KB | domain-primitives    |
+| [`@vytches/ddd-aggregates`](./packages/aggregates)               | Aggregate roots with capabilities     | ~82KB | repositories, events |
 
 ### Pattern Layer
 
 | Package                                                      | Description              | Key Features                             |
 | ------------------------------------------------------------ | ------------------------ | ---------------------------------------- |
-| [`@vytches-ddd/validation`](./packages/validation)           | Business rule validation | Specifications, composite validators     |
-| [`@vytches-ddd/policies`](./packages/policies)               | Business policy engine   | Fluent API, temporal policies, behaviors |
-| [`@vytches-ddd/domain-services`](./packages/domain-services) | Domain service patterns  | Transaction support, logging             |
+| [`@vytches/ddd-validation`](./packages/validation)           | Business rule validation | Specifications, composite validators     |
+| [`@vytches/ddd-policies`](./packages/policies)               | Business policy engine   | Fluent API, temporal policies, behaviors |
+| [`@vytches/ddd-domain-services`](./packages/domain-services) | Domain service patterns  | Transaction support, logging             |
 
 ### Architecture Layer
 
 | Package                                              | Description               | Key Features                           |
 | ---------------------------------------------------- | ------------------------- | -------------------------------------- |
-| [`@vytches-ddd/events`](./packages/events)           | Event-driven architecture | Unified bus, domain/integration events |
-| [`@vytches-ddd/cqrs`](./packages/cqrs)               | Command/Query separation  | Middleware pipeline, decorators        |
-| [`@vytches-ddd/projections`](./packages/projections) | Event projections         | Automated state management             |
-| [`@vytches-ddd/event-store`](./packages/event-store) | Event persistence         | Snapshots, streams, adapters           |
+| [`@vytches/ddd-events`](./packages/events)           | Event-driven architecture | Unified bus, domain/integration events |
+| [`@vytches/ddd-cqrs`](./packages/cqrs)               | Command/Query separation  | Middleware pipeline, decorators        |
+| [`@vytches/ddd-projections`](./packages/projections) | Event projections         | Automated state management             |
+| [`@vytches/ddd-event-store`](./packages/event-store) | Event persistence         | Snapshots, streams, adapters           |
 
 ### Integration Layer
 
 | Package                                          | Description           | Key Features                          |
 | ------------------------------------------------ | --------------------- | ------------------------------------- |
-| [`@vytches-ddd/acl`](./packages/acl)             | Anti-Corruption Layer | Model translation, operation registry |
-| [`@vytches-ddd/messaging`](./packages/messaging) | Messaging patterns    | Outbox, Saga orchestration            |
+| [`@vytches/ddd-acl`](./packages/acl)             | Anti-Corruption Layer | Model translation, operation registry |
+| [`@vytches/ddd-messaging`](./packages/messaging) | Messaging patterns    | Outbox, Saga orchestration            |
 
 ### Infrastructure Layer
 
 | Package                                            | Description          | Key Features                       |
 | -------------------------------------------------- | -------------------- | ---------------------------------- |
-| [`@vytches-ddd/di`](./packages/di)                 | Dependency injection | Auto-discovery, framework adapters |
-| [`@vytches-ddd/resilience`](./packages/resilience) | Resilience patterns  | Circuit breaker, retry, bulkhead   |
-| [`@vytches-ddd/logging`](./packages/logging)       | Structured logging   | DDD-aware, automatic context       |
+| [`@vytches/ddd-di`](./packages/di)                 | Dependency injection | Auto-discovery, framework adapters |
+| [`@vytches/ddd-resilience`](./packages/resilience) | Resilience patterns  | Circuit breaker, retry, bulkhead   |
+| [`@vytches/ddd-logging`](./packages/logging)       | Structured logging   | DDD-aware, automatic context       |
 
 ### Utility Layer
 
 | Package                                      | Description      | Key Features                 |
 | -------------------------------------------- | ---------------- | ---------------------------- |
-| [`@vytches-ddd/utils`](./packages/utils)     | Common utilities | Result pattern, type guards  |
-| [`@vytches-ddd/testing`](./packages/testing) | Test utilities   | DDD test builders, mocks     |
-| [`@vytches-ddd/cli`](./packages/cli)         | CLI tools        | Code generation, scaffolding |
+| [`@vytches/ddd-utils`](./packages/utils)     | Common utilities | Result pattern, type guards  |
+| [`@vytches/ddd-testing`](./packages/testing) | Test utilities   | DDD test builders, mocks     |
+| [`@vytches/ddd-cli`](./packages/cli)         | CLI tools        | Code generation, scaffolding |
 
 ### Meta Packages
 
 | Package                                            | Description       | Includes              |
 | -------------------------------------------------- | ----------------- | --------------------- |
-| [`@vytches-ddd/core`](./packages/core)             | Core meta-package | Foundation + patterns |
-| [`@vytches-ddd/enterprise`](./packages/enterprise) | Full suite        | All packages          |
+| [`@vytches/ddd-core`](./packages/core)             | Core meta-package | Foundation + patterns |
+| [`@vytches/ddd-enterprise`](./packages/enterprise) | Full suite        | All packages          |
 
 ## 🚀 Quick Start
 
@@ -181,13 +181,13 @@ The library is organized into focused, single-responsibility packages:
 
 ```bash
 # Core functionality only
-npm install @vytches-ddd/core
+npm install @vytches/ddd-core
 
 # Full enterprise suite
-npm install @vytches-ddd/enterprise
+npm install @vytches/ddd-enterprise
 
 # Specific features
-npm install @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd/resilience
+npm install @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-resilience
 ```
 
 ### Basic Example: E-Commerce Order Domain
@@ -199,8 +199,8 @@ import {
   DomainEvent,
   Result,
   EntityId,
-} from '@vytches-ddd/core';
-import { Email, Money } from '@vytches-ddd/value-objects';
+} from '@vytches/ddd-core';
+import { Email, Money } from '@vytches/ddd-value-objects';
 
 // Domain Events
 class OrderPlaced extends DomainEvent<{
@@ -296,9 +296,9 @@ class Order extends AggregateRoot {
 ### CQRS Implementation
 
 ```typescript
-import { Command, CommandHandler, CommandBus } from '@vytches-ddd/cqrs';
-import { VytchesDDD, DomainService } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import { Command, CommandHandler, CommandBus } from '@vytches/ddd-cqrs';
+import { VytchesDDD, DomainService } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 
 // Command Definition
 class PlaceOrderCommand extends Command<void> {
@@ -363,7 +363,7 @@ await commandBus.execute(
 ### Business Policies
 
 ```typescript
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
 import { CreditLimitSpecification, FraudDetectionSpec } from './specifications';
 
 // Define complex business policy
@@ -424,7 +424,7 @@ if (result.isFailure()) {
 ### Saga Pattern for Complex Workflows
 
 ```typescript
-import { BaseSaga, SagaOrchestrator, SagaStatus } from '@vytches-ddd/messaging';
+import { BaseSaga, SagaOrchestrator, SagaStatus } from '@vytches/ddd-messaging';
 
 // Define Order Processing Saga
 class OrderProcessingSaga extends BaseSaga {
@@ -526,7 +526,7 @@ await orchestrator.processEvent(orderPlacedEvent, {
 ### Anti-Corruption Layer
 
 ```typescript
-import { BaseACLAdapter, BaseModelTranslator } from '@vytches-ddd/acl';
+import { BaseACLAdapter, BaseModelTranslator } from '@vytches/ddd-acl';
 
 // External payment gateway response
 interface ExternalPaymentResponse {
@@ -614,7 +614,7 @@ Value Objects represent descriptive aspects of the domain with no conceptual
 identity. They are immutable and compared by their values.
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/core';
+import { ValueObject } from '@vytches/ddd-core';
 
 class Address extends ValueObject<{
   street: string;
@@ -654,7 +654,7 @@ class Address extends ValueObject<{
 Entities have a distinct identity that runs through time and different states.
 
 ```typescript
-import { Entity, EntityId } from '@vytches-ddd/core';
+import { Entity, EntityId } from '@vytches/ddd-core';
 
 class Product extends Entity {
   private constructor(
@@ -709,7 +709,7 @@ Aggregates are clusters of domain objects that can be treated as a single unit.
 They maintain consistency boundaries and control access to their internals.
 
 ```typescript
-import { AggregateRoot, DomainEvent } from '@vytches-ddd/core';
+import { AggregateRoot, DomainEvent } from '@vytches/ddd-core';
 
 class ShoppingCart extends AggregateRoot {
   private items: CartItem[] = [];
@@ -762,8 +762,8 @@ Domain Services encapsulate domain logic that doesn't naturally fit within
 entities or value objects.
 
 ```typescript
-import { DomainService } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 
 @DomainService({
   serviceId: 'pricingService',
@@ -798,7 +798,7 @@ Repositories provide an abstraction over data storage, allowing the domain to
 remain persistence-agnostic.
 
 ```typescript
-import { IBaseRepository } from '@vytches-ddd/repositories';
+import { IBaseRepository } from '@vytches/ddd-repositories';
 
 interface IOrderRepository extends IBaseRepository<Order> {
   findByCustomerId(customerId: EntityId): Promise<Order[]>;
@@ -839,7 +839,7 @@ import {
   EventSourcedAggregate,
   DomainEvent,
   IEventStore,
-} from '@vytches-ddd/event-store';
+} from '@vytches/ddd-event-store';
 
 class BankAccount extends EventSourcedAggregate {
   private balance: Money;
@@ -910,7 +910,7 @@ import {
   Projection,
   ProjectionEngine,
   ICheckpointCapability,
-} from '@vytches-ddd/projections';
+} from '@vytches/ddd-projections';
 
 class CustomerOrderSummaryProjection extends Projection {
   constructor() {
@@ -965,7 +965,7 @@ import {
   CompositeSpecification,
   AndSpecification,
   OrSpecification,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 
 // Define specifications
 class MinimumAgeSpecification extends Specification<Customer> {
@@ -1019,7 +1019,7 @@ Here's how to effectively use it with LLMs:
 ```markdown
 ## Context
 
-- Framework: @vytches-ddd
+- Framework: @vytches/ddd-core
 - Domain: E-commerce
 - Bounded Context: Order Management
 
@@ -1056,7 +1056,7 @@ Provide complete TypeScript implementation with:
 ```markdown
 ## Task: Analyze Domain Model
 
-Analyze the following code using @vytches-ddd patterns: [paste code here]
+Analyze the following code using @vytches/ddd-core patterns: [paste code here]
 
 Identify:
 
@@ -1065,7 +1065,7 @@ Identify:
 3. Missing patterns that could benefit the design
 4. Anti-patterns to fix
 
-Provide refactored code following @vytches-ddd best practices.
+Provide refactored code following @vytches/ddd-core best practices.
 ```
 
 ### Best Practices for AI Assistance
@@ -1074,8 +1074,8 @@ Provide refactored code following @vytches-ddd best practices.
 
    ```typescript
    // Use specific imports for clarity
-   import { AggregateRoot, EntityId } from '@vytches-ddd/core';
-   import { Money } from '@vytches-ddd/value-objects';
+   import { AggregateRoot, EntityId } from '@vytches/ddd-core';
+   import { Money } from '@vytches/ddd-value-objects';
    ```
 
 2. **Include domain context in prompts**:
@@ -1086,9 +1086,9 @@ Provide refactored code following @vytches-ddd best practices.
 
 3. **Request specific patterns**:
 
-   - "Implement using Saga pattern from @vytches-ddd/messaging"
-   - "Add resilience using @vytches-ddd/resilience patterns"
-   - "Create ACL adapter using @vytches-ddd/acl"
+   - "Implement using Saga pattern from @vytches/ddd-messaging"
+   - "Add resilience using @vytches/ddd-resilience patterns"
+   - "Create ACL adapter using @vytches/ddd-acl"
 
 4. **Use library conventions**:
    - Result pattern for error handling
@@ -1107,8 +1107,8 @@ Provide refactored code following @vytches-ddd best practices.
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
@@ -1148,7 +1148,7 @@ pnpm release          # Release packages
 ### Project Structure
 
 ```
-vytches-ddd/
+ddd/
 ├── packages/                    # All packages
 │   ├── contracts/              # Shared interfaces
 │   ├── domain-primitives/      # Base DDD classes
@@ -1202,7 +1202,7 @@ pnpm test:e2e
 pnpm test:coverage
 
 # Test specific package
-pnpm nx test @vytches-ddd/events
+pnpm nx test @vytches/ddd-events
 ```
 
 ## 📚 Documentation
@@ -1280,10 +1280,10 @@ for details.
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/PawelGozdz/vytches-ddd)
-- [NPM Organization](https://www.npmjs.com/org/vytches-ddd)
-- [Documentation](https://vytches-ddd.dev)
-- [Discord Community](https://discord.gg/vytches-ddd)
+- [GitHub Repository](https://github.com/vytches/ddd)
+- [NPM Organization](https://www.npmjs.com/org/vytches)
+- [Documentation](https://vytches.dev/ddd)
+- [Discord Community](https://discord.gg/vytches)
 
 ---
 

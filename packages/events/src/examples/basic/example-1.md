@@ -1,12 +1,12 @@
 # Basic Event Publishing with Repository Pattern
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Domain**: Order Management  
 **Patterns**: repository-pattern, domain-events, automatic-publishing  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/repositories,
-@vytches-ddd/aggregates
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-repositories,
+@vytches/ddd-aggregates
 
 ## Description
 
@@ -26,8 +26,8 @@ these events are reliably emitted without manual intervention.
 
 ````typescript
 // order-aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/events';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-events';
 import { Order, CreateOrderCommand, OrderCreatedEventData } from '../types';
 
 /**
@@ -190,8 +190,8 @@ export class OrderConfirmedEvent extends DomainEvent<{
 
 ````typescript
 // order-repository.ts
-import { IBaseRepository } from '@vytches-ddd/repositories';
-import { UniversalEventDispatcher } from '@vytches-ddd/events';
+import { IBaseRepository } from '@vytches/ddd-repositories';
+import { UniversalEventDispatcher } from '@vytches/ddd-events';
 import { OrderAggregate } from '../types';
 
 /**
@@ -284,7 +284,7 @@ export class OrderRepository implements IBaseRepository<OrderAggregate> {
 
 ````typescript
 // usage-example.ts
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
 import { OrderRepository, OrderAggregate, CreateOrderCommand } from '../types';
 
 /**

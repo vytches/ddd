@@ -2,15 +2,15 @@
 
 **Focus**: Order state machine aggregate integration with NestJS **Base
 Example**: [Basic Order Aggregate](../../basic/example-2.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+@nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // order-aggregate.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   Order,
   CreateOrderData,
@@ -336,7 +336,7 @@ export class OrderAggregateService {
 
 // order.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { OrderAggregateService } from './order-aggregate.service';
 
 @Module({

@@ -1,16 +1,16 @@
-# @vytches-ddd/logging
+# @vytches/ddd-logging
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/logging
+Package: @vytches/ddd-logging
 Category: Infrastructure
 Purpose: Enterprise logging with DDD-first design, smart context detection, structured logging, and seamless ecosystem integration
-Dependencies: @vytches-ddd/contracts
+Dependencies: @vytches/ddd-contracts
 Complexity: Medium
 DDD Patterns: Logging Infrastructure, Context Detection, Cross-cutting Concerns
 Integration Points: All packages use logging for observability; special integration with CQRS, events, and resilience packages
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Flogging.svg)](https://badge.fury.io/js/%40vytches-ddd%2Flogging)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-logging.svg)](https://badge.fury.io/js/%40vytches%2Fddd-logging)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -45,20 +45,20 @@ detection and comprehensive observability features.
 
 ```bash
 # npm
-npm install @vytches-ddd/logging
+npm install @vytches/ddd-logging
 
 # yarn
-yarn add @vytches-ddd/logging
+yarn add @vytches/ddd-logging
 
 # pnpm
-pnpm add @vytches-ddd/logging
+pnpm add @vytches/ddd-logging
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependency
-npm install @vytches-ddd/contracts
+npm install @vytches/ddd-contracts
 ```
 
 ## ✨ Key Features
@@ -186,7 +186,7 @@ interface LogProvider {
 ### Basic Usage
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Zero configuration - automatically detects context
 const logger = Logger.create();
@@ -207,7 +207,7 @@ correlatedLogger.info('Processing order', { orderId: 'order-789' });
 ### Service Integration
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class UserService {
   private logger = Logger.forContext(); // Auto-detects "UserService"
@@ -240,8 +240,8 @@ class UserService {
 ### Domain Event Logging
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
-import { DomainEvent } from '@vytches-ddd/domain-primitives';
+import { Logger } from '@vytches/ddd-logging';
+import { DomainEvent } from '@vytches/ddd-domain-primitives';
 
 class OrderCreatedEvent extends DomainEvent {
   constructor(
@@ -284,7 +284,7 @@ class OrderAggregate {
 ### Automatic Context Detection
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Automatically detects class name from stack trace
 class PaymentService {
@@ -313,7 +313,7 @@ class PaymentService {
 ### Bounded Context Detection
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Bounded context detection from namespace/module structure
 namespace OrderManagement {
@@ -348,7 +348,7 @@ class InventoryService {
 ### Context Hierarchy
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class OrderProcessingService {
   private logger = Logger.forContext('OrderProcessingService');
@@ -381,7 +381,7 @@ class OrderProcessingService {
 ### Rich Metadata Support
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class UserRegistrationService {
   private logger = Logger.forContext('UserRegistrationService');
@@ -471,7 +471,7 @@ class UserRegistrationService {
 ### Automatic PII Protection
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Global masking configuration
 Logger.configure({
@@ -526,7 +526,7 @@ class PaymentService {
 ### Custom Masking Patterns
 
 ```typescript
-import { Logger, DataMasker } from '@vytches-ddd/logging';
+import { Logger, DataMasker } from '@vytches/ddd-logging';
 
 // Custom masking for domain-specific data
 const customMasker = new DataMasker({
@@ -579,8 +579,8 @@ class BankingService {
 ### Command Logging Decorator
 
 ```typescript
-import { LogCommands } from '@vytches-ddd/logging';
-import { CommandHandler } from '@vytches-ddd/cqrs';
+import { LogCommands } from '@vytches/ddd-logging';
+import { CommandHandler } from '@vytches/ddd-cqrs';
 
 @LogCommands({
   includePayload: true,
@@ -611,8 +611,8 @@ class CreateUserHandler {
 ### Query Logging Decorator
 
 ```typescript
-import { LogQueries } from '@vytches-ddd/logging';
-import { QueryHandler } from '@vytches-ddd/cqrs';
+import { LogQueries } from '@vytches/ddd-logging';
+import { QueryHandler } from '@vytches/ddd-cqrs';
 
 @LogQueries({
   includePayload: true,
@@ -641,8 +641,8 @@ class GetUserByIdHandler {
 ### Generic CQRS Logging
 
 ```typescript
-import { LogCQRS } from '@vytches-ddd/logging';
-import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
+import { LogCQRS } from '@vytches/ddd-logging';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
 
 @LogCQRS({
   includePayload: true,
@@ -675,8 +675,8 @@ class OrderCommandHandler {
 ### Enhanced Logging Middleware
 
 ```typescript
-import { EnhancedLoggingMiddleware } from '@vytches-ddd/logging';
-import { CommandBus } from '@vytches-ddd/cqrs';
+import { EnhancedLoggingMiddleware } from '@vytches/ddd-logging';
+import { CommandBus } from '@vytches/ddd-cqrs';
 
 // Enhanced middleware with performance metrics
 const loggingMiddleware = new EnhancedLoggingMiddleware({
@@ -710,8 +710,8 @@ await commandBus.execute(new CreateUserCommand(userData));
 ### Result Logging Extensions
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 class UserService {
   private logger = Logger.forContext('UserService');
@@ -736,8 +736,8 @@ class UserService {
 ### Result Middleware
 
 ```typescript
-import { ResultLoggingMiddleware } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+import { ResultLoggingMiddleware } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 class PaymentService {
   private logger = Logger.forContext('PaymentService');
@@ -766,7 +766,7 @@ class PaymentService {
 
 ```typescript
 import winston from 'winston';
-import { LogProvider, LogEvent } from '@vytches-ddd/logging';
+import { LogProvider, LogEvent } from '@vytches/ddd-logging';
 
 class WinstonProvider implements LogProvider {
   readonly name = 'winston';
@@ -825,7 +825,7 @@ Logger.configure({
 
 ```typescript
 import pino from 'pino';
-import { LogProvider, LogEvent } from '@vytches-ddd/logging';
+import { LogProvider, LogEvent } from '@vytches/ddd-logging';
 
 class PinoProvider implements LogProvider {
   readonly name = 'pino';
@@ -878,7 +878,7 @@ Logger.configure({
 
 ```typescript
 import { Client } from '@elastic/elasticsearch';
-import { LogProvider, LogEvent } from '@vytches-ddd/logging';
+import { LogProvider, LogEvent } from '@vytches/ddd-logging';
 
 class ElasticsearchProvider implements LogProvider {
   readonly name = 'elasticsearch';
@@ -978,7 +978,7 @@ Logger.configure({
 ### Basic Configuration
 
 ```typescript
-import { Logger, ConsoleProvider } from '@vytches-ddd/logging';
+import { Logger, ConsoleProvider } from '@vytches/ddd-logging';
 
 // Basic configuration
 Logger.configure({
@@ -1014,7 +1014,7 @@ Logger.configure({
 ### Environment-based Configuration
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Production configuration
 if (process.env.NODE_ENV === 'production') {
@@ -1064,7 +1064,7 @@ if (process.env.NODE_ENV === 'development') {
 ### Context-specific Configuration
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Different configurations for different bounded contexts
 const paymentLogger = Logger.forContext('PaymentService').withContext({
@@ -1092,7 +1092,7 @@ const debugLogger = Logger.forContext('DebuggingService').withContext({
 
 ```typescript
 import express from 'express';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
@@ -1181,7 +1181,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -1259,8 +1259,8 @@ export class UserController {
 ### Event-Driven Architecture Integration
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
-import { DomainEvent, IntegrationEvent } from '@vytches-ddd/events';
+import { Logger } from '@vytches/ddd-logging';
+import { DomainEvent, IntegrationEvent } from '@vytches/ddd-events';
 
 class EventLoggingService {
   private logger = Logger.forContext('EventLoggingService');
@@ -1328,7 +1328,7 @@ class LoggingEventBus {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Logger, LogEvent } from '@vytches-ddd/logging';
+import { Logger, LogEvent } from '@vytches/ddd-logging';
 
 describe('Logger', () => {
   let logger: Logger;
@@ -1425,7 +1425,7 @@ class MockLogProvider implements LogProvider {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { Logger, DataMasker } from '@vytches-ddd/logging';
+import { Logger, DataMasker } from '@vytches/ddd-logging';
 
 describe('DataMasker', () => {
   let masker: DataMasker;
@@ -1503,8 +1503,8 @@ describe('DataMasker', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LogCommands, LogQueries } from '@vytches-ddd/logging';
-import { safeRun } from '@vytches-ddd/utils';
+import { LogCommands, LogQueries } from '@vytches/ddd-logging';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('CQRS Logging Integration', () => {
   let mockProvider: MockLogProvider;
@@ -1575,7 +1575,7 @@ describe('CQRS Logging Integration', () => {
 ### Logging Levels
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class UserService {
   private logger = Logger.forContext('UserService');
@@ -1656,7 +1656,7 @@ class UserService {
 ### Structured Logging
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class OrderService {
   private logger = Logger.forContext('OrderService');
@@ -1738,7 +1738,7 @@ class OrderService {
 ### Correlation and Tracing
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { v4 as uuidv4 } from 'uuid';
 
 class OrderProcessingService {
@@ -1826,7 +1826,7 @@ class OrderProcessingService {
 ### Performance Monitoring
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 class PerformanceMonitoringService {
   private logger = Logger.forContext('PerformanceMonitoringService');
@@ -1919,7 +1919,7 @@ class UserService {
 ### Security and Compliance
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Security-focused logging configuration
 Logger.configure({
@@ -2036,8 +2036,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

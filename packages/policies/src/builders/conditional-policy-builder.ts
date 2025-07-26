@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 import type {
   IBusinessPolicy,
   PolicyContext,
@@ -18,7 +18,7 @@ import {
   AsyncSpecificationPolicy,
 } from '../core/base/base-business-policy';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
 /**

@@ -1,13 +1,13 @@
 # Basic Event Store Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: implementation-guide, setup-patterns,
 best-practices
 
 ## Overview
 
 This guide provides a comprehensive overview of implementing event storage
-systems using @vytches-ddd/event-store. It covers fundamental concepts, setup
+systems using @vytches/ddd-event-store. It covers fundamental concepts, setup
 patterns, and best practices for getting started with event-driven
 architectures.
 
@@ -46,9 +46,9 @@ individual aggregates in Domain-Driven Design:
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-store';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 
 export class BasicEventStoreService {
   private readonly eventStore: InMemoryEventStore;
@@ -100,8 +100,8 @@ export class BasicEventStoreService {
 ```typescript
 // event-sourced-repository.ts
 import { BasicEventStoreService } from './basic-event-store.service';
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { Result } from '@vytches-ddd/utils';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { Result } from '@vytches/ddd-utils';
 
 export abstract class EventSourcedRepository<T extends AggregateRoot> {
   constructor(protected readonly eventStore: BasicEventStoreService) {}
@@ -177,7 +177,7 @@ export abstract class EventSourcedRepository<T extends AggregateRoot> {
 import { EventSourcedRepository } from './event-sourced-repository';
 import { OrderAggregate } from './order.aggregate';
 import { CreateOrderCommand } from './commands';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 export class OrderRepository extends EventSourcedRepository<OrderAggregate> {
   protected getStreamId(aggregate: OrderAggregate): string {

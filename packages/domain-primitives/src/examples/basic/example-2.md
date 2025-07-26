@@ -1,7 +1,7 @@
 # Simple Actor Pattern
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Category**: Actors
 
@@ -18,7 +18,7 @@ import {
   IActor,
   DefaultActorType,
   ActorError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { AuditEntry, ActionContext, UserData } from '../types';
 
 // Basic actor implementation

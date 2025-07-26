@@ -1,9 +1,9 @@
 # Projection Rebuilding System
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 intermediate **Domain**: Event Sourcing **Patterns**: Projection rebuilding,
-snapshots, optimization **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events, @vytches-ddd/event-store
+snapshots, optimization **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events, @vytches/ddd-event-store
 
 ## Description
 
@@ -38,8 +38,8 @@ import {
   ProjectionRebuilder,
   SnapshotCapability,
   CheckpointCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventStore } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventStore } from '@vytches/ddd-events';
 import {
   UserData,
   OrderData,

@@ -4,7 +4,7 @@
 validation  
 **Domain**: E-commerce User Registration  
 **Complexity**: Basic  
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-utils
 
 ## Business Context
 
@@ -25,7 +25,7 @@ import {
   ISpecification,
   IAsyncSpecification,
   CompositeSpecification,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User, UserProfile, Address } from '../types'; // ALWAYS import from app
 
 // Basic user validation specifications
@@ -167,8 +167,8 @@ import {
   ValidationFacade,
   CompositeSpecification,
   SpecificationOperators,
-} from '@vytches-ddd/validation';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Basic User Validation Service
 export class UserValidationService {

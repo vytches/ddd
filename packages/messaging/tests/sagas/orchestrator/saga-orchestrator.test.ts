@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches/ddd-utils';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { SagaOrchestrator } from '../../../src/sagas/orchestrator';
 import type {
   ISagaRepository,
@@ -18,7 +18,7 @@ import {
 } from '../../../src/sagas/errors';
 
 // Mock logger
-vi.mock('@vytches-ddd/logging', () => ({
+vi.mock('@vytches/ddd-logging', () => ({
   Logger: {
     forContext: vi.fn(() => ({
       info: vi.fn(),

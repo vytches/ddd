@@ -1,9 +1,9 @@
 # Event Middleware and Pipeline Processing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: intermediate
 **Domain**: Architecture **Patterns**: event-middleware, pipeline-processing,
 cross-cutting-concerns, event-transformation **Dependencies**:
-@vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
+@vytches/ddd-events, @vytches/ddd-utils, @vytches/ddd-logging
 
 ## Description
 
@@ -23,9 +23,9 @@ applied uniformly regardless of the specific business event being processed.
 
 ```typescript
 // event-middleware.ts
-import { DomainEvent, UnifiedEventBus } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainEvent, UnifiedEventBus } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 // ⭐ FOCUS: Middleware interface definition
 export interface EventMiddleware {

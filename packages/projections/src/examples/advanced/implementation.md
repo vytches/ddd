@@ -1,6 +1,6 @@
 # Advanced Projections Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 advanced **Domain**: Event Sourcing **Focus**: Enterprise-grade projection
 architectures and optimization
 
