@@ -26,6 +26,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'chore(release)')"
+    env:
+      NX_DAEMON: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,6 +92,8 @@ jobs:
   canary:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    env:
+      NX_DAEMON: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
