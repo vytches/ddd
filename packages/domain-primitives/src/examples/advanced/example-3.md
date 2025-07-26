@@ -1,6 +1,6 @@
 # Enterprise Error Recovery Orchestration - Advanced Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 advanced **Domain**: Error Recovery Orchestration **Patterns**: Error Recovery
 Strategies, Distributed System Resilience, Self-Healing Architecture, Cascading
 Failure Prevention **Dependencies**: BaseError, IDomainError, IActor,
@@ -32,7 +32,7 @@ import {
   ActorError,
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import {
   RecoveryStrategy,
   SystemHealth,

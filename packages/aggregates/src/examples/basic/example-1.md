@@ -1,9 +1,9 @@
 # Basic Aggregate Root - User Management
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Basic
 **Domain**: User Management **Patterns**: Aggregate Root, Domain Events,
-Invariant Protection **Dependencies**: @vytches-ddd/aggregates,
-@vytches-ddd/domain-primitives, @vytches-ddd/contracts
+Invariant Protection **Dependencies**: @vytches/ddd-aggregates,
+@vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -22,9 +22,9 @@ through domain events.
 
 ```typescript
 // user.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import { UserData, CreateUserData, UpdateUserData } from './types'; // From your application
 
 // Domain Events

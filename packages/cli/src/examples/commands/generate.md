@@ -28,7 +28,7 @@ vytches-ddd generate aggregate User --domain UserManagement
 
 ```typescript
 // src/domain/user-management/user.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/core';
+import { AggregateRoot } from '@vytches/ddd-core';
 
 export class UserAggregate extends AggregateRoot {
   constructor(
@@ -61,7 +61,7 @@ vytches-ddd generate value-object Email --domain UserManagement
 
 ```typescript
 // src/domain/user-management/value-objects/email.vo.ts
-import { ValueObject } from '@vytches-ddd/core';
+import { ValueObject } from '@vytches/ddd-core';
 
 export class Email extends ValueObject<string> {
   constructor(value: string) {
@@ -91,7 +91,7 @@ vytches-ddd generate domain-service UserRegistration --domain UserManagement
 
 ```typescript
 // src/domain/user-management/services/user-registration.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 
 @DomainService('userRegistrationService', {
   context: 'UserManagement',

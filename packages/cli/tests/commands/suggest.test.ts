@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { suggestCommand } from '../../src/commands/suggest';
 import { CommandSuggester } from '../../src/core/suggestions/command-suggester';
 import { ContextAwarePromptEngine } from '../../src/core/prompts/context-aware-prompts';

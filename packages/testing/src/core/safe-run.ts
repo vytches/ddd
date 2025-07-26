@@ -2,7 +2,7 @@
  * Enhanced safeRun utility specifically designed for testing DDD/CQRS patterns.
  * Provides type-safe error/success pattern for async operations in tests.
  *
- * Migrated from @vytches-ddd/utils and enhanced with testing-specific features.
+ * Migrated from @vytches/ddd-utils and enhanced with testing-specific features.
  */
 
 // Removed import to avoid circular dependency

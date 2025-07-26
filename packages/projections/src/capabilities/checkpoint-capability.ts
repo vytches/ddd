@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IProjectionCheckpointStore } from '../projection-interfaces';
 

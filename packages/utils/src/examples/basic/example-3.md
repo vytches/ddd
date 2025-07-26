@@ -1,6 +1,6 @@
 # Library Utilities
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: Utility functions, validation, helpers,
 UUID generation **Dependencies**: uuid
 
@@ -8,8 +8,8 @@ UUID generation **Dependencies**: uuid
 
 The `LibUtils` class provides essential utility functions for common operations
 like UUID generation, validation, type checking, and object comparison. These
-utilities support the core functionality of the @vytches-ddd library and provide
-helpful functions for general development tasks.
+utilities support the core functionality of the @vytches/ddd-core library and
+provide helpful functions for general development tasks.
 
 ## Business Context
 
@@ -28,7 +28,7 @@ implementations.
 
 ```typescript
 // library-utilities.ts
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 import { UserData, UtilityOptions, CacheConfig } from '../types';
 
 // ✅ FOCUS: Core utility functions usage

@@ -1,11 +1,11 @@
 # Basic Outbox Pattern Implementation
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Basic  
 **Domain**: E-commerce Order Processing  
 **Patterns**: Outbox Pattern, Transactional Messaging  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-core
 
 ## Description
 
@@ -26,8 +26,8 @@ even if the message broker is temporarily unavailable.
 
 ```typescript
 // order-outbox.service.ts
-import { OutboxMessageHandler, OutboxMessage } from '@vytches-ddd/messaging';
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { OutboxMessageHandler, OutboxMessage } from '@vytches/ddd-messaging';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 import { Order, OrderStatus } from './types';
 
 // Domain aggregate that produces events

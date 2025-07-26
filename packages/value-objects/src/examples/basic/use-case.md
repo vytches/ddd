@@ -1,6 +1,6 @@
 # Value Objects - Basic Use Cases
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Focus**: Real-world applications and business scenarios
 
 ## Overview
@@ -14,7 +14,7 @@ solve practical problems in everyday applications.
 ### **Scenario**: Online Shopping Cart Management
 
 ```typescript
-import { Money, Email, Address } from '@vytches-ddd/value-objects';
+import { Money, Email, Address } from '@vytches/ddd-value-objects';
 
 // ✅ Product pricing with currency safety
 class Product {
@@ -131,7 +131,7 @@ console.log(`Customer: ${customer.email}`); // john.doe@example.com
 ### **Scenario**: Multi-tenant user registration and billing
 
 ```typescript
-import { Email, Money } from '@vytches-ddd/value-objects';
+import { Email, Money } from '@vytches/ddd-value-objects';
 
 // ✅ Subscription pricing with different currencies
 class SubscriptionPlan {
@@ -290,7 +290,7 @@ function generateId(): string {
 ### **Scenario**: Portfolio management and risk calculations
 
 ```typescript
-import { Money } from '@vytches-ddd/value-objects';
+import { Money } from '@vytches/ddd-value-objects';
 
 // ✅ Trading position with profit/loss calculations
 class TradingPosition {
@@ -470,7 +470,7 @@ console.log(`Largest Loss: ${metrics.largestLoss}`);
 ### **Scenario**: Order management and delivery optimization
 
 ```typescript
-import { Money, Address } from '@vytches-ddd/value-objects';
+import { Money, Address } from '@vytches/ddd-value-objects';
 
 // ✅ Menu item pricing
 class MenuItem {

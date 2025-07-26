@@ -1,7 +1,7 @@
 # Intermediate NestJS Implementation Patterns
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -9,7 +9,7 @@
 
 ## Overview
 
-Intermediate implementation patterns for integrating @vytches-ddd/policies with
+Intermediate implementation patterns for integrating @vytches/ddd-policies with
 NestJS applications using advanced dependency injection, policy registries, and
 behavior composition for enterprise-grade policy management.
 
@@ -19,13 +19,13 @@ This section covers two intermediate patterns demonstrated in separate examples:
 
 ### 1. Advanced NestJS DI Integration (Example 1)
 
-Enterprise-grade integration using @vytches-ddd/di service locator pattern with
+Enterprise-grade integration using @vytches/ddd-di service locator pattern with
 policy behaviors, cross-cutting concerns, and sophisticated dependency
 management for complex business scenarios.
 
 **Key Features:**
 
-- **@vytches-ddd/di Integration**: Service locator pattern with auto-discovery
+- **@vytches/ddd-di Integration**: Service locator pattern with auto-discovery
   and context isolation
 - **Policy Behaviors**: Retry, caching, and temporal policy enhancement patterns
 - **Bridge Pattern**: Clean separation between NestJS and VytchesDDD dependency
@@ -87,7 +87,7 @@ and optimization.
 The recommended approach for integrating VytchesDDD with NestJS:
 
 ```typescript
-// Domain service with @vytches-ddd/di
+// Domain service with @vytches/ddd-di
 @DomainService('policyService', {
   lifetime: ServiceLifetime.Singleton,
   context: 'PolicyManagement',

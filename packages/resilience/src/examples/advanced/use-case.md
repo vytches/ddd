@@ -1,9 +1,9 @@
 # Advanced Resilience Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Advanced
 **Domain**: Enterprise-Scale Systems **Patterns**: Global Coordination,
 AI-Driven Adaptation, Distributed Intelligence **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 

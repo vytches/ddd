@@ -1,6 +1,6 @@
 # High Availability Scheduling - Clustering and Automatic Failover
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 advanced **Domain**: Infrastructure **Patterns**: high-availability, clustering,
 automatic-failover, consensus-protocols
 
@@ -24,9 +24,9 @@ even during node failures or network partitions.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   ClusterNodeState,
   ConsensusProtocol,

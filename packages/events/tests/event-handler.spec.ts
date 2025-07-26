@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { describe, it, expect, vi } from 'vitest';
-import type { IDomainEvent } from '@vytches-ddd/contracts';
-import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches-ddd/contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches/ddd-contracts';
 
 import type { EventHandlerOptions } from '../src/decorators/event-handler.decorator';
 import { EventHandler } from '../src/decorators/event-handler.decorator';

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { PolicyRegistry } from '../../src/registry';
 import type { PolicyDefinition, PolicyQuery, IBusinessPolicy } from '../../src/core/interfaces';
 

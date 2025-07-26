@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import type { ChatHistoryConfig } from '../../../src/core/utils/chat-history';
 import { ChatHistory, ChatMessage, ChatSession } from '../../../src/core/utils/chat-history';
 import {

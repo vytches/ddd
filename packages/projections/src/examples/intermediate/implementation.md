@@ -1,9 +1,9 @@
 # Intermediate Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 intermediate **Domain**: Event Sourcing **Patterns**: Advanced implementation
 strategies, production patterns, optimization techniques **Dependencies**:
-@vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/utils
+@vytches/ddd-projections, @vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -37,9 +37,9 @@ import {
   ProjectionSharding,
   ProjectionMetrics,
   ProjectionHealthCheck,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventStore } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventStore } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   ProjectionConfig,
   ShardingStrategy,

@@ -1,7 +1,7 @@
 # Basic Domain Primitives Use Cases
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Category**: Use Cases
 
@@ -25,7 +25,7 @@ import {
   DefaultActorType,
   NotFoundError,
   InvalidParameterError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { UserData, AuditEntry } from '../types';
 
 // Domain-specific errors for e-commerce

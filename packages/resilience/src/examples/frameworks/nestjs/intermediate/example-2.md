@@ -1,9 +1,9 @@
 # Adaptive Resilience with Health Monitoring - NestJS Intermediate Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Intermediate **Domain**: Health-Aware Service Management
 **Patterns**: Adaptive Resilience, Health Monitoring, Performance Optimization
-**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches-ddd/resilience
+**Dependencies**: @nestjs/common, @nestjs/schedule, @vytches/ddd-resilience
 
 ## Description
 
@@ -31,7 +31,7 @@ import {
   HealthAwareStrategy,
   AdaptiveTimeoutStrategy,
   SmartCircuitBreaker,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { ServiceRequest, AdaptationMetrics, HealthSnapshot } from './types'; // From your application
 
 @Injectable()

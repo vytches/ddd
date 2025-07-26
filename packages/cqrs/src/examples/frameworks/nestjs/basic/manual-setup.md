@@ -4,14 +4,14 @@
 instantiation  
 **Base Example**: [Command Handlers](../../../basic/example-1.md),
 [Query Handlers](../../../basic/example-2.md)  
-**Dependencies**: @nestjs/common, @vytches-ddd/cqrs
+**Dependencies**: @nestjs/common, @vytches/ddd-cqrs
 
 ## Service Implementation
 
 ```typescript
 // user.service.ts
 import { Injectable } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import {
   CreateUserCommand,
   UpdateUserCommand,
@@ -49,7 +49,7 @@ export class UserService {
    */
   async createUser(userData: CreateUserData): Promise<User> {
     try {
-      // ✅ FOCUS: Command execution through @vytches-ddd/cqrs
+      // ✅ FOCUS: Command execution through @vytches/ddd-cqrs
       const command = new CreateUserCommand(
         userData.email,
         userData.name,
@@ -167,7 +167,7 @@ export class UserService {
    */
   private async initializeHandlers(): Promise<void> {
     // Register command handlers manually
-    // In production, use automatic discovery through @vytches-ddd/di
+    // In production, use automatic discovery through @vytches/ddd-di
 
     // Note: Handler registration would typically be done through
     // dependency injection and automatic discovery. This manual
@@ -175,7 +175,7 @@ export class UserService {
 
     console.log('🔧 CQRS handlers initialized manually');
     console.log(
-      '💡 For production, consider using @vytches-ddd/di for automatic discovery'
+      '💡 For production, consider using @vytches/ddd-di for automatic discovery'
     );
   }
 }
@@ -373,7 +373,7 @@ export class UserModule {}
 For production applications, consider upgrading to the
 [DI Integration](../intermediate/di-integration.md) approach which provides:
 
-- Automatic handler discovery through @vytches-ddd/di
+- Automatic handler discovery through @vytches/ddd-di
 - Advanced middleware pipeline support
 - Better separation of concerns
 - Enhanced performance monitoring

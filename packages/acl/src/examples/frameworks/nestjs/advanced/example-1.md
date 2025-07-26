@@ -1,7 +1,7 @@
 # NestJS Enterprise ACL Orchestration with Global Coordination
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise ACL orchestration with VytchesDDD DI and global
@@ -23,13 +23,13 @@ resolution, and automatic adaptation to changing external schemas.
 
 ```typescript
 // enterprise-acl-orchestrator.service.ts - VytchesDDD DI managed service
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   EnterpriseACLOrchestrator,
   GlobalEventMesh,
   AIIntelligentACL,
-} from '@vytches-ddd/acl';
-import { Resilience } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-acl';
+import { Resilience } from '@vytches/ddd-resilience';
 import { Customer, Order, Product } from '../types'; // From your application
 
 @DomainService({
@@ -99,7 +99,7 @@ export class EnterpriseACLOrchestratorService extends EnterpriseACLOrchestrator 
 
 // global-integration-bridge.service.ts - NestJS bridge service
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseACLOrchestratorService } from './enterprise-acl-orchestrator.service';
 import { GlobalIntegrationOperation } from '../types'; // From your application
 
@@ -159,7 +159,7 @@ export class GlobalIntegrationController {
 
 // enterprise-integration.module.ts - NestJS module with VytchesDDD integration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { GlobalIntegrationController } from './global-integration.controller';
 import { GlobalIntegrationBridgeService } from './global-integration-bridge.service';
 

@@ -1,8 +1,8 @@
 # Advanced Event Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**:
 Intermediate **Domain**: Foundation **Patterns**: event-persistence,
-event-replay, event-store-interfaces **Dependencies**: @vytches-ddd/contracts
+event-replay, event-store-interfaces **Dependencies**: @vytches/ddd-contracts
 
 ## Description
 
@@ -31,7 +31,7 @@ import {
   EventStoreOptions,
   StoredEvent,
   StreamMetadata,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Core event store implementation
 export class AdvancedEventStore implements IEventStore {
@@ -215,7 +215,7 @@ class ConcurrencyError extends Error {
 
 ```typescript
 // src/infrastructure/events/persistence-handler.ts
-import { IEventPersistenceHandler, IDomainEvent } from '@vytches-ddd/contracts';
+import { IEventPersistenceHandler, IDomainEvent } from '@vytches/ddd-contracts';
 
 export class DatabaseEventPersistenceHandler
   implements IEventPersistenceHandler
@@ -358,7 +358,7 @@ import {
   IEventReplay,
   ReplayOptions,
   ReplayResult,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 export class EventReplayService implements IEventReplay {
   constructor(

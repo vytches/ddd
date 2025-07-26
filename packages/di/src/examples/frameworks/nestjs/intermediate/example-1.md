@@ -1,11 +1,11 @@
 # NestJS Bridge Pattern Implementation - Intermediate Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: intermediate  
 **Domain**: E-commerce Platform  
 **Patterns**: Bridge Pattern, Double Instance Prevention, Advanced Integration  
-**Dependencies**: @vytches-ddd/di, @nestjs/common
+**Dependencies**: @vytches/ddd-di, @nestjs/common
 
 ## Description
 
@@ -26,7 +26,7 @@ consistency.
 
 ```typescript
 // domain/product-domain.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Product, CreateProductData, UpdateProductData } from '../types'; // Import from application
 
 /**
@@ -159,7 +159,7 @@ export class ProductDomainService {
 
 ```typescript
 // domain/inventory-domain.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 /**
  * Inventory domain service
@@ -225,7 +225,7 @@ export class InventoryDomainService {
 
 ```typescript
 // bridge/vytches-ddd-bridge.ts
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Bridge utility for VytchesDDD integration
@@ -534,7 +534,7 @@ export class InventoryController {
 ```typescript
 // nestjs/product.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { VytchesDDDBridge } from '../bridge/vytches-ddd-bridge';
 import { ProductController } from './product.controller';
 import { InventoryController } from './inventory.controller';
@@ -595,7 +595,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductService } from '../nestjs/product.service';
 import { InventoryService } from '../nestjs/inventory.service';
 import { ProductModule } from '../nestjs/product.module';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { ProductDomainService } from '../domain/product-domain.service';
 import { InventoryDomainService } from '../domain/inventory-domain.service';
 import { CreateProductData } from '../types'; // Import from application

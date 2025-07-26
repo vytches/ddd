@@ -1,6 +1,6 @@
 # NestJS Real-time Quality Monitoring - VytchesDDD DI
 
-**Package**: @vytches-ddd/validation  
+**Package**: @vytches/ddd-validation  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Real-time global data quality monitoring with streaming analytics and
@@ -18,14 +18,14 @@ enterprise-scale monitoring capabilities.
 ```typescript
 // real-time-quality-monitor.service.ts
 import { Injectable } from '@nestjs/common';
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   GlobalDataQualityMonitor,
   StreamingQualityProcessor,
   QualityPredictor,
   DataQualityMetrics,
   ValidationMetrics,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { QualityStreamConfig, QualityAlert, RemediationAction } from './types'; // From your application
 
 // Real-time quality monitoring service with VytchesDDD DI
@@ -696,7 +696,7 @@ export class QualityMonitoringController {
 import { Module, OnModuleInit } from '@nestjs/common';
 import { QualityMonitoringController } from './quality-monitoring.controller';
 import { RealTimeQualityBridgeService } from './real-time-quality-bridge.service';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Module({
   controllers: [QualityMonitoringController],

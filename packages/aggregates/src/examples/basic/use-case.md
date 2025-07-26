@@ -1,6 +1,6 @@
 # Basic Aggregate Use Cases - Real-World Applications
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Basic
 **Domain**: Cross-Industry Applications
 
 ## Overview

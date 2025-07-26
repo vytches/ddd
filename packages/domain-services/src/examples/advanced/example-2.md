@@ -1,8 +1,8 @@
 # Resilient Domain Service - Advanced Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 advanced **Domain**: order-management **Patterns**: domain-service, resilience,
-fault-tolerance **Dependencies**: @vytches-ddd/core, @vytches-ddd/resilience
+fault-tolerance **Dependencies**: @vytches/ddd-core, @vytches/ddd-resilience
 
 ## Description
 
@@ -22,7 +22,7 @@ degradation.
 
 ````typescript
 // resilient-order.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
 import {
   CircuitBreaker,
   RetryPolicy,
@@ -30,8 +30,8 @@ import {
   TimeoutStrategy,
   ResiliencePolicyBuilder,
   CompositeResilienceStrategy,
-} from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   Customer,

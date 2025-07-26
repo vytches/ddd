@@ -1,8 +1,8 @@
 # Error Aggregation Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: intermediate
 **Domain**: Infrastructure **Patterns**: Error collection, validation
-aggregation, bulk processing **Dependencies**: @vytches-ddd/utils
+aggregation, bulk processing **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ issues rather than just the first error encountered.
 
 ```typescript
 // error-aggregation-patterns.ts
-import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
+import { Result, safeRun, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

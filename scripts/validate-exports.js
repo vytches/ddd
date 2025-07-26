@@ -80,10 +80,10 @@ function validateImportPaths() {
   console.log('🔗 Validating import paths...');
 
   const importTests = [
-    `import { ValueObject } from '@vytches-ddd/core';`,
-    `import { DomainEvent } from '@vytches-ddd/events';`,
-    `import { CommandBus } from '@vytches-ddd/cqrs';`,
-    `import * as Enterprise from '@vytches-ddd/enterprise';`,
+    `import { ValueObject } from '@vytches/ddd-core';`,
+    `import { DomainEvent } from '@vytches/ddd-events';`,
+    `import { CommandBus } from '@vytches/ddd-cqrs';`,
+    `import * as Enterprise from '@vytches/ddd-enterprise';`,
   ];
 
   // Create temporary test file

@@ -1,6 +1,6 @@
 # Enterprise Domain Orchestration - Advanced Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 advanced **Domain**: Domain Orchestration **Patterns**: Domain Orchestration,
 Event-Driven Architecture, CQRS Integration, Cross-Domain Communication
 **Dependencies**: BaseError, IDomainError, IActor, Error Enums, Actor Error
@@ -30,7 +30,7 @@ import {
   ActorError,
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import {
   DomainContext,
   CrossDomainEvent,
@@ -1260,7 +1260,7 @@ export class EnterpriseDomainOrchestrator {
 
 ```typescript
 // cross-domain-event-bridge.ts
-import { IActor } from '@vytches-ddd/domain-primitives';
+import { IActor } from '@vytches/ddd-domain-primitives';
 import {
   CrossDomainEvent,
   EventBridgeConfig,

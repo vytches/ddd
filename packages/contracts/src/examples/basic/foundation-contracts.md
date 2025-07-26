@@ -1,8 +1,8 @@
 # Foundation Contracts
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**: Basic
 **Domain**: Foundation **Patterns**: specifications, actors,
-foundation-interfaces **Dependencies**: @vytches-ddd/contracts
+foundation-interfaces **Dependencies**: @vytches/ddd-contracts
 
 ## Description
 
@@ -24,7 +24,7 @@ making the codebase maintainable and the architecture predictable.
 
 ```typescript
 // src/domain/specifications/specification-foundation.ts
-import { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 
 // Simple business rule specification
 export class EmailValidationSpecification implements ISpecification<string> {
@@ -132,7 +132,7 @@ interface User {
 
 ```typescript
 // src/domain/specifications/async-specifications.ts
-import { IAsyncSpecification } from '@vytches-ddd/contracts';
+import { IAsyncSpecification } from '@vytches/ddd-contracts';
 
 // Async specification for external validation
 export class UniqueEmailSpecification implements IAsyncSpecification<string> {
@@ -297,7 +297,7 @@ export class UserRegistrationValidator {
 
 ```typescript
 // src/domain/actors/actor-foundation.ts
-import { IActor } from '@vytches-ddd/contracts';
+import { IActor } from '@vytches/ddd-contracts';
 
 // System actor for automated processes
 export class SystemActor implements IActor {
@@ -563,7 +563,7 @@ export class ActorAwareDomainService {
 
 ```typescript
 // src/domain/repositories/repository-contracts.ts
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 
 // Base repository interface
 export interface IBaseRepository<T> {

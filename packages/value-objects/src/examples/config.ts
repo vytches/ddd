@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const packageExampleConfig: PackageExampleConfig = {
   packageName: 'value-objects',
@@ -7,7 +7,7 @@ export const packageExampleConfig: PackageExampleConfig = {
   description: 'Domain-driven value objects with validation, immutability, and business logic',
   domain: 'Core',
   patterns: ['value-object', 'immutability', 'factory-pattern'],
-  dependencies: ['@vytches-ddd/domain-primitives', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-domain-primitives', '@vytches/ddd-utils'],
 
   complexityLevels: {
     basic: {

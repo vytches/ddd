@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { Result, safeRun } from '@vytches-ddd/utils';
+import { Result, safeRun } from '@vytches/ddd-utils';
 import { ACLError, BaseACLMiddleware } from '../src';
 import type { ACLMiddleware, ExecuteOptions } from '../src';
 

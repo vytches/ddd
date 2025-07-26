@@ -1,6 +1,6 @@
 # Advanced Aggregate Use Cases - Enterprise-Scale Complex Scenarios
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Advanced
 **Domain**: Enterprise-Scale Global Operations
 
 ## Overview

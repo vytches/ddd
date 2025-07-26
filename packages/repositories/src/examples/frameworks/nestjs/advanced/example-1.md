@@ -3,8 +3,8 @@
 **Focus**: Enterprise-scale distributed repository patterns in NestJS with
 manual setup **Base Example**:
 [Distributed Event-Sourced Repository](../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories,
-@vytches-ddd/events
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches/ddd-repositories,
+@vytches/ddd-events
 
 ## Service Implementation
 
@@ -16,7 +16,7 @@ import {
   GlobalConsistencyManager,
   CrossRegionReplicator,
   AIEnhancedRepository,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import {

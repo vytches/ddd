@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 

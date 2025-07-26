@@ -1,9 +1,9 @@
 # Health Check Integration with Resilience Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**:
 Intermediate **Domain**: Microservices Health Management **Patterns**: Health
 Check Integration, Service Discovery, Adaptive Resilience **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -30,7 +30,7 @@ import {
   ResilienceContext,
   HealthCheckResult,
   ServiceDiscovery,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   HealthStatus,
   DependencyHealth,

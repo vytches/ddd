@@ -3,15 +3,15 @@
 **Focus**: Enterprise blockchain operations with NestJS integration **Base
 Example**:
 [Enterprise Blockchain Transaction Orchestrator](../../advanced/example-3.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Advanced Service Implementation
 
 ```typescript
 // blockchain-orchestrator.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   BlockchainNetwork,
   SmartContractAddress,
@@ -345,7 +345,7 @@ export class BlockchainOrchestratorService {
 
 // blockchain-orchestrator.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { BlockchainOrchestratorService } from './blockchain-orchestrator.service';
 
 @Module({

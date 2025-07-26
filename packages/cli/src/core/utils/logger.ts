@@ -1,10 +1,10 @@
 /**
- * @llm-summary Logger instance from @vytches-ddd/logging for CLI operations
+ * @llm-summary Logger instance from @vytches/ddd-logging for CLI operations
  * @llm-domain Infrastructure
  * @llm-complexity Simple
  *
  * @description
- * Re-export of Logger from @vytches-ddd/logging package with additional
+ * Re-export of Logger from @vytches/ddd-logging package with additional
  * success method for CLI operations.
  *
  * @example
@@ -20,7 +20,7 @@
  * @public
  */
 
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Create logger instance for CLI context
 const cliLogger = Logger.forContext('CLI');

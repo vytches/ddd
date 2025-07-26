@@ -1,6 +1,6 @@
 # NestJS Advanced Messaging Use Cases
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise-scale messaging architectures in NestJS applications

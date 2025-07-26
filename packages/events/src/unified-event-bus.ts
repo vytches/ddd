@@ -1,9 +1,9 @@
 import { BaseEventBus } from './base-event-bus';
-import type { IEventBus, BaseEventBusOptions } from '@vytches-ddd/contracts';
-import type { IDomainEvent } from '@vytches-ddd/contracts';
-import type { IAuditEvent } from '@vytches-ddd/contracts';
+import type { IEventBus, BaseEventBusOptions } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
+import type { IAuditEvent } from '@vytches/ddd-contracts';
 import type { IIntegrationEvent } from './integration/integration-event-interfaces';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import 'reflect-metadata';
 
 /**

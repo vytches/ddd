@@ -1,6 +1,6 @@
 # Simple Event Scheduling - Basic Usage
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 basic **Domain**: Scheduling **Patterns**: event-scheduling, delayed-execution,
 job-management
 
@@ -22,8 +22,8 @@ precise timing control.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { DomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-event-scheduling';
+import { DomainEvent } from '@vytches/ddd-events';
 import { OrderData, NotificationData } from './types'; // From your app
 
 // ⭐ FOCUS: Basic scheduled event implementation

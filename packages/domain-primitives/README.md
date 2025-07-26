@@ -1,7 +1,7 @@
-# @vytches-ddd/domain-primitives
+# @vytches/ddd-domain-primitives
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/domain-primitives
+Package: @vytches/ddd-domain-primitives
 Category: Foundation
 Purpose: Core domain-driven design primitives including base classes, entities, value objects, and domain services
 Dependencies: None (foundation package)
@@ -10,7 +10,7 @@ DDD Patterns: Entity, Value Object, Domain Service, Aggregate Root, Repository, 
 Integration Points: All other packages depend on this foundation
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fdomain-primitives.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fdomain-primitives)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-domain-primitives.svg)](https://badge.fury.io/js/%40vytches%2Fddd-domain-primitives)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -42,13 +42,13 @@ foundation package that all other VytchesDDD packages depend on.
 
 ```bash
 # npm
-npm install @vytches-ddd/domain-primitives
+npm install @vytches/ddd-domain-primitives
 
 # yarn
-yarn add @vytches-ddd/domain-primitives
+yarn add @vytches/ddd-domain-primitives
 
 # pnpm
-pnpm add @vytches-ddd/domain-primitives
+pnpm add @vytches/ddd-domain-primitives
 ```
 
 ### Peer Dependencies
@@ -173,7 +173,7 @@ interface IAggregateRoot {
 ### 1. Creating an Entity
 
 ```typescript
-import { Entity } from '@vytches-ddd/domain-primitives';
+import { Entity } from '@vytches/ddd-domain-primitives';
 
 class User extends Entity<string> {
   private _name: string;
@@ -222,7 +222,7 @@ class User extends Entity<string> {
 ### 2. Creating a Value Object
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/domain-primitives';
+import { ValueObject } from '@vytches/ddd-domain-primitives';
 
 class Money extends ValueObject {
   constructor(
@@ -273,7 +273,7 @@ class Money extends ValueObject {
 ### 3. Creating a Domain Service
 
 ```typescript
-import { IDomainService } from '@vytches-ddd/domain-primitives';
+import { IDomainService } from '@vytches/ddd-domain-primitives';
 
 class OrderProcessingService implements IDomainService {
   readonly serviceName = 'OrderProcessingService';
@@ -317,7 +317,7 @@ class OrderProcessingService implements IDomainService {
 ### Base Entity Class
 
 ```typescript
-import { Entity, EntityId } from '@vytches-ddd/domain-primitives';
+import { Entity, EntityId } from '@vytches/ddd-domain-primitives';
 
 abstract class Entity<TId = EntityId> {
   protected constructor(protected _id: TId) {}
@@ -1497,20 +1497,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/domain-primitives
+pnpm build --filter=@vytches/ddd-domain-primitives
 
 # Run tests
-pnpm test --filter=@vytches-ddd/domain-primitives
+pnpm test --filter=@vytches/ddd-domain-primitives
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/domain-primitives
+pnpm dev --filter=@vytches/ddd-domain-primitives
 ```
 
 ## 📄 License
@@ -1520,7 +1520,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

@@ -1,16 +1,16 @@
-# @vytches-ddd/value-objects
+# @vytches/ddd-value-objects
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/value-objects
+Package: @vytches/ddd-value-objects
 Category: Foundation
 Purpose: Common value object implementations including EntityId, Money, Email, and other domain value objects
-Dependencies: @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+Dependencies: @vytches/ddd-domain-primitives, @vytches/ddd-contracts
 Complexity: Medium
 DDD Patterns: Value Object, Entity Identifier, Domain Primitive
 Integration Points: Used by all domain models and aggregates
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fvalue-objects.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fvalue-objects)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-value-objects.svg)](https://badge.fury.io/js/%40vytches%2Fddd-value-objects)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ immutability, and rich behavior patterns.
 
 ```bash
 # npm
-npm install @vytches-ddd/value-objects
+npm install @vytches/ddd-value-objects
 
 # yarn
-yarn add @vytches-ddd/value-objects
+yarn add @vytches/ddd-value-objects
 
 # pnpm
-pnpm add @vytches-ddd/value-objects
+pnpm add @vytches/ddd-value-objects
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/contracts
+npm install @vytches/ddd-domain-primitives @vytches/ddd-contracts
 ```
 
 ## ✨ Key Features
@@ -127,7 +127,7 @@ processOrder(userId, orderId); // ❌ Type error
 ### 1. Using EntityId
 
 ```typescript
-import { EntityId } from '@vytches-ddd/value-objects';
+import { EntityId } from '@vytches/ddd-value-objects';
 
 // Create new UUID-based ID
 const id = EntityId.create();
@@ -155,7 +155,7 @@ console.log(id1.equals(id1)); // true
 ### 2. Using Money
 
 ```typescript
-import { Money } from '@vytches-ddd/value-objects';
+import { Money } from '@vytches/ddd-value-objects';
 
 // Create money values
 const price = new Money(99.99, 'USD');
@@ -179,7 +179,7 @@ console.log(total.format('en-EU')); // "108,49 $"
 ### 3. Using Email
 
 ```typescript
-import { Email } from '@vytches-ddd/value-objects';
+import { Email } from '@vytches/ddd-value-objects';
 
 // Create validated email
 const email = new Email('user@example.com');
@@ -205,7 +205,7 @@ console.log(email.isPersonalEmail()); // false (not gmail, yahoo, etc.)
 ### 4. Using Address
 
 ```typescript
-import { Address } from '@vytches-ddd/value-objects';
+import { Address } from '@vytches/ddd-value-objects';
 
 // Create address
 const address = new Address('123 Main St', 'Anytown', 'NY', '12345', 'USA');
@@ -234,7 +234,7 @@ try {
 ### Creation Methods
 
 ```typescript
-import { EntityId } from '@vytches-ddd/value-objects';
+import { EntityId } from '@vytches/ddd-value-objects';
 
 // UUID-based (default)
 const uuidId = EntityId.create();
@@ -319,7 +319,7 @@ findUser('string-id'); // ❌ Type error
 ### Creation and Basic Operations
 
 ```typescript
-import { Money } from '@vytches-ddd/value-objects';
+import { Money } from '@vytches/ddd-value-objects';
 
 // Create money values
 const price = new Money(99.99, 'USD');
@@ -418,7 +418,7 @@ console.log(
 ### Creation and Validation
 
 ```typescript
-import { Email } from '@vytches-ddd/value-objects';
+import { Email } from '@vytches/ddd-value-objects';
 
 // Valid email creation
 const email = new Email('user@example.com');
@@ -493,7 +493,7 @@ console.log(disposableEmail.isDisposableEmail()); // true
 ### Creation and Components
 
 ```typescript
-import { Address } from '@vytches-ddd/value-objects';
+import { Address } from '@vytches/ddd-value-objects';
 
 // Complete address
 const address = new Address(
@@ -574,7 +574,7 @@ console.log(ukAddress.isValidUKPostcode()); // true
 ### Creation and Validation
 
 ```typescript
-import { PhoneNumber } from '@vytches-ddd/value-objects';
+import { PhoneNumber } from '@vytches/ddd-value-objects';
 
 // US phone number
 const phoneNumber = new PhoneNumber('+1 (555) 123-4567');
@@ -635,7 +635,7 @@ console.log(intlMobile.getCountryCode()); // "44"
 ### Creation and Validation
 
 ```typescript
-import { DateRange } from '@vytches-ddd/value-objects';
+import { DateRange } from '@vytches/ddd-value-objects';
 
 // Create date range
 const startDate = new Date('2023-01-01');
@@ -703,7 +703,7 @@ const lastWeek = DateRange.lastWeek();
 ### Creating Custom Value Objects
 
 ```typescript
-import { ValueObject } from '@vytches-ddd/domain-primitives';
+import { ValueObject } from '@vytches/ddd-domain-primitives';
 
 // Custom value object for Social Security Number
 class SocialSecurityNumber extends ValueObject {
@@ -848,7 +848,7 @@ import {
   PhoneNumberValidator,
   CurrencyValidator,
   ZipCodeValidator,
-} from '@vytches-ddd/value-objects';
+} from '@vytches/ddd-value-objects';
 
 // Email validation
 const emailValidator = new EmailValidator();
@@ -1016,7 +1016,7 @@ class PersonName extends ValueObject {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { Money, Email, Address } from '@vytches-ddd/value-objects';
+import { Money, Email, Address } from '@vytches/ddd-value-objects';
 
 describe('Money', () => {
   it('should create money with valid amount and currency', () => {
@@ -1363,20 +1363,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/value-objects
+pnpm build --filter=@vytches/ddd-value-objects
 
 # Run tests
-pnpm test --filter=@vytches-ddd/value-objects
+pnpm test --filter=@vytches/ddd-value-objects
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/value-objects
+pnpm dev --filter=@vytches/ddd-value-objects
 ```
 
 ## 📄 License
@@ -1386,7 +1386,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

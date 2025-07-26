@@ -1,16 +1,16 @@
-# @vytches-ddd/projections
+# @vytches/ddd-projections
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/projections
+Package: @vytches/ddd-projections
 Category: Architecture
 Purpose: Event projections and read model capabilities with advanced features like snapshots, checkpoints, and rebuilding
-Dependencies: @vytches-ddd/core, @vytches-ddd/events
+Dependencies: @vytches/ddd-core, @vytches/ddd-events
 Complexity: High
 DDD Patterns: Event Projections, Read Models, CQRS, Event Sourcing, Snapshots
 Integration Points: Integrates with event stores, domain events, and CQRS query handlers; essential for read model maintenance
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fprojections.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fprojections)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-projections.svg)](https://badge.fury.io/js/%40vytches%2Fddd-projections)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -45,20 +45,20 @@ extensibility.
 
 ```bash
 # npm
-npm install @vytches-ddd/projections
+npm install @vytches/ddd-projections
 
 # yarn
-yarn add @vytches-ddd/projections
+yarn add @vytches/ddd-projections
 
 # pnpm
-pnpm add @vytches-ddd/projections
+pnpm add @vytches/ddd-projections
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependencies
-npm install @vytches-ddd/core @vytches-ddd/events
+npm install @vytches/ddd-core @vytches/ddd-events
 ```
 
 ## ✨ Key Features
@@ -149,7 +149,7 @@ interface IProjectionEngine<TReadModel> {
 ### Basic Projection
 
 ```typescript
-import { BaseProjection, ProjectionEngine } from '@vytches-ddd/projections';
+import { BaseProjection, ProjectionEngine } from '@vytches/ddd-projections';
 
 // Define read model
 interface UserStatsReadModel {
@@ -252,7 +252,7 @@ console.log('Current stats:', currentState);
 ### Basic Projection Engine
 
 ```typescript
-import { ProjectionEngine } from '@vytches-ddd/projections';
+import { ProjectionEngine } from '@vytches/ddd-projections';
 
 // Create engine
 const engine = new ProjectionEngine(projection, store);
@@ -275,7 +275,7 @@ await engine.reset();
 ### Enhanced Projection Engine
 
 ```typescript
-import { EnhancedProjectionEngine } from '@vytches-ddd/projections';
+import { EnhancedProjectionEngine } from '@vytches/ddd-projections';
 
 // Create enhanced engine with retry configuration
 const retryConfig = {
@@ -334,7 +334,7 @@ async function processEventStream(
 ### Basic Builder Usage
 
 ```typescript
-import { ProjectionBuilder } from '@vytches-ddd/projections';
+import { ProjectionBuilder } from '@vytches/ddd-projections';
 
 // Create projection engine using builder
 const engine = new ProjectionBuilder(projection, store)
@@ -354,7 +354,7 @@ import {
   CheckpointCapability,
   SnapshotProjectionCapability,
   CircuitBreakerCapability,
-} from '@vytches-ddd/projections';
+} from '@vytches/ddd-projections';
 
 // Create with custom capabilities
 const customCapability = new CustomLoggingCapability();
@@ -385,7 +385,7 @@ const engine = new ProjectionBuilder(projection, store)
 ### Checkpoint Capability
 
 ```typescript
-import { CheckpointCapability } from '@vytches-ddd/projections';
+import { CheckpointCapability } from '@vytches/ddd-projections';
 
 // Create checkpoint store
 class DatabaseCheckpointStore implements IProjectionCheckpointStore {
@@ -427,7 +427,7 @@ engine.addCapability(checkpointCapability);
 ### Snapshot Capability
 
 ```typescript
-import { SnapshotProjectionCapability } from '@vytches-ddd/projections';
+import { SnapshotProjectionCapability } from '@vytches/ddd-projections';
 
 // Create snapshot store
 class DatabaseSnapshotStore implements IProjectionSnapshotStore {
@@ -490,7 +490,7 @@ engine.addCapability(snapshotCapability);
 ### Circuit Breaker Capability
 
 ```typescript
-import { CircuitBreakerCapability } from '@vytches-ddd/projections';
+import { CircuitBreakerCapability } from '@vytches/ddd-projections';
 
 // Create circuit breaker
 const circuitBreaker = new CircuitBreakerCapability({
@@ -509,7 +509,7 @@ console.log('Circuit breaker state:', state); // CLOSED, OPEN, or HALF_OPEN
 ### Dead Letter Capability
 
 ```typescript
-import { DeadLetterCapability } from '@vytches-ddd/projections';
+import { DeadLetterCapability } from '@vytches/ddd-projections';
 
 // Create dead letter store
 class DatabaseDeadLetterStore implements IDeadLetterStore {
@@ -545,7 +545,7 @@ engine.addCapability(deadLetterCapability);
 ### Custom Capabilities
 
 ```typescript
-import { BaseProjectionCapability } from '@vytches-ddd/projections';
+import { BaseProjectionCapability } from '@vytches/ddd-projections';
 
 // Create custom capability
 class LoggingCapability extends BaseProjectionCapability {
@@ -589,7 +589,7 @@ engine.addCapability(loggingCapability);
 ### Basic Checkpoint Usage
 
 ```typescript
-import { CheckpointCapability } from '@vytches-ddd/projections';
+import { CheckpointCapability } from '@vytches/ddd-projections';
 
 // Create checkpoint store
 const checkpointStore = new DatabaseCheckpointStore();
@@ -667,7 +667,7 @@ async function recoverFromCheckpoint(
 ### Basic Snapshot Usage
 
 ```typescript
-import { SnapshotProjectionCapability } from '@vytches-ddd/projections';
+import { SnapshotProjectionCapability } from '@vytches/ddd-projections';
 
 // Create snapshot store
 const snapshotStore = new DatabaseSnapshotStore();
@@ -748,7 +748,7 @@ async function recoverFromSnapshot(
 ### Basic Rebuilding
 
 ```typescript
-import { ProjectionRebuilder } from '@vytches-ddd/projections';
+import { ProjectionRebuilder } from '@vytches/ddd-projections';
 
 // Create rebuilder
 const rebuilder = new ProjectionRebuilder(eventStore, engine, store);
@@ -830,7 +830,7 @@ const streamResult = await engine.rebuildFromStream(
 ### Retry Strategies
 
 ```typescript
-import { ExponentialBackoffStrategy } from '@vytches-ddd/projections';
+import { ExponentialBackoffStrategy } from '@vytches/ddd-projections';
 
 // Create custom retry strategy
 class CustomRetryStrategy implements IProjectionErrorStrategy {
@@ -986,7 +986,7 @@ class GlobalProjectionErrorHandler {
 ### CQRS Integration
 
 ```typescript
-import { QueryHandler } from '@vytches-ddd/cqrs';
+import { QueryHandler } from '@vytches/ddd-cqrs';
 
 // Query handler using projection
 @QueryHandler(GetUserStatsQuery)
@@ -1120,7 +1120,7 @@ class UserRepository {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ProjectionEngine } from '@vytches-ddd/projections';
+import { ProjectionEngine } from '@vytches/ddd-projections';
 
 describe('UserStatsProjection', () => {
   let projection: UserStatsProjection;
@@ -1212,7 +1212,7 @@ describe('UserStatsProjection', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SimpleTestHarness } from '@vytches-ddd/testing';
+import { SimpleTestHarness } from '@vytches/ddd-testing';
 
 describe('Projection Integration', () => {
   let harness: SimpleTestHarness;
@@ -1437,8 +1437,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

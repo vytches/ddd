@@ -1,6 +1,6 @@
 {
-  "name": "@vytches-ddd/cli",
-  "version": "0.4.2",
+  "name": "@vytches/ddd-cli",
+  "version": "0.4.3",
   "description": "Code generation tools and CLI framework",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/cli"
   },
   "scripts": {
@@ -46,18 +46,18 @@
     "cli": "tsx src/cli.ts"
   },
   "dependencies": {
-    "@vytches-ddd/logging": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^11.0.0",
     "handlebars": "^4.7.8"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*"
+    "@vytches/ddd-core": "workspace:*"
   },
   "devDependencies": {
     "@types/handlebars": "^4.1.0",
     "@types/yargs": "^17.0.33",
-    "@vytches-ddd/testing": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
     "eslint-plugin-jsdoc": "^51.3.4",
     "tsx": "^4.20.3",
     "typescript": "^5.0.0",

@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/validation",
+  "name": "@vytches/ddd-validation",
   "projectType": "library",
   "sourceRoot": "packages/validation/src",
   "targets": {

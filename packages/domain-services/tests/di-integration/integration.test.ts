@@ -3,10 +3,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import { VytchesDDD, SimpleContainer, ServiceLifetime } from '@vytches-ddd/di';
+import { safeRun } from '@vytches/ddd-utils';
+import { VytchesDDD, SimpleContainer, ServiceLifetime } from '@vytches/ddd-di';
 import { IBaseDomainService, DomainService } from '../../src';
-// DomainServiceDiscoveryPlugin moved to @vytches-ddd/di
+// DomainServiceDiscoveryPlugin moved to @vytches/ddd-di
 
 // Test services for integration
 @DomainService({
@@ -72,7 +72,7 @@ describe('Domain Services DI Integration', () => {
     contextContainer.registerInstance('contextDependency', { value: 'context-dependency' });
     VytchesDDD.configureContext('TestContext', contextContainer);
 
-    // Manually register services since DomainServiceDiscoveryPlugin was moved to @vytches-ddd/di
+    // Manually register services since DomainServiceDiscoveryPlugin was moved to @vytches/ddd-di
     // Register services with autoRegister: true
     container.register('testIntegrationService', TestIntegrationService, {
       lifetime: ServiceLifetime.Singleton,
@@ -160,7 +160,7 @@ describe('Domain Services DI Integration', () => {
   });
 
   describe.skip('Discovery plugin integration', () => {
-    // DomainServiceDiscoveryPlugin has been moved to @vytches-ddd/di
+    // DomainServiceDiscoveryPlugin has been moved to @vytches/ddd-di
     it('should discover correct number of DI-enhanced services', async () => {
       // const plugin = new DomainServiceDiscoveryPlugin();
       // const handlers = await plugin.discoverHandlers();

@@ -10,7 +10,7 @@ import type {
   IStoredDomainEvent,
   IAggregateSnapshot,
   IEventStoreAdapter,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 import { StreamNotFoundError, StreamDeletedError } from './errors';
 import { BaseEventStore } from './base-event-store';

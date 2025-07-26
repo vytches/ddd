@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/logging",
+  "name": "@vytches/ddd-logging",
   "projectType": "library",
   "sourceRoot": "packages/logging/src",
   "targets": {

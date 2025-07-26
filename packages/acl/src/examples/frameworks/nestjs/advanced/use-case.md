@@ -1,6 +1,6 @@
 # NestJS Advanced ACL Use Cases
 
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Advanced  
 **Focus**: Enterprise-scale ACL integration patterns in NestJS applications

@@ -1,8 +1,8 @@
 # Basic Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**: basic
 **Domain**: Event Sourcing **Patterns**: Real-world scenarios, business
-applications **Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+applications **Dependencies**: @vytches/ddd-projections, @vytches/ddd-events
 
 ## Description
 
@@ -30,8 +30,8 @@ valuable business insights.
 
 ```typescript
 // customer-dashboard-projection.ts
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import { UserData, OrderData, ServiceResponse } from '../types';
 
 // Business Requirement: Real-time customer dashboard showing:
@@ -200,8 +200,8 @@ export class CustomerDashboardProjection extends ProjectionBase<any> {
 
 ```typescript
 // saas-analytics-projection.ts
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 // Business Requirement: SaaS platform analytics showing:
 // - User engagement and feature usage
@@ -487,8 +487,8 @@ export class SaaSAnalyticsProjection extends ProjectionBase<any> {
 
 ```typescript
 // patient-care-projection.ts
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 // Business Requirement: Healthcare patient management showing:
 // - Patient medical history and records

@@ -1,22 +1,22 @@
 # Advanced Repository - NestJS DI Integration
 
-**Focus**: Enterprise-scale distributed repositories with @vytches-ddd/di
+**Focus**: Enterprise-scale distributed repositories with @vytches/ddd-di
 integration **Base Example**:
 [Distributed Event-Sourced Repository](../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/repositories, @vytches-ddd/di,
-@vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-repositories, @vytches/ddd-di,
+@vytches/ddd-events
 
 ## Service Implementation
 
 ```typescript
 // global-trading.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   DistributedEventSourcedRepository,
   AIEnhancedRepository,
   GlobalConsistencyManager
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 import {
   GlobalTradingAccount,
   GlobalTradeRequest,
@@ -33,7 +33,7 @@ export class GlobalTradingService {
   private readonly metricsCollector: EnterpriseMetricsCollector;
 
   constructor() {
-    // ⭐ FOCUS: Enterprise @vytches-ddd/di integration for global scale
+    // ⭐ FOCUS: Enterprise @vytches/ddd-di integration for global scale
     this.globalAccountRepository = VytchesDDD.resolve<DistributedEventSourcedRepository<GlobalTradingAccount>>(
       'globalAccountRepository'
     );
@@ -444,12 +444,12 @@ export class GlobalTradingService {
 
 ```typescript
 // enterprise-di.config.ts
-import { VytchesDDD, DomainService } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService } from '@vytches/ddd-di';
 import {
   DistributedEventSourcedRepository,
   AIEnhancedRepository,
   GlobalConsistencyManager
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 
 // Global distributed repository
 @DomainService('globalAccountRepository')
@@ -551,7 +551,7 @@ export class EnterpriseMetricsConfig {
 ```typescript
 // global-trading.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { GlobalTradingService } from './global-trading.service';
 import { GlobalTradingController } from './global-trading.controller';
 
@@ -575,7 +575,7 @@ export class GlobalTradingModule implements OnModuleInit {
 
 ## Key Points
 
-- Enterprise @vytches-ddd/di integration for global scale operations
+- Enterprise @vytches/ddd-di integration for global scale operations
 - AI-powered components managed through service locator pattern
 - Distributed consistency and global coordination through DI
 - Intelligent auto-scaling and optimization via DI-managed services

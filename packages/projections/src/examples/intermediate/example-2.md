@@ -1,9 +1,9 @@
 # Event Stream Processing
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 intermediate **Domain**: Event Sourcing **Patterns**: Stream processing,
-filtering, aggregations, windowing **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events, @vytches-ddd/utils
+filtering, aggregations, windowing **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -37,9 +37,9 @@ import {
   EventAggregator,
   WindowProcessor,
   PatternMatcher,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   OrderData,
   ProductData,

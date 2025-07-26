@@ -1,5 +1,5 @@
-import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { LibUtils } from '@vytches-ddd/utils';
+import type { IEventMetadata, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 
 /**
  * @llm-summary DomainEvent class for domain event operations

@@ -4,8 +4,8 @@ import type {
   IUnitOfWorkAware,
   IAsyncDomainService,
 } from './domain-service.interface';
-import type { IDomainEvent, IEventBus } from '@vytches-ddd/contracts';
-import type { IUnitOfWork } from '@vytches-ddd/core';
+import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
+import type { IUnitOfWork } from '@vytches/ddd-core';
 
 /**
  * @llm-summary BaseDomainService class for base domain service operations

@@ -1,9 +1,9 @@
 # Coordinates Value Object - Advanced Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Domain**: Geospatial & Location Services
 **Patterns**: Geometric Calculations, Distance Functions, Spatial Operations
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Dependencies**: @vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ location analytics.
 
 ```typescript
 // coordinates.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   CoordinatesData,
   BoundingBox,

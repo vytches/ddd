@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { IValidator, IValidationErrors } from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+import type { IValidator, IValidationErrors } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 import { ValidationError, ValidationErrors, BaseValidationAdapter, AdapterUtils } from '../../src';
 import { Validation } from '../../src/validation-facade';
 

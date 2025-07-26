@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import { BusinessRuleValidator } from '@vytches-ddd/validation';
-import type { ISpecification } from '@vytches-ddd/contracts';
+import { safeRun } from '@vytches/ddd-utils';
+import { BusinessRuleValidator } from '@vytches/ddd-validation';
+import type { ISpecification } from '@vytches/ddd-contracts';
 import {
   BusinessRuleValidatorAdapter,
   BusinessRuleValidatorPolicy,

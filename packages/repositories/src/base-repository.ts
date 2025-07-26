@@ -3,8 +3,8 @@ import type {
   IEventPersistenceHandler,
   IAggregateWithEvents,
   EntityId,
-} from '@vytches-ddd/contracts';
-import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-contracts';
+import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
 
 /**
  * @llm-summary VersionError class for version error operations

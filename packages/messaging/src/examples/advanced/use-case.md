@@ -1,6 +1,6 @@
 # Messaging Package - Advanced Use Cases
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Advanced  
 **Focus**: Enterprise-scale messaging architectures and complex integration
 patterns
@@ -20,7 +20,7 @@ processing millions of trades daily across different asset classes, currencies,
 and regulatory jurisdictions. The system requires ultra-low latency, guaranteed
 message delivery, and complex cross-border compliance.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // global-trading-mesh.ts
@@ -29,7 +29,7 @@ import {
   GlobalSagaCoordinator,
   StreamProcessor,
   LatencyOptimizedRouter,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 export class GlobalTradingPlatform {
   private eventMesh: EventMesh;
@@ -162,7 +162,7 @@ sensors, robots, and automated systems. The platform must coordinate production
 across facilities, optimize supply chains, and prevent quality issues through
 predictive maintenance.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // smart-manufacturing-platform.ts
@@ -171,7 +171,7 @@ import {
   StreamAggregator,
   PatternDetector,
   PredictiveAnalytics,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 export class SmartManufacturingPlatform {
   private cepEngine: ComplexEventProcessor;
@@ -380,7 +380,7 @@ across multiple cities, handling real-time routing, charging optimization,
 passenger requests, and emergency responses while ensuring safety and regulatory
 compliance.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // autonomous-fleet-management.ts
@@ -388,7 +388,7 @@ import {
   RealTimeStreamProcessor,
   GeospatialEventProcessor,
   EmergencyResponseCoordinator,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 export class AutonomousFleetPlatform {
   private streamProcessor: RealTimeStreamProcessor;

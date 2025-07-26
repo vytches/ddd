@@ -1,7 +1,7 @@
 /**
  * @fileoverview DI Package Example Types
  * @version 1.0.0
- * @package @vytches-ddd/di
+ * @package @vytches/ddd-di
  */
 
 /**

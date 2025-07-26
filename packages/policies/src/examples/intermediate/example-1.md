@@ -1,13 +1,13 @@
 # Policy Behaviors and Cross-Cutting Concerns
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Enterprise Applications  
 **Patterns**: policy-behavior-pattern, decorator-pattern,
 cross-cutting-concerns  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/resilience,
-@vytches-ddd/caching
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-resilience,
+@vytches/ddd-caching
 
 ## Description
 
@@ -35,8 +35,8 @@ import {
   BaseBusinessPolicy,
   PolicyRequest,
   PolicyViolation,
-} from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-policies';
+import { Result } from '@vytches/ddd-utils';
 import { CreditCheckService, ComplianceService } from '../types';
 
 /**
@@ -192,7 +192,7 @@ import {
   PolicyCachingBehavior,
   PolicyTemporalBehavior,
   PolicyContext,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import {
   CreditAssessmentPolicy,
   ComplianceValidationPolicy,
@@ -382,7 +382,7 @@ export function createComprehensiveLoanPolicy(services: {
 
 ```typescript
 // policy-behavior-examples.ts
-import { PolicyContext } from '@vytches-ddd/policies';
+import { PolicyContext } from '@vytches/ddd-policies';
 import {
   createEnhancedCreditPolicy,
   createComprehensiveLoanPolicy,

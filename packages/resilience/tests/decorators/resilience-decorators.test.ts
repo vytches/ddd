@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   CircuitBreakerDecorator as CircuitBreaker,
   RetryDecorator as Retry,

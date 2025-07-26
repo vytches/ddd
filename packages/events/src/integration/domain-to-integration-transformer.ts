@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IEventMetadata, IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import type { IActor } from '@vytches-ddd/core';
+import type { IEventMetadata, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IActor } from '@vytches/ddd-core';
 import type { IContextRouter } from './context-router';
 import type {
   IIntegrationEvent,

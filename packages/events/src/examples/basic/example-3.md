@@ -1,11 +1,11 @@
 # Context-Aware Event Processing
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Domain**: Multi-Tenant E-commerce  
 **Patterns**: context-filtering, multi-tenancy, event-routing  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -24,8 +24,8 @@ while maintaining code reuse.
 
 ````typescript
 // context-aware-events.ts
-import { DomainEvent, EventContext } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { DomainEvent, EventContext } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { OrderCreatedEventData, UserRegisteredEventData } from '../types';
 
 /**
@@ -118,7 +118,7 @@ export class UserRegisteredEventWithContext extends DomainEvent<UserRegisteredEv
 
 ````typescript
 // tenant-specific-handlers.ts
-import { EventHandler } from '@vytches-ddd/events';
+import { EventHandler } from '@vytches/ddd-events';
 import {
   OrderCreatedEventWithContext,
   UserRegisteredEventWithContext,
@@ -388,7 +388,7 @@ export class EuropeanUserOnboardingHandler {
 
 ````typescript
 // context-builder.ts
-import { EventContext } from '@vytches-ddd/events';
+import { EventContext } from '@vytches/ddd-events';
 
 /**
  * @llm-summary Builder for creating rich event contexts

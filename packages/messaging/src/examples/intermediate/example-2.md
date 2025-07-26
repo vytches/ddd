@@ -1,12 +1,12 @@
 # Event-Driven Message Routing
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Intermediate  
 **Domain**: Multi-Tenant SaaS Platform  
 **Patterns**: Message Routing, Content-Based Router, Message Enrichment  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
-@vytches-ddd/policies
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-events,
+@vytches/ddd-policies
 
 ## Description
 
@@ -30,8 +30,8 @@ import {
   RouteDefinition,
   MessageEnricher,
   RoutingContext,
-} from '@vytches-ddd/messaging';
-import { PolicyEngine, PolicyContext } from '@vytches-ddd/policies';
+} from '@vytches/ddd-messaging';
+import { PolicyEngine, PolicyContext } from '@vytches/ddd-policies';
 import { Customer, NotificationRequest } from './types';
 
 // Content-based router with policy integration

@@ -1,7 +1,7 @@
 # Domain Interface Patterns
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Category**: Interfaces
 
@@ -14,7 +14,7 @@ components.
 ## Core Domain Interfaces
 
 ```typescript
-import { IActor } from '@vytches-ddd/domain-primitives';
+import { IActor } from '@vytches/ddd-domain-primitives';
 import { DomainEntity, DomainEvent, Repository } from '../types';
 
 // ✅ Entity interface - Base for all domain entities

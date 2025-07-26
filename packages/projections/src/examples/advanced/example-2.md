@@ -1,9 +1,9 @@
 # AI-Enhanced Projections
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 advanced **Domain**: Event Sourcing **Patterns**: AI integration, machine
 learning, predictive analytics, anomaly detection **Dependencies**:
-@vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/utils, external ML
+@vytches/ddd-projections, @vytches/ddd-events, @vytches/ddd-utils, external ML
 services
 
 ## Description
@@ -40,9 +40,9 @@ import {
   PredictiveAnalytics,
   AnomalyDetector,
   IntelligentProcessor,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   AIModelConfig,
   MLPrediction,

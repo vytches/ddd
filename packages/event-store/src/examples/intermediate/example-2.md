@@ -1,9 +1,9 @@
 # Stream-Based Projections
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 intermediate **Domain**: Architecture **Patterns**: stream-processing,
 read-models, projection-building, cqrs-read-side **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/projections, @vytches-ddd/events
+@vytches/ddd-event-store, @vytches/ddd-projections, @vytches/ddd-events
 
 ## Description
 
@@ -26,10 +26,10 @@ of these views while keeping the write-side optimized for business operations.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 import { OrderSummaryProjection, CustomerOrderHistory } from './types'; // From your app
 
 // ⭐ FOCUS: Advanced projection engine with real-time updates

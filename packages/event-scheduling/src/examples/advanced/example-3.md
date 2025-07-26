@@ -1,6 +1,6 @@
 # Performance-Optimized Scheduling - Ultra-High Throughput and Low Latency
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 advanced **Domain**: Performance **Patterns**: high-throughput-scheduling,
 low-latency-execution, performance-optimization, batch-processing
 
@@ -25,9 +25,9 @@ reliability.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   PerformanceConfig,
   BatchProcessingConfig,

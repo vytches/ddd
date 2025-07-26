@@ -42,16 +42,16 @@ emerged:
 
 ## Decision
 
-We will adopt the **Meta-Package Pattern** for `@vytches-ddd/core`:
+We will adopt the **Meta-Package Pattern** for `@vytches/ddd-core`:
 
 ### Architecture
 
 ```text
-@vytches-ddd/core (1.4KB meta-package)
-├── @vytches-ddd/domain-primitives (40KB)
-├── @vytches-ddd/value-objects (36KB)
-├── @vytches-ddd/repositories (40KB)
-└── @vytches-ddd/aggregates (82KB)
+@vytches/ddd-core (1.4KB meta-package)
+├── @vytches/ddd-domain-primitives (40KB)
+├── @vytches/ddd-value-objects (36KB)
+├── @vytches/ddd-repositories (40KB)
+└── @vytches/ddd-aggregates (82KB)
 ```
 
 ### Implementation Strategy
@@ -64,12 +64,12 @@ We will adopt the **Meta-Package Pattern** for `@vytches-ddd/core`:
    - `repositories`: Repository patterns, UnitOfWork
    - `aggregates`: Aggregate root with capabilities
 
-2. **Meta-Package**: Create lightweight `@vytches-ddd/core` that re-exports
+2. **Meta-Package**: Create lightweight `@vytches/ddd-core` that re-exports
    stable APIs from internal packages
 
 3. **Import Strategy**:
 
-   - **External Consumers**: Always import from `@vytches-ddd/core`
+   - **External Consumers**: Always import from `@vytches/ddd-core`
    - **Internal Packages**: Import directly from specific packages to avoid
      circular dependencies
    - **Examples/Testing**: Can use either approach
@@ -83,11 +83,11 @@ We will adopt the **Meta-Package Pattern** for `@vytches-ddd/core`:
 
 ```typescript
 // External consumers - stable API
-import { AggregateRoot, EntityId, BaseError } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId, BaseError } from '@vytches/ddd-core';
 
 // Internal packages - direct imports
-import { IActor } from '@vytches-ddd/domain-primitives';
-import { EntityId } from '@vytches-ddd/value-objects';
+import { IActor } from '@vytches/ddd-domain-primitives';
+import { EntityId } from '@vytches/ddd-value-objects';
 ```
 
 ## Consequences

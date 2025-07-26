@@ -1,16 +1,16 @@
-# @vytches-ddd/policies
+# @vytches/ddd-policies
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/policies
+Package: @vytches/ddd-policies
 Category: Patterns
 Purpose: Business policy validation with fluent API, temporal support, and sophisticated business rule composition
-Dependencies: @vytches-ddd/domain-primitives, @vytches-ddd/validation, @vytches-ddd/utils
+Dependencies: @vytches/ddd-domain-primitives, @vytches/ddd-validation, @vytches/ddd-utils
 Complexity: High
 DDD Patterns: Policy Pattern, Specification Pattern, Business Rules, Validation
-Integration Points: @vytches-ddd/validation, @vytches-ddd/cqrs, @vytches-ddd/domain-services
+Integration Points: @vytches/ddd-validation, @vytches/ddd-cqrs, @vytches/ddd-domain-services
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fpolicies.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fpolicies)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-policies.svg)](https://badge.fury.io/js/%40vytches%2Fddd-policies)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ business rules with enterprise-grade context management.
 
 ```bash
 # npm
-npm install @vytches-ddd/policies
+npm install @vytches/ddd-policies
 
 # yarn
-yarn add @vytches-ddd/policies
+yarn add @vytches/ddd-policies
 
 # pnpm
-pnpm add @vytches-ddd/policies
+pnpm add @vytches/ddd-policies
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/domain-primitives @vytches-ddd/validation @vytches-ddd/utils
+npm install @vytches/ddd-domain-primitives @vytches/ddd-validation @vytches/ddd-utils
 ```
 
 ## ✨ Key Features
@@ -151,7 +151,7 @@ interface PolicyViolation {
 ### 1. Basic Policy Creation
 
 ```typescript
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
 import { AgeSpecification, EmailSpecification } from './specifications';
 
 // Create a basic policy
@@ -189,7 +189,7 @@ if (result.isFailure()) {
 ### 2. Conditional Policies
 
 ```typescript
-import { PolicyBuilder } from '@vytches-ddd/policies';
+import { PolicyBuilder } from '@vytches/ddd-policies';
 
 // Policy with conditional logic
 const orderPolicy = PolicyBuilder.create<Order>()
@@ -222,7 +222,7 @@ const result = await orderPolicy.check({ entity: order, context });
 ### 3. Policy Groups
 
 ```typescript
-import { PolicyGroup } from '@vytches-ddd/policies';
+import { PolicyGroup } from '@vytches/ddd-policies';
 
 // Create policy groups for complex logic
 const excellentCreditGroup = PolicyGroup.create<LoanApplication>(
@@ -372,7 +372,7 @@ result.violations.forEach(violation => {
 ### Business Hours Support
 
 ```typescript
-import { PolicyTemporalBehavior } from '@vytches-ddd/policies';
+import { PolicyTemporalBehavior } from '@vytches/ddd-policies';
 
 // Create temporal policy with business hours
 const temporalPolicy = PolicyTemporalBehavior.create(strictPolicy, {
@@ -434,7 +434,7 @@ const weekdayPolicy = PolicyBuilder.create<Transaction>()
 ### Complex Group Logic
 
 ```typescript
-import { PolicyGroup } from '@vytches-ddd/policies';
+import { PolicyGroup } from '@vytches/ddd-policies';
 
 // Create complex group hierarchies
 const creditCheckGroup = PolicyGroup.create<LoanApplication>('credit-check')
@@ -530,7 +530,7 @@ const applicantTypePolicy = PolicyBuilder.create<LoanApplication>()
 ### Retry Behavior
 
 ```typescript
-import { PolicyRetryBehavior } from '@vytches-ddd/policies';
+import { PolicyRetryBehavior } from '@vytches/ddd-policies';
 
 // Policy with retry logic for transient failures
 const retryPolicy = PolicyRetryBehavior.create(basePolicy, {
@@ -561,7 +561,7 @@ const result = await retryPolicy.check({ entity: user, context });
 ### Caching Behavior
 
 ```typescript
-import { PolicyCachingBehavior } from '@vytches-ddd/policies';
+import { PolicyCachingBehavior } from '@vytches/ddd-policies';
 
 // Policy with caching for performance
 const cachedPolicy = PolicyCachingBehavior.create(basePolicy, {
@@ -584,7 +584,7 @@ const result = await cachedPolicy.check({ entity: user, context });
 ### Temporal Behavior
 
 ```typescript
-import { PolicyTemporalBehavior } from '@vytches-ddd/policies';
+import { PolicyTemporalBehavior } from '@vytches/ddd-policies';
 
 // Time-aware policy behavior
 const temporalPolicy = PolicyTemporalBehavior.create(basePolicy, {
@@ -631,7 +631,7 @@ const result = await composedPolicy.check({ entity: user, context });
 ### Registration and Discovery
 
 ```typescript
-import { PolicyRegistry } from '@vytches-ddd/policies';
+import { PolicyRegistry } from '@vytches/ddd-policies';
 
 // Create policy registry
 const registry = new PolicyRegistry();
@@ -1000,7 +1000,7 @@ class UserRegistrationService implements IDomainService {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
 
 describe('UserValidationPolicy', () => {
   let policy: IPolicy<User>;
@@ -1240,20 +1240,20 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/PawelGozdz/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
 
 # Build package
-pnpm build --filter=@vytches-ddd/policies
+pnpm build --filter=@vytches/ddd-policies
 
 # Run tests
-pnpm test --filter=@vytches-ddd/policies
+pnpm test --filter=@vytches/ddd-policies
 
 # Run in development mode
-pnpm dev --filter=@vytches-ddd/policies
+pnpm dev --filter=@vytches/ddd-policies
 ```
 
 ## 📄 License
@@ -1263,7 +1263,6 @@ This project is licensed under the MIT License - see the
 
 ---
 
-**Part of the [@vytches-ddd](https://github.com/PawelGozdz/vytches-ddd)
-ecosystem**
+**Part of the [@vytches/ddd-core](https://github.com/vytches/ddd) ecosystem**
 
 For more information, visit the [main documentation](../../README.md).

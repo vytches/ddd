@@ -3,8 +3,8 @@ import type {
   IValidationRule as ValidationRule,
   IValidator,
   ISpecification,
-} from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
 

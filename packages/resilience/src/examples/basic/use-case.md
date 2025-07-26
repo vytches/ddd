@@ -1,9 +1,9 @@
 # Basic Resilience Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Basic
 **Domain**: Cross-Domain Applications **Patterns**: Foundational Resilience
 Patterns, Fault Tolerance, Service Protection **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 

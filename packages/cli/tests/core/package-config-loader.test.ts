@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import * as fs from 'fs/promises';
 import { PackageConfigLoader } from '../../src/core/package-config-loader';
 

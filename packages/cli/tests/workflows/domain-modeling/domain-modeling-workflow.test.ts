@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { DomainModelingWorkflow } from '../../../src/workflows/domain-modeling/domain-modeling-workflow';
 import type { DomainModelingOptions } from '../../../src/workflows/types';
 import { Colors } from '../../../src/core/utils/colors';

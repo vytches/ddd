@@ -1,5 +1,5 @@
 /**
- * @fileoverview Configuration system for @vytches-ddd/repositories examples
+ * @fileoverview Configuration system for @vytches/ddd-repositories examples
  *
  * This module provides comprehensive configuration management for all repository
  * examples, including framework integrations, performance settings, and
@@ -17,7 +17,7 @@
  * ```
  */
 
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 import { randomUUID } from 'crypto';
 
 // ===== TYPES AND INTERFACES =====

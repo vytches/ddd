@@ -341,7 +341,7 @@ export interface IEventStoreConfig {
   eventRetentionDays?: number;
 }
 
-// Event Store errors are now defined in the @vytches-ddd/event-store package
+// Event Store errors are now defined in the @vytches/ddd-event-store package
 // to follow the established error inheritance pattern
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { examplesCommand } from '../../src/commands/examples';
 import { DocumentationGenerator } from '../../src/generators/documentation-generator';
 import { DocumentationBundler } from '../../src/generators/documentation-bundler';
@@ -347,7 +347,7 @@ describe('examples command', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith('🔍 Found 2 examples for tag: policies:*');
       expect(mockConsoleLog).toHaveBeenCalledWith('🔹 example-1');
       expect(mockConsoleLog).toHaveBeenCalledWith('   Name: Basic Policy');
-      expect(mockConsoleLog).toHaveBeenCalledWith('   Package: @vytches-ddd/policies');
+      expect(mockConsoleLog).toHaveBeenCalledWith('   Package: @vytches/ddd-policies');
       expect(mockConsoleLog).toHaveBeenCalledWith('   Complexity: 🟢 basic');
       expect(mockConsoleLog).toHaveBeenCalledWith('   DI Support: ✅');
       expect(mockConsoleLog).toHaveBeenCalledWith('   Tags: policies:core');

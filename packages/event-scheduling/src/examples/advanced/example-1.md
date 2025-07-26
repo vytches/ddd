@@ -1,6 +1,6 @@
 # Enterprise Scheduling Platform - Global Multi-Region Coordination
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Complexity**:
 advanced **Domain**: Infrastructure **Patterns**: global-scheduling,
 multi-region-coordination, enterprise-architecture, disaster-recovery
 
@@ -24,9 +24,9 @@ market operations across time zones.
 import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   GlobalRegion,
   RegionConfig,

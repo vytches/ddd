@@ -66,7 +66,7 @@ export {
 } from './builders';
 
 // Re-export specification interfaces from contracts
-export type { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+export type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 
 // Specification adapters for integration
 export {
@@ -123,4 +123,4 @@ export {
 } from './events';
 
 // Common types from utils
-export type { Result } from '@vytches-ddd/utils';
+export type { Result } from '@vytches/ddd-utils';

@@ -1,12 +1,12 @@
 # External Service Integration with Policies
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Service Integration  
 **Patterns**: external-service-integration, circuit-breaker, adapter-pattern  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/resilience,
-@vytches-ddd/validation
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-resilience,
+@vytches/ddd-validation
 
 ## Description
 
@@ -27,10 +27,10 @@ conditions.
 
 ````typescript
 // external-service-policies.ts
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { IAsyncSpecification } from '@vytches-ddd/validation';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
+import { IAsyncSpecification } from '@vytches/ddd-validation';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 
 /**
  * @llm-summary External credit bureau service integration
@@ -478,8 +478,8 @@ export class ComplianceValidationService {
 
 ```typescript
 // external-service-policy-integration.ts
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { IAsyncSpecification } from '@vytches-ddd/validation';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
+import { IAsyncSpecification } from '@vytches/ddd-validation';
 import {
   CreditBureauService,
   FraudDetectionService,
@@ -802,7 +802,7 @@ export class ExternalServicePolicyFactory {
 
 ```typescript
 // external-service-monitoring.ts
-import { PolicyContext } from '@vytches-ddd/policies';
+import { PolicyContext } from '@vytches/ddd-policies';
 
 /**
  * @llm-summary External service monitoring and health management

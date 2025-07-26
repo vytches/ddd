@@ -1,4 +1,4 @@
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
   IPolicyComposer,

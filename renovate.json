@@ -19,7 +19,7 @@
       "groupName": "nx monorepo",
       "schedule": ["before 6am on the first day of the month"],
       "reviewersFromCodeOwners": true,
-      "assignees": ["@PawelGozdz"],
+      "assignees": ["@vytches-bot"],
       "addLabels": ["dependencies", "nx"]
     },
     {
@@ -28,7 +28,7 @@
       "groupName": "typescript",
       "schedule": ["before 6am on the first day of the month"],
       "reviewersFromCodeOwners": true,
-      "assignees": ["@PawelGozdz"],
+      "assignees": ["@vytches-bot"],
       "addLabels": ["dependencies", "typescript"],
       "minimumReleaseAge": "7 days"
     },
@@ -91,7 +91,7 @@
   "vulnerabilityAlerts": {
     "enabled": true,
     "schedule": ["at any time"],
-    "assignees": ["@PawelGozdz"],
+    "assignees": ["@vytches-bot"],
     "addLabels": ["security", "vulnerability"]
   },
   "lockFileMaintenance": {

@@ -205,7 +205,7 @@ registries:
 ### Basic Service Registration
 
 ```typescript
-import { DomainService } from '@vytches-ddd/domain-services';
+import { DomainService } from '@vytches/ddd-domain-services';
 
 // Simple auto-discovery
 @DomainService('userService')
@@ -223,7 +223,7 @@ class UserService extends BaseDomainService {
 ### Advanced Service Registration
 
 ```typescript
-import { DomainService, ServiceLifetime } from '@vytches-ddd/domain-services';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-domain-services';
 
 @DomainService({
   serviceId: 'orderService',
@@ -248,7 +248,7 @@ class OrderService extends EventAwareDomainService {
 ### System Setup
 
 ```typescript
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 // One-time setup with auto-discovery
 const container = new SimpleContainer();
@@ -288,7 +288,7 @@ class AdvancedService extends UnitOfWorkAwareDomainService {}
 ### Integration with CQRS
 
 ```typescript
-import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
 
 // Command handlers are also auto-discovered
 @CommandHandler(CreateUserCommand, {

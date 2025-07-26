@@ -1,9 +1,9 @@
 # Color Value Object - Advanced Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Domain**: Design Systems & Graphics **Patterns**:
 Color Representation, Format Conversion, Color Theory **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ accessibility validation.
 
 ```typescript
 // color.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   ColorData,
   RGBColor,

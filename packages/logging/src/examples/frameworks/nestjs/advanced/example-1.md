@@ -2,7 +2,7 @@
 
 **Focus**: Production-ready logging infrastructure with NestJS integration
 **Base Example**: [Enterprise Observability](../../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/logging, @vytches-ddd/di,
+**Dependencies**: @nestjs/common, @vytches/ddd-logging, @vytches/ddd-di,
 winston, pino
 
 ## Service Implementation
@@ -10,8 +10,8 @@ winston, pino
 ```typescript
 // logging-infrastructure.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Logger, LoggerConfig } from '@vytches-ddd/logging';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { Logger, LoggerConfig } from '@vytches/ddd-logging';
+import { VytchesDDD } from '@vytches/ddd-di';
 import type {
   LoggingInfrastructure,
   ProductionLogConfig,
@@ -27,7 +27,7 @@ export class ProductionLoggingService implements OnModuleInit, OnModuleDestroy {
   private metricsCollectionInterval?: NodeJS.Timeout;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for enterprise logging
+    // ⭐ FOCUS: @vytches/ddd-di integration for enterprise logging
     this.infrastructure = VytchesDDD.resolve<LoggingInfrastructure>(
       'loggingInfrastructure'
     );

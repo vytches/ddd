@@ -1,9 +1,9 @@
 # Intermediate Resilience Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**:
 Intermediate **Domain**: Enterprise Integration Scenarios **Patterns**: Advanced
 Resilience Integration, Adaptive Strategies, Health-Aware Systems
-**Dependencies**: @vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-resilience
 
 ## Description
 

@@ -1,6 +1,6 @@
 // Type definitions for event-scheduling examples
 
-import type { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
+import type { JobStatus, SchedulePriority } from '@vytches/ddd-contracts';
 
 // === BASIC EVENT SCHEDULING TYPES ===
 
@@ -340,4 +340,4 @@ export interface ValidationError extends Error {
 }
 
 // Re-export commonly used enums from contracts
-export { JobStatus, SchedulePriority } from '@vytches-ddd/contracts';
+export { JobStatus, SchedulePriority } from '@vytches/ddd-contracts';

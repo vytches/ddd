@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 
 import type { IRulesProvider } from '../src/rules-registry';
 import { CoreRules, RulesRegistry } from '../src/rules-registry';

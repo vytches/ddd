@@ -1,14 +1,14 @@
 # Basic Specification Pattern Implementation
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**: Basic
 **Domain**: User Management **Patterns**: Specification Pattern, Field
-Validation, Business Rules **Dependencies**: @vytches-ddd/validation,
-@vytches-ddd/core
+Validation, Business Rules **Dependencies**: @vytches/ddd-validation,
+@vytches/ddd-core
 
 ## Description
 
 This example demonstrates basic specification pattern implementation for user
-validation using the @vytches-ddd/validation package. It shows how to create
+validation using the @vytches/ddd-validation package. It shows how to create
 reusable specifications for common validation scenarios and combine them using
 logical operators.
 
@@ -27,7 +27,7 @@ import {
   BaseSpecification,
   ISpecification,
   SpecificationResult,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User } from './types'; // Import from your application
 
 // Email format specification

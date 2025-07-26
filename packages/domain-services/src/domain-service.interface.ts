@@ -1,5 +1,5 @@
-import type { IEventBus } from '@vytches-ddd/contracts';
-import type { IUnitOfWork } from '@vytches-ddd/core';
+import type { IEventBus } from '@vytches/ddd-contracts';
+import type { IUnitOfWork } from '@vytches/ddd-core';
 
 /**
  * @llm-summary Contract for domain service functionality

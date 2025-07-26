@@ -1,19 +1,19 @@
 # CQRS - NestJS DI Integration
 
-**Focus**: Advanced CQRS integration with @vytches-ddd/di for automatic handler
+**Focus**: Advanced CQRS integration with @vytches/ddd-di for automatic handler
 discovery  
 **Base Example**: [Command Handlers](../../../basic/example-1.md),
 [Event Integration](../../../intermediate/example-1.md)  
-**Dependencies**: @nestjs/common, @vytches-ddd/cqrs, @vytches-ddd/di,
-@vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-cqrs, @vytches/ddd-di,
+@vytches/ddd-events
 
 ## Service Implementation
 
 ```typescript
 // user.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import {
   CreateUserCommand,
   UpdateUserCommand,
@@ -26,7 +26,7 @@ import {
 } from './types'; // From your application
 
 /**
- * Advanced NestJS service with @vytches-ddd/di integration
+ * Advanced NestJS service with @vytches/ddd-di integration
  * for automatic handler discovery and enterprise-grade CQRS patterns.
  */
 @Injectable()
@@ -35,7 +35,7 @@ export class UserService implements OnModuleInit {
   private queryBus: QueryBus;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for enterprise patterns
+    // ⭐ FOCUS: @vytches/ddd-di integration for enterprise patterns
     this.commandBus = VytchesDDD.resolve<CommandBus>('commandBus');
     this.queryBus = VytchesDDD.resolve<QueryBus>('queryBus');
   }
@@ -285,14 +285,14 @@ export class UserService implements OnModuleInit {
 ```typescript
 // user-cqrs.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 
 /**
- * Advanced CQRS module with @vytches-ddd/di integration
+ * Advanced CQRS module with @vytches/ddd-di integration
  * for automatic handler discovery and enterprise patterns.
  */
 @Module({
@@ -724,7 +724,7 @@ export class UserController {
 
 ## Key Points
 
-- **Enterprise DI Integration**: Uses @vytches-ddd/di for automatic handler
+- **Enterprise DI Integration**: Uses @vytches/ddd-di for automatic handler
   discovery and service resolution
 - **Automatic Handler Registration**: Command and query handlers discovered
   automatically through decorators

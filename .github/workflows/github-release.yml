@@ -76,7 +76,7 @@ jobs:
 
             ### 🚀 Installation
             ```bash
-            npm install @vytches-ddd/core --registry=https://npm.pkg.github.com
+            npm install @vytches/ddd-core --registry=https://npm.pkg.github.com
             ```
 
             ### 📋 Package Versions in this Release:
@@ -86,7 +86,7 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
 
             ### 📚 Documentation
-            See [README.md](https://github.com/PawelGozdz/vytches-ddd) for complete documentation.
+            See [README.md](https://github.com/vytches/ddd) for complete documentation.
           files: |
             release-assets/vytches-ddd-packages.tar.gz
             release-assets/vytches-ddd-packages.zip

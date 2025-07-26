@@ -1,16 +1,16 @@
-# @vytches-ddd/event-store
+# @vytches/ddd-event-store
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/event-store
+Package: @vytches/ddd-event-store
 Category: Infrastructure
 Purpose: Enterprise-grade Event Store with Event Sourcing support, stream-based storage, snapshots, and optimistic concurrency control
-Dependencies: @vytches-ddd/core, @vytches-ddd/logging
+Dependencies: @vytches/ddd-core, @vytches/ddd-logging
 Complexity: High
 DDD Patterns: Event Sourcing, Aggregate Streams, Snapshots, Optimistic Concurrency Control, Event Replay
 Integration Points: Essential for CQRS, Event Sourcing, and projection rebuilding; integrates with aggregates, repositories, and event systems
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fevent-store.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fevent-store)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-event-store.svg)](https://badge.fury.io/js/%40vytches%2Fddd-event-store)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -47,20 +47,20 @@ applications.
 
 ```bash
 # npm
-npm install @vytches-ddd/event-store
+npm install @vytches/ddd-event-store
 
 # yarn
-yarn add @vytches-ddd/event-store
+yarn add @vytches/ddd-event-store
 
 # pnpm
-pnpm add @vytches-ddd/event-store
+pnpm add @vytches/ddd-event-store
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependencies
-npm install @vytches-ddd/core @vytches-ddd/logging
+npm install @vytches/ddd-core @vytches/ddd-logging
 ```
 
 ## ✨ Key Features
@@ -179,8 +179,8 @@ interface IStreamMetadata {
 ### Basic Usage
 
 ```typescript
-import { InMemoryEventStore } from '@vytches-ddd/event-store';
-import type { IStoredDomainEvent } from '@vytches-ddd/contracts';
+import { InMemoryEventStore } from '@vytches/ddd-event-store';
+import type { IStoredDomainEvent } from '@vytches/ddd-contracts';
 
 // Create event store
 const eventStore = new InMemoryEventStore({
@@ -245,7 +245,7 @@ console.log('All events:', allEvents.events);
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
+} from '@vytches/ddd-event-store';
 
 // Create with custom configuration
 const eventStore = new InMemoryEventStore({
@@ -327,7 +327,7 @@ const backwardStream = await eventStore.readStream('order-1', {
 ### Appending with Concurrency Control
 
 ```typescript
-import { EventStoreConcurrencyError } from '@vytches-ddd/event-store';
+import { EventStoreConcurrencyError } from '@vytches/ddd-event-store';
 
 try {
   // Append with expected version
@@ -368,7 +368,7 @@ async function handleConcurrencyConflict(error: EventStoreConcurrencyError) {
 ### Stream Deletion
 
 ```typescript
-import { StreamDeletedError } from '@vytches-ddd/event-store';
+import { StreamDeletedError } from '@vytches/ddd-event-store';
 
 try {
   // Soft delete stream
@@ -536,7 +536,7 @@ await advancedReplay.endSession(sessionId);
 ### Event Replay Factory
 
 ```typescript
-import { EventReplayFactory } from '@vytches-ddd/event-store';
+import { EventReplayFactory } from '@vytches/ddd-event-store';
 
 // Create factory
 const replayFactory = new EventReplayFactory(eventStore);
@@ -562,7 +562,7 @@ await eventStore.replayAll(async event => {
 ### In-Memory Event Store
 
 ```typescript
-import { InMemoryEventStore } from '@vytches-ddd/event-store';
+import { InMemoryEventStore } from '@vytches/ddd-event-store';
 
 // Perfect for development and testing
 const eventStore = new InMemoryEventStore({
@@ -587,7 +587,7 @@ console.log('Connected:', eventStore.isConnected());
 ### Database Event Store (Production)
 
 ```typescript
-import { PostgreSQLEventStore } from '@vytches-ddd/event-store';
+import { PostgreSQLEventStore } from '@vytches/ddd-event-store';
 import { DataSource } from 'typeorm';
 
 // Create data source
@@ -627,7 +627,7 @@ await eventStore.connect();
 ### Custom Storage Adapter
 
 ```typescript
-import { BaseEventStore } from '@vytches-ddd/event-store';
+import { BaseEventStore } from '@vytches/ddd-event-store';
 
 class CustomEventStore extends BaseEventStore {
   async appendToStream(
@@ -713,7 +713,7 @@ async function appendWithRetry(
 ### Handling Concurrency Conflicts
 
 ```typescript
-import { EventStoreConcurrencyError } from '@vytches-ddd/event-store';
+import { EventStoreConcurrencyError } from '@vytches/ddd-event-store';
 
 class OrderService {
   async updateOrder(
@@ -764,7 +764,7 @@ class OrderService {
 ### JSON Serialization
 
 ```typescript
-import { JsonEventSerializer } from '@vytches-ddd/event-store';
+import { JsonEventSerializer } from '@vytches/ddd-event-store';
 
 // Create serializer
 const serializer = new JsonEventSerializer(true); // Pretty print
@@ -792,7 +792,7 @@ console.log('Content type:', serializer.getContentType()); // 'application/json'
 ### Custom Serialization
 
 ```typescript
-import { IEventSerializer } from '@vytches-ddd/contracts';
+import { IEventSerializer } from '@vytches/ddd-contracts';
 
 class CustomEventSerializer implements IEventSerializer {
   serialize(event: IStoredDomainEvent): string {
@@ -831,7 +831,7 @@ import {
   EventDeserializationError,
   EventStoreConnectionError,
   InvalidStreamVersionError,
-} from '@vytches-ddd/event-store';
+} from '@vytches/ddd-event-store';
 
 // Handle specific errors
 try {
@@ -916,8 +916,8 @@ class EventStoreService {
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEntity, StreamEntity, SnapshotEntity } from './entities';
-import { PostgreSQLEventStore } from '@vytches-ddd/event-store';
-import { JsonEventSerializer } from '@vytches-ddd/event-store';
+import { PostgreSQLEventStore } from '@vytches/ddd-event-store';
+import { JsonEventSerializer } from '@vytches/ddd-event-store';
 import { DataSource } from 'typeorm';
 
 @Global()
@@ -956,7 +956,7 @@ export class EventStoreModule {}
 
 ```typescript
 import { Injectable, Inject } from '@nestjs/common';
-import { IAdvancedEventStore } from '@vytches-ddd/event-store';
+import { IAdvancedEventStore } from '@vytches/ddd-event-store';
 import { Order } from '../domain/order.aggregate';
 
 @Injectable()
@@ -1299,7 +1299,7 @@ import {
   HealthIndicatorResult,
   HealthCheckError,
 } from '@nestjs/terminus';
-import { IAdvancedEventStore } from '@vytches-ddd/event-store';
+import { IAdvancedEventStore } from '@vytches/ddd-event-store';
 
 @Injectable()
 export class EventStoreHealthIndicator extends HealthIndicator {
@@ -1569,8 +1569,8 @@ class BatchEventStoreService {
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { InMemoryEventStore } from '@vytches-ddd/event-store';
-import { safeRun } from '@vytches-ddd/testing';
+import { InMemoryEventStore } from '@vytches/ddd-event-store';
+import { safeRun } from '@vytches/ddd-testing';
 
 describe('EventStore', () => {
   let eventStore: InMemoryEventStore;
@@ -1705,8 +1705,8 @@ describe('EventStore', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SimpleTestHarness } from '@vytches-ddd/testing';
-import { InMemoryEventStore } from '@vytches-ddd/event-store';
+import { SimpleTestHarness } from '@vytches/ddd-testing';
+import { InMemoryEventStore } from '@vytches/ddd-event-store';
 
 describe('Order Integration', () => {
   let harness: SimpleTestHarness;
@@ -1815,8 +1815,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

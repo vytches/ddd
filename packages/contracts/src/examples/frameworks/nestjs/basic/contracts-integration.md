@@ -2,7 +2,7 @@
 
 **Focus**: Basic foundation contract usage in NestJS with manual instantiation
 **Base Example**: [Foundation Contracts](../../basic/foundation-contracts.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/contracts
+**Dependencies**: @nestjs/common, @vytches/ddd-contracts
 
 ## Description
 
@@ -15,7 +15,7 @@ manual instantiation for beginner-friendly patterns.
 ```typescript
 // user.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { EntityId, ISpecification, IActor } from '@vytches-ddd/contracts';
+import { EntityId, ISpecification, IActor } from '@vytches/ddd-contracts';
 import { User, CreateUserData, UpdateUserData } from './types'; // From your app
 
 @Injectable()
@@ -185,7 +185,7 @@ class MinimumLengthSpecification implements ISpecification<string> {
 // user.controller.ts
 import { Controller, Post, Get, Put, Body, Param } from '@nestjs/common';
 import { UserService } from './user.service';
-import { SystemActor, UserActor } from '@vytches-ddd/contracts';
+import { SystemActor, UserActor } from '@vytches/ddd-contracts';
 import { CreateUserData, UpdateUserData } from './types'; // From your app
 
 @Controller('users')
@@ -308,7 +308,7 @@ export class UserModule {}
 
 ```typescript
 // entity-id.utils.ts
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 
 export class EntityIdUtils {
   // ✅ FOCUS: NestJS-specific EntityId helpers

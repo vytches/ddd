@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { Metric, HistogramMetric, TimerMetric } from '../../src/index';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   CircuitBreakerMetricCollector,
   RetryMetricCollector,

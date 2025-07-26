@@ -1,11 +1,11 @@
 # ACL with Caching and Resilience
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Intermediate  
 **Domain**: Order Management  
 **Patterns**: Anti-Corruption Layer, Caching, Circuit Breaker  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/resilience, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-resilience, @vytches/ddd-core
 
 ## Description
 
@@ -27,9 +27,9 @@ import {
   AntiCorruptionLayer,
   IDataTranslator,
   CachingACLDecorator,
-} from '@vytches-ddd/acl';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-acl';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 import { Order, ThirdPartyOrderData, OrderSubmissionRequest } from '../types'; // From your application
 
 // Enhanced translator with validation

@@ -1,7 +1,7 @@
 # Simple Domain Errors
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Category**: Error Handling
 
@@ -21,7 +21,7 @@ import {
   NotFoundError,
   InvalidParameterError,
   DuplicateError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { UserData, CreateUserDto } from '../types';
 
 // Custom domain error for user operations
@@ -202,7 +202,7 @@ export class UserController {
 import {
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { ErrorContext } from '../types';
 
 // Enhanced error with context

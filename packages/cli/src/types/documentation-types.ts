@@ -40,7 +40,7 @@ export type FrameworkComponentType =
   | 'middleware'
   | 'guard'
   | 'interceptor';
-import type { ExampleDefinition } from '@vytches-ddd/contracts';
+import type { ExampleDefinition } from '@vytches/ddd-contracts';
 
 /**
  * Parsed documentation set containing base content and optional framework integration

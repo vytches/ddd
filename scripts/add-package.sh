@@ -16,7 +16,7 @@ PACKAGE_NAME="$1"
 DESCRIPTION="$2"
 DEPENDENCIES="${3:-}"
 
-PACKAGE_FULL_NAME="@vytches-ddd/$PACKAGE_NAME"
+PACKAGE_FULL_NAME="@vytches/ddd-$PACKAGE_NAME"
 PACKAGE_PATH="packages/$PACKAGE_NAME"
 
 echo "🚀 Adding new package: $PACKAGE_FULL_NAME"
@@ -69,7 +69,7 @@ if [ -n "$DEPENDENCIES" ]; then
   IFS=',' read -ra DEPS <<< "$DEPENDENCIES"
   for dep in "${DEPS[@]}"; do
     dep=$(echo "$dep" | xargs) # trim whitespace
-    DEP_FULL="@vytches-ddd/$dep"
+    DEP_FULL="@vytches/ddd-$dep"
 
     echo "  Adding dependency: $DEP_FULL"
 

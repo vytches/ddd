@@ -1,9 +1,9 @@
 # Event Deduplication and Idempotency
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: intermediate
 **Domain**: Architecture **Patterns**: event-deduplication, idempotency,
-duplicate-detection, event-fingerprinting **Dependencies**: @vytches-ddd/events,
-@vytches-ddd/utils, @vytches-ddd/logging
+duplicate-detection, event-fingerprinting **Dependencies**: @vytches/ddd-events,
+@vytches/ddd-utils, @vytches/ddd-logging
 
 ## Description
 
@@ -28,10 +28,10 @@ import {
   DomainEvent,
   IEventHandler,
   UnifiedEventBus,
-} from '@vytches-ddd/events';
-import { EntityId } from '@vytches-ddd/value-objects';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-value-objects';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 // Enhanced event with deduplication metadata
 export abstract class DeduplicatedEvent extends DomainEvent {

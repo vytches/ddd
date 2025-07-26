@@ -1,13 +1,13 @@
 # Advanced CQRS Patterns with Distributed Processing
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: advanced  
 **Domain**: Order Management  
 **Patterns**: cqrs, distributed-processing, sagas, command-coordination,
 event-sourcing  
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events,
-@vytches-ddd/messaging, @vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-cqrs, @vytches/ddd-events,
+@vytches/ddd-messaging, @vytches/ddd-resilience, @vytches/ddd-di
 
 ## Description
 
@@ -28,7 +28,7 @@ and handling failures gracefully.
 
 ````typescript
 // advanced-order-commands.ts
-import { ICommand, IAsyncCommand } from '@vytches-ddd/cqrs';
+import { ICommand, IAsyncCommand } from '@vytches/ddd-cqrs';
 import { OrderItem, ShippingAddress, PaymentMethod, Customer } from '../types';
 
 /**
@@ -222,11 +222,11 @@ import {
   ICommandHandler,
   QueryHandler,
   IQueryHandler,
-} from '@vytches-ddd/cqrs';
-import { Logger } from '@vytches-ddd/logging';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { CircuitBreakerStrategy, RetryStrategy } from '@vytches-ddd/resilience';
-import { OutboxPublisher } from '@vytches-ddd/messaging';
+} from '@vytches/ddd-cqrs';
+import { Logger } from '@vytches/ddd-logging';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { CircuitBreakerStrategy, RetryStrategy } from '@vytches/ddd-resilience';
+import { OutboxPublisher } from '@vytches/ddd-messaging';
 import {
   ProcessCompleteOrderCommand,
   CoordinateInventoryCommand,
@@ -932,10 +932,10 @@ class ShippingCoordinationError extends Error {
 
 ````typescript
 // advanced-order-queries.ts
-import { IQuery, IAsyncQuery } from '@vytches-ddd/cqrs';
-import { QueryHandler, IQueryHandler } from '@vytches-ddd/cqrs';
-import { Logger } from '@vytches-ddd/logging';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { IQuery, IAsyncQuery } from '@vytches/ddd-cqrs';
+import { QueryHandler, IQueryHandler } from '@vytches/ddd-cqrs';
+import { Logger } from '@vytches/ddd-logging';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * @llm-summary Advanced query for comprehensive order analytics and reporting

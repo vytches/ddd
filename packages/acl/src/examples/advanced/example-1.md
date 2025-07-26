@@ -1,12 +1,12 @@
 # Enterprise ACL Orchestration Platform
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Advanced  
 **Domain**: Enterprise Integration  
 **Patterns**: ACL Orchestration, Event Mesh, Global Coordination  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/events, @vytches-ddd/cqrs,
-@vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-events, @vytches/ddd-cqrs,
+@vytches/ddd-resilience
 
 ## Description
 
@@ -30,10 +30,10 @@ import {
   ACLRegistry,
   EventMeshCoordinator,
   GlobalTransactionManager,
-} from '@vytches-ddd/acl';
-import { EventBus, GlobalEventMesh } from '@vytches-ddd/events';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { ResilienceOrchestrator } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-acl';
+import { EventBus, GlobalEventMesh } from '@vytches/ddd-events';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { ResilienceOrchestrator } from '@vytches/ddd-resilience';
 import { Customer, Order, Product, SyncResult } from '../types'; // From your application
 
 export class EnterpriseACLOrchestrator extends ACLOrchestrator {

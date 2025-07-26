@@ -10,10 +10,10 @@ import type {
   ReplayErrorHandler,
   IStoredEvent,
   IAdvancedEventStore,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
-import { Logger } from '@vytches-ddd/logging';
-import type { ILogger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
+import type { ILogger } from '@vytches/ddd-logging';
 
 /**
  * Default replay configuration

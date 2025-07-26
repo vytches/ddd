@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/resilience",
+  "name": "@vytches/ddd-resilience",
   "projectType": "library",
   "sourceRoot": "packages/resilience/src",
   "targets": {

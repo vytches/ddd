@@ -1,11 +1,11 @@
 # Framework Integration Patterns - Advanced Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: advanced  
 **Domain**: Enterprise Multi-Framework Architecture  
 **Patterns**: Framework Integration, Adapter Pattern, Bridge Pattern  
-**Dependencies**: @vytches-ddd/di, NestJS, InversifyJS, TSyringe
+**Dependencies**: @vytches/ddd-di, NestJS, InversifyJS, TSyringe
 
 ## Description
 
@@ -25,7 +25,7 @@ approach provides flexibility and reduces migration costs.
 
 ```typescript
 // domain/user-domain.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
 
 /**
@@ -125,7 +125,7 @@ export class UserDomainService {
 ```typescript
 // adapters/nestjs-adapter.ts
 import { Injectable, OnModuleInit, ModuleRef } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserDomainService } from '../domain/user-domain.service';
 
 /**
@@ -190,7 +190,7 @@ export const UserServiceProvider = {
 ```typescript
 // adapters/inversify-adapter.ts
 import { Container, inject, injectable } from 'inversify';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserDomainService } from '../domain/user-domain.service';
 
 /**
@@ -252,7 +252,7 @@ export class InversifyUserService {
 ```typescript
 // adapters/tsyringe-adapter.ts
 import { container, injectable, singleton } from 'tsyringe';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserDomainService } from '../domain/user-domain.service';
 
 /**
@@ -308,7 +308,7 @@ export class TSyringeUserService {
 
 ```typescript
 // adapters/generic-adapter.ts
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 /**
  * Generic adapter interface for any framework

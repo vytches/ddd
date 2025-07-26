@@ -1,7 +1,7 @@
 # Advanced NestJS Use Cases
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -10,7 +10,7 @@ advanced-governance
 
 ## Description
 
-Enterprise-scale use cases demonstrating advanced @vytches-ddd/policies
+Enterprise-scale use cases demonstrating advanced @vytches/ddd-policies
 integration with NestJS for complex distributed systems requiring sophisticated
 policy orchestration, governance workflows, and strategic business intelligence.
 
@@ -707,7 +707,7 @@ export class ClinicalDecisionOrchestratorService {
 - **Patient Safety**: 99.9% safety compliance with zero critical incidents
 - **Regulatory Adherence**: 100% clinical guideline compliance
 
-These advanced use cases demonstrate how enterprise-scale @vytches-ddd/policies
+These advanced use cases demonstrate how enterprise-scale @vytches/ddd-policies
 integration with NestJS enables sophisticated business scenarios requiring
 comprehensive governance, cross-domain coordination, and strategic intelligence
 while maintaining the highest levels of performance, safety, and regulatory

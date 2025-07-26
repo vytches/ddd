@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Capability } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import { Capability } from '@vytches/ddd-contracts';
+import { safeRun } from '@vytches/ddd-utils';
 import { ProjectionEngine, EnhancedProjectionEngine } from '../src/projection-engine';
 import { ProjectionError } from '../src/projection-errors';
 import { ExponentialBackoffStrategy } from '../src/error-strategy';

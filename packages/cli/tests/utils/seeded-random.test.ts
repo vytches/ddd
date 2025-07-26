@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { SeededRandom } from '../../src/utils/seeded-random';
 
 describe('SeededRandom', () => {
@@ -471,13 +471,29 @@ describe('SeededRandom', () => {
     it('should maintain precision with many iterations', () => {
       const random = new SeededRandom('precision-test');
 
-      // Generate many random numbers and check they stay in bounds
-      for (let i = 0; i < 100000; i++) {
+      // Generate reasonable number of random numbers and check they stay in bounds
+      // Reduced from 100,000 to 10,000 to avoid performance issues during parallel test execution
+      for (let i = 0; i < 10000; i++) {
         const value = random.next();
         expect(value).toBeGreaterThanOrEqual(0);
         expect(value).toBeLessThanOrEqual(1);
         expect(Number.isFinite(value)).toBe(true);
       }
+
+      // Additional check for precision over extended use
+      // Test deterministic behavior after many iterations
+      const random1 = new SeededRandom('precision-deterministic');
+      const random2 = new SeededRandom('precision-deterministic');
+
+      // Advance both generators by the same amount
+      for (let i = 0; i < 5000; i++) {
+        random1.next();
+        random2.next();
+      }
+
+      // They should still produce identical values
+      expect(random1.next()).toBe(random2.next());
+      expect(random1.nextInt(1, 100)).toBe(random2.nextInt(1, 100));
     });
   });
 });

@@ -1,6 +1,6 @@
 # Advanced Projections Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 advanced **Domain**: Enterprise Event Sourcing **Focus**: Real-world advanced
 projection scenarios
 
@@ -684,7 +684,7 @@ export class GlobalSupplyChainProjection extends AIEnhancedProjectionBase<Supply
 - **Monitoring**: Comprehensive observability and performance tracking
 - **Security**: Enterprise-grade security with end-to-end encryption
 
-These advanced use cases demonstrate how the @vytches-ddd/projections package
+These advanced use cases demonstrate how the @vytches/ddd-projections package
 enables enterprise-scale event sourcing with unprecedented performance,
 intelligence, and business impact.
 

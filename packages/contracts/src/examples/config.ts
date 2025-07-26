@@ -71,7 +71,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Comprehensive EntityId usage with factory methods, validation, and type safety',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
     {
@@ -82,7 +82,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Essential event interfaces for domain events, event bus, and handlers',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
     {
@@ -94,7 +94,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Core foundation contracts including specifications, actors, and basic interfaces',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
 
@@ -107,7 +107,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced event interfaces including persistence, replay, and store patterns',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
     {
@@ -119,7 +119,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       description:
         'Capability registry, types, and base implementations for extensible architecture',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
 
@@ -133,7 +133,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       description:
         'Enterprise architecture patterns using foundation contracts across multiple packages',
-      dependencies: ['@vytches-ddd/contracts', '@vytches-ddd/core'],
+      dependencies: ['@vytches/ddd-contracts', '@vytches/ddd-core'],
       validation: { fileExists: true },
     },
 
@@ -147,7 +147,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Basic NestJS integration with contracts, interfaces, and EntityId usage',
-      dependencies: ['@vytches-ddd/contracts', '@nestjs/common'],
+      dependencies: ['@vytches/ddd-contracts', '@nestjs/common'],
       validation: { fileExists: true },
     },
     {
@@ -159,7 +159,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Advanced NestJS integration with event interfaces and capability system',
-      dependencies: ['@vytches-ddd/contracts', '@nestjs/common', '@nestjs/cqrs'],
+      dependencies: ['@vytches/ddd-contracts', '@nestjs/common', '@nestjs/cqrs'],
       validation: { fileExists: true },
     },
   ],

@@ -1,9 +1,9 @@
 # Event Stream Processing with Real-time Analytics
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: advanced
 **Domain**: Architecture **Patterns**: event-stream-processing,
 real-time-analytics, event-aggregation, windowing **Dependencies**:
-@vytches-ddd/events, @vytches-ddd/utils, @vytches-ddd/logging
+@vytches/ddd-events, @vytches/ddd-utils, @vytches/ddd-logging
 
 ## Description
 
@@ -28,10 +28,10 @@ import {
   DomainEvent,
   UnifiedEventBus,
   IEventHandler,
-} from '@vytches-ddd/events';
-import { EntityId } from '@vytches-ddd/value-objects';
-import { Result, AsyncResult } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-value-objects';
+import { Result, AsyncResult } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 
 // Stream processing events
 export class TransactionProcessedEvent extends DomainEvent {

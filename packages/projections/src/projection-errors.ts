@@ -1,4 +1,4 @@
-import { DomainErrorCode, IDomainError } from '@vytches-ddd/core';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary ProjectionError class for projection error operations

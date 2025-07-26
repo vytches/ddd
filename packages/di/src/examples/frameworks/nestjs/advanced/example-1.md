@@ -1,12 +1,12 @@
 # NestJS Multi-Context Architecture - Advanced Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: advanced  
 **Domain**: Enterprise Multi-Context Platform  
 **Patterns**: Multi-Context Architecture, Context Isolation, Enterprise
 Integration  
-**Dependencies**: @vytches-ddd/di, @nestjs/common, @nestjs/microservices
+**Dependencies**: @vytches/ddd-di, @nestjs/common, @nestjs/microservices
 
 ## Description
 
@@ -27,7 +27,7 @@ and data models.
 
 ```typescript
 // contexts/user-management/user-management.context.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { User, CreateUserData, UpdateUserData } from '../../types'; // Import from application
 
 /**
@@ -128,7 +128,7 @@ export class UserManagementService {
 
 ```typescript
 // contexts/order-processing/order-processing.context.ts
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import { Order, CreateOrderData, OrderStatus } from '../../types'; // Import from application
 
 /**
@@ -269,7 +269,7 @@ export class OrderProcessingService {
 
 ```typescript
 // contexts/payment-processing/payment-processing.context.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { Payment, ProcessPaymentData, PaymentStatus } from '../../types'; // Import from application
 
 /**
@@ -370,7 +370,7 @@ export class PaymentProcessingService {
 
 ```typescript
 // context-configuration/context-manager.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 /**
  * Context manager for multi-context architecture

@@ -1,6 +1,6 @@
 # Domain Error Hierarchies - Intermediate Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 intermediate **Domain**: Error Management **Patterns**: Domain Error Hierarchy,
 Error Context, Error Classification **Dependencies**: BaseError, IDomainError,
 Error Enums
@@ -27,7 +27,7 @@ import {
   IDomainError,
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { Customer, CustomerValidationContext } from './types'; // From your app
 
 /**
@@ -368,7 +368,7 @@ import {
   IDomainError,
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { Order, PaymentContext, InventoryContext } from './types'; // From your app
 
 /**

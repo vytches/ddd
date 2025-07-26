@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 
 import { CompositeSpecification } from '../../src';
 import { Specification } from '../../src';
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 
 // Enhanced specification that includes name, description and failure explanation
 class NamedSpecification<T> extends CompositeSpecification<T> {

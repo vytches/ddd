@@ -1,7 +1,7 @@
 # Intermediate Value Objects - NestJS DI Integration
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
-**Complexity**: Intermediate **Framework**: NestJS **Focus**: @vytches-ddd/di
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
+**Complexity**: Intermediate **Framework**: NestJS **Focus**: @vytches/ddd-di
 integration with enhanced composite value object capabilities **Base Example**:
 [User Profile Composite](../../../intermediate/example-2.md)
 
@@ -10,7 +10,7 @@ integration with enhanced composite value object capabilities **Base Example**:
 ```typescript
 // user-profile.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   CreateUserProfileDto,
   UpdateProfileDto,
@@ -27,7 +27,7 @@ export class UserProfileService {
   private readonly geocodingService: GeocodingService;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for enhanced composite operations
+    // ⭐ FOCUS: @vytches/ddd-di integration for enhanced composite operations
     this.userProfileFactory =
       VytchesDDD.resolve<UserProfileFactory>('userProfileFactory');
     this.profileValidationService =
@@ -347,7 +347,7 @@ export class UserProfileService {
 ```typescript
 // date-range.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   CreateDateRangeDto,
   DateRangeResponse,
@@ -538,7 +538,7 @@ export class DateRangeService {
 ```typescript
 // app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { DateRangeModule } from './date-range/date-range.module';
 
@@ -724,7 +724,7 @@ export class OrderService {
 
 ## Key Points
 
-- **@vytches-ddd/di Integration**: Advanced service composition with machine
+- **@vytches/ddd-di Integration**: Advanced service composition with machine
   learning capabilities
 - **Composite Value Objects**: Enhanced creation and management of complex
   nested structures

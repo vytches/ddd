@@ -1,6 +1,6 @@
 import { ScheduledEvent } from '../core/ScheduledEvent';
-import type { IScheduleOptions } from '@vytches-ddd/contracts';
-import { BackoffStrategy } from '@vytches-ddd/contracts';
+import type { IScheduleOptions } from '@vytches/ddd-contracts';
+import { BackoffStrategy } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary TestScheduledEvent class for test scheduled event operations

@@ -1,11 +1,11 @@
 # Batch Event Processing and Performance Optimization
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: intermediate  
 **Domain**: E-commerce Inventory  
 **Patterns**: batch-processing, performance-optimization, bulk-operations  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-di, @vytches/ddd-utils
 
 ## Description
 
@@ -26,9 +26,9 @@ system responsiveness.
 
 ````typescript
 // batch-inventory-processor.ts
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   Product,
   InventoryUpdateCommand,

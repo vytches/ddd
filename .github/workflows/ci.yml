@@ -32,6 +32,7 @@ permissions:
 
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
+  NX_DAEMON: false
 
 jobs:
   main:

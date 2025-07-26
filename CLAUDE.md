@@ -124,7 +124,7 @@ pnpm cli examples validate --package policies --fix
 --randomize            # Randomize example selection
 --seed <string>        # Seed for reproducible randomization
 --output <path>        # Output file path
---di-only              # Show only @vytches-ddd/di examples
+--di-only              # Show only @vytches/ddd-di examples
 --fix                  # Auto-fix validation issues
 ```
 
@@ -144,20 +144,20 @@ All significant architectural decisions MUST be documented as ADRs.
 **External Consumers:**
 
 ```typescript
-import { AggregateRoot, EntityId, BaseError } from '@vytches-ddd/core';
-import { Logger } from '@vytches-ddd/logging';
-import { CommandBus } from '@vytches-ddd/cqrs';
+import { AggregateRoot, EntityId, BaseError } from '@vytches/ddd-core';
+import { Logger } from '@vytches/ddd-logging';
+import { CommandBus } from '@vytches/ddd-cqrs';
 ```
 
 **Internal Packages:**
 
 ```typescript
 // Core building blocks - direct imports
-import { IActor } from '@vytches-ddd/domain-primitives';
-import type { EntityId } from '@vytches-ddd/contracts';
+import { IActor } from '@vytches/ddd-domain-primitives';
+import type { EntityId } from '@vytches/ddd-contracts';
 
 // Higher-level packages - meta-package imports
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 ```
 
 ### Module Boundaries & Import Strategy
@@ -171,10 +171,10 @@ The project enforces strict module boundaries via ESLint and uses an
 
 ```typescript
 // ✅ ALWAYS import from meta-package for stable API
-import { AggregateRoot, EntityId, BaseError } from '@vytches-ddd/core';
-import { Logger } from '@vytches-ddd/logging';
-import { CommandBus } from '@vytches-ddd/cqrs';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { AggregateRoot, EntityId, BaseError } from '@vytches/ddd-core';
+import { Logger } from '@vytches/ddd-logging';
+import { CommandBus } from '@vytches/ddd-cqrs';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 ```
 
 **2. Internal Monorepo Packages:**
@@ -184,26 +184,26 @@ aggregates):
 
 ```typescript
 // ✅ Direct imports to prevent circular dependencies
-import { IActor } from '@vytches-ddd/domain-primitives';
-import type { EntityId } from '@vytches-ddd/contracts'; // EntityId interfaces from contracts
-import { EntityId } from '@vytches-ddd/value-objects'; // Enhanced EntityId implementation
+import { IActor } from '@vytches/ddd-domain-primitives';
+import type { EntityId } from '@vytches/ddd-contracts'; // EntityId interfaces from contracts
+import { EntityId } from '@vytches/ddd-value-objects'; // Enhanced EntityId implementation
 ```
 
 **Higher-Level Packages** (events, cqrs, domain-services, etc.):
 
 ```typescript
 // ✅ Import through meta-package for stability
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 ```
 
 **3. Examples & Testing:**
 
 ```typescript
 // ✅ Can import directly for development/testing
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import type { EntityId } from '@vytches-ddd/contracts'; // For type definitions
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import type { EntityId } from '@vytches/ddd-contracts'; // For type definitions
 // OR through stable API
-import { AggregateRoot } from '@vytches-ddd/core';
+import { AggregateRoot } from '@vytches/ddd-core';
 ```
 
 #### **Module Boundary Rules:**
@@ -212,7 +212,7 @@ import { AggregateRoot } from '@vytches-ddd/core';
   domain contracts)
 - **Core building blocks**: Import EntityId from contracts, minimal other
   dependencies
-- **Higher-level packages**: Must import through `@vytches-ddd/core`
+- **Higher-level packages**: Must import through `@vytches/ddd-core`
 - **Testing package**: Can depend on all packages, uses contracts for EntityId
 - **Examples**: Can use any import pattern
 - **ESLint enforcement**: Prevents inappropriate cross-dependencies
@@ -279,24 +279,24 @@ TypeScript frameworks like Jest, Vitest, and others.
 
 ### Test Utilities
 
-- Use `@vytches-ddd/testing` package for DDD-specific test utilities
+- Use `@vytches/ddd-testing` package for DDD-specific test utilities
 - Vitest configuration supports package aliases
 - Coverage thresholds: 80% for branches, functions, lines, statements
 
 ### Test Error Handling Patterns
 
-**CRITICAL**: All test files MUST use `safeRun` from `@vytches-ddd/utils` for
+**CRITICAL**: All test files MUST use `safeRun` from `@vytches/ddd-utils` for
 error testing. Never use Jest/Vitest `toThrow` patterns.
 
 **NOTE**: `safeRun` is specifically designed for testing scenarios. In normal
 implementation code, use standard try/catch blocks or Result patterns from
-`@vytches-ddd/utils` for error handling.
+`@vytches/ddd-utils` for error handling.
 
 **Required Patterns:**
 
 ```typescript
 // ✅ CORRECT: Use safeRun for synchronous error testing
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
 const [error] = safeRun(() => someFunction());
 expect(error).toBeInstanceOf(ErrorClass);
@@ -325,7 +325,7 @@ await expect(async () => someFunction()).rejects.toThrow(ErrorClass);
 
 **Migration Guidelines:**
 
-- Always import `safeRun` from `@vytches-ddd/utils` at the top of test files
+- Always import `safeRun` from `@vytches/ddd-utils` at the top of test files
 - Replace `expect(() => fn()).toThrow(ErrorClass)` with
   `const [error] = safeRun(() => fn()); expect(error).toBeInstanceOf(ErrorClass)`
 - Replace `expect(() => fn()).toThrow(message)` with
@@ -343,9 +343,9 @@ When generating test files, follow these patterns:
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { UserService } from '../src/user-service';
-import { ValidationError, NotFoundError } from '@vytches-ddd/domain-primitives';
+import { ValidationError, NotFoundError } from '@vytches/ddd-domain-primitives';
 
 describe('UserService', () => {
   let service: UserService;
@@ -387,7 +387,7 @@ describe('UserService', () => {
 **Key Points for Test Generation:**
 
 1. **File naming**: Always use `.test.ts` extension
-2. **Import safeRun**: Always import from `@vytches-ddd/utils`
+2. **Import safeRun**: Always import from `@vytches/ddd-utils`
 3. **Error handling**: Use safeRun for all error assertions
 4. **Variable naming**: Use descriptive names like `validationError`,
    `notFoundError`
@@ -483,12 +483,12 @@ function handleUnknownData(data: unknown): void {
   comprehensive logging
 - **Foundation Layer**: Modular core architecture with meta-package pattern
   (99.2% size reduction)
-  - **@vytches-ddd/core**: Enterprise meta-package (1.4KB) providing stable API
-  - **@vytches-ddd/domain-primitives**: Base classes, errors, interfaces (40KB)
-  - **@vytches-ddd/value-objects**: Value object implementations, EntityId
+  - **@vytches/ddd-core**: Enterprise meta-package (1.4KB) providing stable API
+  - **@vytches/ddd-domain-primitives**: Base classes, errors, interfaces (40KB)
+  - **@vytches/ddd-value-objects**: Value object implementations, EntityId
     (36KB)
-  - **@vytches-ddd/repositories**: Repository patterns, UnitOfWork (40KB)
-  - **@vytches-ddd/aggregates**: Aggregate root + capabilities (82KB)
+  - **@vytches/ddd-repositories**: Repository patterns, UnitOfWork (40KB)
+  - **@vytches/ddd-aggregates**: Aggregate root + capabilities (82KB)
 - **Patterns Layer**: Advanced validation with specifications and fluent policy
   builder implemented
 - **Architecture Layer**: Event-driven architecture with domain events, CQRS,
@@ -522,7 +522,7 @@ function handleUnknownData(data: unknown): void {
 directories
 
 - **Problem Solved**: Foundation packages (value-objects, repositories) were
-  importing from @vytches-ddd/testing in their test files
+  importing from @vytches/ddd-testing in their test files
 - **Solution**: Moved all `*.test.ts` and `*.spec.ts` files to dedicated
   `tests/` directories
 - **Scope**: 16 packages updated with ~80 test files migrated
@@ -541,7 +541,7 @@ directories
 architecture
 
 - **Contracts Foundation**: EntityId interfaces moved to
-  `@vytches-ddd/contracts` as fundamental building block
+  `@vytches/ddd-contracts` as fundamental building block
 - **Circular Dependency Elimination**: Resolved circular dependencies between
   testing and value-objects packages
 - **Enterprise Architecture**: Two-layer EntityId pattern with base
@@ -563,7 +563,7 @@ architecture
   packages for proper dependency resolution
 - **ADR Documentation**: Architectural decision recorded for future reference
 
-#### NEW: Unified Event System (@vytches-ddd/events) - MAJOR REFACTOR COMPLETED
+#### NEW: Unified Event System (@vytches/ddd-events) - MAJOR REFACTOR COMPLETED
 
 **BREAKING CHANGE**: Complete event system redesign for enterprise-grade event
 handling
@@ -592,16 +592,16 @@ handling
 - **ADR Documentation**: Complete architectural decision record (ADR-0006) with
   implementation results
 
-#### NEW: Enterprise Meta-Package Architecture (@vytches-ddd/core)
+#### NEW: Enterprise Meta-Package Architecture (@vytches/ddd-core)
 
 - **Core Package Decomposition**: Transformed monolithic core (184KB) into
   modular architecture (1.4KB meta-package)
-  - **@vytches-ddd/domain-primitives**: Base classes, errors, and interfaces
+  - **@vytches/ddd-domain-primitives**: Base classes, errors, and interfaces
     (40KB)
-  - **@vytches-ddd/value-objects**: Value object implementations and EntityId
+  - **@vytches/ddd-value-objects**: Value object implementations and EntityId
     (36KB)
-  - **@vytches-ddd/repositories**: Repository patterns and UnitOfWork (40KB)
-  - **@vytches-ddd/aggregates**: Aggregate root with capabilities (82KB)
+  - **@vytches/ddd-repositories**: Repository patterns and UnitOfWork (40KB)
+  - **@vytches/ddd-aggregates**: Aggregate root with capabilities (82KB)
 - **Enterprise API Stability**: Single stable entry point through meta-package
   pattern
 - **Import Strategy Enforcement**: Standardized import patterns for internal vs
@@ -611,7 +611,7 @@ handling
 - **Bundle Size Optimization**: 99.2% reduction in core package size
 - **Module Boundaries**: ESLint-enforced architectural boundaries
 
-#### NEW: Logging Package (@vytches-ddd/logging)
+#### NEW: Logging Package (@vytches/ddd-logging)
 
 - **DDD-First Design**: Built specifically for Domain-Driven Design patterns
   with automatic bounded context detection
@@ -627,7 +627,7 @@ handling
   logging providers
 - **CQRS Integration**: Decorators (`@LogCommands`, `@LogQueries`, `@LogCQRS`)
   with automatic execution timing and payload logging
-- **Result Pattern Integration**: Extensions for `@vytches-ddd/utils` Result
+- **Result Pattern Integration**: Extensions for `@vytches/ddd-utils` Result
   pattern with success/failure logging
 - **Aggregate State Logging**: `@LogStateChanges` decorator for automatic
   aggregate state change tracking
@@ -638,7 +638,7 @@ handling
 - **Integration Coverage**: Fully integrated across all packages (core, events,
   cqrs, resilience, messaging, etc.)
 
-#### Business Policies Package (@vytches-ddd/policies) - V2
+#### Business Policies Package (@vytches/ddd-policies) - V2
 
 - **Unified Promise-Based API**: Consistent async interface across all policy
   operations
@@ -664,7 +664,7 @@ handling
 - **Adapter Pattern Ready**: Framework for integrating external validation
   libraries
 
-#### Event Projections Package (@vytches-ddd/projections)
+#### Event Projections Package (@vytches/ddd-projections)
 
 - **Projection Engine**: Enhanced projection engine with retry capabilities
 - **Capability System**: Extensible capabilities (checkpoints, circuit breakers,
@@ -673,7 +673,7 @@ handling
 - **Lifecycle Hooks**: Before/after hooks for projection processing
 - **State Management**: Automated initial state creation and persistence
 
-#### Shared Contracts Package (@vytches-ddd/contracts)
+#### Shared Contracts Package (@vytches/ddd-contracts)
 
 - **Foundation Layer**: Core interfaces and contracts for entire library
 - **EntityId Foundation**: Base EntityId interface and implementation breaking
@@ -688,7 +688,7 @@ handling
 - **Enterprise Architecture**: Prevents circular dependencies while maintaining
   functionality
 
-#### Enhanced Validation Package (@vytches-ddd/validation)
+#### Enhanced Validation Package (@vytches/ddd-validation)
 
 - **Composite Specifications**: Combine specifications with AND/OR/NOT
   operations
@@ -699,7 +699,7 @@ handling
 - **Logging Integration**: All validation operations now include structured
   logging
 
-#### Event Store Package (@vytches-ddd/event-store)
+#### Event Store Package (@vytches/ddd-event-store)
 
 - **Stream-based Storage**: Organize events by aggregate streams with version
   control
@@ -725,7 +725,7 @@ handling
 - **Testing Support**: Complete test coverage with event store test harness
   utilities
 
-#### Enhanced CQRS Package (@vytches-ddd/cqrs)
+#### Enhanced CQRS Package (@vytches/ddd-cqrs)
 
 - **Advanced Middleware System**: Enhanced execution context and logging
   middleware
@@ -736,7 +736,7 @@ handling
   metadata
 - **Context Propagation**: Rich context propagation with correlation tracking
 
-#### Enhanced Resilience Package (@vytches-ddd/resilience)
+#### Enhanced Resilience Package (@vytches/ddd-resilience)
 
 - **Circuit Breaker Pattern**: Three-state circuit breaker
   (CLOSED/OPEN/HALF_OPEN) with automatic recovery
@@ -759,7 +759,7 @@ handling
 - **Logging Integration**: All resilience operations include structured logging
   with context
 
-#### Enhanced Messaging Package (@vytches-ddd/messaging)
+#### Enhanced Messaging Package (@vytches/ddd-messaging)
 
 - **Outbox Pattern**: Complete implementation with reliable message delivery
 - **Priority Processing**: Configurable message priorities
@@ -775,7 +775,7 @@ handling
 - **Logging Integration**: All messaging operations include comprehensive
   structured logging
 
-#### Enterprise Package (@vytches-ddd/enterprise)
+#### Enterprise Package (@vytches/ddd-enterprise)
 
 - **Bundle Architecture**: Enterprise-grade package aggregation
 - **Health Checks**: Interface for system health monitoring (implementation
@@ -783,7 +783,7 @@ handling
 - **Monitoring**: Basic monitoring configuration (implementation pending)
 - **Enterprise Configuration**: Centralized configuration management
 
-#### CLI Package (@vytches-ddd/cli)
+#### CLI Package (@vytches/ddd-cli)
 
 - **Code Generation Framework**: Basic structure for DDD component generation
 - **Template System**: Foundation for Value Objects, Entities, and Aggregates
@@ -791,7 +791,7 @@ handling
 - **Configuration Support**: Output directory and template configuration
 - **Binary Distribution**: `vytches-ddd` command available after installation
 
-#### Dependency Injection Package (@vytches-ddd/di)
+#### Dependency Injection Package (@vytches/ddd-di)
 
 - **Global Service Locator**: Unified approach following MediatR pattern with
   enterprise-grade capabilities
@@ -819,7 +819,7 @@ handling
 ### Basic Logging Setup
 
 ```typescript
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 // Auto-detects context from class name
 class UserService {
@@ -872,7 +872,7 @@ Logger.configure({
 ### Basic DI Setup
 
 ```typescript
-import { VytchesDDD, SimpleContainer, DomainService } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer, DomainService } from '@vytches/ddd-di';
 
 // One-time setup with auto-discovery
 const container = new SimpleContainer();
@@ -981,7 +981,7 @@ export class DomainModule implements OnModuleInit {
 ### Domain Service with DI
 
 ```typescript
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 // Simple service registration
 @DomainService('userService')
@@ -1015,7 +1015,7 @@ class OrderService {
 ### CQRS Integration with DI
 
 ```typescript
-import { CommandHandler, DomainService } from '@vytches-ddd/di';
+import { CommandHandler, DomainService } from '@vytches/ddd-di';
 
 // Enhanced command handler with DI options
 @CommandHandler(CreateOrderCommand, {
@@ -1063,12 +1063,12 @@ const paymentService = VytchesDDD.resolve<PaymentService>(
 ### Basic Saga Implementation
 
 ```typescript
-import { BaseSaga, SagaStatus } from '@vytches-ddd/messaging';
+import { BaseSaga, SagaStatus } from '@vytches/ddd-messaging';
 import type {
   IExtendedDomainEvent,
   ISagaExecutionContext,
   ISagaActionResult,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Define saga for long-running business processes
 class OrderProcessingSaga extends BaseSaga {
@@ -1147,7 +1147,7 @@ class OrderProcessingSaga extends BaseSaga {
 import {
   SagaOrchestrator,
   InMemorySagaRepository,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Setup saga infrastructure
 const sagaRepository = new InMemorySagaRepository();
@@ -1184,7 +1184,7 @@ const results = await orchestrator.processEvent(event, context);
 ### Saga Repository Operations
 
 ```typescript
-import { InMemorySagaRepository } from '@vytches-ddd/messaging';
+import { InMemorySagaRepository } from '@vytches/ddd-messaging';
 
 const repository = new InMemorySagaRepository({
   enableOptimisticLocking: true,
@@ -1225,7 +1225,7 @@ import {
   LoggingMiddleware,
   RetryMiddleware,
   CircuitBreakerMiddleware,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Create middleware pipeline
 const loggingMiddleware = new LoggingMiddleware();
@@ -1350,7 +1350,7 @@ class OrderRepository extends IBaseRepository<OrderAggregate> {
 
 ```typescript
 // NestJS Integration Example
-import { NestJSContainerAdapter } from '@vytches-ddd/di';
+import { NestJSContainerAdapter } from '@vytches/ddd-di';
 
 @Module({
   providers: [OrderService, PaymentService],
@@ -1374,7 +1374,7 @@ The new Policies V2 provides a unified Promise-based API with rich enterprise
 features:
 
 ```typescript
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
 import {
   AgeSpecification,
   EmailSpecification,
@@ -1434,7 +1434,7 @@ const dynamicPolicy = PolicyBuilder.create<Order>()
 ### Complex Group Logic
 
 ```typescript
-import { PolicyGroup } from '@vytches-ddd/policies';
+import { PolicyGroup } from '@vytches/ddd-policies';
 
 // OR group logic for flexible business rules
 const excellentCreditGroup = PolicyGroup.create<LoanApplication>(
@@ -1519,7 +1519,7 @@ const asyncPolicy = PolicyBuilder.create<LoanApplication>()
 ### Policy Registry Usage
 
 ```typescript
-import { PolicyRegistry } from '@vytches-ddd/policies';
+import { PolicyRegistry } from '@vytches/ddd-policies';
 
 const registry = new PolicyRegistry();
 
@@ -1581,7 +1581,7 @@ import {
   PolicyRetryBehavior,
   PolicyCachingBehavior,
   PolicyTemporalBehavior,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 
 // Create a base business policy
 class PaymentValidationPolicy extends BaseBusinessPolicy<PaymentData> {
@@ -1617,7 +1617,7 @@ const result = await cachedPolicy.check({ entity: paymentData, context });
 import {
   PolicyRetryBehavior,
   PolicyRetryBehaviorFactory,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 
 // Factory methods for common scenarios
 const transientFailurePolicy = PolicyRetryBehaviorFactory.forTransientFailures(
@@ -1651,7 +1651,7 @@ console.log(
 import {
   PolicyCachingBehavior,
   PolicyCachingBehaviorFactory,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 
 // Simple TTL-based caching
 const cachedPolicy = PolicyCachingBehaviorFactory.withTTL(basePolicy, 30000); // 30 seconds
@@ -1679,7 +1679,7 @@ import {
   PolicyTemporalBehavior,
   PolicyTemporalBehaviorBuilder,
   PolicyTemporalBehaviorFactory,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 
 // Business hours policy
 const businessHoursPolicy = PolicyTemporalBehaviorFactory.forBusinessHours(
@@ -1729,10 +1729,10 @@ All policy behaviors maintain backward compatibility through aliases:
 
 ```typescript
 // New naming (recommended)
-import { PolicyRetryBehavior } from '@vytches-ddd/policies';
+import { PolicyRetryBehavior } from '@vytches/ddd-policies';
 
 // Old naming (deprecated in v2.1)
-import { RetryPolicy, PolicyRetryDecorator } from '@vytches-ddd/policies';
+import { RetryPolicy, PolicyRetryDecorator } from '@vytches/ddd-policies';
 
 // All work identically
 const policy1 = PolicyRetryBehavior.create(basePolicy, config);
@@ -1769,7 +1769,7 @@ actually use library features.**
 ````markdown
 # [ComponentName] - [ComplexityLevel] Example
 
-**Version**: [current-version] **Package**: @vytches-ddd/[package-name]
+**Version**: [current-version] **Package**: @vytches/ddd-[package-name]
 **Complexity**: [beginner|intermediate|advanced] **Domain**: [domain-name]
 **Patterns**: [pattern1, pattern2, pattern3] **Dependencies**:
 [list-of-dependencies]
@@ -1786,7 +1786,7 @@ actually use library features.**
 
 ```typescript
 // [filename].ts
-import { [LibraryClasses] } from '@vytches-ddd/[package]';
+import { [LibraryClasses] } from '@vytches/ddd-[package]';
 import { [ExistingTypes] } from './types'; // ALWAYS import existing types
 
 // ✅ FOCUS: Library implementation only
@@ -1820,13 +1820,13 @@ export class [ComponentName] extends [LibraryBaseClass] {
 
 **Focus**: Basic [LibraryClass] usage in [Framework] with manual instantiation
 **Base Example**: [link-to-basic-example]
-**Dependencies**: [framework-deps], @vytches-ddd/[package]
+**Dependencies**: [framework-deps], @vytches/ddd-[package]
 
 ## Service Implementation
 ```typescript
 // [component].service.ts
 import { Injectable } from '@nestjs/common';
-import { [LibraryClass] } from '@vytches-ddd/[package]';
+import { [LibraryClass] } from '@vytches/ddd-[package]';
 import { [ExistingTypes] } from './types'; // ALWAYS import from app
 
 @Injectable()
@@ -1857,15 +1857,15 @@ export class [ComponentName]Service {
 ```markdown
 # [ComponentName] - [Framework] DI Integration
 
-**Focus**: Advanced [LibraryClass] usage with @vytches-ddd/di integration
+**Focus**: Advanced [LibraryClass] usage with @vytches/ddd-di integration
 **Base Example**: [link-to-basic-example]
-**Dependencies**: [framework-deps], @vytches-ddd/[package], @vytches-ddd/di
+**Dependencies**: [framework-deps], @vytches/ddd-[package], @vytches/ddd-di
 
 ## Service Implementation
 ```typescript
 // [component].service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { [ExistingTypes] } from './types'; // ALWAYS import from app
 
 @Injectable()
@@ -1873,7 +1873,7 @@ export class [ComponentName]Service {
   private readonly [libraryInstance]: [LibraryClass];
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration
+    // ⭐ FOCUS: @vytches/ddd-di integration
     this.[libraryInstance] = VytchesDDD.resolve<[LibraryClass]>('[serviceId]');
   }
 
@@ -1886,7 +1886,7 @@ export class [ComponentName]Service {
 
 **Key Points:**
 
-- Advanced DI integration with @vytches-ddd/di
+- Advanced DI integration with @vytches/ddd-di
 - Service locator pattern usage
 - Enterprise-grade dependency management
 
@@ -1898,7 +1898,7 @@ export class [ComponentName]Service {
 - [ ] **NO generated interfaces/DTOs**: All types imported from `./types` or similar
 - [ ] **NO business logic in framework services**: Keep as thin wrappers
 - [ ] **SEPARATE FILES**: manual.md for beginners, di.md for intermediate+
-- [ ] **APPROPRIATE APPROACH**: Manual setup for beginner, @vytches-ddd/di for advanced
+- [ ] **APPROPRIATE APPROACH**: Manual setup for beginner, @vytches/ddd-di for advanced
 - [ ] **NO unnecessary files**: interfaces.md, config.md unless library-specific
 - [ ] **LIBRARY FOCUS**: Every code block shows actual library usage
 - [ ] **PROPER IMPORTS**: All external types imported with comments
@@ -1963,10 +1963,10 @@ Run this mental checklist before submitting ANY example:
 - ✅ **USE STANDARD NestJS DI**: Standard @Injectable(), useFactory patterns for
   framework integration
 - ✅ **LIBRARY DI HYBRID APPROACH**: Separate files for manual setup vs
-  @vytches-ddd/di integration
+  @vytches/ddd-di integration
 - ✅ **BEGINNER = MANUAL SETUP**: Basic examples use manual library
   instantiation (simple, clear)
-- ✅ **INTERMEDIATE+ = LIBRARY DI**: Advanced examples show @vytches-ddd/di
+- ✅ **INTERMEDIATE+ = LIBRARY DI**: Advanced examples show @vytches/ddd-di
   integration (@DomainService, VytchesDDD.resolve())
 - ✅ **SEPARATE FILES**: manual.md and di.md files that can be merged in output
 - ✅ **KEEP SIMPLE**: 1-3 methods max, focus on core library operations
@@ -1982,7 +1982,7 @@ Run this mental checklist before submitting ANY example:
 
 - ✅ **USE standard try/catch**: Simple, clear error handling in implementation
   code
-- ✅ **USE safeRun in tests**: Always use safeRun from @vytches-ddd/utils in
+- ✅ **USE safeRun in tests**: Always use safeRun from @vytches/ddd-utils in
   test files
 - ❌ **AVOID safeRun in implementation**: Don't use safeRun in usage examples or
   service code
@@ -2007,7 +2007,7 @@ export class PaymentService {
   constructor(private readonly paymentACL: PaymentACLService) {}
 
   async processPayment(payment: Payment): Promise<Payment> {
-    // ⭐ Main focus: Use our ACL from @vytches-ddd/acl
+    // ⭐ Main focus: Use our ACL from @vytches/ddd-acl
     try {
       return await this.paymentACL.execute('process', payment);
     } catch (error) {

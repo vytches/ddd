@@ -1,10 +1,10 @@
 # Enterprise Blockchain Transaction Orchestrator - Complex Distributed Aggregate
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Advanced
 **Domain**: Distributed Ledger Technology & Blockchain **Patterns**: Distributed
 Coordination, Consensus Management, Cross-Chain Operations, Smart Contract
-Integration, Cryptographic Validation **Dependencies**: @vytches-ddd/aggregates,
-@vytches-ddd/domain-primitives, @vytches-ddd/contracts
+Integration, Cryptographic Validation **Dependencies**: @vytches/ddd-aggregates,
+@vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -27,9 +27,9 @@ requirements, and comprehensive audit trails.
 
 ```typescript
 // blockchain-transaction-orchestrator.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   BlockchainNetwork,
   TransactionType,

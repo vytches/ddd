@@ -1,16 +1,16 @@
-# @vytches-ddd/resilience
+# @vytches/ddd-resilience
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/resilience
+Package: @vytches/ddd-resilience
 Category: Infrastructure
 Purpose: Resilience patterns including circuit breakers, retry policies, bulkheads, and timeout strategies for fault-tolerant applications
-Dependencies: @vytches-ddd/core, @vytches-ddd/logging
+Dependencies: @vytches/ddd-core, @vytches/ddd-logging
 Complexity: High
 DDD Patterns: Resilience Patterns, Circuit Breaker, Retry, Bulkhead, Timeout
-Integration Points: @vytches-ddd/cqrs, @vytches-ddd/messaging, @vytches-ddd/repositories, @vytches-ddd/domain-services
+Integration Points: @vytches/ddd-cqrs, @vytches/ddd-messaging, @vytches/ddd-repositories, @vytches/ddd-domain-services
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fresilience.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fresilience)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-resilience.svg)](https://badge.fury.io/js/%40vytches%2Fddd-resilience)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -44,20 +44,20 @@ observability and metrics collection.
 
 ```bash
 # npm
-npm install @vytches-ddd/resilience
+npm install @vytches/ddd-resilience
 
 # yarn
-yarn add @vytches-ddd/resilience
+yarn add @vytches/ddd-resilience
 
 # pnpm
-pnpm add @vytches-ddd/resilience
+pnpm add @vytches/ddd-resilience
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/core @vytches-ddd/logging
+npm install @vytches/ddd-core @vytches/ddd-logging
 ```
 
 ## ✨ Key Features
@@ -167,7 +167,7 @@ interface BulkheadConfig {
 ### Basic Circuit Breaker
 
 ```typescript
-import { CircuitBreaker, CircuitBreakerState } from '@vytches-ddd/resilience';
+import { CircuitBreaker, CircuitBreakerState } from '@vytches/ddd-resilience';
 
 // Create circuit breaker
 const circuitBreaker = new CircuitBreaker({
@@ -200,7 +200,7 @@ try {
 ### Basic Retry Policy
 
 ```typescript
-import { RetryPolicy, MaxRetriesExceededError } from '@vytches-ddd/resilience';
+import { RetryPolicy, MaxRetriesExceededError } from '@vytches/ddd-resilience';
 
 // Create retry policy
 const retryPolicy = new RetryPolicy({
@@ -230,7 +230,7 @@ try {
 ### Basic Bulkhead
 
 ```typescript
-import { Bulkhead, BulkheadRejectedException } from '@vytches-ddd/resilience';
+import { Bulkhead, BulkheadRejectedException } from '@vytches/ddd-resilience';
 
 // Create bulkhead
 const bulkhead = new Bulkhead({
@@ -259,7 +259,7 @@ try {
 ### Advanced Circuit Breaker Usage
 
 ```typescript
-import { CircuitBreaker, CircuitBreakerState } from '@vytches-ddd/resilience';
+import { CircuitBreaker, CircuitBreakerState } from '@vytches/ddd-resilience';
 
 class PaymentServiceCircuitBreaker {
   private circuitBreaker: CircuitBreaker;
@@ -313,7 +313,7 @@ class PaymentServiceCircuitBreaker {
 import {
   CircuitBreaker,
   CircuitBreakerOpenError,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 class ResilientApiClient {
   private circuitBreaker: CircuitBreaker;
@@ -372,7 +372,7 @@ class ResilientApiClient {
 ### Exponential Backoff with Jitter
 
 ```typescript
-import { RetryPolicy } from '@vytches-ddd/resilience';
+import { RetryPolicy } from '@vytches/ddd-resilience';
 
 const retryPolicy = new RetryPolicy({
   maxAttempts: 5,
@@ -424,7 +424,7 @@ async function fetchWithRetry(url: string): Promise<any> {
 ### Retry with Custom Backoff Strategy
 
 ```typescript
-import { RetryPolicy } from '@vytches-ddd/resilience';
+import { RetryPolicy } from '@vytches/ddd-resilience';
 
 class CustomRetryPolicy extends RetryPolicy {
   constructor(config: RetryConfig) {
@@ -466,7 +466,7 @@ const customRetry = new CustomRetryPolicy({
 ### Resource Isolation
 
 ```typescript
-import { Bulkhead, BulkheadMetrics } from '@vytches-ddd/resilience';
+import { Bulkhead, BulkheadMetrics } from '@vytches/ddd-resilience';
 
 class DatabaseBulkhead {
   private readBulkhead: Bulkhead;
@@ -521,7 +521,7 @@ class DatabaseBulkhead {
 ### Priority Queue Implementation
 
 ```typescript
-import { Bulkhead } from '@vytches-ddd/resilience';
+import { Bulkhead } from '@vytches/ddd-resilience';
 
 class PriorityBulkhead extends Bulkhead {
   private highPriorityQueue: QueuedTask[] = [];
@@ -576,7 +576,7 @@ import {
   CircuitBreakerStrategy,
   RetryStrategy,
   BulkheadStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Create composite strategy
 const compositeStrategy = new CompositeResilienceStrategy([
@@ -611,7 +611,7 @@ const result = await compositeStrategy.execute(async ctx => {
 ### Fluent Policy Builder
 
 ```typescript
-import { ResiliencePolicyBuilder } from '@vytches-ddd/resilience';
+import { ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
 
 // Build policy with fluent API
 const policy = ResiliencePolicyBuilder.create()
@@ -655,7 +655,7 @@ import {
   RetryDecorator,
   BulkheadDecorator,
   TimeoutDecorator,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 class PaymentService {
   @CircuitBreakerDecorator({
@@ -700,7 +700,7 @@ class PaymentService {
 ### Class-Level Decorators
 
 ```typescript
-import { ResilienceDecorator } from '@vytches-ddd/resilience';
+import { ResilienceDecorator } from '@vytches/ddd-resilience';
 
 @ResilienceDecorator({
   circuitBreaker: {
@@ -746,7 +746,7 @@ import {
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
   BulkheadMetricCollector,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Setup metrics collection
 const metricRegistry = GlobalMetricRegistry.getInstance();
@@ -785,7 +785,7 @@ import {
   PrometheusMetricExporter,
   CsvMetricExporter,
   CompositeMetricExporter,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Create exporters
 const jsonExporter = new JsonMetricExporter('./metrics.json');
@@ -810,7 +810,7 @@ await compositeExporter.export(registry.getMetrics());
 import {
   GlobalObservabilityEventBus,
   ObservabilityEventListener,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Create event listener
 const eventListener: ObservabilityEventListener = {
@@ -838,8 +838,8 @@ eventBus.subscribe(eventListener);
 ### CQRS Integration
 
 ```typescript
-import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
-import { ResilienceDecorator } from '@vytches-ddd/resilience';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
+import { ResilienceDecorator } from '@vytches/ddd-resilience';
 
 @CommandHandler(ProcessPaymentCommand)
 @ResilienceDecorator({
@@ -891,8 +891,8 @@ class GetUserHandler {
 ### Repository Integration
 
 ```typescript
-import { IBaseRepository } from '@vytches-ddd/repositories';
-import { ResilienceDecorator } from '@vytches-ddd/resilience';
+import { IBaseRepository } from '@vytches/ddd-repositories';
+import { ResilienceDecorator } from '@vytches/ddd-resilience';
 
 @ResilienceDecorator({
   circuitBreaker: {
@@ -932,8 +932,8 @@ class UserRepository extends IBaseRepository<User> {
 ### Domain Services Integration
 
 ```typescript
-import { DomainService } from '@vytches-ddd/domain-services';
-import { ResilienceDecorator } from '@vytches-ddd/resilience';
+import { DomainService } from '@vytches/ddd-domain-services';
+import { ResilienceDecorator } from '@vytches/ddd-resilience';
 
 @DomainService('paymentValidationService')
 @ResilienceDecorator({
@@ -972,12 +972,12 @@ class PaymentValidationService {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   CircuitBreaker,
   CircuitBreakerState,
   CircuitBreakerOpenError,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 describe('CircuitBreaker', () => {
   let circuitBreaker: CircuitBreaker;
@@ -1092,8 +1092,8 @@ describe('CircuitBreaker', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
-import { RetryPolicy, MaxRetriesExceededError } from '@vytches-ddd/resilience';
+import { safeRun } from '@vytches/ddd-utils';
+import { RetryPolicy, MaxRetriesExceededError } from '@vytches/ddd-resilience';
 
 describe('RetryPolicy', () => {
   let retryPolicy: RetryPolicy;
@@ -1233,8 +1233,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

@@ -1,8 +1,8 @@
 # EntityId Usage Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**: Basic
 **Domain**: Foundation **Patterns**: entity-id, identity-patterns,
-factory-methods **Dependencies**: @vytches-ddd/contracts
+factory-methods **Dependencies**: @vytches/ddd-contracts
 
 ## Description
 
@@ -22,7 +22,7 @@ supporting multiple ID formats while maintaining architectural integrity.
 
 ```typescript
 // src/domain/foundation/entity-id-usage.ts
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 
 // Basic EntityId creation
 export class BasicEntityIdUsage {
@@ -188,7 +188,7 @@ export class EntityIdOperations {
 
 ```typescript
 // src/domain/users/user.entity.ts
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 
 export interface UserData {
   email: string;

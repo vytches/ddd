@@ -1,8 +1,8 @@
 # NestJS Enterprise Monitoring
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging + NestJS **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging + NestJS **Complexity**:
 intermediate **Framework**: NestJS **Integration**: Enterprise monitoring and
-observability patterns **Dependencies**: @nestjs/common, @vytches-ddd/logging,
+observability patterns **Dependencies**: @nestjs/common, @vytches/ddd-logging,
 monitoring integrations
 
 ## Description
@@ -25,7 +25,7 @@ for proactive operational management.
 ```typescript
 // enterprise-monitoring.service.ts - Core monitoring service
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 

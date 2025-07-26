@@ -1,9 +1,9 @@
 # Unit of Work Pattern - Transaction Management
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 intermediate **Domain**: financial-transactions **Patterns**: unit-of-work,
 transaction-management, multi-repository-coordination **Dependencies**:
-@vytches-ddd/repositories, @vytches-ddd/domain-primitives
+@vytches/ddd-repositories, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -21,8 +21,8 @@ need to participate in a single business transaction.
 
 ```typescript
 // financial-unit-of-work.ts
-import { UnitOfWork, IRepository } from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { UnitOfWork, IRepository } from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   Account,
   Transaction,

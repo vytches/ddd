@@ -1,9 +1,9 @@
 # Basic Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**: basic
 **Domain**: Event Sourcing **Patterns**: Implementation strategies, setup
-patterns, best practices **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events
+patterns, best practices **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events
 
 ## Description
 
@@ -33,8 +33,8 @@ import {
   ProjectionEngine,
   CheckpointCapability,
   CircuitBreakerCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent, IEventBus } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent, IEventBus } from '@vytches/ddd-events';
 import { UserData, ProjectionCheckpoint, ServiceResponse } from '../types';
 
 // Step 1: Define Your Projection Class

@@ -1,9 +1,9 @@
 # Event System - NestJS Basic Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: basic
 **Domain**: Integration **Patterns**: event-publishing, repository-pattern,
 domain-events, nestjs-integration **Dependencies**: @nestjs/common,
-@vytches-ddd/events, @vytches-ddd/repositories
+@vytches/ddd-events, @vytches/ddd-repositories
 
 ## Description
 
@@ -24,7 +24,7 @@ handling in controllers.
 ```typescript
 // user.service.ts
 import { Injectable } from '@nestjs/common';
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
 import { UserRepository } from './user.repository';
 import { User, CreateUserData, UpdateUserData } from './types'; // From your app
 
@@ -113,7 +113,7 @@ export class UserController {
 
 // notification.service.ts
 import { Injectable } from '@nestjs/common';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 import { UserCreatedEvent, UserUpdatedEvent, UserArchivedEvent } from './types'; // From your app
 
 @Injectable()

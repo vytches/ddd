@@ -6,7 +6,7 @@
  * All examples import types from this central location.
  */
 
-import type { EntityId } from '@vytches-ddd/contracts';
+import type { EntityId } from '@vytches/ddd-contracts';
 
 // ===== BASE VALUE OBJECT TYPES =====
 

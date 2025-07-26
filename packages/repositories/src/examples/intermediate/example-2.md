@@ -1,15 +1,15 @@
 # Specification Pattern - Advanced Query Composition
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 intermediate **Domain**: product-catalog **Patterns**: specification-pattern,
-query-composition, domain-criteria **Dependencies**: @vytches-ddd/repositories,
-@vytches-ddd/validation
+query-composition, domain-criteria **Dependencies**: @vytches/ddd-repositories,
+@vytches/ddd-validation
 
 ## Description
 
 Advanced querying using the Specification pattern to create composable, reusable
 business criteria. Demonstrates complex query building, specification chaining,
-and domain-driven query logic with the @vytches-ddd/repositories specification
+and domain-driven query logic with the @vytches/ddd-repositories specification
 system.
 
 ## Business Context
@@ -23,7 +23,7 @@ complex query composition.
 
 ```typescript
 // product-specifications.ts
-import { BaseSpecification, CompositeSpecification } from '@vytches-ddd/repositories';
+import { BaseSpecification, CompositeSpecification } from '@vytches/ddd-repositories';
 import { Product, QueryOptions } from './types'; // From your application
 
 // ✅ FOCUS: Domain-specific specifications using library base classes

@@ -324,7 +324,7 @@ class JSDocPublisher {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@vytches-ddd/${pkg.name} - Documentation</title>
+    <title>@vytches/ddd-${pkg.name} - Documentation</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -441,7 +441,7 @@ class JSDocPublisher {
 </head>
 <body>
     <div class="header">
-        <h1>@vytches-ddd/${pkg.name}</h1>
+        <h1>@vytches/ddd-${pkg.name}</h1>
         <p>${domain} Package - API Documentation</p>
     </div>
 
@@ -712,7 +712,7 @@ class JSDocPublisher {
 
         return `
         <div class="package-card">
-            <h3>@vytches-ddd/${pkg.name}</h3>
+            <h3>@vytches/ddd-${pkg.name}</h3>
             <p><strong>${domain}</strong> - ${description}</p>
             <a href="${pkg.name}/index.html">View Documentation →</a>
         </div>

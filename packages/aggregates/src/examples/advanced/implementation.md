@@ -1,6 +1,6 @@
 # Advanced Aggregate Implementation - Enterprise Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Advanced
 **Domain**: Enterprise Architecture & Advanced DDD Patterns
 
 ## Overview

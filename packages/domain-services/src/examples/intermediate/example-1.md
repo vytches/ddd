@@ -1,9 +1,9 @@
 # Event-Driven Domain Service - Intermediate Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 intermediate **Domain**: order-management **Patterns**: domain-service,
-event-driven, orchestration **Dependencies**: @vytches-ddd/core,
-@vytches-ddd/events
+event-driven, orchestration **Dependencies**: @vytches/ddd-core,
+@vytches/ddd-events
 
 ## Description
 
@@ -22,9 +22,9 @@ direct dependencies.
 
 ````typescript
 // order-fulfillment.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { EventHandler, DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { EventHandler, DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   OrderCreatedEvent,

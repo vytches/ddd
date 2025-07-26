@@ -4,8 +4,8 @@
 comprehensive validation workflows  
 **Domain**: Global Banking Compliance Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/policies,
-@vytches-ddd/events, @vytches-ddd/messaging, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-policies,
+@vytches/ddd-events, @vytches/ddd-messaging, @vytches/ddd-di
 
 ## Business Context
 
@@ -26,7 +26,7 @@ import {
   PolicyBuilder,
   PolicyContext,
   ISpecification as IPolicySpecification,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import { ValidationConfiguration, RegulatoryFramework } from '../types'; // ALWAYS import from app
 
 // Policy specifications for validation configuration
@@ -195,8 +195,8 @@ export class ValidationPolicyEngine {
 }
 
 // validation-messages.ts
-import { OutboxMessage, MessagePriority } from '@vytches-ddd/messaging';
-import { DomainEvent } from '@vytches-ddd/events';
+import { OutboxMessage, MessagePriority } from '@vytches/ddd-messaging';
+import { DomainEvent } from '@vytches/ddd-events';
 
 // Validation domain events
 export class ValidationWorkflowStartedEvent extends DomainEvent {
@@ -305,12 +305,12 @@ import {
   CompositeSpecification,
   BusinessRuleValidator,
   ValidationFacade,
-} from '@vytches-ddd/validation';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { OutboxService } from '@vytches-ddd/messaging';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { OutboxService } from '@vytches/ddd-messaging';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Enterprise Validation Orchestrator
 @DomainService('enterpriseValidationOrchestrator', {

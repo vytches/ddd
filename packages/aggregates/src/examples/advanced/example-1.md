@@ -1,10 +1,10 @@
 # Enterprise Process Orchestration Platform - Global Coordination System
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Advanced
 **Domain**: Enterprise Process Management **Patterns**: Process Orchestration,
 Saga Coordination, Global State Management, AI-Enhanced Decision Making
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives,
-@vytches-ddd/contracts
+**Dependencies**: @vytches/ddd-aggregates, @vytches/ddd-domain-primitives,
+@vytches/ddd-contracts
 
 ## Description
 
@@ -25,9 +25,9 @@ while maintaining high availability and performance across global operations.
 
 ```typescript
 // enterprise-process-orchestrator.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   ProcessDefinition,
   ProcessInstance,

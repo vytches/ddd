@@ -1,9 +1,9 @@
 # AI-Powered Repository - Machine Learning Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 advanced **Domain**: intelligent-data-management **Patterns**: ai-integration,
 predictive-caching, intelligent-querying, machine-learning-optimization
-**Dependencies**: @vytches-ddd/repositories, @vytches-ddd/ai, @vytches-ddd/ml
+**Dependencies**: @vytches/ddd-repositories, @vytches/ddd-ai, @vytches/ddd-ml
 
 ## Description
 
@@ -26,8 +26,8 @@ import {
   MachineLearningEngine,
   PredictiveCache,
   QueryOptimizer
-} from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   Customer,
   AIModelConfig,

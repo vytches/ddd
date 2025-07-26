@@ -1,9 +1,9 @@
 # Enterprise Resilience with VytchesDDD DI - NestJS Advanced Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Advanced **Domain**: Enterprise Service Mesh **Patterns**:
 VytchesDDD DI Integration, Global Coordination, Predictive Adaptation
-**Dependencies**: @nestjs/common, @vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-resilience, @vytches/ddd-di
 
 ## Description
 
@@ -24,13 +24,13 @@ system.
 ```typescript
 // resilience-orchestration.service.ts
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   EnterpriseResilienceOrchestrator,
   GlobalResilienceCoordinator,
   PredictiveAdaptationEngine,
   ServiceMeshIntegration,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   ServiceOperation,
   ResilienceMetrics,
@@ -226,7 +226,7 @@ export class ResilienceOrchestrationService implements OnModuleInit {
 
 // regional-resilience.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 // ⭐ CRITICAL: Regional resilience coordinator with VytchesDDD DI
 @DomainService({
@@ -297,7 +297,7 @@ export class RegionalResilienceService implements OnModuleInit {
 
 // predictive-adaptation.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 // ⭐ CRITICAL: AI-driven predictive adaptation with VytchesDDD DI
 @DomainService({
@@ -462,7 +462,7 @@ export class ResilienceController {
 
 // resilience.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { ResilienceController } from './resilience.controller';
 import { ResilienceOrchestrationService } from './resilience-orchestration.service';
 import { RegionalResilienceService } from './regional-resilience.service';

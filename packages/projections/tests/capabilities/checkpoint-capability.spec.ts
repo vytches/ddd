@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { safeRun } from '@vytches/ddd-utils';
 import { CheckpointCapability } from '../../src';
 import type {
   ICapabilityContext,

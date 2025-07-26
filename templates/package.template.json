@@ -1,5 +1,5 @@
 {
-  "name": "@vytches-ddd/{PACKAGE_NAME}",
+  "name": "@vytches/ddd-{PACKAGE_NAME}",
   "version": "0.1.0",
   "description": "{PACKAGE_DESCRIPTION}",
   "type": "module",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/{PACKAGE_NAME}"
   },
   "scripts": {
@@ -42,13 +42,15 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    {PEER_DEPENDENCIES}
+    {PEER_DEPENDENCIES
+    }
   },
   "dependencies": {
-    {DEPENDENCIES}
+    {DEPENDENCIES
+    }
   },
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vitest": "^2.0.0",

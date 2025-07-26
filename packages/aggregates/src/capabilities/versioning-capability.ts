@@ -1,9 +1,9 @@
-import { Capability } from '@vytches-ddd/contracts';
+import { Capability } from '@vytches/ddd-contracts';
 import type {
   IVersioningCapability,
   IExtendedDomainEvent,
   IEventUpcaster,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
 /**

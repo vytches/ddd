@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches-ddd/core';
+import { BaseError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary CqrsValidationError class for cqrs validation error operations

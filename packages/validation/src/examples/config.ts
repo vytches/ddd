@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const packageExampleConfig: PackageExampleConfig = {
   packageName: 'validation',
@@ -8,7 +8,7 @@ export const packageExampleConfig: PackageExampleConfig = {
     'Domain validation patterns with specifications, composite validation, and business rules',
   domain: 'Core',
   patterns: ['specification-pattern', 'composite-validation', 'business-rules'],
-  dependencies: ['@vytches-ddd/domain-primitives', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-domain-primitives', '@vytches/ddd-utils'],
 
   complexityLevels: {
     basic: {

@@ -1,24 +1,24 @@
-# Advanced NestJS DI Integration with @vytches-ddd/di
+# Advanced NestJS DI Integration with @vytches/ddd-di
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
 **Patterns**: di-integration, service-locator, enterprise-architecture  
-**Dependencies**: @nestjs/common, @vytches-ddd/policies, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-policies, @vytches/ddd-di
 
 ## Description
 
-Advanced integration of @vytches-ddd/policies with NestJS using the
-@vytches-ddd/di service locator pattern for enterprise-grade dependency
+Advanced integration of @vytches/ddd-policies with NestJS using the
+@vytches/ddd-di service locator pattern for enterprise-grade dependency
 injection, policy behaviors, and cross-cutting concerns.
 
 ## Business Context
 
 Enterprise applications require sophisticated policy management with
 cross-cutting concerns like retry logic, caching, and audit logging. This
-example demonstrates integration with @vytches-ddd/di for advanced policy
+example demonstrates integration with @vytches/ddd-di for advanced policy
 orchestration and behavior composition.
 
 ## Code Example
@@ -26,13 +26,13 @@ orchestration and behavior composition.
 ```typescript
 // user-policy.service.ts - Domain Service with DI Integration
 import { Injectable } from '@nestjs/common';
-import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches/ddd-di';
 import {
   PolicyBuilder,
   PolicyRetryBehavior,
   PolicyCachingBehavior,
   PolicyResult,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import { User, CreateUserRequest, PolicyContext } from './types'; // From your application
 
 /**
@@ -194,7 +194,7 @@ export class UserPolicyService {
 
 // user-management.controller.ts - NestJS Controller with Bridge Pattern
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CreateUserRequest } from './types'; // From your application
 
 /**
@@ -282,7 +282,7 @@ export class UserManagementController {
 
 // user-management.module.ts - NestJS Module with VytchesDDD Integration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 @Module({
   controllers: [UserManagementController],

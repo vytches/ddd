@@ -1,11 +1,11 @@
 # Query Handlers with Caching and Performance Optimization
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: query-handler, caching, performance-optimization, pagination  
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/di, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-cqrs, @vytches/ddd-di, @vytches/ddd-utils
 
 ## Description
 
@@ -243,8 +243,8 @@ export class SearchUsersQuery implements SearchUsersQuery {
 
 ````typescript
 // user-query-handlers.ts
-import { QueryHandler } from '@vytches-ddd/cqrs';
-import { Result } from '@vytches-ddd/utils';
+import { QueryHandler } from '@vytches/ddd-cqrs';
+import { Result } from '@vytches/ddd-utils';
 import {
   GetUserByIdQuery,
   GetUsersByRoleQuery,
@@ -853,8 +853,8 @@ interface UserSearchFilters {
 
 ````typescript
 // query-bus-setup.ts
-import { QueryBus } from '@vytches-ddd/cqrs';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { QueryBus } from '@vytches/ddd-cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   GetUserByIdQueryHandler,
   GetUsersByRoleQueryHandler,

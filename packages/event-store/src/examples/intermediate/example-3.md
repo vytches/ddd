@@ -1,9 +1,9 @@
 # Event Versioning and Migration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 intermediate **Domain**: Infrastructure **Patterns**: event-versioning,
 schema-migration, backward-compatibility, event-evolution **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/utils
+@vytches/ddd-event-store, @vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -26,10 +26,10 @@ integrations or losing historical data.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
 import { EventMigration, VersionedEvent, MigrationContext } from './types'; // From your app
 
 // ⭐ FOCUS: Advanced event versioning with migration support

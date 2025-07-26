@@ -126,7 +126,7 @@ and dependency rules:
 
 **Higher Layer Rules**:
 
-- Must import from `@vytches-ddd/core` for stability
+- Must import from `@vytches/ddd-core` for stability
 - Can depend on lower layers through stable APIs
 - Cannot bypass layer boundaries
 
@@ -134,18 +134,18 @@ and dependency rules:
 
 ```typescript
 // ✅ External consumers
-import { AggregateRoot, EntityId } from '@vytches-ddd/core';
+import { AggregateRoot, EntityId } from '@vytches/ddd-core';
 
 // ✅ Internal foundation packages (direct imports to avoid circles)
-import { IActor } from '@vytches-ddd/domain-primitives';
-import { EntityId } from '@vytches-ddd/value-objects';
+import { IActor } from '@vytches/ddd-domain-primitives';
+import { EntityId } from '@vytches/ddd-value-objects';
 
 // ✅ Higher-level packages (through meta-package)
-import { AggregateRoot } from '@vytches-ddd/core';
-import { Logger } from '@vytches-ddd/logging';
+import { AggregateRoot } from '@vytches/ddd-core';
+import { Logger } from '@vytches/ddd-logging';
 
 // ❌ Layer violations (prevented by ESLint)
-import { EntityId } from '@vytches-ddd/value-objects'; // in events package
+import { EntityId } from '@vytches/ddd-value-objects'; // in events package
 ```
 
 ### ESLint Rule Enforcement

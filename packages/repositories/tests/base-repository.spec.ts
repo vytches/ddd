@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 import type {
   IDomainEvent,
   IAggregateWithEvents,
   IExtendedDomainEvent,
-} from '@vytches-ddd/contracts';
-import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
+import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import type { IRepositoryAggregate } from '../src';
 import { IBaseRepository } from '../src';
 

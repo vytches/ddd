@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const config: PackageExampleConfig = {
   packageName: 'event-store',
@@ -29,7 +29,7 @@ export const config: PackageExampleConfig = {
       'event-store:migration',
     ],
   },
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/event-store', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-event-store', '@vytches/ddd-utils'],
   sections: [
     'hero',
     'description',
@@ -90,7 +90,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Basic event storage and retrieval using in-memory implementation with stream management',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-events'],
     },
     {
       id: 'basic-event-serialization',
@@ -100,7 +100,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Different event serialization approaches including JSON and custom formatters',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-utils'],
     },
     {
       id: 'basic-stream-operations',
@@ -110,7 +110,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic stream operations including reading, filtering, and pagination',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-events'],
     },
     {
       id: 'basic-implementation-overview',
@@ -120,7 +120,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'High-level overview of event store implementation patterns and setup',
-      dependencies: ['@vytches-ddd/event-store'],
+      dependencies: ['@vytches/ddd-event-store'],
     },
     {
       id: 'basic-use-cases',
@@ -130,7 +130,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Real-world business scenarios and use cases for event storage',
-      dependencies: ['@vytches-ddd/event-store'],
+      dependencies: ['@vytches/ddd-event-store'],
     },
     // Intermediate Examples
     {
@@ -142,7 +142,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Advanced event replay capabilities for system recovery and historical data processing',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/events', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-events', '@vytches/ddd-utils'],
     },
     {
       id: 'intermediate-stream-projections',
@@ -152,7 +152,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Building read models and projections directly from event streams',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/projections', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-projections', '@vytches/ddd-events'],
     },
     {
       id: 'intermediate-versioning-migration',
@@ -162,7 +162,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced event versioning strategies and data migration techniques',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/utils', '@vytches-ddd/logging'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-utils', '@vytches/ddd-logging'],
     },
     {
       id: 'intermediate-implementation-guide',
@@ -172,7 +172,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Advanced implementation patterns for event storage systems',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/resilience'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-resilience'],
     },
     {
       id: 'intermediate-use-cases',
@@ -182,7 +182,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Enterprise-level use cases for event storage and replay systems',
-      dependencies: ['@vytches-ddd/event-store'],
+      dependencies: ['@vytches/ddd-event-store'],
     },
     // Advanced Examples
     {
@@ -194,7 +194,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Enterprise distributed event store with sharding, replication, and consistency guarantees',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/resilience', '@vytches-ddd/logging'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-resilience', '@vytches/ddd-logging'],
     },
     {
       id: 'advanced-performance-optimization',
@@ -204,7 +204,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Extreme performance optimization for high-throughput event storage systems',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/utils', '@vytches-ddd/logging'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-utils', '@vytches/ddd-logging'],
     },
     {
       id: 'advanced-enterprise-integration',
@@ -216,10 +216,10 @@ export const config: PackageExampleConfig = {
       description:
         'Complete enterprise event storage platform with monitoring, analytics, and governance',
       dependencies: [
-        '@vytches-ddd/event-store',
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/logging',
-        '@vytches-ddd/messaging',
+        '@vytches/ddd-event-store',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-logging',
+        '@vytches/ddd-messaging',
       ],
     },
     {
@@ -230,7 +230,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Comprehensive implementation patterns for enterprise-grade event storage',
-      dependencies: ['@vytches-ddd/event-store', '@vytches-ddd/resilience'],
+      dependencies: ['@vytches/ddd-event-store', '@vytches/ddd-resilience'],
     },
     {
       id: 'advanced-use-cases',
@@ -240,7 +240,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Large-scale enterprise use cases and real-world applications',
-      dependencies: ['@vytches-ddd/event-store'],
+      dependencies: ['@vytches/ddd-event-store'],
     },
     // Framework Examples - NestJS
     {
@@ -251,7 +251,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic NestJS integration with manual event store setup',
-      dependencies: ['@nestjs/common', '@vytches-ddd/event-store'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-event-store'],
     },
     {
       id: 'nestjs-di-integration',
@@ -260,8 +260,8 @@ export const config: PackageExampleConfig = {
       tags: ['event-store:nestjs', 'event-store:di', 'framework:nestjs'],
       complexity: 'basic',
       priority: 'high',
-      description: 'NestJS integration using @vytches-ddd/di service locator pattern',
-      dependencies: ['@nestjs/common', '@vytches-ddd/event-store', '@vytches-ddd/di'],
+      description: 'NestJS integration using @vytches/ddd-di service locator pattern',
+      dependencies: ['@nestjs/common', '@vytches/ddd-event-store', '@vytches/ddd-di'],
     },
     {
       id: 'nestjs-intermediate-integration',
@@ -278,9 +278,9 @@ export const config: PackageExampleConfig = {
       description: 'Advanced NestJS integration with event replay and projection capabilities',
       dependencies: [
         '@nestjs/common',
-        '@vytches-ddd/event-store',
-        '@vytches-ddd/di',
-        '@vytches-ddd/projections',
+        '@vytches/ddd-event-store',
+        '@vytches/ddd-di',
+        '@vytches/ddd-projections',
       ],
     },
     {
@@ -298,9 +298,9 @@ export const config: PackageExampleConfig = {
       description: 'Enterprise-grade NestJS integration with distributed event store capabilities',
       dependencies: [
         '@nestjs/common',
-        '@vytches-ddd/event-store',
-        '@vytches-ddd/di',
-        '@vytches-ddd/resilience',
+        '@vytches/ddd-event-store',
+        '@vytches/ddd-di',
+        '@vytches/ddd-resilience',
       ],
     },
   ],

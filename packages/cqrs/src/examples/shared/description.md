@@ -1,7 +1,7 @@
 # CQRS Package - Package Overview
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Domain**: Architecture  
 **Patterns**: command-query-responsibility-segregation, mediator-pattern,
 handler-registration
@@ -103,15 +103,15 @@ health monitoring.
 
 ## Integration Patterns
 
-The package integrates seamlessly with other @vytches-ddd packages:
+The package integrates seamlessly with other @vytches/ddd-core packages:
 
-- **@vytches-ddd/di**: Automatic handler discovery and dependency injection
-- **@vytches-ddd/events**: Command results can trigger domain events
+- **@vytches/ddd-di**: Automatic handler discovery and dependency injection
+- **@vytches/ddd-events**: Command results can trigger domain events
   automatically
-- **@vytches-ddd/validation**: Command validation through middleware pipeline
-- **@vytches-ddd/logging**: Comprehensive logging with `@LogCommands` and
+- **@vytches/ddd-validation**: Command validation through middleware pipeline
+- **@vytches/ddd-logging**: Comprehensive logging with `@LogCommands` and
   `@LogQueries` decorators
-- **@vytches-ddd/resilience**: Circuit breaker and retry patterns for external
+- **@vytches/ddd-resilience**: Circuit breaker and retry patterns for external
   dependencies
 
 ## Performance Characteristics

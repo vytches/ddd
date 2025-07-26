@@ -17,7 +17,7 @@ mkdir -p "$PLAYGROUND_PATH/src"
 # Create package.json
 cat > "$PLAYGROUND_PATH/package.json" << EOF
 {
-  "name": "@vytches-ddd/playground-$PLAYGROUND_NAME",
+  "name": "@vytches/ddd-playground-$PLAYGROUND_NAME",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -28,10 +28,10 @@ cat > "$PLAYGROUND_PATH/package.json" << EOF
     "test:watch": "vitest --watch"
   },
   "dependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/events": "workspace:*",
-    "@vytches-ddd/utils": "workspace:*",
-    "@vytches-ddd/validation": "workspace:*"
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",
@@ -70,8 +70,8 @@ cat > "$PLAYGROUND_PATH/src/index.ts" << EOF
  * Test your VytchesDDD features here!
  */
 
-import { ValueObject } from '@vytches-ddd/core';
-import { Guid } from '@vytches-ddd/utils';
+import { ValueObject } from '@vytches/ddd-core';
+import { Guid } from '@vytches/ddd-utils';
 
 console.log('🎮 $PLAYGROUND_NAME Playground Active!');
 

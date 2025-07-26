@@ -1,16 +1,16 @@
 # Policy Specification Integration in NestJS
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: basic  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
 **Patterns**: specification-pattern, business-rules, validation  
-**Dependencies**: @nestjs/common, @vytches-ddd/policies
+**Dependencies**: @nestjs/common, @vytches/ddd-policies
 
 ## Description
 
-Integration of specification pattern with @vytches-ddd/policies in NestJS
+Integration of specification pattern with @vytches/ddd-policies in NestJS
 applications, demonstrating business rule composition and reusable validation
 logic using manual instantiation.
 
@@ -31,7 +31,7 @@ import {
   PolicyResult,
   ISpecification,
   SpecificationBuilder,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import { Order, OrderItem, Customer } from './types'; // From your application
 
 /**

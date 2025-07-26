@@ -163,7 +163,7 @@ function checkEnterpriseDependencies() {
 
     console.log('🏢 Enterprise bundle includes:');
     deps.forEach(dep => {
-      if (dep.startsWith('@vytches-ddd/')) {
+      if (dep.startsWith('@vytches/ddd-')) {
         console.log(`  ✅ ${dep}`);
       }
     });

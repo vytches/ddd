@@ -6,9 +6,9 @@ process with compensating transactions:
 ```typescript
 // loan-approval-workflow.ts
 import { LoanApprovalService } from './services/loan-approval.service';
-import { UnitOfWork } from '@vytches-ddd/repositories';
-import { EventBus } from '@vytches-ddd/events';
-import { Logger } from '@vytches-ddd/logging';
+import { UnitOfWork } from '@vytches/ddd-repositories';
+import { EventBus } from '@vytches/ddd-events';
+import { Logger } from '@vytches/ddd-logging';
 import {
   LoanApprovalCommand,
   CreditCheckService,

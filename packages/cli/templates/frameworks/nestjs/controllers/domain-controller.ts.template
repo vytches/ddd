@@ -31,8 +31,8 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import { AuthGuard } from '@nestjs/passport';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { PerformanceInterceptor } from '../interceptors/performance.interceptor';
@@ -58,7 +58,7 @@ import { {{className}}Query } from '../../application/queries/{{fileName}}.query
 
 // Domain types
 import type { {{className}}Aggregate } from '../../domain/aggregates/{{fileName}}.aggregate';
-import { ValidationError, NotFoundError, BusinessRuleError } from '@vytches-ddd/domain-primitives';
+import { ValidationError, NotFoundError, BusinessRuleError } from '@vytches/ddd-domain-primitives';
 
 /**
  * {{name}} Controller

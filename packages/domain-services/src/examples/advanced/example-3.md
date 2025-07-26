@@ -1,8 +1,8 @@
 # Enterprise Domain Service - Expert Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 expert **Domain**: order-management **Patterns**: domain-service, enterprise,
-full-stack **Dependencies**: @vytches-ddd/core, @vytches-ddd/enterprise
+full-stack **Dependencies**: @vytches/ddd-core, @vytches/ddd-enterprise
 
 ## Description
 
@@ -22,7 +22,7 @@ requirements.
 
 ````typescript
 // enterprise-order.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
 import {
   EventStore,
   CommandBus,
@@ -31,8 +31,8 @@ import {
   SagaOrchestrator,
   CircuitBreaker,
   Logger,
-} from '@vytches-ddd/enterprise';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-enterprise';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   CreateOrderCommand,

@@ -1,6 +1,6 @@
 # Intermediate Validation Use Cases
 
-**Package**: @vytches-ddd/validation **Complexity**: Intermediate **Focus**:
+**Package**: @vytches/ddd-validation **Complexity**: Intermediate **Focus**:
 Advanced validation scenarios with composite patterns, async operations, and
 performance optimization
 
@@ -19,14 +19,14 @@ requires real-time risk validation with sub-millisecond latency. Each trade must
 be validated against portfolio limits, regulatory requirements, and market
 conditions while maintaining 99.99% uptime.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 import {
   CompositeSpecification,
   IAsyncSpecification,
   BatchValidationOptimizer,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 
 class TradingRiskValidator {
   private batchOptimizer: BatchValidationOptimizer<TradeOrder>;
@@ -97,7 +97,7 @@ EMR systems. Data quality varies significantly across sources, requiring
 sophisticated validation that adapts to source characteristics while maintaining
 HIPAA compliance.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class HealthcareDataValidator {
@@ -183,7 +183,7 @@ that adapt to product categories, geographic regions, and seasonal requirements.
 Validation rules change frequently based on regulatory updates and business
 requirements.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class DynamicProductValidator {
@@ -311,7 +311,7 @@ quality. Sensor data must be validated in real-time to detect anomalies, prevent
 defects, and maintain production efficiency. Data validation includes temporal
 patterns, cross-sensor correlations, and predictive quality indicators.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class IoTSensorValidator {
@@ -425,7 +425,7 @@ configuration requirements. Each tenant has custom validation rules, compliance
 requirements, and business logic that must be enforced consistently across all
 users within the tenant.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class TenantConfigurationValidator {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { ContainerBuilder, ServiceLifetime } from '../../src';
 
 describe('ContainerBuilder', () => {

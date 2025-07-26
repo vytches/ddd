@@ -1,5 +1,5 @@
 // Testing Pattern for Domain Services import { describe, it, expect, beforeEach
-} from 'vitest'; import { safeRun } from '@vytches-ddd/utils'; import {
+} from 'vitest'; import { safeRun } from '@vytches/ddd-utils'; import {
 UserManagementService } from './user-management.service'; import {
 CreateUserCommand } from '../types';
 

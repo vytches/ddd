@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import type { ISpecification, IValidator, IValidationErrors } from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+import type { ISpecification, IValidator, IValidationErrors } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 import { Validation } from '../src/validation-facade';
 
 import { BusinessRuleValidator } from '../src/business-rules';

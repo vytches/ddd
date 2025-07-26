@@ -1,14 +1,14 @@
 # CQRS Integration Logging
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging + @vytches-ddd/cqrs
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging + @vytches/ddd-cqrs
 **Complexity**: basic **Domain**: Command/Query Logging **Patterns**:
-Decorators, middleware, execution timing **Dependencies**: @vytches-ddd/logging,
-@vytches-ddd/cqrs
+Decorators, middleware, execution timing **Dependencies**: @vytches/ddd-logging,
+@vytches/ddd-cqrs
 
 ## Description
 
 Automatic command and query execution logging using decorators. This example
-demonstrates how to integrate @vytches-ddd/logging with CQRS patterns for
+demonstrates how to integrate @vytches/ddd-logging with CQRS patterns for
 comprehensive operation tracking, performance monitoring, and debugging.
 
 ## Business Context
@@ -28,14 +28,14 @@ import {
   LogQueries,
   LogCQRS,
   CQRSLoggingOptions,
-} from '@vytches-ddd/logging';
+} from '@vytches/ddd-logging';
 import {
   CommandHandler,
   QueryHandler,
   ICommand,
   IQuery,
-} from '@vytches-ddd/cqrs';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-cqrs';
+import { Result } from '@vytches/ddd-utils';
 import {
   CreateUserCommand,
   UpdateUserCommand,

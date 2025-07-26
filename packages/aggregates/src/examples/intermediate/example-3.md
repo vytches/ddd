@@ -1,10 +1,10 @@
 # Multi-Tenant Loan Application - Complex Workflow Aggregate
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**:
 Intermediate **Domain**: Financial Services & Multi-Tenancy **Patterns**:
 Workflow Management, Multi-Tenant Architecture, Approval Chain, Document
-Management **Dependencies**: @vytches-ddd/aggregates,
-@vytches-ddd/domain-primitives, @vytches-ddd/contracts
+Management **Dependencies**: @vytches/ddd-aggregates,
+@vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -25,9 +25,9 @@ compliance.
 
 ```typescript
 // loan-application.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   LoanApplicationData,
   LoanType,

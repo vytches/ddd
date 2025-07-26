@@ -1,7 +1,7 @@
 # Advanced Error Hierarchies
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Intermediate  
 **Category**: Errors
 
@@ -20,7 +20,7 @@ import {
   DomainErrorCode,
   ApplicationErrorCode,
   FrameworkErrorCode,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { ErrorContext } from '../types';
 
 // ==================

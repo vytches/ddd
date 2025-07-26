@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const config: PackageExampleConfig = {
   packageName: 'messaging',
@@ -31,7 +31,7 @@ export const config: PackageExampleConfig = {
       'messaging:retry',
     ],
   },
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/messaging', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-messaging', '@vytches/ddd-utils'],
   sections: [
     'hero',
     'description',
@@ -90,7 +90,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic implementation of outbox pattern for reliable message delivery',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/core'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-core'],
     },
     {
       id: 'basic-retry-dlq',
@@ -100,7 +100,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Message processing with retry logic and dead letter queue handling',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/core'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-core'],
     },
     {
       id: 'basic-use-cases',
@@ -110,7 +110,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'medium',
       description: 'Real-world use cases for basic messaging patterns',
-      dependencies: ['@vytches-ddd/messaging'],
+      dependencies: ['@vytches/ddd-messaging'],
     },
 
     // Intermediate examples
@@ -122,7 +122,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Implementation of saga pattern for distributed transaction management',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/core'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-events', '@vytches/ddd-core'],
     },
     {
       id: 'intermediate-message-routing',
@@ -132,7 +132,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'high',
       description: 'Sophisticated message routing based on content and business rules',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/policies'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-events', '@vytches/ddd-policies'],
     },
     {
       id: 'intermediate-use-cases',
@@ -142,7 +142,7 @@ export const config: PackageExampleConfig = {
       complexity: 'intermediate',
       priority: 'medium',
       description: 'Advanced use cases for saga orchestration and message routing',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-events'],
     },
 
     // Advanced examples
@@ -155,10 +155,10 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Global event mesh for enterprise-scale distributed systems',
       dependencies: [
-        '@vytches-ddd/messaging',
-        '@vytches-ddd/events',
-        '@vytches-ddd/cqrs',
-        '@vytches-ddd/event-store',
+        '@vytches/ddd-messaging',
+        '@vytches/ddd-events',
+        '@vytches/ddd-cqrs',
+        '@vytches/ddd-event-store',
       ],
     },
     {
@@ -169,7 +169,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'high',
       description: 'Complex event processing and real-time stream processing',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/policies'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-events', '@vytches/ddd-policies'],
     },
     {
       id: 'advanced-use-cases',
@@ -179,7 +179,7 @@ export const config: PackageExampleConfig = {
       complexity: 'advanced',
       priority: 'medium',
       description: 'Enterprise-scale messaging architectures and patterns',
-      dependencies: ['@vytches-ddd/messaging', '@vytches-ddd/events', '@vytches-ddd/cqrs'],
+      dependencies: ['@vytches/ddd-messaging', '@vytches/ddd-events', '@vytches/ddd-cqrs'],
     },
 
     // Framework examples - NestJS
@@ -192,7 +192,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Manual integration of outbox pattern with NestJS',
-      dependencies: ['@nestjs/common', '@vytches-ddd/messaging'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-messaging'],
     },
     {
       id: 'nestjs-basic-retry-manual',
@@ -203,7 +203,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Manual integration of message processing with retry logic',
-      dependencies: ['@nestjs/common', '@vytches-ddd/messaging'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-messaging'],
     },
     {
       id: 'nestjs-intermediate-saga-di',
@@ -214,7 +214,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       framework: 'nestjs',
       description: 'Advanced saga orchestration with VytchesDDD DI integration',
-      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-messaging', '@vytches/ddd-di'],
     },
     {
       id: 'nestjs-advanced-event-mesh',
@@ -227,9 +227,9 @@ export const config: PackageExampleConfig = {
       description: 'Enterprise event mesh with global coordination and VytchesDDD DI',
       dependencies: [
         '@nestjs/common',
-        '@vytches-ddd/messaging',
-        '@vytches-ddd/di',
-        '@vytches-ddd/resilience',
+        '@vytches/ddd-messaging',
+        '@vytches/ddd-di',
+        '@vytches/ddd-resilience',
       ],
     },
     {
@@ -241,7 +241,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Overview of advanced messaging implementation patterns in NestJS',
-      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-messaging', '@vytches/ddd-di'],
     },
     {
       id: 'nestjs-advanced-use-cases',
@@ -252,7 +252,7 @@ export const config: PackageExampleConfig = {
       priority: 'medium',
       framework: 'nestjs',
       description: 'Enterprise-scale messaging use cases with NestJS integration',
-      dependencies: ['@nestjs/common', '@vytches-ddd/messaging', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/common', '@vytches/ddd-messaging', '@vytches/ddd-di'],
     },
   ],
   contentConfig: {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import type {
   IDomainToIntegrationEventTransformer,
   IIntegrationEvent,

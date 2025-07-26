@@ -185,7 +185,7 @@ export class {{className}} extends AggregateRoot {
 
 **.vytches/templates/commands/command.hbs:**
 ```handlebars
-import { Command } from '@vytches-ddd/cqrs';
+import { Command } from '@vytches/ddd-cqrs';
 {{#each imports}}
 import { {{name}} } from '{{path}}';
 {{/each}}
@@ -237,7 +237,7 @@ export class {{className}} extends Command {
 
 **.vytches/templates/value-objects/value-object.hbs:**
 ```handlebars
-import { ValueObject } from '@vytches-ddd/core';
+import { ValueObject } from '@vytches/ddd-core';
 {{#each imports}}
 import { {{name}} } from '{{path}}';
 {{/each}}

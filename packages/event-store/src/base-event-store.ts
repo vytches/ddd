@@ -14,13 +14,13 @@ import type {
   IEventReplay,
   IAdvancedEventReplay,
   IEventReplayFactory,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 import { EventStoreConcurrencyError } from './errors';
 import { EventReplayFactory } from './event-replay-factory';
 
-import { Logger } from '@vytches-ddd/logging';
-import type { ILogger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
+import type { ILogger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary BaseEventStore class for base event store operations

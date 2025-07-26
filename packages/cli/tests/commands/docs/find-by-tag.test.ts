@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import type { FindByTagArgs } from '../../../src/commands/docs/find-by-tag';
 import { findByTagCommand } from '../../../src/commands/docs/find-by-tag';
 import { SmartTagFinder } from '../../../src/core/smart-tag-finder';

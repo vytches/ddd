@@ -26,6 +26,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'chore(release)')"
+    env:
+      NX_DAEMON: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,7 +46,7 @@ jobs:
           node-version: "20.x"
           cache: "pnpm"
           registry-url: "https://npm.pkg.github.com"
-          scope: "@vytches-ddd"
+          scope: "@vytches/ddd"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -90,6 +92,8 @@ jobs:
   canary:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    env:
+      NX_DAEMON: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,7 +111,7 @@ jobs:
           node-version: "20.x"
           cache: "pnpm"
           registry-url: "https://npm.pkg.github.com"
-          scope: "@vytches-ddd"
+          scope: "@vytches/ddd"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

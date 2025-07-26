@@ -5,85 +5,20 @@
   "packages": ["packages/*"],
   "command": {
     "publish": {
-      "conventionalCommits": true,
-      "message": "chore(release): publish packages",
       "registry": "https://npm.pkg.github.com",
-      "distTag": "latest",
-      "allowBranch": ["main", "release/*", "develop"],
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.spec.ts",
-        "**/*.test.ts",
-        "**/test/**",
-        "**/tests/**",
-        "**/__tests__/**",
-        "**/stories/**",
-        "**/*.stories.*"
-      ]
+      "conventionalCommits": true,
+      "message": "chore: publish releases",
+      "allowBranch": ["main", "master", "release/*"],
+      "ignoreChanges": ["**/*.md", "**/*.test.ts", "**/*.spec.ts", "**/tests/**"]
     },
     "version": {
-      "allowBranch": ["main", "release/*", "develop"],
       "conventionalCommits": true,
+      "changelogPreset": "angular",
+      "createRelease": false,
       "exact": true,
-      "push": false,
-      "createRelease": "github",
-      "tagVersionPrefix": "v",
-      "message": "chore(release): version packages",
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.spec.ts",
-        "**/*.test.ts",
-        "**/test/**",
-        "**/tests/**",
-        "**/__tests__/**",
-        "**/stories/**",
-        "**/*.stories.*"
-      ]
+      "allowBranch": ["main", "master", "release/*"]
     }
   },
-  "changelogPreset": {
-    "name": "conventionalcommits",
-    "types": [
-      {
-        "type": "feat",
-        "section": "✨ Features"
-      },
-      {
-        "type": "fix",
-        "section": "🐛 Bug Fixes"
-      },
-      {
-        "type": "docs",
-        "section": "📚 Documentation"
-      },
-      {
-        "type": "style",
-        "section": "💎 Styles"
-      },
-      {
-        "type": "refactor",
-        "section": "📦 Refactor"
-      },
-      {
-        "type": "perf",
-        "section": "🚀 Performance"
-      },
-      {
-        "type": "test",
-        "section": "🚨 Tests"
-      },
-      {
-        "type": "build",
-        "section": "🛠 Build System"
-      },
-      {
-        "type": "ci",
-        "section": "⚙️ CI/CD"
-      },
-      {
-        "type": "chore",
-        "hidden": true
-      }
-    ]
-  }
+  "changelogPreset": "angular",
+  "ignoreChanges": ["**/__tests__/**", "**/*.md"]
 }

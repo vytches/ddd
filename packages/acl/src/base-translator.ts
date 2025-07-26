@@ -1,4 +1,4 @@
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 
 import type { IModelTranslator } from './acl.interfaces';
 import { TranslationError } from './acl-errors';

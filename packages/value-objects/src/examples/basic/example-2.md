@@ -1,9 +1,9 @@
 # Email Value Object - Basic Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Domain**: Identity & Communication **Patterns**: Value
 Object, String Validation, Domain Parsing **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ communication systems, and email marketing platforms.
 
 ```typescript
 // email.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   EmailData,
   EmailValidationConfig,

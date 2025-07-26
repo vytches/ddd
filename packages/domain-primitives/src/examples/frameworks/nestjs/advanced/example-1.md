@@ -1,11 +1,11 @@
 # Enterprise Domain Foundation Platform - NestJS Advanced Integration
 
-**Version**: 2.1.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 2.1.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 Advanced **Framework**: NestJS **Base Example**:
 [Enterprise Error Recovery Orchestration](../../advanced/example-3.md)
 **Dependencies**: @nestjs/common, @nestjs/schedule,
-@vytches-ddd/domain-primitives, @vytches-ddd/di, @vytches-ddd/logging,
-@vytches-ddd/resilience
+@vytches/ddd-domain-primitives, @vytches/ddd-di, @vytches/ddd-logging,
+@vytches/ddd-resilience
 
 ## Business Context
 
@@ -22,9 +22,9 @@ sophisticated disaster recovery capabilities.
 // enterprise-domain-platform.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { CircuitBreaker, Retry } from '@vytches/ddd-resilience';
 import type {
   IEnterpriseDomainPlatform,
   DomainOrchestrationContext,
@@ -38,7 +38,7 @@ import {
   ErrorRecoveryOrchestrationError,
   MultiTenantSecurityError,
   DomainOrchestrationError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 
 @DomainService('enterpriseDomainPlatform', {
   lifetime: ServiceLifetime.Singleton,
@@ -394,7 +394,7 @@ export class EnterpriseDomainPlatformService
 // enterprise-domain-platform.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseDomainPlatformService } from './enterprise-domain-platform.service';
 
 @Module({

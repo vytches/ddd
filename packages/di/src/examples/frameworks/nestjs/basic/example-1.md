@@ -1,11 +1,11 @@
 # NestJS Basic Integration - Beginner Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: NestJS Integration, Manual Setup, Bridge Pattern  
-**Dependencies**: @vytches-ddd/di, @nestjs/common
+**Dependencies**: @vytches/ddd-di, @nestjs/common
 
 ## Description
 
@@ -24,7 +24,7 @@ keeping the integration straightforward.
 
 ```typescript
 // domain/user-domain.service.ts
-import { DomainService } from '@vytches-ddd/di';
+import { DomainService } from '@vytches/ddd-di';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
 
 /**
@@ -106,7 +106,7 @@ export class UserDomainService {
 ```typescript
 // nestjs/user.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { UserDomainService } from '../domain/user-domain.service';
 import { User, CreateUserData, UpdateUserData } from '../types'; // Import from application
 
@@ -228,7 +228,7 @@ export class UserController {
 ```typescript
 // nestjs/user.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 

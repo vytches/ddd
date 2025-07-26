@@ -1,5 +1,5 @@
 // Basic Domain Service Implementation import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { Result } from '@vytches-ddd/utils';
+'@vytches/ddd-domain-services'; import { Result } from '@vytches/ddd-utils';
 import { User, CreateUserCommand } from '../types';
 
 export class UserManagementService extends BaseDomainService { constructor() {

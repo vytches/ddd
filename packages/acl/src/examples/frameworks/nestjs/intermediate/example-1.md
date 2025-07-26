@@ -1,7 +1,7 @@
 # NestJS Advanced ACL with VytchesDDD DI Integration
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Intermediate  
 **Focus**: VytchesDDD DI integration with enterprise ACL patterns
@@ -22,10 +22,10 @@ breakers, and automatic service discovery through VytchesDDD DI.
 
 ```typescript
 // enterprise-customer-acl.service.ts - VytchesDDD DI managed service
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { AntiCorruptionLayer, CachingACLDecorator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { AntiCorruptionLayer, CachingACLDecorator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 import { Customer, ExternalCustomerData, CustomerSyncRequest } from '../types'; // From your application
 
 @DomainService({
@@ -189,7 +189,7 @@ export class EnterpriseCustomerACLService extends AntiCorruptionLayer<
 
 // customer-bridge.service.ts - NestJS bridge service
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseCustomerACLService } from './enterprise-customer-acl.service';
 import { CustomerSyncRequest, Customer } from '../types'; // From your application
 
@@ -304,7 +304,7 @@ export class CustomerAdminController {
 
 // customer-enterprise.module.ts - NestJS module with VytchesDDD integration
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CustomerAdminController } from './customer-admin.controller';
 import { CustomerBridgeService } from './customer-bridge.service';
 

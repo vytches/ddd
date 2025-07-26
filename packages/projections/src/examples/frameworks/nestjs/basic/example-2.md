@@ -1,9 +1,9 @@
 # Projection with Capabilities - NestJS Manual Setup
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + NestJS
 **Complexity**: basic **Framework**: NestJS **Integration**: Manual setup with
-capabilities **Dependencies**: @nestjs/common, @vytches-ddd/projections,
-@vytches-ddd/events
+capabilities **Dependencies**: @nestjs/common, @vytches/ddd-projections,
+@vytches/ddd-events
 
 ## Description
 
@@ -29,8 +29,8 @@ import {
   CheckpointCapability,
   CircuitBreakerCapability,
   DeadLetterCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import { OrderData, OrderSummaryData } from '../types'; // From your application
 
 @Injectable()
@@ -593,7 +593,7 @@ export class OrderSummaryModule {}
 // order-summary-projection.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderSummaryProjectionService } from './order-summary-projection.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 describe('OrderSummaryProjectionService with Capabilities', () => {
   let service: OrderSummaryProjectionService;

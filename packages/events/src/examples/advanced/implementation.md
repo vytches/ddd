@@ -4,8 +4,8 @@
 integration  
 **Domain**: Financial Trading Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/event-store,
-@vytches-ddd/projections, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-event-store,
+@vytches/ddd-projections, @vytches/ddd-di
 
 ## Business Context
 
@@ -23,7 +23,7 @@ financial trading platform:
 
 ```typescript
 // trading-events.ts
-import { DomainEvent } from '@vytches-ddd/events';
+import { DomainEvent } from '@vytches/ddd-events';
 import { Trade, Position, Account, MarketData } from '../types'; // ALWAYS import from app
 
 // Core trading domain events
@@ -141,9 +141,9 @@ export class RiskLimitExceededEvent extends DomainEvent {
 }
 
 // trading-account-aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EventStore } from '@vytches-ddd/event-store';
-import { Result } from '@vytches-ddd/utils';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EventStore } from '@vytches/ddd-event-store';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Event-Sourced Trading Account Aggregate
 export class TradingAccountAggregate extends AggregateRoot {
@@ -525,9 +525,9 @@ export class TradingAccountAggregate extends AggregateRoot {
 }
 
 // event-sourced-repository.ts
-import { EventStore, EventStream } from '@vytches-ddd/event-store';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import { EventStore, EventStream } from '@vytches/ddd-event-store';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 
 // ⭐ Event-Sourced Repository
 @DomainService('tradingAccountRepository', {
@@ -735,7 +735,7 @@ export class TradingAccountRepository {
 }
 
 // trading-projections.ts
-import { ProjectionEngine, BaseProjection } from '@vytches-ddd/projections';
+import { ProjectionEngine, BaseProjection } from '@vytches/ddd-projections';
 import {
   AccountCreatedEvent,
   TradeExecutedEvent,

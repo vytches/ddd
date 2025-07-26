@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/projections",
+  "name": "@vytches/ddd-projections",
   "projectType": "library",
   "sourceRoot": "packages/projections/src",
   "targets": {

@@ -4,8 +4,8 @@
 resilience  
 **Domain**: Financial Trading Platform  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events,
-@vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-events,
+@vytches/ddd-resilience, @vytches/ddd-di
 
 ## Business Context
 
@@ -22,8 +22,8 @@ platform that requires:
 
 ```typescript
 // trading-messages.ts
-import { OutboxMessage, MessagePriority } from '@vytches-ddd/messaging';
-import { DomainEvent, IntegrationEvent } from '@vytches-ddd/events';
+import { OutboxMessage, MessagePriority } from '@vytches/ddd-messaging';
+import { DomainEvent, IntegrationEvent } from '@vytches/ddd-events';
 import { Trade, Settlement, Position, RiskAlert } from '../types'; // ALWAYS import from app
 
 // Trading domain events that trigger messaging
@@ -132,17 +132,17 @@ import {
   OutboxMessage,
   MessageProcessor,
   OutboxRepository,
-} from '@vytches-ddd/messaging';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+} from '@vytches/ddd-messaging';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 import {
   CircuitBreaker,
   RetryStrategy,
   TimeoutStrategy,
   ResiliencePolicyBuilder,
-} from '@vytches-ddd/resilience';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-resilience';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Resilient Outbox Service with Events Integration
 @DomainService('resilientOutboxService', {

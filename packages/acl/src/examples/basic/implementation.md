@@ -1,6 +1,6 @@
 // Basic ACL Implementation import { BaseModelTranslator, SimpleACLAdapter }
-from '@vytches-ddd/acl'; import { DomainService, ServiceLifetime } from
-'@vytches-ddd/di'; import { Result } from '@vytches-ddd/utils'; import { User,
+from '@vytches/ddd-acl'; import { DomainService, ServiceLifetime } from
+'@vytches/ddd-di'; import { Result } from '@vytches/ddd-utils'; import { User,
 ExternalUserData, CreateUserData } from '../types';
 
 // ACL Model Translator export class UserModelTranslator extends

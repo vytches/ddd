@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { BaseEventBus } from '../src/base-event-bus';
-import type { IDomainEvent } from '@vytches-ddd/contracts';
-import type { IEventHandler } from '@vytches-ddd/contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
+import type { IEventHandler } from '@vytches/ddd-contracts';
 
 // Test event and handler
 class TestEvent implements IDomainEvent {

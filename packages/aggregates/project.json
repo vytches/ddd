@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "name": "@vytches-ddd/aggregates",
+  "name": "@vytches/ddd-aggregates",
   "projectType": "library",
   "sourceRoot": "packages/aggregates/src",
   "targets": {

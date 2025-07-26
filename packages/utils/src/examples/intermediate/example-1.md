@@ -1,8 +1,8 @@
 # Advanced Result Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: intermediate
 **Domain**: Infrastructure **Patterns**: Result chaining, functional
-composition, monadic operations **Dependencies**: @vytches-ddd/utils
+composition, monadic operations **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ maintaining explicit error handling.
 
 ```typescript
 // advanced-result-patterns.ts
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,
@@ -355,7 +355,7 @@ export class AdvancedResultPatterns {
 }
 
 // Extension to Result class for additional operations
-declare module '@vytches-ddd/utils' {
+declare module '@vytches/ddd-utils' {
   interface Result<TValue, TError> {
     mapError<TNewError>(
       fn: (error: TError) => TNewError

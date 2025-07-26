@@ -1,7 +1,7 @@
 # Advanced NestJS Implementation Patterns
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -10,7 +10,7 @@ advanced-governance
 
 ## Overview
 
-Advanced implementation patterns for integrating @vytches-ddd/policies with
+Advanced implementation patterns for integrating @vytches/ddd-policies with
 NestJS at enterprise scale, demonstrating sophisticated policy orchestration,
 cross-domain coordination, and strategic business intelligence for complex
 distributed systems.

@@ -1,6 +1,6 @@
 # Actor Pattern Implementation - Intermediate Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 intermediate **Domain**: Actor Management **Patterns**: Actor Pattern, Context
 Propagation, Identity Management **Dependencies**: IActor, ActorError,
 DefaultActorType
@@ -25,7 +25,7 @@ import {
   IActor,
   ActorError,
   DefaultActorType,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import {
   TenantContext,
   OrganizationContext,
@@ -1649,7 +1649,7 @@ import {
   ServiceAccountActor,
   ActorManagementService,
 } from './actor-implementation';
-import { ActorError } from '@vytches-ddd/domain-primitives';
+import { ActorError } from '@vytches/ddd-domain-primitives';
 
 export class ActorPatternDemo {
   private actorManagementService: ActorManagementService;

@@ -1,9 +1,9 @@
 # Product Inventory Aggregate - Transaction Script to DDD Evolution
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Basic
 **Domain**: Inventory Management **Patterns**: Aggregate Root, Optimistic
 Locking, Business Invariants, Event Sourcing Ready **Dependencies**:
-@vytches-ddd/aggregates, @vytches-ddd/domain-primitives, @vytches-ddd/contracts
+@vytches/ddd-aggregates, @vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -23,9 +23,9 @@ overselling and managing complex stock movements.
 
 ```typescript
 // product-inventory.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   ProductData,
   InventoryLocation,

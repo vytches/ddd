@@ -1,8 +1,8 @@
 # Performance-Optimized Utilities
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: advanced
 **Domain**: Infrastructure **Patterns**: Performance optimization, memoization,
-lazy evaluation, algorithmic efficiency **Dependencies**: @vytches-ddd/utils
+lazy evaluation, algorithmic efficiency **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -28,7 +28,7 @@ demands while maintaining responsiveness.
 
 ```typescript
 // performance-optimized-utilities.ts
-import { Result, LibUtils } from '@vytches-ddd/utils';
+import { Result, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   PerformanceMetrics,

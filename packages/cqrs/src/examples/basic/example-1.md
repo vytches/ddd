@@ -1,11 +1,11 @@
 # Command Handlers with Automatic Registration
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: beginner  
 **Domain**: User Management  
 **Patterns**: command-handler, automatic-registration, mediator-pattern  
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/di, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-cqrs, @vytches/ddd-di, @vytches/ddd-utils
 
 ## Description
 
@@ -270,8 +270,8 @@ export class DeactivateUserCommand implements DeactivateUserCommand {
 
 ````typescript
 // user-command-handlers.ts
-import { CommandHandler } from '@vytches-ddd/cqrs';
-import { Result } from '@vytches-ddd/utils';
+import { CommandHandler } from '@vytches/ddd-cqrs';
+import { Result } from '@vytches/ddd-utils';
 import {
   CreateUserCommand,
   UpdateUserCommand,
@@ -862,8 +862,8 @@ interface CleanupService {
 
 ````typescript
 // command-bus-setup.ts
-import { CommandBus } from '@vytches-ddd/cqrs';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { CommandBus } from '@vytches/ddd-cqrs';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   CreateUserCommandHandler,
   UpdateUserCommandHandler,

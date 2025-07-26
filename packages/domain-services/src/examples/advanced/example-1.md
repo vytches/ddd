@@ -1,9 +1,9 @@
 # Saga-Orchestrated Domain Service - Advanced Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-services **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-services **Complexity**:
 advanced **Domain**: order-management **Patterns**: domain-service, saga,
-long-running-processes **Dependencies**: @vytches-ddd/core,
-@vytches-ddd/messaging
+long-running-processes **Dependencies**: @vytches/ddd-core,
+@vytches/ddd-messaging
 
 ## Description
 
@@ -21,15 +21,15 @@ long-running processes with proper compensation and rollback capabilities.
 
 ````typescript
 // order-saga.service.ts
-import { BaseDomainService } from '@vytches-ddd/domain-services';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
 import {
   BaseSaga,
   SagaOrchestrator,
   ISagaDefinition,
   ISagaExecutionContext,
   ISagaActionResult,
-} from '@vytches-ddd/messaging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-messaging';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   OrderCreatedEvent,

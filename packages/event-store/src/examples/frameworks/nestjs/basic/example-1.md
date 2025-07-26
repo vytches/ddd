@@ -2,7 +2,7 @@
 
 **Focus**: Basic Event Store usage in NestJS with manual instantiation **Base
 Example**: [Event Store Basic Usage](../../../basic/usage.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/event-store
+@nestjs/common, @vytches/ddd-event-store
 
 ## Service Implementation
 
@@ -12,9 +12,9 @@ import { Injectable } from '@nestjs/common';
 import {
   InMemoryEventStore,
   EventStoreOptions,
-} from '@vytches-ddd/event-store';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-store';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { OrderEvent, InventoryEvent } from './types'; // From your app
 
 @Injectable()

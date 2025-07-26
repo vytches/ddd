@@ -1,8 +1,8 @@
 # Capability System Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**:
 Intermediate **Domain**: Foundation **Patterns**: capability-registry,
-extensible-architecture, plugin-system **Dependencies**: @vytches-ddd/contracts
+extensible-architecture, plugin-system **Dependencies**: @vytches/ddd-contracts
 
 ## Description
 
@@ -30,7 +30,7 @@ import {
   CapabilityMetadata,
   ICapabilityRegistry,
   CapabilityType,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Base capability class
 export abstract class BaseCapability implements ICapability {

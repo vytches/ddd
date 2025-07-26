@@ -152,7 +152,7 @@ describe('ContentResolver', () => {
 
       expect(content).toContain('Import Pattern');
       expect(content).toContain('PolicyBuilder');
-      expect(content).toContain('@vytches-ddd/policies');
+      expect(content).toContain('@vytches/ddd-policies');
     });
 
     it('should fallback to any file in complexity directory', () => {

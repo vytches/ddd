@@ -1,5 +1,5 @@
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
-import { Logger } from '@vytches-ddd/logging';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import type {
   ISagaStep,
   ISagaState,

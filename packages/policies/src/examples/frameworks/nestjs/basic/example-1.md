@@ -1,16 +1,16 @@
 # Basic Policy Usage in NestJS
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: basic  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
 **Patterns**: policy-builder, fluent-api, validation  
-**Dependencies**: @nestjs/common, @vytches-ddd/policies
+**Dependencies**: @nestjs/common, @vytches/ddd-policies
 
 ## Description
 
-Basic integration of @vytches-ddd/policies with NestJS applications using manual
+Basic integration of @vytches/ddd-policies with NestJS applications using manual
 setup for straightforward policy validation and business rule enforcement within
 controller and service methods.
 
@@ -26,11 +26,11 @@ instantiation.
 ```typescript
 // user-validation.service.ts
 import { Injectable } from '@nestjs/common';
-import { PolicyBuilder, PolicyResult } from '@vytches-ddd/policies';
+import { PolicyBuilder, PolicyResult } from '@vytches/ddd-policies';
 import { User, CreateUserRequest } from './types'; // From your application
 
 /**
- * Basic NestJS service integrating @vytches-ddd/policies
+ * Basic NestJS service integrating @vytches/ddd-policies
  * Shows manual policy setup and validation
  */
 @Injectable()

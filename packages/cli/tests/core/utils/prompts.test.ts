@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import type { PromptOptions, SelectOptions } from '../../../src/core/utils/prompts';
 import {
   Prompts,

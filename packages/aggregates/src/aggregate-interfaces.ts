@@ -7,7 +7,7 @@ import type {
   Capability,
   CapabilityConstructor,
   EntityId,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // ==========================================
 // CORE AGGREGATE INTERFACES

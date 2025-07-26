@@ -1,4 +1,4 @@
-import type { ISpecification } from '@vytches-ddd/contracts';
+import type { ISpecification } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary CompositeSpecification class for composite specification operations

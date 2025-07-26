@@ -1,7 +1,7 @@
-# @vytches-ddd/contracts
+# @vytches/ddd-contracts
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/contracts
+Package: @vytches/ddd-contracts
 Category: Foundation
 Purpose: Enterprise-grade contracts and fundamental types for Domain-Driven Design, providing core interfaces and foundation types for the entire ecosystem
 Dependencies: None (zero dependencies)
@@ -10,7 +10,7 @@ DDD Patterns: Foundation Layer, Entity Identification, Event Contracts, Aggregat
 Integration Points: Foundation package used by all other packages; provides core interfaces and contracts that prevent circular dependencies
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fcontracts.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fcontracts)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-contracts.svg)](https://badge.fury.io/js/%40vytches%2Fddd-contracts)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -45,13 +45,13 @@ framework.
 
 ```bash
 # npm
-npm install @vytches-ddd/contracts
+npm install @vytches/ddd-contracts
 
 # yarn
-yarn add @vytches-ddd/contracts
+yarn add @vytches/ddd-contracts
 
 # pnpm
-pnpm add @vytches-ddd/contracts
+pnpm add @vytches/ddd-contracts
 ```
 
 ### Zero Dependencies
@@ -63,7 +63,7 @@ layer:
 {
   "dependencies": {},
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   }
@@ -192,7 +192,7 @@ interface IProjectionCapability<T = unknown> {
 ### Basic EntityId Usage
 
 ```typescript
-import { EntityId } from '@vytches-ddd/contracts';
+import { EntityId } from '@vytches/ddd-contracts';
 
 // Factory methods for different ID types
 const userIdUuid = EntityId.createUuid('550e8400-e29b-41d4-a716-446655440000');
@@ -224,7 +224,7 @@ import {
   IDomainEvent,
   IEventMetadata,
   createDomainEvent,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Create domain event
 const orderCreated = createDomainEvent({
@@ -256,7 +256,7 @@ class OrderCreatedHandler implements IEventHandler<OrderCreatedEvent> {
 ### Specification Pattern
 
 ```typescript
-import { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 
 // Synchronous specification
 class CustomerIsActiveSpec implements ISpecification<Customer> {
@@ -307,7 +307,7 @@ class CustomerHasValidCreditSpec implements IAsyncSpecification<Customer> {
 The contracts package provides the base EntityId implementation:
 
 ```typescript
-import { EntityId, IEntityId, IdType } from '@vytches-ddd/contracts';
+import { EntityId, IEntityId, IdType } from '@vytches/ddd-contracts';
 
 // Basic construction
 const entityId = new EntityId('user-123', 'text');
@@ -362,7 +362,7 @@ const productId = ProductIdId.createProductId('PROD-12345678');
 ### EntityId Factory Pattern
 
 ```typescript
-import { IEntityIdFactory } from '@vytches-ddd/contracts';
+import { IEntityIdFactory } from '@vytches/ddd-contracts';
 
 class EntityIdFactory implements IEntityIdFactory {
   createFromString(value: string, type: IdType = 'text'): IEntityId<string> {
@@ -400,7 +400,7 @@ class EntityIdFactory implements IEntityIdFactory {
 ### Domain Event Interface
 
 ```typescript
-import { IDomainEvent, IEventMetadata } from '@vytches-ddd/contracts';
+import { IDomainEvent, IEventMetadata } from '@vytches/ddd-contracts';
 
 // Extended domain event with additional metadata
 interface IExtendedDomainEvent extends IDomainEvent {
@@ -433,7 +433,7 @@ import {
   IEventBus,
   IEventDispatcher,
   IEventHandler,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Event bus implementation requirements
 interface IEventBus {
@@ -472,7 +472,7 @@ import {
   IAppendResult,
   IStoredEvent,
   IEventStream,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Basic event store interface
 interface IEventStore {
@@ -518,7 +518,7 @@ interface IAdvancedEventStore extends IEventStore {
 ### Specification Contracts
 
 ```typescript
-import { ISpecification, IAsyncSpecification } from '@vytches-ddd/contracts';
+import { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 
 // Composite specification pattern
 class CompositeSpecification<T> implements ISpecification<T> {
@@ -586,7 +586,7 @@ class AsyncCompositeSpecification<T> implements IAsyncSpecification<T> {
 ### Validation Rules
 
 ```typescript
-import { IValidationRule, IValidationError } from '@vytches-ddd/contracts';
+import { IValidationRule, IValidationError } from '@vytches/ddd-contracts';
 
 // Validation rule interface
 interface IValidationRule<T> {
@@ -646,7 +646,7 @@ class EmailValidationRule implements IValidationRule<string> {
 ### Aggregate Capabilities
 
 ```typescript
-import { IAggregateCapability, Capability } from '@vytches-ddd/contracts';
+import { IAggregateCapability, Capability } from '@vytches/ddd-contracts';
 
 // Versioning capability
 class VersioningCapability implements IAggregateCapability<AggregateRoot> {
@@ -694,7 +694,7 @@ class AuditCapability implements IAggregateCapability<AggregateRoot> {
 ### Projection Capabilities
 
 ```typescript
-import { IProjectionCapability } from '@vytches-ddd/contracts';
+import { IProjectionCapability } from '@vytches/ddd-contracts';
 
 // Checkpoint capability for projections
 class CheckpointCapability implements IProjectionCapability<BaseProjection> {
@@ -745,7 +745,7 @@ class SnapshotCapability implements IProjectionCapability<BaseProjection> {
 import {
   CapabilityRegistry,
   createCapabilityRegistry,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Create capability registry
 const registry = createCapabilityRegistry();
@@ -770,7 +770,7 @@ const enhancedProjection = registry.applyCapabilities(projection);
 ### Aggregate Interface
 
 ```typescript
-import { IAggregateWithEvents } from '@vytches-ddd/contracts';
+import { IAggregateWithEvents } from '@vytches/ddd-contracts';
 
 // Aggregate with events contract
 interface IAggregateWithEvents {
@@ -803,7 +803,7 @@ import {
   IAggregateWithEvents,
   IDomainEvent,
   IEntityId,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 class BaseAggregate implements IAggregateWithEvents {
   private _uncommittedEvents: IDomainEvent[] = [];
@@ -851,7 +851,7 @@ import {
   IScheduleOptions,
   JobStatus,
   SchedulePriority,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Event scheduler interface
 interface IEventScheduler {
@@ -903,7 +903,7 @@ import {
   IScheduledJob,
   IJobFilter,
   IJobQueryResult,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Job filter for querying
 interface IJobFilter {
@@ -946,11 +946,11 @@ dependencies:
 
 ```typescript
 // ✅ Good: All packages can depend on contracts
-import { IEntityId, IDomainEvent } from '@vytches-ddd/contracts';
+import { IEntityId, IDomainEvent } from '@vytches/ddd-contracts';
 
 // ❌ Bad: Circular dependency
-// import { EntityId } from '@vytches-ddd/value-objects';
-// import { DomainEvent } from '@vytches-ddd/events';
+// import { EntityId } from '@vytches/ddd-value-objects';
+// import { DomainEvent } from '@vytches/ddd-events';
 ```
 
 ### Consistent Interfaces
@@ -1001,7 +1001,7 @@ function validateUser(user: User, spec: ISpecification<User>): boolean {
 
 ```typescript
 // In domain-primitives package
-import { IEntityId } from '@vytches-ddd/contracts';
+import { IEntityId } from '@vytches/ddd-contracts';
 
 export abstract class Entity {
   constructor(protected readonly _id: IEntityId) {}
@@ -1012,7 +1012,7 @@ export abstract class Entity {
 }
 
 // In aggregates package
-import { IAggregateWithEvents, IDomainEvent } from '@vytches-ddd/contracts';
+import { IAggregateWithEvents, IDomainEvent } from '@vytches/ddd-contracts';
 
 export abstract class AggregateRoot
   extends Entity
@@ -1024,7 +1024,7 @@ export abstract class AggregateRoot
 }
 
 // In events package
-import { IDomainEvent, IEventBus } from '@vytches-ddd/contracts';
+import { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
 
 export class UnifiedEventBus implements IEventBus {
   // Implementation using contracts
@@ -1035,7 +1035,7 @@ export class UnifiedEventBus implements IEventBus {
 
 ```typescript
 // Repository using contracts
-import { IEntityId, IAggregateWithEvents } from '@vytches-ddd/contracts';
+import { IEntityId, IAggregateWithEvents } from '@vytches/ddd-contracts';
 
 export abstract class Repository<T extends IAggregateWithEvents> {
   abstract findById(id: IEntityId): Promise<T | null>;
@@ -1044,7 +1044,7 @@ export abstract class Repository<T extends IAggregateWithEvents> {
 }
 
 // Service using contracts
-import { IEventBus, IDomainEvent } from '@vytches-ddd/contracts';
+import { IEventBus, IDomainEvent } from '@vytches/ddd-contracts';
 
 export class DomainService {
   constructor(private eventBus: IEventBus) {}
@@ -1070,8 +1070,8 @@ export class DomainService {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EntityId, IEntityId } from '@vytches-ddd/contracts';
-import { safeRun } from '@vytches-ddd/utils';
+import { EntityId, IEntityId } from '@vytches/ddd-contracts';
+import { safeRun } from '@vytches/ddd-utils';
 
 describe('EntityId Contract', () => {
   describe('Factory Methods', () => {
@@ -1167,7 +1167,7 @@ describe('EntityId Contract', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { ISpecification } from '@vytches-ddd/contracts';
+import { ISpecification } from '@vytches/ddd-contracts';
 
 // Test specification implementation
 class TestSpecification implements ISpecification<string> {
@@ -1344,7 +1344,7 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
+git clone https://github.com/vytches/ddd.git
 
 # Install dependencies
 pnpm install
@@ -1360,6 +1360,6 @@ pnpm build
 
 **Built with ❤️ by the VytchesDDD Team**
 
-_The foundation of the [@vytches-ddd](https://github.com/vytches/vytches-ddd)
-ecosystem - Providing enterprise-grade contracts and interfaces for
-Domain-Driven Design_
+_The foundation of the
+[@vytches/ddd-core](https://github.com/vytches/vytches-ddd) ecosystem -
+Providing enterprise-grade contracts and interfaces for Domain-Driven Design_

@@ -2,20 +2,20 @@
 
 **Focus**: Advanced Event Store usage with distributed systems integration
 **Base Example**: [Distributed Event Sourcing](../../../advanced/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/event-store, @vytches-ddd/di,
-@vytches-ddd/messaging
+**Dependencies**: @nestjs/common, @vytches/ddd-event-store, @vytches/ddd-di,
+@vytches/ddd-messaging
 
 ## Distributed Event Store Service
 
 ```typescript
 // distributed-event-store.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { DistributedEventSourcingCoordinator } from '../../../advanced/example-1';
 import { HighPerformanceEventStore } from '../../../advanced/example-2';
 import { ClusteredEventStore } from '../../../advanced/example-3';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   OrderFulfillmentData,
   ProcessResult,
@@ -30,7 +30,7 @@ export class DistributedEventStoreService implements OnModuleInit {
   private readonly clusteredStore: ClusteredEventStore;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration with distributed systems
+    // ⭐ FOCUS: @vytches/ddd-di integration with distributed systems
     this.distributedCoordinator =
       VytchesDDD.resolve<DistributedEventSourcingCoordinator>(
         'distributedCoordinator'
@@ -289,7 +289,7 @@ export class DistributedOrderManagementService {
 ```typescript
 // distributed-event-store.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { DistributedEventStoreService } from './distributed-event-store.service';
 import { DistributedOrderManagementService } from './distributed-order-management.service';
 import {

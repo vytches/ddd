@@ -1,13 +1,13 @@
 # Advanced Projections - NestJS DI Integration Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + @vytches-ddd/di +
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + @vytches/ddd-di +
 NestJS **Complexity**: intermediate **Framework**: NestJS **Integration**:
 VytchesDDD DI integration patterns **Dependencies**: @nestjs/common,
-@vytches-ddd/projections, @vytches-ddd/di, @vytches-ddd/events
+@vytches/ddd-projections, @vytches/ddd-di, @vytches/ddd-events
 
 ## Overview
 
-This guide covers advanced NestJS integration patterns using @vytches-ddd/di for
+This guide covers advanced NestJS integration patterns using @vytches/ddd-di for
 projection management. It demonstrates the bridge pattern between NestJS and
 VytchesDDD dependency injection systems, enabling enterprise-grade projection
 architectures with automatic service discovery and advanced capabilities.
@@ -53,7 +53,7 @@ export class ProjectionEngineService {
 
 ```typescript
 // advanced-projection-manager.domain-service.ts
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   ProjectionEngine,
   ProjectionRegistry,
@@ -62,7 +62,7 @@ import {
   CircuitBreakerCapability,
   DeadLetterCapability,
   MonitoringCapability,
-} from '@vytches-ddd/projections';
+} from '@vytches/ddd-projections';
 
 @DomainService({
   serviceId: 'advancedProjectionManager',
@@ -640,7 +640,7 @@ export class AdvancedProjectionManagerDomainService extends ProjectionEngine {
 ```typescript
 // advanced-projection.module.ts
 import { Module, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { AdvancedProjectionManagerService } from './advanced-projection-manager.service';
 import { ProjectionAnalyticsController } from './projection-analytics.controller';
 import { ProjectionHealthController } from './projection-health.controller';
@@ -814,7 +814,7 @@ export class EnterpriseProjectionService {
 
 ```typescript
 // domain-service.spec.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { MyProjectionDomainService } from './my-projection.domain-service';
 
 describe('MyProjectionDomainService', () => {
@@ -849,7 +849,7 @@ describe('MyProjectionDomainService', () => {
 ```typescript
 // integration.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { MyProjectionModule } from './my-projection.module';
 import { MyProjectionService } from './my-projection.service';
 

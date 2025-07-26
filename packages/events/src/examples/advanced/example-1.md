@@ -1,9 +1,9 @@
 # Event Sourcing with Snapshots
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: advanced
 **Domain**: Architecture **Patterns**: event-sourcing, snapshots,
 aggregate-reconstruction, performance-optimization **Dependencies**:
-@vytches-ddd/events, @vytches-ddd/aggregates, @vytches-ddd/event-store
+@vytches/ddd-events, @vytches/ddd-aggregates, @vytches/ddd-event-store
 
 ## Description
 
@@ -24,10 +24,10 @@ storing aggregate state at specific intervals.
 
 ```typescript
 // advanced-event-sourced-aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent, EventStore } from '@vytches-ddd/events';
-import { EntityId } from '@vytches-ddd/value-objects';
-import { Result } from '@vytches-ddd/utils';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent, EventStore } from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-value-objects';
+import { Result } from '@vytches/ddd-utils';
 
 // Domain Events
 export class AccountOpenedEvent extends DomainEvent {
@@ -550,8 +550,8 @@ export class InMemorySnapshotStore implements SnapshotStore {
 
 ```typescript
 // Usage example with event sourcing and snapshots
-import { EventStore } from '@vytches-ddd/events';
-import { EntityId } from '@vytches-ddd/value-objects';
+import { EventStore } from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-value-objects';
 
 async function demonstrateEventSourcing() {
   const eventStore = new InMemoryEventStore();

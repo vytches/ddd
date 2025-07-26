@@ -1,16 +1,16 @@
-# @vytches-ddd/domain-services
+# @vytches/ddd-domain-services
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/domain-services
+Package: @vytches/ddd-domain-services
 Category: Patterns
 Purpose: Domain services for complex business logic coordination, stateless operations, and cross-aggregate workflows
-Dependencies: @vytches-ddd/core, @vytches-ddd/validation, @vytches-ddd/contracts
+Dependencies: @vytches/ddd-core, @vytches/ddd-validation, @vytches/ddd-contracts
 Complexity: Medium
 DDD Patterns: Domain Services, Service Coordination, Business Logic Encapsulation, Transactional Operations, Event Publishing
 Integration Points: Essential for complex business workflows; integrates with repositories, aggregates, Unit of Work, and event systems
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fdomain-services.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fdomain-services)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-domain-services.svg)](https://badge.fury.io/js/%40vytches%2Fddd-domain-services)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ publishing, and dependency injection integration.
 
 ```bash
 # npm
-npm install @vytches-ddd/domain-services
+npm install @vytches/ddd-domain-services
 
 # yarn
-yarn add @vytches-ddd/domain-services
+yarn add @vytches/ddd-domain-services
 
 # pnpm
-pnpm add @vytches-ddd/domain-services
+pnpm add @vytches/ddd-domain-services
 ```
 
 ### Dependencies
 
 ```bash
 # Required peer dependencies
-npm install @vytches-ddd/core @vytches-ddd/validation @vytches-ddd/contracts
+npm install @vytches/ddd-core @vytches/ddd-validation @vytches/ddd-contracts
 ```
 
 ## ✨ Key Features
@@ -172,7 +172,7 @@ abstract class AsyncDomainService
 import {
   IBaseDomainService,
   DomainService,
-} from '@vytches-ddd/domain-services';
+} from '@vytches/ddd-domain-services';
 
 @DomainService('orderCalculationService')
 class OrderCalculationService extends IBaseDomainService {
@@ -208,7 +208,7 @@ class OrderCalculationService extends IBaseDomainService {
 import {
   EventAwareDomainService,
   DomainService,
-} from '@vytches-ddd/domain-services';
+} from '@vytches/ddd-domain-services';
 import { OrderProcessedEvent } from '../events/order-processed.event';
 
 @DomainService({
@@ -257,7 +257,7 @@ class OrderProcessingService extends EventAwareDomainService {
 import {
   UnitOfWorkAwareDomainService,
   DomainService,
-} from '@vytches-ddd/domain-services';
+} from '@vytches/ddd-domain-services';
 import { IOrderRepository } from '../repositories/order.repository';
 import { ICustomerRepository } from '../repositories/customer.repository';
 
@@ -329,7 +329,7 @@ class OrderManagementService extends UnitOfWorkAwareDomainService {
 The foundation for all domain services:
 
 ```typescript
-import { IBaseDomainService } from '@vytches-ddd/domain-services';
+import { IBaseDomainService } from '@vytches/ddd-domain-services';
 
 class ProductCatalogService extends IBaseDomainService {
   constructor() {
@@ -358,7 +358,7 @@ class ProductCatalogService extends IBaseDomainService {
 For services that need to publish domain events:
 
 ```typescript
-import { EventAwareDomainService } from '@vytches-ddd/domain-services';
+import { EventAwareDomainService } from '@vytches/ddd-domain-services';
 
 class NotificationService extends EventAwareDomainService {
   constructor() {
@@ -390,7 +390,7 @@ class NotificationService extends EventAwareDomainService {
 For services requiring transactional consistency:
 
 ```typescript
-import { UnitOfWorkAwareDomainService } from '@vytches-ddd/domain-services';
+import { UnitOfWorkAwareDomainService } from '@vytches/ddd-domain-services';
 
 class TransferService extends UnitOfWorkAwareDomainService {
   constructor() {
@@ -440,7 +440,7 @@ class TransferService extends UnitOfWorkAwareDomainService {
 For services with async lifecycle:
 
 ```typescript
-import { AsyncDomainService } from '@vytches-ddd/domain-services';
+import { AsyncDomainService } from '@vytches/ddd-domain-services';
 
 class CacheService extends AsyncDomainService {
   private cache: Map<string, any> = new Map();
@@ -485,7 +485,7 @@ class CacheService extends AsyncDomainService {
 ### Basic Decorator Usage
 
 ```typescript
-import { DomainService } from '@vytches-ddd/domain-services';
+import { DomainService } from '@vytches/ddd-domain-services';
 
 // Simple service ID
 @DomainService('userService')
@@ -513,7 +513,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
 ### DI Integration
 
 ```typescript
-import { DomainService, ServiceLifetime } from '@vytches-ddd/domain-services';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-domain-services';
 
 @DomainService({
   serviceId: 'paymentService',
@@ -538,7 +538,7 @@ class PaymentService extends UnitOfWorkAwareDomainService {
 import {
   getDomainServiceMetadata,
   getDIDomainServiceMetadata,
-} from '@vytches-ddd/domain-services';
+} from '@vytches/ddd-domain-services';
 
 const metadata = getDomainServiceMetadata(OrderService);
 console.log(metadata?.serviceId); // 'orderService'
@@ -739,7 +739,7 @@ class OrderProcessingService extends EventAwareDomainService {
 ### Service Registration
 
 ```typescript
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 
 // Setup container
 const container = new SimpleContainer();
@@ -754,7 +754,7 @@ container.register('customService', CustomService);
 ### Service Resolution
 
 ```typescript
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 // Resolve service
 const orderService = VytchesDDD.resolve<OrderService>('orderService');
@@ -854,7 +854,7 @@ import {
   ServiceNotFoundError,
   ServiceDuplicateError,
   ServiceCircularError,
-} from '@vytches-ddd/domain-services';
+} from '@vytches/ddd-domain-services';
 
 class ServiceRegistry {
   private services = new Map<string, IDomainService>();
@@ -919,7 +919,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { OrderCalculationService } from '../order-calculation.service';
 
 describe('OrderCalculationService', () => {
@@ -970,9 +970,9 @@ describe('OrderCalculationService', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { TransferService } from '../transfer.service';
-import { MockUnitOfWork } from '@vytches-ddd/testing';
+import { MockUnitOfWork } from '@vytches/ddd-testing';
 
 describe('TransferService', () => {
   let service: TransferService;
@@ -1035,9 +1035,9 @@ describe('TransferService', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { NotificationService } from '../notification.service';
-import { MockEventBus } from '@vytches-ddd/testing';
+import { MockEventBus } from '@vytches/ddd-testing';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -1199,7 +1199,7 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
+git clone https://github.com/vytches/ddd.git
 
 # Install dependencies
 pnpm install
@@ -1215,5 +1215,5 @@ pnpm build
 
 **Built with ❤️ by the VytchesDDD Team**
 
-_Part of the [@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem -
-A comprehensive Domain-Driven Design framework for TypeScript_
+_Part of the [@vytches/ddd-core](https://github.com/vytches/vytches-ddd)
+ecosystem - A comprehensive Domain-Driven Design framework for TypeScript_

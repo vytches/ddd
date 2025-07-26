@@ -1,7 +1,7 @@
 # Advanced Policy Use Cases
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Enterprise Architecture  
 **Patterns**: enterprise-orchestration, policy-mesh, ai-optimization

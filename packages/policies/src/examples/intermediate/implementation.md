@@ -1,7 +1,7 @@
 # Intermediate Policy Implementation Patterns
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Policy Architecture  
 **Patterns**: policy-behaviors, policy-registry, external-integration
@@ -75,8 +75,8 @@ import {
   PolicyRegistry,
   BaseBusinessPolicy,
   PolicyContext,
-} from '@vytches-ddd/policies';
-import { CircuitBreaker } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-policies';
+import { CircuitBreaker } from '@vytches/ddd-resilience';
 import { ExternalCreditService, ComplianceService } from '../types';
 
 /**

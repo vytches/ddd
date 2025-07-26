@@ -1,11 +1,11 @@
 # CQRS Handler Registration - Intermediate Example
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/di  
+**Package**: @vytches/ddd-di  
 **Complexity**: intermediate  
 **Domain**: User Management  
 **Patterns**: CQRS, Handler Registration, Command-Query Separation  
-**Dependencies**: @vytches-ddd/di, @vytches-ddd/cqrs
+**Dependencies**: @vytches/ddd-di, @vytches/ddd-cqrs
 
 ## Description
 
@@ -25,7 +25,7 @@ ensuring consistent registration and reducing configuration errors.
 
 ```typescript
 // commands/create-user.command.ts
-import { Command } from '@vytches-ddd/cqrs';
+import { Command } from '@vytches/ddd-cqrs';
 import { CreateUserData } from '../types'; // Import from application
 
 /**
@@ -41,7 +41,7 @@ export class CreateUserCommand implements Command {
 
 ```typescript
 // commands/update-user.command.ts
-import { Command } from '@vytches-ddd/cqrs';
+import { Command } from '@vytches/ddd-cqrs';
 import { UpdateUserData } from '../types'; // Import from application
 
 /**
@@ -58,7 +58,7 @@ export class UpdateUserCommand implements Command {
 
 ```typescript
 // queries/get-user.query.ts
-import { Query } from '@vytches-ddd/cqrs';
+import { Query } from '@vytches/ddd-cqrs';
 import { User } from '../types'; // Import from application
 
 /**
@@ -71,7 +71,7 @@ export class GetUserQuery implements Query<User> {
 
 ```typescript
 // queries/get-users.query.ts
-import { Query } from '@vytches-ddd/cqrs';
+import { Query } from '@vytches/ddd-cqrs';
 import { User, PaginationParams, PaginatedResponse } from '../types'; // Import from application
 
 /**
@@ -84,9 +84,9 @@ export class GetUsersQuery implements Query<PaginatedResponse<User>> {
 
 ```typescript
 // handlers/create-user.handler.ts
-import { CommandHandler, ICommandHandler } from '@vytches-ddd/di';
+import { CommandHandler, ICommandHandler } from '@vytches/ddd-di';
 import { CreateUserCommand } from '../commands/create-user.command';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { AuditService } from '../services/audit.service';
 import { User } from '../types'; // Import from application
 
@@ -153,9 +153,9 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
 ```typescript
 // handlers/update-user.handler.ts
-import { CommandHandler, ICommandHandler } from '@vytches-ddd/di';
+import { CommandHandler, ICommandHandler } from '@vytches/ddd-di';
 import { UpdateUserCommand } from '../commands/update-user.command';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { AuditService } from '../services/audit.service';
 
 /**
@@ -224,9 +224,9 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
 
 ```typescript
 // handlers/get-user.handler.ts
-import { QueryHandler, IQueryHandler } from '@vytches-ddd/di';
+import { QueryHandler, IQueryHandler } from '@vytches/ddd-di';
 import { GetUserQuery } from '../queries/get-user.query';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { CacheService } from '../services/cache.service';
 import { User } from '../types'; // Import from application
 
@@ -293,7 +293,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
 
 ```typescript
 // handlers/get-users.handler.ts
-import { QueryHandler, IQueryHandler } from '@vytches-ddd/di';
+import { QueryHandler, IQueryHandler } from '@vytches/ddd-di';
 import { GetUsersQuery } from '../queries/get-users.query';
 import { User, PaginatedResponse } from '../types'; // Import from application
 
@@ -372,7 +372,7 @@ export class GetUsersHandler
 
 ```typescript
 // services/audit.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import { AuditLogEntry } from '../types'; // Import from application
 
 /**
@@ -409,7 +409,7 @@ export class AuditService {
 
 ```typescript
 // services/cache.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 /**
  * Cache service for query handlers
@@ -443,8 +443,8 @@ export class CacheService {
 
 ```typescript
 // app.ts
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UpdateUserCommand } from './commands/update-user.command';
 import { GetUserQuery } from './queries/get-user.query';

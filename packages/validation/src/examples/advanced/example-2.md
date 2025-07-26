@@ -1,10 +1,10 @@
 # AI-Powered Adaptive Validation with Machine Learning
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**: Advanced
 **Domain**: Intelligent Data Processing **Patterns**: Machine Learning
 Integration, Adaptive Thresholds, Predictive Validation, Anomaly Detection
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/events,
-@vytches-ddd/utils, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-events,
+@vytches/ddd-utils, @vytches/ddd-core
 
 ## Description
 
@@ -31,9 +31,9 @@ import {
   ValidationResult,
   DataQualityMetrics,
   SpecificationResult,
-} from '@vytches-ddd/validation';
-import { DomainEvent, UnifiedEventBus } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-validation';
+import { DomainEvent, UnifiedEventBus } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 
 // AI model interfaces
 interface MLModel {

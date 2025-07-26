@@ -1,9 +1,9 @@
 # Field-Level Validation with Business Rules
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**: Basic
 **Domain**: Product Management **Patterns**: Field Validation, Business Rules,
-Configuration-driven Validation **Dependencies**: @vytches-ddd/validation,
-@vytches-ddd/core
+Configuration-driven Validation **Dependencies**: @vytches/ddd-validation,
+@vytches/ddd-core
 
 ## Description
 
@@ -28,7 +28,7 @@ import {
   BusinessRule,
   RuleCondition,
   RuleAction,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { Product } from './types'; // Import from your application
 
 // Generic field validator for business rules

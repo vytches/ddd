@@ -1,9 +1,9 @@
 # In-Memory Event Store
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: event-storage, stream-management,
-basic-persistence, in-memory-storage **Dependencies**: @vytches-ddd/event-store,
-@vytches-ddd/events
+basic-persistence, in-memory-storage **Dependencies**: @vytches/ddd-event-store,
+@vytches/ddd-events
 
 ## Description
 
@@ -26,9 +26,9 @@ within a single process lifecycle.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { CreateOrderData, Order, OrderStatus } from './types'; // From your app
 
 // ⭐ FOCUS: Basic event store setup

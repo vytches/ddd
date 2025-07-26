@@ -1,4 +1,4 @@
-import type { Result } from '@vytches-ddd/utils';
+import type { Result } from '@vytches/ddd-utils';
 import type { PolicyViolation } from '../models/policy-violation';
 import type { PolicyMetadata } from '../models/policy-metadata';
 

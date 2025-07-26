@@ -105,7 +105,7 @@ function showInitializationSuggestions(): void {
   console.log('');
 
   console.log(Colors.green('3. Add DDD packages:'));
-  console.log(`   ${Colors.cyan('pnpm add @vytches-ddd/core @vytches-ddd/events')}`);
+  console.log(`   ${Colors.cyan('pnpm add @vytches/ddd-core @vytches/ddd-events')}`);
   console.log('');
 
   console.log(

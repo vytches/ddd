@@ -1,23 +1,23 @@
 # Event Store - NestJS Intermediate DI Integration
 
-**Focus**: Advanced Event Store usage with @vytches-ddd/di integration **Base
+**Focus**: Advanced Event Store usage with @vytches/ddd-di integration **Base
 Example**:
 [Event Store Intermediate Implementation](../../../intermediate/implementation.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/event-store, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-event-store, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // event-store.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseEventStoreService } from '../../../intermediate/implementation';
 import {
   ProjectionEngine,
   OrderSummaryProjection,
 } from '../../../intermediate/implementation';
-import { DomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { DomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { OrderData, ProjectionState } from './types'; // From your app
 
 @Injectable()
@@ -26,7 +26,7 @@ export class EventStoreService implements OnModuleInit {
   private readonly projectionEngine: ProjectionEngine;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration
+    // ⭐ FOCUS: @vytches/ddd-di integration
     this.enterpriseEventStore = VytchesDDD.resolve<EnterpriseEventStoreService>(
       'enterpriseEventStore'
     );
@@ -202,7 +202,7 @@ export class AdvancedOrderService {
 ```typescript
 // event-store.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { EventStoreService } from './event-store.service';
 import { AdvancedOrderService } from './advanced-order.service';
 import {
@@ -252,7 +252,7 @@ export class HealthController {
 
 **Key Points:**
 
-- Advanced DI integration with @vytches-ddd/di
+- Advanced DI integration with @vytches/ddd-di
 - Service locator pattern usage
 - Enterprise-grade dependency management
 - Projection system integration

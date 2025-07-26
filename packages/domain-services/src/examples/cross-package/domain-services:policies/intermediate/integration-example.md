@@ -1,6 +1,6 @@
 // Domain Service with Policy Integration import { BaseDomainService } from
-'@vytches-ddd/domain-services'; import { PolicyBuilder, PolicyContext } from
-'@vytches-ddd/policies'; import { Result } from '@vytches-ddd/utils'; import {
+'@vytches/ddd-domain-services'; import { PolicyBuilder, PolicyContext } from
+'@vytches/ddd-policies'; import { Result } from '@vytches/ddd-utils'; import {
 User, Order, CreateOrderCommand } from '../types';
 
 export class OrderValidationService extends BaseDomainService { private

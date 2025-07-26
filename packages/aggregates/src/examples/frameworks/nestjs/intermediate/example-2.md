@@ -2,15 +2,15 @@
 
 **Focus**: Banking account with capability separation in NestJS **Base
 Example**: [Banking Account with Capabilities](../../intermediate/example-2.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // banking-account.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   BankingAccount,
   CreateAccountData,
@@ -207,7 +207,7 @@ export class BankingAccountService {
 
 // banking-account.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { BankingAccountService } from './banking-account.service';
 
 @Module({

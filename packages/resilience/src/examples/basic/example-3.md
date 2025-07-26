@@ -1,8 +1,8 @@
 # Bulkhead Pattern for Resource Isolation
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Basic
 **Domain**: Customer Service Management **Patterns**: Bulkhead Pattern, Resource
-Isolation, Thread Pool Management **Dependencies**: @vytches-ddd/resilience
+Isolation, Thread Pool Management **Dependencies**: @vytches/ddd-resilience
 
 ## Description
 
@@ -28,7 +28,7 @@ import {
   ResiliencePolicyBuilder,
   ResilienceContext,
   BulkheadConfiguration,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { Customer, NotificationRequest } from './types'; // From your application
 
 // Customer service manager with resource isolation

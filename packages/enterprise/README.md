@@ -1,16 +1,16 @@
-# @vytches-ddd/enterprise
+# @vytches/ddd-enterprise
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/enterprise
+Package: @vytches/ddd-enterprise
 Category: Meta-Package
 Purpose: Enterprise-grade bundle aggregating all VytchesDDD packages with unified API, enterprise features, and advanced capabilities
-Dependencies: All @vytches-ddd packages
+Dependencies: All @vytches/ddd-core packages
 Complexity: High
 DDD Patterns: Complete DDD ecosystem, Enterprise Architecture, Bundle Management, Unified API
 Integration Points: Meta-package providing single entry point to entire DDD ecosystem; includes all patterns, infrastructure, and enterprise features
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fenterprise.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fenterprise)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-enterprise.svg)](https://badge.fury.io/js/%40vytches%2Fddd-enterprise)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -46,26 +46,26 @@ for building robust, scalable applications.
 
 ```bash
 # npm
-npm install @vytches-ddd/enterprise
+npm install @vytches/ddd-enterprise
 
 # yarn
-yarn add @vytches-ddd/enterprise
+yarn add @vytches/ddd-enterprise
 
 # pnpm
-pnpm add @vytches-ddd/enterprise
+pnpm add @vytches/ddd-enterprise
 ```
 
 ### Selective Installation (Alternative)
 
 ```bash
 # Core Bundle (basic DDD patterns)
-npm install @vytches-ddd/core @vytches-ddd/utils @vytches-ddd/validation
+npm install @vytches/ddd-core @vytches/ddd-utils @vytches/ddd-validation
 
 # Advanced Bundle (event-driven patterns)
-npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd/projections
+npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-projections
 
 # Enterprise Bundle (complete ecosystem)
-npm install @vytches-ddd/enterprise
+npm install @vytches/ddd-enterprise
 ```
 
 ## ✨ Key Features
@@ -106,49 +106,49 @@ The Enterprise package includes all VytchesDDD packages:
 
 ```typescript
 // Foundation Layer
-export * from '@vytches-ddd/core';
-export * from '@vytches-ddd/domain-primitives';
-export * from '@vytches-ddd/value-objects';
-export * from '@vytches-ddd/repositories';
-export * from '@vytches-ddd/aggregates';
+export * from '@vytches/ddd-core';
+export * from '@vytches/ddd-domain-primitives';
+export * from '@vytches/ddd-value-objects';
+export * from '@vytches/ddd-repositories';
+export * from '@vytches/ddd-aggregates';
 
 // Patterns Layer
-export * from '@vytches-ddd/validation';
-export * from '@vytches-ddd/policies';
-export * from '@vytches-ddd/domain-services';
+export * from '@vytches/ddd-validation';
+export * from '@vytches/ddd-policies';
+export * from '@vytches/ddd-domain-services';
 
 // Architecture Layer
-export * from '@vytches-ddd/events';
-export * from '@vytches-ddd/cqrs';
-export * from '@vytches-ddd/projections';
+export * from '@vytches/ddd-events';
+export * from '@vytches/ddd-cqrs';
+export * from '@vytches/ddd-projections';
 
 // Integration Layer
-export * from '@vytches-ddd/acl';
-export * from '@vytches-ddd/messaging';
+export * from '@vytches/ddd-acl';
+export * from '@vytches/ddd-messaging';
 
 // Infrastructure Layer
-export * from '@vytches-ddd/resilience';
-export * from '@vytches-ddd/event-store';
-export * from '@vytches-ddd/logging';
+export * from '@vytches/ddd-resilience';
+export * from '@vytches/ddd-event-store';
+export * from '@vytches/ddd-logging';
 
 // Tooling Layer
-export * from '@vytches-ddd/testing';
-export * from '@vytches-ddd/di';
-export * from '@vytches-ddd/utils';
+export * from '@vytches/ddd-testing';
+export * from '@vytches/ddd-di';
+export * from '@vytches/ddd-utils';
 ```
 
 ### Conflict Resolution
 
 ```typescript
 // Resolve naming conflicts with qualified exports
-export { RetryPolicy as ResilienceRetryPolicy } from '@vytches-ddd/resilience';
+export { RetryPolicy as ResilienceRetryPolicy } from '@vytches/ddd-resilience';
 
 // Selective exports to avoid conflicts
 export {
   PolicyBuilder,
   PolicyRetryBehavior as PolicyRetryBehavior,
   // ... other non-conflicting exports
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 ```
 
 ## 🚀 Quick Start
@@ -192,7 +192,7 @@ import {
   Result,
   Logger,
   safeRun,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Complete application setup
 const container = new SimpleContainer();
@@ -231,7 +231,7 @@ import {
   UnitOfWork,
   Repository,
   Result,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Domain model
 class Order extends AggregateRoot {
@@ -352,7 +352,7 @@ import {
   EntityId,
   DomainEvent,
   DomainError,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Repositories and Unit of Work
 import {
@@ -361,7 +361,7 @@ import {
   IBaseRepository,
   IUnitOfWork,
   RepositoryError,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Specifications and Validation
 import {
@@ -369,7 +369,7 @@ import {
   CompositeSpecification,
   ValidationFacade,
   BusinessRuleValidator,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 ```
 
 ### CQRS and Event Architecture
@@ -384,7 +384,7 @@ import {
   CommandBus,
   QueryBus,
   Mediator,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Event sourcing and projections
 import {
@@ -394,7 +394,7 @@ import {
   ProjectionEngine,
   EventReplay,
   Snapshot,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Messaging and integration
 import {
@@ -403,7 +403,7 @@ import {
   IntegrationEvent,
   SagaOrchestrator,
   EventDispatcher,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 ```
 
 ### Enterprise Infrastructure
@@ -416,7 +416,7 @@ import {
   Bulkhead,
   Timeout,
   ResilienceStrategy,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Logging and monitoring
 import {
@@ -425,7 +425,7 @@ import {
   LogLevel,
   LogContext,
   StructuredLogging,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Dependency injection
 import {
@@ -434,7 +434,7 @@ import {
   ServiceLifetime,
   Container,
   ServiceLocator,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 ```
 
 ### Business Logic and Policies
@@ -447,7 +447,7 @@ import {
   PolicyRegistry,
   PolicyViolation,
   PolicyBehavior,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Domain services
 import {
@@ -455,7 +455,7 @@ import {
   EventAwareDomainService,
   UnitOfWorkAwareDomainService,
   AsyncDomainService,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Anti-corruption layer
 import {
@@ -463,7 +463,7 @@ import {
   ModelTranslator,
   ExternalSystemAdapter,
   IntegrationMiddleware,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 ```
 
 ## 🏢 Enterprise Features
@@ -476,7 +476,7 @@ import {
   HealthStatus,
   MetricsCollector,
   PerformanceMonitor,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Application health monitoring
 class ApplicationHealthChecker {
@@ -524,7 +524,7 @@ import {
   CacheManager,
   ConnectionPoolManager,
   ResourceOptimizer,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 class PerformanceOptimizer {
   private profiler = new PerformanceProfiler();
@@ -572,7 +572,7 @@ import {
   Repository,
   UnitOfWork,
   DomainEvent,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Basic application with core patterns
 class CoreApplication {
@@ -602,7 +602,7 @@ import {
   EventBus,
   EventProjection,
   CQRS,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Event-driven application
 class EventDrivenApplication {
@@ -642,7 +642,7 @@ import {
   MetricsCollector,
   SagaOrchestrator,
   VytchesDDD,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Full enterprise application
 class EnterpriseApplication {
@@ -687,11 +687,11 @@ class EnterpriseApplication {
 
 ```typescript
 // Before: Individual package imports
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { EntityId } from '@vytches-ddd/value-objects';
-import { CommandHandler } from '@vytches-ddd/cqrs';
-import { EventStore } from '@vytches-ddd/event-store';
-import { CircuitBreaker } from '@vytches-ddd/resilience';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-value-objects';
+import { CommandHandler } from '@vytches/ddd-cqrs';
+import { EventStore } from '@vytches/ddd-event-store';
+import { CircuitBreaker } from '@vytches/ddd-resilience';
 
 // After: Single enterprise import
 import {
@@ -700,7 +700,7 @@ import {
   CommandHandler,
   EventStore,
   CircuitBreaker,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 ```
 
 ### Conflict Resolution
@@ -711,7 +711,7 @@ import {
   RetryPolicy as ResilienceRetryPolicy, // From resilience
   PolicyRetryBehavior, // From policies
   PolicyBuilder,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Use qualified names
 const resilienceRetry = new ResilienceRetryPolicy({ maxAttempts: 3 });
@@ -725,12 +725,12 @@ const policyRetry = PolicyRetryBehavior.create(basePolicy, { maxAttempts: 3 });
 {
   "dependencies": {
     // Remove individual packages
-    // "@vytches-ddd/core": "^0.1.0",
-    // "@vytches-ddd/cqrs": "^0.1.0",
-    // "@vytches-ddd/events": "^0.1.0",
+    // "@vytches/ddd-core": "^0.1.0",
+    // "@vytches/ddd-cqrs": "^0.1.0",
+    // "@vytches/ddd-events": "^0.1.0",
 
     // Add enterprise bundle
-    "@vytches-ddd/enterprise": "^0.2.0"
+    "@vytches/ddd-enterprise": "^0.2.0"
   }
 }
 ```
@@ -745,10 +745,10 @@ import {
   AggregateRoot,
   EntityId,
   CommandHandler,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Avoid importing entire modules
-// import * as Enterprise from '@vytches-ddd/enterprise'; // ❌ Large bundle
+// import * as Enterprise from '@vytches/ddd-enterprise'; // ❌ Large bundle
 ```
 
 ### Lazy Loading
@@ -756,12 +756,12 @@ import {
 ```typescript
 // Lazy load heavy components
 const loadEventStore = async () => {
-  const { EventStore } = await import('@vytches-ddd/enterprise');
+  const { EventStore } = await import('@vytches/ddd-enterprise');
   return new EventStore();
 };
 
 const loadSagaOrchestrator = async () => {
-  const { SagaOrchestrator } = await import('@vytches-ddd/enterprise');
+  const { SagaOrchestrator } = await import('@vytches/ddd-enterprise');
   return new SagaOrchestrator();
 };
 ```
@@ -769,7 +769,7 @@ const loadSagaOrchestrator = async () => {
 ### Connection Pooling
 
 ```typescript
-import { ConnectionPoolManager } from '@vytches-ddd/enterprise';
+import { ConnectionPoolManager } from '@vytches/ddd-enterprise';
 
 const poolManager = new ConnectionPoolManager({
   database: {
@@ -797,7 +797,7 @@ import {
   CircuitBreaker,
   EventStore,
   VytchesDDD,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // Production-ready configuration
 class ProductionSetup {
@@ -892,7 +892,7 @@ import {
   MetricsCollector,
   PerformanceMonitor,
   AlertManager,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 class ObservabilitySetup {
   private metrics = new MetricsCollector();
@@ -933,7 +933,7 @@ import {
   TracingManager,
   SpanBuilder,
   TraceContext,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 class TracingSetup {
   private tracer = new TracingManager();
@@ -969,7 +969,7 @@ import {
   EncryptionService,
   AuditLogger,
   ComplianceChecker,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 class SecuritySetup {
   private security = new SecurityManager();
@@ -1009,7 +1009,7 @@ import {
   AuthorizationService,
   RoleBasedAccessControl,
   PolicyBasedAccessControl,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 class AccessControlSetup {
   private authz = new AuthorizationService();
@@ -1049,7 +1049,7 @@ import {
   TestEventStore,
   TestMetrics,
   safeRun,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 describe('Enterprise Order Service', () => {
   let harness: TestHarness;
@@ -1118,7 +1118,7 @@ import {
   TestDatabase,
   TestEventStore,
   TestMessageBus,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 describe('Integration Tests', () => {
   let harness: IntegrationTestHarness;
@@ -1175,7 +1175,7 @@ import {
   EventStore,
   CircuitBreaker,
   Logger,
-} from '@vytches-ddd/enterprise';
+} from '@vytches/ddd-enterprise';
 
 // ✅ Good: Comprehensive monitoring
 class EnterpriseService {
@@ -1213,11 +1213,11 @@ class EnterpriseService {
 
 ```typescript
 // ✅ Good: Optimized imports
-import { AggregateRoot, CommandHandler } from '@vytches-ddd/enterprise';
+import { AggregateRoot, CommandHandler } from '@vytches/ddd-enterprise';
 
 // ✅ Good: Lazy loading
 const loadEventStore = async () => {
-  const { EventStore } = await import('@vytches-ddd/enterprise');
+  const { EventStore } = await import('@vytches/ddd-enterprise');
   return new EventStore();
 };
 
@@ -1271,7 +1271,7 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
+git clone https://github.com/vytches/ddd.git
 
 # Install dependencies
 pnpm install
@@ -1288,5 +1288,5 @@ pnpm build:enterprise
 **Built with ❤️ by the VytchesDDD Team**
 
 _The complete Enterprise bundle for
-[@vytches-ddd](https://github.com/vytches/vytches-ddd) ecosystem - Your complete
-Domain-Driven Design solution for TypeScript_
+[@vytches/ddd-core](https://github.com/vytches/vytches-ddd) ecosystem - Your
+complete Domain-Driven Design solution for TypeScript_

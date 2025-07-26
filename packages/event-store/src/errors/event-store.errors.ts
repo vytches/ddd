@@ -1,5 +1,5 @@
-import { IDomainError, DomainErrorCode } from '@vytches-ddd/core';
-import type { DomainErrorOptions } from '@vytches-ddd/core';
+import { IDomainError, DomainErrorCode } from '@vytches/ddd-core';
+import type { DomainErrorOptions } from '@vytches/ddd-core';
 
 /**
  * Helper function to create options object with undefined values omitted

@@ -1,9 +1,9 @@
 # CQRS with Policy-Based Authorization
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-cqrs **Complexity**: Intermediate
 **Domain**: Architecture **Patterns**: CQRS, Policy-based authorization, Command
-validation, Query security **Dependencies**: @vytches-ddd/cqrs,
-@vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/utils
+validation, Query security **Dependencies**: @vytches/ddd-cqrs,
+@vytches/ddd-policies, @vytches/ddd-di, @vytches/ddd-utils
 
 ## Description
 
@@ -26,10 +26,10 @@ In enterprise applications, security is paramount. This pattern addresses:
 
 ```typescript
 // policy-secured-commands.ts
-import { Command, CommandHandler, CommandBus } from '@vytches-ddd/cqrs';
-import { PolicyBuilder, PolicyContext } from '@vytches-ddd/policies';
-import { Result } from '@vytches-ddd/utils';
-import { Injectable } from '@vytches-ddd/di';
+import { Command, CommandHandler, CommandBus } from '@vytches/ddd-cqrs';
+import { PolicyBuilder, PolicyContext } from '@vytches/ddd-policies';
+import { Result } from '@vytches/ddd-utils';
+import { Injectable } from '@vytches/ddd-di';
 import type { User, Account, TransferCommand, SecurityContext } from '../types'; // From your application
 
 // ✅ FOCUS: Command with security metadata
@@ -379,7 +379,7 @@ export class SecurityPolicyMiddleware implements ICommandMiddleware {
 ## Key Features
 
 - **Policy-Based Authorization**: Comprehensive security policies using
-  @vytches-ddd/policies
+  @vytches/ddd-policies
 - **Context-Aware Permissions**: Dynamic authorization based on user context and
   business rules
 - **Role-Based Limits**: Different transaction limits for different user roles

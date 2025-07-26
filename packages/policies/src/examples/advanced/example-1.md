@@ -1,13 +1,13 @@
 # Enterprise Policy Orchestration Platform
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: advanced  
 **Domain**: Enterprise Architecture  
 **Patterns**: policy-orchestration, enterprise-governance,
 distributed-policy-management  
-**Dependencies**: @vytches-ddd/policies, @vytches-ddd/events,
-@vytches-ddd/messaging, @vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-policies, @vytches/ddd-events,
+@vytches/ddd-messaging, @vytches/ddd-resilience
 
 ## Description
 
@@ -34,11 +34,11 @@ import {
   PolicyEventBus,
   PolicyAnalyticsEngine,
   DistributedPolicyManager,
-} from '@vytches-ddd/policies';
-import { EventBus, DomainEvent } from '@vytches-ddd/events';
-import { OutboxPattern } from '@vytches-ddd/messaging';
-import { CircuitBreaker, BulkheadIsolation } from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-policies';
+import { EventBus, DomainEvent } from '@vytches/ddd-events';
+import { OutboxPattern } from '@vytches/ddd-messaging';
+import { CircuitBreaker, BulkheadIsolation } from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * @llm-summary Enterprise policy orchestration platform for large-scale distributed systems

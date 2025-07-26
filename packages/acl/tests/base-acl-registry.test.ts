@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import type { ACLRegistrationMetadata, IACLAdapter, ACLContextInfo } from '../src';
 import { BaseACLRegistry } from '../src/base-acl-registry';
 

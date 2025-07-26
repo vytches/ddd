@@ -1,6 +1,6 @@
 # Advanced ACL Use Cases
 
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Advanced  
 **Focus**: Enterprise-scale integration patterns with AI, global orchestration,
 and intelligent automation

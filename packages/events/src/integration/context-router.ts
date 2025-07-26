@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent, ISpecification } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent, ISpecification } from '@vytches/ddd-contracts';
 
 /**
  * @llm-summary Contract for context router functionality

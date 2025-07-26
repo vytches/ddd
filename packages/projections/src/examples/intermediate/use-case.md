@@ -1,9 +1,9 @@
 # Intermediate Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**:
 intermediate **Domain**: Event Sourcing **Patterns**: Advanced business
 scenarios, enterprise patterns, production use cases **Dependencies**:
-@vytches-ddd/projections, @vytches-ddd/events, @vytches-ddd/utils
+@vytches/ddd-projections, @vytches/ddd-events, @vytches/ddd-utils
 
 ## Description
 
@@ -37,8 +37,8 @@ import {
   StreamProcessor,
   WindowProcessor,
   PatternMatcher,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   TradingData,
   MarketAnalytics,
@@ -570,8 +570,8 @@ import {
   MultiTenantProjectionBase,
   ProjectionRebuilder,
   TenantIsolationCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   TenantContext,
   GlobalTenantConfiguration,
@@ -1200,8 +1200,8 @@ import {
   StreamProcessor,
   WindowProcessor,
   PatternMatcher,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   SensorReading,
   DeviceMetrics,

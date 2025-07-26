@@ -1,9 +1,9 @@
 # Circuit Breaker Pattern - NestJS Basic Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Basic **Domain**: Payment Processing Service **Patterns**:
 Circuit Breaker, Manual Setup **Dependencies**: @nestjs/common,
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -26,7 +26,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import {
   ResiliencePolicyBuilder,
   CircuitBreakerStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { PaymentRequest, PaymentResult, PaymentGatewayError } from './types'; // From your application
 
 @Injectable()

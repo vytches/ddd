@@ -1,9 +1,9 @@
 # CQRS with Distributed Tracing and Observability
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/cqrs **Complexity**: Intermediate
+**Version**: 1.0.0 **Package**: @vytches/ddd-cqrs **Complexity**: Intermediate
 **Domain**: Architecture **Patterns**: CQRS, Distributed tracing, Observability,
-Performance monitoring **Dependencies**: @vytches-ddd/cqrs,
-@vytches-ddd/logging, @vytches-ddd/resilience, @vytches-ddd/utils
+Performance monitoring **Dependencies**: @vytches/ddd-cqrs,
+@vytches/ddd-logging, @vytches/ddd-resilience, @vytches/ddd-utils
 
 ## Description
 
@@ -32,10 +32,10 @@ import {
   Query,
   CommandHandler,
   QueryHandler,
-} from '@vytches-ddd/cqrs';
-import { Logger } from '@vytches-ddd/logging';
-import { CircuitBreaker, Retry } from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-cqrs';
+import { Logger } from '@vytches/ddd-logging';
+import { CircuitBreaker, Retry } from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 import type {
   TraceContext,
   PerformanceMetrics,

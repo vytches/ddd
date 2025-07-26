@@ -16,8 +16,8 @@ Before starting, ensure you have:
 
 ```bash
 # Clone the repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install
@@ -34,10 +34,10 @@ pnpm test
 
 ```bash
 # Install specific packages you need
-npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/cqrs
+npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs
 
 # Or install the complete suite
-npm install @vytches-ddd/core
+npm install @vytches/ddd-core
 ```
 
 ## 🔧 Verify Installation
@@ -57,9 +57,9 @@ npm test      # Test your application using VytchesDDD
 
 ```typescript
 // app.ts
-import { AggregateRoot, EntityId, DomainEvent } from '@vytches-ddd/core';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { EventBus } from '@vytches-ddd/events';
+import { AggregateRoot, EntityId, DomainEvent } from '@vytches/ddd-core';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { EventBus } from '@vytches/ddd-events';
 
 // Create a simple aggregate
 class User extends AggregateRoot {
@@ -91,19 +91,19 @@ console.log('User created:', user.getId().getValue());
 
 | Package                      | Description                              | Installation                             |
 | ---------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `@vytches-ddd/core`          | Meta-package with all essentials         | `npm install @vytches-ddd/core`          |
-| `@vytches-ddd/events`        | Event-driven architecture                | `npm install @vytches-ddd/events`        |
-| `@vytches-ddd/cqrs`          | Command Query Responsibility Segregation | `npm install @vytches-ddd/cqrs`          |
-| `@vytches-ddd/aggregates`    | Aggregate root patterns                  | `npm install @vytches-ddd/aggregates`    |
-| `@vytches-ddd/repositories`  | Repository patterns                      | `npm install @vytches-ddd/repositories`  |
-| `@vytches-ddd/value-objects` | Value object implementations             | `npm install @vytches-ddd/value-objects` |
-| `@vytches-ddd/policies`      | Business policy patterns                 | `npm install @vytches-ddd/policies`      |
-| `@vytches-ddd/resilience`    | Resilience patterns                      | `npm install @vytches-ddd/resilience`    |
+| `@vytches/ddd-core`          | Meta-package with all essentials         | `npm install @vytches/ddd-core`          |
+| `@vytches/ddd-events`        | Event-driven architecture                | `npm install @vytches/ddd-events`        |
+| `@vytches/ddd-cqrs`          | Command Query Responsibility Segregation | `npm install @vytches/ddd-cqrs`          |
+| `@vytches/ddd-aggregates`    | Aggregate root patterns                  | `npm install @vytches/ddd-aggregates`    |
+| `@vytches/ddd-repositories`  | Repository patterns                      | `npm install @vytches/ddd-repositories`  |
+| `@vytches/ddd-value-objects` | Value object implementations             | `npm install @vytches/ddd-value-objects` |
+| `@vytches/ddd-policies`      | Business policy patterns                 | `npm install @vytches/ddd-policies`      |
+| `@vytches/ddd-resilience`    | Resilience patterns                      | `npm install @vytches/ddd-resilience`    |
 
 ## 📋 Project Structure (if cloned)
 
 ```
-vytches-ddd/
+ddd/
 ├── packages/                   # All DDD packages
 │   ├── core/                  # Meta-package
 │   ├── aggregates/            # Aggregate patterns
@@ -164,7 +164,7 @@ npm run build
 **TypeScript Errors:**
 
 - Check your TypeScript version (should be >= 5.0)
-- Ensure proper imports from `@vytches-ddd/*` packages
+- Ensure proper imports from `@vytches/ddd-*` packages
 
 ### Getting Help
 
@@ -178,7 +178,7 @@ After setup, test basic functionality:
 
 ```typescript
 // test.ts
-import { EntityId } from '@vytches-ddd/core';
+import { EntityId } from '@vytches/ddd-core';
 
 const id = EntityId.createWithRandomUUID();
 console.log('VytchesDDD is working!', id.getValue());

@@ -1,6 +1,6 @@
 # Multi-Tenant Domain Security - Advanced Example
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 advanced **Domain**: Multi-Tenant Security **Patterns**: Multi-Tenancy, Security
 Contexts, Isolation Boundaries, Compliance Frameworks **Dependencies**:
 BaseError, IDomainError, IActor, ActorError, Error Enums
@@ -30,7 +30,7 @@ import {
   ActorError,
   DomainErrorCode,
   type DomainErrorOptions,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import {
   TenantSecurityContext,
   ComplianceFramework,

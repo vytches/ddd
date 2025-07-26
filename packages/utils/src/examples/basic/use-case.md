@@ -1,8 +1,8 @@
 # Basic Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/utils **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-utils **Complexity**: basic
 **Domain**: Infrastructure **Patterns**: Real-world scenarios, practical
-applications, common use cases **Dependencies**: @vytches-ddd/utils
+applications, common use cases **Dependencies**: @vytches/ddd-utils
 
 ## Description
 
@@ -27,7 +27,7 @@ package.
 
 ```typescript
 // basic-use-cases.ts
-import { Result, safeRun, LibUtils } from '@vytches-ddd/utils';
+import { Result, safeRun, LibUtils } from '@vytches/ddd-utils';
 import {
   UserData,
   ValidationError,

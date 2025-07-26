@@ -1,16 +1,16 @@
-# @vytches-ddd/messaging
+# @vytches/ddd-messaging
 
 <!-- LLM-METADATA
-Package: @vytches-ddd/messaging
+Package: @vytches/ddd-messaging
 Category: Integration
 Purpose: Outbox pattern and Saga orchestration for reliable message delivery and long-running business processes
-Dependencies: @vytches-ddd/core, @vytches-ddd/events, @vytches-ddd/logging
+Dependencies: @vytches/ddd-core, @vytches/ddd-events, @vytches/ddd-logging
 Complexity: High
 DDD Patterns: Outbox Pattern, Saga Pattern, Message Passing, Event-Driven Architecture
-Integration Points: @vytches-ddd/events, @vytches-ddd/repositories, @vytches-ddd/logging, @vytches-ddd/di
+Integration Points: @vytches/ddd-events, @vytches/ddd-repositories, @vytches/ddd-logging, @vytches/ddd-di
 -->
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fmessaging.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fmessaging)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-messaging.svg)](https://badge.fury.io/js/%40vytches%2Fddd-messaging)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -43,20 +43,20 @@ message delivery and complex workflow orchestration.
 
 ```bash
 # npm
-npm install @vytches-ddd/messaging
+npm install @vytches/ddd-messaging
 
 # yarn
-yarn add @vytches-ddd/messaging
+yarn add @vytches/ddd-messaging
 
 # pnpm
-pnpm add @vytches-ddd/messaging
+pnpm add @vytches/ddd-messaging
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/logging
+npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-logging
 ```
 
 ## ✨ Key Features
@@ -172,7 +172,7 @@ import {
   OutboxProcessor,
   OutboxMessageFactory,
   MessagePriority,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Create outbox service
 const outboxService = new OutboxService({
@@ -210,7 +210,7 @@ import {
   InMemorySagaRepository,
   Saga,
   SagaEventHandler,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Define a saga
 @Saga('OrderProcessingSaga')
@@ -313,7 +313,7 @@ class OrderProcessingSaga extends BaseSaga {
 import {
   SagaOrchestrator,
   InMemorySagaRepository,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Setup saga infrastructure
 const sagaRepository = new InMemorySagaRepository();
@@ -357,7 +357,7 @@ const results = await orchestrator.processEvent(event, context);
 ### Message Creation
 
 ```typescript
-import { OutboxMessageFactory, MessagePriority } from '@vytches-ddd/messaging';
+import { OutboxMessageFactory, MessagePriority } from '@vytches/ddd-messaging';
 
 const factory = new OutboxMessageFactory();
 
@@ -387,7 +387,7 @@ const messages = factory.createBatch([
 ### Custom Message Handler
 
 ```typescript
-import { IOutboxMessageHandler, IOutboxMessage } from '@vytches-ddd/messaging';
+import { IOutboxMessageHandler, IOutboxMessage } from '@vytches/ddd-messaging';
 
 class EmailMessageHandler implements IOutboxMessageHandler {
   async handle(message: IOutboxMessage): Promise<void> {
@@ -418,7 +418,7 @@ class EmailMessageHandler implements IOutboxMessageHandler {
 ### Processing Configuration
 
 ```typescript
-import { OutboxProcessor, OutboxService } from '@vytches-ddd/messaging';
+import { OutboxProcessor, OutboxService } from '@vytches/ddd-messaging';
 
 const processor = new OutboxProcessor(outboxService, {
   processingInterval: 5000, // Process every 5 seconds
@@ -445,7 +445,7 @@ import {
   SagaDefinition,
   SagaStep,
   SagaStatus,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 const orderProcessingDefinition = new SagaDefinition({
   sagaType: 'OrderProcessingSaga',
@@ -533,7 +533,7 @@ class OrderProcessingSaga extends BaseSaga {
 ### Saga Repository
 
 ```typescript
-import { InMemorySagaRepository } from '@vytches-ddd/messaging';
+import { InMemorySagaRepository } from '@vytches/ddd-messaging';
 
 // Create repository with configuration
 const repository = new InMemorySagaRepository({
@@ -578,7 +578,7 @@ import {
   CircuitBreakerMiddleware,
   PerformanceMonitoringMiddleware,
   SecurityMiddleware,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 // Retry middleware
 const retryMiddleware = new RetryMiddleware({
@@ -613,7 +613,7 @@ const securityMiddleware = new SecurityMiddleware({
 ### Custom Middleware
 
 ```typescript
-import { BaseSagaMiddleware } from '@vytches-ddd/messaging';
+import { BaseSagaMiddleware } from '@vytches/ddd-messaging';
 
 class AuditMiddleware extends BaseSagaMiddleware {
   async execute(
@@ -665,7 +665,7 @@ import {
   SagaError,
   SagaExecutionError,
   SagaCompensationError,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 class OrderProcessingSaga extends BaseSaga {
   async handleEvent(
@@ -717,7 +717,7 @@ class OrderProcessingSaga extends BaseSaga {
 ### Outbox Error Handling
 
 ```typescript
-import { OutboxProcessor } from '@vytches-ddd/messaging';
+import { OutboxProcessor } from '@vytches/ddd-messaging';
 
 const processor = new OutboxProcessor(outboxService, {
   errorHandler: async (error, message) => {
@@ -750,7 +750,7 @@ const processor = new OutboxProcessor(outboxService, {
 ### Saga Metrics
 
 ```typescript
-import { SagaOrchestrator } from '@vytches-ddd/messaging';
+import { SagaOrchestrator } from '@vytches/ddd-messaging';
 
 const orchestrator = new SagaOrchestrator(repository, {
   enableMetrics: true,
@@ -787,7 +787,7 @@ console.log('Order Processing Metrics:', {
 ### Performance Monitoring
 
 ```typescript
-import { PerformanceMonitoringMiddleware } from '@vytches-ddd/messaging';
+import { PerformanceMonitoringMiddleware } from '@vytches/ddd-messaging';
 
 const performanceMiddleware = new PerformanceMonitoringMiddleware({
   enableMetrics: true,
@@ -816,8 +816,8 @@ console.log('Performance Metrics:', {
 ### Event-Driven Integration
 
 ```typescript
-import { EventBusOutboxHandler } from '@vytches-ddd/messaging';
-import { UnifiedEventBus } from '@vytches-ddd/events';
+import { EventBusOutboxHandler } from '@vytches/ddd-messaging';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 
 // Integrate outbox with event bus
 const eventBus = new UnifiedEventBus();
@@ -838,8 +838,8 @@ const processor = new OutboxProcessor(outboxService, {
 ### Repository Integration
 
 ```typescript
-import { OutboxService } from '@vytches-ddd/messaging';
-import { IBaseRepository } from '@vytches-ddd/repositories';
+import { OutboxService } from '@vytches/ddd-messaging';
+import { IBaseRepository } from '@vytches/ddd-repositories';
 
 class OrderRepository extends IBaseRepository<OrderAggregate> {
   constructor(
@@ -867,8 +867,8 @@ class OrderRepository extends IBaseRepository<OrderAggregate> {
 ### CQRS Integration
 
 ```typescript
-import { CommandHandler, QueryHandler } from '@vytches-ddd/cqrs';
-import { SagaOrchestrator } from '@vytches-ddd/messaging';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
+import { SagaOrchestrator } from '@vytches/ddd-messaging';
 
 @CommandHandler(ProcessOrderCommand)
 class ProcessOrderHandler {
@@ -895,9 +895,9 @@ class ProcessOrderHandler {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { OrderProcessingSaga } from '../src/order-processing-saga';
-import { SagaStatus } from '@vytches-ddd/messaging';
+import { SagaStatus } from '@vytches/ddd-messaging';
 
 describe('OrderProcessingSaga', () => {
   let saga: OrderProcessingSaga;
@@ -966,12 +966,12 @@ describe('OrderProcessingSaga', () => {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import {
   OutboxService,
   OutboxMessageFactory,
   MessageStatus,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 
 describe('OutboxService', () => {
   let service: OutboxService;
@@ -1084,8 +1084,8 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
-cd vytches-ddd
+git clone https://github.com/vytches/ddd.git
+cd ddd
 
 # Install dependencies
 pnpm install

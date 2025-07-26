@@ -120,11 +120,11 @@ cat .vytches/config.json
 {
   "imports": {
     "autoResolve": true,
-    "basePackage": "@vytches-ddd/core",
+    "basePackage": "@vytches/ddd-core",
     "customMappings": {
-      "AggregateRoot": "@vytches-ddd/core",
-      "EntityId": "@vytches-ddd/value-objects",
-      "DomainEvent": "@vytches-ddd/events"
+      "AggregateRoot": "@vytches/ddd-core",
+      "EntityId": "@vytches/ddd-value-objects",
+      "DomainEvent": "@vytches/ddd-events"
     }
   }
 }
@@ -458,14 +458,14 @@ npx --node-version=18 vytches-ddd generate aggregate User
 **Error:**
 
 ```
-❌ Cannot find module '@vytches-ddd/core'
+❌ Cannot find module '@vytches/ddd-core'
 ```
 
 **Solutions:**
 
 ```bash
 # Install required dependencies
-npm install @vytches-ddd/core @vytches-ddd/cqrs @vytches-ddd/events
+npm install @vytches/ddd-core @vytches/ddd-cqrs @vytches/ddd-events
 
 # Check package.json
 cat package.json
@@ -474,7 +474,7 @@ cat package.json
 vytches-ddd install --dependencies
 
 # Verify installation
-npm list @vytches-ddd/core
+npm list @vytches/ddd-core
 ```
 
 ## Integration Issues

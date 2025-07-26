@@ -1,9 +1,9 @@
 # Composite Resilience Strategy - NestJS Intermediate Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Framework**: NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Framework**: NestJS
 **Complexity**: Intermediate **Domain**: Order Management System **Patterns**:
 Composite Strategy, Health Check Integration, Manual Setup **Dependencies**:
-@nestjs/common, @nestjs/schedule, @vytches-ddd/resilience
+@nestjs/common, @nestjs/schedule, @vytches/ddd-resilience
 
 ## Description
 
@@ -29,7 +29,7 @@ import {
   CompositeResilienceStrategy,
   ResiliencePolicyBuilder,
   HealthCheckIntegratedStrategy,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import { Order, OrderProcessingResult, ServiceHealthMetrics } from './types'; // From your application
 
 @Injectable()

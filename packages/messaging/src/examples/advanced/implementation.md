@@ -4,8 +4,8 @@
 comprehensive fault tolerance  
 **Domain**: Cross-Border Payment System  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/policies,
-@vytches-ddd/events, @vytches-ddd/resilience, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-policies,
+@vytches/ddd-events, @vytches/ddd-resilience, @vytches/ddd-di
 
 ## Business Context
 
@@ -29,19 +29,19 @@ import {
   ISagaActionResult,
   ISagaExecutionContext,
   SagaStep,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 import {
   PolicyBuilder,
   PolicyContext,
   ISpecification,
-} from '@vytches-ddd/policies';
-import { DomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-policies';
+import { DomainEvent } from '@vytches/ddd-events';
 import {
   ResiliencePolicyBuilder,
   CircuitBreakerState,
-} from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   PaymentRequest,
   ComplianceCheck,
@@ -838,8 +838,8 @@ import {
   SagaOrchestrator,
   ISagaDefinition,
   InMemorySagaRepository,
-} from '@vytches-ddd/messaging';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
+} from '@vytches/ddd-messaging';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
 
 // ⭐ Enterprise Saga Orchestrator with Full Integration
 @DomainService('enterpriseSagaOrchestrator', {

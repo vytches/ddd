@@ -1,6 +1,6 @@
 {
-  "name": "@vytches-ddd/contracts",
-  "version": "0.4.2",
+  "name": "@vytches/ddd-contracts",
+  "version": "0.4.3",
   "description": "Enterprise-grade contracts & fundamental types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/contracts"
   },
   "scripts": {

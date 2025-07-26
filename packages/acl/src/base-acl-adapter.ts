@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 
 import type {
   IACLAdapter,

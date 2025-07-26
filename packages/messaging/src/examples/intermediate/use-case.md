@@ -1,13 +1,13 @@
 # Messaging Package - Intermediate Use Cases
 
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Intermediate  
 **Focus**: Real-world applications of advanced messaging patterns
 
 ## Overview
 
 This document presents real-world use cases for intermediate messaging patterns
-in the @vytches-ddd/messaging package, focusing on saga orchestration,
+in the @vytches/ddd-messaging package, focusing on saga orchestration,
 content-based routing, and complex integration scenarios.
 
 ## Use Case 1: Healthcare Appointment Scheduling
@@ -18,7 +18,7 @@ A healthcare platform coordinates appointments across multiple providers,
 insurance verification, and patient notifications. The system must handle
 partial failures gracefully and ensure all parties are synchronized.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // healthcare-appointment-saga.ts
@@ -26,8 +26,8 @@ import {
   BaseSaga,
   SagaOrchestrator,
   ISagaExecutionContext,
-} from '@vytches-ddd/messaging';
-import { MessageRouter, RoutingContext } from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
+import { MessageRouter, RoutingContext } from '@vytches/ddd-messaging';
 
 export class AppointmentSchedulingSaga extends BaseSaga {
   constructor() {
@@ -177,12 +177,12 @@ A global supply chain platform coordinates orders across suppliers, warehouses,
 and logistics providers. Complex routing rules ensure optimal fulfillment based
 on inventory, location, and delivery requirements.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // supply-chain-orchestration.ts
-import { MessageRouter, SagaOrchestrator } from '@vytches-ddd/messaging';
-import { PolicyEngine } from '@vytches-ddd/policies';
+import { MessageRouter, SagaOrchestrator } from '@vytches/ddd-messaging';
+import { PolicyEngine } from '@vytches/ddd-policies';
 
 export class SupplyChainRouter extends MessageRouter {
   constructor(
@@ -332,12 +332,12 @@ stages, integrating with credit bureaus, fraud detection, and regulatory
 compliance systems. Message routing varies based on loan amount, customer
 profile, and regulatory requirements.
 
-### Implementation with @vytches-ddd/messaging
+### Implementation with @vytches/ddd-messaging
 
 ```typescript
 // risk-assessment-pipeline.ts
-import { MessageRouter, BaseSaga } from '@vytches-ddd/messaging';
-import { CircuitBreaker } from '@vytches-ddd/resilience';
+import { MessageRouter, BaseSaga } from '@vytches/ddd-messaging';
+import { CircuitBreaker } from '@vytches/ddd-resilience';
 
 export class RiskAssessmentRouter extends MessageRouter {
   configureRoutes(): void {

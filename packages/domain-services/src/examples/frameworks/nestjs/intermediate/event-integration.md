@@ -2,16 +2,16 @@
 
 **Focus**: Domain service with event publishing in NestJS **Base Example**:
 [Event-Driven Domain Service](../../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/core, @vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-core, @vytches/ddd-events
 
 ## Service Implementation
 
 ```typescript
 // order-event.service.ts
 import { Injectable } from '@nestjs/common';
-import { BaseDomainService } from '@vytches-ddd/domain-services';
-import { EventHandler, IEventBus } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { BaseDomainService } from '@vytches/ddd-domain-services';
+import { EventHandler, IEventBus } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   OrderCreatedEvent,

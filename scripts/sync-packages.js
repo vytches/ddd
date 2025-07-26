@@ -29,7 +29,7 @@ function updateTsConfig() {
 
   // Add paths for each package
   Object.keys(packages).forEach(packageName => {
-    const fullName = `@vytches-ddd/${packageName}`;
+    const fullName = `@vytches/ddd-${packageName}`;
     tsconfig.compilerOptions.paths[fullName] = [`packages/${packageName}/src/index.ts`];
   });
 
@@ -46,7 +46,7 @@ function updateVitestConfig() {
   // Generate alias section
   const aliases = Object.keys(packages)
     .map(packageName => {
-      const fullName = `@vytches-ddd/${packageName}`;
+      const fullName = `@vytches/ddd-${packageName}`;
       return `      '${fullName}': new URL('./packages/${packageName}/src/index.ts', import.meta.url).pathname,`;
     })
     .join('\n');
@@ -134,7 +134,7 @@ function updateReadme() {
   const tableRows = Object.entries(packages)
     .filter(([_, config]) => config.type === 'lib' || config.type === 'bundle')
     .map(([packageName, config]) => {
-      const fullName = `@vytches-ddd/${packageName}`;
+      const fullName = `@vytches/ddd-${packageName}`;
       return `| [${fullName}](./packages/${packageName}) | ![npm](https://img.shields.io/npm/v/${fullName}) | ${config.description} |`;
     })
     .join('\n');
@@ -180,7 +180,7 @@ function updateEnterpriseBundle() {
     // Add dependencies for packages that should be included in enterprise
     Object.entries(packages).forEach(([packageName, config]) => {
       if (config.includeInEnterprise && packageName !== 'enterprise') {
-        enterprisePackage.dependencies[`@vytches-ddd/${packageName}`] = 'workspace:*';
+        enterprisePackage.dependencies[`@vytches/ddd-${packageName}`] = 'workspace:*';
       }
     });
 
@@ -191,7 +191,7 @@ function updateEnterpriseBundle() {
   if (fs.existsSync(enterpriseIndexPath)) {
     const exports = Object.entries(packages)
       .filter(([packageName, config]) => config.includeInEnterprise && packageName !== 'enterprise')
-      .map(([packageName]) => `export * from '@vytches-ddd/${packageName}';`)
+      .map(([packageName]) => `export * from '@vytches/ddd-${packageName}';`)
       .join('\n');
 
     const indexContent = `// VytchesDDD Enterprise Bundle - All components in one package
@@ -216,7 +216,7 @@ function generateNxCommands() {
   const commands = Object.entries(packages)
     .filter(([_, config]) => config.type === 'lib')
     .map(([packageName, config]) => {
-      const fullName = `@vytches-ddd/${packageName}`;
+      const fullName = `@vytches/ddd-${packageName}`;
       const libType = config.type === 'tool' ? 'node' : 'js';
       return `npx nx g @nx/${libType}:lib ${packageName} --directory=packages/${packageName} --bundler=vite --unitTestRunner=vitest --publishable --importPath=${fullName}`;
     });

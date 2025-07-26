@@ -1,11 +1,11 @@
 # Saga Pattern Implementation
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Complexity**: Intermediate  
 **Domain**: Travel Booking System  
 **Patterns**: Saga Pattern, Compensating Transactions, State Machine  
-**Dependencies**: @vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/core
+**Dependencies**: @vytches/ddd-messaging, @vytches/ddd-events, @vytches/ddd-core
 
 ## Description
 
@@ -28,9 +28,9 @@ import {
   BaseSaga,
   SagaStatus,
   ISagaExecutionContext,
-} from '@vytches-ddd/messaging';
-import { IExtendedDomainEvent } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-messaging';
+import { IExtendedDomainEvent } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import { Order, Customer } from './types';
 
 export class TravelBookingSaga extends BaseSaga {

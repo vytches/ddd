@@ -1,6 +1,6 @@
-# @vytches-ddd/event-scheduling
+# @vytches/ddd-event-scheduling
 
-[![npm version](https://badge.fury.io/js/%40vytches-ddd%2Fevent-scheduling.svg)](https://badge.fury.io/js/%40vytches-ddd%2Fevent-scheduling)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-event-scheduling.svg)](https://badge.fury.io/js/%40vytches%2Fddd-event-scheduling)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,20 +29,20 @@ applications requiring precise timing control and reliable delayed processing.
 
 ```bash
 # npm
-npm install @vytches-ddd/event-scheduling
+npm install @vytches/ddd-event-scheduling
 
 # yarn
-yarn add @vytches-ddd/event-scheduling
+yarn add @vytches/ddd-event-scheduling
 
 # pnpm
-pnpm add @vytches-ddd/event-scheduling
+pnpm add @vytches/ddd-event-scheduling
 ```
 
 ### Peer Dependencies
 
 ```bash
 # Required for full functionality
-npm install @vytches-ddd/core @vytches-ddd/events
+npm install @vytches/ddd-core @vytches/ddd-events
 ```
 
 ## ✨ Key Features
@@ -78,7 +78,7 @@ Events that execute at specific times or intervals:
 import {
   ScheduledEvent,
   SchedulePriority,
-} from '@vytches-ddd/event-scheduling';
+} from '@vytches/ddd-event-scheduling';
 
 class OrderReminderEvent extends ScheduledEvent<OrderData> {
   constructor(orderId: string, data: OrderData, scheduleAt: Date) {
@@ -97,7 +97,7 @@ class OrderReminderEvent extends ScheduledEvent<OrderData> {
 Core scheduling engine for managing event execution:
 
 ```typescript
-import { InMemorySchedulerAdapter } from '@vytches-ddd/event-scheduling';
+import { InMemorySchedulerAdapter } from '@vytches/ddd-event-scheduling';
 
 const scheduler = new InMemorySchedulerAdapter({
   maxConcurrency: 10,
@@ -127,7 +127,7 @@ import {
   InMemorySchedulerAdapter,
   ScheduledEvent,
   SchedulePriority,
-} from '@vytches-ddd/event-scheduling';
+} from '@vytches/ddd-event-scheduling';
 
 // Create scheduler instance
 const scheduler = new InMemorySchedulerAdapter({
@@ -174,7 +174,7 @@ await scheduler.schedule(reminderEvent);
 ### Priority-Based Scheduling
 
 ```typescript
-import { SchedulePriority } from '@vytches-ddd/event-scheduling';
+import { SchedulePriority } from '@vytches/ddd-event-scheduling';
 
 // Critical system events
 const systemMaintenanceEvent = new SystemMaintenanceEvent(
@@ -202,7 +202,7 @@ await scheduler.schedule(marketingEmailEvent);
 ### Recurring Events
 
 ```typescript
-import { CronExpression } from '@vytches-ddd/event-scheduling';
+import { CronExpression } from '@vytches/ddd-event-scheduling';
 
 // Daily backup at 2 AM
 const backupEvent = new BackupEvent('daily-backup', backupConfig, {
@@ -364,7 +364,7 @@ import {
   TestScheduledEvent,
   TestEventFactory,
   FailingScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
+} from '@vytches/ddd-event-scheduling';
 
 describe('Event Scheduling', () => {
   it('should execute scheduled events', async () => {
@@ -438,7 +438,7 @@ describe('Event Scheduling', () => {
 
 ### Package Information
 
-- **Package Name**: @vytches-ddd/event-scheduling
+- **Package Name**: @vytches/ddd-event-scheduling
 - **Version**: 0.2.0
 - **Layer**: Infrastructure
 - **Category**: Scheduling & Time Management
@@ -454,9 +454,9 @@ describe('Event Scheduling', () => {
 
 ### Dependencies
 
-- **Core**: @vytches-ddd/core, @vytches-ddd/events
-- **Types**: @vytches-ddd/contracts (for interfaces)
-- **Testing**: @vytches-ddd/testing (for test utilities)
+- **Core**: @vytches/ddd-core, @vytches/ddd-events
+- **Types**: @vytches/ddd-contracts (for interfaces)
+- **Testing**: @vytches/ddd-testing (for test utilities)
 
 ### Use Cases
 
@@ -467,7 +467,7 @@ describe('Event Scheduling', () => {
 
 ### Integration Patterns
 
-- **Event-Driven**: Integrates with @vytches-ddd/events for event publishing
+- **Event-Driven**: Integrates with @vytches/ddd-events for event publishing
 - **Domain Services**: Works with domain services for business logic execution
 - **Repository Pattern**: Can trigger repository operations on schedule
 - **CQRS**: Supports scheduled command and query execution
@@ -481,7 +481,7 @@ We welcome contributions! Please see our
 
 ```bash
 # Clone repository
-git clone https://github.com/vytches/vytches-ddd.git
+git clone https://github.com/vytches/ddd.git
 
 # Install dependencies
 pnpm install
@@ -501,5 +501,5 @@ MIT License - see [LICENSE](../../LICENSE) for details.
 
 **Built with ❤️ by the VytchesDDD Team**
 
-For more information, visit our [documentation](https://vytches-ddd.dev) or join
-our [community](https://discord.gg/vytches-ddd).
+For more information, visit our [documentation](https://vytches.dev/ddd) or join
+our [community](https://discord.gg/vytches).

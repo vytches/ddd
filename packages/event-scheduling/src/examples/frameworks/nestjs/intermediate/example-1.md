@@ -1,12 +1,12 @@
 # NestJS Advanced DI Integration - VytchesDDD Dependency Injection
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-scheduling **Framework**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-scheduling **Framework**:
 NestJS **Complexity**: intermediate **Integration**: Advanced VytchesDDD DI
 integration with enterprise scheduling features
 
 ## Description
 
-Advanced NestJS integration using @vytches-ddd/di for sophisticated dependency
+Advanced NestJS integration using @vytches/ddd-di for sophisticated dependency
 injection, distributed scheduling capabilities, and enterprise-grade event
 management with comprehensive monitoring and health checks.
 
@@ -27,13 +27,13 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService, ServiceLifetime } from '@vytches/ddd-di';
 import {
   DistributedSchedulerService,
   DistributedScheduledEvent,
   HAScheduledEvent,
-} from '@vytches-ddd/event-scheduling';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-event-scheduling';
+import { Result } from '@vytches/ddd-utils';
 import {
   EnterpriseOrderData,
   ComplianceSchedulingData,
@@ -464,8 +464,8 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Result } from '@vytches-ddd/utils';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Result } from '@vytches/ddd-utils';
 import {
   ScheduleEnterpriseOrderDto,
   ScheduleComplianceReportDto,
@@ -677,7 +677,7 @@ export class EnterpriseSchedulingController {
 // enterprise-scheduling.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { VytchesDDD, NestJSContainerAdapter } from '@vytches-ddd/di';
+import { VytchesDDD, NestJSContainerAdapter } from '@vytches/ddd-di';
 import { EnterpriseSchedulingService } from './enterprise-scheduling.service';
 import { EnterpriseSchedulingController } from './enterprise-scheduling.controller';
 
@@ -889,7 +889,7 @@ export class AppModule {}
 ```typescript
 // usage-example.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EnterpriseSchedulingService } from './enterprise-scheduling/enterprise-scheduling.service';
 
 @Injectable()
@@ -1001,7 +1001,7 @@ export class EnterpriseUsageService {
 
 ## Key Features
 
-- **VytchesDDD Integration**: Full integration with @vytches-ddd/di container
+- **VytchesDDD Integration**: Full integration with @vytches/ddd-di container
   and service resolution
 - **Distributed Scheduling**: Multi-node coordination with partition management
   and leader election

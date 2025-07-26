@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 /**
  * Logging Package Examples Configuration
@@ -18,7 +18,7 @@ export const packageExampleConfig: PackageExampleConfig = {
   description: 'DDD-first structured logging with automatic context detection and data masking',
   domain: 'Infrastructure',
   patterns: ['logging', 'structured-logging', 'context-detection'],
-  dependencies: ['@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-utils'],
   complexityLevels: {
     basic: {
       level: 'basic',
@@ -129,7 +129,7 @@ export const packageExampleConfig: PackageExampleConfig = {
       id: 'nestjs-intermediate-di',
       name: 'NestJS Advanced DI Integration',
       file: 'frameworks/nestjs/intermediate/example-1.md',
-      tags: ['nestjs:di', 'vytches-ddd:integration', 'enterprise:logging'],
+      tags: ['nestjs:di', 'vytches:ddd:integration', 'enterprise:logging'],
       complexity: 'intermediate',
       priority: 'high',
       description: 'Advanced NestJS integration with VytchesDDD DI system',

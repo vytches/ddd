@@ -1,10 +1,10 @@
 # Domain-Driven Design Foundation - NestJS Intermediate Integration
 
-**Version**: 2.1.0 **Package**: @vytches-ddd/domain-primitives **Complexity**:
+**Version**: 2.1.0 **Package**: @vytches/ddd-domain-primitives **Complexity**:
 Intermediate **Framework**: NestJS **Base Example**:
 [Enterprise Domain Management](../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/domain-primitives,
-@vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-domain-primitives,
+@vytches/ddd-di
 
 ## Business Context
 
@@ -19,7 +19,7 @@ platforms requiring sophisticated error handling and actor management.
 ```typescript
 // domain-foundation.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import type {
   IDomainContext,
   IEnterpriseActor,
@@ -30,7 +30,7 @@ import {
   BaseError,
   DomainValidationError,
   ActorContext,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 
 @Injectable()
 export class DomainFoundationService {
@@ -39,7 +39,7 @@ export class DomainFoundationService {
   private readonly errorOrchestrator: IErrorOrchestrator;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for domain services
+    // ⭐ FOCUS: @vytches/ddd-di integration for domain services
     this.domainManager = VytchesDDD.resolve<IDomainManager>('domainManager');
     this.actorManager = VytchesDDD.resolve<IActorManager>('actorManager');
     this.errorOrchestrator =
@@ -119,7 +119,7 @@ export class DomainFoundationService {
 ```typescript
 // domain-foundation.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { DomainFoundationService } from './domain-foundation.service';
 
 @Module({

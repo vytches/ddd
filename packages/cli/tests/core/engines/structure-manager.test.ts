@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { StructureManager } from '../../../src/core/engines/structure-manager';
 import { CLIError } from '../../../src/types';
 

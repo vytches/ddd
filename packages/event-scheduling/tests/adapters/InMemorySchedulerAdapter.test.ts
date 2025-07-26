@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { TestScheduledEvent, TestEventFactory, InMemorySchedulerAdapter } from '../../src';
-import { JobStatus, BackoffStrategy } from '@vytches-ddd/contracts';
-import type { ISchedulerLifecycle } from '@vytches-ddd/contracts';
+import { JobStatus, BackoffStrategy } from '@vytches/ddd-contracts';
+import type { ISchedulerLifecycle } from '@vytches/ddd-contracts';
 
 // Mock timers
 vi.useFakeTimers();

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { DocumentationGenerator } from '../../src/generators/documentation-generator';
 import { HybridTemplateEngine } from '../../src/core/hybrid-template-engine';
 import { SmartTagFinder } from '../../src/core/smart-tag-finder';
@@ -63,7 +63,7 @@ describe('DocumentationGenerator', () => {
     description: 'Domain services package',
     domain: 'core',
     patterns: ['service-pattern', 'repository-pattern'],
-    dependencies: ['@vytches-ddd/core'],
+    dependencies: ['@vytches/ddd-core'],
     complexityLevels: {
       basic: {
         level: 'basic',

@@ -3,7 +3,7 @@
 **Focus**: Basic circuit breaker pattern for external service calls  
 **Domain**: Payment Processing  
 **Complexity**: Basic  
-**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-resilience, @vytches/ddd-utils
 
 ## Business Context
 
@@ -26,8 +26,8 @@ import {
   TimeoutStrategy,
   BulkheadStrategy,
   ResiliencePolicyBuilder,
-} from '@vytches-ddd/resilience';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-resilience';
+import { Result } from '@vytches/ddd-utils';
 import { PaymentRequest, PaymentResponse, PaymentGateway } from '../types'; // ALWAYS import from app
 
 // ⭐ Basic Payment Service with Circuit Breaker
@@ -194,7 +194,7 @@ export class PaymentService {
 }
 
 // resilience-policy-builder.ts
-import { ResiliencePolicyBuilder } from '@vytches-ddd/resilience';
+import { ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
 
 // ⭐ Fluent Policy Builder for Complex Scenarios
 export class PaymentResiliencePolicy {
@@ -339,7 +339,7 @@ import {
   Retry,
   Timeout,
   Bulkhead,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // ⭐ Decorator-based Resilience
 export class DecoratorPaymentService {

@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches-ddd/core';
+import { BaseError } from '@vytches/ddd-core';
 
 /**
  * @llm-summary HandlerNotFoundError class for handler not found error operations

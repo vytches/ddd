@@ -4,21 +4,21 @@
 advanced architecture  
 **Base Example**: [Advanced CQRS Patterns](../../../basic/example-3.md),
 [DI Integration](../intermediate/di-integration.md)  
-**Dependencies**: @nestjs/common, @nestjs/microservices, @vytches-ddd/cqrs,
-@vytches-ddd/di, @vytches-ddd/events, @vytches-ddd/messaging,
-@vytches-ddd/resilience
+**Dependencies**: @nestjs/common, @nestjs/microservices, @vytches/ddd-cqrs,
+@vytches/ddd-di, @vytches/ddd-events, @vytches/ddd-messaging,
+@vytches/ddd-resilience
 
 ## Service Implementation
 
 ```typescript
 // enterprise-order.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { OutboxPublisher } from '@vytches-ddd/messaging';
-import { CircuitBreakerStrategy, RetryStrategy } from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { OutboxPublisher } from '@vytches/ddd-messaging';
+import { CircuitBreakerStrategy, RetryStrategy } from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
 import {
   ProcessCompleteOrderCommand,
   GetOrderAnalyticsQuery,
@@ -626,15 +626,15 @@ export class EnterpriseOrderService implements OnModuleInit, OnModuleDestroy {
 ```typescript
 // enterprise-order.module.ts
 import { Module, OnModuleInit, DynamicModule } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { CommandBus, QueryBus } from '@vytches-ddd/cqrs';
-import { OutboxPublisher } from '@vytches-ddd/messaging';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+import { OutboxPublisher } from '@vytches/ddd-messaging';
 import {
   ResilienceManager,
   CircuitBreakerStrategy,
-} from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
 import { EnterpriseOrderService } from './enterprise-order.service';
 import { EnterpriseOrderController } from './enterprise-order.controller';
 
@@ -1087,7 +1087,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { EnterpriseOrderService } from './enterprise-order.service';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import {
   CreateOrderDto,
   AnalyticsQueryDto,

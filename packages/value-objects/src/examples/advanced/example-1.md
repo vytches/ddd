@@ -1,9 +1,9 @@
 # Time Period Value Object - Advanced Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Advanced **Domain**: Time Management & Scheduling **Patterns**:
 Period Management, Duration Calculations, Overlap Detection **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -22,7 +22,7 @@ operations, conflict resolution, and intelligent scheduling capabilities.
 
 ```typescript
 // time-period.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   TimePeriodData,
   RecurrencePattern,

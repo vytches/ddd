@@ -1,10 +1,10 @@
 # Enterprise Validation Orchestration Platform
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/validation **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-validation **Complexity**: Advanced
 **Domain**: Enterprise Data Management **Patterns**: Validation Orchestration,
 AI-Enhanced Validation, Global Coordination, Event-Driven Architecture
-**Dependencies**: @vytches-ddd/validation, @vytches-ddd/events,
-@vytches-ddd/policies, @vytches-ddd/di, @vytches-ddd/resilience
+**Dependencies**: @vytches/ddd-validation, @vytches/ddd-events,
+@vytches/ddd-policies, @vytches/ddd-di, @vytches/ddd-resilience
 
 ## Description
 
@@ -32,22 +32,22 @@ import {
   ValidationPolicy,
   DataQualityMetrics,
   BatchValidationResult,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import {
   UnifiedEventBus,
   UniversalEventDispatcher,
   DomainEvent,
-} from '@vytches-ddd/events';
+} from '@vytches/ddd-events';
 import {
   PolicyBuilder,
   PolicyRegistry,
   PolicyContext,
-} from '@vytches-ddd/policies';
-import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches-ddd/di';
+} from '@vytches/ddd-policies';
+import { DomainService, ServiceLifetime, VytchesDDD } from '@vytches/ddd-di';
 import {
   CircuitBreakerStrategy,
   ResiliencePolicyBuilder,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 
 // Global validation coordination events
 export class ValidationOrchestrationStartedEvent implements DomainEvent {

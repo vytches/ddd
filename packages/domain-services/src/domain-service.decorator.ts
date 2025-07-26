@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ServiceLifetime } from '@vytches-ddd/di';
+import { ServiceLifetime } from '@vytches/ddd-di';
 import type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
 import { DIDomainServiceMetadataRegistry } from './di-types';
 

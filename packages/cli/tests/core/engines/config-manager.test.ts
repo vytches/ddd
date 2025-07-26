@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigManager } from '../../../src/core/engines/config-manager';

@@ -1,7 +1,7 @@
 # NestJS ACL Integration - Manual Setup
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Manual ACL integration with standard NestJS patterns
@@ -23,8 +23,8 @@ maintaining clean architecture principles.
 ```typescript
 // customer-acl.service.ts - Core ACL implementation
 import { Injectable } from '@nestjs/common';
-import { AntiCorruptionLayer, IDataTranslator } from '@vytches-ddd/acl';
-import { Result } from '@vytches-ddd/utils';
+import { AntiCorruptionLayer, IDataTranslator } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
 import { Customer, ExternalCustomerData } from '../types'; // From your application
 
 // Data translator for customer conversion

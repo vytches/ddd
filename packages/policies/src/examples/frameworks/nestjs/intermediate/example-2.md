@@ -1,12 +1,12 @@
 # Policy Registry and Versioning in NestJS
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: intermediate  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
 **Patterns**: policy-registry, versioning, a-b-testing  
-**Dependencies**: @nestjs/common, @vytches-ddd/policies, @vytches-ddd/di
+**Dependencies**: @nestjs/common, @vytches/ddd-policies, @vytches/ddd-di
 
 ## Description
 
@@ -26,14 +26,14 @@ registry integration.
 ```typescript
 // policy-registry.service.ts - Centralized Policy Management
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches-ddd/di';
+import { DomainService, VytchesDDD, ServiceLifetime } from '@vytches/ddd-di';
 import {
   PolicyRegistry,
   PolicyBuilder,
   PolicyCachingBehavior,
   PolicyResult,
   IPolicy,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import { User, Order, PolicyContext } from './types'; // From your application
 
 /**
@@ -463,7 +463,7 @@ export class PolicyRegistryService implements OnModuleInit {
 
 // policy-management.controller.ts - Controller for Policy Registry Operations
 import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 
 @Controller('policies')
 export class PolicyManagementController {

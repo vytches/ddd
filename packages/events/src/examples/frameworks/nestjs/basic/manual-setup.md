@@ -1,11 +1,11 @@
 # Events - NestJS Manual Setup
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Framework**: NestJS  
 **Approach**: Manual instantiation for beginner-friendly setup  
-**Dependencies**: @nestjs/common, @vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-events
 
 ## Description
 
@@ -18,7 +18,7 @@ without the complexity of dependency injection frameworks.
 ````typescript
 // order-event.service.ts
 import { Injectable } from '@nestjs/common';
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
 import { OrderAggregate, OrderRepository, CreateOrderCommand } from '../types'; // ALWAYS import from app
 
 /**

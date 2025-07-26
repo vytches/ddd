@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import type { Constructor } from '@vytches-ddd/di';
+import type { Constructor } from '@vytches/ddd-di';
 import type { SagaDecoratorOptions, SagaMetadata } from '../interfaces';
 import { SagaConfigurationError } from '../errors';
 
@@ -179,7 +179,7 @@ export function Saga(
       setTimeout(() => {
         try {
           // This allows for lazy loading of DI system
-          const { VytchesDDD } = require('@vytches-ddd/di');
+          const { VytchesDDD } = require('@vytches/ddd-di');
           if (VytchesDDD && typeof VytchesDDD.registerService === 'function') {
             VytchesDDD.registerService({
               serviceId: `saga:${sagaOptions.sagaType}`,

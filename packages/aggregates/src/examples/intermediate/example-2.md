@@ -1,10 +1,10 @@
 # Aggregate with Advanced Capabilities - Banking Account Management
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**:
 Intermediate **Domain**: Banking & Financial Services **Patterns**: Capability
 Pattern, Command-Query Separation, Optimistic Locking, Transaction History
-**Dependencies**: @vytches-ddd/aggregates, @vytches-ddd/domain-primitives,
-@vytches-ddd/contracts
+**Dependencies**: @vytches/ddd-aggregates, @vytches/ddd-domain-primitives,
+@vytches/ddd-contracts
 
 ## Description
 
@@ -25,9 +25,9 @@ capabilities.
 
 ```typescript
 // banking-account.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   BankAccountData,
   Transaction,

@@ -65,7 +65,7 @@ export const packageExampleConfig: PackageExampleConfig = {
 #### Shared Types in Contracts
 
 ```typescript
-// @vytches-ddd/contracts/src/examples/types.ts
+// @vytches/ddd-contracts/src/examples/types.ts
 export interface PackageExampleConfig {
   // Configuration types to prevent circular dependencies
 }
@@ -209,7 +209,7 @@ import { User, CreateUserData } from './types/user';
 
 ## Migration Path
 
-1. Move shared types to `@vytches-ddd/contracts`
+1. Move shared types to `@vytches/ddd-contracts`
 2. Convert existing examples to individual files
 3. Update configurations with metadata
 4. Convert type files from .ts to .md

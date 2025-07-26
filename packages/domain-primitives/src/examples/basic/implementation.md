@@ -1,7 +1,7 @@
 # Basic Domain Primitives Implementation Guide
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Category**: Implementation
 
@@ -22,7 +22,7 @@ import {
   DefaultActorType,
   InvalidParameterError,
   NotFoundError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import { DomainEntity, Repository, ActionContext, AuditEntry } from '../types';
 
 // ====================

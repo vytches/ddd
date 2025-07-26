@@ -1,5 +1,5 @@
 /**
- * @vytches-ddd/di
+ * @vytches/ddd-di
  * Global Service Locator with Optional Context Isolation for Dependency Injection
  *
  * Phase 1: Core Infrastructure

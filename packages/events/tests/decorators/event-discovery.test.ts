@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
+import type { IDomainEvent, IEventHandler } from '@vytches/ddd-contracts';
 import { EventDiscoveryPlugin, EventHandler } from '../../src';
 
 // Test event for testing

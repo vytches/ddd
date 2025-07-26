@@ -1,4 +1,4 @@
-import type { IDependencyContainer } from '@vytches-ddd/di';
+import type { IDependencyContainer } from '@vytches/ddd-di';
 import type { ICommandBus, IQueryBus } from '../abstracts';
 import { CommandBus, QueryBus, EnhancedCommandBus, EnhancedQueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';

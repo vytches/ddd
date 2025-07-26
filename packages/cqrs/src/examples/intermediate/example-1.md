@@ -1,13 +1,13 @@
 # Event Integration with CQRS Operations
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/cqrs  
+**Package**: @vytches/ddd-cqrs  
 **Complexity**: intermediate  
 **Domain**: Order Management  
 **Patterns**: event-driven-cqrs, domain-events, integration-events,
 event-sourcing  
-**Dependencies**: @vytches-ddd/cqrs, @vytches-ddd/events, @vytches-ddd/di,
-@vytches-ddd/utils
+**Dependencies**: @vytches/ddd-cqrs, @vytches/ddd-events, @vytches/ddd-di,
+@vytches/ddd-utils
 
 ## Description
 
@@ -238,9 +238,9 @@ export class ProcessPaymentCommand implements ProcessPaymentCommand {
 
 ````typescript
 // order-command-handlers.ts
-import { CommandHandler } from '@vytches-ddd/cqrs';
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
+import { CommandHandler } from '@vytches/ddd-cqrs';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
 import {
   CreateOrderCommand,
   ProcessPaymentCommand,
@@ -912,7 +912,7 @@ interface PaymentGateway {
 
 ````typescript
 // event-projection-handler.ts
-import { EventHandler } from '@vytches-ddd/events';
+import { EventHandler } from '@vytches/ddd-events';
 import {
   OrderCreatedEvent,
   PaymentProcessedEvent,

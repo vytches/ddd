@@ -1,9 +1,9 @@
 # Projection with Capabilities
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**: basic
 **Domain**: Event Sourcing **Patterns**: Projection capabilities, checkpoints,
-circuit breakers **Dependencies**: @vytches-ddd/projections,
-@vytches-ddd/events, @vytches-ddd/resilience
+circuit breakers **Dependencies**: @vytches/ddd-projections,
+@vytches/ddd-events, @vytches/ddd-resilience
 
 ## Description
 
@@ -35,8 +35,8 @@ import {
   CircuitBreakerCapability,
   DeadLetterCapability,
   ProjectionEngine,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   OrderData,
   OrderItem,

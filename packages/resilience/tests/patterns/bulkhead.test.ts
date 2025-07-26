@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { Bulkhead, BulkheadRejectedException } from '../../src';
 import { DefaultResilienceContext } from '../../src/core/resilience-context';
 

@@ -1,6 +1,6 @@
 # Event Store Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**: basic
 **Domain**: Business **Patterns**: business-scenarios, real-world-applications,
 use-cases
 

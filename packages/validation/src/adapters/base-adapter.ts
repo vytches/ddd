@@ -1,5 +1,5 @@
-import type { IValidator, IValidationErrors } from '@vytches-ddd/contracts';
-import { Result } from '@vytches-ddd/utils';
+import type { IValidator, IValidationErrors } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-utils';
 import { ValidationError, ValidationErrors } from '../validation-error';
 
 /**

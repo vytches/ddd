@@ -1,7 +1,7 @@
 # Basic Repository Implementation Patterns
 
 This document provides comprehensive guidance on implementing repository
-patterns using the @vytches-ddd/repositories package, focusing on foundation
+patterns using the @vytches/ddd-repositories package, focusing on foundation
 patterns and best practices.
 
 ## Core Repository Patterns
@@ -14,8 +14,8 @@ consistent interface patterns.
 #### Implementation Structure
 
 ```typescript
-import { BaseRepository, IRepository } from '@vytches-ddd/repositories';
-import { EntityId, Result } from '@vytches-ddd/domain-primitives';
+import { BaseRepository, IRepository } from '@vytches/ddd-repositories';
+import { EntityId, Result } from '@vytches/ddd-domain-primitives';
 
 export class GenericRepository<T extends { id: string }>
   extends BaseRepository<T>
@@ -114,8 +114,8 @@ persisting domain events.
 #### Implementation Structure
 
 ```typescript
-import { EventSourcedRepository, IEventStore } from '@vytches-ddd/repositories';
-import { DomainEvent, EntityId } from '@vytches-ddd/domain-primitives';
+import { EventSourcedRepository, IEventStore } from '@vytches/ddd-repositories';
+import { DomainEvent, EntityId } from '@vytches/ddd-domain-primitives';
 
 export class EventSourcedRepositoryBase<T> extends EventSourcedRepository<T> {
   constructor(aggregateType: string, eventStore?: IEventStore) {
@@ -227,7 +227,7 @@ consistency.
 #### Implementation Structure
 
 ```typescript
-import { CachedRepository, ICacheProvider } from '@vytches-ddd/repositories';
+import { CachedRepository, ICacheProvider } from '@vytches/ddd-repositories';
 
 export class CachedRepositoryBase<
   T extends { id: string },
@@ -576,6 +576,6 @@ export class ResilientRepository<T> {
 ```
 
 This implementation guide provides the foundation for building robust, scalable
-repository patterns with the @vytches-ddd/repositories package. Each pattern
+repository patterns with the @vytches/ddd-repositories package. Each pattern
 addresses specific use cases while maintaining consistency and type safety
 across your domain model persistence layer.

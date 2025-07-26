@@ -1,6 +1,6 @@
 # Advanced Event System Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: advanced
 **Domain**: Business **Patterns**: business-scenarios, enterprise-use-cases,
 real-world-applications
 

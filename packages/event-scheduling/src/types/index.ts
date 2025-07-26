@@ -9,9 +9,9 @@ export type {
   IEventScheduler,
   ISchedulerLifecycle,
   ISchedulerConfig,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
-export { SchedulePriority, BackoffStrategy, JobStatus } from '@vytches-ddd/contracts';
+export { SchedulePriority, BackoffStrategy, JobStatus } from '@vytches/ddd-contracts';
 
 // Internal types
 

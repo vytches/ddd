@@ -3,7 +3,7 @@
 **Focus**: Advanced event handling with context filtering and batch processing  
 **Domain**: Multi-Tenant E-commerce Platform  
 **Complexity**: Intermediate  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/di, @vytches-ddd/utils
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-di, @vytches/ddd-utils
 
 ## Business Context
 
@@ -19,7 +19,7 @@ e-commerce platform:
 
 ```typescript
 // tenant-order-events.ts
-import { DomainEvent, IntegrationEvent } from '@vytches-ddd/events';
+import { DomainEvent, IntegrationEvent } from '@vytches/ddd-events';
 import { OrderItem, TenantContext, Customer } from '../types'; // ALWAYS import from app
 
 // Enhanced domain events with tenant context
@@ -91,10 +91,10 @@ import {
   UnifiedEventBus,
   UniversalEventDispatcher,
   EventHandler,
-} from '@vytches-ddd/events';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+} from '@vytches/ddd-events';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 
 // ⭐ Advanced Event Bus with Context Filtering
 @DomainService('advancedEventBus', {

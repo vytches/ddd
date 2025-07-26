@@ -1,10 +1,10 @@
 # Distributed Event Sourcing Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 advanced **Domain**: Architecture **Patterns**: distributed-systems,
 event-sourcing, microservices, saga-orchestration **Dependencies**:
-@vytches-ddd/event-store, @vytches-ddd/events, @vytches-ddd/messaging,
-@vytches-ddd/resilience
+@vytches/ddd-event-store, @vytches/ddd-events, @vytches/ddd-messaging,
+@vytches/ddd-resilience
 
 ## Description
 
@@ -28,12 +28,12 @@ orchestration.
 import {
   InMemoryEventStore,
   JsonEventSerializer,
-} from '@vytches-ddd/event-store';
-import { DomainEvent, EntityId } from '@vytches-ddd/events';
-import { Result } from '@vytches-ddd/utils';
-import { Logger } from '@vytches-ddd/logging';
-import { OutboxPattern, SagaOrchestrator } from '@vytches-ddd/messaging';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
+} from '@vytches/ddd-event-store';
+import { DomainEvent, EntityId } from '@vytches/ddd-events';
+import { Result } from '@vytches/ddd-utils';
+import { Logger } from '@vytches/ddd-logging';
+import { OutboxPattern, SagaOrchestrator } from '@vytches/ddd-messaging';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
 import { ServiceDiscovery, EventPropagationBus } from './types'; // From your app
 
 // ⭐ FOCUS: Distributed event sourcing coordinator

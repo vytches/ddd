@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { HybridTemplateEngine } from '../../src/core/hybrid-template-engine';
 import { ContentResolver } from '../../src/core/content-resolver';
 import fs from 'fs/promises';

@@ -1,11 +1,11 @@
 # Event Handlers with Context Filtering
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/events  
+**Package**: @vytches/ddd-events  
 **Complexity**: beginner  
 **Domain**: Order Management  
 **Patterns**: event-handlers, context-filtering, automatic-registration  
-**Dependencies**: @vytches-ddd/events, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-events, @vytches/ddd-di
 
 ## Description
 
@@ -25,7 +25,7 @@ maintaining loose coupling between bounded contexts.
 
 ````typescript
 // event-handlers.ts
-import { EventHandler } from '@vytches-ddd/events';
+import { EventHandler } from '@vytches/ddd-events';
 import { OrderCreatedEvent, OrderConfirmedEvent } from '../types';
 
 /**
@@ -305,8 +305,8 @@ export class NotificationEventHandler {
 
 ````typescript
 // event-system-setup.ts
-import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches-ddd/events';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { UnifiedEventBus, UniversalEventDispatcher } from '@vytches/ddd-events';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   InventoryEventHandler,
   PaymentEventHandler,

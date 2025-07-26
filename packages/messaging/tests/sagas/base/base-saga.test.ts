@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches-ddd/contracts';
+import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { BaseSaga, ConcreteSagaStep } from '../../../src/sagas/base';
 import type { ISagaState, ISagaStep, ISagaExecutionContext } from '../../../src/sagas/interfaces';
 import { SagaStatus } from '../../../src/sagas/interfaces';
 import { PerformanceMonitoringMiddleware } from '../../../src/sagas/middleware';
 
 // Mock logger
-vi.mock('@vytches-ddd/logging', () => ({
+vi.mock('@vytches/ddd-logging', () => ({
   Logger: {
     forContext: vi.fn(() => ({
       info: vi.fn(),

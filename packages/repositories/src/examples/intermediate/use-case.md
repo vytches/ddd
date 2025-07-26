@@ -2,7 +2,7 @@
 
 This document outlines complex enterprise scenarios where intermediate
 repository patterns solve sophisticated business requirements using the
-@vytches-ddd/repositories package.
+@vytches/ddd-repositories package.
 
 ## Use Case 1: Financial Trading Platform
 
@@ -514,7 +514,7 @@ class ResilientRepositoryService<T> {
 }
 ```
 
-These intermediate use cases demonstrate how the @vytches-ddd/repositories
+These intermediate use cases demonstrate how the @vytches/ddd-repositories
 patterns can be combined to address complex enterprise scenarios. Each pattern
 contributes specific capabilities:
 

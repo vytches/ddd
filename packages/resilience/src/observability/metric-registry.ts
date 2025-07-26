@@ -3,7 +3,7 @@
  * Zero external dependencies - pure TypeScript implementation
  */
 
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import type {
   Metric,
   HistogramMetric,

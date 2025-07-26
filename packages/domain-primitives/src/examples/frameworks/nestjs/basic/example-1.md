@@ -1,7 +1,7 @@
 # Domain Primitives - NestJS Basic Manual Setup
 
 **Version**: 2025-01-21  
-**Package**: @vytches-ddd/domain-primitives  
+**Package**: @vytches/ddd-domain-primitives  
 **Complexity**: Basic  
 **Framework**: NestJS  
 **Focus**: Manual setup with basic error handling and actor tracking **Base
@@ -24,7 +24,7 @@ import {
   DefaultActorType,
   NotFoundError,
   InvalidParameterError,
-} from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-domain-primitives';
 import {
   CreateUserDto,
   UserData,
@@ -371,7 +371,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { IActor, DefaultActorType } from '@vytches-ddd/domain-primitives';
+import { IActor, DefaultActorType } from '@vytches/ddd-domain-primitives';
 import { CreateUserDto, SuccessResponse, UserData } from './types';
 import { UserService } from './user.service';
 
@@ -525,7 +525,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { IDomainError, DomainErrorCode } from '@vytches-ddd/domain-primitives';
+import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
 
 @Catch(IDomainError)
 export class DomainErrorFilter implements ExceptionFilter {

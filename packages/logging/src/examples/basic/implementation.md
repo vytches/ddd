@@ -1,13 +1,13 @@
 # Basic Logging Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging **Complexity**: basic
 **Domain**: Implementation Guidance **Patterns**: Setup, configuration,
-integration strategies **Dependencies**: @vytches-ddd/logging
+integration strategies **Dependencies**: @vytches/ddd-logging
 
 ## Overview
 
 This guide provides step-by-step implementation guidance for integrating
-@vytches-ddd/logging into applications. It covers basic setup patterns,
+@vytches/ddd-logging into applications. It covers basic setup patterns,
 configuration strategies, and common integration approaches for different
 development scenarios.
 
@@ -17,7 +17,7 @@ development scenarios.
 
 ```bash
 # Install the logging package
-npm install @vytches-ddd/logging
+npm install @vytches/ddd-logging
 
 # For TypeScript projects, types are included
 # No additional @types package needed
@@ -27,7 +27,7 @@ npm install @vytches-ddd/logging
 
 ```typescript
 // logger.config.ts - Central configuration file
-import { Logger, LoggerConfiguration } from '@vytches-ddd/logging';
+import { Logger, LoggerConfiguration } from '@vytches/ddd-logging';
 
 export const createLoggerConfig = (): LoggerConfiguration => {
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -91,7 +91,7 @@ export const initializeLogging = (): void => {
 ```typescript
 // main.ts - Application entry point
 import { initializeLogging } from './config/logger.config';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 async function bootstrap(): Promise<void> {
   // ⭐ CRITICAL: Initialize logging FIRST
@@ -137,7 +137,7 @@ bootstrap().catch(error => {
 
 ```typescript
 // user.service.ts - Business service example
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { UserData, CreateUserRequest } from './types';
 
 export class UserService {
@@ -255,7 +255,7 @@ export class UserService {
 
 ```typescript
 // error-handler.ts - Centralized error handling
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 export class ApplicationErrorHandler {
   private logger = Logger.forContext('ErrorHandler');
@@ -354,7 +354,7 @@ export const setupGlobalErrorHandling = (): void => {
 
 ```typescript
 // logging.middleware.ts - HTTP request logging
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 export interface RequestContext {
   requestId: string;
@@ -446,7 +446,7 @@ export class LoggingMiddleware {
 
 ```typescript
 // database.service.ts - Database operation logging
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 export class DatabaseService {
   private logger = Logger.forContext();
@@ -709,7 +709,7 @@ export const createFeatureBasedConfig = (features: FeatureFlags) => {
 
 ```typescript
 // test-utils/logger.test-setup.ts
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 
 export const setupTestLogging = () => {
   // Quiet logging during tests

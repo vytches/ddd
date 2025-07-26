@@ -1,11 +1,11 @@
 # Real-World Basic Validation Use Cases
 
-**Package**: @vytches-ddd/validation **Complexity**: Basic **Focus**: Practical
+**Package**: @vytches/ddd-validation **Complexity**: Basic **Focus**: Practical
 validation scenarios for common business domains
 
 ## Overview
 
-Basic validation use cases demonstrate how @vytches-ddd/validation solves
+Basic validation use cases demonstrate how @vytches/ddd-validation solves
 real-world business problems across different industries. These examples show
 practical applications with measurable business impact.
 
@@ -17,14 +17,14 @@ An online retail platform needs to validate user registrations to ensure data
 quality, reduce fraud, and improve customer experience. Poor validation leads to
 15% of customer support tickets and $2M annual losses from fraudulent accounts.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 import {
   BaseSpecification,
   ValidationResult,
   ValidationError,
-} from '@vytches-ddd/validation';
+} from '@vytches/ddd-validation';
 import { User } from './types'; // From your application
 
 class UserRegistrationValidator {
@@ -93,7 +93,7 @@ A digital bank requires strict validation for account opening to meet regulatory
 compliance (KYC/AML) and prevent financial crimes. Failed validation costs $500
 per manual review and regulatory fines can reach $10M annually.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class AccountOpeningValidator {
@@ -167,7 +167,7 @@ A healthcare system needs to validate patient data for electronic health records
 (EHR) to ensure accurate treatment and billing. Data errors cost $12,000 per
 incident and can impact patient safety.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class PatientDataValidator {
@@ -239,7 +239,7 @@ A SaaS platform needs to validate user workspace setup and configuration to
 ensure successful onboarding. Poor validation leads to 40% churn in the first
 month and $150 average customer acquisition cost loss.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class WorkspaceSetupValidator {
@@ -309,7 +309,7 @@ An IoT platform manages thousands of device registrations daily. Invalid device
 data leads to 30% device connectivity failures and $50,000 monthly support
 costs.
 
-### Implementation with @vytches-ddd/validation
+### Implementation with @vytches/ddd-validation
 
 ```typescript
 class IoTDeviceValidator {

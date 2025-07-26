@@ -1,4 +1,4 @@
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import type {
   ISagaRepository,
   ISaga,

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { SmartTagFinder } from '../../src/core/smart-tag-finder';
 import type { ExampleDefinition } from '../../src/types/example-types';
 import { PackageConfigLoader } from '../../src/core/package-config-loader';

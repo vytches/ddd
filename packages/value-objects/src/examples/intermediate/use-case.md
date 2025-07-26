@@ -1,6 +1,6 @@
 # Value Objects - Intermediate Use Cases
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Focus**: Advanced business scenarios and complex
 domain modeling
 
@@ -16,7 +16,7 @@ rules.
 ### **Scenario**: Automated quality inspection with statistical process control
 
 ```typescript
-import { Measurement, DateRange } from '@vytches-ddd/value-objects';
+import { Measurement, DateRange } from '@vytches/ddd-value-objects';
 
 // ✅ Product specification with tolerances
 class ProductSpecification {
@@ -314,7 +314,7 @@ import {
   Measurement,
   DateRange,
   UserProfile,
-} from '@vytches-ddd/value-objects';
+} from '@vytches/ddd-value-objects';
 
 // ✅ Vital signs composite with medical context
 class VitalSigns {
@@ -840,7 +840,7 @@ import {
   Measurement,
   DateRange,
   UserProfile,
-} from '@vytches-ddd/value-objects';
+} from '@vytches/ddd-value-objects';
 
 // ✅ Environmental measurement station
 class EnvironmentalStation {

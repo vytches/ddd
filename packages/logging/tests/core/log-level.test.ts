@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { LOG_LEVELS, isLogLevelEnabled, parseLogLevel } from '../../src';
 
 describe('Log Levels', () => {

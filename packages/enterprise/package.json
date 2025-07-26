@@ -1,6 +1,6 @@
 {
-  "name": "@vytches-ddd/enterprise",
-  "version": "0.3.3",
+  "name": "@vytches/ddd-enterprise",
+  "version": "0.3.4",
   "description": "Health checks and enterprise monitoring",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/enterprise"
   },
   "scripts": {
@@ -42,8 +42,23 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/policies": "workspace:*"
+    "@vytches/ddd-acl": "workspace:*",
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-cqrs": "workspace:*",
+    "@vytches/ddd-di": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-messaging": "workspace:*",
+    "@vytches/ddd-policies": "workspace:*",
+    "@vytches/ddd-projections": "workspace:*",
+    "@vytches/ddd-repositories": "workspace:*",
+    "@vytches/ddd-resilience": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

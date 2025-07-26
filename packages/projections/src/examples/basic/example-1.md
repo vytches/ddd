@@ -1,8 +1,8 @@
 # Simple Event Projection
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections **Complexity**: basic
 **Domain**: Event Sourcing **Patterns**: Event projection, read models, event
-handling **Dependencies**: @vytches-ddd/projections, @vytches-ddd/events
+handling **Dependencies**: @vytches/ddd-projections, @vytches/ddd-events
 
 ## Description
 
@@ -32,8 +32,8 @@ import {
   ProjectionBase,
   ProjectionProcessor,
   EventHandler,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 import {
   UserData,
   ProjectionData,

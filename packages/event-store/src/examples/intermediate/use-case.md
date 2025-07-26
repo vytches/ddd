@@ -1,6 +1,6 @@
 # Enterprise Event Store Use Cases
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/event-store **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-event-store **Complexity**:
 intermediate **Domain**: Business **Patterns**: enterprise-scenarios,
 complex-workflows, advanced-use-cases
 

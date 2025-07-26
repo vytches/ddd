@@ -1,7 +1,7 @@
 # Advanced Repository Implementation - Enterprise Architecture
 
 This document provides comprehensive guidance for implementing sophisticated
-repository patterns at enterprise scale using the @vytches-ddd/repositories
+repository patterns at enterprise scale using the @vytches/ddd-repositories
 package, focusing on distributed systems, AI integration, and extreme
 performance scenarios.
 
@@ -18,8 +18,8 @@ import {
   GlobalConsistencyManager,
   VectorClock,
   ConsensusAlgorithm,
-} from '@vytches-ddd/repositories';
-import { EntityId, DomainEvent } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId, DomainEvent } from '@vytches/ddd-domain-primitives';
 
 export class EnterpriseGlobalConsistencyManager extends GlobalConsistencyManager {
   private vectorClocks = new Map<string, VectorClock>();

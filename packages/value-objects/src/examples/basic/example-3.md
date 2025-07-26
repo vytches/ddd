@@ -1,9 +1,9 @@
 # Address Value Object - Basic Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Basic **Domain**: Geographic & Location **Patterns**: Value
 Object, Composite Data, Geographic Coordinates **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -23,7 +23,7 @@ shipping, service delivery, and location-aware applications.
 
 ```typescript
 // address.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   AddressData,
   GeographicCoordinates,

@@ -1,6 +1,6 @@
-import { IDomainError } from '@vytches-ddd/core';
-import { Result } from '@vytches-ddd/utils';
-import type { BusinessRuleValidator } from '@vytches-ddd/validation';
+import { IDomainError } from '@vytches/ddd-core';
+import { Result } from '@vytches/ddd-utils';
+import type { BusinessRuleValidator } from '@vytches/ddd-validation';
 
 /**
  * @llm-summary Contract for application service functionality

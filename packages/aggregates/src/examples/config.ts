@@ -1,16 +1,16 @@
 // aggregates/src/examples/config.ts
 
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const aggregatesExamplesConfig: PackageExampleConfig = {
-  packageName: '@vytches-ddd/aggregates',
+  packageName: '@vytches/ddd-aggregates',
   displayName: 'Aggregates',
   version: '1.0.0',
   description:
     'Aggregate root patterns with capabilities, event sourcing, and complex business logic',
   domain: 'Core',
   patterns: ['aggregate-pattern', 'event-sourcing', 'capability-pattern'],
-  dependencies: ['@vytches-ddd/domain-primitives', '@vytches-ddd/contracts'],
+  dependencies: ['@vytches/ddd-domain-primitives', '@vytches/ddd-contracts'],
   complexityLevels: {
     basic: {
       level: 'basic',
@@ -35,9 +35,9 @@ export const aggregatesExamplesConfig: PackageExampleConfig = {
     {
       name: 'nestjs',
       displayName: 'NestJS',
-      description: 'NestJS integration with @vytches-ddd/di service locator pattern',
+      description: 'NestJS integration with @vytches/ddd-di service locator pattern',
       complexityLevels: ['basic', 'intermediate', 'advanced'],
-      dependencies: ['@nestjs/core', '@nestjs/common', '@vytches-ddd/di'],
+      dependencies: ['@nestjs/core', '@nestjs/common', '@vytches/ddd-di'],
       minimumVersion: '10.0.0',
     },
   ],
@@ -147,7 +147,7 @@ export const aggregatesExamplesConfig: PackageExampleConfig = {
     {
       id: 'nestjs-event-sourced-cart',
       name: 'Event Sourced Shopping Cart - NestJS Integration',
-      description: 'Event sourced shopping cart with NestJS and @vytches-ddd/di integration',
+      description: 'Event sourced shopping cart with NestJS and @vytches/ddd-di integration',
       file: 'frameworks/nestjs/intermediate/example-1.md',
       tags: ['nestjs', 'event-sourcing', 'snapshots', 'di-integration'],
       complexity: 'intermediate',

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Shared Resilience Utilities
  * @version 1.0.0
- * @package @vytches-ddd/resilience
+ * @package @vytches/ddd-resilience
  * @description Shared utilities, constants, and helper functions for resilience examples.
  */
 

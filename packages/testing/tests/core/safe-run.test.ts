@@ -279,7 +279,7 @@ describe('safeRunWithTimeout', () => {
 
   it('should return timeout error for slow operations', async () => {
     const result = await safeRunWithTimeout(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       return 'slow operation';
     }, 50);
     const [error, value] = result;
@@ -293,7 +293,7 @@ describe('safeRunWithTimeout', () => {
     const testContext = 'UserRepository.save';
     const result = await safeRunWithTimeout(
       async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         return 'slow operation';
       },
       50,

@@ -25,10 +25,10 @@ automated GitHub integration.
 Each package evolves independently following semantic versioning:
 
 ```bash
-@vytches-ddd/core@1.0.0         # Stable meta-package
-@vytches-ddd/events@1.2.3       # Active development
-@vytches-ddd/logging@0.9.0      # Pre-1.0 evolution
-@vytches-ddd/cqrs@2.0.1         # Major version with patch
+@vytches/ddd-core@1.0.0         # Stable meta-package
+@vytches/ddd-events@1.2.3       # Active development
+@vytches/ddd-logging@0.9.0      # Pre-1.0 evolution
+@vytches/ddd-cqrs@2.0.1         # Major version with patch
 ```
 
 **Why Independent Versioning for DDD:**
@@ -281,13 +281,13 @@ chore(deps): update development dependencies
 
 ```bash
 # Package-specific tags (created by Lerna)
-@vytches-ddd/core@1.0.0
-@vytches-ddd/events@1.2.3
-@vytches-ddd/logging@0.9.0
+@vytches/ddd-core@1.0.0
+@vytches/ddd-events@1.2.3
+@vytches/ddd-logging@0.9.0
 
 # Simplified version tags
-v1.0.0  # for @vytches-ddd/core@1.0.0
-v1.2.3  # for @vytches-ddd/events@1.2.3
+v1.0.0  # for @vytches/ddd-core@1.0.0
+v1.2.3  # for @vytches/ddd-events@1.2.3
 ```
 
 **CRITICAL: Always use `--tags` flag when pushing release branches:**
@@ -334,9 +334,9 @@ Each package version creates a GitHub Release with:
 
 ### 📋 Package Versions in this Release:
 
-- @vytches-ddd/core@1.2.0 (updated)
-- @vytches-ddd/events@1.1.0 (unchanged)
-- @vytches-ddd/logging@0.9.1 (updated)
+- @vytches/ddd-core@1.2.0 (updated)
+- @vytches/ddd-events@1.1.0 (unchanged)
+- @vytches/ddd-logging@0.9.1 (updated)
 
 ### ✨ Features
 
@@ -350,7 +350,7 @@ Each package version creates a GitHub Release with:
 ### 🚀 Installation
 
 ```bash
-npm install @vytches-ddd/core@^1.2.0 --registry=https://npm.pkg.github.com
+npm install @vytches/ddd-core@^1.2.0 --registry=https://npm.pkg.github.com
 ```
 ````
 
@@ -408,7 +408,7 @@ pnpm release:version     # Retry release
 
 ```bash
 # Deprecate problematic version
-npm deprecate @vytches-ddd/core@1.2.0 "Critical bug - use v1.2.1+" --registry=https://npm.pkg.github.com
+npm deprecate @vytches/ddd-core@1.2.0 "Critical bug - use v1.2.1+" --registry=https://npm.pkg.github.com
 
 # Release immediate patch
 pnpm release:hotfix
@@ -430,7 +430,7 @@ pnpm lerna version 1.2.1 --no-conventional-commits --no-push
 
 ```bash
 # Configure npm for GitHub Packages
-echo "@vytches-ddd:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "@vytches/ddd-core:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> ~/.npmrc
 ```
 
@@ -438,13 +438,13 @@ echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> ~/.npmrc
 
 ```bash
 # Core packages for basic DDD
-npm install @vytches-ddd/core
+npm install @vytches/ddd-core
 
 # Event-driven architecture
-npm install @vytches-ddd/events @vytches-ddd/cqrs
+npm install @vytches/ddd-events @vytches/ddd-cqrs
 
 # Full enterprise suite
-npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd/logging @vytches-ddd/messaging
+npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-logging @vytches/ddd-messaging
 ```
 
 ## Benefits of This Approach
@@ -479,24 +479,24 @@ npm install @vytches-ddd/core @vytches-ddd/events @vytches-ddd/cqrs @vytches-ddd
 
 ```bash
 # Independent (chosen)
-@vytches-ddd/core@1.0.0      # Stable
-@vytches-ddd/events@2.3.1    # Evolving rapidly
-@vytches-ddd/logging@0.9.0   # Pre-release
+@vytches/ddd-core@1.0.0      # Stable
+@vytches/ddd-events@2.3.1    # Evolving rapidly
+@vytches/ddd-logging@0.9.0   # Pre-release
 
 # Fixed versioning (not chosen)
-@vytches-ddd/core@1.0.0      # Forced sync
-@vytches-ddd/events@1.0.0    # Held back
-@vytches-ddd/logging@1.0.0   # Premature stable
+@vytches/ddd-core@1.0.0      # Forced sync
+@vytches/ddd-events@1.0.0    # Held back
+@vytches/ddd-logging@1.0.0   # Premature stable
 ```
 
 ### **✅ Why Semantic over Date-based Versioning**
 
 ```bash
 # Semantic (chosen)
-@vytches-ddd/core@1.2.0      # Clear breaking change policy
+@vytches/ddd-core@1.2.0      # Clear breaking change policy
 
 # Date-based (not chosen)
-@vytches-ddd/core@2025.07.12 # What changed? Breaking changes?
+@vytches/ddd-core@2025.07.12 # What changed? Breaking changes?
 ```
 
 ## Compliance & Standards

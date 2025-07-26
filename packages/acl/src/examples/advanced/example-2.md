@@ -1,11 +1,11 @@
 # AI-Powered ACL with Intelligent Data Transformation
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/acl  
+**Package**: @vytches/ddd-acl  
 **Complexity**: Advanced  
 **Domain**: Intelligent Integration  
 **Patterns**: AI-Enhanced ACL, Machine Learning, Adaptive Translation  
-**Dependencies**: @vytches-ddd/acl, @vytches-ddd/events, @vytches-ddd/policies
+**Dependencies**: @vytches/ddd-acl, @vytches/ddd-events, @vytches/ddd-policies
 
 ## Description
 
@@ -29,9 +29,9 @@ import {
   MachineLearningTranslator,
   AnomalyDetector,
   SchemaEvolutionEngine,
-} from '@vytches-ddd/acl';
-import { PolicyEngine } from '@vytches-ddd/policies';
-import { EventBus } from '@vytches-ddd/events';
+} from '@vytches/ddd-acl';
+import { PolicyEngine } from '@vytches/ddd-policies';
+import { EventBus } from '@vytches/ddd-events';
 import { Customer, Product, Order } from '../types'; // From your application
 
 export class AIIntelligentACL extends AIEnhancedACL {

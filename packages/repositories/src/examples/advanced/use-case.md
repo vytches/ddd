@@ -2,7 +2,7 @@
 
 This document outlines the most sophisticated enterprise scenarios where
 advanced repository patterns solve mission-critical business requirements using
-the @vytches-ddd/repositories package.
+the @vytches/ddd-repositories package.
 
 ## Use Case 1: Global Financial Trading Infrastructure
 
@@ -385,6 +385,6 @@ include:
 5. **Observability**: Comprehensive monitoring and predictive alerting
 6. **Integration**: Seamless integration with existing enterprise systems
 
-The @vytches-ddd/repositories package provides the foundation for building these
+The @vytches/ddd-repositories package provides the foundation for building these
 enterprise-grade solutions while maintaining code quality, performance, and
 scalability.

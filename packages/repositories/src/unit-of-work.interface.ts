@@ -1,4 +1,4 @@
-import type { IEventBus } from '@vytches-ddd/contracts';
+import type { IEventBus } from '@vytches/ddd-contracts';
 import type { IRepository } from './base-repository.interface';
 
 /**

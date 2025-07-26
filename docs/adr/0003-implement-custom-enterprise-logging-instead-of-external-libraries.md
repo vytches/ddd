@@ -76,7 +76,7 @@ popular logging libraries like Winston, Pino, or Bunyan.
 ## Decision
 
 We will implement a **custom enterprise logging package**
-(`@vytches-ddd/logging`) with the following design:
+(`@vytches/ddd-logging`) with the following design:
 
 ### Core Architecture
 

@@ -1,14 +1,14 @@
 # Basic Logger Setup
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/logging **Complexity**: basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-logging **Complexity**: basic
 **Domain**: Structured Logging **Patterns**: Context detection, data masking,
-configuration **Dependencies**: @vytches-ddd/logging
+configuration **Dependencies**: @vytches/ddd-logging
 
 ## Description
 
 Basic logger setup with automatic context detection, data masking for sensitive
 information, and foundational configuration. This example demonstrates the core
-features of @vytches-ddd/logging package for structured application logging.
+features of @vytches/ddd-logging package for structured application logging.
 
 ## Business Context
 
@@ -21,7 +21,7 @@ debugging, monitoring, and compliance.
 
 ```typescript
 // basic-logger-setup.ts
-import { Logger, LogLevel, LoggerConfiguration } from '@vytches-ddd/logging';
+import { Logger, LogLevel, LoggerConfiguration } from '@vytches/ddd-logging';
 import {
   UserData,
   OrderData,

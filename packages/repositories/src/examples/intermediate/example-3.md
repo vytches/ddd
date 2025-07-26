@@ -1,14 +1,14 @@
 # Multi-Tenant Repository - Tenant-Aware Data Access
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/repositories **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-repositories **Complexity**:
 intermediate **Domain**: saas-platform **Patterns**: multi-tenancy,
 tenant-isolation, shared-schema, data-partitioning **Dependencies**:
-@vytches-ddd/repositories, @vytches-ddd/domain-primitives
+@vytches/ddd-repositories, @vytches/ddd-domain-primitives
 
 ## Description
 
 Advanced multi-tenant data access patterns providing tenant isolation, shared
-schema management, and tenant-aware querying using the @vytches-ddd/repositories
+schema management, and tenant-aware querying using the @vytches/ddd-repositories
 multi-tenant capabilities.
 
 ## Business Context
@@ -24,8 +24,8 @@ prevention while maintaining performance and scalability.
 import {
   MultiTenantRepository,
   TenantContext,
-} from '@vytches-ddd/repositories';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+} from '@vytches/ddd-repositories';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   User,
   TenantConfig,

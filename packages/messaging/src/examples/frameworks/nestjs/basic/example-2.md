@@ -1,7 +1,7 @@
 # NestJS Message Processing with Retry Logic
 
 **Version**: 1.0.0  
-**Package**: @vytches-ddd/messaging  
+**Package**: @vytches/ddd-messaging  
 **Framework**: NestJS  
 **Complexity**: Basic  
 **Focus**: Manual integration of message processing with retry and dead letter
@@ -29,7 +29,7 @@ import {
   RetryableMessage,
   DeadLetterQueue,
   ExponentialBackoff,
-} from '@vytches-ddd/messaging';
+} from '@vytches/ddd-messaging';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationRequest } from './types'; // From your application

@@ -1,9 +1,9 @@
 # AI-Enhanced Resilience with Machine Learning
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/resilience **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-resilience **Complexity**: Advanced
 **Domain**: AI-Driven Operations **Patterns**: Machine Learning Integration,
 Predictive Analytics, Adaptive Intelligence **Dependencies**:
-@vytches-ddd/resilience
+@vytches/ddd-resilience
 
 ## Description
 
@@ -30,7 +30,7 @@ import {
   AdaptiveConfiguration,
   PatternAnalyzer,
   AnomalyDetector,
-} from '@vytches-ddd/resilience';
+} from '@vytches/ddd-resilience';
 import {
   Customer,
   SystemMetrics,

@@ -1,8 +1,8 @@
 # Event Interface Architecture
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/contracts **Complexity**: Basic
+**Version**: 1.0.0 **Package**: @vytches/ddd-contracts **Complexity**: Basic
 **Domain**: Foundation **Patterns**: event-interfaces, domain-events,
-event-architecture **Dependencies**: @vytches-ddd/contracts
+event-architecture **Dependencies**: @vytches/ddd-contracts
 
 ## Description
 
@@ -29,7 +29,7 @@ import {
   DomainEventMetadata,
   IEventBus,
   IEventHandler,
-} from '@vytches-ddd/contracts';
+} from '@vytches/ddd-contracts';
 
 // Basic domain event implementation
 export class UserRegisteredEvent implements IDomainEvent {
@@ -102,7 +102,7 @@ export class OrderProcessedEvent implements IDomainEvent {
 
 ```typescript
 // src/application/handlers/event-handler-patterns.ts
-import { IEventHandler } from '@vytches-ddd/contracts';
+import { IEventHandler } from '@vytches/ddd-contracts';
 
 // Simple event handler
 export class UserRegistrationEmailHandler
@@ -198,7 +198,7 @@ export class OrderAnalyticsHandler
 
 ```typescript
 // src/infrastructure/events/event-bus-implementation.ts
-import { IEventBus, IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
+import { IEventBus, IDomainEvent, IEventHandler } from '@vytches/ddd-contracts';
 
 // Event bus interface implementation
 export class InMemoryEventBus implements IEventBus {
@@ -312,7 +312,7 @@ export class InMemoryEventBus implements IEventBus {
 
 ```typescript
 // src/infrastructure/events/event-registry.ts
-import { IDomainEvent, IEventHandler } from '@vytches-ddd/contracts';
+import { IDomainEvent, IEventHandler } from '@vytches/ddd-contracts';
 
 interface EventHandlerRegistration {
   eventType: string;
@@ -436,7 +436,7 @@ export class EventRegistry {
 
 ```typescript
 // src/domain/events/integration-events.ts
-import { IDomainEvent, DomainEventMetadata } from '@vytches-ddd/contracts';
+import { IDomainEvent, DomainEventMetadata } from '@vytches/ddd-contracts';
 
 // Integration event for cross-domain communication
 export class CustomerProfileUpdatedIntegrationEvent implements IDomainEvent {
@@ -515,7 +515,7 @@ export class PaymentProcessedExternalEvent implements IDomainEvent {
 
 ```typescript
 // src/domain/events/event-versioning.ts
-import { IDomainEvent, DomainEventMetadata } from '@vytches-ddd/contracts';
+import { IDomainEvent, DomainEventMetadata } from '@vytches/ddd-contracts';
 
 // Version 1 of user event
 export class UserCreatedEventV1 implements IDomainEvent {

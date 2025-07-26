@@ -1,7 +1,7 @@
 # Basic NestJS Use Cases
 
 **Version**: 2.0.0  
-**Package**: @vytches-ddd/policies  
+**Package**: @vytches/ddd-policies  
 **Complexity**: basic  
 **Domain**: Framework Integration  
 **Framework**: NestJS  
@@ -9,7 +9,7 @@
 
 ## Description
 
-Real-world use cases demonstrating basic @vytches-ddd/policies integration with
+Real-world use cases demonstrating basic @vytches/ddd-policies integration with
 NestJS applications for common business scenarios including user validation,
 order processing, and content management.
 
@@ -309,6 +309,6 @@ export class TransactionValidationService {
 5. **Expand Coverage**: Gradually apply policy validation to additional business
    scenarios
 
-These basic use cases demonstrate how @vytches-ddd/policies can be integrated
+These basic use cases demonstrate how @vytches/ddd-policies can be integrated
 into NestJS applications with minimal complexity while providing significant
 business value through consistent validation and clear error handling.

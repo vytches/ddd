@@ -2,16 +2,16 @@
 
 **Focus**: Complete enterprise setup with all features **Base Example**:
 [Enterprise Domain Service](../../../advanced/example-3.md) **Dependencies**:
-@nestjs/common, @vytches-ddd/core, @vytches-ddd/enterprise
+@nestjs/common, @vytches/ddd-core, @vytches/ddd-enterprise
 
 ## Service Implementation
 
 ```typescript
 // enterprise-order-nestjs.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
-import { Result } from '@vytches-ddd/utils';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import {
   Order,
   CreateOrderCommand,
@@ -257,8 +257,8 @@ export class EnterpriseOrderController {
 ```typescript
 // enterprise-order.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import { EnterpriseOrderController } from './enterprise-order.controller';
 import { EnterpriseOrderNestJSService } from './enterprise-order-nestjs.service';
 
@@ -305,7 +305,7 @@ export class EnterpriseOrderModule implements OnModuleInit {
 ```typescript
 // main.ts
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@vytches-ddd/logging';
+import { Logger } from '@vytches/ddd-logging';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

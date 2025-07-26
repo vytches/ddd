@@ -1,9 +1,9 @@
 # User Profile Composite Value Object - Intermediate Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Domain**: User Management & Identity
 **Patterns**: Composite Value Objects, Nested Validation, Profile Aggregation
-**Dependencies**: @vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+**Dependencies**: @vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -25,7 +25,7 @@ experiences.
 
 ```typescript
 // user-profile.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   UserProfileData,
   UserPreferences,

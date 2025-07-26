@@ -1,21 +1,21 @@
 # Intermediate Repository - NestJS DI Integration
 
-**Focus**: Advanced repository patterns with @vytches-ddd/di integration **Base
+**Focus**: Advanced repository patterns with @vytches/ddd-di integration **Base
 Example**: [Unit of Work Pattern](../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches-ddd/repositories,
-@vytches-ddd/di
+**Dependencies**: @nestjs/common, @nestjs/typeorm, @vytches/ddd-repositories,
+@vytches/ddd-di
 
 ## Service Implementation
 
 ```typescript
 // financial.service.ts
 import { Injectable } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import {
   UnitOfWork,
   BaseRepository,
   SpecificationRegistry,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 import {
   Account,
   Transaction,
@@ -33,7 +33,7 @@ export class FinancialService {
   private readonly unitOfWorkFactory: UnitOfWorkFactory;
 
   constructor() {
-    // ⭐ FOCUS: @vytches-ddd/di integration for advanced scenarios
+    // ⭐ FOCUS: @vytches/ddd-di integration for advanced scenarios
     this.accountRepository =
       VytchesDDD.resolve<BaseRepository<Account>>('accountRepository');
     this.transactionRepository = VytchesDDD.resolve<
@@ -279,12 +279,12 @@ export class FinancialService {
 
 ```typescript
 // financial-di.setup.ts
-import { VytchesDDD, DomainService } from '@vytches-ddd/di';
+import { VytchesDDD, DomainService } from '@vytches/ddd-di';
 import {
   BaseRepository,
   SpecificationRegistry,
   UnitOfWorkFactory,
-} from '@vytches-ddd/repositories';
+} from '@vytches/ddd-repositories';
 
 // Repository configurations with DI
 @DomainService('accountRepository')
@@ -396,7 +396,7 @@ export class BatchTransactionProcessorConfig {
 ```typescript
 // financial.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { FinancialService } from './financial.service';
 import { FinancialController } from './financial.controller';
 
@@ -415,7 +415,7 @@ export class FinancialModule implements OnModuleInit {
 
 ## Key Points
 
-- Advanced @vytches-ddd/di integration for enterprise scenarios
+- Advanced @vytches/ddd-di integration for enterprise scenarios
 - Service locator pattern for sophisticated repository coordination
 - Enterprise-grade Unit of Work with DI-managed dependencies
 - AI integration through DI container for intelligent analysis

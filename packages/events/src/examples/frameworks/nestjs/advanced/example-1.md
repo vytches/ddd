@@ -1,10 +1,10 @@
 # Event System - NestJS Advanced Integration
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/events **Complexity**: advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-events **Complexity**: advanced
 **Domain**: Integration **Patterns**: event-sourcing, event-mesh,
 complex-event-processing, microservices-coordination **Dependencies**:
-@nestjs/common, @vytches-ddd/events, @vytches-ddd/event-store, @vytches-ddd/di,
-@vytches-ddd/resilience
+@nestjs/common, @vytches/ddd-events, @vytches/ddd-event-store, @vytches/ddd-di,
+@vytches/ddd-resilience
 
 ## Description
 
@@ -25,10 +25,10 @@ business process automation.
 
 ```typescript
 // event-sourced-order.service.ts
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { UnifiedEventBus, EventStore } from '@vytches-ddd/events';
-import { CircuitBreaker, RetryPolicy } from '@vytches-ddd/resilience';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { UnifiedEventBus, EventStore } from '@vytches/ddd-events';
+import { CircuitBreaker, RetryPolicy } from '@vytches/ddd-resilience';
+import { Logger } from '@vytches/ddd-logging';
 import { Order, OrderAggregate, OrderSnapshot } from './types'; // From your app
 
 @DomainService({
@@ -188,9 +188,9 @@ export class EventSourcedOrderService {
 }
 
 // event-mesh.service.ts
-import { DomainService } from '@vytches-ddd/di';
-import { UnifiedEventBus, DomainEvent } from '@vytches-ddd/events';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService } from '@vytches/ddd-di';
+import { UnifiedEventBus, DomainEvent } from '@vytches/ddd-events';
+import { Logger } from '@vytches/ddd-logging';
 
 @DomainService('eventMeshService')
 export class EventMeshService {
@@ -440,9 +440,9 @@ export class EventMeshService {
 }
 
 // complex-event-processor.service.ts
-import { DomainService } from '@vytches-ddd/di';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { Logger } from '@vytches-ddd/logging';
+import { DomainService } from '@vytches/ddd-di';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { Logger } from '@vytches/ddd-logging';
 
 @DomainService('complexEventProcessor')
 export class ComplexEventProcessorService {
@@ -685,7 +685,7 @@ import {
   Param,
   Injectable,
 } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
+import { VytchesDDD } from '@vytches/ddd-di';
 import { EventSourcedOrderService } from './event-sourced-order.service';
 import { CreateOrderData, OrderAction } from './types'; // From your app
 
@@ -757,7 +757,7 @@ export class AdvancedOrderController {
 
 // app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { AdvancedOrderController } from './advanced-order.controller';
 
 @Module({

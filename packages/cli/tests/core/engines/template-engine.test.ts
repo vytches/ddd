@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches-ddd/utils';
+import { safeRun } from '@vytches/ddd-utils';
 import { TemplateEngine } from '../../../src/core/engines/template-engine';
 import { TemplateError } from '../../../src/types';
 

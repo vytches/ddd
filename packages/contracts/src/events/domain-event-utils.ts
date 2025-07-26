@@ -1,4 +1,4 @@
-import { LibUtils } from '@vytches-ddd/utils';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interfaces';
 
 /**

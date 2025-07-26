@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Result } from '@vytches-ddd/utils';
+import { Result } from '@vytches/ddd-utils';
 import { EnhancedACLAdapter } from '../src/enhanced-acl-adapter';
 import { ACLError } from '../src/acl-errors';
 import type {

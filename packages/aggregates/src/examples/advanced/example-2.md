@@ -1,10 +1,10 @@
 # AI-Powered Global Financial Risk Management - Intelligent Decision System
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**: Advanced
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**: Advanced
 **Domain**: Financial Risk Management & AI Integration **Patterns**: Machine
 Learning Integration, Real-time Risk Assessment, Global Coordination, Predictive
-Analytics **Dependencies**: @vytches-ddd/aggregates,
-@vytches-ddd/domain-primitives, @vytches-ddd/contracts
+Analytics **Dependencies**: @vytches/ddd-aggregates,
+@vytches/ddd-domain-primitives, @vytches/ddd-contracts
 
 ## Description
 
@@ -27,9 +27,9 @@ reporting.
 
 ```typescript
 // ai-powered-risk-management.aggregate.ts
-import { AggregateRoot } from '@vytches-ddd/aggregates';
-import { DomainEvent } from '@vytches-ddd/contracts';
-import { BaseError, EntityId } from '@vytches-ddd/domain-primitives';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-contracts';
+import { BaseError, EntityId } from '@vytches/ddd-domain-primitives';
 import {
   RiskProfile,
   AIRiskModel,

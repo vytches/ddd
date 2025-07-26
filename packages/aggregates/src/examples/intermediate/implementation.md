@@ -1,6 +1,6 @@
 # Intermediate Aggregate Implementation Patterns
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/aggregates **Complexity**:
+**Version**: 1.0.0 **Package**: @vytches/ddd-aggregates **Complexity**:
 Intermediate **Domain**: Advanced Domain-Driven Design Patterns
 
 ## Overview

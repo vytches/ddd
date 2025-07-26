@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 /**
  * CLI Package Examples Configuration
@@ -25,7 +25,7 @@ export const config: PackageExampleConfig = {
     frameworks: ['nestjs'],
     patterns: ['code-generation', 'domain-modeling', 'scaffolding', 'validation'],
   },
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-utils'],
   complexityLevels: {
     basic: {
       level: 'basic',
@@ -67,7 +67,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Generate DDD components with intelligent templates - aggregates, entities, commands, queries, and more',
-      dependencies: ['@vytches-ddd/core'],
+      dependencies: ['@vytches/ddd-core'],
       validation: { fileExists: true },
     },
     {
@@ -79,7 +79,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Manage and generate package examples and documentation with validation and bundling capabilities',
-      dependencies: ['@vytches-ddd/contracts'],
+      dependencies: ['@vytches/ddd-contracts'],
       validation: { fileExists: true },
     },
     {
@@ -91,7 +91,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Interactive domain modeling with AI-assisted guidance, context mapping, and validation',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-utils'],
       validation: { fileExists: true },
     },
 
@@ -105,7 +105,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Complete workflow for creating a DDD project from scratch with multiple bounded contexts',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/cqrs', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-cqrs', '@vytches/ddd-events'],
       validation: { fileExists: true },
     },
     {
@@ -117,7 +117,7 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description:
         'Add new bounded context to existing DDD project with proper integration and anti-corruption layers',
-      dependencies: ['@vytches-ddd/core', '@vytches-ddd/events'],
+      dependencies: ['@vytches/ddd-core', '@vytches/ddd-events'],
       validation: { fileExists: true },
     },
 

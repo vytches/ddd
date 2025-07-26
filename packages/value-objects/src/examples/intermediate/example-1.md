@@ -1,9 +1,9 @@
 # Date Range Value Object - Intermediate Example
 
-**Version**: 2025-01-21 **Package**: @vytches-ddd/value-objects  
+**Version**: 2025-01-21 **Package**: @vytches/ddd-value-objects  
 **Complexity**: Intermediate **Domain**: Time & Scheduling **Patterns**: Range
 Value Objects, Time Calculations, Business Day Logic **Dependencies**:
-@vytches-ddd/value-objects, @vytches-ddd/domain-primitives
+@vytches/ddd-value-objects, @vytches/ddd-domain-primitives
 
 ## Description
 
@@ -24,7 +24,7 @@ management.
 
 ```typescript
 // date-range.ts
-import { ValueObject } from '@vytches-ddd/value-objects';
+import { ValueObject } from '@vytches/ddd-value-objects';
 import {
   DateRangeData,
   DateRangeCalculation,

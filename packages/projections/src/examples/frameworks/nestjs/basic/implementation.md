@@ -1,14 +1,14 @@
 # Basic Projections - NestJS Implementation Guide
 
-**Version**: 1.0.0 **Package**: @vytches-ddd/projections + NestJS
+**Version**: 1.0.0 **Package**: @vytches/ddd-projections + NestJS
 **Complexity**: basic **Framework**: NestJS **Integration**: Manual setup
-patterns **Dependencies**: @nestjs/common, @vytches-ddd/projections,
-@vytches-ddd/events
+patterns **Dependencies**: @nestjs/common, @vytches/ddd-projections,
+@vytches/ddd-events
 
 ## Overview
 
 This guide covers basic NestJS integration patterns for
-@vytches-ddd/projections, focusing on manual setup, standard dependency
+@vytches/ddd-projections, focusing on manual setup, standard dependency
 injection, and fundamental projection management. These patterns provide a solid
 foundation for event-driven read models in NestJS applications.
 
@@ -19,8 +19,8 @@ foundation for event-driven read models in NestJS applications.
 ```typescript
 // basic-projection.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class BasicProjectionService
@@ -86,7 +86,7 @@ export class BasicProjectionService
 // event-processor.service.ts
 import { Injectable } from '@nestjs/common';
 import { BasicProjectionService } from './basic-projection.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class EventProcessorService {
@@ -120,7 +120,7 @@ export class EventProcessorService {
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { BasicProjectionService } from './basic-projection.service';
 import { EventProcessorService } from './event-processor.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Controller('api/projections')
 export class ProjectionApiController {
@@ -168,8 +168,8 @@ import {
   EventHandler,
   CheckpointCapability,
   CircuitBreakerCapability,
-} from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+} from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class EnhancedProjectionService
@@ -381,7 +381,7 @@ export class AppModule {}
 // projection.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { BasicProjectionService } from './basic-projection.service';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 describe('BasicProjectionService', () => {
   let service: BasicProjectionService;
@@ -472,8 +472,8 @@ describe('Projection Integration', () => {
 ```typescript
 // error-handling-projection.service.ts
 import { Injectable } from '@nestjs/common';
-import { ProjectionBase, EventHandler } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase, EventHandler } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class ErrorHandlingProjectionService extends ProjectionBase<any> {
@@ -537,8 +537,8 @@ export class ErrorHandlingProjectionService extends ProjectionBase<any> {
 ```typescript
 // batch-processing-projection.service.ts
 import { Injectable } from '@nestjs/common';
-import { ProjectionBase } from '@vytches-ddd/projections';
-import { IDomainEvent } from '@vytches-ddd/events';
+import { ProjectionBase } from '@vytches/ddd-projections';
+import { IDomainEvent } from '@vytches/ddd-events';
 
 @Injectable()
 export class BatchProcessingProjectionService extends ProjectionBase<any> {

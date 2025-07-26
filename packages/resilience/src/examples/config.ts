@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches-ddd/contracts';
+import type { PackageExampleConfig } from '@vytches/ddd-contracts';
 
 export const config: PackageExampleConfig = {
   packageName: 'resilience',
@@ -31,7 +31,7 @@ export const config: PackageExampleConfig = {
       'resilience:composite',
     ],
   },
-  dependencies: ['@vytches-ddd/core', '@vytches-ddd/resilience', '@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-core', '@vytches/ddd-resilience', '@vytches/ddd-utils'],
   sections: [
     'hero',
     'description',
@@ -90,7 +90,7 @@ export const config: PackageExampleConfig = {
       complexity: 'basic',
       priority: 'high',
       description: 'Basic circuit breaker pattern for external service calls',
-      dependencies: ['@vytches-ddd/resilience', '@vytches-ddd/utils'],
+      dependencies: ['@vytches/ddd-resilience', '@vytches/ddd-utils'],
     },
     {
       id: 'intermediate-resilience-events',
@@ -101,10 +101,10 @@ export const config: PackageExampleConfig = {
       priority: 'high',
       description: 'Advanced resilience patterns integrated with events system for observability',
       dependencies: [
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/events',
-        '@vytches-ddd/di',
-        '@vytches-ddd/utils',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-events',
+        '@vytches/ddd-di',
+        '@vytches/ddd-utils',
       ],
     },
     {
@@ -122,11 +122,11 @@ export const config: PackageExampleConfig = {
       description:
         'Enterprise resilience system with policies, messaging, and comprehensive fault tolerance',
       dependencies: [
-        '@vytches-ddd/resilience',
-        '@vytches-ddd/policies',
-        '@vytches-ddd/messaging',
-        '@vytches-ddd/events',
-        '@vytches-ddd/di',
+        '@vytches/ddd-resilience',
+        '@vytches/ddd-policies',
+        '@vytches/ddd-messaging',
+        '@vytches/ddd-events',
+        '@vytches/ddd-di',
       ],
     },
   ],

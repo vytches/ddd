@@ -5,7 +5,7 @@ export const packageExampleConfig = {
   version: '1.0.0',
   domain: 'Core',
   patterns: ['error-handling', 'actors', 'interfaces'],
-  dependencies: ['@vytches-ddd/utils'],
+  dependencies: ['@vytches/ddd-utils'],
   complexityLevels: {
     basic: {
       level: 'basic',

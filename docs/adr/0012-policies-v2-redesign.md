@@ -215,7 +215,7 @@ consumers. V1 implementation was removed and replaced with V2 architecture.
 1. **Monolithic Policy Class**: Rejected due to violation of Single
    Responsibility Principle
 2. **Callback-based API**: Rejected in favor of Promise consistency with rest of
-   @vytches-ddd
+   @vytches/ddd-core
 3. **Generic Infrastructure Decorators**: Rejected in favor of domain-specific
    policy behaviors (following MediatR naming conventions)
 
@@ -231,7 +231,7 @@ consumers. V1 implementation was removed and replaced with V2 architecture.
   composition and integration
 - **Developer Experience**: Fluent builders with conditional logic support
   complex business rules
-- **System Integration**: Seamless connection with existing @vytches-ddd
+- **System Integration**: Seamless connection with existing @vytches/ddd-core
   ecosystem
 
 ### Negative Consequences
@@ -257,10 +257,10 @@ consumers. V1 implementation was removed and replaced with V2 architecture.
 This ADR follows the enterprise DDD patterns established in the VytchesDDD
 library and maintains consistency with:
 
-- **Result pattern** from `@vytches-ddd/utils`
-- **Specification pattern** from `@vytches-ddd/contracts`
+- **Result pattern** from `@vytches/ddd-utils`
+- **Specification pattern** from `@vytches/ddd-contracts`
 - **Test patterns** using `safeRun` for error testing
-- **Logging integration** ready for `@vytches-ddd/logging`
+- **Logging integration** ready for `@vytches/ddd-logging`
 - **Module boundaries** with proper import strategies
 
 ## Status

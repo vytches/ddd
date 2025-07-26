@@ -254,7 +254,7 @@ vytches-ddd generate event-handler InventoryUpdated --domain OrderManagement
 
 ```typescript
 // src/application/order-management/handlers/product-price-changed.handler.ts
-import { EventHandler, IEventHandler } from '@vytches-ddd/events';
+import { EventHandler, IEventHandler } from '@vytches/ddd-events';
 import { ProductPriceChangedIntegrationEvent } from '@shared/contracts/product-data.contract';
 
 @EventHandler(ProductPriceChangedIntegrationEvent)

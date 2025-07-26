@@ -4,8 +4,8 @@
 comprehensive fault tolerance  
 **Domain**: Financial Trading Platform  
 **Complexity**: Advanced  
-**Dependencies**: @vytches-ddd/resilience, @vytches-ddd/policies,
-@vytches-ddd/messaging, @vytches-ddd/events, @vytches-ddd/di
+**Dependencies**: @vytches/ddd-resilience, @vytches/ddd-policies,
+@vytches/ddd-messaging, @vytches/ddd-events, @vytches/ddd-di
 
 ## Business Context
 
@@ -26,7 +26,7 @@ import {
   PolicyBuilder,
   PolicyContext,
   ISpecification,
-} from '@vytches-ddd/policies';
+} from '@vytches/ddd-policies';
 import { ResilienceConfiguration } from '../types'; // ALWAYS import from app
 
 // Business rule specifications for resilience
@@ -219,11 +219,11 @@ import {
   CircuitBreakerState,
   ResilienceMetrics,
   ResilienceContext,
-} from '@vytches-ddd/resilience';
-import { UnifiedEventBus } from '@vytches-ddd/events';
-import { OutboxService } from '@vytches-ddd/messaging';
-import { DomainService, ServiceLifetime } from '@vytches-ddd/di';
-import { Logger } from '@vytches-ddd/logging';
+} from '@vytches/ddd-resilience';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+import { OutboxService } from '@vytches/ddd-messaging';
+import { DomainService, ServiceLifetime } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 
 // ⭐ Enterprise Resilience Service with Policy Integration
 @DomainService('enterpriseResilienceService', {

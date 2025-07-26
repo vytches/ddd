@@ -1,6 +1,6 @@
 {
-  "name": "@vytches-ddd/messaging",
-  "version": "0.3.2",
+  "name": "@vytches/ddd-messaging",
+  "version": "0.3.3",
   "description": "Outbox pattern and reliable message delivery",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vytches/vytches-ddd.git",
+    "url": "https://github.com/vytches/ddd.git",
     "directory": "packages/messaging"
   },
   "scripts": {
@@ -42,11 +42,11 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@vytches-ddd/core": "workspace:*",
-    "@vytches-ddd/events": "workspace:*"
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-events": "workspace:*"
   },
   "devDependencies": {
-    "@vytches-ddd/testing": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^4.0.0",

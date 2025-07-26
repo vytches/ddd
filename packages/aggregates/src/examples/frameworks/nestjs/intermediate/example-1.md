@@ -1,18 +1,18 @@
 # Event Sourced Shopping Cart - NestJS Integration
 
-**Focus**: Event sourced shopping cart with NestJS and @vytches-ddd/di
+**Focus**: Event sourced shopping cart with NestJS and @vytches/ddd-di
 integration  
 **Base Example**: [Event Sourced Shopping Cart](../../intermediate/example-1.md)
-**Dependencies**: @nestjs/common, @vytches-ddd/aggregates, @vytches-ddd/di,
-@vytches-ddd/events
+**Dependencies**: @nestjs/common, @vytches/ddd-aggregates, @vytches/ddd-di,
+@vytches/ddd-events
 
 ## Advanced Service Implementation
 
 ```typescript
 // event-sourced-cart.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { VytchesDDD } from '@vytches-ddd/di';
-import { EntityId } from '@vytches-ddd/domain-primitives';
+import { VytchesDDD } from '@vytches/ddd-di';
+import { EntityId } from '@vytches/ddd-domain-primitives';
 import {
   ShoppingCart,
   CartItem,
@@ -552,7 +552,7 @@ export class EventSourcedCartService {
 
 // event-sourced-cart.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
-import { VytchesDDD, SimpleContainer } from '@vytches-ddd/di';
+import { VytchesDDD, SimpleContainer } from '@vytches/ddd-di';
 import { EventSourcedCartService } from './event-sourced-cart.service';
 
 @Module({
