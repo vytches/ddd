@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-logging",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Enterprise logging with DDD-first design",
   "type": "module",
   "main": "./dist/index.cjs",
