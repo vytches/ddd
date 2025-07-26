@@ -25,7 +25,7 @@
 
 ---
 
-## Phase 1: Stabilization & Community (Q1 2026)
+## Phase 1: Stabilization & Community (Q1 2026+)
 
 ### 🎯 Goals
 
