@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-testing",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Test utilities and DDD-specific testing helpers",
   "type": "module",
   "main": "./dist/index.cjs",

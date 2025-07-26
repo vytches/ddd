@@ -292,6 +292,10 @@ importers:
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
   packages/contracts:
+    dependencies:
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       typescript:
         specifier: ^5.0.0

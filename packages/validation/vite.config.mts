@@ -7,8 +7,15 @@ import dts from 'vite-plugin-dts';
 // Package type detection - determines build configuration
 const packageJsonContent = readFileSync('./package.json', 'utf-8');
 const packageJson = JSON.parse(packageJsonContent);
-const isMetaPackage = packageJson.dependencies && Object.keys(packageJson.dependencies).length > 0;
 const packageName = packageJson.name?.split('/')[1] || 'unknown';
+
+// Meta package detection: enterprise package that re-exports many packages
+const isMetaPackage =
+  packageName === 'enterprise' ||
+  packageName === 'ddd' ||
+  (packageJson.dependencies &&
+    Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length >=
+      5);
 
 // Complete dependencies that should be available in test environment
 const commonTestAliases = {
@@ -36,6 +43,13 @@ const commonTestAliases = {
   '@vytches/ddd-enterprise': resolve(__dirname, '../enterprise/src/index.ts'),
 };
 
+// Determine package type based on dependencies and devDependencies
+const isFoundationPackage =
+  !isMetaPackage &&
+  (!packageJson.dependencies ||
+    Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length <=
+      2);
+
 // Determine required dependencies based on package type
 function getPackageDependencies(): Record<string, string> {
   if (isMetaPackage) {
@@ -43,15 +57,8 @@ function getPackageDependencies(): Record<string, string> {
     return {};
   }
 
-  // Foundation packages (only need utils)
-  const foundationPackages = [
-    'domain-primitives',
-    'value-objects',
-    'repositories',
-    'aggregates',
-    'contracts',
-  ];
-  if (foundationPackages.includes(packageName)) {
+  if (isFoundationPackage) {
+    // Foundation packages (only need utils and contracts)
     return {
       '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
       '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
@@ -79,7 +86,23 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: buildAliases,
+    alias: {
+      ...buildAliases,
+      // Foundation packages need aliasing to bundle @vytches dependencies
+      ...(isFoundationPackage
+        ? {
+            '@vytches/ddd-domain-primitives': resolve(
+              __dirname,
+              '../domain-primitives/src/index.ts'
+            ),
+            '@vytches/ddd-value-objects': resolve(__dirname, '../value-objects/src/index.ts'),
+            '@vytches/ddd-repositories': resolve(__dirname, '../repositories/src/index.ts'),
+            '@vytches/ddd-aggregates': resolve(__dirname, '../aggregates/src/index.ts'),
+            '@vytches/ddd-utils': resolve(__dirname, '../utils/src/index.ts'),
+            '@vytches/ddd-contracts': resolve(__dirname, '../contracts/src/index.ts'),
+          }
+        : {}),
+    },
   },
   build: {
     outDir: 'dist',
@@ -91,9 +114,35 @@ export default defineConfig({
     },
     rollupOptions: {
       external: id => {
-        // For publication, bundle all @vytches/ddd-* dependencies
-        // Only externalize real npm packages (not internal ones)
-        return !id.startsWith('@vytches/ddd-') && !id.includes('src/');
+        if (isMetaPackage) {
+          // Meta-packages should externalize all @vytches/ddd-* dependencies
+          return (
+            id.startsWith('@vytches/ddd-') ||
+            (!id.includes('src/') && !id.startsWith('./') && !id.startsWith('../'))
+          );
+        }
+
+        // Utils package should bundle everything (no dependencies)
+        if (packageName === 'utils') {
+          return false; // Bundle everything
+        }
+
+        if (isFoundationPackage) {
+          // Foundation packages: bundle ALL internal files and @vytches packages
+          if (id.startsWith('@vytches/ddd-')) return false; // Bundle @vytches packages
+          if (id.includes('src/')) return false; // Bundle source files
+          if (id.startsWith('./') || id.startsWith('../')) return false; // Bundle relative imports
+          if (id.includes('packages/') && id.includes('vytches-ddd')) return false; // Bundle resolved paths
+
+          // Only externalize real npm packages (like uuid, etc.)
+          return true;
+        }
+
+        // Higher-level packages - externalize @vytches dependencies
+        return (
+          id.startsWith('@vytches/ddd-') ||
+          (!id.includes('src/') && !id.startsWith('./') && !id.startsWith('../'))
+        );
       },
     },
     sourcemap: false, // Disable source maps for production builds

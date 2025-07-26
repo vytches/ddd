@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-resilience",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Circuit breakers and resilience patterns",
   "type": "module",
   "main": "./dist/index.cjs",
