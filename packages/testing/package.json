@@ -41,9 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-utils": "workspace:*"
-  },
   "dependencies": {
     "@vytches/ddd-utils": "workspace:*"
   },

@@ -41,11 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-validation": "workspace:*"
-  },
   "devDependencies": {
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-testing": "workspace:*",
@@ -66,5 +61,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
+  },
+  "dependencies": {
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
   }
 }

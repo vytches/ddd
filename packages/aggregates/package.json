@@ -41,11 +41,6 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-domain-primitives": "workspace:*",
-    "@vytches/ddd-value-objects": "workspace:*"
-  },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",

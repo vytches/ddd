@@ -170,29 +170,57 @@ The library is organized into focused, single-responsibility packages:
 
 ### Meta Packages
 
-| Package                                            | Description       | Includes              |
-| -------------------------------------------------- | ----------------- | --------------------- |
-| [`@vytches/ddd-core`](./packages/core)             | Core meta-package | Foundation + patterns |
-| [`@vytches/ddd-enterprise`](./packages/enterprise) | Full suite        | All packages          |
+| Package                                 | Description        | Includes              |
+| --------------------------------------- | ------------------ | --------------------- |
+| [`@vytches/ddd`](./packages/enterprise) | Complete framework | All packages          |
+| [`@vytches/ddd-core`](./packages/core)  | Core meta-package  | Foundation + patterns |
 
 ## 🚀 Quick Start
 
 ### Installation
 
+#### From GitHub Packages
+
 ```bash
-# Core functionality only
+# Setup .npmrc file
+echo "@vytches:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > .npmrc
+
+# Complete framework (recommended)
+npm install @vytches/ddd
+
+# Or core functionality only
 npm install @vytches/ddd-core
 
-# Full enterprise suite
-npm install @vytches/ddd-enterprise
-
-# Specific features
+# Or specific features
 npm install @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-resilience
+```
+
+#### From NPM (coming soon)
+
+```bash
+# Complete framework
+npm install @vytches/ddd
+
+# Core functionality only
+npm install @vytches/ddd-core
 ```
 
 ### Basic Example: E-Commerce Order Domain
 
 ```typescript
+// Option 1: Complete framework import (recommended)
+import {
+  AggregateRoot,
+  ValueObject,
+  DomainEvent,
+  Result,
+  EntityId,
+  Email,
+  Money,
+} from '@vytches/ddd';
+
+// Option 2: Specific package imports
 import {
   AggregateRoot,
   ValueObject,
