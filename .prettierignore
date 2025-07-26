@@ -3,3 +3,7 @@ templates/
 /.nx/cache
 /.nx/workspace-data
 .vscode
+.vytches-ddd/
+dist/
+*.cjs
+*.mjs
