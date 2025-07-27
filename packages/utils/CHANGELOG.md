@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.3.8 (2025-07-27)
+
+### Bug Fixes
+
+- fixing enterprise meta-packet for ts issues and addint ci-cd
+  workflow-optimizatio
+  ([46017d2](https://github.com/vytches/ddd/commit/46017d29b945739d0601c153c290de0ddef216f2))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.3.7 (2025-07-27)
 
 **Note:** Version bump only for package @vytches/ddd-utils

@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-domain-services",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Domain services and domain logic coordination",
   "type": "module",
   "main": "./dist/index.cjs",
