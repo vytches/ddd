@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.4.7 (2025-07-27)
+
+**Note:** Version bump only for package @vytches/ddd-policies
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.4.6 (2025-07-26)
 
 **Note:** Version bump only for package @vytches/ddd-policies
