@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "Complete Domain-Driven Design framework for TypeScript",
   "type": "module",
   "main": "./dist/index.cjs",
