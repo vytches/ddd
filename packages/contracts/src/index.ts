@@ -1,4 +1,4 @@
-// Events
+// Events - Updated for dependency sync 2025-07-27
 export type {
   IEventMetadata,
   IDomainEvent,
