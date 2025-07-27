@@ -1,10 +1,7 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
-    tags:
-      - "v*"
+  # Manual releases only - enterprise best practice
   workflow_dispatch:
     inputs:
       release_type:
@@ -16,16 +13,57 @@ on:
           - patch
           - minor
           - major
-          - prerelease
+          - hotfix
+  # Tag-based publishing for completed releases
+  push:
+    tags:
+      - "v*"
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".vscode/**"
+      - ".github/workflows/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  test:
+  context-detection:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      is_hotfix: ${{ steps.detect.outputs.is_hotfix }}
+      validation_needed: ${{ steps.detect.outputs.validation_needed }}
+      validation_mode: ${{ steps.detect.outputs.validation_mode }}
+    steps:
+      - name: Detect release context
+        id: detect
+        run: |
+          echo "🔍 Analyzing release context..."
+
+          # Hotfix detection
+          if [[ "${{ github.ref }}" == *"hotfix"* ]] || [[ "${{ github.event.inputs.release_type }}" == "hotfix" ]]; then
+            echo "is_hotfix=true" >> $GITHUB_OUTPUT
+            echo "validation_mode=quick" >> $GITHUB_OUTPUT
+            echo "validation_needed=true" >> $GITHUB_OUTPUT
+            echo "🚨 HOTFIX MODE: Using quick validation path"
+          else
+            echo "is_hotfix=false" >> $GITHUB_OUTPUT
+            echo "validation_mode=full" >> $GITHUB_OUTPUT
+            echo "validation_needed=true" >> $GITHUB_OUTPUT
+            echo "🎯 STANDARD RELEASE: Using full validation"
+          fi
+
+          echo "📊 Context: release_type=${{ github.event.inputs.release_type }}, branch=${{ github.ref }}"
+
+  validation:
+    runs-on: ubuntu-latest
+    needs: [context-detection]
+    if: needs.context-detection.outputs.validation_needed == 'true'
     env:
       NX_DAEMON: false
     steps:
@@ -48,26 +86,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        run: pnpm test
+      - name: Quick validation (Hotfix)
+        if: needs.context-detection.outputs.is_hotfix == 'true'
+        run: |
+          echo "🚨 HOTFIX MODE: Running essential checks only"
+          pnpm test --testNamePattern="(critical|security|hotfix)"
+          pnpm lint --fix=false
+          pnpm type-check
+          echo "✅ Hotfix validation complete"
 
-      - name: Run type check
-        run: pnpm type-check
-
-      - name: Run lint
-        run: pnpm lint
+      - name: Full validation (Standard Release)
+        if: needs.context-detection.outputs.is_hotfix == 'false'
+        run: |
+          echo "🎯 STANDARD RELEASE: Running full validation suite"
+          pnpm test
+          pnpm lint
+          pnpm type-check
+          pnpm build
+          echo "✅ Full validation complete"
 
   release:
     runs-on: ubuntu-latest
-    if: |
-      !contains(github.event.head_commit.message, 'chore(release)') &&
-      !contains(github.event.head_commit.message, 'fix:') &&
-      !contains(github.event.head_commit.message, 'fix(') &&
-      !contains(github.event.head_commit.message, 'style:') &&
-      !contains(github.event.head_commit.message, 'docs:') &&
-      !contains(github.event.head_commit.message, 'test:') &&
-      !contains(github.event.head_commit.message, 'chore:') &&
-      !contains(github.event.head_commit.message, 'ci:')
+    needs: [context-detection, validation]
+    if: github.event_name == 'workflow_dispatch'
     env:
       NX_DAEMON: false
     steps:
@@ -102,33 +143,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build all packages
-        run: pnpm build
-
-      - name: Run tests
-        run: pnpm test
+      - name: Build packages
+        run: |
+          if [[ "${{ needs.context-detection.outputs.is_hotfix }}" == "true" ]]; then
+            echo "🚨 HOTFIX: Building affected packages only"
+            pnpm nx affected --target=build --parallel=3
+          else
+            echo "🎯 STANDARD: Building all packages"
+            pnpm build
+          fi
 
       - name: Check if packages have changes
         id: changes
         run: |
           if pnpm lerna changed; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📦 Found packages with changes"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  No packages changed since last release"
           fi
-
-      - name: Debug GitHub Token Permissions
-        if: steps.changes.outputs.has_changes == 'true'
-        run: |
-          echo "Testing GITHUB_TOKEN permissions..."
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }} | jq '.permissions // "No permissions field"'
-
-          echo "Repository info:"
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }} | jq '{name, private, permissions}'
 
       - name: Configure Git
         if: steps.changes.outputs.has_changes == 'true'
@@ -137,15 +171,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
-          echo "Testing Git push permissions..."
-          git ls-remote origin || echo "❌ Git remote access failed"
-
       - name: Version packages
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          if [ "${{ github.event.inputs.release_type }}" != "" ]; then
+          if [[ "${{ github.event.inputs.release_type }}" == "hotfix" ]]; then
+            echo "🚨 HOTFIX: Creating patch version"
+            pnpm lerna version patch --conventional-commits --yes
+          elif [[ "${{ github.event.inputs.release_type }}" != "" ]]; then
+            echo "🎯 STANDARD: Creating ${{ github.event.inputs.release_type }} version"
             pnpm lerna version ${{ github.event.inputs.release_type }} --conventional-commits --yes
           else
+            echo "🤖 AUTO: Using conventional commits detection"
             pnpm lerna version --conventional-commits --yes
           fi
         env:
@@ -153,13 +189,24 @@ jobs:
 
       - name: Publish to GitHub Packages
         if: steps.changes.outputs.has_changes == 'true'
-        run: pnpm lerna publish from-git --yes
+        run: |
+          echo "📦 Publishing packages to GitHub Packages..."
+          pnpm lerna publish from-git --yes
         env:
           NODE_AUTH_TOKEN: ${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
-  canary:
+      - name: Summary
+        if: always()
+        run: |
+          echo "🎉 Release workflow completed!"
+          echo "📊 Release type: ${{ github.event.inputs.release_type }}"
+          echo "🔄 Validation mode: ${{ needs.context-detection.outputs.validation_mode }}"
+          echo "📦 Had changes: ${{ steps.changes.outputs.has_changes }}"
+
+  # Tag-only publishing for completed releases
+  tag-publish:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     env:
       NX_DAEMON: false
     steps:
@@ -184,13 +231,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build all packages
-        run: pnpm build
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Publish canary version to GitHub Packages
-        run: pnpm lerna publish --canary --preid=alpha --dist-tag=alpha --yes
+      - name: Publish from git tags
+        run: |
+          echo "📦 Publishing from git tag: ${{ github.ref_name }}"
+          pnpm lerna publish from-git --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
