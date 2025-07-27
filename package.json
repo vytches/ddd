@@ -152,6 +152,7 @@
     "release:alpha": "NX_DAEMON=false lerna publish prerelease --preid alpha",
     "release:beta": "NX_DAEMON=false lerna publish prerelease --preid beta",
     "release:collect": "git log --oneline --grep='feat\\|fix\\|BREAKING' --since='$(git describe --tags --abbrev=0 2>/dev/null || echo \"1 week ago\")' --format='%h %s'",
+    "release:hotfix": "echo '🚨 HOTFIX MODE: Quick patch release' && NX_DAEMON=false lerna version patch --conventional-commits --yes && echo '📦 Publishing hotfix...' && NX_DAEMON=false lerna publish from-git --yes && echo '✅ Hotfix published successfully'",
     "// === GIT HOOKS ===": "",
     "prepare": "husky install && pnpm build",
     "commit": "git-cz"
