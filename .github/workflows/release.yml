@@ -178,12 +178,12 @@ jobs:
           if [[ "${{ github.event.inputs.release_type }}" == "hotfix" ]]; then
             echo "🚨 HOTFIX: Creating patch version"
             pnpm lerna version patch --conventional-commits --yes
-          elif [[ "${{ github.event.inputs.release_type }}" != "" ]]; then
-            echo "🎯 STANDARD: Creating ${{ github.event.inputs.release_type }} version"
-            pnpm lerna version ${{ github.event.inputs.release_type }} --conventional-commits --yes
-          else
+          elif [[ "${{ github.event.inputs.release_type }}" == "auto" || "${{ github.event.inputs.release_type }}" == "" ]]; then
             echo "🤖 AUTO: Using conventional commits detection"
             pnpm lerna version --conventional-commits --yes
+          else
+            echo "🎯 STANDARD: Creating ${{ github.event.inputs.release_type }} version"
+            pnpm lerna version ${{ github.event.inputs.release_type }} --conventional-commits --yes
           fi
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
