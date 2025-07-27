@@ -32,6 +32,7 @@
     "baseUrl": ".",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
+      "@vytches/ddd": ["packages/enterprise/src/index.ts"],
       "@vytches/ddd-acl": ["packages/acl/src/index.ts"],
       "@vytches/ddd-aggregates": ["packages/aggregates/src/index.ts"],
       "@vytches/ddd-cli": ["packages/cli/src/index.ts"],

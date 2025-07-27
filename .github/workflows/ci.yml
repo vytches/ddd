@@ -1,5 +1,9 @@
 name: CI
 
+# OPTIMIZATION: Context-aware validation per ADR-0018
+# - PR: Full validation (JSDoc, Quality Gates, E2E) ~8-15m
+# - Main: Quick check (lint, test, build affected only) ~2-3m
+
 on:
   # Only test on PRs - avoid duplicate runs after merge
   pull_request:
@@ -104,6 +108,7 @@ jobs:
         run: pnpm nx affected --target=type-check --parallel=3
 
       - name: JSDoc validation
+        if: github.event_name == 'pull_request'
         run: node scripts/jsdoc-validator.js
         env:
           CI: true
@@ -119,13 +124,18 @@ jobs:
       - name: Check if quality gates needed
         id: check_gates
         run: |
-          # Check if any code files changed (not just docs)
-          if pnpm nx affected --target=build --dry-run | grep -q "No projects"; then
-            echo "skip_gates=true" >> $GITHUB_OUTPUT
-            echo "No projects affected, skipping quality gates"
+          # Quality gates only on PRs - quick check on main
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if pnpm nx affected --target=build --dry-run | grep -q "No projects"; then
+              echo "skip_gates=true" >> $GITHUB_OUTPUT
+              echo "No projects affected, skipping quality gates"
+            else
+              echo "skip_gates=false" >> $GITHUB_OUTPUT
+              echo "Projects affected, running quality gates"
+            fi
           else
-            echo "skip_gates=false" >> $GITHUB_OUTPUT
-            echo "Projects affected, running quality gates"
+            echo "skip_gates=true" >> $GITHUB_OUTPUT
+            echo "🚀 QUICK CHECK (main): Skipping quality gates (already done in PR)"
           fi
 
       - name: Run Quality Gates
@@ -146,7 +156,8 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')
+    # E2E only on PRs for comprehensive validation - skip on main for quick check
+    if: github.event_name == 'pull_request' && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')
     steps:
       - name: Checkout
         uses: actions/checkout@v4

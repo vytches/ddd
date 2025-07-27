@@ -99,16 +99,30 @@ function generateMetaTypes(packagePath) {
 }
 
 // Main execution
-const packagesDir = path.join(__dirname, '..', 'packages');
-const packageDirs = fs
-  .readdirSync(packagesDir)
-  .filter(dir => fs.statSync(path.join(packagesDir, dir)).isDirectory());
+const specificPackagePath = process.argv[2]; // Get package path from command line
 
-for (const packageDir of packageDirs) {
-  const packagePath = path.join(packagesDir, packageDir);
+if (specificPackagePath) {
+  // Process specific package
+  const packagePath = path.resolve(specificPackagePath);
   try {
     generateMetaTypes(packagePath);
   } catch (error) {
-    console.error(`Error processing ${packageDir}:`, error.message);
+    console.error(`Error processing specific package:`, error.message);
+    process.exit(1);
+  }
+} else {
+  // Process all packages
+  const packagesDir = path.join(__dirname, '..', 'packages');
+  const packageDirs = fs
+    .readdirSync(packagesDir)
+    .filter(dir => fs.statSync(path.join(packagesDir, dir)).isDirectory());
+
+  for (const packageDir of packageDirs) {
+    const packagePath = path.join(packagesDir, packageDir);
+    try {
+      generateMetaTypes(packagePath);
+    } catch (error) {
+      console.error(`Error processing ${packageDir}:`, error.message);
+    }
   }
 }
