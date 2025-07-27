@@ -192,6 +192,11 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           echo "📦 Publishing packages to GitHub Packages..."
+          # Fetch all tags to ensure they're available
+          git fetch --tags
+          echo "📊 Available tags:"
+          git tag --list | tail -10
+          echo "🚀 Publishing from git tags..."
           pnpm lerna publish from-git --yes
         env:
           NODE_AUTH_TOKEN: ${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
