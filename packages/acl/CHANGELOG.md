@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.10](https://github.com/vytches/ddd/compare/@vytches/ddd-acl@0.3.9...@vytches/ddd-acl@0.3.10) (2025-07-27)
+
+**Note:** Version bump only for package @vytches/ddd-acl
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.3.9 (2025-07-27)
 
 **Note:** Version bump only for package @vytches/ddd-acl
