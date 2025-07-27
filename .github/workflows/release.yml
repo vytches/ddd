@@ -192,7 +192,8 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           echo "📦 Publishing packages to GitHub Packages..."
-          pnpm lerna publish from-git --yes
+          echo "🚀 Publishing from package.json versions..."
+          pnpm lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
@@ -235,6 +236,7 @@ jobs:
       - name: Publish from git tags
         run: |
           echo "📦 Publishing from git tag: ${{ github.ref_name }}"
-          pnpm lerna publish from-git --yes
+          echo "🚀 Using from-package strategy for reliability..."
+          pnpm lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

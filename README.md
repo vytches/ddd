@@ -38,7 +38,7 @@ VytchesDDD is a comprehensive TypeScript framework for implementing
 Domain-Driven Design patterns in enterprise applications. Built with modern
 TypeScript and designed for both human developers and AI assistants, it provides
 a complete toolkit for building scalable, maintainable, and testable
-domain-centric applications.
+domain-centric applications
 
 ### Philosophy
 
