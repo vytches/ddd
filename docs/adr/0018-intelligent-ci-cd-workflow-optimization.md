@@ -316,25 +316,306 @@ source_code_paths:
   - 'scripts/**/*.js'
 ```
 
-## Error Recovery and Debugging
+## Release Failure Recovery Guide
 
-### **Failed Release Recovery (Context-Aware)**
+### **🚨 Quick Emergency Reference**
 
 ```bash
-# Standard release failure
-git reset --hard HEAD~1  # Undo version commit
-git tag -d v1.2.0        # Delete created tag
-pnpm release:dry         # Preview what would happen
-# → Manual trigger with full validation
+# 🔍 IMMEDIATE DIAGNOSIS
+git status                           # Check git state
+git tag --list | tail -5            # Check recent tags
+pnpm lerna changed                   # Check what needs release
+pnpm release:preview                 # See what would happen
 
-# Hotfix release failure
-git reset --hard HEAD~1
-git tag -d v1.2.1
-# → Manual trigger with hotfix context (quick validation)
+# 🔧 RESET COMMANDS (when versioning fails)
+git reset --hard HEAD~1             # Undo version commit
+git tag -d v1.2.0                   # Delete local tag
+git push origin :refs/tags/v1.2.0   # Delete remote tag
 
-# Emergency bypass (if all automation fails)
-pnpm lerna version patch --no-conventional-commits --no-push
+# 📦 RE-PUBLISH ONLY (when only publish fails)
+pnpm lerna publish from-git --yes   # Use existing version/tags
+
+# 🆘 MANUAL BYPASS (emergency situations only)
+pnpm lerna version patch --no-git-tag-version --no-push --yes
+git add . && git commit -m "chore(release): publish packages"
+git tag v1.2.0 && git push origin main --follow-tags
 pnpm lerna publish from-git --yes
+```
+
+### **🎯 Failure Decision Tree**
+
+```
+Release Workflow Failed
+│
+├── Step 1: Validation Failed?
+│   ├── → Fix code locally
+│   ├── → git commit -m "fix: resolve validation issues"
+│   ├── → git push origin main
+│   └── → Retry release via GitHub UI
+│
+├── Step 2: Versioning Failed?
+│   ├── Git Conflicts:
+│   │   ├── → git status (identify conflicts)
+│   │   ├── → Resolve conflicts manually
+│   │   ├── → git add . && git commit
+│   │   └── → Retry release
+│   │
+│   ├── Tag Already Exists:
+│   │   ├── → git tag -d v1.2.0
+│   │   ├── → git push origin :refs/tags/v1.2.0
+│   │   └── → Retry release
+│   │
+│   └── Lerna Error:
+│       ├── → git reset --hard HEAD~1 (if commit made)
+│       ├── → Clean working directory
+│       └── → Retry release
+│
+└── Step 3: Publishing Failed?
+    ├── Authentication Issues:
+    │   ├── → Check GitHub token permissions
+    │   ├── → Verify NODE_AUTH_TOKEN in Actions
+    │   └── → Re-run publish job only
+    │
+    ├── Registry Issues:
+    │   ├── → Check GitHub Packages status
+    │   ├── → Wait for registry recovery
+    │   └── → Manual publish: pnpm lerna publish from-git
+    │
+    └── Partial Publish:
+        ├── → Identify failed packages
+        ├── → Manual publish individual packages
+        └── → npm publish (for specific packages)
+```
+
+### **📋 Detailed Recovery Scenarios**
+
+#### **Scenario A: Validation Fails (After CI Passed)**
+
+**Symptoms:**
+
+- CI workflow passed on PR
+- Release workflow validation step fails
+- Tests/lint/type-check fail in Release context
+
+**Diagnosis:**
+
+```bash
+# Check what's different between CI and Release environments
+pnpm test                    # Run tests locally
+pnpm lint                    # Check linting locally
+pnpm type-check             # Verify TypeScript
+pnpm build                  # Try building all packages
+```
+
+**Recovery Steps:**
+
+```bash
+# 1. Fix issues locally
+git checkout main
+git pull origin main
+# Fix the failing validation issues
+git commit -m "fix: resolve validation issues for release"
+git push origin main
+
+# 2. Retry release
+# → Go to GitHub Actions → Release → Run workflow → Select release type
+```
+
+**Prevention:**
+
+- Ensure CI and Release environments are identical
+- Add pre-release validation: `pnpm prerelease`
+- Lock dependency versions consistently
+
+#### **Scenario B: Versioning Fails**
+
+**Symptoms:**
+
+- Validation passed
+- `lerna version` command fails
+- Git conflicts or tag issues
+
+**Diagnosis:**
+
+```bash
+git status                   # Check for uncommitted changes
+git log --oneline -5        # Check recent commits
+git tag --list | tail -10   # Check existing tags
+git remote -v               # Verify remote configuration
+```
+
+**Recovery Steps:**
+
+**B1: Git Conflicts**
+
+```bash
+# Check and resolve conflicts
+git status
+# Manually resolve conflicts in affected files
+git add .
+git commit -m "resolve: fix merge conflicts for release"
+git push origin main
+# → Retry release via GitHub UI
+```
+
+**B2: Tag Already Exists**
+
+```bash
+# Remove problematic tag
+git tag -d v1.2.0                    # Delete local tag
+git push origin :refs/tags/v1.2.0    # Delete remote tag
+# → Retry release via GitHub UI
+```
+
+**B3: Version Commit Made But Failed**
+
+```bash
+# Undo the version commit
+git reset --hard HEAD~1              # Undo version changes
+git push origin main --force-with-lease  # Update remote (careful!)
+# → Retry release via GitHub UI
+```
+
+#### **Scenario C: Publishing Fails**
+
+**Symptoms:**
+
+- Validation and versioning succeeded
+- Version commit exists, tags created
+- `lerna publish` fails
+
+**Diagnosis:**
+
+```bash
+# Check git state
+git log --oneline -3        # Verify version commit exists
+git tag --list | tail -3    # Verify tags were created
+pnpm lerna changed          # Should show "No changed packages"
+
+# Check publishing status
+npm whoami                  # Verify authentication
+npm config get registry     # Check registry configuration
+```
+
+**Recovery Steps:**
+
+**C1: Authentication Issues**
+
+```bash
+# Check token permissions in GitHub
+# → Settings → Developer settings → Personal access tokens
+# → Verify packages:write permission
+
+# Re-run only the failed publish job
+# → GitHub Actions → Release → Re-run failed jobs
+```
+
+**C2: Registry Temporarily Down**
+
+```bash
+# Wait for registry recovery, then manual publish
+pnpm lerna publish from-git --yes
+
+# Alternative: Publish individual packages
+cd packages/[package-name]
+npm publish
+```
+
+**C3: Partial Publish Success**
+
+```bash
+# Identify which packages failed
+pnpm lerna changed                    # Should show failed packages
+
+# Publish failed packages individually
+cd packages/[failed-package]
+npm publish
+
+# Or retry all from git tags
+pnpm lerna publish from-git --yes
+```
+
+### **⚡ Emergency Bypass Procedures**
+
+**When All Automation Fails:**
+
+```bash
+# STEP 1: Manual versioning (no git operations)
+pnpm lerna version patch --no-git-tag-version --no-push --yes
+
+# STEP 2: Manual git operations
+git add .
+git commit -m "chore(release): publish packages"
+git tag v1.2.0
+git push origin main --follow-tags
+
+# STEP 3: Manual publishing
+pnpm lerna publish from-git --yes
+
+# STEP 4: Verify success
+pnpm lerna changed                    # Should show "No changed packages"
+git tag --list | tail -3             # Verify tag exists
+```
+
+### **🕐 Recovery Time Estimates**
+
+| Failure Type           | Typical Recovery Time | Complexity Level |
+| ---------------------- | --------------------- | ---------------- |
+| **Validation Failure** | 5-15 minutes          | 🟢 Easy          |
+| **Git Conflicts**      | 5-10 minutes          | 🟡 Medium        |
+| **Tag Conflicts**      | 2-5 minutes           | 🟢 Easy          |
+| **Auth Issues**        | 3-8 minutes           | 🟡 Medium        |
+| **Registry Down**      | 10-60 minutes         | 🔴 Hard (wait)   |
+| **Partial Publish**    | 10-30 minutes         | 🔴 Hard          |
+| **Complete Bypass**    | 15-25 minutes         | 🔴 Hard          |
+
+### **✅ Prevention Checklist**
+
+**Before Every Release:**
+
+- [ ] `git status` - Clean working directory
+- [ ] `git pull origin main` - Latest changes
+- [ ] `pnpm install` - Updated dependencies
+- [ ] `pnpm release:preview` - Preview what will happen
+- [ ] `pnpm prerelease` - Local validation first
+- [ ] Check GitHub token expiration
+- [ ] Verify GitHub Packages registry status
+
+**Monitoring Setup:**
+
+- [ ] GitHub Actions failure notifications enabled
+- [ ] Registry status monitoring configured
+- [ ] Token expiration alerts set up
+- [ ] Team notification channels configured
+
+### **🔍 Troubleshooting Commands**
+
+**Git State Analysis:**
+
+```bash
+git status                           # Working directory state
+git log --oneline -5                # Recent commits
+git tag --list | tail -10           # Recent tags
+git remote show origin              # Remote configuration
+git branch -vv                      # Branch tracking info
+```
+
+**Lerna State Analysis:**
+
+```bash
+pnpm lerna changed                   # Packages needing release
+pnpm lerna list                     # All packages
+pnpm lerna ls --since HEAD~1        # Changes since last commit
+pnpm release:collect                # Collect release notes
+```
+
+**Registry & Auth Analysis:**
+
+```bash
+npm whoami                          # Current authentication
+npm config get registry            # Registry configuration
+npm config list                    # All npm configuration
+pnpm audit --fix                   # Security audit
 ```
 
 ## Quality Gates Integration

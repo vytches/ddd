@@ -148,7 +148,8 @@ export function createFoundationConfig(packagePath: string = __dirname) {
 
   return defineConfig({
     plugins: [
-      // Only generate DTS for non-meta packages
+      // Generate DTS for non-meta packages only
+      // Meta packages use custom template via generate-meta-types.js
       ...(isMetaPackage
         ? []
         : [
