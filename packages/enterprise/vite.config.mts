@@ -18,7 +18,7 @@ export default defineConfig({
       // Bundle all dependencies for proper type resolution
       bundledPackages: [
         '@vytches/ddd-acl',
-        '@vytches/ddd-aggregates', 
+        '@vytches/ddd-aggregates',
         '@vytches/ddd-contracts',
         '@vytches/ddd-core',
         '@vytches/ddd-cqrs',
@@ -33,8 +33,8 @@ export default defineConfig({
         '@vytches/ddd-resilience',
         '@vytches/ddd-utils',
         '@vytches/ddd-validation',
-        '@vytches/ddd-value-objects'
-      ]
+        '@vytches/ddd-value-objects',
+      ],
     }),
   ],
 });
