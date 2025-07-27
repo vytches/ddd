@@ -15,3 +15,6 @@
 - [13. enterprise-documentation-standards-and-llm-optimization](0013-enterprise-documentation-standards-and-llm-optimization.md)
 - [14. di-integration-bridge-pattern-for-framework-compatibility](0014-di-integration-bridge-pattern-for-framework-compatibility.md)
 - [15. individual-example-system-for-documentation-generation](0015-individual-example-system-for-documentation-generation.md)
+- [16. 0016-publish-individual-packages-to-github-packages](0016-publish-individual-packages-to-github-packages.md)
+- [17. 0017-vytches-organization-naming-convention](0017-vytches-organization-naming-convention.md)
+- [18. 0018-intelligent-ci-cd-workflow-optimization](0018-intelligent-ci-cd-workflow-optimization.md)
