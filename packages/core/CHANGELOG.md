@@ -3,6 +3,59 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/vytches/ddd/compare/@vytches/ddd-core@0.3.11...@vytches/ddd-core@0.4.0) (2025-07-28)
+
+- Release/2025 07 28 1 (#24)
+  ([4d6f93a](https://github.com/vytches/ddd/commit/4d6f93ac80407ce7cc7106869bb12b756bc0c72c)),
+  closes [#24](https://github.com/vytches/ddd/issues/24)
+
+### BREAKING CHANGES
+
+- Enterprise package no longer bundles dependencies. Users must install all
+  required @vytches/ddd-\* packages.
+
+This aligns with industry standards (TanStack Query, Zod) where meta-packages
+are thin re-export layers, not fat bundles.
+
+- refactor: build refactored
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.3.12
+* @vytches/ddd-aggregates@0.3.12
+* @vytches/ddd-cli@0.4.12
+* @vytches/ddd-contracts@0.4.12
+* @vytches/ddd-core@0.3.12
+* @vytches/ddd-cqrs@0.3.12
+* @vytches/ddd-di@0.3.12
+* @vytches/ddd-domain-primitives@0.3.12
+* @vytches/ddd-domain-services@0.3.12
+* @vytches/ddd@0.4.0
+* @vytches/ddd-event-scheduling@0.3.12
+* @vytches/ddd-event-store@0.3.12
+* @vytches/ddd-events@0.3.12
+* @vytches/ddd-logging@0.3.12
+* @vytches/ddd-messaging@0.3.12
+* @vytches/ddd-policies@0.4.12
+* @vytches/ddd-projections@0.3.12
+* @vytches/ddd-repositories@0.3.12
+* @vytches/ddd-resilience@0.3.12
+* @vytches/ddd-testing@0.3.10
+* @vytches/ddd-utils@0.3.10
+* @vytches/ddd-validation@0.3.12
+* @vytches/ddd-value-objects@0.3.12
+
+- refactor: build refactored
+
+- refactor: build refactored
+
+- refactor: build refactored
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.3.12](https://github.com/vytches/ddd/compare/@vytches/ddd-core@0.3.11...@vytches/ddd-core@0.3.12) (2025-07-28)
 
 **Note:** Version bump only for package @vytches/ddd-core
