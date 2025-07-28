@@ -821,6 +821,9 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils

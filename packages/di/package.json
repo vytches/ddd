@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-di",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "Enterprise dependency injection with auto-discovery",
   "type": "module",
   "main": "./dist/index.cjs",
