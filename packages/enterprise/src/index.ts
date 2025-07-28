@@ -134,7 +134,8 @@ export * from '@vytches/ddd-aggregates';
 
 // ===== PATTERN LAYER =====
 export * from '@vytches/ddd-validation';
-export * from '@vytches/ddd-domain-services';
+// TODO: Fix domain-services build issue - missing .js files for sub-modules
+// export * from '@vytches/ddd-domain-services';
 export * from '@vytches/ddd-policies';
 
 // ===== ARCHITECTURE LAYER =====
