@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-value-objects",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "Enhanced value objects and EntityId implementations",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
   },
   "devDependencies": {

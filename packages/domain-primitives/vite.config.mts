@@ -1,3 +1,3 @@
-// Foundation package - uses shared vite template from utils
-import { createFoundationConfig } from '../utils/vite.config.mts';
+// Domain primitives package - foundation layer with new optimized config
+import { createFoundationConfig } from '../utils/build-configs';
 export default createFoundationConfig(__dirname);

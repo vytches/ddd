@@ -473,6 +473,15 @@ importers:
       '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
+      '@vytches/ddd-domain-services':
+        specifier: workspace:*
+        version: link:../domain-services
+      '@vytches/ddd-event-scheduling':
+        specifier: workspace:*
+        version: link:../event-scheduling
+      '@vytches/ddd-event-store':
+        specifier: workspace:*
+        version: link:../event-store
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
@@ -812,6 +821,9 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils

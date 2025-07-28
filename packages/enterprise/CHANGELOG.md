@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/vytches/ddd/compare/@vytches/ddd@0.3.14...@vytches/ddd@0.4.0) (2025-07-28)
+
+### Features
+
+- transform enterprise package to proper meta-package architecture
+  ([b698f8c](https://github.com/vytches/ddd/commit/b698f8c933404e373928d360e68e49ffee9aae32))
+
+### BREAKING CHANGES
+
+- Enterprise package no longer bundles dependencies. Users must install all
+  required @vytches/ddd-\* packages.
+
+This aligns with industry standards (TanStack Query, Zod) where meta-packages
+are thin re-export layers, not fat bundles.
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.3.14](https://github.com/vytches/ddd/compare/@vytches/ddd@0.3.12...@vytches/ddd@0.3.14) (2025-07-27)
 
 **Note:** Version bump only for package @vytches/ddd
