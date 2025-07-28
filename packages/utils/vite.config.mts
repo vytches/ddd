@@ -4,18 +4,23 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
 
-// Package type detection - determines build configuration
+// Modern build configuration system
+export {
+  createPackageConfig,
+  createFoundationConfig,
+  createMetaPackageConfig,
+  createPatternConfig,
+  createArchitectureConfig,
+  createInfrastructureConfig,
+  type PackageConfigOptions,
+  type PackageType,
+  type BundleStrategy,
+} from './build-configs';
+
+// Legacy configuration for utils package itself
 const packageJsonContent = readFileSync('./package.json', 'utf-8');
 const packageJson = JSON.parse(packageJsonContent);
 const packageName = packageJson.name?.split('/')[1] || 'unknown';
-
-// Meta package detection: enterprise package that re-exports many packages
-const isMetaPackage =
-  packageName === 'enterprise' ||
-  packageName === 'ddd' ||
-  (packageJson.dependencies &&
-    Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length >=
-      5);
 
 // Complete dependencies that should be available in test environment
 const commonTestAliases = {
@@ -43,208 +48,42 @@ const commonTestAliases = {
   '@vytches/ddd-enterprise': resolve(__dirname, '../enterprise/src/index.ts'),
 };
 
-// Determine package type based on dependencies and devDependencies
-const isFoundationPackage =
-  !isMetaPackage &&
-  (!packageJson.dependencies ||
-    Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length <=
-      2);
-
-// Determine required dependencies based on package type
-function getPackageDependencies(): Record<string, string> {
-  if (isMetaPackage) {
-    // Meta packages don't need aliases - they re-export from dependencies
-    return {};
-  }
-
-  if (isFoundationPackage) {
-    // Foundation packages (only need utils and contracts)
-    return {
-      '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
-      '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
-    };
-  }
-
-  // Higher-level packages (need core + specific dependencies)
-  return {
-    '@vytches/ddd-core': resolve(__dirname, '../core/src/index.ts'),
-    '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
-    '@vytches/ddd-logging': commonTestAliases['@vytches/ddd-logging'],
-    '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
-  };
-}
-
-const buildAliases = getPackageDependencies();
-
-// Shared configuration function for foundation packages
-export function createFoundationConfig(packagePath: string = __dirname) {
-  // Read package.json from the specific package directory
-  const packageJsonContent = readFileSync(resolve(packagePath, 'package.json'), 'utf-8');
-  const packageJson = JSON.parse(packageJsonContent);
-  const packageName = packageJson.name?.split('/')[1] || 'unknown';
-
-  // Meta package detection: enterprise package that re-exports many packages
-  const isMetaPackage =
-    packageName === 'enterprise' ||
-    packageName === 'ddd' ||
-    (packageJson.dependencies &&
-      Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length >=
-        5);
-
-  // Determine package type based on dependencies and devDependencies
-  const isFoundationPackage =
-    !isMetaPackage &&
-    (!packageJson.dependencies ||
-      Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length <=
-        2);
-
-  // Determine required dependencies based on package type
-  function getPackageDependencies(): Record<string, string> {
-    if (isMetaPackage) {
-      // Meta packages need aliases to ALL dependencies to bundle them
-      return {
-        '@vytches/ddd-utils': resolve(packagePath, '../utils/src/index.ts'),
-        '@vytches/ddd-contracts': resolve(packagePath, '../contracts/src/index.ts'),
-        '@vytches/ddd-domain-primitives': resolve(packagePath, '../domain-primitives/src/index.ts'),
-        '@vytches/ddd-value-objects': resolve(packagePath, '../value-objects/src/index.ts'),
-        '@vytches/ddd-repositories': resolve(packagePath, '../repositories/src/index.ts'),
-        '@vytches/ddd-aggregates': resolve(packagePath, '../aggregates/src/index.ts'),
-        '@vytches/ddd-core': resolve(packagePath, '../core/src/index.ts'),
-        '@vytches/ddd-logging': resolve(packagePath, '../logging/src/index.ts'),
-        '@vytches/ddd-events': resolve(packagePath, '../events/src/index.ts'),
-        '@vytches/ddd-cqrs': resolve(packagePath, '../cqrs/src/index.ts'),
-        '@vytches/ddd-di': resolve(packagePath, '../di/src/index.ts'),
-        '@vytches/ddd-validation': resolve(packagePath, '../validation/src/index.ts'),
-        '@vytches/ddd-policies': resolve(packagePath, '../policies/src/index.ts'),
-        '@vytches/ddd-domain-services': resolve(packagePath, '../domain-services/src/index.ts'),
-        '@vytches/ddd-projections': resolve(packagePath, '../projections/src/index.ts'),
-        '@vytches/ddd-acl': resolve(packagePath, '../acl/src/index.ts'),
-        '@vytches/ddd-messaging': resolve(packagePath, '../messaging/src/index.ts'),
-        '@vytches/ddd-resilience': resolve(packagePath, '../resilience/src/index.ts'),
-        '@vytches/ddd-event-store': resolve(packagePath, '../event-store/src/index.ts'),
-        '@vytches/ddd-event-scheduling': resolve(packagePath, '../event-scheduling/src/index.ts'),
-        '@vytches/ddd-testing': resolve(packagePath, '../testing/src/index.ts'),
-      };
-    }
-
-    if (isFoundationPackage) {
-      // Foundation packages (only need utils and contracts)
-      return {
-        '@vytches/ddd-utils': resolve(packagePath, '../utils/src/index.ts'),
-        '@vytches/ddd-contracts': resolve(packagePath, '../contracts/src/index.ts'),
-      };
-    }
-
-    // Higher-level packages (need core + specific dependencies)
-    return {
-      '@vytches/ddd-core': resolve(packagePath, '../core/src/index.ts'),
-      '@vytches/ddd-contracts': resolve(packagePath, '../contracts/src/index.ts'),
-      '@vytches/ddd-logging': resolve(packagePath, '../logging/src/index.ts'),
-      '@vytches/ddd-utils': resolve(packagePath, '../utils/src/index.ts'),
-    };
-  }
-
-  const buildAliases = getPackageDependencies();
-
-  return defineConfig({
-    plugins: [
-      // Generate DTS for non-meta packages only
-      // Meta packages use custom template via generate-meta-types.js
-      ...(isMetaPackage
-        ? []
-        : [
-            dts({
-              insertTypesEntry: true,
-              exclude: ['**/*.spec.ts', '**/*.test.ts'],
-              outDir: 'dist',
-              entryRoot: 'src',
-            }),
-          ]),
-    ],
-    resolve: {
-      alias: {
-        ...buildAliases,
-        // Foundation packages need aliasing to bundle @vytches dependencies
-        ...(isFoundationPackage
-          ? {
-              '@vytches/ddd-domain-primitives': resolve(
-                packagePath,
-                '../domain-primitives/src/index.ts'
-              ),
-              '@vytches/ddd-value-objects': resolve(packagePath, '../value-objects/src/index.ts'),
-              '@vytches/ddd-repositories': resolve(packagePath, '../repositories/src/index.ts'),
-              '@vytches/ddd-aggregates': resolve(packagePath, '../aggregates/src/index.ts'),
-              '@vytches/ddd-utils': resolve(packagePath, '../utils/src/index.ts'),
-              '@vytches/ddd-contracts': resolve(packagePath, '../contracts/src/index.ts'),
-            }
-          : {}),
-      },
-    },
-    build: {
+// Utils package configuration (bundles everything, no dependencies)
+export default defineConfig({
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      exclude: ['**/*.spec.ts', '**/*.test.ts'],
       outDir: 'dist',
-      lib: {
-        entry: resolve(packagePath, 'src/index.ts'), // Use package-specific entry
-        name: `VytchesDDD${packageName.charAt(0).toUpperCase() + packageName.slice(1).replace(/-([a-z])/g, (_match: string, letter: string) => letter.toUpperCase())}`,
-        formats: ['es', 'cjs'],
-        fileName: format => `index.${format === 'es' ? 'js' : format}`,
-      },
-      rollupOptions: {
-        external: id => {
-          if (isMetaPackage) {
-            // Meta-packages should BUNDLE all @vytches/ddd-* dependencies to re-export them
-            // Only externalize real npm packages (uuid, etc.)
-            if (id.startsWith('@vytches/ddd-')) return false; // Bundle @vytches packages
-            if (id.includes('src/')) return false; // Bundle source files
-            if (id.startsWith('./') || id.startsWith('../')) return false; // Bundle relative imports
-            if (id.includes('packages/') && id.includes('vytches-ddd')) return false; // Bundle resolved paths
-
-            // Only externalize real npm packages
-            return true;
-          }
-
-          // Utils package should bundle everything (no dependencies)
-          if (packageName === 'utils') {
-            return false; // Bundle everything
-          }
-
-          if (isFoundationPackage) {
-            // Foundation packages: bundle ALL internal files and @vytches packages
-            if (id.startsWith('@vytches/ddd-')) return false; // Bundle @vytches packages
-            if (id.includes('src/')) return false; // Bundle source files
-            if (id.startsWith('./') || id.startsWith('../')) return false; // Bundle relative imports
-            if (id.includes('packages/') && id.includes('vytches-ddd')) return false; // Bundle resolved paths
-
-            // Only externalize real npm packages (like uuid, etc.)
-            return true;
-          }
-
-          // Higher-level packages - externalize @vytches dependencies
-          return (
-            id.startsWith('@vytches/ddd-') ||
-            (!id.includes('src/') && !id.startsWith('./') && !id.startsWith('../'))
-          );
-        },
-      },
-      sourcemap: false, // Disable source maps for production builds
-      target: 'ES2020',
-      emptyOutDir: true,
+      entryRoot: 'src',
+    }),
+  ],
+  build: {
+    outDir: 'dist',
+    lib: {
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'VytchesDDDUtils',
+      formats: ['es', 'cjs'],
+      fileName: format => `index.${format === 'es' ? 'js' : format}`,
     },
-    test: {
-      globals: true,
-      environment: 'node',
-      include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-      passWithNoTests: true,
-      coverage: {
-        enabled: false,
-      },
-      alias: {
-        // All packages need all common aliases for testing
-        ...commonTestAliases,
-        // Add current package alias for self-imports in tests
-        [`@vytches/ddd-${packageName}`]: resolve(packagePath, 'src/index.ts'),
-      },
+    rollupOptions: {
+      external: () => false, // Utils bundles everything
     },
-  });
-}
-
-export default createFoundationConfig();
+    sourcemap: false,
+    target: 'ES2020',
+    emptyOutDir: true,
+  },
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    passWithNoTests: true,
+    coverage: {
+      enabled: false,
+    },
+    alias: {
+      ...commonTestAliases,
+      '@vytches/ddd-utils': resolve(__dirname, 'src/index.ts'),
+    },
+  },
+});

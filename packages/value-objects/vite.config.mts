@@ -1,3 +1,3 @@
-// Foundation package - uses shared vite template from utils
-import { createFoundationConfig } from '../utils/vite.config.mts';
-export default createFoundationConfig(__dirname);
+// Value objects package - pattern layer (depends on domain-primitives)
+import { createPatternConfig } from '../utils/build-configs';
+export default createPatternConfig(__dirname);

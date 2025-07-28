@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
   },
   "devDependencies": {

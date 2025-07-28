@@ -66,6 +66,7 @@
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-domain-services": "workspace:*",
     "@vytches/ddd-event-scheduling": "workspace:*",
     "@vytches/ddd-event-store": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
