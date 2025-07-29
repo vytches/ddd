@@ -11,7 +11,6 @@ import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
  * @description
  * QueryHandler function implementing architectural component for query handler operations.
  *
- *
  * @param {new (...args: unknown[]} queryType - queryType parameter
  * @throws {Error} When validation fails
  *
@@ -20,13 +19,7 @@ import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
  * // Basic usage
  * const result = QueryHandler(queryType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => QueryHandler(queryType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

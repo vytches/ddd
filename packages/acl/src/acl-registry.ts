@@ -64,16 +64,7 @@ export interface ImportResult {
  * // Basic usage
  * const instance = new ACLRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ACLRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

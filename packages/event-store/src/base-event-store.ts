@@ -35,16 +35,7 @@ import type { ILogger } from '@vytches/ddd-logging';
  * // Basic usage
  * const instance = new BaseEventStore();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseEventStore());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -41,16 +41,7 @@ export type DomainErrorOptions = ErrorOptions & {
  * // Basic usage
  * const instance = new IDomainError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IDomainError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -107,20 +98,15 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
  * // Basic usage
  * const instance = new MissingValueError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new MissingValueError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
 export class MissingValueError extends IDomainError {
+  /**
+   * Create MissingValueError with value
+   * @example-inject
+   */
   static withValue(msg: string, data?: DomainErrorOptions): MissingValueError {
     const message = msg ?? 'Missing value';
     const options = {
@@ -144,20 +130,14 @@ export class MissingValueError extends IDomainError {
  * // Basic usage
  * const instance = new InvalidParameterError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new InvalidParameterError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
 export class InvalidParameterError extends IDomainError {
+  /**
+   * Create InvalidParameterError with parameter details
+   */
   static withParameter(
     parameter: string,
     msg?: string,
@@ -186,20 +166,14 @@ export class InvalidParameterError extends IDomainError {
  * // Basic usage
  * const instance = new DuplicateError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DuplicateError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
 export class DuplicateError extends IDomainError {
+  /**
+   * Create DuplicateError with entity ID
+   */
   static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
     const message = `Entity with id ${id} already exists`;
     const options = {
@@ -223,16 +197,7 @@ export class DuplicateError extends IDomainError {
  * // Basic usage
  * const instance = new NotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new NotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

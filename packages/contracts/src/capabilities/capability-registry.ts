@@ -13,16 +13,7 @@ import type { Capability, CapabilityConstructor, CapabilityType } from './capabi
  * // Basic usage
  * const instance = new CapabilityRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CapabilityRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -132,13 +123,7 @@ export class CapabilityRegistry<
  * // Basic usage
  * const result = createCapabilityRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createCapabilityRegistry());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

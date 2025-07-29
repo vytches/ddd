@@ -19,16 +19,7 @@ import { ProjectionError } from '../projection-errors';
  * // Basic usage
  * const instance = new BaseIntervalCapability();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseIntervalCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

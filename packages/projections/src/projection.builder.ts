@@ -31,16 +31,7 @@ import type {
  * // Basic usage
  * const instance = new ProjectionBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -92,16 +83,7 @@ export class ProjectionBuilder<TReadModel> {
  * // Basic usage
  * const instance = new EnhancedProjectionBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedProjectionBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

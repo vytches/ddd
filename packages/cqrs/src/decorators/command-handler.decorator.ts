@@ -11,7 +11,6 @@ import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
  * @description
  * CommandHandler function implementing architectural component for command handler operations.
  *
- *
  * @param {new (...args: unknown[]} commandType - commandType parameter
  * @throws {Error} When validation fails
  *
@@ -20,13 +19,7 @@ import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
  * // Basic usage
  * const result = CommandHandler(commandType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => CommandHandler(commandType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

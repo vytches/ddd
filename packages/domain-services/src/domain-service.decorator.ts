@@ -117,7 +117,6 @@ export interface DomainServiceOptions {
  * @description
  * DomainService function implementing domain pattern implementation for domain service operations.
  *
- *
  * @param {string | DomainServiceOptions | EnhancedDomainServiceOptions} options - options parameter
  * @throws {Error} When validation fails
  *
@@ -126,13 +125,7 @@ export interface DomainServiceOptions {
  * // Basic usage
  * const result = DomainService(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => DomainService(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -236,7 +229,6 @@ export function getDIDomainServiceMetadata(target: unknown): DIServiceMetadata |
  * @description
  * isDomainServicePendingDIRegistration function implementing domain pattern implementation for is domain service pending d i registration operations.
  *
- *
  * @param {unknown} target - target parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
@@ -246,13 +238,7 @@ export function getDIDomainServiceMetadata(target: unknown): DIServiceMetadata |
  * // Basic usage
  * const result = isDomainServicePendingDIRegistration(target);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isDomainServicePendingDIRegistration(target));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

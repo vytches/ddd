@@ -49,7 +49,6 @@ export const SAGA_TYPE_METADATA_KEY = Symbol('saga:type');
  * @description
  * Saga function implementing integration layer component for saga operations.
  *
- *
  * @param {SagaDecoratorOptions} options - options parameter
  * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
  * @throws {Error} When validation fails
@@ -59,13 +58,7 @@ export const SAGA_TYPE_METADATA_KEY = Symbol('saga:type');
  * // Basic usage
  * const result = Saga(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => Saga(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -79,7 +72,6 @@ export function Saga(options: SagaDecoratorOptions): <T extends Constructor>(tar
  * @description
  * Saga function implementing integration layer component for saga operations.
  *
- *
  * @param {string} sagaType - sagaType parameter
  * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
  * @throws {Error} When validation fails
@@ -89,13 +81,7 @@ export function Saga(options: SagaDecoratorOptions): <T extends Constructor>(tar
  * // Basic usage
  * const result = Saga(sagaType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => Saga(sagaType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -109,7 +95,6 @@ export function Saga(sagaType: string): <T extends Constructor>(target: T) => T;
  * @description
  * Saga function implementing integration layer component for saga operations.
  *
- *
  * @param {SagaDecoratorOptions | string} optionsOrType - optionsOrType parameter
  * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
  * @throws {Error} When validation fails
@@ -119,13 +104,7 @@ export function Saga(sagaType: string): <T extends Constructor>(target: T) => T;
  * // Basic usage
  * const result = Saga(optionsOrType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => Saga(optionsOrType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -229,7 +208,6 @@ export function getSagaType(target: Constructor): string | undefined {
  * @description
  * isSagaClass function implementing integration layer component for is saga class operations.
  *
- *
  * @param {Constructor} target - target parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
@@ -239,13 +217,7 @@ export function getSagaType(target: Constructor): string | undefined {
  * // Basic usage
  * const result = isSagaClass(target);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isSagaClass(target));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -261,7 +233,6 @@ export function isSagaClass(target: Constructor): boolean {
  * @description
  * getAllSagaTypes function implementing integration layer component for get all saga types operations.
  *
- *
  * @param {Constructor[]} targets - targets parameter
  * @returns {string[]} Returns string[]
  * @throws {Error} When validation fails
@@ -271,13 +242,7 @@ export function isSagaClass(target: Constructor): boolean {
  * // Basic usage
  * const result = getAllSagaTypes(targets);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getAllSagaTypes(targets));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

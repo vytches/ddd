@@ -38,16 +38,7 @@ export interface ConsoleProviderOptions {
  * // Basic usage
  * const instance = new ConsoleProvider();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConsoleProvider());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

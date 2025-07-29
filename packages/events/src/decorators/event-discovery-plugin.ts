@@ -34,16 +34,7 @@ import type { DIHandlerMetadata } from './di-types';
  * // Basic usage
  * const instance = new EventDiscoveryPlugin();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventDiscoveryPlugin());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -50,16 +50,7 @@ export interface PatternDefinition {
  * // Basic usage
  * const instance = new PatternRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PatternRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

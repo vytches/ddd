@@ -15,16 +15,7 @@ import { PolicyContextBuilder } from './policy-context-builder';
  * // Basic usage
  * const instance = new PolicyRequestBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRequestBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -187,16 +178,7 @@ export class PolicyRequestBuilder<T> {
  * // Basic usage
  * const instance = new PolicyRequestFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRequestFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

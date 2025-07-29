@@ -11,7 +11,6 @@ import type { IAuditable } from './audible.interface';
  * @description
  * captureState function implementing architectural component for capture state operations.
  *
- *
  * @param {ISpecification<T> | ((instance: T} conditionOrSpecification? - conditionOrSpecification? parameter
  * @param {any[]} args - args parameter
  * @returns {MethodDecorator} Returns MethodDecorator
@@ -22,13 +21,7 @@ import type { IAuditable } from './audible.interface';
  * // Basic usage
  * const result = captureState(conditionOrSpecification?, args);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => captureState(conditionOrSpecification?, args));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

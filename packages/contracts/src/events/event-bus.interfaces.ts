@@ -15,16 +15,7 @@ import type { IDomainEvent } from './domain-event-interfaces';
  * // Basic usage
  * const instance = new IEventBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

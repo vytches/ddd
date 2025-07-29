@@ -18,16 +18,7 @@ import type { IEntityId, IEntityIdConstructorParams, IdType } from './entity-id.
  * // Basic usage
  * const instance = new EntityId();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityId());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -18,16 +18,7 @@ import { BusinessRuleValidator } from './business-rule-validator';
  * // Basic usage
  * const instance = new BusinessRuleValidatorExtension();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BusinessRuleValidatorExtension());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

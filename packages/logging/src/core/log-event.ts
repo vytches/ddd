@@ -70,16 +70,7 @@ export interface LogEventBuilder {
  * // Basic usage
  * const instance = new DefaultLogEventBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultLogEventBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -50,7 +50,6 @@ export const LOG_LEVELS: Record<LogLevel, number> = {
  * @description
  * isLogLevelEnabled function implementing infrastructure service for is log level enabled operations.
  *
- *
  * @param {LogLevel} level - level parameter
  * @param {LogLevel} minLevel - minLevel parameter
  * @returns {boolean} Returns boolean
@@ -61,13 +60,7 @@ export const LOG_LEVELS: Record<LogLevel, number> = {
  * // Basic usage
  * const result = isLogLevelEnabled(level, minLevel);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isLogLevelEnabled(level, minLevel));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -83,7 +76,6 @@ export function isLogLevelEnabled(level: LogLevel, minLevel: LogLevel): boolean 
  * @description
  * parseLogLevel function implementing infrastructure service for parse log level operations.
  *
- *
  * @param {string} level - level parameter
  * @returns {LogLevel} Returns LogLevel
  * @throws {Error} When validation fails
@@ -93,13 +85,7 @@ export function isLogLevelEnabled(level: LogLevel, minLevel: LogLevel): boolean 
  * // Basic usage
  * const result = parseLogLevel(level);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => parseLogLevel(level));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

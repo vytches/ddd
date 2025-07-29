@@ -46,16 +46,7 @@ export interface ResilienceContext {
  * // Basic usage
  * const instance = new DefaultResilienceContext();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultResilienceContext());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -167,16 +158,7 @@ export class DefaultResilienceContext implements ResilienceContext {
  * // Basic usage
  * const instance = new TimeoutError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TimeoutError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -200,16 +182,7 @@ export class TimeoutError extends Error {
  * // Basic usage
  * const instance = new OperationCancelledError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OperationCancelledError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

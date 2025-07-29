@@ -147,16 +147,7 @@ export interface RetryMetrics {
  * // Basic usage
  * const instance = new PolicyRetryBehavior();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRetryBehavior());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -486,16 +477,7 @@ export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
  * // Basic usage
  * const instance = new PolicyRetryBehaviorFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRetryBehaviorFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

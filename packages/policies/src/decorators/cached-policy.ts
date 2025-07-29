@@ -172,16 +172,7 @@ class PolicyCache {
  * // Basic usage
  * const instance = new PolicyCachingBehavior();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyCachingBehavior());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -385,16 +376,7 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
  * // Basic usage
  * const instance = new PolicyCachingBehaviorFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyCachingBehaviorFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

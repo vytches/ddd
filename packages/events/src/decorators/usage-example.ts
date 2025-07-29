@@ -23,16 +23,7 @@ import { EventHandler } from './event-handler.decorator';
  * // Basic usage
  * const instance = new UserRegisteredEvent();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UserRegisteredEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -61,16 +52,7 @@ export class UserRegisteredEvent implements IDomainEvent {
  * // Basic usage
  * const instance = new OrderCreatedEvent();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OrderCreatedEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -100,16 +82,7 @@ export class OrderCreatedEvent implements IDomainEvent {
  * // Basic usage
  * const instance = new PaymentProcessedEvent();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PaymentProcessedEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -147,16 +120,7 @@ export class PaymentProcessedEvent implements IDomainEvent {
  * // Basic usage
  * const instance = new UserRegistrationNotificationHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UserRegistrationNotificationHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -193,16 +157,7 @@ export class UserRegistrationNotificationHandler implements IEventHandler<UserRe
  * // Basic usage
  * const instance = new OrderInventoryUpdateHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OrderInventoryUpdateHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -238,16 +193,7 @@ export class OrderInventoryUpdateHandler implements IEventHandler<OrderCreatedEv
  * // Basic usage
  * const instance = new PaymentConfirmationHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PaymentConfirmationHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -282,16 +228,7 @@ export class PaymentConfirmationHandler implements IEventHandler<PaymentProcesse
  * // Basic usage
  * const instance = new OrderAnalyticsHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OrderAnalyticsHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -320,16 +257,7 @@ export class OrderAnalyticsHandler implements IEventHandler<OrderCreatedEvent> {
  * // Basic usage
  * const instance = new LegacyUserHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new LegacyUserHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -356,16 +284,7 @@ export class LegacyUserHandler implements IEventHandler<UserRegisteredEvent> {
  * // Basic usage
  * const instance = new ManualPaymentHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ManualPaymentHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -391,13 +310,7 @@ export class ManualPaymentHandler implements IEventHandler<PaymentProcessedEvent
  * // Basic usage
  * const result = setupEventHandlersExample();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => setupEventHandlersExample());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -438,13 +351,7 @@ export function setupEventHandlersExample() {
  * // Basic usage
  * const result = exampleEventHandling();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => exampleEventHandling());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

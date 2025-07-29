@@ -13,16 +13,7 @@ import { BaseError } from '@vytches/ddd-core';
  * // Basic usage
  * const instance = new HandlerNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new HandlerNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

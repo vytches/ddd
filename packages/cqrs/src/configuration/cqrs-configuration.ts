@@ -16,16 +16,7 @@ import type { CQRSOptions } from './cqrs-options.interface';
  * // Basic usage
  * const instance = new CQRSConfiguration();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CQRSConfiguration());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

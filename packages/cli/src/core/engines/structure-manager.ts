@@ -52,16 +52,7 @@ export interface StructureConfig {
  * // Basic usage
  * const instance = new StructureManager();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new StructureManager());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -126,16 +126,7 @@ const DEFAULT_CONFIG: ChatHistoryConfig = {
  * // Basic usage
  * const instance = new ChatHistory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ChatHistory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

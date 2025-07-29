@@ -67,16 +67,7 @@ export interface IEventProcessor {
  * // Basic usage
  * const instance = new IEventDispatcher();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IEventDispatcher());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -110,16 +101,7 @@ export abstract class IEventDispatcher {
  * // Basic usage
  * const instance = new IEnhancedEventDispatcher();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IEnhancedEventDispatcher());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

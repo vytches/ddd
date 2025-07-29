@@ -3,7 +3,7 @@ import type {
   IAggregateCapability,
   IAggregateConstructorParams,
   IAggregateEventHandler,
-} from './aggregate-interfaces';
+} from '../aggregate-interfaces';
 
 import type {
   IExtendedDomainEvent,
@@ -22,20 +22,7 @@ import { createDomainEvent, CapabilityRegistry } from '@vytches/ddd-contracts';
  * @description
  * AggregateRoot class implementing domain pattern implementation for aggregate root operations.
  *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AggregateRoot();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AggregateRoot());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
+ * @example-inject
  *
  * @since 1.0.0
  * @public
@@ -58,10 +45,18 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // CORE AGGREGATE FUNCTIONALITY
   // ==========================================
 
+  /**
+   * Get the aggregate's unique identifier
+   * @example-inject
+   */
   getId(): EntityId<TId> {
     return this._id;
   }
 
+  /**
+   * Get the aggregate's current version for optimistic locking
+   * @example-inject
+   */
   getVersion(): number {
     return this._version;
   }
@@ -78,6 +73,10 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     return [...this._domainEvents];
   }
 
+  /**
+   * Clear uncommitted domain events after successful publishing
+   * @example-inject
+   */
   commit(): void {
     this._domainEvents = [];
     this._initialVersion = this._version;
@@ -232,4 +231,4 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
 }
 
 // Import capability classes for type checking
-import { VersioningCapability } from './capabilities/versioning-capability';
+import { VersioningCapability } from '../capabilities/versioning-capability';

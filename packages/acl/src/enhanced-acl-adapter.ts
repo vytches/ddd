@@ -25,16 +25,7 @@ import type { TypedOperation } from './typed-operations';
  * // Basic usage
  * const instance = new EnhancedACLAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -13,16 +13,7 @@ import type { IProjectionErrorStrategy, IProjectionRetryConfig } from './project
  * // Basic usage
  * const instance = new ExponentialBackoffStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ExponentialBackoffStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

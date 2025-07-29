@@ -25,16 +25,7 @@ import { ACLError } from './acl-errors';
  * // Basic usage
  * const instance = new BaseACLAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -186,16 +177,7 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
  * // Basic usage
  * const instance = new SimpleACLAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SimpleACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

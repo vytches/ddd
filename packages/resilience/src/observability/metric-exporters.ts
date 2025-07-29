@@ -25,16 +25,7 @@ import type {
  * // Basic usage
  * const instance = new JsonMetricExporter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new JsonMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -106,16 +97,7 @@ export class JsonMetricExporter implements MetricExporter {
  * // Basic usage
  * const instance = new PrometheusMetricExporter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PrometheusMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -245,16 +227,7 @@ export class PrometheusMetricExporter implements MetricExporter {
  * // Basic usage
  * const instance = new CsvMetricExporter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CsvMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -342,16 +315,7 @@ export class CsvMetricExporter implements MetricExporter {
  * // Basic usage
  * const instance = new TextMetricExporter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TextMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -434,16 +398,7 @@ export class TextMetricExporter implements MetricExporter {
  * // Basic usage
  * const instance = new CompositeMetricExporter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CompositeMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -526,16 +481,7 @@ export class CompositeMetricExporter implements MetricExporter {
  * // Basic usage
  * const instance = new MetricExporterFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new MetricExporterFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

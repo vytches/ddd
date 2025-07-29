@@ -11,7 +11,6 @@ import { SagaConfigurationError } from '../errors';
  * @description
  * CompensationHandler function implementing integration layer component for compensation handler operations.
  *
- *
  * @param {CompensationHandlerOptions} options - options parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -21,13 +20,7 @@ import { SagaConfigurationError } from '../errors';
  * // Basic usage
  * const result = CompensationHandler(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => CompensationHandler(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -41,7 +34,6 @@ export function CompensationHandler(options: CompensationHandlerOptions): Method
  * @description
  * CompensationHandler function implementing integration layer component for compensation handler operations.
  *
- *
  * @param {string} stepName - stepName parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -51,13 +43,7 @@ export function CompensationHandler(options: CompensationHandlerOptions): Method
  * // Basic usage
  * const result = CompensationHandler(stepName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => CompensationHandler(stepName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -71,7 +57,6 @@ export function CompensationHandler(stepName: string): MethodDecorator;
  * @description
  * CompensationHandler function implementing integration layer component for compensation handler operations.
  *
- *
  * @param {CompensationHandlerOptions | string} optionsOrStepName - optionsOrStepName parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -81,13 +66,7 @@ export function CompensationHandler(stepName: string): MethodDecorator;
  * // Basic usage
  * const result = CompensationHandler(optionsOrStepName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => CompensationHandler(optionsOrStepName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -162,7 +141,6 @@ export function getCompensationHandlerMetadata(
  * @description
  * getCompensationHandlerMethods function implementing integration layer component for get compensation handler methods operations.
  *
- *
  * @param {any} target - target parameter
  * @returns {Map<string, CompensationHandlerOptions>} Returns Map<string, CompensationHandlerOptions>
  * @throws {Error} When validation fails
@@ -172,13 +150,7 @@ export function getCompensationHandlerMetadata(
  * // Basic usage
  * const result = getCompensationHandlerMethods(target);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getCompensationHandlerMethods(target));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -197,7 +169,6 @@ export function getCompensationHandlerMethods(
  * @description
  * isCompensationHandlerMethod function implementing integration layer component for is compensation handler method operations.
  *
- *
  * @param {any} target - target parameter
  * @param {string} methodName - methodName parameter
  * @returns {boolean} Returns boolean
@@ -208,13 +179,7 @@ export function getCompensationHandlerMethods(
  * // Basic usage
  * const result = isCompensationHandlerMethod(target, methodName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isCompensationHandlerMethod(target, methodName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -231,7 +196,6 @@ export function isCompensationHandlerMethod(target: any, methodName: string): bo
  * @description
  * getCompensationHandlerForStep function implementing integration layer component for get compensation handler for step operations.
  *
- *
  * @param {any} target - target parameter
  * @param {string} stepName - stepName parameter
  * @returns {|} Returns |
@@ -242,13 +206,7 @@ export function isCompensationHandlerMethod(target: any, methodName: string): bo
  * // Basic usage
  * const result = getCompensationHandlerForStep(target, stepName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getCompensationHandlerForStep(target, stepName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -280,7 +238,6 @@ export function getCompensationHandlerForStep(
  * @description
  * getOrderedCompensationHandlers function implementing integration layer component for get ordered compensation handlers operations.
  *
- *
  * @param {any} target - target parameter
  * @returns {Array<} Returns Array<
  * @throws {Error} When validation fails
@@ -290,13 +247,7 @@ export function getCompensationHandlerForStep(
  * // Basic usage
  * const result = getOrderedCompensationHandlers(target);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getOrderedCompensationHandlers(target));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

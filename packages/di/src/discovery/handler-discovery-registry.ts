@@ -17,16 +17,7 @@ import type {
  * // Basic usage
  * const instance = new HandlerDiscoveryRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new HandlerDiscoveryRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

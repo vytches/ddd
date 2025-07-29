@@ -15,16 +15,7 @@ import type { IAggregateRoot } from '../aggregate-interfaces';
  * // Basic usage
  * const instance = new AuditCapability();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AuditCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

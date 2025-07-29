@@ -120,16 +120,7 @@ export interface PolicyEventBusMetrics {
  * // Basic usage
  * const instance = new PolicyEventBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -434,16 +425,7 @@ export const globalPolicyEventBus = new PolicyEventBus({
  * // Basic usage
  * const instance = new PolicyEventHandlers();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyEventHandlers());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

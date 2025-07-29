@@ -14,16 +14,7 @@ import { DomainErrorCode, IDomainError } from '../errors';
  * // Basic usage
  * const instance = new ActorError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ActorError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -68,16 +68,7 @@ export interface RetryMetrics {
  * // Basic usage
  * const instance = new MaxRetriesExceededError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new MaxRetriesExceededError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -104,16 +95,7 @@ export class MaxRetriesExceededError extends Error {
  * // Basic usage
  * const instance = new RetryPolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new RetryPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

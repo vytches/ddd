@@ -34,16 +34,7 @@ export interface ValueObjectValidator<T> {
  * // Basic usage
  * const instance = new BaseValueObject();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseValueObject());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -58,6 +49,7 @@ export abstract class BaseValueObject<T> implements ValueObjectValidator<T> {
    * Compares two value objects for equality
    * @param valueObject The value object to compare with
    * @returns True if they are equal, false otherwise
+   * @example-inject
    */
   equals(valueObject: BaseValueObject<T>): boolean {
     if (!valueObject) {
@@ -86,6 +78,7 @@ export abstract class BaseValueObject<T> implements ValueObjectValidator<T> {
   /**
    * Returns VO value as string
    * @returns JSON representation
+   * @example-inject
    */
   getValue(): T {
     return this.value;

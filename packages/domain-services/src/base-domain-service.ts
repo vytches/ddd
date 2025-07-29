@@ -20,16 +20,7 @@ import type { IUnitOfWork } from '@vytches/ddd-core';
  * // Basic usage
  * const instance = new IBaseDomainService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IBaseDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -55,16 +46,7 @@ export abstract class IBaseDomainService implements IDomainService {
  * // Basic usage
  * const instance = new EventAwareDomainService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventAwareDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -126,16 +108,7 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
  * // Basic usage
  * const instance = new UnitOfWorkAwareDomainService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UnitOfWorkAwareDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -239,16 +212,7 @@ export abstract class UnitOfWorkAwareDomainService
  * // Basic usage
  * const instance = new AsyncDomainService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AsyncDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

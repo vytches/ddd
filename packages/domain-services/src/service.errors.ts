@@ -15,16 +15,7 @@ import type { DomainErrorOptions } from '@vytches/ddd-core';
  * // Basic usage
  * const instance = new ServiceDuplicateError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceDuplicateError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -52,16 +43,7 @@ export class ServiceDuplicateError extends IDomainError {
  * // Basic usage
  * const instance = new ServiceNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -89,16 +71,7 @@ export class ServiceNotFoundError extends IDomainError {
  * // Basic usage
  * const instance = new ServiceCircularError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceCircularError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

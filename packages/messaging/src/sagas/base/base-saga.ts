@@ -24,16 +24,7 @@ import { SagaMiddlewarePipeline } from '../middleware';
  * // Basic usage
  * const instance = new BaseSaga();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseSaga());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

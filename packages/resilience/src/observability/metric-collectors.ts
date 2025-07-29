@@ -105,16 +105,7 @@ abstract class BaseMetricCollector implements MetricCollector {
  * // Basic usage
  * const instance = new CircuitBreakerMetricCollector();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreakerMetricCollector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -311,16 +302,7 @@ export class CircuitBreakerMetricCollector extends BaseMetricCollector {
  * // Basic usage
  * const instance = new RetryMetricCollector();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new RetryMetricCollector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -476,16 +458,7 @@ export class RetryMetricCollector extends BaseMetricCollector {
  * // Basic usage
  * const instance = new BulkheadMetricCollector();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BulkheadMetricCollector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -649,16 +622,7 @@ export class BulkheadMetricCollector extends BaseMetricCollector {
  * // Basic usage
  * const instance = new TimeoutMetricCollector();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TimeoutMetricCollector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

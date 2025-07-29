@@ -14,16 +14,7 @@ import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../interf
  * // Basic usage
  * const instance = new CQRSExecutionContext();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CQRSExecutionContext());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

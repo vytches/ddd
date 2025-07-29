@@ -9,7 +9,6 @@ import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interf
  * @description
  * createDomainEvent function implementing core domain functionality for create domain event operations.
  *
- *
  * @param {string} eventType - eventType parameter
  * @param {P} payload - payload parameter
  * @param {Partial<IEventMetadata>} metadata? - metadata? parameter
@@ -21,13 +20,7 @@ import type { IExtendedDomainEvent, IEventMetadata } from './domain-event-interf
  * // Basic usage
  * const result = createDomainEvent(eventType, payload, metadata?);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createDomainEvent(eventType, payload, metadata?));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

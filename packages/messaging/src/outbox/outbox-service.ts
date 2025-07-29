@@ -51,16 +51,7 @@ export interface OutboxServiceOptions {
  * // Basic usage
  * const instance = new OutboxService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OutboxService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -426,7 +426,6 @@ export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
  * @description
  * getResilienceMetrics function implementing infrastructure service for get resilience metrics operations.
  *
- *
  * @param {Record<string} instance - instance parameter
  * @param {string} methodName - methodName parameter
  * @throws {Error} When validation fails
@@ -436,13 +435,7 @@ export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
  * // Basic usage
  * const result = getResilienceMetrics(instance, methodName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getResilienceMetrics(instance, methodName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

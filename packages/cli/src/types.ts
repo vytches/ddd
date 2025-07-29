@@ -1052,16 +1052,7 @@ export interface CommandSuggestion {
  * // Basic usage
  * const instance = new CLIError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CLIError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -1088,16 +1079,7 @@ export class CLIError extends Error {
  * // Basic usage
  * const instance = new ValidationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ValidationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -1124,16 +1106,7 @@ export class ValidationError extends CLIError {
  * // Basic usage
  * const instance = new TemplateError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TemplateError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -1157,16 +1130,7 @@ export class TemplateError extends CLIError {
  * // Basic usage
  * const instance = new ConfigError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConfigError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

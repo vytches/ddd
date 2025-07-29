@@ -72,16 +72,7 @@ export interface LogContextBuilder {
  * // Basic usage
  * const instance = new DefaultLogContextBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultLogContextBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

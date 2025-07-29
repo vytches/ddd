@@ -37,16 +37,7 @@ export interface MaskingOptions {
  * // Basic usage
  * const instance = new DataMasker();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DataMasker());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

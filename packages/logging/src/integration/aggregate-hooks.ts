@@ -35,7 +35,6 @@ export interface StateChangeLoggingOptions {
  * @description
  * LogStateChanges function implementing infrastructure service for log state changes operations.
  *
- *
  * @param {StateChangeLoggingOptions = {}} options - options parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -45,13 +44,7 @@ export interface StateChangeLoggingOptions {
  * // Basic usage
  * const result = LogStateChanges(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => LogStateChanges(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -116,13 +109,7 @@ export function LogStateChanges(options: StateChangeLoggingOptions = {}): Method
  * // Basic usage
  * const result = LogDomainEvents();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => LogDomainEvents());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

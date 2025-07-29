@@ -54,6 +54,14 @@ export interface PackageConfigOptions {
     environment?: 'node' | 'jsdom';
     globals?: boolean;
   };
+
+  /** JSDoc examples plugin configuration */
+  jsdocExamples?: {
+    enabled?: boolean;
+    verbose?: boolean;
+    cache?: boolean;
+    fallbackBehavior?: 'generate' | 'skip' | 'error';
+  };
 }
 
 export interface BuildContext {

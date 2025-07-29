@@ -13,16 +13,7 @@ import type { IValidationError, IValidationErrors } from '@vytches/ddd-contracts
  * // Basic usage
  * const instance = new ValidationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ValidationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -51,16 +42,7 @@ export class ValidationError implements IValidationError {
  * // Basic usage
  * const instance = new ValidationErrors();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ValidationErrors());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

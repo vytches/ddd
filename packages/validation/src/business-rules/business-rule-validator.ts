@@ -21,16 +21,7 @@ import { ValidationError, ValidationErrors } from '../validation-error';
  * // Basic usage
  * const instance = new BusinessRuleValidator();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BusinessRuleValidator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

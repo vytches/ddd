@@ -6,14 +6,14 @@ import type {
   IAggregateCapability,
   IAggregateSnapshot,
 } from '@vytches/ddd-contracts';
-import { AggregateError } from './aggregate-errors';
-import type { IAggregateRoot } from './aggregate-interfaces';
+import { AggregateError } from '../aggregate-errors';
+import type { IAggregateRoot } from '../aggregate-interfaces';
 
 // Import concrete capability classes
-import { SnapshotCapability } from './capabilities/snapshot-capability';
-import { VersioningCapability } from './capabilities/versioning-capability';
-import { EventSourcingCapability } from './capabilities/event-sourcing-capability';
-import { AuditCapability } from './capabilities/audit-capability';
+import { SnapshotCapability } from '../capabilities/snapshot-capability';
+import { VersioningCapability } from '../capabilities/versioning-capability';
+import { EventSourcingCapability } from '../capabilities/event-sourcing-capability';
+import { AuditCapability } from '../capabilities/audit-capability';
 
 // Import new type-safe aggregate
 import type { AggregateRoot } from './aggregate-root';
@@ -137,7 +137,6 @@ export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
  * @description
  * hasSnapshotCapability function implementing domain pattern implementation for has snapshot capability operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithSnapshotCapability<TId>} Returns aggregate is AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
@@ -147,13 +146,7 @@ export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
  * // Basic usage
  * const result = hasSnapshotCapability(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasSnapshotCapability(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -171,7 +164,6 @@ export function hasSnapshotCapability<TId>(
  * @description
  * hasVersioningCapability function implementing domain pattern implementation for has versioning capability operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithVersioningCapability<TId>} Returns aggregate is AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
@@ -181,13 +173,7 @@ export function hasSnapshotCapability<TId>(
  * // Basic usage
  * const result = hasVersioningCapability(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasVersioningCapability(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -205,7 +191,6 @@ export function hasVersioningCapability<TId>(
  * @description
  * hasAuditCapability function implementing domain pattern implementation for has audit capability operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithAuditCapability<TId>} Returns aggregate is AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
@@ -215,13 +200,7 @@ export function hasVersioningCapability<TId>(
  * // Basic usage
  * const result = hasAuditCapability(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasAuditCapability(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -239,7 +218,6 @@ export function hasAuditCapability<TId>(
  * @description
  * hasEventSourcingCapability function implementing domain pattern implementation for has event sourcing capability operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithEventSourcingCapability<TId>} Returns aggregate is AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
@@ -249,13 +227,7 @@ export function hasAuditCapability<TId>(
  * // Basic usage
  * const result = hasEventSourcingCapability(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasEventSourcingCapability(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -277,7 +249,6 @@ export function hasEventSourcingCapability<TId>(
  * @description
  * asSnapshotAggregate function implementing domain pattern implementation for as snapshot aggregate operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithSnapshotCapability<TId>} Returns AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
@@ -287,13 +258,7 @@ export function hasEventSourcingCapability<TId>(
  * // Basic usage
  * const result = asSnapshotAggregate(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => asSnapshotAggregate(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -314,7 +279,6 @@ export function asSnapshotAggregate<TId>(
  * @description
  * asVersioningAggregate function implementing domain pattern implementation for as versioning aggregate operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithVersioningCapability<TId>} Returns AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
@@ -324,13 +288,7 @@ export function asSnapshotAggregate<TId>(
  * // Basic usage
  * const result = asVersioningAggregate(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => asVersioningAggregate(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -351,7 +309,6 @@ export function asVersioningAggregate<TId>(
  * @description
  * asAuditAggregate function implementing domain pattern implementation for as audit aggregate operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithAuditCapability<TId>} Returns AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
@@ -361,13 +318,7 @@ export function asVersioningAggregate<TId>(
  * // Basic usage
  * const result = asAuditAggregate(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => asAuditAggregate(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -388,7 +339,6 @@ export function asAuditAggregate<TId>(
  * @description
  * asEventSourcingAggregate function implementing domain pattern implementation for as event sourcing aggregate operations.
  *
- *
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithEventSourcingCapability<TId>} Returns AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
@@ -398,13 +348,7 @@ export function asAuditAggregate<TId>(
  * // Basic usage
  * const result = asEventSourcingAggregate(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => asEventSourcingAggregate(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -429,7 +373,6 @@ export function asEventSourcingAggregate<TId>(
  * @description
  * getAggregateCapabilities function implementing domain pattern implementation for get aggregate capabilities operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {string[]} Returns string[]
  * @throws {Error} When validation fails
@@ -439,13 +382,7 @@ export function asEventSourcingAggregate<TId>(
  * // Basic usage
  * const result = getAggregateCapabilities(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getAggregateCapabilities(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -461,7 +398,6 @@ export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): str
  * @description
  * hasAllCapabilities function implementing domain pattern implementation for has all capabilities operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
@@ -472,13 +408,7 @@ export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): str
  * // Basic usage
  * const result = hasAllCapabilities(aggregate, capabilities);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasAllCapabilities(aggregate, capabilities));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -497,7 +427,6 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
  * @description
  * hasAnyCapability function implementing domain pattern implementation for has any capability operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
@@ -508,13 +437,7 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
  * // Basic usage
  * const result = hasAnyCapability(aggregate, capabilities);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => hasAnyCapability(aggregate, capabilities));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -533,7 +456,6 @@ export function hasAnyCapability<T extends Capability & IAggregateCapability>(
  * @description
  * getAggregateInfo function implementing domain pattern implementation for get aggregate info operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @throws {Error} When validation fails
  *
@@ -542,13 +464,7 @@ export function hasAnyCapability<T extends Capability & IAggregateCapability>(
  * // Basic usage
  * const result = getAggregateInfo(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getAggregateInfo(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -597,7 +513,6 @@ export function createSnapshotIfCapable<TState>(
  * @description
  * restoreFromSnapshotIfCapable function implementing domain pattern implementation for restore from snapshot if capable operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {IAggregateSnapshot<unknown} snapshot - snapshot parameter
  * @param {(state: TState} deserializer - deserializer parameter
@@ -609,13 +524,7 @@ export function createSnapshotIfCapable<TState>(
  * // Basic usage
  * const result = restoreFromSnapshotIfCapable(aggregate, snapshot, deserializer);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => restoreFromSnapshotIfCapable(aggregate, snapshot, deserializer));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -649,7 +558,6 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
  * @description
  * getAuditLogIfCapable function implementing domain pattern implementation for get audit log if capable operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {unknown[]} Returns unknown[]
  * @throws {Error} When validation fails
@@ -659,13 +567,7 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
  * // Basic usage
  * const result = getAuditLogIfCapable(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getAuditLogIfCapable(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -700,7 +602,6 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
  * @description
  * loadFromEventStoreIfCapable function implementing domain pattern implementation for load from event store if capable operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string | number} aggregateId - aggregateId parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
@@ -711,13 +612,7 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
  * // Basic usage
  * const result = loadFromEventStoreIfCapable(aggregate, aggregateId);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => loadFromEventStoreIfCapable(aggregate, aggregateId));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -743,7 +638,6 @@ export async function loadFromEventStoreIfCapable(
  * @description
  * saveToEventStoreIfCapable function implementing domain pattern implementation for save to event store if capable operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
  * @throws {Error} When validation fails
@@ -753,13 +647,7 @@ export async function loadFromEventStoreIfCapable(
  * // Basic usage
  * const result = saveToEventStoreIfCapable(aggregate);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => saveToEventStoreIfCapable(aggregate));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -788,7 +676,6 @@ export async function saveToEventStoreIfCapable(
  * @description
  * registerUpcasterIfCapable function implementing domain pattern implementation for register upcaster if capable operations.
  *
- *
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string} eventType - eventType parameter
  * @param {number} sourceVersion - sourceVersion parameter
@@ -802,13 +689,7 @@ export async function saveToEventStoreIfCapable(
  * // Basic usage
  * const result = registerUpcasterIfCapable(aggregate, eventType, sourceVersion, upcaster, metadata?);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => registerUpcasterIfCapable(aggregate, eventType, sourceVersion, upcaster, metadata?));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -862,13 +743,7 @@ export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): u
  * // Basic usage
  * const result = processAggregatesWithCapabilities();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => processAggregatesWithCapabilities());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -919,13 +794,7 @@ export async function processAggregatesWithCapabilities<TId>(
  * // Basic usage
  * const result = cloneAggregateCapabilities();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => cloneAggregateCapabilities());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

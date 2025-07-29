@@ -16,16 +16,7 @@ type CommandConstructor<T extends ICommand = ICommand> = new (...args: unknown[]
  * // Basic usage
  * const instance = new ICommandBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ICommandBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -15,16 +15,7 @@ import type { IEventMetadata } from '@vytches/ddd-contracts';
  * // Basic usage
  * const instance = new ScheduledEvent();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ScheduledEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

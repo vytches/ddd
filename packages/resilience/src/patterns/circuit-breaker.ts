@@ -91,16 +91,7 @@ export interface CircuitBreakerMetrics {
  * // Basic usage
  * const instance = new CircuitBreakerOpenError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreakerOpenError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -126,16 +117,7 @@ export class CircuitBreakerOpenError extends Error {
  * // Basic usage
  * const instance = new CircuitBreaker();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreaker());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

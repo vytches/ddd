@@ -14,16 +14,7 @@ import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
  * // Basic usage
  * const instance = new VersionError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersionError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

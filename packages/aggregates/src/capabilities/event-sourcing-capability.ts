@@ -16,16 +16,7 @@ import type { IAggregateRoot } from '../aggregate-interfaces';
  * // Basic usage
  * const instance = new EventSourcingCapability();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventSourcingCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

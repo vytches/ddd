@@ -36,16 +36,7 @@ import { ProjectionRebuilder, type IProjectionRebuildConfig } from './projection
  * // Basic usage
  * const instance = new ProjectionEngine();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionEngine());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -269,16 +260,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
  * // Basic usage
  * const instance = new EnhancedProjectionEngine();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedProjectionEngine());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

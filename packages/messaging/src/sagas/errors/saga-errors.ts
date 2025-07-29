@@ -13,16 +13,7 @@ import { BaseError } from '@vytches/ddd-domain-primitives';
  * // Basic usage
  * const instance = new SagaError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -79,16 +70,7 @@ export abstract class SagaError extends BaseError {
  * // Basic usage
  * const instance = new SagaExecutionError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaExecutionError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -129,16 +111,7 @@ export class SagaExecutionError extends SagaError {
  * // Basic usage
  * const instance = new SagaStepError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaStepError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -171,16 +144,7 @@ export class SagaStepError extends SagaError {
  * // Basic usage
  * const instance = new SagaConfigurationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaConfigurationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -230,16 +194,7 @@ export class SagaConfigurationError extends BaseError {
  * // Basic usage
  * const instance = new SagaEventProcessingError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaEventProcessingError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -274,16 +229,7 @@ export class SagaEventProcessingError extends SagaError {
  * // Basic usage
  * const instance = new SagaCompensationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaCompensationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -324,16 +270,7 @@ export class SagaCompensationError extends SagaError {
  * // Basic usage
  * const instance = new SagaDiscoveryError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaDiscoveryError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -381,16 +318,7 @@ export class SagaDiscoveryError extends BaseError {
  * // Basic usage
  * const instance = new SagaOrchestrationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaOrchestrationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -423,16 +351,7 @@ export class SagaOrchestrationError extends SagaError {
  * // Basic usage
  * const instance = new SagaInstanceLimitExceededError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaInstanceLimitExceededError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -463,16 +382,7 @@ export class SagaInstanceLimitExceededError extends SagaError {
  * // Basic usage
  * const instance = new SagaDefinitionNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaDefinitionNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

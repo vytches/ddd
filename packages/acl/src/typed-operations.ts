@@ -13,16 +13,7 @@ import type { Result } from '@vytches/ddd-utils';
  * // Basic usage
  * const instance = new TypedOperation();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TypedOperation());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

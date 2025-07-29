@@ -87,16 +87,7 @@ export interface ICQRSMiddleware {
  * // Basic usage
  * const instance = new EnhancedLoggingMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedLoggingMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -168,7 +159,6 @@ export class EnhancedLoggingMiddleware implements ICQRSMiddleware {
  * @description
  * createCQRSMiddleware function implementing infrastructure service for create c q r s middleware operations.
  *
- *
  * @param {CQRSMiddlewareOptions} options? - options? parameter
  * @returns {EnhancedLoggingMiddleware} Returns EnhancedLoggingMiddleware
  * @throws {Error} When validation fails
@@ -178,13 +168,7 @@ export class EnhancedLoggingMiddleware implements ICQRSMiddleware {
  * // Basic usage
  * const result = createCQRSMiddleware(options?);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createCQRSMiddleware(options?));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

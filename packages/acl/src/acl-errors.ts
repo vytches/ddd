@@ -13,16 +13,7 @@ import { IDomainError } from '@vytches/ddd-core';
  * // Basic usage
  * const instance = new ACLError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ACLError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -86,16 +77,7 @@ export class ACLError extends IDomainError {
  * // Basic usage
  * const instance = new TranslationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TranslationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -142,16 +124,7 @@ export class TranslationError extends ACLError {
  * // Basic usage
  * const instance = new AdapterNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AdapterNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

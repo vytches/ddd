@@ -13,16 +13,7 @@ import type { PolicyContext } from '../core/interfaces/business-policy.interface
  * // Basic usage
  * const instance = new PolicyContextBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyContextBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -230,16 +221,7 @@ export class PolicyContextBuilder {
  * // Basic usage
  * const instance = new PolicyContextFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyContextFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

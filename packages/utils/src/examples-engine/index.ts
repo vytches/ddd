@@ -1,0 +1,51 @@
+/**
+ * JSDoc Examples Engine - Main exports
+ * 
+ * @llm-summary Example extraction system for JSDoc injection and CLI generation
+ * @llm-domain Infrastructure
+ * @llm-complexity Medium
+ */
+
+// Core engine
+export { ExampleEngine } from './engine';
+
+// Interfaces
+export type {
+  IExampleEngine,
+  IJSDocAdapter,
+  ICLIAdapter,
+  IExampleValidator,
+  IFileScanner,
+} from './interfaces';
+
+// Types
+export type {
+  ExampleFile,
+  ExtractedExample,
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ExampleValidationRules,
+  ExtractionTag,
+  GenerationOptions,
+  LayerType,
+  ComplexityLevel,
+  OutputType,
+} from './types';
+
+// Components
+export { FileScanner } from './scanner/file-scanner';
+export { TagExtractor } from './extractor/tag-extractor';
+export { ExampleValidator } from './validation/validator';
+
+// Validation rules
+export {
+  DEFAULT_VALIDATION_RULES,
+  COMPILATION_PATTERNS,
+  BEST_PRACTICES,
+  LINE_COUNTING_RULES,
+  QUALITY_THRESHOLDS,
+} from './validation/rules';
+
+// Re-export for convenience
+export { ExampleEngine as Engine } from './engine';

@@ -47,16 +47,7 @@ export interface ResilienceStrategy {
  * // Basic usage
  * const instance = new CompositeResilienceStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CompositeResilienceStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -97,16 +88,7 @@ export class CompositeResilienceStrategy implements ResilienceStrategy {
  * // Basic usage
  * const instance = new CircuitBreakerStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreakerStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -142,16 +124,7 @@ export class CircuitBreakerStrategy implements ResilienceStrategy {
  * // Basic usage
  * const instance = new RetryStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new RetryStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -183,16 +156,7 @@ export class RetryStrategy implements ResilienceStrategy {
  * // Basic usage
  * const instance = new TimeoutStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TimeoutStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -236,16 +200,7 @@ export class TimeoutStrategy implements ResilienceStrategy {
  * // Basic usage
  * const instance = new BulkheadStrategy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BulkheadStrategy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -281,16 +236,7 @@ export class BulkheadStrategy implements ResilienceStrategy {
  * // Basic usage
  * const instance = new ResiliencePolicyBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ResiliencePolicyBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

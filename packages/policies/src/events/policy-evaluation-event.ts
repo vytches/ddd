@@ -136,16 +136,7 @@ export type PolicyEvent<T = unknown> =
  * // Basic usage
  * const instance = new PolicyEventBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyEventBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -305,16 +296,7 @@ export interface PolicyExecutionMetrics {
  * // Basic usage
  * const instance = new PolicyMetricsAggregator();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyMetricsAggregator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

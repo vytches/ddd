@@ -95,16 +95,7 @@ export interface ConfirmOptions {
  * // Basic usage
  * const instance = new Prompts();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new Prompts());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -411,13 +402,7 @@ export class Prompts {
  * // Basic usage
  * const result = promptForInput();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => promptForInput());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -459,13 +444,7 @@ export async function promptForInput(
  * // Basic usage
  * const result = promptForChoice();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => promptForChoice());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -491,7 +470,6 @@ export async function promptForChoice<T = unknown>(
  * @description
  * promptForConfirmation function implementing infrastructure service for prompt for confirmation operations.
  *
- *
  * @param {string} message - message parameter
  * @param {boolean} defaultValue? - defaultValue? parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
@@ -502,13 +480,7 @@ export async function promptForChoice<T = unknown>(
  * // Basic usage
  * const result = promptForConfirmation(message, defaultValue?);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => promptForConfirmation(message, defaultValue?));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -539,13 +511,7 @@ export async function promptForConfirmation(
  * // Basic usage
  * const result = promptForMultiSelect();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => promptForMultiSelect());
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

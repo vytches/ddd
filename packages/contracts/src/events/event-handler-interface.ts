@@ -117,7 +117,6 @@ export interface EventHandlerMetadata {
  * @description
  * isEventHandler function implementing core domain functionality for is event handler operations.
  *
- *
  * @param {unknown} obj - obj parameter
  * @returns {obj is IEventHandler<IDomainEvent>} Returns obj is IEventHandler<IDomainEvent>
  * @throws {Error} When validation fails
@@ -127,13 +126,7 @@ export interface EventHandlerMetadata {
  * // Basic usage
  * const result = isEventHandler(obj);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isEventHandler(obj));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

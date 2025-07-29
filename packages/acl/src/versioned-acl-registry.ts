@@ -46,16 +46,7 @@ export interface ACLVersionMetadata extends ACLRegistrationMetadata {
  * // Basic usage
  * const instance = new VersionedACLRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersionedACLRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -179,16 +170,7 @@ export class VersionedACLRegistry extends BaseACLRegistry {
  * // Basic usage
  * const instance = new VersionedACLAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersionedACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

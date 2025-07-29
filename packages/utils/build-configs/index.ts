@@ -24,6 +24,14 @@ export function createFoundationConfig(packagePath: string) {
   return createPackageConfig(packagePath, {
     packageType: 'foundation',
     bundleStrategy: 'bundle-all',
+    jsdocExamples: {
+      enabled: true,
+      verbose: true,
+      cache: true,
+      fallbackBehavior: 'skip',
+      include: ['*.ts', '**/*.ts', '**/src/*.ts', '**/src/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/*.spec.ts'],
+    },
   });
 }
 

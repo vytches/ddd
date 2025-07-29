@@ -14,16 +14,7 @@ import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
  * // Basic usage
  * const instance = new AggregateError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AggregateError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

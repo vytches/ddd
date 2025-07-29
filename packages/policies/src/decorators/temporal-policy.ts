@@ -183,16 +183,7 @@ export interface TemporalPolicyConfig {
  * // Basic usage
  * const instance = new PolicyTemporalBehavior();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyTemporalBehavior());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -432,16 +423,7 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
  * // Basic usage
  * const instance = new PolicyTemporalBehaviorBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyTemporalBehaviorBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -603,16 +585,7 @@ export class PolicyTemporalBehaviorBuilder<T> {
  * // Basic usage
  * const instance = new PolicyTemporalBehaviorFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyTemporalBehaviorFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -16,16 +16,7 @@ import type { PolicyViolationSeverity } from '../core/models/policy-violation';
  * // Basic usage
  * const instance = new PolicyStepBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyStepBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

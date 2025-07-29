@@ -2,13 +2,13 @@ import type { IEventStore, Capability } from '@vytches/ddd-contracts';
 import { EntityId } from '@vytches/ddd-contracts';
 
 import { AggregateRoot } from './aggregate-root';
-import type { IAggregateConstructorParams, IAggregateCapability } from './aggregate-interfaces';
+import type { IAggregateConstructorParams, IAggregateCapability } from '../aggregate-interfaces';
 
 // Import capability classes
-import { SnapshotCapability } from './capabilities/snapshot-capability';
-import { VersioningCapability } from './capabilities/versioning-capability';
-import { EventSourcingCapability } from './capabilities/event-sourcing-capability';
-import { AuditCapability } from './capabilities/audit-capability';
+import { SnapshotCapability } from '../capabilities/snapshot-capability';
+import { VersioningCapability } from '../capabilities/versioning-capability';
+import { EventSourcingCapability } from '../capabilities/event-sourcing-capability';
+import { AuditCapability } from '../capabilities/audit-capability';
 
 /**
  * @llm-summary AggregateBuilder class for aggregate builder operations
@@ -18,20 +18,7 @@ import { AuditCapability } from './capabilities/audit-capability';
  * @description
  * AggregateBuilder class implementing domain pattern implementation for aggregate builder operations.
  *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AggregateBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AggregateBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
+ * @example-inject
  *
  * @since 1.0.0
  * @public
@@ -50,6 +37,7 @@ export class AggregateBuilder<TId = string> {
 
   /**
    * Create a new builder instance
+   * @example-inject
    */
   static create<TId = string>(params: {
     id: TId | EntityId<TId>;
@@ -64,6 +52,7 @@ export class AggregateBuilder<TId = string> {
 
   /**
    * Add snapshot capability
+   * @example-inject
    */
   withSnapshots(): this {
     this.capabilities.push({ capability: new SnapshotCapability() });
@@ -131,6 +120,7 @@ export class AggregateBuilder<TId = string> {
 
   /**
    * Build the aggregate with all configured capabilities
+   * @example-inject
    */
   build<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
     AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
@@ -173,17 +163,7 @@ export class AggregateBuilder<TId = string> {
  *
  * @throws {Error} When validation fails
  *
- * @example
- * ```typescript
- * // Basic usage
- * const result = aggregateBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => aggregateBuilder());
- * ```
+ * @example-inject
  *
  * @since 1.0.0
  * @public

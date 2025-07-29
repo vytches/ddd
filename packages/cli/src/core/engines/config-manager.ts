@@ -48,16 +48,7 @@ const DEFAULT_CONFIG: CLIConfig = {
  * // Basic usage
  * const instance = new ConfigManager();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConfigManager());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

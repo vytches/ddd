@@ -52,16 +52,7 @@ import { JobStatus } from '@vytches/ddd-contracts';
  * // Basic usage
  * const instance = new BaseSchedulerAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseSchedulerAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

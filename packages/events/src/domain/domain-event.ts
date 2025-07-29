@@ -14,16 +14,7 @@ import { LibUtils } from '@vytches/ddd-utils';
  * // Basic usage
  * const instance = new DomainEvent();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DomainEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

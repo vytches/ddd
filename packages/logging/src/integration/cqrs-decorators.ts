@@ -35,7 +35,6 @@ export interface CQRSLoggingOptions {
  * @description
  * LogCommands function implementing infrastructure service for log commands operations.
  *
- *
  * @param {CQRSLoggingOptions = {}} options - options parameter
  * @throws {Error} When validation fails
  *
@@ -44,13 +43,7 @@ export interface CQRSLoggingOptions {
  * // Basic usage
  * const result = LogCommands(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => LogCommands(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -82,7 +75,6 @@ export function LogCommands(options: CQRSLoggingOptions = {}) {
  * @description
  * LogQueries function implementing infrastructure service for log queries operations.
  *
- *
  * @param {CQRSLoggingOptions = {}} options - options parameter
  * @throws {Error} When validation fails
  *
@@ -91,13 +83,7 @@ export function LogCommands(options: CQRSLoggingOptions = {}) {
  * // Basic usage
  * const result = LogQueries(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => LogQueries(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -129,7 +115,6 @@ export function LogQueries(options: CQRSLoggingOptions = {}) {
  * @description
  * LogCQRS function implementing infrastructure service for log c q r s operations.
  *
- *
  * @param {CQRSLoggingOptions = {}} options - options parameter
  * @throws {Error} When validation fails
  *
@@ -138,13 +123,7 @@ export function LogQueries(options: CQRSLoggingOptions = {}) {
  * // Basic usage
  * const result = LogCQRS(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => LogCQRS(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -10,6 +10,17 @@ Complete aggregate root implementation with built-in event sourcing, capability
 system, and automatic event management. Designed for complex domain models with
 strong consistency boundaries.
 
+## 📚 Detailed Documentation
+
+**NEW**: The package has been reorganized for clarity. Each class now has its own detailed documentation:
+
+- 📖 **[AggregateRoot Methods](./docs/AGGREGATE_ROOT_METHODS.md)** - Core aggregate methods (`getId()`, `commit()`, `apply()`, etc.)
+- 🔧 **[AggregateBuilder Methods](./docs/AGGREGATE_BUILDER_METHODS.md)** - Builder pattern methods (`create()`, `withSnapshots()`, `build()`, etc.)  
+- 🛠️ **[Utility Functions](./docs/UTILITY_FUNCTIONS.md)** - Helper functions (`asSnapshotAggregate()`, `getAggregateCapabilities()`, etc.)
+- 📋 **[Complete Package Guide](./docs/README.md)** - Architecture overview and examples
+
+> **Why the reorganization?** The previous structure was confusing because it wasn't clear which `create()` method belonged to which class. Now each class has its own file and documentation.
+
 ## 📋 Table of Contents
 
 - [Installation](#installation)

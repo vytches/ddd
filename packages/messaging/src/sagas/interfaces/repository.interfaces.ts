@@ -256,16 +256,7 @@ export interface ISagaRepositoryConfig {
  * // Basic usage
  * const instance = new SagaConcurrencyError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaConcurrencyError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -295,16 +286,7 @@ export class SagaConcurrencyError extends Error {
  * // Basic usage
  * const instance = new SagaNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

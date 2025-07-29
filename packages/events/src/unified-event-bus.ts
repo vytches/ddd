@@ -76,16 +76,7 @@ interface HandlerEntry {
  * // Basic usage
  * const instance = new UnifiedEventBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UnifiedEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

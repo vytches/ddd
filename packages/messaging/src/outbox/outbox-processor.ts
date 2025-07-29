@@ -52,16 +52,7 @@ export interface OutboxProcessorOptions {
  * // Basic usage
  * const instance = new OutboxProcessor();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OutboxProcessor());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -300,16 +291,7 @@ export class OutboxProcessor {
  * // Basic usage
  * const instance = new EventBusOutboxHandler();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventBusOutboxHandler());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

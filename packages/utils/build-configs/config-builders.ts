@@ -7,6 +7,7 @@ import dts from 'vite-plugin-dts';
 import type { PackageConfigOptions, BuildContext } from './types';
 import { detectPackageType, getWorkspaceAliases } from './package-detection';
 import { getBundleStrategy, createExternalFunction, getBuildAliases } from './bundle-strategies';
+import { createJSDocExamplesPlugin } from './plugins/jsdoc-examples';
 
 /**
  * Create DTS plugin configuration with path transformation for meta packages
@@ -84,6 +85,12 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
 
   const buildConfig = defineConfig({
     plugins: [
+      // JSDoc examples plugin (enabled by default for foundation and pattern packages)
+      ...((() => {
+        const jsDocEnabled = shouldEnableJSDocPlugin(packageType, options);
+        console.log(`[createPackageConfig] JSDoc plugin will be ${jsDocEnabled ? 'ENABLED' : 'DISABLED'} for ${context.packageName}`);
+        return jsDocEnabled ? [createJSDocExamplesPlugin(options.jsdocExamples || {})] : [];
+      })()),
       // Generate DTS unless explicitly disabled
       ...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : []),
     ],
@@ -136,3 +143,28 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
 
 // Import wrapper for the main detection function
 import { createBuildContext } from './package-detection';
+
+/**
+ * Determine if JSDoc examples plugin should be enabled for a package type
+ */
+function shouldEnableJSDocPlugin(packageType: string, options: PackageConfigOptions): boolean {
+  // Debug logging
+  console.log(`[shouldEnableJSDocPlugin] packageType: ${packageType}, enabled: ${options.jsdocExamples?.enabled}`);
+  
+  // Explicitly disabled
+  if (options.jsdocExamples?.enabled === false) {
+    console.log(`[shouldEnableJSDocPlugin] Explicitly disabled`);
+    return false;
+  }
+
+  // Explicitly enabled
+  if (options.jsdocExamples?.enabled === true) {
+    console.log(`[shouldEnableJSDocPlugin] Explicitly enabled`);
+    return true;
+  }
+
+  // Default: enable for foundation and pattern packages (where we have examples)
+  const defaultEnabled = packageType === 'foundation' || packageType === 'pattern';
+  console.log(`[shouldEnableJSDocPlugin] Default enabled: ${defaultEnabled}`);
+  return defaultEnabled;
+}

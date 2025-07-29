@@ -113,16 +113,7 @@ export interface IServiceLocator {
  * // Basic usage
  * const instance = new ServiceLocator();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceLocator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -544,16 +535,7 @@ export class ServiceLocator implements IServiceLocator {
  * // Basic usage
  * const instance = new VytchesDDD();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VytchesDDD());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

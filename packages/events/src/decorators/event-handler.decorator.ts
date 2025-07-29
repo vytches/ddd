@@ -15,7 +15,6 @@ export type { EventHandlerOptions };
  * @description
  * EventHandler function implementing architectural component for event handler operations.
  *
- *
  * @param {new (...args: any[]} eventType - eventType parameter
  * @throws {Error} When validation fails
  *
@@ -24,13 +23,7 @@ export type { EventHandlerOptions };
  * // Basic usage
  * const result = EventHandler(eventType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => EventHandler(eventType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

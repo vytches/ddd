@@ -8,7 +8,7 @@
 export async function runCLI(): Promise<void> {
   try {
     // Import the CLI main function
-    const { main } = await import('./cli.js');
+    const { main } = await import('./index.js');
 
     // Execute CLI
     await main();

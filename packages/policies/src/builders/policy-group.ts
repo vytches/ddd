@@ -23,16 +23,7 @@ import type { Result } from '@vytches/ddd-utils';
  * // Basic usage
  * const instance = new PolicyGroup();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyGroup());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -190,16 +181,7 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
  * // Basic usage
  * const instance = new PolicyGroupStepBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyGroupStepBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

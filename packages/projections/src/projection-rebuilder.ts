@@ -97,16 +97,7 @@ export interface IProjectionRebuilder<TReadModel> {
  * // Basic usage
  * const instance = new ProjectionRebuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionRebuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -364,7 +355,6 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
  * @description
  * createProjectionRebuilder function implementing architectural component for create projection rebuilder operations.
  *
- *
  * @param {IEventStore} eventStore - eventStore parameter
  * @param {IProjectionEngine<TReadModel>} projectionEngine - projectionEngine parameter
  * @param {IProjectionStore<TReadModel>} projectionStore - projectionStore parameter
@@ -376,13 +366,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
  * // Basic usage
  * const result = createProjectionRebuilder(eventStore, projectionEngine, projectionStore);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createProjectionRebuilder(eventStore, projectionEngine, projectionStore));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -16,16 +16,7 @@ import { CommandBus } from './command-bus';
  * // Basic usage
  * const instance = new EnhancedCommandBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedCommandBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

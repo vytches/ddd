@@ -23,16 +23,7 @@ import { CircuitState } from '../projection-interfaces';
  * // Basic usage
  * const instance = new CircuitBreakerCapability();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreakerCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

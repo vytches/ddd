@@ -19,16 +19,7 @@ import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
  * // Basic usage
  * const instance = new VersionError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersionError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -84,16 +75,7 @@ export interface IRepositoryAggregate extends IAggregateWithEvents {
  * // Basic usage
  * const instance = new IBaseRepository();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IBaseRepository());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

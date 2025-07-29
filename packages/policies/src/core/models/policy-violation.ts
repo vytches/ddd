@@ -32,16 +32,7 @@ export type PolicyViolationSeverity = 'ERROR' | 'WARNING' | 'INFO';
  * // Basic usage
  * const instance = new PolicyViolation();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyViolation());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -342,16 +333,7 @@ export interface PolicyViolationData {
  * // Basic usage
  * const instance = new PolicyViolationCollection();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyViolationCollection());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

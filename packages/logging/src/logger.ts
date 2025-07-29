@@ -17,16 +17,7 @@ import { DataMasker } from './utils/data-masker';
  * // Basic usage
  * const instance = new DefaultLogger();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultLogger());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

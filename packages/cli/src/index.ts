@@ -23,6 +23,9 @@ export { Performance } from './core/utils/performance';
 // Types
 export * from './types';
 
+// CLI Main
+export { main } from './cli';
+
 // Version
 
 /**

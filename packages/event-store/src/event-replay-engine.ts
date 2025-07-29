@@ -42,16 +42,7 @@ const DEFAULT_REPLAY_CONFIG: Required<IReplayConfig> = {
  * // Basic usage
  * const instance = new EventReplayEngine();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventReplayEngine());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

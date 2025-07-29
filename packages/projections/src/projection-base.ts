@@ -14,16 +14,7 @@ import type { IProjection } from './projection-interfaces';
  * // Basic usage
  * const instance = new BaseProjection();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseProjection());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

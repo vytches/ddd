@@ -66,16 +66,7 @@ export interface BulkheadMetrics {
  * // Basic usage
  * const instance = new BulkheadRejectedException();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BulkheadRejectedException());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -107,16 +98,7 @@ interface QueuedTask<T = unknown> {
  * // Basic usage
  * const instance = new Bulkhead();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new Bulkhead());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

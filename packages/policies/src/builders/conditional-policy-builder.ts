@@ -34,16 +34,7 @@ import type { PolicyViolation } from '../core/models/policy-violation';
  * // Basic usage
  * const instance = new ConditionalPolicyBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConditionalPolicyBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -106,16 +97,7 @@ export class ConditionalPolicyBuilder<T> implements IConditionalPolicyBuilder<T>
  * // Basic usage
  * const instance = new ConditionalPolicyThenStepBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConditionalPolicyThenStepBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -248,16 +230,7 @@ export class ConditionalPolicyThenStepBuilder<T> implements IConditionalPolicyTh
  * // Basic usage
  * const instance = new ConditionalPolicyElseStepBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConditionalPolicyElseStepBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -346,16 +319,7 @@ export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyEl
  * // Basic usage
  * const instance = new ConditionalPolicyElse();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ConditionalPolicyElse());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

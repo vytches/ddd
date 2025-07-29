@@ -22,16 +22,7 @@ import { SagaStatus } from '../interfaces';
  * // Basic usage
  * const instance = new SagaDefinition();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaDefinition());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

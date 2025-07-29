@@ -16,16 +16,7 @@ import { TranslationError } from './acl-errors';
  * // Basic usage
  * const instance = new BaseModelTranslator();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseModelTranslator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

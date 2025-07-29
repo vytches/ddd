@@ -24,16 +24,7 @@ import { Performance } from '../utils/performance';
  * // Basic usage
  * const instance = new WorkflowEngine();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new WorkflowEngine());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

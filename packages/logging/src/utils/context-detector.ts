@@ -47,16 +47,7 @@ interface StackTraceFrame {
  * // Basic usage
  * const instance = new ContextDetector();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContextDetector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

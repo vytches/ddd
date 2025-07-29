@@ -14,16 +14,7 @@ import type { ICQRSMiddleware, ExecutionContext } from './middleware.interface';
  * // Basic usage
  * const instance = new LoggingMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new LoggingMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

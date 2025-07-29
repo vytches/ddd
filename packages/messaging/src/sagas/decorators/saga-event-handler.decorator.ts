@@ -11,7 +11,6 @@ import { SagaConfigurationError } from '../errors';
  * @description
  * SagaEventHandler function implementing integration layer component for saga event handler operations.
  *
- *
  * @param {SagaEventHandlerOptions} options - options parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -21,13 +20,7 @@ import { SagaConfigurationError } from '../errors';
  * // Basic usage
  * const result = SagaEventHandler(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => SagaEventHandler(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -41,7 +34,6 @@ export function SagaEventHandler(options: SagaEventHandlerOptions): MethodDecora
  * @description
  * SagaEventHandler function implementing integration layer component for saga event handler operations.
  *
- *
  * @param {string} eventType - eventType parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -51,13 +43,7 @@ export function SagaEventHandler(options: SagaEventHandlerOptions): MethodDecora
  * // Basic usage
  * const result = SagaEventHandler(eventType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => SagaEventHandler(eventType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -71,7 +57,6 @@ export function SagaEventHandler(eventType: string): MethodDecorator;
  * @description
  * SagaEventHandler function implementing integration layer component for saga event handler operations.
  *
- *
  * @param {string[]} eventTypes - eventTypes parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -81,13 +66,7 @@ export function SagaEventHandler(eventType: string): MethodDecorator;
  * // Basic usage
  * const result = SagaEventHandler(eventTypes);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => SagaEventHandler(eventTypes));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -101,7 +80,6 @@ export function SagaEventHandler(eventTypes: string[]): MethodDecorator;
  * @description
  * SagaEventHandler function implementing integration layer component for saga event handler operations.
  *
- *
  * @param {SagaEventHandlerOptions | string | string[]} optionsOrEventType - optionsOrEventType parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -111,13 +89,7 @@ export function SagaEventHandler(eventTypes: string[]): MethodDecorator;
  * // Basic usage
  * const result = SagaEventHandler(optionsOrEventType);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => SagaEventHandler(optionsOrEventType));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -195,7 +167,6 @@ export function SagaEventHandler(
  * @description
  * StartSaga function implementing integration layer component for start saga operations.
  *
- *
  * @param {Partial<SagaEventHandlerOptions> = {}} options - options parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -205,13 +176,7 @@ export function SagaEventHandler(
  * // Basic usage
  * const result = StartSaga(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => StartSaga(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -253,7 +218,6 @@ export function StartSaga(options: Partial<SagaEventHandlerOptions> = {}): Metho
  * @description
  * EndSaga function implementing integration layer component for end saga operations.
  *
- *
  * @param {Partial<SagaEventHandlerOptions> = {}} options - options parameter
  * @returns {MethodDecorator} Returns MethodDecorator
  * @throws {Error} When validation fails
@@ -263,13 +227,7 @@ export function StartSaga(options: Partial<SagaEventHandlerOptions> = {}): Metho
  * // Basic usage
  * const result = EndSaga(options);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => EndSaga(options));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -324,7 +282,6 @@ export function getEventHandlerMetadata(
  * @description
  * getEventHandlerMethods function implementing integration layer component for get event handler methods operations.
  *
- *
  * @param {any} target - target parameter
  * @returns {Map<string, SagaEventHandlerOptions>} Returns Map<string, SagaEventHandlerOptions>
  * @throws {Error} When validation fails
@@ -334,13 +291,7 @@ export function getEventHandlerMetadata(
  * // Basic usage
  * const result = getEventHandlerMethods(target);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => getEventHandlerMethods(target));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -357,7 +308,6 @@ export function getEventHandlerMethods(target: any): Map<string, SagaEventHandle
  * @description
  * isEventHandlerMethod function implementing integration layer component for is event handler method operations.
  *
- *
  * @param {any} target - target parameter
  * @param {string} methodName - methodName parameter
  * @returns {boolean} Returns boolean
@@ -368,13 +318,7 @@ export function getEventHandlerMethods(target: any): Map<string, SagaEventHandle
  * // Basic usage
  * const result = isEventHandlerMethod(target, methodName);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isEventHandlerMethod(target, methodName));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

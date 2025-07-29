@@ -19,16 +19,7 @@ import {
  * // Basic usage
  * const instance = new EntityId();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityId());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -54,11 +45,16 @@ export class EntityId<T = string> extends BaseEntityId<T> {
 
   /**
    * Enhanced factory methods with strict validation
+   * @example-inject
    */
   static override createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
 
+  /**
+   * Create EntityId from UUID string
+   * @example-inject
+   */
   static override fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -89,6 +85,10 @@ export class EntityId<T = string> extends BaseEntityId<T> {
     return new EntityId(stringValue, 'bigint');
   }
 
+  /**
+   * Create EntityId from text string
+   * @example-inject
+   */
   static override fromText(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -115,16 +115,7 @@ export class EntityId<T = string> extends BaseEntityId<T> {
  * // Basic usage
  * const instance = new EntityIdFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityIdFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

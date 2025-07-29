@@ -22,16 +22,7 @@ import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
  * // Basic usage
  * const instance = new CommandBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CommandBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

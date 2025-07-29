@@ -16,16 +16,7 @@ type QueryConstructor<T extends IQuery<R>, R = unknown> = new (...args: unknown[
  * // Basic usage
  * const instance = new IQueryBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IQueryBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

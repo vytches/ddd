@@ -16,16 +16,7 @@ type UUID = 'v4';
  * // Basic usage
  * const instance = new LibUtils();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new LibUtils());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

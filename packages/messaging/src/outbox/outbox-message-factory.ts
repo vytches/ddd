@@ -17,16 +17,7 @@ import { MessageStatus, MessagePriority } from './outbox-interfaces';
  * // Basic usage
  * const instance = new OutboxMessageFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OutboxMessageFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

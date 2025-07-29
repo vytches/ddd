@@ -54,16 +54,7 @@ export interface EventDrivenPolicyConfig {
  * // Basic usage
  * const instance = new EventDrivenPolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventDrivenPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -334,7 +325,6 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
  * @description
  * withEvents function implementing domain pattern implementation for with events operations.
  *
- *
  * @param {EventDrivenPolicyConfig} config - config parameter
  * @throws {Error} When validation fails
  *
@@ -343,13 +333,7 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
  * // Basic usage
  * const result = withEvents(config);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => withEvents(config));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -372,16 +356,7 @@ export function withEvents<T>(config: EventDrivenPolicyConfig) {
  * // Basic usage
  * const instance = new EventDrivenPolicyFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventDrivenPolicyFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -15,16 +15,7 @@ import { ValidationError, ValidationErrors } from '../validation-error';
  * // Basic usage
  * const instance = new BaseValidationAdapter();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseValidationAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -112,16 +103,7 @@ export interface ErrorMapper<TExternalError> {
  * // Basic usage
  * const instance = new AdapterUtils();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AdapterUtils());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

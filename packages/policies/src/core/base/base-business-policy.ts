@@ -25,16 +25,7 @@ import { PolicyViolation } from '../models/policy-violation';
  * // Basic usage
  * const instance = new BaseBusinessPolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseBusinessPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -147,16 +138,7 @@ export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
  * // Basic usage
  * const instance = new SpecificationPolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SpecificationPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -228,16 +210,7 @@ export class SpecificationPolicy<T> extends BaseBusinessPolicy<T> {
  * // Basic usage
  * const instance = new AsyncSpecificationPolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AsyncSpecificationPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -315,16 +288,7 @@ export class AsyncSpecificationPolicy<T> extends BaseBusinessPolicy<T> {
  * // Basic usage
  * const instance = new BaseCompositePolicy();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseCompositePolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -28,16 +28,7 @@ import type {
  * // Basic usage
  * const instance = new DefaultMetricRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultMetricRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -109,16 +100,7 @@ export class DefaultMetricRegistry implements MetricRegistry {
  * // Basic usage
  * const instance = new DefaultObservabilityEventBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultObservabilityEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -208,16 +190,7 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
  * // Basic usage
  * const instance = new GlobalMetricRegistry();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new GlobalMetricRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -251,16 +224,7 @@ export class GlobalMetricRegistry {
  * // Basic usage
  * const instance = new GlobalObservabilityEventBus();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new GlobalObservabilityEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -294,16 +258,7 @@ export class GlobalObservabilityEventBus {
  * // Basic usage
  * const instance = new ObservabilityEventFactory();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ObservabilityEventFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

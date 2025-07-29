@@ -554,7 +554,6 @@ export interface SagaMetadata {
  * @description
  * isSagaMetadata function implementing integration layer component for is saga metadata operations.
  *
- *
  * @param {unknown} metadata - metadata parameter
  * @returns {metadata is SagaMetadata} Returns metadata is SagaMetadata
  * @throws {Error} When validation fails
@@ -564,13 +563,7 @@ export interface SagaMetadata {
  * // Basic usage
  * const result = isSagaMetadata(metadata);
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => isSagaMetadata(metadata));
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

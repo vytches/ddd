@@ -38,16 +38,7 @@ export interface IApplicationService {
  * // Basic usage
  * const instance = new BaseApplicationService();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseApplicationService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -112,16 +103,7 @@ export abstract class BaseApplicationService implements IApplicationService {
  * // Basic usage
  * const instance = new ApplicationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ApplicationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -32,16 +32,7 @@ import type { Result } from '@vytches/ddd-utils';
  * // Basic usage
  * const instance = new PolicyBuilder();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

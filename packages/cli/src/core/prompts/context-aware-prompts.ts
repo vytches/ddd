@@ -34,15 +34,6 @@ import { Colors } from '../utils/colors';
  * const instance = new ContextAwarePromptEngine();
  * ```
  *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContextAwarePromptEngine());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
  * @since 1.0.0
  * @public
  */
@@ -734,15 +725,6 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
  * ```typescript
  * // Basic usage
  * const instance = new SmartPrompts();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SmartPrompts());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
  * ```
  *
  * @since 1.0.0

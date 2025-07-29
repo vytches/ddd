@@ -50,16 +50,7 @@ export interface AuditEventProcessorOptions {
  * // Basic usage
  * const instance = new AuditEventProcessor();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AuditEventProcessor());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

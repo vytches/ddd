@@ -22,16 +22,7 @@ import { createIntegrationEvent } from './integration-event.utils';
  * // Basic usage
  * const instance = new DomainToIntegrationTransformer();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DomainToIntegrationTransformer());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

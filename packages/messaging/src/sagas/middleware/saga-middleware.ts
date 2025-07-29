@@ -21,16 +21,7 @@ import type {
  * // Basic usage
  * const instance = new BaseSagaMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseSagaMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -107,16 +98,7 @@ export abstract class BaseSagaMiddleware implements ISagaMiddleware {
  * // Basic usage
  * const instance = new PerformanceMonitoringMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PerformanceMonitoringMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -210,16 +192,7 @@ export class PerformanceMonitoringMiddleware extends BaseSagaMiddleware {
  * // Basic usage
  * const instance = new RetryMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new RetryMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -324,16 +297,7 @@ export class RetryMiddleware extends BaseSagaMiddleware {
  * // Basic usage
  * const instance = new CircuitBreakerMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircuitBreakerMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -474,16 +438,7 @@ export class CircuitBreakerMiddleware extends BaseSagaMiddleware {
  * // Basic usage
  * const instance = new SecurityMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SecurityMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -534,16 +489,7 @@ export class SecurityMiddleware extends BaseSagaMiddleware {
  * // Basic usage
  * const instance = new SagaMiddlewarePipeline();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaMiddlewarePipeline());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

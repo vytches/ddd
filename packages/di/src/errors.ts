@@ -14,16 +14,7 @@ import type { ServiceToken } from './types';
  * // Basic usage
  * const instance = new DIError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DIError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -52,16 +43,7 @@ export class DIError extends BaseError {
  * // Basic usage
  * const instance = new ServiceNotFoundError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceNotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -95,16 +77,7 @@ export class ServiceNotFoundError extends DIError {
  * // Basic usage
  * const instance = new CircularDependencyError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CircularDependencyError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -140,16 +113,7 @@ export class CircularDependencyError extends DIError {
  * // Basic usage
  * const instance = new InvalidRegistrationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new InvalidRegistrationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -182,16 +146,7 @@ export class InvalidRegistrationError extends DIError {
  * // Basic usage
  * const instance = new ServiceAlreadyRegisteredError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ServiceAlreadyRegisteredError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -225,16 +180,7 @@ export class ServiceAlreadyRegisteredError extends DIError {
  * // Basic usage
  * const instance = new ContainerConfigurationError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContainerConfigurationError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
@@ -258,16 +204,7 @@ export class ContainerConfigurationError extends DIError {
  * // Basic usage
  * const instance = new ContainerDisposedError();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContainerDisposedError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

@@ -37,16 +37,7 @@ export interface ParsedArgs {
  * // Basic usage
  * const instance = new SimpleArgsParser();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SimpleArgsParser());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

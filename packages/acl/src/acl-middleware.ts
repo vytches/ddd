@@ -17,16 +17,7 @@ import type { ACLMiddleware, ExecuteOptions } from './acl.interfaces';
  * // Basic usage
  * const instance = new BaseACLMiddleware();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseACLMiddleware());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */

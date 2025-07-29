@@ -22,16 +22,7 @@ import { Logger } from '@vytches/ddd-logging';
  * // Basic usage
  * const instance = new UniversalEventDispatcher();
  * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UniversalEventDispatcher());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
+ * *
  * @since 1.0.0
  * @public
  */
