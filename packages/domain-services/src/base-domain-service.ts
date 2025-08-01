@@ -69,10 +69,10 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
   }
 
   /**
-   * Sets the event bus instance for this service.
-   * Must be called before any attempt to publish events.
-   *
+   * @description-inject
+   * @business-context-inject
    * @param {IEventBus} eventBus - The event bus to use for publishing events
+   * @example-inject
    */
   setEventBus(eventBus: IEventBus): void {
     this.eventBus = eventBus;
@@ -134,10 +134,10 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * Sets the Unit of Work instance for this service.
-   * Must be called before any transactional operation.
-   *
+   * @description-inject
+   * @business-context-inject
    * @param {IUnitOfWork} unitOfWork - The Unit of Work to use
+   * @example-inject
    */
   setUnitOfWork(unitOfWork: IUnitOfWork): void {
     this.unitOfWork = unitOfWork;
@@ -146,8 +146,9 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * Clears the Unit of Work reference.
-   * Call this when the service should no longer use the current Unit of Work.
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
    */
   clearUnitOfWork(): void {
     this.unitOfWork = undefined;
@@ -227,20 +228,20 @@ export abstract class AsyncDomainService extends IBaseDomainService implements I
   }
 
   /**
-   * Initializes the service asynchronously.
-   * Override this method to implement custom initialization logic.
-   *
+   * @description-inject
+   * @business-context-inject
    * @returns {Promise<void>} A promise that resolves when initialization is complete
+   * @example-inject
    */
   async initialize(): Promise<void> {
     // Default implementation (empty)
   }
 
   /**
-   * Disposes of the service asynchronously.
-   * Override this method to implement custom disposal logic.
-   *
+   * @description-inject
+   * @business-context-inject
    * @returns {Promise<void>} A promise that resolves when disposal is complete
+   * @example-inject
    */
   async dispose(): Promise<void> {
     // Default implementation (empty)

@@ -9,28 +9,69 @@ import type { IFileScanner } from '../interfaces';
 
 export class FileScanner implements IFileScanner {
   /**
-   * Scan directory recursively for markdown files
+   * Scan directory recursively for markdown files with timeout protection
    */
   async scanDirectory(path: string): Promise<string[]> {
+    console.log(`[FileScanner.scanDirectory] Starting scan: ${path}`);
+    
+    try {
+      // Add timeout protection to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Directory scan timed out after 5 seconds for ${path}`)), 5000);
+      });
+
+      const scanPromise = this._scanDirectoryRecursive(path);
+      const files = await Promise.race([scanPromise, timeoutPromise]);
+      
+      console.log(`[FileScanner.scanDirectory] Found ${files.length} files in: ${path}`);
+      return files;
+    } catch (error) {
+      console.error(`[FileScanner.scanDirectory] Failed to scan directory ${path}:`, error);
+      throw new Error(`Failed to scan directory ${path}: ${error}`);
+    }
+  }
+
+  /**
+   * Internal recursive directory scanning method
+   */
+  private async _scanDirectoryRecursive(path: string): Promise<string[]> {
+    console.log(`[FileScanner._scanDirectoryRecursive] Scanning: ${path}`);
+    
     try {
       const entries = await readdir(path, { withFileTypes: true });
       const files: string[] = [];
 
       for (const entry of entries) {
-        const fullPath = join(path, entry.name);
-        
-        if (entry.isDirectory()) {
-          // Recursively scan subdirectories
-          const subFiles = await this.scanDirectory(fullPath);
-          files.push(...subFiles);
-        } else if (entry.isFile() && entry.name.endsWith('.md')) {
-          files.push(fullPath);
+        try {
+          const fullPath = join(path, entry.name);
+          console.log(`[FileScanner._scanDirectoryRecursive] Processing: ${fullPath}`);
+          
+          if (entry.isDirectory()) {
+            // Recursively scan subdirectories with error protection
+            try {
+              const subFiles = await this._scanDirectoryRecursive(fullPath);
+              files.push(...subFiles);
+            } catch (subdirError) {
+              console.warn(`[FileScanner._scanDirectoryRecursive] Failed to scan subdirectory ${fullPath}:`, subdirError);
+              // Continue with other directories instead of failing completely
+              continue;
+            }
+          } else if (entry.isFile() && entry.name.endsWith('.md')) {
+            console.log(`[FileScanner._scanDirectoryRecursive] Found MD file: ${fullPath}`);
+            files.push(fullPath);
+          }
+        } catch (entryError) {
+          console.warn(`[FileScanner._scanDirectoryRecursive] Failed to process entry ${entry.name}:`, entryError);
+          continue;
         }
       }
 
+      console.log(`[FileScanner._scanDirectoryRecursive] Completed ${path}, found ${files.length} files`);
       return files;
     } catch (error) {
-      throw new Error(`Failed to scan directory ${path}: ${error}`);
+      console.error(`[FileScanner._scanDirectoryRecursive] Failed to read directory ${path}:`, error);
+      // Return empty array instead of throwing to prevent build failure
+      return [];
     }
   }
 

@@ -498,30 +498,9 @@ class JSDocGenerator {
     const summary = this.generateSummary(exp.name, exp.type);
 
     return `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * @llm-complexity ${complexity}
- * 
+ *
  * @description
  * ${this.generateDescription(exp.name, exp.type, domain)}.
- * 
- * @example
- * \`\`\`typescript
- * // Basic usage
- * const instance = new ${exp.name}();
- * \`\`\`
- * 
- * @example
- * \`\`\`typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ${exp.name}());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * \`\`\`
- * 
- * @since 1.0.0
- * @public
  */`;
   }
 
@@ -532,23 +511,8 @@ class JSDocGenerator {
     const summary = this.generateSummary(exp.name, exp.type);
 
     return `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * @llm-contract Required
- * 
  * @description
  * ${this.generateDescription(exp.name, exp.type, domain)}.
- * 
- * @example
- * \`\`\`typescript
- * // Implementation example
- * class Concrete${exp.name.replace(/^I/, '')} implements ${exp.name} {
- *   // Implementation
- * }
- * \`\`\`
- * 
- * @since 1.0.0
- * @public
  */`;
   }
 
@@ -561,10 +525,6 @@ class JSDocGenerator {
     const returnType = this.extractReturnType(exp.signature);
 
     let jsdoc = `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * @llm-pure ${this.isPureFunction(exp.name)}
- * 
  * @description
  * ${this.generateDescription(exp.name, exp.type, domain)}.
  *`;
@@ -586,21 +546,7 @@ class JSDocGenerator {
     jsdoc += `\n * @throws {Error} When validation fails`;
 
     // Add examples
-    jsdoc += `\n * 
- * @example
- * \`\`\`typescript
- * // Basic usage
- * const result = ${exp.name}(${params.map(p => `${p.name}`).join(', ')});
- * \`\`\`
- * 
- * @example
- * \`\`\`typescript
- * // With error handling
- * const [error, result] = safeRun(() => ${exp.name}(${params.map(p => `${p.name}`).join(', ')}));
- * \`\`\`
- * 
- * @since 1.0.0
- * @public
+    jsdoc += `\n *
  */`;
 
     return jsdoc;
@@ -613,21 +559,8 @@ class JSDocGenerator {
     const summary = this.generateSummary(exp.name, exp.type);
 
     return `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * @llm-usage Frequent
- * 
  * @description
  * ${this.generateDescription(exp.name, exp.type, domain)}.
- * 
- * @example
- * \`\`\`typescript
- * // Usage example
- * const value: ${exp.name} = ${exp.type === 'enum' ? `${exp.name}.VALUE` : `{} as ${exp.name}`};
- * \`\`\`
- * 
- * @since 1.0.0
- * @public
  */`;
   }
 
@@ -638,20 +571,8 @@ class JSDocGenerator {
     const summary = this.generateSummary(exp.name, 'constant');
 
     return `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * 
  * @description
  * ${this.generateDescription(exp.name, 'constant', domain)}.
- * 
- * @example
- * \`\`\`typescript
- * // Usage example
- * console.log(${exp.name});
- * \`\`\`
- * 
- * @since 1.0.0
- * @public
  */`;
   }
 
@@ -662,14 +583,8 @@ class JSDocGenerator {
     const summary = this.generateSummary(exp.name, exp.type);
 
     return `/**
- * @llm-summary ${summary}
- * @llm-domain ${domain}
- * 
  * @description
  * ${this.generateDescription(exp.name, exp.type, domain)}.
- * 
- * @since 1.0.0
- * @public
  */`;
   }
 

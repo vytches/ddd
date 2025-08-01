@@ -22,44 +22,68 @@ function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
     entryRoot: dtsConfig.entryRoot ?? 'src',
   };
 
-  // Meta packages need path transformation
-  if (context.isMetaPackage && dtsConfig.transformPaths !== false) {
-    return dts({
-      ...baseConfig,
-      // Transform paths to use package names instead of relative paths
-      afterBuild: async () => {
-        try {
-          const fs = await import('fs');
-          const path = await import('path');
+  const afterBuildTasks = async () => {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
 
-          const indexDtsPath = path.resolve(context.packagePath, 'dist/index.d.ts');
-          if (fs.existsSync(indexDtsPath)) {
-            let content = fs.readFileSync(indexDtsPath, 'utf-8');
+      // Meta packages path transformation
+      if (context.isMetaPackage && dtsConfig.transformPaths !== false) {
+        const indexDtsPath = path.resolve(context.packagePath, 'dist/index.d.ts');
+        if (fs.existsSync(indexDtsPath)) {
+          let content = fs.readFileSync(indexDtsPath, 'utf-8');
 
-            // Replace relative paths with package names
-            content = content.replace(
-              /from '\.\.\/\.\.\/([^/]+)\/src\/index\.ts'/g,
-              "from '@vytches/ddd-$1'"
-            );
-            content = content.replace(
-              /from "\.\.\/\.\.\/([^/]+)\/src\/index\.ts"/g,
-              'from "@vytches/ddd-$1"'
-            );
-
-            fs.writeFileSync(indexDtsPath, content);
-          }
-        } catch (error) {
-          console.warn(
-            `Warning: Failed to transform DTS paths for ${context.packagePath}:`,
-            error instanceof Error ? error.message : 'Unknown error'
+          // Replace relative paths with package names
+          content = content.replace(
+            /from '\.\.\/\.\.\/([^/]+)\/src\/index\.ts'/g,
+            "from '@vytches/ddd-$1'"
           );
-          // Don't throw - allow build to continue even if DTS transformation fails
-        }
-      },
-    });
-  }
+          content = content.replace(
+            /from "\.\.\/\.\.\/([^/]+)\/src\/index\.ts"/g,
+            'from "@vytches/ddd-$1"'
+          );
 
-  return dts(baseConfig);
+          fs.writeFileSync(indexDtsPath, content);
+        }
+      }
+
+      // Enhanced Metadata System V2 - Process .d.ts files ONLY for @*-inject directives
+      // Focus on .d.ts files for library developer experience (IDE IntelliSense, TypeDoc)
+      if (options.jsdocExamples?.enabled !== false) {
+        console.log(`[createDTSPlugin] Processing .d.ts files for Enhanced Metadata System V2...`);
+        
+        try {
+          // Dynamic import to avoid circular dependencies
+          const { PostCompilationDTSProcessor } = await import('../src/examples-engine/adapters/post-compilation-dts-processor');
+          const processor = new PostCompilationDTSProcessor();
+          
+          // Process the dist directory for this package
+          const distDir = path.resolve(context.packagePath, 'dist');
+          await processor.processDirectory(distDir);
+          
+          console.log(`[createDTSPlugin] Enhanced Metadata processing completed for ${context.packageName}`);
+        } catch (processingError) {
+          console.warn(
+            `Warning: Enhanced Metadata processing failed for ${context.packageName}:`,
+            processingError instanceof Error ? processingError.message : 'Unknown error'
+          );
+          // Don't throw - allow build to continue
+        }
+      }
+      
+    } catch (error) {
+      console.warn(
+        `Warning: DTS post-processing failed for ${context.packagePath}:`,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      // Don't throw - allow build to continue even if DTS processing fails
+    }
+  };
+
+  return dts({
+    ...baseConfig,
+    afterBuild: afterBuildTasks,
+  });
 }
 
 /**
@@ -85,13 +109,16 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
 
   const buildConfig = defineConfig({
     plugins: [
-      // JSDoc examples plugin (enabled by default for foundation and pattern packages)
-      ...((() => {
-        const jsDocEnabled = shouldEnableJSDocPlugin(packageType, options);
-        console.log(`[createPackageConfig] JSDoc plugin will be ${jsDocEnabled ? 'ENABLED' : 'DISABLED'} for ${context.packageName}`);
-        return jsDocEnabled ? [createJSDocExamplesPlugin(options.jsdocExamples || {})] : [];
-      })()),
-      // Generate DTS unless explicitly disabled
+      // JSDoc examples plugin - DISABLED for library focus on .d.ts only
+      // Enhanced Metadata System V2 processes .d.ts files post-compilation
+      // ...((() => {
+      //   const jsDocEnabled = shouldEnableJSDocPlugin(packageType, options);
+      //   console.log(`[createPackageConfig] JSDoc plugin will be ${jsDocEnabled ? 'ENABLED' : 'DISABLED'} for ${context.packageName}`);
+      //   return jsDocEnabled ? [createJSDocExamplesPlugin(options.jsdocExamples || {})] : [];
+      // })()),
+      
+      // Generate DTS with Enhanced Metadata System V2 post-processing
+      // This is the ONLY place where @*-inject directives are processed
       ...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : []),
     ],
     resolve: {
@@ -150,7 +177,7 @@ import { createBuildContext } from './package-detection';
 function shouldEnableJSDocPlugin(packageType: string, options: PackageConfigOptions): boolean {
   // Debug logging
   console.log(`[shouldEnableJSDocPlugin] packageType: ${packageType}, enabled: ${options.jsdocExamples?.enabled}`);
-  
+
   // Explicitly disabled
   if (options.jsdocExamples?.enabled === false) {
     console.log(`[shouldEnableJSDocPlugin] Explicitly disabled`);

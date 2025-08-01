@@ -28,10 +28,22 @@ export class EntityId<T = string> implements IEntityId<T> {
     private readonly type: IdType = 'text'
   ) {}
 
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns The identifier value
+   * @example-inject
+   */
   getValue(): T {
     return this.value;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns The identifier type
+   * @example-inject
+   */
   getType(): IdType {
     return this.type;
   }
@@ -41,6 +53,12 @@ export class EntityId<T = string> implements IEntityId<T> {
     return value != null && value !== undefined;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns True if entities have same value and type
+   * @example-inject
+   */
   equals(other: IEntityId<T>): boolean {
     return other.getValue() === this.value && other.getType() === this.type;
   }
@@ -81,6 +99,12 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   // Compatibility methods for existing code
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns New EntityId with random UUID
+   * @example-inject
+   */
   static createWithRandomUUID(): EntityId<string> {
     // Simple UUID generation without external dependencies
     const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -91,6 +115,12 @@ export class EntityId<T = string> implements IEntityId<T> {
     return new EntityId(uuid, 'uuid');
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns EntityId from UUID string
+   * @example-inject
+   */
   static fromUUID(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {
       throw new Error('entity identifier must be provided');
@@ -118,6 +148,12 @@ export class EntityId<T = string> implements IEntityId<T> {
     return new EntityId(stringValue, 'bigint');
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject  
+   * @returns EntityId from text string
+   * @example-inject
+   */
   static fromText(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {
       throw new Error('entity identifier must be provided');

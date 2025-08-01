@@ -47,5 +47,22 @@ export {
   QUALITY_THRESHOLDS,
 } from './validation/rules';
 
+// Enhanced Metadata System V2
+export { HierarchicalMetadataResolver } from './hierarchy/hierarchical-metadata-resolver';
+export { FormatSpecificResolver } from './hierarchy/format-specific-resolver';
+export { MetadataResolutionStrategies } from './hierarchy/resolution-strategies';
+export { MultiLevelCache, PerformanceMonitor } from './cache/multi-level-cache';
+export { HierarchicalJSDocAdapter } from './adapters/hierarchical-jsdoc-adapter';
+export { PostCompilationDTSProcessor } from './adapters/post-compilation-dts-processor';
+
+// Enhanced Metadata Types
+export type {
+  ResolvedMetadata,
+  MetadataSource,
+  HierarchyConfig,
+  ResolutionStrategy,
+  MetadataLevel,
+} from './hierarchy/types';
+
 // Re-export for convenience
 export { ExampleEngine as Engine } from './engine';

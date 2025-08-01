@@ -65,24 +65,32 @@ export function createJSDocExamplesPlugin(
   return {
     name: 'jsdoc-examples',
     
-    async transform(code: string, id: string) {
+    // CRITICAL FIX: Use 'load' hook instead of 'transform' to process BEFORE TypeScript transpilation
+    async load(id: string) {
       try {
-        // console.log(`[jsdoc-examples] Transform called for: ${id}`);
-        
         // Check if file should be processed
         if (!shouldProcessFile(id, options)) {
-          // console.log(`[jsdoc-examples] Skipping file (not in include pattern): ${id}`);
+          return null; // Let Vite handle normally
+        }
+
+        // Read the original TypeScript source file
+        const fs = await import('fs/promises');
+        let code: string;
+        
+        try {
+          code = await fs.readFile(id, 'utf-8');
+        } catch (error) {
+          // File doesn't exist or can't be read
           return null;
         }
 
-        // Check if file contains @example-inject
-        if (!code.includes('@example-inject')) {
-          // console.log(`[jsdoc-examples] No @example-inject found in: ${id}`);
-          return null;
+        // Check if file contains injection directives
+        if (!code.includes('-inject')) {
+          return null; // Let Vite handle normally
         }
 
         if (options.verbose) {
-          console.log(`[jsdoc-examples] Processing file with @example-inject: ${id}`);
+          console.log(`[jsdoc-examples] Processing original TypeScript source: ${id}`);
         }
 
         // Check cache first
@@ -95,35 +103,19 @@ export function createJSDocExamplesPlugin(
           return cachedResult;
         }
 
-        // Process the file
+        // Process the original TypeScript source
         const processedCode = await adapter.processInjectionDirectives(code, id);
         
-        // Debug: Log transformation details
-        if (options.verbose) {
-          console.log(`[jsdoc-examples] Original code length: ${code.length}`);
-          console.log(`[jsdoc-examples] Processed code length: ${processedCode.length}`);
+        // Debug: Log processing details
+        if (options.verbose || true) { // Always log for debugging
+          console.log(`[jsdoc-examples] LOAD HOOK - Original code length: ${code.length}`);
+          console.log(`[jsdoc-examples] LOAD HOOK - Processed code length: ${processedCode.length}`);
+          console.log(`[jsdoc-examples] LOAD HOOK - File: ${id}`);
           
-          // Find the exact transformation
-          const originalLines = code.split('\n');
-          const processedLines = processedCode.split('\n');
-          
-          console.log(`[jsdoc-examples] Line count: ${originalLines.length} -> ${processedLines.length}`);
-          
-          // Check if exports are preserved
-          const hasExports = processedCode.includes('export class InvalidParameterError');
-          console.log(`[jsdoc-examples] InvalidParameterError export preserved: ${hasExports}`);
-          
-          // Look for where transformation happened
-          for (let i = 0; i < Math.max(originalLines.length, processedLines.length); i++) {
-            const original = originalLines[i] || '<missing>';
-            const processed = processedLines[i] || '<missing>';
-            
-            if (original !== processed && (original.includes('@example-inject') || processed.includes('Example'))) {
-              console.log(`[jsdoc-examples] Line ${i + 1} CHANGED:`);
-              console.log(`[jsdoc-examples]   Original: ${original}`);
-              console.log(`[jsdoc-examples]   Processed: ${processed}`);
-            }
-          }
+          // Count directives in original vs processed
+          const originalDirectives = (code.match(/@[\w-]+-inject/g) || []).length;
+          const processedDirectives = (processedCode.match(/@[\w-]+-inject/g) || []).length;
+          console.log(`[jsdoc-examples] LOAD HOOK - Directives: ${originalDirectives} -> ${processedDirectives}`);
         }
         
         // Cache result
@@ -134,23 +126,55 @@ export function createJSDocExamplesPlugin(
         processedFiles.add(id);
         
         if (options.verbose) {
-          console.log(`[jsdoc-examples] Processed ${id}`);
+          console.log(`[jsdoc-examples] LOAD HOOK - Successfully processed ${id}`);
         }
 
         return processedCode;
       } catch (error) {
-        console.warn(`[jsdoc-examples] Failed to process ${id}:`, error);
+        console.warn(`[jsdoc-examples] LOAD HOOK - Failed to process ${id}:`, error);
         
         if (options.fallbackBehavior === 'error') {
           throw error;
         }
         
-        return options.fallbackBehavior === 'skip' ? null : code;
+        return null; // Let Vite handle normally
+      }
+    },
+    
+    // Keep transform as fallback for edge cases where load hook didn't catch the file
+    async transform(code: string, id: string) {
+      try {
+        // Only process if load hook didn't handle it and file still has directives
+        if (!code.includes('-inject') || processedFiles.has(id)) {
+          return null;
+        }
+
+        if (options.verbose) {
+          console.log(`[jsdoc-examples] TRANSFORM HOOK - Processing missed file: ${id}`);
+        }
+
+        // Process the file (fallback)
+        const processedCode = await adapter.processInjectionDirectives(code, id);
+        
+        processedFiles.add(id);
+        
+        return processedCode;
+      } catch (error) {
+        console.warn(`[jsdoc-examples] TRANSFORM HOOK - Failed to process ${id}:`, error);
+        return null;
       }
     },
 
     buildStart() {
       console.log('[jsdoc-examples] Plugin initialized');
+      // Clear any previous cache to start fresh
+      try {
+        const { ExampleEngine } = require('../../src/examples-engine/engine');
+        ExampleEngine.clearGlobalCache();
+        console.log('[jsdoc-examples] Cleared global cache for fresh build');
+      } catch (error) {
+        console.log('[jsdoc-examples] Could not clear global cache (might not be built yet)');
+      }
     },
 
     buildEnd() {
@@ -159,6 +183,15 @@ export function createJSDocExamplesPlugin(
         if (processedFiles.size > 0) {
           console.log('[jsdoc-examples] Processed files:', Array.from(processedFiles));
         }
+      }
+      
+      // Clean up cache after successful build
+      try {
+        const { ExampleEngine } = require('../../src/examples-engine/engine');
+        ExampleEngine.clearGlobalCache();
+        console.log('[jsdoc-examples] Cleaned up global cache after build');
+      } catch (error) {
+        console.log('[jsdoc-examples] Could not clean up global cache');
       }
     },
 

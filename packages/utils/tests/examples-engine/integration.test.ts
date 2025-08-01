@@ -29,7 +29,7 @@ return user;
         extractor.extractAllTags(content, 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(examples).toBeDefined();
       expect(examples?.length).toBe(1);
       
@@ -54,7 +54,7 @@ return user;
       
       const [error, result] = safeRun(() => engine.formatOutput(content, 'jsdoc'));
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toContain('* @example');
       expect(result).toContain('* ```typescript');
       expect(result).toContain('* const user = User.create(data);');
@@ -65,19 +65,19 @@ return user;
       
       const [error, result] = safeRun(() => engine.formatOutput(content, 'cli'));
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBe('```typescript\nconst user = User.create(data);\n```');
     });
 
     it('should manage cache correctly', () => {
       const [error, initialStats] = safeRun(() => engine.getCacheStats());
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(initialStats?.size).toBe(0);
 
       engine.clearCache();
       
       const [clearError, clearedStats] = safeRun(() => engine.getCacheStats());
-      expect(clearError).toBeNull();
+      expect(clearError).toBeUndefined();
       expect(clearedStats?.size).toBe(0);
     });
   });
@@ -102,7 +102,7 @@ This example shows how to create objects.`;
 
       const [error, metadata] = safeRun(() => scanner.extractMetadata(content));
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(metadata).toBeDefined();
       expect(metadata?.title).toBe('Test Example');
       expect(metadata?.description).toBe('This is a test example');

@@ -11,17 +11,9 @@ import { EventSourcingCapability } from '../capabilities/event-sourcing-capabili
 import { AuditCapability } from '../capabilities/audit-capability';
 
 /**
- * @llm-summary AggregateBuilder class for aggregate builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AggregateBuilder class implementing domain pattern implementation for aggregate builder operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @example-inject
- *
- * @since 1.0.0
- * @public
  */
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
@@ -36,7 +28,9 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Create a new builder instance
+   * @description-inject
+   * @business-context-inject
+   * @returns Aggregate
    * @example-inject
    */
   static create<TId = string>(params: {
@@ -51,7 +45,8 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Add snapshot capability
+   * @description-inject
+   * @business-context-inject
    * @example-inject
    */
   withSnapshots(): this {
@@ -60,7 +55,10 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Add versioning capability
+   * @description-inject
+   * @business-context-inject
+   * @returns {this} Builder instance for method chaining
+   * @example-inject
    */
   withVersioning(): this {
     this.capabilities.push({ capability: new VersioningCapability() });
@@ -68,7 +66,10 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Add audit capability
+   * @description-inject
+   * @business-context-inject
+   * @returns {this} Builder instance for method chaining
+   * @example-inject
    */
   withAudit(): this {
     this.capabilities.push({ capability: new AuditCapability() });
@@ -76,7 +77,11 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Add event sourcing capability
+   * @description-inject
+   * @business-context-inject
+   * @param {IEventStore} [eventStore] - Optional event store for event sourcing
+   * @returns {this} Builder instance for method chaining
+   * @example-inject
    */
   withEventSourcing(eventStore?: IEventStore): this {
     const capability = new EventSourcingCapability();
@@ -95,7 +100,12 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Add a custom capability
+   * @description-inject
+   * @business-context-inject
+   * @param {T} capability - Custom capability instance to add
+   * @param {(cap: T) => void} configure - Optional configuration function for the capability
+   * @returns {this} Builder instance for method chaining
+   * @example-inject
    */
   withCapability<T extends Capability & IAggregateCapability>(
     capability: T,
@@ -111,7 +121,11 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Set event store for event sourcing
+   * @description-inject
+   * @business-context-inject
+   * @param {IEventStore} eventStore - Event store instance for event sourcing capability
+   * @returns {this} Builder instance for method chaining
+   * @example-inject
    */
   setEventStore(eventStore: IEventStore): this {
     this.eventStore = eventStore;
@@ -119,7 +133,8 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Build the aggregate with all configured capabilities
+   * @description-inject
+   * @business-context-inject
    * @example-inject
    */
   build<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
@@ -140,7 +155,11 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * Build with all standard capabilities
+   * @description-inject
+   * @business-context-inject
+   * @param {new (params: IAggregateConstructorParams<TId>) => TAgg} AggregateClass - Optional aggregate class constructor
+   * @returns {TAgg} Fully configured aggregate with all standard capabilities
+   * @example-inject
    */
   buildWithAllCapabilities<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
     AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
@@ -154,19 +173,13 @@ export class AggregateBuilder<TId = string> {
 }
 
 /**
- * @llm-summary aggregate builder function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * aggregateBuilder function implementing domain pattern implementation for aggregate builder operations.
- *
- * @throws {Error} When validation fails
- *
+ * @description-inject
+ * @business-context-inject
+ * @param {object} params - Parameters for creating aggregate builder
+ * @param {TId | EntityId<TId>} params.id - Entity identifier
+ * @param {number} [params.version] - Optional version number
+ * @returns {AggregateBuilder<TId>} New aggregate builder instance
  * @example-inject
- *
- * @since 1.0.0
- * @public
  */
 export function aggregateBuilder<TId = string>(params: {
   id: TId | EntityId<TId>;

@@ -23,17 +23,30 @@
 export interface IRepository<T extends { getId(): unknown }> {
   /**
    * Find an aggregate by its identifier
-   *
-   * @param id - The aggregate identifier
+   * @param id The aggregate identifier
    * @returns The aggregate if found, null otherwise
+   * @example
+   * ```typescript
+   * const userRepository: IRepository<UserAggregate> = new UserRepository();
+   * const user = await userRepository.findById("user-123");
+   * if (user) {
+   *   console.log("Found user:", user.getName());
+   * }
+   * ```
    */
   findById?(id: unknown): Promise<T | null>;
 
   /**
-   * Save an aggregate
-   * This will create or update the aggregate
-   *
-   * @param aggregate - The aggregate to save
+   * Save an aggregate (create or update)
+   * @param aggregate The aggregate to save
+   * @returns Promise that resolves when save is complete
+   * @example
+   * ```typescript
+   * const userRepository: IRepository<UserAggregate> = new UserRepository();
+   * const user = UserAggregate.create({ name: "John Doe", email: "john@example.com" });
+   * await userRepository.save(user);
+   * console.log("User saved with ID:", user.getId());
+   * ```
    */
   save(aggregate: T): Promise<void>;
 

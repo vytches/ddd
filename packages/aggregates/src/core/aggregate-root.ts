@@ -15,17 +15,9 @@ import type {
 import { createDomainEvent, CapabilityRegistry } from '@vytches/ddd-contracts';
 
 /**
- * @llm-summary AggregateRoot class for aggregate root operations
- * @llm-domain Pattern
- * @llm-complexity Complex
- *
- * @description
- * AggregateRoot class implementing domain pattern implementation for aggregate root operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @example-inject
- *
- * @since 1.0.0
- * @public
  */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
@@ -46,7 +38,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   /**
-   * Get the aggregate's unique identifier
+   * @description-inject
+   * @business-context-inject
    * @example-inject
    */
   getId(): EntityId<TId> {
@@ -54,27 +47,48 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * Get the aggregate's current version for optimistic locking
+   * @description-inject
+   * @business-context-inject
+   * @returns {number} Current version number for optimistic locking
    * @example-inject
    */
   getVersion(): number {
     return this._version;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {number} Initial version when aggregate was loaded
+   * @example-inject
+   */
   getInitialVersion(): number {
     return this._initialVersion;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {boolean} True if aggregate has uncommitted domain events
+   * @example-inject
+   */
   hasChanges(): boolean {
     return this._domainEvents.length > 0;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {ReadonlyArray<IExtendedDomainEvent>} Array of uncommitted domain events
+   * @example-inject
+   */
   getDomainEvents(): ReadonlyArray<IExtendedDomainEvent> {
     return [...this._domainEvents];
   }
 
   /**
-   * Clear uncommitted domain events after successful publishing
+   * @description-inject
+   * @business-context-inject
    * @example-inject
    */
   commit(): void {
@@ -86,11 +100,27 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // EVENT HANDLING - Type-safe approach
   // ==========================================
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {string} eventType - Event type to register handler for
+   * @param {IAggregateEventHandler<T>} handler - Event handler function
+   * @returns {this} The aggregate instance for method chaining
+   * @example-inject
+   */
   protected registerEventHandler<T>(eventType: string, handler: IAggregateEventHandler<T>): this {
     this._eventHandlers.set(eventType, handler as IAggregateEventHandler);
     return this;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {string | IExtendedDomainEvent<P>} eventTypeOrEvent - Event type string or complete event object
+   * @param {P} payload - Event payload data
+   * @param {Partial<IEventMetadata>} metadata - Optional event metadata
+   * @example-inject
+   */
   protected apply<P = unknown>(
     eventTypeOrEvent: string | IExtendedDomainEvent<P>,
     payload?: P,
@@ -138,6 +168,12 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     }
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {IExtendedDomainEvent[]} events - Array of events to replay for state reconstruction
+   * @example-inject
+   */
   protected loadFromHistory(events: IExtendedDomainEvent[]): void {
     this._version = this._initialVersion;
     this._domainEvents = [];
@@ -155,7 +191,11 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   /**
-   * Add a capability using its instance
+   * @description-inject
+   * @business-context-inject
+   * @param {T} capability - Capability instance to add to the aggregate
+   * @returns {this} The aggregate instance for method chaining
+   * @example-inject
    */
   addCapability<T extends Capability & IAggregateCapability>(capability: T): this {
     if ('attach' in capability && typeof capability.attach === 'function') {
@@ -166,7 +206,11 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * Get a capability by its constructor
+   * @description-inject
+   * @business-context-inject
+   * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to retrieve
+   * @returns {T | undefined} The capability instance or undefined if not found
+   * @example-inject
    */
   getCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -175,7 +219,11 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * Check if aggregate has a capability by its constructor
+   * @description-inject
+   * @business-context-inject
+   * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to check
+   * @returns {boolean} True if the capability is present
+   * @example-inject
    */
   hasCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -184,7 +232,11 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * Remove a capability by its constructor
+   * @description-inject
+   * @business-context-inject
+   * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to remove
+   * @returns {this} The aggregate instance for method chaining
+   * @example-inject
    */
   removeCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -198,14 +250,20 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * Get all capabilities
+   * @description-inject
+   * @business-context-inject
+   * @returns {Capability[]} Array of all registered capabilities
+   * @example-inject
    */
   getAllCapabilities(): Capability[] {
     return this._capabilities.getAll();
   }
 
   /**
-   * Get capability types
+   * @description-inject
+   * @business-context-inject
+   * @returns {string[]} Array of capability type names
+   * @example-inject
    */
   getCapabilityTypes(): string[] {
     return this._capabilities.getTypes();

@@ -23,7 +23,7 @@ describe('ExampleEngine', () => {
       
       const [error, result] = safeRun(() => engine.formatOutput(content, 'jsdoc'));
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toContain('* @example');
       expect(result).toContain('* ```typescript');
       expect(result).toContain('* const user = User.create(data);');
@@ -36,7 +36,7 @@ describe('ExampleEngine', () => {
       
       const [error, result] = safeRun(() => engine.formatOutput(content, 'cli'));
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBe('```typescript\nconst user = User.create(data);\n```');
     });
 
@@ -45,7 +45,7 @@ describe('ExampleEngine', () => {
       
       const [error, result] = safeRun(() => engine.formatOutput(content, 'unknown' as any));
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBe(content);
     });
   });
@@ -83,13 +83,15 @@ return result;
         await engine.extractTaggedContent(mockFile, 'create:domain:basic')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBeDefined();
-      expect(result?.methodName).toBe('create');
-      expect(result?.layer).toBe('domain');
-      expect(result?.complexity).toBe('basic');
-      expect(result?.content).toContain('const userData');
-      expect(result?.content).toContain('User.create(userData)');
+      if (result) {
+        expect(result.methodName).toBe('create');
+        expect(result.layer).toBe('domain');
+        expect(result.complexity).toBe('basic');
+        expect(result.content).toContain('const userData');
+        expect(result.content).toContain('User.create(userData)');
+      }
     });
 
     it('should return null for non-existent tag', async () => {
@@ -110,7 +112,7 @@ return result;
         await engine.extractTaggedContent(mockFile, 'create:domain:basic')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBeNull();
     });
 
@@ -175,7 +177,7 @@ return result;
         await engine.getBestExampleForMethod('create', 'test-package', 'domain', 'basic')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBeDefined();
       expect(result?.layer).toBe('domain');
       expect(result?.complexity).toBe('basic');
@@ -194,7 +196,7 @@ return result;
         await engine.getBestExampleForMethod('nonexistent', 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(result).toBeNull();
 
       // Restore original method
@@ -206,7 +208,7 @@ return result;
     it('should provide cache statistics', () => {
       const [error, stats] = safeRun(() => engine.getCacheStats());
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(stats).toBeDefined();
       expect(typeof stats?.size).toBe('number');
       expect(Array.isArray(stats?.keys)).toBe(true);
@@ -215,7 +217,7 @@ return result;
     it('should clear cache successfully', () => {
       const [error] = safeRun(() => engine.clearCache());
       
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       
       const stats = engine.getCacheStats();
       expect(stats.size).toBe(0);

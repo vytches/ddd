@@ -1,5 +1,309 @@
 # CLAUDE.md
 
+## CRITICAL: Implementation Verification Before Documentation
+
+**🚨 MANDATORY BEFORE ANY EXAMPLE/DOCUMENTATION GENERATION 🚨**
+
+**When creating ANY documentation or examples, FIRST verify implementation:**
+
+- ✅ **ALWAYS READ SOURCE**: Read actual TypeScript implementation files before creating examples
+- ✅ **VERIFY METHODS EXIST**: Check that all methods used in examples actually exist in the codebase
+- ✅ **CHECK METHOD SIGNATURES**: Ensure parameter types, return types, and method names match reality
+- ✅ **VALIDATE INHERITANCE**: Understand which methods come from base classes vs specific implementations
+- ❌ **NEVER ASSUME**: Never assume methods like `create()`, `fromEvents()`, `fromData()` exist without verification
+- ❌ **NO FICTIONAL CODE**: Don't create examples with non-existent methods or patterns
+
+**Critical Implementation Facts (DO NOT FORGET):**
+- ❌ `AggregateRoot.create()` - **DOES NOT EXIST**, use `new AggregateRoot(params)` constructor
+- ❌ `AggregateRoot.fromEvents()` - **DOES NOT EXIST**, use `new AggregateRoot(params)` + `loadFromHistory(events)`
+- ✅ `AggregateBuilder.create()` - **EXISTS**, this is the correct static factory method for builder
+- ✅ `aggregate.loadFromHistory(events)` - **EXISTS**, use this for event sourcing reconstruction
+- ✅ `EntityId.createWithRandomUUID()` - **EXISTS**, correct factory method for EntityId
+
+**Verification Process:**
+1. Read relevant TypeScript files in `packages/[package]/src/`
+2. Use Grep tool to search for method definitions
+3. Verify method signatures and return types
+4. Check base class methods vs derived class methods
+5. Only then create documentation examples
+
+## CRITICAL: Documentation Generation Procedure
+
+**🚨 MANDATORY CHECKLIST FOR ALL MD FILE GENERATION 🚨**
+
+**IMPORTANT: Only update MD files in `/docs/` directory, NOT in package `/examples/` folders!**
+
+**When creating ANY markdown documentation file, ALWAYS follow this procedure:**
+
+**CRITICAL FILE LOCATION RULE:**
+- ✅ **UPDATE ONLY**: Files in `/home/node/projects/vytches-ddd/docs/examples/` directory
+- ❌ **DO NOT UPDATE**: Files in `packages/*/src/examples/` directories (these are old and will be removed)
+- ⚠️ **REMINDER**: The proper documentation location is the root `/docs/` folder, not package-specific examples
+
+### 1. **Template Structure Validation**
+- ✅ **HEADER**: Must include Version, Package, Complexity, Domain, Patterns, Dependencies
+- ✅ **DESCRIPTION**: Clear explanation of what the example demonstrates
+- ✅ **BUSINESS CONTEXT**: Why this pattern is useful in enterprise scenarios
+- ✅ **CODE EXAMPLE**: Real working code using actual implementation methods
+- ✅ **KEY FEATURES**: List of important functionality demonstrated
+- ✅ **COMMON PITFALLS**: Mistakes to avoid when using the library
+- ✅ **RELATED EXAMPLES**: Links to other relevant examples
+- ✅ **TRAILING NEWLINE**: File must end with exactly one newline character
+
+### 2. **Enhanced Metadata System V2 Integration**
+
+**🚨 CRITICAL: Enhanced Metadata System V2 - Performance & Hierarchical Architecture 🚨**
+
+**Enhanced Metadata System now supports:**
+- ✅ **Hierarchical Metadata Resolution** - Global → Package → Class → Method levels
+- ✅ **Performance Optimization** - Worker threads, multi-level caching, smart change detection
+- ✅ **Format-Specific Overrides** - Different content for JSDoc vs CLI output
+- ✅ **Resolution Strategies** - merge, replace, append strategies for metadata inheritance
+- ✅ **TypeScript Example Formatting** - All @example blocks must use ```typescript
+
+**For Implementation Files (.ts) - Use Dynamic JSDoc:**
+```typescript
+/**
+ * @description-inject
+ * @business-context-inject
+ * @param {Type} param - Description
+ * @returns {Type} Description
+ * @throws {ErrorType} When validation fails
+ * @example-inject
+ */
+```
+
+**For Interface Files (.ts) - Use Static JSDoc:**
+```typescript
+/**
+ * Brief description of the interface method contract
+ * @param param Description of the parameter and its constraints
+ * @returns Description of what the method returns
+ * @throws Description of when and what errors are thrown
+ * @example
+ * ```typescript
+ * // Concise example showing interface usage
+ * const instance: IInterface = new Implementation();
+ * const result = instance.methodName(param);
+ * ```
+ */
+```
+
+**🎯 Hierarchical Metadata Structure:**
+
+**Level 0: Global Settings**
+```markdown
+<!-- docs/global-settings.md -->
+@global-settings
+@strategy: merge
+@description: Global description for all examples
+@business-context: Standard business context for enterprise applications
+@author: DDD Team
+@since: 1.0.0
+@global-settings-end
+```
+
+**Level 1: Package Settings**
+```markdown
+<!-- packages/aggregates/.md-settings.md -->
+@package-settings
+@strategy: merge
+@description.jsdoc: Aggregate operations and domain event handling
+@business-context.jsdoc: Core aggregate patterns for domain modeling
+@author: Aggregates Team
+@complexity: intermediate
+@package-settings-end
+```
+
+**Level 2: Class Metadata**
+```markdown
+<!-- docs/examples/domain/aggregates/aggregate-root.md -->
+@description: Base aggregate root functionality
+@business-context: Core DDD aggregate pattern implementation
+@strategy: merge
+@author: Core Team
+```
+
+**Level 3: Method Metadata (Highest Priority)**
+```markdown
+<!-- docs/examples/domain/aggregates/aggregate-root/commit.md -->
+@description: Commits all pending domain events and updates aggregate version
+@description.jsdoc: Commits pending domain events and updates version
+@business-context: Used after completing business operations to persist state changes
+@business-context.jsdoc: Essential for event sourcing and domain event handling
+@strategy: replace
+@since: 1.0.0
+
+@extract: commit:domain:basic
+```typescript
+const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+aggregate.apply('OrderCreated', { amount: 100 });
+aggregate.commit(); // Commits events and clears pending list
+```
+@extract-end
+```
+
+**🚀 Performance Commands:**
+```bash
+JSDOC_DEBUG=true pnpm dev        # Enhanced logging with hierarchy resolution
+pnpm jsdoc:verify               # Post-build verification with performance metrics
+pnpm jsdoc:manual               # CLI fallback processing for debugging
+pnpm jsdoc:benchmark            # Performance testing and cache analysis
+```
+
+**Expected Performance Gains:**
+- **Before**: ~45s (single thread, no cache)
+- **After**: ~12s (initial), ~2s (incremental), ~0.5s (no changes)
+
+### 3. **Mandatory Pre-Generation Checks**
+- ✅ **READ IMPLEMENTATION**: Always read source .ts files first
+- ✅ **VERIFY METHODS**: Confirm all methods used in examples exist
+- ✅ **CHECK IMPORTS**: Ensure all imports reference actual exported types/classes
+- ✅ **VALIDATE PATTERNS**: Verify usage patterns match actual implementation
+- ✅ **TEST EXAMPLES**: Ensure code examples would actually compile and run
+
+### 4. **Quality Assurance**
+- ✅ **NO FICTIONAL CODE**: Only use methods that actually exist in the codebase
+- ✅ **CONSISTENT FORMATTING**: Follow established markdown formatting patterns
+- ✅ **PROPER LINKING**: Ensure all internal links point to existing files
+- ✅ **LINTING COMPLIANCE**: File must pass markdown linting (proper newlines)
+
+### 5. **Forbidden Patterns**
+- ❌ **NO ASSUMPTIONS**: Don't assume method signatures without verification
+- ❌ **NO PLACEHOLDER CODE**: Don't use `// Implementation here` or similar
+- ❌ **NO BROKEN EXAMPLES**: All code must be valid and executable
+- ❌ **NO MISSING NEWLINES**: Files must end with single newline character
+
+## CRITICAL: Complete MD File Structure Template
+
+**🚨 ALWAYS USE THIS TEMPLATE FOR MARKDOWN FILES 🚨**
+
+```markdown
+# [ComponentName] - [ComplexityLevel] Example
+
+**Version**: 1.0.0
+**Package**: @vytches/ddd-[package-name]
+**Complexity**: [beginner|intermediate|advanced]
+**Domain**: [domain-name]
+**Patterns**: [pattern1, pattern2, pattern3]
+**Dependencies**: [list-of-dependencies]
+
+## Description
+
+[Clear explanation of what the example demonstrates]
+
+## Business Context
+
+[Why this pattern is useful in enterprise scenarios]
+
+## Code Example
+
+@extract: [methodName]:[domain]:[complexity]
+```typescript
+// [filename].ts
+import { [Classes] } from '@vytches/ddd-[package]';
+
+// Code example (3-5 lines for basic, more for advanced)
+const result = SomeClass.method(params);
+// Result: [explanation]
+```
+@extract-end
+
+## Key Features
+
+- **[Feature 1]**: [Description of feature]
+- **[Feature 2]**: [Description of feature]
+- **[Feature 3]**: [Description of feature]
+
+## Common Pitfalls
+
+- [Pitfall 1 description]
+- [Pitfall 2 description]
+- [Pitfall 3 description]
+
+## Related Examples
+
+- [[RelatedExample1]](./related-example-1.md) - [Brief description]
+- [[RelatedExample2]](./related-example-2.md) - [Brief description]
+```
+
+### Enhanced Metadata System V2 - Resolution Strategies
+
+**🎯 Resolution Strategies (Hierarchical Inheritance):**
+
+**1. @strategy: merge** (Default)
+- Combines content from lower levels
+- Preserves existing metadata from global/package/class levels
+- Method-level metadata adds to existing content
+
+**2. @strategy: replace** 
+- Completely overrides content from lower levels
+- Method-level metadata replaces all previous content
+- Use for method-specific customization
+
+**3. @strategy: append**
+- Adds content to existing metadata
+- Concatenates descriptions with newlines
+- Useful for extending base descriptions
+
+**🎨 Format-Specific Overrides:**
+```markdown
+@description: Base description for all formats
+@description.jsdoc: Concise JSDoc-specific description  
+@description.cli: ## Extended CLI Description\n\nWith markdown formatting
+@business-context: Standard business context
+@business-context.jsdoc: Brief context for JSDoc
+@warning.jsdoc: JSDoc-only warning message
+```
+
+**📋 Enhanced Metadata Tags Reference:**
+
+**Global Settings (docs/global-settings.md):**
+```markdown
+@global-settings
+@strategy: merge
+@description: Global description for all examples
+@business-context: Standard business context
+@author: DDD Team
+@since: 1.0.0
+@global-settings-end
+```
+
+**Package Settings (packages/[package]/.md-settings.md):**
+```markdown
+@package-settings
+@strategy: merge
+@description.jsdoc: Package-specific JSDoc description
+@business-context: Package domain context
+@author: Package Team
+@complexity: [beginner|intermediate|advanced]
+@package-settings-end
+```
+
+**Method-Specific Metadata (before @extract):**
+```markdown
+@description: Method-specific description
+@description.jsdoc: Concise JSDoc description
+@business-context: Business scenario explaining usage  
+@strategy: [merge|replace|append]
+@since: 1.0.0
+@warning.jsdoc: Important usage warning
+```
+
+**🚨 CRITICAL: TypeScript Example Formatting**
+**ALL @example blocks must use ```typescript formatting:**
+```markdown
+@extract: methodName:domain:complexity
+```typescript
+// Always use typescript code blocks
+const result = SomeClass.method(params);
+console.log('TypeScript formatted example');
+```
+@extract-end
+```
+
+**CRITICAL: Always close @extract blocks with @extract-end**
+
 ## CRITICAL: Test Files Location
 
 **When generating or creating test files, ALWAYS place them in the `tests/`
@@ -32,47 +336,148 @@ documentation.**
   consumption
 - ✅ **REQUIRED**: Provide minimum 2 `@example` blocks per public API
 - ✅ **REQUIRED**: Document all `@param`, `@returns`, and `@throws`
+- ❌ **AVOID**: Using `console.log()` in code examples unless specifically demonstrating logging
+- ✅ **PREFER**: Use comments like `// Result: variable contains expected value` instead
 - ⚠️ **VALIDATION**: Run `pnpm jsdoc:validate` to check compliance
 - 📖 **REFERENCE**: See `.jsdoc-template.md` for exact format requirements
 
-### JSDoc Template Example:
+### JSDoc Template Examples:
+
+#### **For Implementations (Classes) - Enhanced Metadata System:**
+
+**CRITICAL**: Use the Enhanced Metadata System for all JSDoc generation. This system supports:
+- **Hierarchical configuration**: Global, package, and local metadata layers
+- **Format-specific overrides**: Different content for JSDoc vs CLI via dot notation (`@description.jsdoc`, `@description.cli`)
+- **Selective display**: Tags can be omitted in one format while displayed in another
+- **Dynamic injection**: Real examples from markdown files automatically injected
 
 ````typescript
 /**
- * @llm-summary Brief one-line description
- * @llm-domain Core|Pattern|Architecture|Integration|Infrastructure
- * @llm-complexity Simple|Medium|Complex|Expert
- *
- * @description
- * Detailed description with business context.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {Type} param - Description
  * @returns {Type} Description
- *
  * @throws {ErrorType} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = new ClassName(params);
- * console.log(result.value);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * try {
- *   const result = new ClassName(params);
- *   await processResult(result);
- * } catch (error) {
- *   console.error('Failed:', error.message);
- * }
- * ```
- *
+ * @example-inject
  * @since 1.0.0
  * @public
  */
+public methodName(param: Type): ReturnType {
+  // Implementation
+}
 ````
+
+#### **For Interfaces (Contracts) - Static JSDoc Documentation:**
+
+````typescript
+/**
+ * Brief description of the interface method contract
+ * @param param Description of the parameter and its constraints
+ * @returns Description of what the method returns
+ * @throws Description of when and what errors are thrown
+ * @example
+ * ```typescript
+ * // Concise example showing interface usage
+ * const instance: IInterface = new Implementation();
+ * const result = instance.methodName(param);
+ * ```
+ * @since 1.0.0
+ */
+methodName(param: Type): ReturnType;
+````
+
+### JSDoc Strategy by Code Type:
+
+| Code Type | JSDoc Approach | Purpose | Example Source |
+|-----------|---------------|---------|----------------|
+| **Classes/Implementations** | Dynamic Directives | Business examples, real usage scenarios | MD files in `docs/examples/domain/{package-name}/{class-name}/` |
+| **Interfaces/Contracts** | Static Inline | API contracts, parameter specifications | Written directly in interface |
+| **Types/Enums** | Static Inline | Type definitions, usage constraints | Written directly in code |
+
+**Key Principle**: Avoid duplication - interfaces get precise contract documentation, implementations get rich business examples.
+
+### Enhanced Metadata System Structure
+
+**CRITICAL: All method example MD files use the Enhanced Metadata System with hierarchical configuration:**
+
+#### **0. MANDATORY: Implementation Verification Protocol**
+
+**🚨 BEFORE creating ANY enhanced metadata examples, ALWAYS verify implementation 🚨**
+
+```bash
+# 1. READ THE ACTUAL IMPLEMENTATION FIRST
+Read packages/[package]/src/**/*.ts
+
+# 2. VERIFY METHOD EXISTENCE
+Grep -r "methodName" packages/[package]/src/
+
+# 3. CHECK METHOD SIGNATURES  
+Read the specific class file to understand parameters and return types
+
+# 4. ONLY THEN create enhanced metadata documentation
+```
+
+**Enhanced Metadata MUST reflect actual implementation:**
+- ✅ Use only methods that exist in the actual TypeScript code
+- ✅ Match exact parameter types and names from implementation  
+- ✅ Use correct constructor patterns (e.g., `new ClassName(params)`)
+- ❌ Never use fictional methods in enhanced metadata examples
+- ❌ Don't assume factory methods exist without verification
+
+#### **1. File Placement Pattern:**
+
+```
+docs/examples/domain/
+├── {package-name}/           # Package folder (e.g., domain-services, aggregates)
+│   └── {class-name}/         # Class folder (e.g., base-domain-service, aggregate-root)
+│       ├── methodName.md     # Method-specific example file with enhanced metadata
+│       └── anotherMethod.md  # Another method example
+```
+
+#### **2. Enhanced Metadata Structure in MD Files:**
+
+````markdown
+@global-settings
+@strategy: merge
+@description: Global description for all examples
+@business-context: Standard business context
+@author: DDD Team
+@global-settings-end
+
+@description: Method-specific description
+@description.cli: ## Extended CLI Description\n\nWith markdown formatting for CLI output
+@description.jsdoc: Concise JSDoc description optimized for code documentation
+@business-context: Business scenario for this specific method
+@business-context.cli: Extended business context for CLI documentation
+@warning.jsdoc: Important JSDoc warning
+@since: 1.0.0
+
+@extract: create:domain:basic
+```typescript
+// Enhanced example with metadata-driven documentation
+const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+aggregate.apply('OrderCreated', { amount: 100 });
+return aggregate;
+```
+@extract-end
+````
+
+#### **3. Key Features:**
+
+- **Hierarchical Configuration**: Global settings merged with local metadata
+- **Format-Specific Overrides**: Use dot notation (`@key.format`) for different outputs
+- **Selective Display**: Tags can appear in CLI but not JSDoc, or vice versa
+- **Strategy Control**: `merge` or `replace` strategies for configuration inheritance
+- **Rich Metadata**: Support for warnings, business context, complexity levels
+
+**Examples:**
+- ✅ **CORRECT**: `docs/examples/domain/domain-services/base-domain-service/seteventbus.md`
+- ✅ **CORRECT**: `docs/examples/domain/aggregates/aggregate-root/create.md`
+- ✅ **CORRECT**: `docs/examples/domain/value-objects/base-value-object/getValue.md`
+- ❌ **WRONG**: `packages/domain-services/src/examples/basic/seteventbus.md`
+- ❌ **WRONG**: `packages/aggregates/src/examples/basic/create.md`
+
+**File naming**: Use lowercase method names with no special characters (e.g., `setEventBus` becomes `seteventbus.md`).
 
 ## Development Commands
 
@@ -86,46 +491,61 @@ pnpm lint          # Lint code
 pnpm type-check    # Type checking
 pnpm quality       # Run quality checks
 
-# JSDoc Documentation
-pnpm jsdoc:validate   # Validate JSDoc compliance
-pnpm jsdoc:generate   # Generate JSDoc for packages
-pnpm jsdoc:publish    # Generate HTML documentation
+# Enhanced Metadata System V2 & JSDoc Documentation
+pnpm jsdoc:validate   # Validate JSDoc compliance with enhanced metadata V2
+pnpm jsdoc:generate   # Generate JSDoc using hierarchical metadata system
+pnpm jsdoc:publish    # Generate HTML documentation with hierarchical metadata
 pnpm jsdoc:serve      # Generate and serve locally
-pnpm jsdoc:watch      # Watch for changes and regenerate
+pnpm jsdoc:watch      # Watch for changes and regenerate with metadata
+pnpm jsdoc:verify     # Post-build verification with performance metrics
+pnpm jsdoc:manual     # CLI fallback processing for debugging
+pnpm jsdoc:benchmark  # Performance testing and cache analysis
+
+# Enhanced Metadata System V2 Debug Commands
+JSDOC_DEBUG=true pnpm dev        # Enhanced logging with hierarchy resolution
+JSDOC_PERFORMANCE=true pnpm dev  # Performance monitoring and cache metrics
 ```
 
-### CLI Documentation Generation
+### Enhanced CLI Documentation Generation
 
-**IMPORTANT**: Use `pnpm cli examples` for all documentation generation tasks.
+**IMPORTANT**: Use `pnpm cli examples` with Enhanced Metadata System for all documentation generation tasks.
 
 ```bash
-# Generate Package Documentation
-pnpm cli examples generate <package> --complexity <level>
-pnpm cli examples generate domain-services --complexity intermediate
-pnpm cli examples generate policies --framework nestjs --llm-optimized
+# Generate Package Documentation with Enhanced Metadata
+pnpm cli examples generate <package> --complexity <level> --enhanced-metadata
+pnpm cli examples generate domain-services --complexity intermediate --format cli
+pnpm cli examples generate policies --framework nestjs --llm-optimized --enhanced-metadata
 
-# Generate Multi-Package Bundles
-pnpm cli examples bundle --packages <packages> --framework <framework>
-pnpm cli examples bundle --packages policies,domain-services --framework nestjs
+# Generate Multi-Package Bundles with Metadata Hierarchy
+pnpm cli examples bundle --packages <packages> --framework <framework> --enhanced-metadata
+pnpm cli examples bundle --packages policies,domain-services --framework nestjs --format cli
 
-# Find Examples by Tag
-pnpm cli examples find-by-tag <tag> --complexity <level>
-pnpm cli examples find-by-tag "policies:core" --max-examples 3
+# Find Examples by Tag (Enhanced Metadata Compatible)
+pnpm cli examples find-by-tag <tag> --complexity <level> --enhanced-metadata
+pnpm cli examples find-by-tag "policies:core" --max-examples 3 --format jsdoc
 
-# Validate Examples
-pnpm cli examples validate --package <package> --fix
-pnpm cli examples validate --package policies --fix
+# Validate Examples with Enhanced Metadata
+pnpm cli examples validate --package <package> --fix --enhanced-metadata
+pnpm cli examples validate --package policies --fix --check-metadata
+
+# Test Enhanced Metadata Workflow
+pnpm cli examples test-metadata --file <path-to-md> --format <jsdoc|cli>
+pnpm cli examples parse-metadata --file aggregate-root.md --debug
 
 # Available CLI Options
 --complexity <level>     # basic, intermediate, advanced
 --framework <name>       # nestjs, express, fastify
 --llm-optimized         # Optimize for LLM consumption
+--enhanced-metadata     # Use enhanced metadata system (default: true)
+--format <type>         # jsdoc, cli - controls format-specific resolution
 --max-examples <num>    # Limit number of examples
 --randomize            # Randomize example selection
 --seed <string>        # Seed for reproducible randomization
 --output <path>        # Output file path
 --di-only              # Show only @vytches/ddd-di examples
 --fix                  # Auto-fix validation issues
+--check-metadata       # Validate enhanced metadata structure
+--debug                # Debug metadata parsing and resolution
 ```
 
 ### Architecture Decision Records

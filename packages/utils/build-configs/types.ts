@@ -61,6 +61,8 @@ export interface PackageConfigOptions {
     verbose?: boolean;
     cache?: boolean;
     fallbackBehavior?: 'generate' | 'skip' | 'error';
+    include?: string[];
+    exclude?: string[];
   };
 }
 

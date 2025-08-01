@@ -104,7 +104,8 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
  */
 export class MissingValueError extends IDomainError {
   /**
-   * Create MissingValueError with value
+   * @description-inject
+   * @business-context-inject
    * @example-inject
    */
   static withValue(msg: string, data?: DomainErrorOptions): MissingValueError {
@@ -136,7 +137,9 @@ export class MissingValueError extends IDomainError {
  */
 export class InvalidParameterError extends IDomainError {
   /**
-   * Create InvalidParameterError with parameter details
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
    */
   static withParameter(
     parameter: string,
@@ -172,7 +175,9 @@ export class InvalidParameterError extends IDomainError {
  */
 export class DuplicateError extends IDomainError {
   /**
-   * Create DuplicateError with entity ID
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
    */
   static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
     const message = `Entity with id ${id} already exists`;
@@ -202,12 +207,17 @@ export class DuplicateError extends IDomainError {
  * @public
  */
 export class NotFoundError extends IDomainError {
-  static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
-    const message = `Entity with id ${id} already exists`;
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
+   */
+  static withEntityId(id: string, data?: DomainErrorOptions): NotFoundError {
+    const message = `Entity with id ${id} not found`;
     const options = {
-      code: DomainErrorCode.DuplicateEntry,
+      code: DomainErrorCode.NotFound,
       data,
     };
-    return new DuplicateError(message, options);
+    return new NotFoundError(message, options);
   }
 }

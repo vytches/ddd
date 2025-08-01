@@ -40,24 +40,26 @@ return validation.isValid;
         extractor.extractAllTags(content, 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(examples).toHaveLength(3);
       
-      // Check first example
-      expect(examples?.[0].methodName).toBe('create');
-      expect(examples?.[0].layer).toBe('domain');
-      expect(examples?.[0].complexity).toBe('basic');
-      expect(examples?.[0].content).toContain('User.create(userData)');
-      
-      // Check second example
-      expect(examples?.[1].methodName).toBe('create');
-      expect(examples?.[1].layer).toBe('service');
-      expect(examples?.[1].complexity).toBe('basic');
-      
-      // Check third example
-      expect(examples?.[2].methodName).toBe('validate');
-      expect(examples?.[2].layer).toBe('domain');
-      expect(examples?.[2].complexity).toBe('basic');
+      if (examples) {
+        // Check first example
+        expect(examples[0].methodName).toBe('create');
+        expect(examples[0].layer).toBe('domain');
+        expect(examples[0].complexity).toBe('basic');
+        expect(examples[0].content).toContain('User.create(userData)');
+        
+        // Check second example
+        expect(examples[1].methodName).toBe('create');
+        expect(examples[1].layer).toBe('service');
+        expect(examples[1].complexity).toBe('basic');
+        
+        // Check third example
+        expect(examples[2].methodName).toBe('validate');
+        expect(examples[2].layer).toBe('domain');
+        expect(examples[2].complexity).toBe('basic');
+      }
     });
 
     it('should handle empty content', () => {
@@ -65,7 +67,7 @@ return validation.isValid;
         extractor.extractAllTags('', 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(examples).toHaveLength(0);
     });
 
@@ -84,7 +86,7 @@ const example = 'code';
         extractor.extractAllTags(content, 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(examples).toHaveLength(0);
     });
 
@@ -102,11 +104,13 @@ return user;
         extractor.extractAllTags(content, 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(examples).toHaveLength(1);
-      expect(examples?.[0].content).not.toContain('```typescript');
-      expect(examples?.[0].content).not.toContain('```');
-      expect(examples?.[0].content).toContain('const user = User.create(data)');
+      if (examples && examples.length > 0) {
+        expect(examples[0].content).not.toContain('```typescript');
+        expect(examples[0].content).not.toContain('```');
+        expect(examples[0].content).toContain('const user = User.create(data)');
+      }
     });
   });
 
@@ -126,7 +130,7 @@ const command = new CreateUserCommand();
         extractor.extractSpecificTag(content, 'create', 'service', 'basic', 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(example).toBeDefined();
       expect(example?.methodName).toBe('create');
       expect(example?.layer).toBe('service');
@@ -145,7 +149,7 @@ const user = User.create(data);
         extractor.extractSpecificTag(content, 'update', 'service', 'basic', 'test-package')
       );
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(example).toBeNull();
     });
   });
@@ -168,7 +172,7 @@ Even more content
 
       const [error, tags] = safeRun(() => extractor.findAllTags(content));
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(tags).toHaveLength(3);
       
       expect(tags?.[0].methodName).toBe('create');
@@ -195,7 +199,7 @@ Even more content
 
       validTags.forEach(tag => {
         const [error, isValid] = safeRun(() => extractor.validateTagFormat(tag));
-        expect(error).toBeNull();
+        expect(error).toBeUndefined();
         expect(isValid).toBe(true);
       });
     });
@@ -211,7 +215,7 @@ Even more content
 
       invalidTags.forEach(tag => {
         const [error, isValid] = safeRun(() => extractor.validateTagFormat(tag));
-        expect(error).toBeNull();
+        expect(error).toBeUndefined();
         expect(isValid).toBe(false);
       });
     });
@@ -239,7 +243,7 @@ Content 4
 
       const [error, stats] = safeRun(() => extractor.getTagStatistics(content));
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(stats).toBeDefined();
       expect(stats?.totalTags).toBe(4);
       
@@ -265,7 +269,7 @@ Content 4
 
       const [error, stats] = safeRun(() => extractor.getTagStatistics(content));
 
-      expect(error).toBeNull();
+      expect(error).toBeUndefined();
       expect(stats?.totalTags).toBe(0);
       expect(stats?.methods).toHaveLength(0);
     });

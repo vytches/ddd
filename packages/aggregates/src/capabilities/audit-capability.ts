@@ -3,21 +3,9 @@ import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytch
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * @llm-summary AuditCapability class for audit capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AuditCapability class implementing domain pattern implementation for audit capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AuditCapability();
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @description-inject
+ * @business-context-inject
+ * @example-inject
  */
 export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
   override readonly type = 'audit' as const;
@@ -29,6 +17,12 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   private auditLog: IAuditEvent[] = [];
   private originalApply?: ((...args: unknown[]) => void) | undefined;
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   * @example-inject
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
 
@@ -53,6 +47,11 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     }
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
+   */
   detach?(): void {
     // Restore original apply method
     if (this.aggregate && this.originalApply) {
@@ -65,14 +64,31 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     this.originalApply = undefined;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {IAuditEvent[]} Copy of the current audit log
+   * @example-inject
+   */
   getAuditLog(): IAuditEvent[] {
     return [...this.auditLog];
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
+   */
   clearAuditLog(): void {
     this.auditLog = [];
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {{totalEvents: number, eventsByType: Record<string, number>, averageTimeBetweenEvents: number}} Audit statistics summary
+   * @example-inject
+   */
   getAuditStatistics(): {
     totalEvents: number;
     eventsByType: Record<string, number>;
@@ -117,7 +133,10 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Manually record a domain event for auditing
+   * @description-inject
+   * @business-context-inject
+   * @param {IExtendedDomainEvent} event - Domain event to record in audit log
+   * @example-inject
    */
   recordEvent(event: IExtendedDomainEvent): void {
     const auditEvent: IAuditEvent = {
@@ -139,14 +158,23 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Get audit events by type
+   * @description-inject
+   * @business-context-inject
+   * @param {string} eventType - Type of events to filter by
+   * @returns {IAuditEvent[]} Array of audit events matching the specified type
+   * @example-inject
    */
   getEventsByType(eventType: string): IAuditEvent[] {
     return this.auditLog.filter(event => event.eventType === eventType);
   }
 
   /**
-   * Get audit events within a time range
+   * @description-inject
+   * @business-context-inject
+   * @param {Date} startDate - Start date for time range filter
+   * @param {Date} endDate - End date for time range filter
+   * @returns {IAuditEvent[]} Array of audit events within the specified time range
+   * @example-inject
    */
   getEventsByTimeRange(startDate: Date, endDate: Date): IAuditEvent[] {
     return this.auditLog.filter(event => {
@@ -156,14 +184,20 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Get the first audit event
+   * @description-inject
+   * @business-context-inject
+   * @returns {IAuditEvent | null} First audit event in chronological order or null if none exists
+   * @example-inject
    */
   getFirstEvent(): IAuditEvent | null {
     return this.auditLog[0] || null;
   }
 
   /**
-   * Get the last audit event
+   * @description-inject
+   * @business-context-inject
+   * @returns {IAuditEvent | null} Last audit event in chronological order or null if none exists
+   * @example-inject
    */
   getLastEvent(): IAuditEvent | null {
     return this.auditLog[this.auditLog.length - 1] || null;

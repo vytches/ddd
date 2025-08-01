@@ -23,61 +23,22 @@ import type { AggregateRoot } from './aggregate-root';
 // ==========================================
 
 /**
- * @llm-summary Type definition for aggregate with capability
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithCapability type implementing domain pattern implementation for aggregate with capability operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithCapability = {} as AggregateWithCapability;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Type utility for aggregates with specific capability requirements.
+ * Provides compile-time type safety for capability-dependent operations.
  */
 export type AggregateWithCapability<TId, TCap extends Capability> = AggregateRoot<TId> & {
   getCapability<T extends TCap>(CapabilityClass: CapabilityConstructor<T>): T;
 };
 
 /**
- * @llm-summary Type definition for aggregate with snapshot capability
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithSnapshotCapability type implementing domain pattern implementation for aggregate with snapshot capability operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithSnapshotCapability = {} as AggregateWithSnapshotCapability;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Type alias for aggregates with snapshot capability.
+ * Ensures aggregate has snapshot functionality for state persistence.
  */
 export type AggregateWithSnapshotCapability<TId> = AggregateWithCapability<TId, SnapshotCapability>;
 
 /**
- * @llm-summary Type definition for aggregate with versioning capability
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithVersioningCapability type implementing domain pattern implementation for aggregate with versioning capability operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithVersioningCapability = {} as AggregateWithVersioningCapability;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Type alias for aggregates with versioning capability.
+ * Ensures aggregate has event versioning and upcasting functionality.
  */
 export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<
   TId,
@@ -85,40 +46,14 @@ export type AggregateWithVersioningCapability<TId> = AggregateWithCapability<
 >;
 
 /**
- * @llm-summary Type definition for aggregate with audit capability
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithAuditCapability type implementing domain pattern implementation for aggregate with audit capability operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithAuditCapability = {} as AggregateWithAuditCapability;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Type alias for aggregates with audit capability.
+ * Ensures aggregate has audit logging functionality for compliance.
  */
 export type AggregateWithAuditCapability<TId> = AggregateWithCapability<TId, AuditCapability>;
 
 /**
- * @llm-summary Type definition for aggregate with event sourcing capability
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithEventSourcingCapability type implementing domain pattern implementation for aggregate with event sourcing capability operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithEventSourcingCapability = {} as AggregateWithEventSourcingCapability;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Type alias for aggregates with event sourcing capability.
+ * Ensures aggregate has event store integration for persistence.
  */
 export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
   TId,
@@ -130,25 +65,12 @@ export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
 // ==========================================
 
 /**
- * @llm-summary has snapshot capability function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasSnapshotCapability function implementing domain pattern implementation for has snapshot capability operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithSnapshotCapability<TId>} Returns aggregate is AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasSnapshotCapability(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasSnapshotCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -157,25 +79,12 @@ export function hasSnapshotCapability<TId>(
 }
 
 /**
- * @llm-summary has versioning capability function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasVersioningCapability function implementing domain pattern implementation for has versioning capability operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithVersioningCapability<TId>} Returns aggregate is AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasVersioningCapability(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasVersioningCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -184,25 +93,12 @@ export function hasVersioningCapability<TId>(
 }
 
 /**
- * @llm-summary has audit capability function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasAuditCapability function implementing domain pattern implementation for has audit capability operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithAuditCapability<TId>} Returns aggregate is AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasAuditCapability(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasAuditCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -211,25 +107,12 @@ export function hasAuditCapability<TId>(
 }
 
 /**
- * @llm-summary has event sourcing capability function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasEventSourcingCapability function implementing domain pattern implementation for has event sourcing capability operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithEventSourcingCapability<TId>} Returns aggregate is AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasEventSourcingCapability(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasEventSourcingCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -242,25 +125,12 @@ export function hasEventSourcingCapability<TId>(
 // ==========================================
 
 /**
- * @llm-summary as snapshot aggregate function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * asSnapshotAggregate function implementing domain pattern implementation for as snapshot aggregate operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithSnapshotCapability<TId>} Returns AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = asSnapshotAggregate(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function asSnapshotAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -272,25 +142,12 @@ export function asSnapshotAggregate<TId>(
 }
 
 /**
- * @llm-summary as versioning aggregate function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * asVersioningAggregate function implementing domain pattern implementation for as versioning aggregate operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithVersioningCapability<TId>} Returns AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = asVersioningAggregate(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function asVersioningAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -302,25 +159,12 @@ export function asVersioningAggregate<TId>(
 }
 
 /**
- * @llm-summary as audit aggregate function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * asAuditAggregate function implementing domain pattern implementation for as audit aggregate operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithAuditCapability<TId>} Returns AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = asAuditAggregate(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function asAuditAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -332,25 +176,12 @@ export function asAuditAggregate<TId>(
 }
 
 /**
- * @llm-summary as event sourcing aggregate function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * asEventSourcingAggregate function implementing domain pattern implementation for as event sourcing aggregate operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithEventSourcingCapability<TId>} Returns AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = asEventSourcingAggregate(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function asEventSourcingAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -366,51 +197,25 @@ export function asEventSourcingAggregate<TId>(
 // ==========================================
 
 /**
- * @llm-summary get aggregate capabilities function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * getAggregateCapabilities function implementing domain pattern implementation for get aggregate capabilities operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {string[]} Returns string[]
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = getAggregateCapabilities(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): string[] {
   return aggregate.getCapabilityTypes();
 }
 
 /**
- * @llm-summary has all capabilities function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasAllCapabilities function implementing domain pattern implementation for has all capabilities operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasAllCapabilities(aggregate, capabilities);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -420,26 +225,13 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * @llm-summary has any capability function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * hasAnyCapability function implementing domain pattern implementation for has any capability operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = hasAnyCapability(aggregate, capabilities);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function hasAnyCapability<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -449,24 +241,11 @@ export function hasAnyCapability<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * @llm-summary get aggregate info function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * getAggregateInfo function implementing domain pattern implementation for get aggregate info operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = getAggregateInfo(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
   id: unknown;
@@ -491,7 +270,13 @@ export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
 // ==========================================
 
 /**
- * Creates a snapshot if the aggregate has snapshot capability
+ * @description-inject
+ * @business-context-inject
+ * @param {AggregateRoot<unknown>} aggregate - Aggregate to create snapshot for
+ * @param {() => TState} serializer - Function to serialize aggregate state
+ * @param {() => unknown} metadataCreator - Optional metadata creator function
+ * @returns {unknown | null} Snapshot object if capability exists, null otherwise
+ * @example-inject
  */
 export function createSnapshotIfCapable<TState>(
   aggregate: AggregateRoot<unknown>,
@@ -506,27 +291,14 @@ export function createSnapshotIfCapable<TState>(
 }
 
 /**
- * @llm-summary restore from snapshot if capable function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * restoreFromSnapshotIfCapable function implementing domain pattern implementation for restore from snapshot if capable operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {IAggregateSnapshot<unknown} snapshot - snapshot parameter
  * @param {(state: TState} deserializer - deserializer parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = restoreFromSnapshotIfCapable(aggregate, snapshot, deserializer);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function restoreFromSnapshotIfCapable<TState = unknown>(
   aggregate: AggregateRoot<unknown>,
@@ -551,25 +323,12 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
 // ==========================================
 
 /**
- * @llm-summary get audit log if capable function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * getAuditLogIfCapable function implementing domain pattern implementation for get audit log if capable operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {unknown[]} Returns unknown[]
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = getAuditLogIfCapable(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown[] {
   if (hasAuditCapability(aggregate)) {
@@ -580,7 +339,11 @@ export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown
 }
 
 /**
- * Gets audit statistics if the aggregate has audit capability
+ * @description-inject
+ * @business-context-inject
+ * @param {AggregateRoot<unknown>} aggregate - Aggregate to get audit statistics from
+ * @returns {unknown | null} Audit statistics if capability exists, null otherwise
+ * @example-inject
  */
 export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasAuditCapability(aggregate)) {
@@ -595,26 +358,13 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
 // ==========================================
 
 /**
- * @llm-summary load from event store if capable function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * loadFromEventStoreIfCapable function implementing domain pattern implementation for load from event store if capable operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string | number} aggregateId - aggregateId parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = loadFromEventStoreIfCapable(aggregate, aggregateId);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export async function loadFromEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>,
@@ -631,25 +381,12 @@ export async function loadFromEventStoreIfCapable(
 }
 
 /**
- * @llm-summary save to event store if capable function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * saveToEventStoreIfCapable function implementing domain pattern implementation for save to event store if capable operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = saveToEventStoreIfCapable(aggregate);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export async function saveToEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>
@@ -669,13 +406,8 @@ export async function saveToEventStoreIfCapable(
 // ==========================================
 
 /**
- * @llm-summary register upcaster if capable function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * registerUpcasterIfCapable function implementing domain pattern implementation for register upcaster if capable operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string} eventType - eventType parameter
  * @param {number} sourceVersion - sourceVersion parameter
@@ -683,15 +415,7 @@ export async function saveToEventStoreIfCapable(
  * @param {unknown} metadata? - metadata? parameter
  * @returns {TTo }} Returns TTo }
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = registerUpcasterIfCapable(aggregate, eventType, sourceVersion, upcaster, metadata?);
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function registerUpcasterIfCapable<TFrom, TTo>(
   aggregate: AggregateRoot<unknown>,
@@ -708,7 +432,11 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 }
 
 /**
- * Gets versioning information if the aggregate has versioning capability
+ * @description-inject
+ * @business-context-inject
+ * @param {AggregateRoot<unknown>} aggregate - Aggregate to get versioning info from
+ * @returns {unknown | null} Versioning information if capability exists, null otherwise
+ * @example-inject
  */
 export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasVersioningCapability(aggregate)) {
@@ -729,23 +457,10 @@ export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): u
 // ==========================================
 
 /**
- * @llm-summary process aggregates with capabilities function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * processAggregatesWithCapabilities function implementing domain pattern implementation for process aggregates with capabilities operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = processAggregatesWithCapabilities();
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export async function processAggregatesWithCapabilities<TId>(
   aggregates: AggregateRoot<TId>[],
@@ -780,23 +495,10 @@ export async function processAggregatesWithCapabilities<TId>(
 }
 
 /**
- * @llm-summary clone aggregate capabilities function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * cloneAggregateCapabilities function implementing domain pattern implementation for clone aggregate capabilities operations.
- *
+ * @description-inject
+ * @business-context-inject
  * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = cloneAggregateCapabilities();
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @example-inject
  */
 export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
   sourceAggregate: AggregateRoot<TIdFrom>,

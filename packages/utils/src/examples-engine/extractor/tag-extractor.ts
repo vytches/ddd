@@ -148,6 +148,68 @@ export class TagExtractor {
   }
 
   /**
+   * Extract Description section from markdown content
+   */
+  extractDescription(content: string): string | null {
+    const lines = content.split('\n');
+    let inDescriptionSection = false;
+    const descriptionLines: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Start Description section
+      if (trimmed === '## Description') {
+        inDescriptionSection = true;
+        continue;
+      }
+      
+      // End on next ## section
+      if (inDescriptionSection && trimmed.startsWith('## ') && trimmed !== '## Description') {
+        break;
+      }
+      
+      // Collect description content
+      if (inDescriptionSection && trimmed) {
+        descriptionLines.push(trimmed);
+      }
+    }
+
+    return descriptionLines.length > 0 ? descriptionLines.join(' ') : null;
+  }
+
+  /**
+   * Extract Business Context section from markdown content
+   */
+  extractBusinessContext(content: string): string | null {
+    const lines = content.split('\n');
+    let inBusinessContextSection = false;
+    const contextLines: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Start Business Context section
+      if (trimmed === '## Business Context') {
+        inBusinessContextSection = true;
+        continue;
+      }
+      
+      // End on next ## section
+      if (inBusinessContextSection && trimmed.startsWith('## ') && trimmed !== '## Business Context') {
+        break;
+      }
+      
+      // Collect business context content
+      if (inBusinessContextSection && trimmed) {
+        contextLines.push(trimmed);
+      }
+    }
+
+    return contextLines.length > 0 ? contextLines.join(' ') : null;
+  }
+
+  /**
    * Create ExtractedExample from tag and content
    */
   private createExtractedExample(

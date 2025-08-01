@@ -85,6 +85,13 @@ export abstract class IBaseRepository {
     protected readonly eventPersistenceHandler: IEventPersistenceHandler
   ) {}
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param aggregate The aggregate to save
+   * @throws VersionError if version conflict occurs
+   * @example-inject
+   */
   async save(aggregate: IRepositoryAggregate): Promise<void> {
     const events = aggregate.getDomainEvents();
 
@@ -112,5 +119,12 @@ export abstract class IBaseRepository {
     await this.eventDispatcher.dispatchEventsForAggregate(aggregate);
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param id The entity identifier
+   * @returns The aggregate or null if not found
+   * @example-inject
+   */
   abstract findById(id: unknown): Promise<unknown | null>;
 }

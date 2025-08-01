@@ -19,9 +19,13 @@ import { ExampleValidator } from './validation/validator';
 
 export class ExampleEngine implements IExampleEngine {
   private fileScanner: FileScanner;
-  private tagExtractor: TagExtractor;
+  public tagExtractor: TagExtractor; // Make public for JSDocAdapter access
   private validator: ExampleValidator;
   private cache: Map<string, ExampleFile[]> = new Map();
+  
+  // Global shared cache to prevent concurrent filesystem access
+  private static globalCache = new Map<string, ExampleFile[]>();
+  private static pendingScans = new Map<string, Promise<ExampleFile[]>>();
 
   constructor() {
     this.fileScanner = new FileScanner();
@@ -30,34 +34,112 @@ export class ExampleEngine implements IExampleEngine {
   }
 
   /**
+   * Clear global cache (useful for testing or between builds)
+   */
+  static clearGlobalCache(): void {
+    console.log(`[ExampleEngine] Clearing global cache with ${ExampleEngine.globalCache.size} entries`);
+    ExampleEngine.globalCache.clear();
+    ExampleEngine.pendingScans.clear();
+  }
+
+  /**
    * Scan folder for example files with caching
    */
   async scanFolder(folderPath: string): Promise<ExampleFile[]> {
-    // Check cache first
+    console.log(`[scanFolder] Starting scan of: ${folderPath}`);
+    
     const cacheKey = folderPath;
+    
+    // Check global cache first (shared across all instances)
+    if (ExampleEngine.globalCache.has(cacheKey)) {
+      console.log(`[scanFolder] Global cache hit for: ${folderPath}`);
+      return ExampleEngine.globalCache.get(cacheKey)!;
+    }
+    
+    // Check instance cache
     if (this.cache.has(cacheKey)) {
+      console.log(`[scanFolder] Instance cache hit for: ${folderPath}`);
       return this.cache.get(cacheKey)!;
     }
 
+    // Check if another scan is already in progress for this path
+    if (ExampleEngine.pendingScans.has(cacheKey)) {
+      console.log(`[scanFolder] Scan already in progress for: ${folderPath}, waiting...`);
+      try {
+        const result = await ExampleEngine.pendingScans.get(cacheKey)!;
+        console.log(`[scanFolder] Completed waiting for concurrent scan: ${folderPath}`);
+        return result;
+      } catch (error) {
+        console.log(`[scanFolder] Concurrent scan failed for: ${folderPath}, trying own scan`);
+        // Fall through to try our own scan
+      }
+    }
+
+    // Start new scan and store the promise to prevent concurrent scans
+    const scanPromise = this._performScan(folderPath);
+    ExampleEngine.pendingScans.set(cacheKey, scanPromise);
+
     try {
-      const filePaths = await this.fileScanner.scanDirectory(folderPath);
+      const result = await scanPromise;
+      
+      // Cache in both global and instance cache
+      ExampleEngine.globalCache.set(cacheKey, result);
+      this.cache.set(cacheKey, result);
+      
+      console.log(`[scanFolder] Scan completed successfully for: ${folderPath}, found ${result.length} files`);
+      return result;
+    } catch (error) {
+      console.error(`[scanFolder] Scan failed for ${folderPath}:`, error);
+      throw error;
+    } finally {
+      // Clean up pending scan tracking
+      ExampleEngine.pendingScans.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Internal method to perform the actual scanning work
+   */
+  private async _performScan(folderPath: string): Promise<ExampleFile[]> {
+    console.log(`[_performScan] Starting actual scan for: ${folderPath}`);
+    
+    try {
+      // Add timeout protection
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`_performScan timed out after 8 seconds for ${folderPath}`)), 8000);
+      });
+
+      console.log(`[_performScan] About to scan directory: ${folderPath}`);
+      const filePaths = await Promise.race([
+        this.fileScanner.scanDirectory(folderPath),
+        timeoutPromise
+      ]);
+      
+      console.log(`[_performScan] Found ${filePaths.length} files in: ${folderPath}`);
       const exampleFiles: ExampleFile[] = [];
 
       for (const filePath of filePaths) {
         try {
+          console.log(`[_performScan] Parsing file: ${filePath}`);
           const exampleFile = await this.fileScanner.parseExampleFile(filePath);
           exampleFiles.push(exampleFile);
+          console.log(`[_performScan] Successfully parsed: ${filePath}`);
         } catch (error) {
           console.warn(`Failed to parse example file ${filePath}:`, error);
           continue;
         }
       }
 
-      // Cache results
-      this.cache.set(cacheKey, exampleFiles);
+      console.log(`[_performScan] Successfully parsed ${exampleFiles.length} files from: ${folderPath}`);
       return exampleFiles;
     } catch (error) {
-      throw new Error(`Failed to scan folder ${folderPath}: ${error}`);
+      console.error(`[_performScan] Failed to scan folder ${folderPath}:`, error);
+      if (error instanceof Error && error.message.includes('timed out')) {
+        // Return empty array on timeout to prevent hanging the build
+        console.log(`[_performScan] Returning empty array due to timeout: ${folderPath}`);
+        return [];
+      }
+      throw error;
     }
   }
 
@@ -129,6 +211,71 @@ export class ExampleEngine implements IExampleEngine {
       return examples;
     } catch (error) {
       throw new Error(`Failed to get examples for method ${methodName} in package ${packageName}: ${error}`);
+    }
+  }
+
+  /**
+   * Find example file containing specific method
+   */
+  async findExampleFileForMethod(methodName: string, packageName: string): Promise<ExampleFile | null> {
+    try {
+      console.log(`[findExampleFileForMethod] Starting search for method: ${methodName} in package: ${packageName}`);
+      
+      // Determine base path for examples
+      const basePath = this.resolveExamplesPath(packageName);
+      console.log(`[findExampleFileForMethod] Resolved base path: ${basePath}`);
+      
+      // Check if base path exists before scanning
+      const fs = await import('fs/promises');
+      try {
+        await fs.access(basePath);
+        console.log(`[findExampleFileForMethod] Base path exists: ${basePath}`);
+      } catch (error) {
+        console.log(`[findExampleFileForMethod] Base path does not exist: ${basePath}`);
+        return null;
+      }
+      
+      console.log(`[findExampleFileForMethod] About to scan folder: ${basePath}`);
+      const exampleFiles = await this.scanFolder(basePath);
+      console.log(`[findExampleFileForMethod] Scanned ${exampleFiles.length} files in ${basePath}`);
+      
+      // Filter files by package
+      const packageFiles = exampleFiles.filter(file => file.packageName === packageName);
+      console.log(`[findExampleFileForMethod] Found ${packageFiles.length} files for package: ${packageName}`);
+      
+      for (const file of packageFiles) {
+        try {
+          console.log(`[findExampleFileForMethod] Checking file: ${file.filePath}`);
+          
+          // Check if file name matches method (e.g., getValue.md for getValue method)
+          const fileName = file.filePath.split('/').pop()?.toLowerCase();
+          const methodNameLower = methodName.toLowerCase();
+          
+          if (fileName === `${methodNameLower}.md`) {
+            console.log(`[findExampleFileForMethod] Found exact match: ${file.filePath}`);
+            return file;
+          }
+          
+          // Also check if file contains extract tags for this method
+          console.log(`[findExampleFileForMethod] Checking for extract tags in: ${file.filePath}`);
+          const fileExamples = this.tagExtractor.extractAllTags(file.content, packageName);
+          const hasMethodExample = fileExamples.some(ex => ex.methodName === methodName);
+          
+          if (hasMethodExample) {
+            console.log(`[findExampleFileForMethod] Found extract tags match: ${file.filePath}`);
+            return file;
+          }
+        } catch (error) {
+          console.warn(`Failed to check file ${file.filePath}:`, error);
+          continue;
+        }
+      }
+
+      console.log(`[findExampleFileForMethod] No matching file found for method: ${methodName}`);
+      return null;
+    } catch (error) {
+      console.error(`Failed to find example file for method ${methodName} in package ${packageName}:`, error);
+      return null;
     }
   }
 

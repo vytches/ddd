@@ -4,21 +4,9 @@ import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
- * @llm-summary SnapshotCapability class for snapshot capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * SnapshotCapability class implementing domain pattern implementation for snapshot capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SnapshotCapability();
- * ```
- * *
- * @since 1.0.0
- * @public
+ * @description-inject
+ * @business-context-inject
+ * @example-inject
  */
 export class SnapshotCapability<TState = unknown, TMeta = unknown>
   extends Capability<'snapshot'>
@@ -32,15 +20,34 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
   private aggregate!: IAggregateRoot;
   private _snapshot: IAggregateSnapshot<TState, TMeta> | null = null;
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   * @example-inject
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @example-inject
+   */
   detach?(): void {
     this.aggregate = undefined!;
     this._snapshot = null;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {() => TState} serializer - Function to serialize aggregate state
+   * @param {() => TMeta} metadataCreator - Optional function to create snapshot metadata
+   * @returns {IAggregateSnapshot<TState, TMeta>} Created snapshot with state and metadata
+   * @example-inject
+   */
   createSnapshot(
     serializer: () => TState,
     metadataCreator?: () => TMeta
@@ -64,6 +71,15 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     return snapshot;
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {IAggregateSnapshot<TState, TMeta>} snapshot - Snapshot to restore from
+   * @param {(state: TState) => void} deserializer - Function to deserialize state into aggregate
+   * @param {(metadata: TMeta) => void} metadataRestorer - Optional function to restore metadata
+   * @throws {AggregateError} When snapshot is invalid or IDs don't match
+   * @example-inject
+   */
   restoreFromSnapshot(
     snapshot: IAggregateSnapshot<TState, TMeta>,
     deserializer: (state: TState) => void,
@@ -108,23 +124,42 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     }
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @param {TState} state - State to save temporarily
+   * @example-inject
+   */
   saveTemporaryState?(state: TState): void {
     this._snapshot = this.createSnapshot(() => state);
   }
 
+  /**
+   * @description-inject
+   * @business-context-inject
+   * @returns {Date | null} Timestamp of last snapshot or null if none exists
+   * @example-inject
+   */
   getLastSnapshotTimestamp?(): Date | null {
     return this._snapshot?.timestamp || null;
   }
 
   /**
-   * Helper method to save a snapshot
+   * @description-inject
+   * @business-context-inject
+   * @param {() => TState} serializer - Function to serialize aggregate state
+   * @param {() => TMeta} metadataCreator - Optional metadata creator function
+   * @example-inject
    */
   saveSnapshot(serializer: () => TState, metadataCreator?: () => TMeta): void {
     this._snapshot = this.createSnapshot(serializer, metadataCreator);
   }
 
   /**
-   * Helper method to get previous state
+   * @description-inject
+   * @business-context-inject
+   * @returns {IAggregateSnapshot<TState, TMeta> | null} Previous snapshot state if exists
+   * @example-inject
    */
   getPreviousState(): IAggregateSnapshot<TState, TMeta> | null {
     const snapshot = this._snapshot;

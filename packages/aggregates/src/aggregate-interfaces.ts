@@ -14,47 +14,37 @@ import type {
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate root functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateRoot interface implementing domain pattern implementation for aggregate root operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateRoot implements IAggregateRoot {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Core interface for aggregate root functionality.
+ * Provides the foundation for domain aggregates with event sourcing, versioning, and capability management.
  */
 export interface IAggregateRoot<TId = string> {
   /**
    * Returns the aggregate identifier
+   * @returns The unique identifier for this aggregate
    */
   getId(): EntityId<TId>;
 
   /**
    * Returns the current version of the aggregate
+   * @returns Current version number for optimistic locking
    */
   getVersion(): number;
 
   /**
-   * Returns the initial version of the aggregate when it was loaded
+   * Returns the initial version when the aggregate was loaded
+   * @returns Initial version number when loaded from storage
    */
   getInitialVersion(): number;
 
   /**
    * Checks if the aggregate has uncommitted changes
+   * @returns True if there are uncommitted domain events
    */
   hasChanges(): boolean;
 
   /**
    * Returns uncommitted domain events
+   * @returns Readonly array of uncommitted domain events
    */
   getDomainEvents(): ReadonlyArray<IExtendedDomainEvent>;
 
@@ -65,11 +55,15 @@ export interface IAggregateRoot<TId = string> {
 
   /**
    * Adds a capability to the aggregate
+   * @param capability - The capability instance to add
+   * @returns The aggregate instance for method chaining
    */
   addCapability<T extends Capability & IAggregateCapability>(capability: T): this;
 
   /**
-   * Gets a specific capability
+   * Gets a specific capability by its constructor
+   * @param CapabilityClass - Constructor of the capability to retrieve
+   * @returns The capability instance or undefined if not found
    */
   getCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -77,6 +71,8 @@ export interface IAggregateRoot<TId = string> {
 
   /**
    * Checks if aggregate has a specific capability
+   * @param CapabilityClass - Constructor of the capability to check
+   * @returns True if the capability is present
    */
   hasCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -84,6 +80,8 @@ export interface IAggregateRoot<TId = string> {
 
   /**
    * Removes a capability from the aggregate
+   * @param {CapabilityClass} - Constructor of the capability to remove
+   * @returns The aggregate instance for method chaining
    */
   removeCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -91,26 +89,13 @@ export interface IAggregateRoot<TId = string> {
 }
 
 /**
- * @llm-summary Contract for aggregate constructor params functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateConstructorParams interface implementing domain pattern implementation for aggregate constructor params operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateConstructorParams implements IAggregateConstructorParams {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Parameters for aggregate construction.
+ * Defines the minimal required data to create an aggregate instance.
  */
 export interface IAggregateConstructorParams<TId> {
+  /** Unique identifier for the aggregate */
   id: EntityId<TId>;
+  /** Initial version number, defaults to 0 */
   version?: number;
 }
 
@@ -119,27 +104,13 @@ export interface IAggregateConstructorParams<TId> {
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateCapability interface implementing domain pattern implementation for aggregate capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateCapability implements IAggregateCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Base interface for all aggregate capabilities.
+ * Capabilities extend aggregate functionality with features like snapshots, versioning, and event sourcing.
  */
 export interface IAggregateCapability {
   /**
    * Called when capability is attached to an aggregate
+   * @param aggregate The aggregate to attach to
    */
   attach(aggregate: IAggregateRoot<unknown>): void;
 
@@ -150,23 +121,8 @@ export interface IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for snapshot capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * SnapshotCapability interface implementing domain pattern implementation for snapshot capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSnapshotCapability implements ISnapshotCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for creating and restoring aggregate snapshots.
+ * Enables performance optimization by periodically saving aggregate state.
  */
 export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
   extends IAggregateCapability {
@@ -199,23 +155,8 @@ export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
 }
 
 /**
- * @llm-summary Contract for versioning capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * VersioningCapability interface implementing domain pattern implementation for versioning capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteVersioningCapability implements IVersioningCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for handling event versioning and upcasting.
+ * Enables backward compatibility when event schemas evolve.
  */
 export interface IVersioningCapability extends IAggregateCapability {
   /**
@@ -237,23 +178,8 @@ export interface IVersioningCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for event sourcing capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * EventSourcingCapability interface implementing domain pattern implementation for event sourcing capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventSourcingCapability implements IEventSourcingCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for event store integration.
+ * Enables loading and saving aggregates from/to event stores.
  */
 export interface IEventSourcingCapability extends IAggregateCapability {
   /**
@@ -273,23 +199,8 @@ export interface IEventSourcingCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for audit capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AuditCapability interface implementing domain pattern implementation for audit capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditCapability implements IAuditCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for maintaining audit logs of aggregate changes.
+ * Tracks all modifications for compliance and debugging purposes.
  */
 export interface IAuditCapability extends IAggregateCapability {
   /**
@@ -304,23 +215,8 @@ export interface IAuditCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for middleware capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * MiddlewareCapability interface implementing domain pattern implementation for middleware capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteMiddlewareCapability implements IMiddlewareCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for adding middleware to event processing pipeline.
+ * Enables cross-cutting concerns like validation, logging, and transformation.
  */
 export interface IMiddlewareCapability extends IAggregateCapability {
   /**
@@ -334,23 +230,8 @@ export interface IMiddlewareCapability extends IAggregateCapability {
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateBuilder interface implementing domain pattern implementation for aggregate builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateBuilder implements IAggregateBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Builder interface for creating aggregates with capabilities.
+ * Provides fluent API for configuring aggregate features before construction.
  */
 export interface IAggregateBuilder<TId> {
   /**
@@ -389,44 +270,16 @@ export interface IAggregateBuilder<TId> {
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate event handler functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateEventHandler interface implementing domain pattern implementation for aggregate event handler operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateEventHandler implements IAggregateEventHandler {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Handler function for processing aggregate events.
+ * Used internally by aggregates to handle domain events.
  */
 export interface IAggregateEventHandler<T = unknown> {
   (payload: T, metadata?: IEventMetadata): void;
 }
 
 /**
- * @llm-summary Type definition for event aggregate middleware
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * EventAggregateMiddleware type implementing domain pattern implementation for event aggregate middleware operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EventAggregateMiddleware = {} as EventAggregateMiddleware;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Middleware function for event processing pipeline.
+ * Enables interception and modification of events before they are handled.
  */
 export type EventAggregateMiddleware<T = unknown> = (
   event: IExtendedDomainEvent<T>,
@@ -434,23 +287,8 @@ export type EventAggregateMiddleware<T = unknown> = (
 ) => void;
 
 /**
- * @llm-summary Contract for aggregate snapshot functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateSnapshot interface implementing domain pattern implementation for aggregate snapshot operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateSnapshot implements IAggregateSnapshot {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Represents a point-in-time snapshot of aggregate state.
+ * Used for performance optimization and audit purposes.
  */
 export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
   /** Aggregate identifier */
@@ -486,20 +324,8 @@ export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
 // ==========================================
 
 /**
- * @llm-summary CAPABILITY_NAMES constant
- * @llm-domain Pattern
- *
- * @description
- * CAPABILITY_NAMES constant implementing domain pattern implementation for c a p a b i l i t y_ n a m e s operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(CAPABILITY_NAMES);
- * ```
- *
- * @since 1.0.0
- * @public
+ * @deprecated Use capability constructors directly instead of string names
+ * Constants for standard capability names.
  */
 export const CAPABILITY_NAMES = {
   SNAPSHOT: 'snapshot',
@@ -510,21 +336,8 @@ export const CAPABILITY_NAMES = {
 } as const;
 
 /**
- * @llm-summary Type definition for capability name
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * CapabilityName type implementing domain pattern implementation for capability name operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: CapabilityName = {} as CapabilityName;
- * ```
- *
- * @since 1.0.0
- * @public
+ * @deprecated Use capability constructors directly instead of string names
+ * Union type of all standard capability names.
  */
 export type CapabilityName = (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_NAMES];
 
@@ -533,40 +346,13 @@ export type CapabilityName = (typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_N
 // ==========================================
 
 /**
- * @llm-summary Type definition for aggregate id type
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateIdType type implementing domain pattern implementation for aggregate id type operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateIdType = {} as AggregateIdType;
- * ```
- *
- * @since 1.0.0
- * @public
+ * Utility type to extract the ID type from an aggregate type.
  */
 export type AggregateIdType<T> = T extends IAggregateRoot<infer TId> ? TId : never;
 
 /**
- * @llm-summary Type definition for aggregate with capabilities
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * AggregateWithCapabilities type implementing domain pattern implementation for aggregate with capabilities operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AggregateWithCapabilities = {} as AggregateWithCapabilities;
- * ```
- *
- * @since 1.0.0
- * @public
+ * @deprecated Use capability constructors directly instead of string-based capabilities
+ * Utility type for aggregates with specific capabilities.
  */
 export type AggregateWithCapabilities<
   TId,
@@ -592,23 +378,8 @@ export type AggregateWithCapabilities<
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate factory functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateFactory interface implementing domain pattern implementation for aggregate factory operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateFactory implements IAggregateFactory {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Factory interface for creating and rebuilding aggregates.
+ * Provides standard methods for aggregate lifecycle management.
  */
 export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> {
   /**
@@ -635,23 +406,8 @@ export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> 
 // ==========================================
 
 /**
- * @llm-summary Contract for aggregate validator functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AggregateValidator interface implementing domain pattern implementation for aggregate validator operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAggregateValidator implements IAggregateValidator {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Interface for validating aggregate state and operations.
+ * Enables business rule validation at the aggregate level.
  */
 export interface IAggregateValidator<TAggregate extends IAggregateRoot<unknown>> {
   /**
@@ -666,51 +422,26 @@ export interface IAggregateValidator<TAggregate extends IAggregateRoot<unknown>>
 }
 
 /**
- * @llm-summary Contract for validation result functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ValidationResult interface implementing domain pattern implementation for validation result operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteValidationResult implements ValidationResult {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Result of aggregate validation operation.
+ * Contains validation status and any error details.
  */
 export interface ValidationResult {
+  /** Whether the validation passed */
   isValid: boolean;
+  /** List of validation errors if any */
   errors: IValidationError[];
 }
 
 /**
- * @llm-summary Contract for validation error functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ValidationError interface implementing domain pattern implementation for validation error operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteValidationError implements IValidationError {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Represents a single validation error.
+ * Provides details about what failed validation and why.
  */
 export interface IValidationError {
+  /** The field or property that failed validation */
   field: string;
+  /** Human-readable error message */
   message: string;
+  /** Optional error code for programmatic handling */
   code?: string;
 }
 
@@ -719,23 +450,8 @@ export interface IValidationError {
 // ==========================================
 
 /**
- * @llm-summary Contract for caching capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * CachingCapability interface implementing domain pattern implementation for caching capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteCachingCapability implements ICachingCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for caching aggregate data.
+ * Provides key-value storage with TTL support for performance optimization.
  */
 export interface ICachingCapability extends IAggregateCapability {
   /**
@@ -760,23 +476,8 @@ export interface ICachingCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for metrics capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * MetricsCapability interface implementing domain pattern implementation for metrics capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteMetricsCapability implements IMetricsCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for collecting aggregate metrics.
+ * Enables monitoring and observability of aggregate operations.
  */
 export interface IMetricsCapability extends IAggregateCapability {
   /**
@@ -801,50 +502,25 @@ export interface IMetricsCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for metric data functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * MetricData interface implementing domain pattern implementation for metric data operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteMetricData implements MetricData {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Represents a single metric data point.
+ * Contains metric information with optional tags and timestamp.
  */
 export interface MetricData {
+  /** Metric name */
   name: string;
+  /** Metric value */
   value: number;
+  /** Type of metric */
   type: 'counter' | 'gauge' | 'timing';
+  /** Optional tags for metric categorization */
   tags?: Record<string, string>;
+  /** When the metric was recorded */
   timestamp: Date;
 }
 
 /**
- * @llm-summary Contract for security capability functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * SecurityCapability interface implementing domain pattern implementation for security capability operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSecurityCapability implements ISecurityCapability {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Capability for security features like encryption and authorization.
+ * Provides security controls for sensitive aggregate operations.
  */
 export interface ISecurityCapability extends IAggregateCapability {
   /**
@@ -869,28 +545,18 @@ export interface ISecurityCapability extends IAggregateCapability {
 }
 
 /**
- * @llm-summary Contract for security event functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * SecurityEvent interface implementing domain pattern implementation for security event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSecurityEvent implements SecurityEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
+ * Represents a security-related event.
+ * Used for audit trails and security monitoring.
  */
 export interface SecurityEvent {
+  /** Type of security event */
   type: 'access' | 'modification' | 'failure';
+  /** Action that was performed */
   action: string;
+  /** User who performed the action */
   user?: unknown;
+  /** When the event occurred */
   timestamp: Date;
+  /** Additional event metadata */
   metadata?: Record<string, unknown>;
 }
