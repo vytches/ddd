@@ -26,6 +26,7 @@ interface ExamplesOptions {
   package?: string;
   fix?: boolean;
   verbose?: boolean;
+  enhancedMetadata?: boolean;
 }
 
 export const examplesCommand = {
@@ -129,6 +130,7 @@ async function generateDocumentation(packageName: string, options: ExamplesOptio
       ...(options.seed && { seed: options.seed }),
       ...(options.diOnly && { diOnly: options.diOnly }),
       ...(options.output && { outputPath: options.output }),
+      ...(options.enhancedMetadata && { enhancedMetadata: options.enhancedMetadata }),
     });
 
     console.log(Colors.green(`✅ Documentation generated: ${result.outputPath}`));

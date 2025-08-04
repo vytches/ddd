@@ -254,12 +254,18 @@ importers:
 
   packages/cli:
     dependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
       '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
       chalk:
         specifier: ^5.3.0
         version: 5.4.1
@@ -269,6 +275,9 @@ importers:
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
     devDependencies:
       '@types/handlebars':
         specifier: ^4.1.0

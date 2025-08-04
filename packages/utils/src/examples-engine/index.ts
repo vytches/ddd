@@ -47,7 +47,20 @@ export {
   QUALITY_THRESHOLDS,
 } from './validation/rules';
 
-// Enhanced Metadata System V2
+// Enhanced Metadata System V2 - Clean Architecture
+export { YamlMetadataEngine, type MetadataConfig } from './core/yaml-metadata-engine';
+export { JsDocOutputAdapter } from './adapters/jsdoc-output-adapter';
+export { CliOutputAdapter } from './adapters/cli-output-adapter';
+export { 
+  UnifiedAdapter, 
+  formatAsJSDoc, 
+  formatAsCLI,
+  formatAllMethodsAsJSDoc,
+  formatAllMethodsAsCLI,
+  type OutputFormat 
+} from './adapters/unified-adapter';
+
+// Legacy Enhanced Metadata System (will be deprecated)
 export { HierarchicalMetadataResolver } from './hierarchy/hierarchical-metadata-resolver';
 export { FormatSpecificResolver } from './hierarchy/format-specific-resolver';
 export { MetadataResolutionStrategies } from './hierarchy/resolution-strategies';

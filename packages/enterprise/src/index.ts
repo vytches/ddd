@@ -79,22 +79,7 @@ export type {
   ISchedulerConfig,
   ISchedulerLifecycle,
   IRecurringPattern,
-  BundleGenerationOptions,
-  BundleResult,
-  ComplexityLevel,
-  ContentConfig,
-  ExampleDefinition,
-  FindOptions,
-  FrameworkIntegration,
-  GenerateDocumentationOptions,
-  GenerateDocumentationResult,
-  LLMSupport,
-  PackageExampleConfig,
-  RelatedPackage,
-  TagSystem,
-  ValidationFix,
-  ValidationResult,
-  ValidationWarning,
+  // Example-related types removed - use YAML metadata system instead
 } from '@vytches/ddd-contracts';
 
 export {
@@ -117,8 +102,7 @@ export {
 // Export contracts EntityId as base type
 export { EntityId as BaseEntityId } from '@vytches/ddd-contracts';
 
-// Export contracts ValidationError as foundation type
-export type { ValidationError as ContractsValidationError } from '@vytches/ddd-contracts';
+// ValidationError removed from contracts - use IValidationError instead
 
 // Domain primitives exports
 export * from '@vytches/ddd-domain-primitives';

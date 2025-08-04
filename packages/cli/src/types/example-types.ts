@@ -39,4 +39,4 @@ export type {
   LLMSupport,
   TagSystem,
   RelatedPackage,
-} from '@vytches/ddd-contracts';
+} from './legacy-contracts';

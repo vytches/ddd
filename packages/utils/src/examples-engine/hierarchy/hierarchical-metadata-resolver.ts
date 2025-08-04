@@ -276,33 +276,98 @@ export class HierarchicalMetadataResolver {
    * Instead of reading file 13 times for 13 methods, read ONCE and parse all methods
    */
   private async loadAllMethodsMetadata(packageName: string, className: string): Promise<Record<string, MetadataParseResult>> {
-    const classFilePath = path.join(
-      this.baseDir,
-      'docs',
-      'examples',
-      'domain',
-      packageName,
-      `${className}.md`
-    );
-
-    console.log(`[hierarchical-resolver] BATCH - Loading all methods from class file: ${classFilePath}`);
-
+    console.log(`[hierarchical-resolver] BATCH - Loading all methods from YAML class metadata for ${packageName}/${className}`);
+    
     try {
-      // Get file content from cache
-      const content = await this.fileCache.getFileContent(classFilePath);
-      if (!content) {
-        console.log(`[hierarchical-resolver] BATCH - Class file not found: ${classFilePath}`);
+      // Load class metadata from YAML file
+      const classMetadata = await this.loadClassMetadata(packageName, className);
+      if (!classMetadata) {
+        console.log(`[hierarchical-resolver] BATCH - No class metadata found for ${className}`);
         return {};
       }
 
-      // Parse ALL methods at once from the class file
-      const allMethods = this.parseAllMethodsFromClassFile(content);
-      console.log(`[hierarchical-resolver] BATCH - Parsed ${Object.keys(allMethods).length} methods from class file`);
-
-      return allMethods;
+      const results: Record<string, MetadataParseResult> = {};
+      
+      // Extract method data from YAML structure
+      if (classMetadata.metadata && typeof classMetadata.metadata === 'object') {
+        const metadata = classMetadata.metadata as Record<string, unknown>;
+        
+        // Look for classes section in YAML
+        if (metadata.classes && typeof metadata.classes === 'object') {
+          const classesData = metadata.classes as Record<string, unknown>;
+          
+          // Find the specific class in the classes section
+          for (const [yamlClassName, classData] of Object.entries(classesData)) {
+            if (typeof classData === 'object' && classData !== null) {
+              const classInfo = classData as Record<string, unknown>;
+              
+              // Extract methods from this class
+              if (classInfo.methods && typeof classInfo.methods === 'object') {
+                const methodsData = classInfo.methods as Record<string, unknown>;
+                
+                for (const [methodName, methodData] of Object.entries(methodsData)) {
+                  if (typeof methodData === 'object' && methodData !== null) {
+                    const methodInfo = methodData as Record<string, unknown>;
+                    
+                    // Convert YAML method data to MetadataParseResult format
+                    const methodMetadata: Record<string, unknown> = {};
+                    
+                    // Copy basic fields
+                    if (methodInfo.description) methodMetadata.description = methodInfo.description;
+                    if (methodInfo.businessContext) methodMetadata.businessContext = methodInfo.businessContext;
+                    if (methodInfo.parameters) methodMetadata.parameters = methodInfo.parameters;
+                    if (methodInfo.returns) methodMetadata.returns = methodInfo.returns;
+                    if (methodInfo.customTags) methodMetadata.customTags = methodInfo.customTags;
+                    
+                    // Handle examples array - preserve full structure with id and code
+                    if (methodInfo.examples && Array.isArray(methodInfo.examples)) {
+                      const examples: Array<{id?: string; code: string}> = [];
+                      for (const example of methodInfo.examples) {
+                        if (typeof example === 'object' && example !== null) {
+                          const exampleData = example as Record<string, unknown>;
+                          if (exampleData.code && typeof exampleData.code === 'string') {
+                            const exampleObj: {id?: string; code: string} = {
+                              code: exampleData.code
+                            };
+                            if (exampleData.id && typeof exampleData.id === 'string') {
+                              exampleObj.id = exampleData.id;
+                            }
+                            examples.push(exampleObj);
+                          }
+                        }
+                      }
+                      methodMetadata.examples = examples;
+                    }
+                    
+                    // Handle hierarchy configuration
+                    let strategy: ResolutionStrategy = 'merge';
+                    if (methodInfo.hierarchy && typeof methodInfo.hierarchy === 'object') {
+                      const hierarchyData = methodInfo.hierarchy as Record<string, unknown>;
+                      if (hierarchyData.strategy && typeof hierarchyData.strategy === 'string') {
+                        strategy = hierarchyData.strategy as ResolutionStrategy;
+                      }
+                    }
+                    
+                    results[methodName] = {
+                      metadata: methodMetadata,
+                      strategy
+                    };
+                    
+                    console.log(`[hierarchical-resolver] BATCH - Extracted method ${methodName} from YAML with ${methodMetadata.examples ? (methodMetadata.examples as string[]).length : 0} examples`);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      console.log(`[hierarchical-resolver] BATCH - Extracted ${Object.keys(results).length} methods from YAML class metadata`);
+      return results;
+      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.log(`[hierarchical-resolver] BATCH - Could not read class file ${classFilePath}:`, errorMessage);
+      console.log(`[hierarchical-resolver] BATCH - Error loading methods from YAML: ${errorMessage}`);
       return {};
     }
   }

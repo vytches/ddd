@@ -1,7 +1,7 @@
 # {{packageConfig.displayName}}{{#if framework}} - {{framework}} Integration{{/if}}
 
 {{#ifSection "hero"}}
-{{loadMarkdown packageConfig.packageName "shared/hero.md"}}
+{{yamlContent packageConfig.packageName "package" "description" "cli"}}
 
 **Version**: {{packageConfig.version}}  
 **Package**: @vytches/ddd-{{packageConfig.packageName}}  
@@ -13,7 +13,7 @@
 {{#ifSection "description"}}
 ## What is {{packageConfig.displayName}}?
 
-{{loadMarkdown packageConfig.packageName "shared/description.md"}}
+{{yamlContent packageConfig.packageName "package" "business-context" "cli"}}
 {{/ifSection}}
 
 {{#ifSection "whenToUse"}}
@@ -27,11 +27,19 @@
 {{#ifSection "examples"}}
 ## Implementation Examples
 
-{{#each complexityLevels}}
-### {{capitalize this}} Level Implementation
+{{#each examples}}
+### {{this.name}}
+
+{{#if this.description}}
+{{this.description}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{this.businessContext}}
+{{/if}}
 
 ```typescript
-{{loadMarkdown ../packageConfig.packageName (concat this "/implementation.md")}}
+{{loadYamlMarkdown ../packageConfig.packageName this.file}}
 ```
 
 {{/each}}
