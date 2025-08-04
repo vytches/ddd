@@ -45,15 +45,29 @@ export class EntityId<T = string> extends BaseEntityId<T> {
 
   /**
    * Enhanced factory methods with strict validation
-   * @example-inject
+   * Creates a new EntityId with a randomly generated UUID
+   * @returns EntityId with random UUID
+   * @example
+   * ```typescript
+   * const id = EntityId.createWithRandomUUID();
+   * console.log(id.getValue()); // Returns a UUID string
+   * ```
    */
   static override createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
 
   /**
-   * Create EntityId from UUID string
-   * @example-inject
+   * Create EntityId from UUID string with enhanced validation
+   * @param value UUID string value
+   * @returns EntityId instance
+   * @throws MissingValueError if value is empty
+   * @throws InvalidParameterError if value is not a valid UUID
+   * @example
+   * ```typescript
+   * const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+   * console.log(id.getType()); // Returns: 'uuid'
+   * ```
    */
   static override fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
@@ -86,8 +100,16 @@ export class EntityId<T = string> extends BaseEntityId<T> {
   }
 
   /**
-   * Create EntityId from text string
-   * @example-inject
+   * Create EntityId from text string with enhanced validation
+   * @param value Text string value
+   * @returns EntityId instance
+   * @throws MissingValueError if value is empty
+   * @throws InvalidParameterError if value contains invalid characters
+   * @example
+   * ```typescript
+   * const id = EntityId.fromText('user-123');
+   * console.log(id.getValue()); // Returns: 'user-123'
+   * ```
    */
   static override fromText(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {

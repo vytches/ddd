@@ -86,11 +86,9 @@ export abstract class IBaseRepository {
   ) {}
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Saves an aggregate by persisting its domain events
    * @param aggregate The aggregate to save
    * @throws VersionError if version conflict occurs
-   * @example-inject
    */
   async save(aggregate: IRepositoryAggregate): Promise<void> {
     const events = aggregate.getDomainEvents();
@@ -120,11 +118,9 @@ export abstract class IBaseRepository {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Finds an aggregate by its identifier
    * @param id The entity identifier
    * @returns The aggregate or null if not found
-   * @example-inject
    */
   abstract findById(id: unknown): Promise<unknown | null>;
 }

@@ -10,11 +10,6 @@ import { VersioningCapability } from '../capabilities/versioning-capability';
 import { EventSourcingCapability } from '../capabilities/event-sourcing-capability';
 import { AuditCapability } from '../capabilities/audit-capability';
 
-/**
- * @description-inject
- * @business-context-inject
- * @example-inject
- */
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
   private capabilities: Array<{
@@ -28,10 +23,7 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns Aggregate
-   * @example-inject
    */
   static create<TId = string>(params: {
     id: TId | EntityId<TId>;
@@ -44,21 +36,13 @@ export class AggregateBuilder<TId = string> {
     return new AggregateBuilder(constructorParams);
   }
 
-  /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
-   */
   withSnapshots(): this {
     this.capabilities.push({ capability: new SnapshotCapability() });
     return this;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {this} Builder instance for method chaining
-   * @example-inject
    */
   withVersioning(): this {
     this.capabilities.push({ capability: new VersioningCapability() });
@@ -66,10 +50,7 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {this} Builder instance for method chaining
-   * @example-inject
    */
   withAudit(): this {
     this.capabilities.push({ capability: new AuditCapability() });
@@ -77,11 +58,8 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {IEventStore} [eventStore] - Optional event store for event sourcing
    * @returns {this} Builder instance for method chaining
-   * @example-inject
    */
   withEventSourcing(eventStore?: IEventStore): this {
     const capability = new EventSourcingCapability();
@@ -100,12 +78,9 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {T} capability - Custom capability instance to add
    * @param {(cap: T) => void} configure - Optional configuration function for the capability
    * @returns {this} Builder instance for method chaining
-   * @example-inject
    */
   withCapability<T extends Capability & IAggregateCapability>(
     capability: T,
@@ -121,22 +96,14 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {IEventStore} eventStore - Event store instance for event sourcing capability
    * @returns {this} Builder instance for method chaining
-   * @example-inject
    */
   setEventStore(eventStore: IEventStore): this {
     this.eventStore = eventStore;
     return this;
   }
 
-  /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
-   */
   build<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
     AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
   ): TAgg {
@@ -155,11 +122,8 @@ export class AggregateBuilder<TId = string> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {new (params: IAggregateConstructorParams<TId>) => TAgg} AggregateClass - Optional aggregate class constructor
    * @returns {TAgg} Fully configured aggregate with all standard capabilities
-   * @example-inject
    */
   buildWithAllCapabilities<TAgg extends AggregateRoot<TId> = AggregateRoot<TId>>(
     AggregateClass?: new (params: IAggregateConstructorParams<TId>) => TAgg
@@ -173,13 +137,10 @@ export class AggregateBuilder<TId = string> {
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {object} params - Parameters for creating aggregate builder
  * @param {TId | EntityId<TId>} params.id - Entity identifier
  * @param {number} [params.version] - Optional version number
  * @returns {AggregateBuilder<TId>} New aggregate builder instance
- * @example-inject
  */
 export function aggregateBuilder<TId = string>(params: {
   id: TId | EntityId<TId>;

@@ -14,11 +14,6 @@ import type {
 } from '@vytches/ddd-contracts';
 import { createDomainEvent, CapabilityRegistry } from '@vytches/ddd-contracts';
 
-/**
- * @description-inject
- * @business-context-inject
- * @example-inject
- */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
   private _version = 0;
@@ -38,58 +33,46 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Get the unique identifier of this aggregate
    */
   getId(): EntityId<TId> {
     return this._id;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   *
    * @returns {number} Current version number for optimistic locking
-   * @example-inject
    */
   getVersion(): number {
     return this._version;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   *
    * @returns {number} Initial version when aggregate was loaded
-   * @example-inject
    */
   getInitialVersion(): number {
     return this._initialVersion;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   *
    * @returns {boolean} True if aggregate has uncommitted domain events
-   * @example-inject
    */
   hasChanges(): boolean {
     return this._domainEvents.length > 0;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   *
    * @returns {ReadonlyArray<IExtendedDomainEvent>} Array of uncommitted domain events
-   * @example-inject
    */
   getDomainEvents(): ReadonlyArray<IExtendedDomainEvent> {
     return [...this._domainEvents];
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Clear all uncommitted domain events and update initial version
    */
   commit(): void {
     this._domainEvents = [];
@@ -101,12 +84,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {string} eventType - Event type to register handler for
    * @param {IAggregateEventHandler<T>} handler - Event handler function
    * @returns {this} The aggregate instance for method chaining
-   * @example-inject
    */
   protected registerEventHandler<T>(eventType: string, handler: IAggregateEventHandler<T>): this {
     this._eventHandlers.set(eventType, handler as IAggregateEventHandler);
@@ -114,12 +94,10 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Apply domain event to aggregate and add to pending events
    * @param {string | IExtendedDomainEvent<P>} eventTypeOrEvent - Event type string or complete event object
    * @param {P} payload - Event payload data
    * @param {Partial<IEventMetadata>} metadata - Optional event metadata
-   * @example-inject
    */
   protected apply<P = unknown>(
     eventTypeOrEvent: string | IExtendedDomainEvent<P>,
@@ -169,10 +147,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Reconstruct aggregate state from historical domain events
    * @param {IExtendedDomainEvent[]} events - Array of events to replay for state reconstruction
-   * @example-inject
    */
   protected loadFromHistory(events: IExtendedDomainEvent[]): void {
     this._version = this._initialVersion;
@@ -191,11 +167,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Add capability to enhance aggregate functionality
    * @param {T} capability - Capability instance to add to the aggregate
    * @returns {this} The aggregate instance for method chaining
-   * @example-inject
    */
   addCapability<T extends Capability & IAggregateCapability>(capability: T): this {
     if ('attach' in capability && typeof capability.attach === 'function') {
@@ -206,11 +180,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to retrieve
    * @returns {T | undefined} The capability instance or undefined if not found
-   * @example-inject
    */
   getCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -219,11 +190,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to check
    * @returns {boolean} True if the capability is present
-   * @example-inject
    */
   hasCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -232,11 +200,8 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {CapabilityConstructor<T>} CapabilityClass - Constructor of the capability to remove
    * @returns {this} The aggregate instance for method chaining
-   * @example-inject
    */
   removeCapability<T extends Capability & IAggregateCapability>(
     CapabilityClass: CapabilityConstructor<T>
@@ -250,20 +215,14 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {Capability[]} Array of all registered capabilities
-   * @example-inject
    */
   getAllCapabilities(): Capability[] {
     return this._capabilities.getAll();
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {string[]} Array of capability type names
-   * @example-inject
    */
   getCapabilityTypes(): string[] {
     return this._capabilities.getTypes();

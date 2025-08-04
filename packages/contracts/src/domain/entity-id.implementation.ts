@@ -29,20 +29,26 @@ export class EntityId<T = string> implements IEntityId<T> {
   ) {}
 
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Returns the stored identifier value
    * @returns The identifier value
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id = EntityId.fromText('user-123');
+   * const value = id.getValue(); // Returns: 'user-123'
+   * ```
    */
   getValue(): T {
     return this.value;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Returns the identifier type (text, uuid, integer, bigint)
    * @returns The identifier type
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+   * const type = id.getType(); // Returns: 'uuid'
+   * ```
    */
   getType(): IdType {
     return this.type;
@@ -54,10 +60,14 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Compares this EntityId with another for equality
    * @returns True if entities have same value and type
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id1 = EntityId.fromText('user-123');
+   * const id2 = EntityId.fromText('user-123');
+   * const isEqual = id1.equals(id2); // Returns: true
+   * ```
    */
   equals(other: IEntityId<T>): boolean {
     return other.getValue() === this.value && other.getType() === this.type;
@@ -100,10 +110,13 @@ export class EntityId<T = string> implements IEntityId<T> {
 
   // Compatibility methods for existing code
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Creates a new EntityId with a randomly generated UUID
    * @returns New EntityId with random UUID
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id = EntityId.createWithRandomUUID();
+   * console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
+   * ```
    */
   static createWithRandomUUID(): EntityId<string> {
     // Simple UUID generation without external dependencies
@@ -116,10 +129,13 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Creates an EntityId from a UUID string with validation
    * @returns EntityId from UUID string
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+   * console.log(id.getType()); // Returns: 'uuid'
+   * ```
    */
   static fromUUID(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {
@@ -149,10 +165,13 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject  
+   * Creates an EntityId from a text string with validation
    * @returns EntityId from text string
-   * @example-inject
+   * @example
+   * ```typescript
+   * const id = EntityId.fromText('user-123');
+   * console.log(id.getValue()); // Returns: 'user-123'
+   * ```
    */
   static fromText(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {

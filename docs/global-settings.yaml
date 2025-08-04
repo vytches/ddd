@@ -1,0 +1,77 @@
+# Global Settings for VytchesDDD Enhanced Metadata System V2
+# This file provides base metadata for ALL packages and classes
+
+# === GLOBAL DEFAULTS ===
+author: "VytchesDDD Team"
+since: "1.0.0"
+license: "MIT"
+documentation-url: "https://docs.vytches.com/ddd"
+version: "0.5.0"
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: "merge"
+  scope: "global"
+
+# === GLOBAL JSDOC PLACEMENT CONFIGURATION ===
+jsdoc:
+  # Global default placement strategy
+  placement-strategy: "separate"        # separate | constructor-only | class-only | smart
+  class-documentation: "enabled"       # enabled | disabled | auto
+  constructor-documentation: "enabled" # enabled | disabled | auto
+  content-strategy: "distinct"         # distinct | shared | primary-secondary
+  
+  # Global defaults for all classes
+  class-defaults:
+    description: "VytchesDDD implementation following enterprise DDD patterns"
+    business-context: "Part of the VytchesDDD library for domain-driven design"
+    author: "VytchesDDD Team"
+    since: "1.0.0"
+  
+  # Global defaults for all constructors  
+  constructor-defaults:
+    description: "Creates new instance with specified configuration"
+    business-context: "Initializes object for domain operations"
+
+# === GLOBAL BUSINESS CONTEXT ===
+business-context: "Enterprise Domain-Driven Design building blocks and patterns"
+description: "Implementation patterns for @vytches/ddd library"
+
+# === FORMAT-SPECIFIC GLOBAL SETTINGS ===
+formats:
+  jsdoc:
+    author: "VytchesDDD Team"
+    license: "MIT"
+    since: "1.0.0"
+  cli:
+    detailed-description: |
+      ## VytchesDDD Library
+
+      Enterprise-grade Domain-Driven Design patterns for TypeScript applications.
+
+      ### Features
+      - Type-safe domain modeling
+      - Event-driven architecture
+      - Performance optimized
+      - Production ready
+
+# === ENVIRONMENT-BASED SETTINGS ===
+environment:
+  # When VYTCHES_LOGGER=true
+  VYTCHES_LOGGER:
+    custom-tags:
+      performance: "Includes performance monitoring capabilities"
+      debug: "Includes debug information when logger is enabled"
+
+  # When VYTCHES_DEV_MODE=true
+  VYTCHES_DEV_MODE:
+    custom-tags:
+      development: "Additional development utilities available"
+
+# === CUSTOM DECORATORS REGISTRY ===
+custom-decorators:
+  warning: "Important usage warnings and limitations"
+  # performance: "Performance characteristics and optimization notes"
+  # example-advanced: "Advanced usage examples for expert developers"
+  # see-also: "Related methods and cross-references"
+  # internal: "Internal implementation details"

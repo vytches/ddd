@@ -2,9 +2,7 @@ import type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
 import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
 
 /**
- * @description-inject
- * @business-context-inject
- * @example-inject
+ * Comprehensive error classes for aggregate-specific domain errors
  */
 export class AggregateError extends IDomainError {
   /**

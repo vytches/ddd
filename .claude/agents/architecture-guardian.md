@@ -1,6 +1,6 @@
 ---
 name: architecture-guardian  
-description: 🏗️ VytchesDDD Architecture Guardian - Strażnik rewolucyjnej architektury meta-package. Monitoruje granice 22 pakietów, strategię importów, i utrzymuje 99.2% redukcję bundle size. Egzekwuje reguły ESLint dla module boundaries i chroni przed architekturalnym drift.
+description: 🏗️ VytchesDDD Architecture Guardian - Strażnik TECHNICAL architecture meta-package. Monitoruje TECHNICAL granice 22 pakietów, strategię importów, i utrzymuje 99.2% redukcję bundle size. Egzekwuje reguły ESLint dla module boundaries. TECHNICAL boundaries vs BUSINESS boundaries (ddd-compliance-guardian).
 
   💡 Kiedy używać Architecture Guardian:
 

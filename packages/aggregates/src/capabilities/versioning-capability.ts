@@ -6,11 +6,6 @@ import type {
 } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
-/**
- * @description-inject
- * @business-context-inject
- * @example-inject
- */
 export class VersioningCapability
   extends Capability<'versioning'>
   implements IVersioningCapability
@@ -24,32 +19,21 @@ export class VersioningCapability
   private upcasters = new Map<string, Map<number, IEventUpcaster>>();
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {unknown} aggregate - Aggregate to attach this capability to
-   * @example-inject
    */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
   }
 
-  /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
-   */
   detach?(): void {
     this.aggregate = undefined!;
     this.upcasters.clear();
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {string} eventType - Type of event to register upcaster for
    * @param {number} sourceVersion - Source version number to upcast from
    * @param {IEventUpcaster<TFrom, TTo>} upcaster - Upcaster instance to transform events
-   * @example-inject
    */
   registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
@@ -63,11 +47,8 @@ export class VersioningCapability
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {IExtendedDomainEvent} event - Event to process with version handling
    * @param {Map<string, IAggregateEventHandler>} handlers - Map of event handlers
-   * @example-inject
    */
   handleVersionedEvent(
     event: IExtendedDomainEvent,
@@ -107,53 +88,38 @@ export class VersioningCapability
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {string[]} Array of event types that have registered upcasters
-   * @example-inject
    */
   getRegisteredEventTypes(): string[] {
     return Array.from(this.upcasters.keys());
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {string} eventType - Event type to check
    * @param {number} version - Version number to check for upcaster
    * @returns {boolean} True if upcaster exists for specified event type and version
-   * @example-inject
    */
   hasUpcaster(eventType: string, version: number): boolean {
     return this.upcasters.get(eventType)?.has(version) || false;
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {string} eventType - Event type to get upcasters for
    * @returns {Map<number, IEventUpcaster> | undefined} Map of upcasters by version or undefined
-   * @example-inject
    */
   getUpcastersForType(eventType: string): Map<number, IEventUpcaster> | undefined {
     return this.upcasters.get(eventType);
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @param {string} eventType - Event type to clear upcasters for
-   * @example-inject
    */
   clearUpcastersForType(eventType: string): void {
     this.upcasters.delete(eventType);
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
    * @returns {number} Total count of all registered upcasters across all event types
-   * @example-inject
    */
   getTotalUpcasterCount(): number {
     let count = 0;

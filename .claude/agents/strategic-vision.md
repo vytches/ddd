@@ -1,6 +1,6 @@
 ---
 name: strategic-vision
-description: 🚀 VytchesDDD Strategic Vision Agent - Architekt przyszłości library. Tworzy roadmap do market leadership, planuje kolejne revolutionary features, koordynuje enterprise monetization strategy. Vision: #1 enterprise DDD framework globally z $10M+ ARR do 2027.
+description: 🚀 VytchesDDD Strategic Vision Agent - Architekt BUSINESS przyszłości library. Tworzy roadmap do market leadership, planuje kolejne revolutionary features, koordynuje enterprise monetization strategy. BUSINESS strategy collaboration z ddd-compliance-guardian dla DDD credibility. Vision: #1 enterprise DDD framework globally z $10M+ ARR do 2027.
 
   💡 Kiedy używać Strategic Vision Agent:
 

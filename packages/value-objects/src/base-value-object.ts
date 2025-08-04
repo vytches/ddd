@@ -46,11 +46,9 @@ export abstract class BaseValueObject<T> implements ValueObjectValidator<T> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Compares this value object with another for equality
    * @param valueObject The value object to compare with
    * @returns True if they are equal, false otherwise
-   * @example-inject
    */
   equals(valueObject: BaseValueObject<T>): boolean {
     if (!valueObject) {
@@ -77,10 +75,8 @@ export abstract class BaseValueObject<T> implements ValueObjectValidator<T> {
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Gets the underlying value
    * @returns The underlying value
-   * @example-inject
    */
   getValue(): T {
     return this.value;

@@ -69,10 +69,8 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Sets the event bus for publishing domain events
    * @param {IEventBus} eventBus - The event bus to use for publishing events
-   * @example-inject
    */
   setEventBus(eventBus: IEventBus): void {
     this.eventBus = eventBus;
@@ -134,10 +132,8 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Sets the Unit of Work for transactional operations
    * @param {IUnitOfWork} unitOfWork - The Unit of Work to use
-   * @example-inject
    */
   setUnitOfWork(unitOfWork: IUnitOfWork): void {
     this.unitOfWork = unitOfWork;
@@ -146,9 +142,7 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Clears the Unit of Work and event bus references
    */
   clearUnitOfWork(): void {
     this.unitOfWork = undefined;
@@ -228,20 +222,16 @@ export abstract class AsyncDomainService extends IBaseDomainService implements I
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Initializes the domain service
    * @returns {Promise<void>} A promise that resolves when initialization is complete
-   * @example-inject
    */
   async initialize(): Promise<void> {
     // Default implementation (empty)
   }
 
   /**
-   * @description-inject
-   * @business-context-inject
+   * Disposes of the domain service resources
    * @returns {Promise<void>} A promise that resolves when disposal is complete
-   * @example-inject
    */
   async dispose(): Promise<void> {
     // Default implementation (empty)

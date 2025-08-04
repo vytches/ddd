@@ -63,7 +63,7 @@ export interface IJSDocAdapter {
   injectIntoJSDoc(code: string, methodName: string, packageName: string): Promise<string>;
 
   /**
-   * Process @example-inject directives
+   * Process JSDoc directives using YAML metadata system
    */
   processInjectionDirectives(code: string, filePath: string): Promise<string>;
 }

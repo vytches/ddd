@@ -57,5 +57,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
+  },
+  "dependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0"
   }
 }

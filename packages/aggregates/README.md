@@ -12,14 +12,20 @@ strong consistency boundaries.
 
 ## 📚 Detailed Documentation
 
-**NEW**: The package has been reorganized for clarity. Each class now has its own detailed documentation:
+**NEW**: Enhanced Metadata System V2 with YAML Front Matter for AI-optimized documentation:
 
-- 📖 **[AggregateRoot Methods](./docs/AGGREGATE_ROOT_METHODS.md)** - Core aggregate methods (`getId()`, `commit()`, `apply()`, etc.)
-- 🔧 **[AggregateBuilder Methods](./docs/AGGREGATE_BUILDER_METHODS.md)** - Builder pattern methods (`create()`, `withSnapshots()`, `build()`, etc.)  
-- 🛠️ **[Utility Functions](./docs/UTILITY_FUNCTIONS.md)** - Helper functions (`asSnapshotAggregate()`, `getAggregateCapabilities()`, etc.)
-- 📋 **[Complete Package Guide](./docs/README.md)** - Architecture overview and examples
+- 🎯 **Generated JSDoc**: Full API documentation with hierarchical metadata system
+- 📊 **Live Documentation**: View at `/docs/api/aggregates/index.html` after running `pnpm jsdoc:publish`
+- 🧠 **AI-Optimized**: Structured metadata for LLM consumption and code generation
+- ⚡ **Performance**: ~12s initial build, ~2s incremental, ~0.5s no changes
 
-> **Why the reorganization?** The previous structure was confusing because it wasn't clear which `create()` method belonged to which class. Now each class has its own file and documentation.
+**Core Documentation:**
+- 📖 **AggregateRoot Class** - Base aggregate implementation with event sourcing
+- 🔧 **AggregateBuilder Class** - Fluent builder for aggregates with capabilities  
+- 🛠️ **Utility Functions** - Type-safe capability management and utilities
+- 📋 **Error Classes** - Comprehensive aggregate-specific error handling
+
+> **Enhanced Metadata System V2** provides hierarchical documentation (Global → Package → Class → Method) with format-specific content, custom tags, and automatic example injection.
 
 ## 📋 Table of Contents
 

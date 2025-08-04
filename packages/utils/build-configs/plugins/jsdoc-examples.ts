@@ -1,6 +1,6 @@
 /**
- * Vite plugin for JSDoc example injection
- * Processes @example-inject directives during build
+ * Vite plugin for JSDoc documentation processing
+ * Processes JSDoc documentation during build using YAML metadata system
  */
 
 import type { Plugin } from 'vite';
@@ -303,7 +303,7 @@ export function createAdvancedJSDocExamplesPlugin(
     name: 'jsdoc-examples-advanced',
     
     async transform(code: string, id: string) {
-      if (!shouldProcessFile(id, options) || !code.includes('@example-inject')) {
+      if (!shouldProcessFile(id, options)) {
         return null;
       }
 

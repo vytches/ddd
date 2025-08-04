@@ -1,0 +1,415 @@
+# AggregateBuilder - Universal Enhanced Metadata System V2
+# Documentation for aggregate-builder.d.ts file
+# Builder pattern implementation for creating aggregates with capabilities
+
+# === FILE METADATA ===
+file-name: "aggregate-builder"
+title: "AggregateBuilder - Fluent Aggregate Construction with Capabilities"
+description: "Builder pattern implementation for creating aggregates with flexible capability configuration"
+business-context: "Simplifies aggregate creation by providing fluent API for configuring capabilities and dependencies"
+
+# === GLOBAL HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  AggregateBuilder:
+    # === CLASS-LEVEL JSDOC CONFIGURATION ===
+    jsdoc:
+      placement-strategy: "separate"
+      class-documentation: "enabled"
+      constructor-documentation: "enabled"
+      content-strategy: "distinct"
+
+    # === CLASS-LEVEL DOCUMENTATION ===
+    class-doc:
+      description: "Fluent builder for creating aggregate instances with capability configuration"
+      business-context: "Provides intuitive API for aggregate construction with runtime capability composition"
+
+      # Format-specific overrides
+      formats:
+        jsdoc:
+          description: "Builder pattern for aggregates with capability system"
+        cli:
+          description: |
+            ## AggregateBuilder - Fluent Aggregate Construction
+
+            Enterprise builder pattern for creating aggregates with:
+            - Capability composition
+            - Event store configuration
+            - Type-safe construction
+
+      hierarchy:
+        strategy: "append"
+        scope: "class-doc"
+
+      custom-tags:
+        since: "1.0.0"
+        pattern: "Builder pattern for complex object construction"
+        capabilities: "Supports all aggregate capabilities: audit, versioning, snapshots, event sourcing"
+
+    # === CLASS HIERARCHY ===
+    hierarchy:
+      strategy: "merge"
+      scope: "class"
+
+    # === METHODS ===
+    methods:
+      constructor:
+        description: "Private constructor for builder pattern implementation"
+        business-context: "Ensures controlled instantiation through factory method"
+
+        hierarchy:
+          strategy: "replace"
+          scope: "method"
+
+        parameters:
+          - name: "params"
+            type: "IAggregateConstructorParams<TId>"
+            description: "Initial aggregate construction parameters"
+            optional: false
+
+        custom-tags:
+          visibility: "private"
+          pattern: "Private constructor enforces factory method usage"
+
+      create:
+        description: "Creates new builder instance with initial parameters"
+        business-context: "Factory method for initiating fluent aggregate construction"
+
+        parameters:
+          - name: "params"
+            type: "{ id: TId | EntityId<TId>; version?: number; }"
+            description: "Initial aggregate parameters with id and optional version"
+            optional: false
+
+        returns:
+          type: "AggregateBuilder<TId>"
+          description: "New builder instance for fluent configuration"
+
+        custom-tags:
+          static: "true"
+          factory: "Creates builder instances"
+          generics: "TId - Type of aggregate identifier"
+
+        examples:
+          - id: "basic-builder"
+            code: |
+              const builder = AggregateBuilder.create({
+                id: EntityId.createWithRandomUUID(),
+                version: 0
+              });
+          - id: "with-string-id"
+            code: |
+              const builder = AggregateBuilder.create({
+                id: 'order-123',
+                version: 1
+              });
+
+      withSnapshots:
+        description: "Adds snapshot capability to aggregate"
+        business-context: "Enables performance optimization through state snapshots"
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          capability: "Adds SnapshotCapability"
+
+        examples:
+          - id: "add-snapshots"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withSnapshots()
+                .build();
+
+      withVersioning:
+        description: "Adds versioning capability for optimistic concurrency control"
+        business-context: "Enables concurrent access control through version tracking"
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          capability: "Adds VersioningCapability"
+          concurrency: "Enables optimistic locking"
+
+        examples:
+          - id: "add-versioning"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withVersioning()
+                .build();
+
+      withAudit:
+        description: "Adds audit capability for compliance tracking"
+        business-context: "Enables audit trail for regulatory compliance and debugging"
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          capability: "Adds AuditCapability"
+          compliance: "Supports audit requirements"
+
+        examples:
+          - id: "add-audit"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withAudit()
+                .build();
+
+      withEventSourcing:
+        description: "Adds event sourcing capability with optional event store"
+        business-context: "Enables event-driven state management and event replay"
+
+        parameters:
+          - name: "eventStore"
+            type: "IEventStore"
+            description: "Optional event store instance for persistence"
+            optional: true
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          capability: "Adds EventSourcingCapability"
+          event-sourcing: "Core event sourcing support"
+
+        examples:
+          - id: "basic-event-sourcing"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withEventSourcing()
+                .build();
+          - id: "with-event-store"
+            code: |
+              const eventStore = new PostgreSQLEventStore(config);
+              const aggregate = AggregateBuilder.create({ id })
+                .withEventSourcing(eventStore)
+                .build();
+
+      withCapability:
+        description: "Adds custom capability with optional configuration"
+        business-context: "Enables extension with custom domain-specific capabilities"
+
+        parameters:
+          - name: "capability"
+            type: "T extends Capability & IAggregateCapability"
+            description: "Custom capability instance to add"
+            optional: false
+          - name: "configure"
+            type: "(cap: T) => void"
+            description: "Optional configuration function for the capability"
+            optional: true
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          extensibility: "Supports custom capabilities"
+          generics: "T extends Capability & IAggregateCapability"
+
+        examples:
+          - id: "custom-capability"
+            code: |
+              const customCapability = new ValidationCapability();
+              const aggregate = AggregateBuilder.create({ id })
+                .withCapability(customCapability)
+                .build();
+          - id: "configured-capability"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withCapability(
+                  new RateLimitCapability(),
+                  cap => cap.setLimit(100)
+                )
+                .build();
+
+      setEventStore:
+        description: "Sets event store for event sourcing capability"
+        business-context: "Configures persistence layer for event sourcing"
+
+        parameters:
+          - name: "eventStore"
+            type: "IEventStore"
+            description: "Event store instance for event persistence"
+            optional: false
+
+        returns:
+          type: "this"
+          description: "Builder instance for method chaining"
+
+        custom-tags:
+          fluent: "Returns this for chaining"
+          event-sourcing: "Configures event persistence"
+
+        examples:
+          - id: "set-event-store"
+            code: |
+              const eventStore = new InMemoryEventStore();
+              const aggregate = AggregateBuilder.create({ id })
+                .setEventStore(eventStore)
+                .withEventSourcing()
+                .build();
+
+      build:
+        description: "Builds configured aggregate instance"
+        business-context: "Finalizes configuration and creates aggregate with all capabilities"
+
+        parameters:
+          - name: "AggregateClass"
+            type: "new (params: IAggregateConstructorParams<TId>) => TAgg"
+            description: "Optional custom aggregate class constructor"
+            optional: true
+
+        returns:
+          type: "TAgg extends AggregateRoot<TId>"
+          description: "Fully configured aggregate instance"
+
+        custom-tags:
+          terminal: "Terminal builder method"
+          generics: "TAgg extends AggregateRoot<TId>"
+
+        examples:
+          - id: "build-default"
+            code: |
+              const aggregate = AggregateBuilder.create({ id })
+                .withVersioning()
+                .withAudit()
+                .build();
+          - id: "build-custom-class"
+            code: |
+              class OrderAggregate extends AggregateRoot<string> {
+                // Custom aggregate implementation
+              }
+
+              const order = AggregateBuilder.create({ id: 'order-123' })
+                .withEventSourcing()
+                .build(OrderAggregate);
+
+      buildWithAllCapabilities:
+        description: "Builds aggregate with all standard capabilities enabled"
+        business-context: "Quick setup for aggregates requiring full capability suite"
+
+        parameters:
+          - name: "AggregateClass"
+            type: "new (params: IAggregateConstructorParams<TId>) => TAgg"
+            description: "Optional custom aggregate class constructor"
+            optional: true
+
+        returns:
+          type: "TAgg extends AggregateRoot<TId>"
+          description: "Aggregate with all capabilities: snapshots, versioning, audit, event sourcing"
+
+        custom-tags:
+          convenience: "Shortcut for common configuration"
+          capabilities: "Includes all standard capabilities"
+          generics: "TAgg extends AggregateRoot<TId>"
+
+        examples:
+          - id: "all-capabilities"
+            code: |
+              // Equivalent to calling all withXxx() methods
+              const aggregate = AggregateBuilder.create({ id })
+                .buildWithAllCapabilities();
+          - id: "custom-with-all"
+            code: |
+              const order = AggregateBuilder.create({ id: orderId })
+                .setEventStore(eventStore)
+                .buildWithAllCapabilities(OrderAggregate);
+
+# === FUNCTIONS ===
+functions:
+  aggregateBuilder:
+    description: "Factory function for creating aggregate builders"
+    business-context: "Alternative syntax for builder creation"
+
+    parameters:
+      - name: "params"
+        type: "{ id: TId | EntityId<TId>; version?: number; }"
+        description: "Initial aggregate parameters"
+        optional: false
+
+    returns:
+      type: "AggregateBuilder<TId>"
+      description: "New builder instance"
+
+    custom-tags:
+      factory: "Convenience function"
+      generics: "TId - Type of aggregate identifier"
+
+    examples:
+      - id: "function-usage"
+        code: |
+          // Function syntax alternative to static method
+          const builder = aggregateBuilder({
+            id: 'user-123',
+            version: 0
+          });
+
+          const aggregate = builder
+            .withAudit()
+            .withVersioning()
+            .build();
+
+# === IMPORTED REFERENCES ===
+imported:
+  interfaces:
+    - name: "IEventStore"
+      from: "@vytches/ddd-contracts"
+      description: "Contract for event persistence"
+    - name: "Capability"
+      from: "@vytches/ddd-contracts"
+      description: "Base capability interface"
+    - name: "IAggregateConstructorParams"
+      from: "../aggregate-interfaces"
+      description: "Parameters for aggregate construction"
+    - name: "IAggregateCapability"
+      from: "../aggregate-interfaces"
+      description: "Contract for aggregate capabilities"
+
+  classes:
+    - name: "EntityId"
+      from: "@vytches/ddd-contracts"
+      description: "Strongly-typed entity identifier"
+    - name: "AggregateRoot"
+      from: "./aggregate-root"
+      description: "Base aggregate root class"
+    - name: "SnapshotCapability"
+      from: "../capabilities/snapshot-capability"
+      description: "Snapshot support capability"
+    - name: "VersioningCapability"
+      from: "../capabilities/versioning-capability"
+      description: "Version tracking capability"
+    - name: "EventSourcingCapability"
+      from: "../capabilities/event-sourcing-capability"
+      description: "Event sourcing capability"
+    - name: "AuditCapability"
+      from: "../capabilities/audit-capability"
+      description: "Audit trail capability"
+
+# === DEPENDENCIES ===
+dependencies:
+  internal:
+    - "@vytches/ddd-contracts"
+    - "../aggregate-interfaces"
+    - "./aggregate-root"
+    - "../capabilities/snapshot-capability"
+    - "../capabilities/versioning-capability"
+    - "../capabilities/event-sourcing-capability"
+    - "../capabilities/audit-capability"
+  external:
+    - "none"

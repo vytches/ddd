@@ -1,0 +1,405 @@
+# SnapshotCapability - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "snapshot-capability"
+title: "SnapshotCapability - Aggregate State Snapshots"
+description: "Performance optimization capability that creates and restores aggregate state snapshots"
+business-context: "Reduces event replay overhead for long-lived aggregates and improves system performance"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  SnapshotCapability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: "separate"
+      class-documentation: "enabled"
+      
+    # Class Documentation
+    class-doc:
+      description: "Generic capability that manages aggregate state snapshots for performance optimization in event sourcing"
+      business-context: "Critical for maintaining performance in event-sourced systems with long aggregate histories"
+      
+      # Format-specific
+      formats:
+        jsdoc:
+          description: "Snapshot capability for aggregate state persistence and restoration"
+        cli:
+          description: |
+            ## SnapshotCapability<TState, TMeta>
+            
+            Provides snapshot functionality for aggregates to optimize event sourcing performance.
+            Captures and restores aggregate state at specific points in time, reducing event replay overhead.
+      
+      custom-tags:
+        since: "1.0.0"
+        capability-type: "snapshot"
+        performance: "Reduces event replay time for large aggregates"
+        generic: "TState and TMeta type parameters for type safety"
+    
+    # Methods
+    methods:
+      constructor:
+        description: "Creates new snapshot capability instance with empty state"
+        business-context: "Initializes capability ready for attachment to any aggregate type"
+        
+        examples:
+          - id: "basic"
+            code: |
+              const snapshotCapability = new SnapshotCapability<OrderState, OrderMetadata>();
+              aggregate.addCapability(snapshotCapability);
+              
+      attach:
+        description: "Attaches snapshot capability to aggregate for state management"
+        business-context: "Enables snapshot creation and restoration for the target aggregate"
+        
+        parameters:
+          - name: "aggregate"
+            type: "unknown"
+            description: "Aggregate instance to enable snapshotting for"
+            
+        returns:
+          type: "void"
+          description: "No return value - capability is now attached"
+          
+        examples:
+          - id: "attachment"
+            code: |
+              const capability = new SnapshotCapability<OrderState, OrderMetadata>();
+              capability.attach(orderAggregate);
+              
+              // Now the aggregate can create and restore snapshots
+              const snapshot = capability.createSnapshot(() => order.getState());
+              
+      detach:
+        description: "Detaches snapshot capability and clears stored snapshots"
+        business-context: "Safely removes snapshotting without affecting aggregate core functionality"
+        
+        returns:
+          type: "void"
+          description: "No return value - capability is detached and memory freed"
+          
+        examples:
+          - id: "cleanup"
+            code: |
+              capability.detach();
+              // All snapshot data is cleared to prevent memory leaks
+              
+        custom-tags:
+          cleanup: "Clears snapshot data to prevent memory leaks"
+          
+      createSnapshot:
+        description: "Creates snapshot of current aggregate state using provided serializer functions"
+        business-context: "Captures point-in-time aggregate state for later restoration and performance optimization"
+        
+        parameters:
+          - name: "serializer"
+            type: "() => TState"
+            description: "Function that extracts and serializes aggregate state"
+          - name: "metadataCreator"
+            type: "() => TMeta"
+            description: "Optional function that creates snapshot metadata"
+            
+        returns:
+          type: "IAggregateSnapshot<TState, TMeta>"
+          description: "Complete snapshot object with state, metadata, and versioning information"
+          
+        examples:
+          - id: "basic-snapshot"
+            code: |
+              const snapshot = capability.createSnapshot(
+                () => ({
+                  orderId: order.getId(),
+                  customerId: order.getCustomerId(),
+                  items: order.getItems(),
+                  status: order.getStatus()
+                })
+              );
+              
+              console.log(`Snapshot created at version ${snapshot.version}`);
+              
+          - id: "with-metadata"
+            code: |
+              const snapshot = capability.createSnapshot(
+                () => order.getState(),
+                () => ({
+                  createdBy: 'system',
+                  reason: 'scheduled-backup',
+                  environment: 'production'
+                })
+              );
+              
+              console.log(`Metadata:`, snapshot.metadata);
+              
+        custom-tags:
+          performance: "Serializer should be efficient for frequent snapshots"
+          type-safety: "Generic types ensure compile-time type checking"
+          
+      restoreFromSnapshot:
+        description: "Restores aggregate state from snapshot using provided deserializer functions"
+        business-context: "Rebuilds aggregate to previous state for performance optimization or recovery scenarios"
+        
+        parameters:
+          - name: "snapshot"
+            type: "IAggregateSnapshot<TState, TMeta>"
+            description: "Snapshot object containing state and metadata to restore"
+          - name: "deserializer"
+            type: "(state: TState) => void"
+            description: "Function that applies state data to aggregate"
+          - name: "metadataRestorer"
+            type: "(metadata: TMeta) => void"
+            description: "Optional function that processes snapshot metadata"
+            
+        returns:
+          type: "void"
+          description: "No return value - aggregate state is modified in-place"
+          
+        throws:
+          - type: "AggregateError"
+            description: "When snapshot is invalid, or aggregate IDs/types don't match"
+            
+        examples:
+          - id: "basic-restore"
+            code: |
+              capability.restoreFromSnapshot(
+                snapshot,
+                (state) => {
+                  order.setCustomerId(state.customerId);
+                  order.setItems(state.items);
+                  order.setStatus(state.status);
+                }
+              );
+              
+              console.log(`Restored to version ${snapshot.version}`);
+              
+          - id: "with-metadata"
+            code: |
+              capability.restoreFromSnapshot(
+                snapshot,
+                (state) => order.setState(state),
+                (metadata) => {
+                  console.log(`Restored from ${metadata.environment} snapshot`);
+                  console.log(`Created by: ${metadata.createdBy}`);
+                }
+              );
+              
+        custom-tags:
+          validation: "Validates snapshot integrity and aggregate compatibility"
+          atomicity: "Restoration is atomic - either succeeds completely or fails"
+          
+      saveTemporaryState:
+        description: "Saves temporary state internally for later retrieval"
+        business-context: "Useful for caching state during complex operations or testing scenarios"
+        
+        parameters:
+          - name: "state"
+            type: "TState"
+            description: "State object to save temporarily"
+            
+        returns:
+          type: "void"
+          description: "No return value - state is stored in memory"
+          
+        examples:
+          - id: "temporary-save"
+            code: |
+              // Save current state before risky operation
+              capability.saveTemporaryState(order.getState());
+              
+              try {
+                order.performRiskyOperation();
+              } catch (error) {
+                // Can restore from temporary state if needed
+                const previousState = capability.getPreviousState();
+              }
+              
+        custom-tags:
+          temporary: "For short-term state caching only"
+          testing: "Useful in test scenarios"
+          
+      getLastSnapshotTimestamp:
+        description: "Returns timestamp of the most recent snapshot or null if none exists"
+        business-context: "Helps determine when last snapshot was created for scheduling and monitoring"
+        
+        returns:
+          type: "Date | null"
+          description: "Timestamp of last snapshot or null if no snapshots exist"
+          
+        examples:
+          - id: "timestamp-check"
+            code: |
+              const lastSnapshot = capability.getLastSnapshotTimestamp();
+              if (lastSnapshot) {
+                const age = Date.now() - lastSnapshot.getTime();
+                console.log(`Last snapshot was ${age}ms ago`);
+                
+                // Create new snapshot if too old
+                if (age > 24 * 60 * 60 * 1000) { // 24 hours
+                  capability.saveSnapshot(() => order.getState());
+                }
+              }
+              
+        custom-tags:
+          monitoring: "Use for snapshot age monitoring and scheduling"
+          
+      saveSnapshot:
+        description: "Creates and saves snapshot internally using provided serializers"
+        business-context: "Combines createSnapshot and internal storage for convenient snapshot management"
+        
+        parameters:
+          - name: "serializer"
+            type: "() => TState"
+            description: "Function that extracts and serializes aggregate state"
+          - name: "metadataCreator"
+            type: "() => TMeta"
+            description: "Optional function that creates snapshot metadata"
+            
+        returns:
+          type: "void"
+          description: "No return value - snapshot is created and stored internally"
+          
+        examples:
+          - id: "save-internal"
+            code: |
+              // Save snapshot internally for later use
+              capability.saveSnapshot(
+                () => order.getState(),
+                () => ({ savedBy: 'user-123', reason: 'manual-backup' })
+              );
+              
+              // Later retrieve the saved snapshot
+              const savedSnapshot = capability.getPreviousState();
+              
+        custom-tags:
+          convenience: "Combines creation and internal storage"
+          
+      getPreviousState:
+        description: "Retrieves and clears previously saved internal snapshot"
+        business-context: "Provides access to internally saved snapshots with automatic cleanup"
+        
+        returns:
+          type: "IAggregateSnapshot<TState, TMeta> | null"
+          description: "Previously saved snapshot or null if none exists - clears internal storage"
+          
+        examples:
+          - id: "retrieve-previous"
+            code: |
+              // Save current state
+              capability.saveSnapshot(() => order.getState());
+              
+              // Perform operations
+              order.updateStatus('processing');
+              order.addItems([newItem]);
+              
+              // Retrieve previous state (and clear internal storage)
+              const previousSnapshot = capability.getPreviousState();
+              if (previousSnapshot) {
+                console.log(`Previous version: ${previousSnapshot.version}`);
+                // Can restore if needed
+              }
+              
+              // Second call returns null (state was cleared)
+              const shouldBeNull = capability.getPreviousState(); // null
+              
+        custom-tags:
+          destructive: "Clears internal storage after retrieval"
+          one-time: "Can only retrieve once - state is cleared after access"
+
+# === STATIC PROPERTIES ===
+static-properties:
+  capabilityType:
+    description: "Returns the string identifier for this capability type"
+    business-context: "Used by capability system for registration and type checking"
+    
+    returns:
+      type: "string"
+      description: "Always returns 'snapshot'"
+      
+    examples:
+      - id: "type-check"
+        code: |
+          console.log(SnapshotCapability.capabilityType); // 'snapshot'
+          
+          // Used in capability management
+          if (capability.type === SnapshotCapability.capabilityType) {
+            // Handle snapshot capability
+          }
+
+# === INTERFACES ===
+interfaces:
+  IAggregateSnapshot:
+    description: "Snapshot data structure containing aggregate state and metadata"
+    business-context: "Standard format for aggregate snapshots with versioning and audit information"
+    
+    properties:
+      - name: "aggregateId"
+        type: "string | number"
+        description: "Unique identifier of the snapshotted aggregate"
+      - name: "version"
+        type: "number"
+        description: "Aggregate version when snapshot was created"
+      - name: "aggregateType"
+        type: "string"
+        description: "Class name of the aggregate"
+      - name: "state"
+        type: "TState"
+        description: "Serialized aggregate state data"
+      - name: "timestamp"
+        type: "Date"
+        description: "When the snapshot was created"
+      - name: "lastEventId"
+        type: "string | undefined"
+        description: "ID of the last event included in this snapshot"
+      - name: "metadata"
+        type: "TMeta | undefined"
+        description: "Optional snapshot metadata"
+
+# === ERROR HANDLING ===
+errors:
+  AggregateError.invalidSnapshot:
+    description: "Thrown when snapshot data is invalid or corrupted"
+    business-context: "Prevents restoration from corrupted snapshots that could break aggregate state"
+    
+    examples:
+      - id: "invalid-snapshot"
+        code: |
+          try {
+            capability.restoreFromSnapshot(corruptedSnapshot, deserializer);
+          } catch (error) {
+            if (error instanceof AggregateError) {
+              console.log('Snapshot is invalid, falling back to event replay');
+              // Fall back to loading from event store
+            }
+          }
+          
+  AggregateError.idMismatch:
+    description: "Thrown when snapshot aggregate ID doesn't match current aggregate"
+    business-context: "Prevents accidental cross-aggregate state corruption"
+    
+    examples:
+      - id: "id-mismatch"
+        code: |
+          // This will throw if snapshot is for different aggregate
+          try {
+            orderAggregate.restoreFromSnapshot(customerSnapshot, deserializer);
+          } catch (error) {
+            console.log('Cannot restore snapshot from different aggregate');
+          }
+          
+  AggregateError.typeMismatch:
+    description: "Thrown when snapshot aggregate type doesn't match current aggregate class"
+    business-context: "Prevents type confusion and maintains type safety across snapshots"
+    
+    examples:
+      - id: "type-mismatch"
+        code: |
+          // This will throw if snapshot is from different aggregate type
+          try {
+            orderAggregate.restoreFromSnapshot(userSnapshot, deserializer);
+          } catch (error) {
+            console.log('Cannot restore snapshot from different aggregate type');
+          }

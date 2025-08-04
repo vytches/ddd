@@ -1,0 +1,484 @@
+# VersioningCapability - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "versioning-capability"
+title: "VersioningCapability - Event Schema Evolution"
+description: "Advanced capability that handles event schema evolution and version migration through upcasting"
+business-context: "Essential for maintaining backward compatibility in evolving event-sourced systems"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  VersioningCapability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: "separate"  
+      class-documentation: "enabled"
+      
+    # Class Documentation
+    class-doc:
+      description: "Capability that manages event schema evolution through upcasting, enabling seamless upgrades of event structures"
+      business-context: "Critical for long-term maintenance of event-sourced systems where event schemas must evolve over time"
+      
+      # Format-specific
+      formats:
+        jsdoc:
+          description: "Event versioning capability with upcasting support for schema evolution"
+        cli:
+          description: |
+            ## VersioningCapability
+            
+            Handles event schema evolution through a sophisticated upcasting system.
+            Enables backward compatibility when event structures change over time.
+            
+            ### Key Features
+            - Automatic event version detection and transformation
+            - Pluggable upcaster registration system
+            - Sequential version migration support
+            - Type-safe event transformation
+      
+      custom-tags:
+        since: "1.0.0"
+        capability-type: "versioning"
+        backward-compatibility: "Maintains compatibility across event schema versions"
+        architecture: "Supports microservices evolution patterns"
+    
+    # Methods
+    methods:
+      constructor:
+        description: "Creates new versioning capability instance with empty upcaster registry"
+        business-context: "Initializes capability ready for upcaster registration and event handling"
+        
+        examples:
+          - id: "basic"
+            code: |
+              const versioningCapability = new VersioningCapability();
+              aggregate.addCapability(versioningCapability);
+              
+      attach:
+        description: "Attaches versioning capability to aggregate"
+        business-context: "Enables event version handling and upcasting for the target aggregate"
+        
+        parameters:
+          - name: "aggregate"
+            type: "unknown"
+            description: "Aggregate instance to enable versioning for"
+            
+        returns:
+          type: "void"
+          description: "No return value - capability is now attached"
+          
+        examples:
+          - id: "attachment"
+            code: |
+              const capability = new VersioningCapability();
+              capability.attach(orderAggregate);
+              
+              // Now the aggregate can handle versioned events
+              capability.registerUpcaster('OrderCreated', 1, orderCreatedV1ToV2Upcaster);
+              
+      detach:
+        description: "Detaches versioning capability and clears all registered upcasters"
+        business-context: "Safely removes versioning without affecting aggregate core functionality"
+        
+        returns:
+          type: "void"
+          description: "No return value - capability detached and upcasters cleared"
+          
+        examples:
+          - id: "cleanup"
+            code: |
+              capability.detach();
+              // All upcasters are cleared to free memory
+              
+        custom-tags:
+          cleanup: "Clears upcaster registry to prevent memory leaks"
+          
+      registerUpcaster:
+        description: "Registers an upcaster for transforming events from one version to the next"
+        business-context: "Enables automatic event transformation when loading historical events with older schemas"
+        
+        parameters:
+          - name: "eventType"
+            type: "string"
+            description: "Type of event this upcaster handles"
+          - name: "sourceVersion"
+            type: "number"
+            description: "Source version number to transform from"
+          - name: "upcaster"
+            type: "IEventUpcaster<TFrom, TTo>"
+            description: "Upcaster implementation that transforms event data"
+            
+        returns:
+          type: "void"
+          description: "No return value - upcaster is registered in internal registry"
+          
+        examples:
+          - id: "basic-upcaster"
+            code: |
+              // Register upcaster for OrderCreated v1 -> v2
+              capability.registerUpcaster('OrderCreated', 1, {
+                upcast: (payload, metadata) => ({
+                  ...payload,
+                  orderDate: new Date(payload.timestamp), // New field in v2
+                  customerId: payload.customer_id,        // Renamed field
+                })
+              });
+              
+          - id: "complex-upcaster"
+            code: |
+              // Register upcaster for complex transformation
+              const orderItemsUpcaster = {
+                upcast: (payload, metadata) => ({
+                  ...payload,
+                  items: payload.line_items.map(item => ({
+                    productId: item.product_id,
+                    quantity: item.qty,
+                    price: item.unit_price,
+                    // Calculate new fields
+                    totalPrice: item.qty * item.unit_price
+                  }))
+                })
+              };
+              
+              capability.registerUpcaster('OrderCreated', 2, orderItemsUpcaster);
+              
+        custom-tags:
+          type-safety: "Generic types TFrom and TTo ensure compile-time type checking"
+          sequential: "Upcasters are applied sequentially from source to target version"
+          
+      handleVersionedEvent:
+        description: "Processes event with automatic version detection and upcasting to current schema"
+        business-context: "Core method that ensures all events are transformed to current schema before handling"
+        
+        parameters:
+          - name: "event"
+            type: "IExtendedDomainEvent"
+            description: "Domain event that may need version transformation"
+          - name: "handlers"
+            type: "Map<string, IAggregateEventHandler>"
+            description: "Map of event handlers by event type"
+            
+        returns:
+          type: "void"
+          description: "No return value - event is processed and handler is called"
+          
+        examples:
+          - id: "automatic-upcasting"
+            code: |
+              // Historical event from version 1
+              const oldEvent = {
+                eventType: 'OrderCreated',
+                payload: { customer_id: '123', timestamp: '2023-01-01' },
+                metadata: { version: 1 }
+              };
+              
+              const handlers = new Map([
+                ['OrderCreated', (payload, metadata) => {
+                  // Handler expects v3 format
+                  console.log(`Order date: ${payload.orderDate}`);
+                  console.log(`Customer: ${payload.customerId}`);
+                }]
+              ]);
+              
+              // Automatically upcasts v1 -> v2 -> v3 then calls handler
+              capability.handleVersionedEvent(oldEvent, handlers);
+              
+          - id: "current-version"
+            code: |
+              // Current version event (no upcasting needed)
+              const currentEvent = {
+                eventType: 'OrderCreated',
+                payload: { customerId: '123', orderDate: new Date() },
+                metadata: { version: 3 }
+              };
+              
+              // Calls handler directly without upcasting
+              capability.handleVersionedEvent(currentEvent, handlers);
+              
+        custom-tags:
+          automatic: "Version detection and transformation happens automatically"
+          sequential: "Applies upcasters in sequence until target version reached"
+          
+      getRegisteredEventTypes:
+        description: "Returns list of event types that have registered upcasters"
+        business-context: "Useful for diagnostics and ensuring all required upcasters are registered"
+        
+        returns:
+          type: "string[]"
+          description: "Array of event type names that have upcasters"
+          
+        examples:
+          - id: "diagnostics"
+            code: |
+              const eventTypes = capability.getRegisteredEventTypes();
+              console.log('Events with upcasters:', eventTypes);
+              // Output: ['OrderCreated', 'OrderUpdated', 'OrderCancelled']
+              
+              // Verify critical events have upcasters
+              const requiredEvents = ['OrderCreated', 'PaymentProcessed'];
+              const missing = requiredEvents.filter(type => !eventTypes.includes(type));
+              if (missing.length > 0) {
+                console.warn('Missing upcasters for:', missing);
+              }
+              
+        custom-tags:
+          diagnostics: "Use for system health checks and validation"
+          
+      hasUpcaster:
+        description: "Checks if upcaster exists for specific event type and version"
+        business-context: "Defensive programming to verify upcaster availability before processing events"
+        
+        parameters:
+          - name: "eventType"
+            type: "string"
+            description: "Event type to check"
+          - name: "version"
+            type: "number"
+            description: "Version number to check for upcaster"
+            
+        returns:
+          type: "boolean"
+          description: "True if upcaster exists for specified event type and version"
+          
+        examples:
+          - id: "validation"
+            code: |
+              if (!capability.hasUpcaster('OrderCreated', 1)) {
+                throw new Error('Missing upcaster for OrderCreated v1');
+              }
+              
+              // Safe to process v1 events
+              capability.handleVersionedEvent(oldEvent, handlers);
+              
+          - id: "conditional-processing"
+            code: |
+              const eventVersion = event.metadata?.version || 1;
+              if (eventVersion < 3 && !capability.hasUpcaster(event.eventType, eventVersion)) {
+                console.warn(`No upcaster for ${event.eventType} v${eventVersion}`);
+                // Handle legacy event differently or skip
+                return;
+              }
+              
+        custom-tags:
+          validation: "Use before processing events to prevent runtime errors"
+          
+      getUpcastersForType:
+        description: "Returns all registered upcasters for specific event type"
+        business-context: "Allows inspection of complete upcasting chain for diagnostics and debugging"
+        
+        parameters:
+          - name: "eventType"
+            type: "string"
+            description: "Event type to get upcasters for"
+            
+        returns:
+          type: "Map<number, IEventUpcaster> | undefined"
+          description: "Map of upcasters by version number, or undefined if no upcasters exist"
+          
+        examples:
+          - id: "inspection"
+            code: |
+              const upcasters = capability.getUpcastersForType('OrderCreated');
+              if (upcasters) {
+                console.log(`OrderCreated has ${upcasters.size} upcasters`);
+                console.log('Versions:', Array.from(upcasters.keys()));
+                // Versions: [1, 2, 3]
+              }
+              
+          - id: "validation-chain"
+            code: |
+              const validateUpcasterChain = (eventType, maxVersion) => {
+                const upcasters = capability.getUpcastersForType(eventType);
+                if (!upcasters) return false;
+                
+                // Check for gaps in version chain
+                for (let v = 1; v < maxVersion; v++) {
+                  if (!upcasters.has(v)) {
+                    console.error(`Missing upcaster for ${eventType} v${v}`);
+                    return false; 
+                  }
+                }
+                return true;
+              };
+              
+        custom-tags:
+          diagnostics: "Use for debugging and system validation"
+          
+      clearUpcastersForType:
+        description: "Removes all registered upcasters for specified event type"
+        business-context: "Allows dynamic reconfiguration of upcasting rules or cleanup during testing"
+        
+        parameters:
+          - name: "eventType"
+            type: "string"
+            description: "Event type to clear upcasters for"
+            
+        returns:
+          type: "void"
+          description: "No return value - all upcasters for event type are removed"
+          
+        examples:
+          - id: "cleanup"
+            code: |
+              // Clear all OrderCreated upcasters
+              capability.clearUpcastersForType('OrderCreated');
+              
+              // Re-register with new logic
+              capability.registerUpcaster('OrderCreated', 1, newUpcasterV1);
+              capability.registerUpcaster('OrderCreated', 2, newUpcasterV2);
+              
+        custom-tags:
+          testing: "Useful for test cleanup and dynamic reconfiguration"
+          
+      getTotalUpcasterCount:
+        description: "Returns total number of registered upcasters across all event types"
+        business-context: "Provides system-wide metric for monitoring upcaster configuration completeness"
+        
+        returns:
+          type: "number"
+          description: "Total count of all registered upcasters"
+          
+        examples:
+          - id: "metrics"
+            code: |
+              const totalUpcasters = capability.getTotalUpcasterCount();
+              console.log(`System has ${totalUpcasters} upcasters registered`);
+              
+              // Monitor for system health
+              if (totalUpcasters < expectedMinimum) {
+                console.warn('Fewer upcasters than expected - check configuration');
+              }
+              
+        custom-tags:
+          metrics: "Use for system monitoring and health checks"
+
+# === STATIC PROPERTIES ===
+static-properties:
+  capabilityType:
+    description: "Returns the string identifier for this capability type"
+    business-context: "Used by capability system for registration and type checking"
+    
+    returns:
+      type: "string"
+      description: "Always returns 'versioning'"
+      
+    examples:
+      - id: "type-check"
+        code: |
+          console.log(VersioningCapability.capabilityType); // 'versioning'
+          
+          // Used in capability management
+          if (capability.type === VersioningCapability.capabilityType) {
+            // Handle versioning capability
+          }
+
+# === INTERFACES ===
+interfaces:
+  IEventUpcaster:
+    description: "Interface for event transformation between versions"
+    business-context: "Contract for implementing event schema migrations with type safety"
+    
+    properties:
+      - name: "upcast"
+        type: "function"
+        description: "Transforms event payload and metadata from source to target version"
+        
+    examples:
+      - id: "upcaster-implementation"
+        code: |
+          const orderCreatedV1ToV2: IEventUpcaster<OrderCreatedV1, OrderCreatedV2> = {
+            upcast: (payload, metadata) => ({
+              // Transform V1 payload to V2 format
+              orderId: payload.id,
+              customerId: payload.customer_id,
+              orderDate: new Date(payload.timestamp),
+              items: payload.line_items.map(item => ({
+                productId: item.product_id,
+                quantity: item.qty,
+                price: item.unit_price
+              }))
+            })
+          };
+          
+  IExtendedDomainEvent:
+    description: "Extended domain event interface with versioning metadata"
+    business-context: "Standard event structure that includes version information for upcasting"
+    
+    properties:
+      - name: "eventType"
+        type: "string"
+        description: "Type identifier for the event"
+      - name: "payload"
+        type: "unknown"
+        description: "Event payload data"
+      - name: "metadata"
+        type: "unknown"
+        description: "Event metadata including version information"
+
+# === ARCHITECTURE PATTERNS ===
+patterns:
+  sequential-upcasting:
+    description: "Pattern for chaining multiple version transformations"
+    business-context: "Enables gradual schema evolution through multiple incremental changes"
+    
+    examples:
+      - id: "multi-version-chain"
+        code: |
+          // V1 -> V2: Add orderDate field
+          capability.registerUpcaster('OrderCreated', 1, {
+            upcast: (payload) => ({
+              ...payload,
+              orderDate: new Date(payload.timestamp)
+            })
+          });
+          
+          // V2 -> V3: Restructure items
+          capability.registerUpcaster('OrderCreated', 2, {
+            upcast: (payload) => ({
+              ...payload,
+              items: payload.line_items.map(item => ({
+                id: item.product_id,
+                quantity: item.qty,
+                price: item.unit_price,
+                total: item.qty * item.unit_price
+              }))
+            })
+          });
+          
+          // V3 -> V4: Add customer details
+          capability.registerUpcaster('OrderCreated', 3, {
+            upcast: async (payload) => ({
+              ...payload,
+              customer: await customerService.getCustomer(payload.customerId)
+            })
+          });
+          
+  version-detection:
+    description: "Pattern for detecting event versions from metadata"
+    business-context: "Ensures correct upcaster selection based on event version information"
+    
+    examples:
+      - id: "version-detection"
+        code: |
+          const detectEventVersion = (event) => {
+            // Check metadata for version
+            if (event.metadata?.version) {
+              return event.metadata.version;
+            }
+            
+            // Fall back to schema detection
+            if (event.payload.timestamp && !event.payload.orderDate) {
+              return 1; // V1 schema
+            }
+            
+            if (event.payload.line_items && !event.payload.items) {
+              return 2; // V2 schema
+            }
+            
+            return 3; // Current version
+          };

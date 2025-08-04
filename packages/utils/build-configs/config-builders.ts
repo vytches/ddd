@@ -47,28 +47,10 @@ function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
         }
       }
 
-      // Enhanced Metadata System V2 - Process .d.ts files ONLY for @*-inject directives
-      // Focus on .d.ts files for library developer experience (IDE IntelliSense, TypeDoc)
+      // Enhanced Metadata System V2 has been replaced with YAML-based system
+      // YAML processing is now handled by separate scripts, not during build
       if (options.jsdocExamples?.enabled !== false) {
-        console.log(`[createDTSPlugin] Processing .d.ts files for Enhanced Metadata System V2...`);
-        
-        try {
-          // Dynamic import to avoid circular dependencies
-          const { PostCompilationDTSProcessor } = await import('../src/examples-engine/adapters/post-compilation-dts-processor');
-          const processor = new PostCompilationDTSProcessor();
-          
-          // Process the dist directory for this package
-          const distDir = path.resolve(context.packagePath, 'dist');
-          await processor.processDirectory(distDir);
-          
-          console.log(`[createDTSPlugin] Enhanced Metadata processing completed for ${context.packageName}`);
-        } catch (processingError) {
-          console.warn(
-            `Warning: Enhanced Metadata processing failed for ${context.packageName}:`,
-            processingError instanceof Error ? processingError.message : 'Unknown error'
-          );
-          // Don't throw - allow build to continue
-        }
+        console.log(`[createDTSPlugin] Skipping deprecated Enhanced Metadata System V2 - use YAML system instead`);
       }
       
     } catch (error) {

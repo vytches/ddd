@@ -104,9 +104,15 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
  */
 export class MissingValueError extends IDomainError {
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Creates a MissingValueError with specific message and data
+   * @param msg Error message
+   * @param data Optional error data
+   * @returns MissingValueError instance
+   * @example
+   * ```typescript
+   * const error = MissingValueError.withValue('user name', { field: 'name' });
+   * throw error;
+   * ```
    */
   static withValue(msg: string, data?: DomainErrorOptions): MissingValueError {
     const message = msg ?? 'Missing value';
@@ -137,9 +143,16 @@ export class MissingValueError extends IDomainError {
  */
 export class InvalidParameterError extends IDomainError {
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Creates an InvalidParameterError for a specific parameter
+   * @param parameter Parameter name that is invalid
+   * @param msg Optional custom error message
+   * @param data Optional error data
+   * @returns InvalidParameterError instance
+   * @example
+   * ```typescript
+   * const error = InvalidParameterError.withParameter('email', 'Invalid format');
+   * throw error;
+   * ```
    */
   static withParameter(
     parameter: string,
@@ -175,9 +188,15 @@ export class InvalidParameterError extends IDomainError {
  */
 export class DuplicateError extends IDomainError {
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Creates a DuplicateError for a specific entity ID
+   * @param id Entity ID that already exists
+   * @param data Optional error data
+   * @returns DuplicateError instance
+   * @example
+   * ```typescript
+   * const error = DuplicateError.withEntityId('user-123');
+   * throw error;
+   * ```
    */
   static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
     const message = `Entity with id ${id} already exists`;
@@ -208,9 +227,15 @@ export class DuplicateError extends IDomainError {
  */
 export class NotFoundError extends IDomainError {
   /**
-   * @description-inject
-   * @business-context-inject
-   * @example-inject
+   * Creates a NotFoundError for a specific entity ID
+   * @param id Entity ID that was not found
+   * @param data Optional error data
+   * @returns NotFoundError instance
+   * @example
+   * ```typescript
+   * const error = NotFoundError.withEntityId('user-123');
+   * throw error;
+   * ```
    */
   static withEntityId(id: string, data?: DomainErrorOptions): NotFoundError {
     const message = `Entity with id ${id} not found`;

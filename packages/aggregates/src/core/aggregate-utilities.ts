@@ -65,12 +65,9 @@ export type AggregateWithEventSourcingCapability<TId> = AggregateWithCapability<
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithSnapshotCapability<TId>} Returns aggregate is AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasSnapshotCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -79,12 +76,9 @@ export function hasSnapshotCapability<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithVersioningCapability<TId>} Returns aggregate is AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasVersioningCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -93,12 +87,9 @@ export function hasVersioningCapability<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithAuditCapability<TId>} Returns aggregate is AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasAuditCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -107,12 +98,9 @@ export function hasAuditCapability<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {aggregate is AggregateWithEventSourcingCapability<TId>} Returns aggregate is AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasEventSourcingCapability<TId>(
   aggregate: AggregateRoot<TId>
@@ -125,12 +113,9 @@ export function hasEventSourcingCapability<TId>(
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithSnapshotCapability<TId>} Returns AggregateWithSnapshotCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function asSnapshotAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -142,12 +127,9 @@ export function asSnapshotAggregate<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithVersioningCapability<TId>} Returns AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function asVersioningAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -159,12 +141,9 @@ export function asVersioningAggregate<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithAuditCapability<TId>} Returns AggregateWithAuditCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function asAuditAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -176,12 +155,9 @@ export function asAuditAggregate<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithEventSourcingCapability<TId>} Returns AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function asEventSourcingAggregate<TId>(
   aggregate: AggregateRoot<TId>
@@ -197,25 +173,19 @@ export function asEventSourcingAggregate<TId>(
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {string[]} Returns string[]
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function getAggregateCapabilities(aggregate: AggregateRoot<unknown>): string[] {
   return aggregate.getCapabilityTypes();
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -225,13 +195,10 @@ export function hasAllCapabilities<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {CapabilityConstructor<T>[]} capabilities - capabilities parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function hasAnyCapability<T extends Capability & IAggregateCapability>(
   aggregate: AggregateRoot<unknown>,
@@ -241,11 +208,8 @@ export function hasAnyCapability<T extends Capability & IAggregateCapability>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
   id: unknown;
@@ -270,13 +234,10 @@ export function getAggregateInfo(aggregate: AggregateRoot<unknown>): {
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - Aggregate to create snapshot for
  * @param {() => TState} serializer - Function to serialize aggregate state
  * @param {() => unknown} metadataCreator - Optional metadata creator function
  * @returns {unknown | null} Snapshot object if capability exists, null otherwise
- * @example-inject
  */
 export function createSnapshotIfCapable<TState>(
   aggregate: AggregateRoot<unknown>,
@@ -291,14 +252,11 @@ export function createSnapshotIfCapable<TState>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {IAggregateSnapshot<unknown} snapshot - snapshot parameter
  * @param {(state: TState} deserializer - deserializer parameter
  * @returns {boolean} Returns boolean
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function restoreFromSnapshotIfCapable<TState = unknown>(
   aggregate: AggregateRoot<unknown>,
@@ -323,12 +281,9 @@ export function restoreFromSnapshotIfCapable<TState = unknown>(
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {unknown[]} Returns unknown[]
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown[] {
   if (hasAuditCapability(aggregate)) {
@@ -339,11 +294,8 @@ export function getAuditLogIfCapable(aggregate: AggregateRoot<unknown>): unknown
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - Aggregate to get audit statistics from
  * @returns {unknown | null} Audit statistics if capability exists, null otherwise
- * @example-inject
  */
 export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasAuditCapability(aggregate)) {
@@ -358,13 +310,10 @@ export function getAuditStatsIfCapable(aggregate: AggregateRoot<unknown>): unkno
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string | number} aggregateId - aggregateId parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export async function loadFromEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>,
@@ -381,12 +330,9 @@ export async function loadFromEventStoreIfCapable(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @returns {Promise<boolean>} Returns Promise<boolean>
  * @throws {Error} When validation fails
- * @example-inject
  */
 export async function saveToEventStoreIfCapable(
   aggregate: AggregateRoot<unknown>
@@ -406,8 +352,6 @@ export async function saveToEventStoreIfCapable(
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - aggregate parameter
  * @param {string} eventType - eventType parameter
  * @param {number} sourceVersion - sourceVersion parameter
@@ -415,7 +359,6 @@ export async function saveToEventStoreIfCapable(
  * @param {unknown} metadata? - metadata? parameter
  * @returns {TTo }} Returns TTo }
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function registerUpcasterIfCapable<TFrom, TTo>(
   aggregate: AggregateRoot<unknown>,
@@ -432,11 +375,8 @@ export function registerUpcasterIfCapable<TFrom, TTo>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @param {AggregateRoot<unknown>} aggregate - Aggregate to get versioning info from
  * @returns {unknown | null} Versioning information if capability exists, null otherwise
- * @example-inject
  */
 export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): unknown | null {
   if (hasVersioningCapability(aggregate)) {
@@ -457,10 +397,7 @@ export function getVersioningInfoIfCapable(aggregate: AggregateRoot<unknown>): u
 // ==========================================
 
 /**
- * @description-inject
- * @business-context-inject
  * @throws {Error} When validation fails
- * @example-inject
  */
 export async function processAggregatesWithCapabilities<TId>(
   aggregates: AggregateRoot<TId>[],
@@ -495,10 +432,7 @@ export async function processAggregatesWithCapabilities<TId>(
 }
 
 /**
- * @description-inject
- * @business-context-inject
  * @throws {Error} When validation fails
- * @example-inject
  */
 export function cloneAggregateCapabilities<TIdFrom, TIdTo>(
   sourceAggregate: AggregateRoot<TIdFrom>,

@@ -10,7 +10,6 @@ import type { IJSDocAdapter } from '../interfaces';
 import { ExampleEngine } from '../engine';
 import { EnhancedJSDocAdapter } from './enhanced-jsdoc-adapter';
 import { EnhancedTagExtractor } from '../extractor/enhanced-tag-extractor';
-import { HierarchicalJSDocAdapter } from './hierarchical-jsdoc-adapter';
 
 /**
  *
@@ -20,18 +19,11 @@ export class JSDocAdapter implements IJSDocAdapter {
   private engine: ExampleEngine;
   private enhancedAdapter: EnhancedJSDocAdapter;
   private enhancedTagExtractor: EnhancedTagExtractor;
-  private hierarchicalAdapter: HierarchicalJSDocAdapter;
 
   constructor() {
     this.engine = new ExampleEngine();
     this.enhancedAdapter = new EnhancedJSDocAdapter();
     this.enhancedTagExtractor = new EnhancedTagExtractor();
-    this.hierarchicalAdapter = new HierarchicalJSDocAdapter();
-    
-    // Initialize hierarchical adapter
-    this.hierarchicalAdapter.initialize().catch(err => {
-      console.warn('[jsdoc-adapter] Failed to initialize hierarchical adapter:', err);
-    });
   }
 
   /**
@@ -319,7 +311,7 @@ export class JSDocAdapter implements IJSDocAdapter {
       // Get the best example for this method
       const exampleText = await this.getExampleForMethod(methodName, packageName);
 
-      // Replace @example-inject with actual example
+      // Replace legacy injection markers with actual examples from YAML metadata
       // Match the entire line including JSDoc comment markers
       const injectionPattern = /(\s*\*\s*)@example-inject(?:\s+[^\n]*)?/g;
 
@@ -409,19 +401,11 @@ export class JSDocAdapter implements IJSDocAdapter {
   }
 
   /**
-   * Process @example-inject directives in file
+   * Process JSDoc directives in file using YAML metadata system
    */
   async processInjectionDirectives(code: string, filePath: string): Promise<string> {
     try {
-      // Use Enhanced Metadata System V2 with hierarchical resolution
-      const useHierarchicalSystem = process.env.USE_HIERARCHICAL_METADATA !== 'false';
-      
-      if (useHierarchicalSystem) {
-        console.log(`[jsdoc-adapter] Using Enhanced Metadata System V2 for ${filePath}`);
-        return await this.hierarchicalAdapter.processInjectionDirectives(code, filePath);
-      }
-      
-      // Fallback to legacy system
+      // Use legacy metadata system
       console.log(`[jsdoc-adapter] Using legacy metadata system for ${filePath}`);
       // Debug: Log first part of code received by plugin
       console.log(`[jsdoc-adapter] DEBUG: First 200 chars of code received by plugin:`);
@@ -431,7 +415,7 @@ export class JSDocAdapter implements IJSDocAdapter {
       const packageName = this.extractPackageFromPath(filePath);
       console.log(`[jsdoc-examples] Package name extracted: ${packageName} from path: ${filePath}`);
 
-      // Find all injection directives (@example-inject, @description-inject, @business-context-inject)
+      // Find all legacy injection directives (replaced by YAML metadata system)
       const directives = this.findInjectionDirectives(code);
       console.log(`[jsdoc-adapter] Found ${directives.length} directives to process`);
 
@@ -1115,7 +1099,7 @@ export class JSDocAdapter implements IJSDocAdapter {
       examples?: number;
     } = {};
 
-    // Parse layer parameter: @example-inject layer:domain
+    // Parse layer parameter from legacy directive syntax
     const layerMatch = directive.match(/layer:(\w+)/);
     if (layerMatch) {
       const layer = layerMatch[1] as LayerType;
@@ -1124,7 +1108,7 @@ export class JSDocAdapter implements IJSDocAdapter {
       }
     }
 
-    // Parse complexity parameter: @example-inject complexity:basic
+    // Parse complexity parameter from legacy directive syntax
     const complexityMatch = directive.match(/complexity:(\w+)/);
     if (complexityMatch) {
       const complexity = complexityMatch[1] as ComplexityLevel;
@@ -1133,7 +1117,7 @@ export class JSDocAdapter implements IJSDocAdapter {
       }
     }
 
-    // Parse examples count: @example-inject examples:3
+    // Parse examples count from legacy directive syntax
     const examplesMatch = directive.match(/examples:(\d+)/);
     if (examplesMatch && examplesMatch[1]) {
       params.examples = parseInt(examplesMatch[1], 10);
@@ -1176,7 +1160,7 @@ export class JSDocAdapter implements IJSDocAdapter {
           .map(ex => this.engine.formatOutput(ex.content, 'jsdoc'))
           .join('\n *\n');
 
-        const injectionPattern = /@example-inject(?:\s+[^\n]*)?/g;
+        const injectionPattern = /@example-inject(?:\s+[^\n]*)?/g; // Legacy pattern
         return code.replace(injectionPattern, formattedExamples || this.createFallbackExample(methodName, layer));
       }
     } catch (error) {

@@ -61,17 +61,10 @@
 - ✅ **Resolution Strategies** - merge, replace, append strategies for metadata inheritance
 - ✅ **TypeScript Example Formatting** - All @example blocks must use ```typescript
 
-**For Implementation Files (.ts) - Use Dynamic JSDoc:**
-```typescript
-/**
- * @description-inject
- * @business-context-inject
- * @param {Type} param - Description
- * @returns {Type} Description
- * @throws {ErrorType} When validation fails
- * @example-inject
- */
-```
+**For Implementation Files (.ts) - YAML-based Documentation:**
+- Documentation is managed entirely through YAML files
+- NO special markers or directives in source code
+- JSDoc is generated automatically during build process
 
 **For Interface Files (.ts) - Use Static JSDoc:**
 ```typescript
@@ -149,6 +142,27 @@ JSDOC_DEBUG=true pnpm dev        # Enhanced logging with hierarchy resolution
 pnpm jsdoc:verify               # Post-build verification with performance metrics
 pnpm jsdoc:manual               # CLI fallback processing for debugging
 pnpm jsdoc:benchmark            # Performance testing and cache analysis
+pnpm metadata:validate          # Validate all metadata files for common issues
+```
+
+**🛠️ CRITICAL: Common Issues Prevention**
+
+**Class Name Mapping Issues:**
+- ✅ System now handles `aggregate-root.builder` → `aggregate-builder.md` mapping
+- ✅ Automatic detection of class name mismatches in validation script
+- ⚠️ Always verify .d.ts filename matches expected .md filename
+
+**@extract Block Format Issues:**
+- ✅ **MANDATORY**: All @extract blocks MUST use ```typescript wrappers
+- ✅ **MANDATORY**: All @extract blocks MUST end with @extract-end
+- ❌ **FORBIDDEN**: @extract blocks without proper markdown formatting
+- 🔧 **FIX**: Run `pnpm metadata:validate` to catch formatting issues
+
+**Validation Commands:**
+```bash
+pnpm metadata:validate          # Check all MD files for common issues
+pnpm build                      # Full build with Enhanced Metadata System V2
+JSDOC_DEBUG=true pnpm build     # Debug build with detailed logging
 ```
 
 **Expected Performance Gains:**
@@ -343,28 +357,34 @@ documentation.**
 
 ### JSDoc Template Examples:
 
-#### **For Implementations (Classes) - Enhanced Metadata System:**
+#### **For Implementations (Classes) - YAML Metadata System:**
 
-**CRITICAL**: Use the Enhanced Metadata System for all JSDoc generation. This system supports:
+**CRITICAL**: All JSDoc documentation is now managed through YAML files. This system supports:
 - **Hierarchical configuration**: Global, package, and local metadata layers
 - **Format-specific overrides**: Different content for JSDoc vs CLI via dot notation (`@description.jsdoc`, `@description.cli`)
 - **Selective display**: Tags can be omitted in one format while displayed in another
-- **Dynamic injection**: Real examples from markdown files automatically injected
+- **Automatic generation**: JSDoc is generated from YAML during build process
 
-````typescript
-/**
- * @description-inject
- * @business-context-inject
- * @param {Type} param - Description
- * @returns {Type} Description
- * @throws {ErrorType} When validation fails
- * @example-inject
- * @since 1.0.0
- * @public
- */
-public methodName(param: Type): ReturnType {
-  // Implementation
-}
+**Source code should NOT contain any special markers or directives**
+
+Example YAML configuration:
+````yaml
+# docs/examples/domain/{package-name}/{class-name}/{method-name}.yaml
+@description: Method description from YAML
+@business-context: Business context explanation
+@parameters:
+  - name: param
+    type: Type
+    description: Parameter description
+@returns:
+  type: ReturnType
+  description: Return value description
+@throws:
+  - type: ErrorType
+    description: When validation fails
+@example:
+  - code: |
+      const result = instance.methodName(param);
 ````
 
 #### **For Interfaces (Contracts) - Static JSDoc Documentation:**
@@ -429,55 +449,354 @@ Read the specific class file to understand parameters and return types
 ```
 docs/examples/domain/
 ├── {package-name}/           # Package folder (e.g., domain-services, aggregates)
+│   ├── {class-name}.yaml     # Class-level metadata file
 │   └── {class-name}/         # Class folder (e.g., base-domain-service, aggregate-root)
-│       ├── methodName.md     # Method-specific example file with enhanced metadata
-│       └── anotherMethod.md  # Another method example
+│       ├── methodName.yaml   # Method-specific metadata file
+│       └── anotherMethod.yaml # Another method metadata
 ```
 
-#### **2. Enhanced Metadata Structure in MD Files:**
+#### **2. YAML File Structure - Hierarchical System**
 
-````markdown
-@global-settings
-@strategy: merge
-@description: Global description for all examples
-@business-context: Standard business context
-@author: DDD Team
-@global-settings-end
+**🚨 CRITICAL: Enhanced Metadata System V2 uses HIERARCHICAL INHERITANCE 🚨**
 
-@description: Method-specific description
-@description.cli: ## Extended CLI Description\n\nWith markdown formatting for CLI output
-@description.jsdoc: Concise JSDoc description optimized for code documentation
-@business-context: Business scenario for this specific method
-@business-context.cli: Extended business context for CLI documentation
-@warning.jsdoc: Important JSDoc warning
-@since: 1.0.0
+**Inheritance Chain**: `global-settings.yaml` → `.md-settings.yaml` → `{class-name}.yaml`
 
-@extract: create:domain:basic
-```typescript
-// Enhanced example with metadata-driven documentation
-const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
-aggregate.apply('OrderCreated', { amount: 100 });
-return aggregate;
+**A. Global Settings Structure (`docs/global-settings.yaml`):**
+
+```yaml
+# Global Settings for VytchesDDD Enhanced Metadata System V2
+# Provides base metadata for ALL packages and classes
+
+# === GLOBAL DEFAULTS ===
+author: "VytchesDDD Team"
+since: "1.0.0"
+license: "MIT"
+documentation-url: "https://docs.vytches.com/ddd"
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: "merge"  # merge | replace | append
+  scope: "global"
+
+# === GLOBAL JSDOC PLACEMENT ===
+jsdoc:
+  placement-strategy: "separate"
+  class-documentation: "enabled"
+  constructor-documentation: "enabled"
+  
+  class-defaults:
+    description: "VytchesDDD implementation"
+    business-context: "DDD library patterns"
 ```
-@extract-end
-````
 
-#### **3. Key Features:**
+**B. Package Settings Structure (`domain/[package]/.md-settings.yaml`):**
 
-- **Hierarchical Configuration**: Global settings merged with local metadata
-- **Format-Specific Overrides**: Use dot notation (`@key.format`) for different outputs
-- **Selective Display**: Tags can appear in CLI but not JSDoc, or vice versa
-- **Strategy Control**: `merge` or `replace` strategies for configuration inheritance
-- **Rich Metadata**: Support for warnings, business context, complexity levels
+```yaml
+# Package Settings - Inherits from global-settings.yaml
 
-**Examples:**
-- ✅ **CORRECT**: `docs/examples/domain/domain-services/base-domain-service/seteventbus.md`
-- ✅ **CORRECT**: `docs/examples/domain/aggregates/aggregate-root/create.md`
-- ✅ **CORRECT**: `docs/examples/domain/value-objects/base-value-object/getValue.md`
-- ❌ **WRONG**: `packages/domain-services/src/examples/basic/seteventbus.md`
-- ❌ **WRONG**: `packages/aggregates/src/examples/basic/create.md`
+# === PACKAGE IDENTITY ===
+package-name: "aggregates"
+display-name: "DDD Aggregates"
+description: "Core aggregate patterns"
 
-**File naming**: Use lowercase method names with no special characters (e.g., `setEventBus` becomes `seteventbus.md`).
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: "merge"
+  scope: "package"
+
+# === PACKAGE METADATA ===
+domain: "domain-modeling"
+complexity: "intermediate"
+patterns:
+  - "aggregate-pattern"
+  - "event-sourcing"
+```
+
+**C. Class/File Metadata Structure (`{class-name}.yaml`):**
+
+```yaml
+# [ClassName] - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "aggregate-root"
+title: "AggregateRoot - Enterprise Implementation"
+description: "Core aggregate root class"
+business-context: "Main DDD aggregate"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  AggregateRoot:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: "separate"
+      class-documentation: "enabled"
+      
+    # Class Documentation
+    class-doc:
+      description: "Enterprise aggregate root"
+      business-context: "Core DDD building block"
+      
+      # Format-specific
+      formats:
+        jsdoc:
+          description: "Aggregate with event sourcing"
+        cli:
+          description: |
+            ## AggregateRoot
+            Complete aggregate implementation
+      
+      custom-tags:
+        since: "1.0.0"
+        capabilities: "Extensible capability system"
+    
+    # Methods
+    methods:
+      constructor:
+        description: "Creates new instance"
+        business-context: "Initializes aggregate"
+        
+        parameters:
+          - name: "params"
+            type: "IAggregateConstructorParams<TId>"
+            description: "Construction parameters"
+            
+        examples:
+          - id: "basic"
+            code: |
+              const aggregate = new AggregateRoot({
+                id: EntityId.fromText('order-123'),
+                version: 0
+              });
+              
+      commit:
+        description: "Commits pending events"
+        business-context: "Finalizes transaction"
+        
+        returns:
+          type: "void"
+          description: "Clears pending events"
+          
+        custom-tags:
+          warning: "Clears pending events"
+          event-sourcing: "Persists events"
+
+# === FILE-LEVEL ELEMENTS ===
+types:
+  ABC:
+    description: "Test type"
+    business-context: "Testing metadata"
+    
+interfaces:
+  ITest:
+    description: "Test interface"
+    properties:
+      - name: "name"
+        type: "string"
+        
+enums:
+  IDtype:
+    description: "ID types"
+    values:
+      - name: "UUID"
+        value: "'uuid'"
+        
+functions:
+  isIdType:
+    description: "Type guard"
+    returns:
+      type: "boolean"
+```
+
+#### **3. Key Structural Elements**
+
+**Core Sections in Class YAML Files:**
+- `file-name`: Base name without extension
+- `hierarchy`: Strategy configuration (merge/replace/append)
+- `classes`: Main classes defined in the file
+- `types`: Type aliases defined in the file
+- `interfaces`: Interfaces defined in the file
+- `enums`: Enumerations defined in the file
+- `functions`: Standalone functions defined in the file
+- `imported`: Optional documentation of imported types
+
+**Method-Level Structure:**
+- `description`: Technical description
+- `business-context`: Business value explanation
+- `parameters`: Array of parameter definitions
+- `returns`: Return type and description
+- `custom-tags`: Additional metadata tags
+- `examples`: Array of code examples
+- `formats`: Format-specific overrides
+
+**Hierarchy Strategies:**
+- `merge`: Combines with inherited metadata (default)
+- `replace`: Completely overrides inherited metadata
+- `append`: Adds to existing metadata
+
+#### **4. YAML Structure Rules**
+
+**🚨 MANDATORY RULES FOR HIERARCHICAL YAML FILES 🚨**
+
+1. **Nested structure**: Use proper YAML nesting, NOT flat `@tag:` format
+2. **Section headers**: Use `# === SECTION ===` format for clarity
+3. **Hierarchy blocks**: Always specify `hierarchy:` with strategy and scope
+4. **Multi-line strings**: Use pipe (`|`) for formatted text blocks
+5. **Arrays**: Use proper YAML array syntax with `-` for lists
+6. **Comments**: Use `#` for documentation and section markers
+7. **Encoding**: UTF-8 without BOM
+8. **Indentation**: Consistent 2-space indentation
+9. **No document markers**: Never use `---` 
+10. **Case sensitivity**: Method names must match exactly (case-sensitive)
+
+**Example of CORRECT hierarchical structure:**
+
+```yaml
+# === FILE METADATA ===
+file-name: "aggregate-root"
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  AggregateRoot:
+    class-doc:
+      description: "Aggregate implementation"
+      formats:
+        jsdoc:
+          description: "Concise JSDoc version"
+        cli:
+          description: |
+            ## Extended CLI Description
+            With multiple lines
+    
+    methods:
+      commit:
+        description: "Commits events"
+        returns:
+          type: "void"
+          description: "No return value"
+```
+
+**Example of INCORRECT structure:**
+
+```yaml
+# ❌ WRONG - Using flat @ format
+@description: Aggregate root
+@businessContext: DDD pattern
+
+# ❌ WRONG - Missing hierarchy configuration
+classes:
+  AggregateRoot:
+    description: "Missing hierarchy block"
+
+# ❌ WRONG - Using document markers
+---
+file-name: "aggregate-root"
+```
+
+#### **5. Examples:**
+
+**Correct file paths:**
+- ✅ `docs/examples/domain/aggregates/aggregate-root.yaml` (class metadata)
+- ✅ `docs/examples/domain/aggregates/aggregate-root/commit.yaml` (method metadata)
+- ✅ `docs/examples/domain/value-objects/entity-id.yaml` (class metadata)
+- ✅ `docs/examples/domain/value-objects/entity-id/createwithrandomuuid.yaml` (method metadata)
+
+**Incorrect file paths:**
+- ❌ `packages/aggregates/src/examples/aggregate-root.yaml`
+- ❌ `docs/examples/aggregates/AggregateRoot.yaml` (use lowercase)
+- ❌ `docs/examples/domain/aggregates/methods/commit.yaml` (wrong structure)
+
+**File naming**: 
+- Class names: Convert to lowercase with hyphens (e.g., `AggregateRoot` → `aggregate-root.yaml`)
+- Method names: Convert to lowercase, no special chars (e.g., `createWithRandomUUID` → `createwithrandomuuid.yaml`)
+- Constructors: Always named `constructor.yaml`
+
+#### **6. YAML Template Reference**
+
+**🎯 Complete YAML template available at: `docs/examples/yaml-template.yaml`**
+
+This template file contains:
+- Complete class-level metadata structure
+- Complete method-level metadata structure
+- Constructor metadata examples
+- Type/Interface/Enum metadata patterns
+- All available metadata tags with descriptions
+- Format-specific override examples
+- Special metadata tags for advanced scenarios
+
+**Use this template as a reference when creating new YAML metadata files!**
+
+#### **7. CRITICAL: Enhanced Metadata System V2 Troubleshooting**
+
+**🚨 COMMON ISSUES AND SOLUTIONS 🚨**
+
+**A. .d.ts File Generation Issues:**
+
+If TypeScript declaration files are missing method declarations or generating incorrectly:
+
+1. **Vite DTS Plugin Issues**: The vite-plugin-dts may not generate complete .d.ts files for builder patterns
+   ```bash
+   # Rebuild the package to regenerate .d.ts files
+   pnpm build --filter=@vytches/ddd-aggregates
+   
+   # Check if methods are missing from .d.ts
+   cat packages/aggregates/dist/core/aggregate-root.builder.d.ts
+   ```
+
+2. **Missing Method Declarations**: If .d.ts only shows class/function but no methods:
+   - This is a build system issue, not YAML metadata issue
+   - Methods must exist in .d.ts before JSDoc can be applied
+   - Manually add method declarations if necessary during development
+
+3. **JSDoc Injection Not Working**: If YAML metadata isn't applied to methods:
+   ```bash
+   # Debug JSDoc injection process
+   JSDOC_DEBUG=true node scripts/inject-yaml-jsdoc.js --package=aggregates
+   
+   # Check class name mapping (aggregate-root.builder.d.ts → aggregate-builder.yaml)
+   ls docs/examples/domain/aggregates/
+   ```
+
+**B. File Naming Convention Issues:**
+
+- **Source**: `aggregate-root.builder.ts`
+- **Generated**: `aggregate-root.builder.d.ts`  
+- **YAML**: `aggregate-builder.yaml` (class name: AggregateBuilder)
+- **Script expects**: Match between class name and YAML filename
+
+**C. Build Order Dependencies:**
+
+1. **TypeScript compilation** → generates .d.ts files
+2. **JSDoc injection** → applies YAML metadata to .d.ts files
+3. **Manual fixes** → may be needed if build system issues occur
+
+**D. Debug Commands:**
+```bash
+# Step-by-step debugging
+JSDOC_DEBUG=true node scripts/inject-yaml-jsdoc.js --package=aggregates packages/aggregates/dist/core/aggregate-root.builder.d.ts
+
+# Check build output
+pnpm build --filter=@vytches/ddd-aggregates
+wc -l packages/aggregates/dist/core/aggregate-root.builder.d.ts
+
+# Verify YAML file structure
+cat docs/examples/domain/aggregates/aggregate-builder.yaml
+```
+
+**E. Resolution Workflow:**
+
+1. **Verify source code** has all expected methods
+2. **Check .d.ts generation** after build
+3. **Manually fix .d.ts** if build system issues
+4. **Run JSDoc injection** to apply YAML metadata
+5. **Verify final result** has both declarations and documentation
 
 ## Development Commands
 
