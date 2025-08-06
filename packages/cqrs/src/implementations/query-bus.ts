@@ -94,7 +94,7 @@ export class QueryBus extends IQueryBus {
 
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
-    return this.executeWithMiddleware(context, () => handler.execute(query)) as Promise<R>;
+    return this.executeWithMiddleware(context, () => handler.execute(query));
   }
 
   private getHandlerToken(queryClass: Function): ServiceToken {
@@ -110,20 +110,20 @@ export class QueryBus extends IQueryBus {
     return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
   }
 
-  private async executeWithMiddleware(
+  private async executeWithMiddleware<T>(
     context: CQRSExecutionContext,
-    handlerExecution: () => Promise<unknown>
-  ): Promise<unknown> {
+    handlerExecution: () => Promise<T>
+  ): Promise<T> {
     if (this.middlewares.length === 0) {
       return handlerExecution();
     }
 
     let index = 0;
 
-    const next = async (): Promise<unknown> => {
+    const next = async (): Promise<T> => {
       if (index < this.middlewares.length) {
         const middleware = this.middlewares[index++];
-        return middleware?.handle(context, next);
+        return middleware?.handle(context, next) as Promise<T>;
       } else {
         return handlerExecution();
       }

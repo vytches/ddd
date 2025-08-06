@@ -30,11 +30,11 @@ import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
  * @since 1.0.0
  * @public
  */
-export function CommandHandler<T extends ICommand>(
+export function CommandHandler<T extends ICommand, TResult = void>(
   commandType: new (...args: any[]) => T,
   options?: CommandHandlerOptions
 ) {
-  return function <K extends ICommandHandler<T>>(target: new (...args: any[]) => K) {
+  return function <K extends ICommandHandler<T, TResult>>(target: new (...args: any[]) => K) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'command',

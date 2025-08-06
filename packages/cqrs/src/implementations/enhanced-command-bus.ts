@@ -42,15 +42,17 @@ export class EnhancedCommandBus extends CommandBus {
     this.use(new LoggingMiddleware());
   }
 
-  override async execute<T extends ICommand>(command: T): Promise<void> {
+  override async execute<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
     const startTime = performance.now();
 
     try {
-      await super.execute(command);
+      const result = await super.execute<T, TResult>(command);
 
       // Update metrics
       this.metrics.executionCount++;
       this.metrics.totalExecutionTime += performance.now() - startTime;
+
+      return result;
     } catch (error) {
       this.metrics.errors++;
       throw error;

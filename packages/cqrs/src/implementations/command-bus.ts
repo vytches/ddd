@@ -42,7 +42,10 @@ export class CommandBus extends ICommandBus {
     super();
   }
 
-  register<T extends ICommand>(_commandType: unknown, _handler: ICommandHandler<T>): void {
+  register<T extends ICommand, TResult = void>(
+    _commandType: unknown,
+    _handler: ICommandHandler<T, TResult>
+  ): void {
     // Legacy method - deprecated in favor of DI container registration
     throw new CQRSConfigurationError(
       'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.',
@@ -50,9 +53,9 @@ export class CommandBus extends ICommandBus {
     );
   }
 
-  registerFactory<T extends ICommand>(
+  registerFactory<T extends ICommand, TResult = void>(
     _commandType: unknown,
-    _factory: () => ICommandHandler<T>
+    _factory: () => ICommandHandler<T, TResult>
   ): void {
     // Legacy method - deprecated in favor of DI container registration
     throw new CQRSConfigurationError(
@@ -77,13 +80,13 @@ export class CommandBus extends ICommandBus {
     }
   }
 
-  async execute<T extends ICommand>(command: T): Promise<void> {
+  async execute<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
     // Direct resolution through DI container using metadata
     const handlerToken = this.getHandlerToken(command.constructor);
 
-    let handler: ICommandHandler<T>;
+    let handler: ICommandHandler<T, TResult>;
     try {
-      handler = this.container.resolve<ICommandHandler<T>>(handlerToken);
+      handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
     } catch (_error) {
       throw new HandlerNotFoundError(command.constructor.name, 'command');
     }
@@ -95,7 +98,7 @@ export class CommandBus extends ICommandBus {
 
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(command, handler, 'command');
-    await this.executeWithMiddleware(context, () => handler.execute(command));
+    return await this.executeWithMiddleware(context, () => handler.execute(command));
   }
 
   private getHandlerToken(commandClass: Function): ServiceToken {
@@ -111,20 +114,20 @@ export class CommandBus extends ICommandBus {
     return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
   }
 
-  private async executeWithMiddleware(
+  private async executeWithMiddleware<T>(
     context: CQRSExecutionContext,
-    handlerExecution: () => Promise<unknown>
-  ): Promise<unknown> {
+    handlerExecution: () => Promise<T>
+  ): Promise<T> {
     if (this.middlewares.length === 0) {
       return handlerExecution();
     }
 
     let index = 0;
 
-    const next = async (): Promise<unknown> => {
+    const next = async (): Promise<T> => {
       if (index < this.middlewares.length) {
         const middleware = this.middlewares[index++];
-        return middleware?.handle(context, next);
+        return middleware?.handle(context, next) as Promise<T>;
       } else {
         return handlerExecution();
       }
