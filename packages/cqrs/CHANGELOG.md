@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.2) (2025-08-06)
+
+### Bug Fixes
+
+- fix cqrs handlers return type
+  ([203e5a0](https://github.com/vytches/ddd/commit/203e5a0af36ad2ffee3feabee938eebc715381fb))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.4.1](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.1) (2025-08-06)
 
 ### Bug Fixes
