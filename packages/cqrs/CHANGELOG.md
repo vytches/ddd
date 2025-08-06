@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.3](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.3) (2025-08-06)
+
+### Bug Fixes
+
+- fix typing isse for command-handlers
+  ([13e4851](https://github.com/vytches/ddd/commit/13e485197d44253e6190d4212d084f33efd4cdd7))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.2) (2025-08-06)
 
 ### Bug Fixes
