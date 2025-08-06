@@ -409,9 +409,10 @@ describe('ApplicationError', () => {
     });
 
     it('should work in try-catch blocks', () => {
-      const [throwError] = safeRun(() => {
+      const fn = (): void => {
         throw new ApplicationError('Test application error');
-      });
+      };
+      const [throwError] = safeRun(fn);
       expect(throwError?.message).toBe('Test application error');
     });
 

@@ -56,20 +56,20 @@
  * ```
  */
 
-// Asynchronous version (must come first for proper overload resolution)
-export function safeRun<E extends Error = Error, T = unknown>(
+// Asynchronous overload - for functions that return a Promise
+export function safeRun<T>(
   fn: () => Promise<T>
-): Promise<readonly [E | undefined, T | undefined]>;
+): Promise<readonly [Error | undefined, T | undefined]>;
 
-// Synchronous version
-export function safeRun<E extends Error = Error, T = unknown>(
-  fn: () => T
-): readonly [E | undefined, T | undefined];
+// Synchronous overload - for functions that don't return a Promise
+export function safeRun<T>(fn: () => T): readonly [Error | undefined, T | undefined];
 
 // Implementation
-export function safeRun<E extends Error, T>(
+export function safeRun<T>(
   fn: () => T | Promise<T>
-): readonly [E | undefined, T | undefined] | Promise<readonly [E | undefined, T | undefined]> {
+):
+  | readonly [Error | undefined, T | undefined]
+  | Promise<readonly [Error | undefined, T | undefined]> {
   try {
     const result = fn();
 
@@ -87,7 +87,7 @@ export function safeRun<E extends Error, T>(
         .catch(error => {
           // Ensure error is an Error instance
           const errorInstance = normalizeError(error);
-          return [errorInstance as E, undefined] as const;
+          return [errorInstance, undefined] as const;
         });
     }
 
@@ -96,7 +96,7 @@ export function safeRun<E extends Error, T>(
   } catch (error) {
     // Ensure error is an Error instance
     const errorInstance = normalizeError(error);
-    return [errorInstance as E, undefined] as const;
+    return [errorInstance, undefined] as const;
   }
 }
 

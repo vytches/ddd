@@ -44,7 +44,7 @@ describe('safeRun', () => {
         // Arrange - (already set up in testCases)
 
         // Act
-        const [error, value] = safeRun<any, any>(fn);
+        const [error, value] = safeRun(fn as () => unknown);
 
         // Assert
         expect(value).toEqual(expected);
@@ -132,7 +132,7 @@ describe('safeRun', () => {
 
       for (const { fn, expected } of testCases) {
         // Act
-        const [error, value] = await safeRun<any, any>(fn);
+        const [error, value] = await safeRun(fn as () => Promise<unknown>);
 
         // Assert
         expect(value).toEqual(expected);

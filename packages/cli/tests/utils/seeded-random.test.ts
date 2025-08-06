@@ -242,8 +242,9 @@ describe('SeededRandom', () => {
     });
 
     it('should throw error for empty array', () => {
+      const emptyArray: string[] = [];
       const [error] = safeRun(() => {
-        return random.pick([]);
+        return random.pick(emptyArray);
       });
 
       expect(error).toBeInstanceOf(Error);

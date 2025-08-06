@@ -179,7 +179,7 @@ describe('Performance', () => {
           .mockReturnValueOnce(1000)
           .mockReturnValueOnce(1500);
 
-        const testFn = () => {
+        const testFn = (): void => {
           throw new Error('Test error');
         };
 
