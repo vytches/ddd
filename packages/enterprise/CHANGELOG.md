@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.4](https://github.com/vytches/ddd/compare/@vytches/ddd@0.5.0...@vytches/ddd@0.5.4) (2025-08-06)
+
+**Note:** Version bump only for package @vytches/ddd
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.5.3](https://github.com/vytches/ddd/compare/@vytches/ddd@0.5.0...@vytches/ddd@0.5.3) (2025-08-06)
 
 **Note:** Version bump only for package @vytches/ddd
