@@ -17,6 +17,7 @@ class YamlJSDocInjector {
     this.packageMetadata = new Map();
     this.classMetadata = new Map();
     this.cache = new Map();
+    this.debug = process.env.JSDOC_DEBUG === 'true';
   }
 
   /**
@@ -67,7 +68,9 @@ class YamlJSDocInjector {
       config.contentStrategy = cls['content-strategy'] || config.contentStrategy;
     }
 
-    console.log(`  🎯 JSDoc placement config for ${className}: ${JSON.stringify(config)}`);
+    if (this.debug) {
+      console.log(`  🎯 JSDoc placement config for ${className}: ${JSON.stringify(config)}`);
+    }
     return config;
   }
 
@@ -86,19 +89,25 @@ class YamlJSDocInjector {
       case 'separate':
         targets.documentClass = config.classDocumentation === 'enabled';
         targets.documentConstructor = config.constructorDocumentation === 'enabled' && hasConstructor;
-        console.log(`  📋 Strategy "separate": class=${targets.documentClass}, constructor=${targets.documentConstructor}`);
+        if (this.debug) {
+          console.log(`  📋 Strategy "separate": class=${targets.documentClass}, constructor=${targets.documentConstructor}`);
+        }
         break;
         
       case 'constructor-only':
         targets.documentClass = false;
         targets.documentConstructor = hasConstructor;
-        console.log(`  🏗️ Strategy "constructor-only": only constructor documentation`);
+        if (this.debug) {
+          console.log(`  🏗️ Strategy "constructor-only": only constructor documentation`);
+        }
         break;
         
       case 'class-only':
         targets.documentClass = true;
         targets.documentConstructor = false;
-        console.log(`  📋 Strategy "class-only": only class documentation`);
+        if (this.debug) {
+          console.log(`  📋 Strategy "class-only": only class documentation`);
+        }
         break;
         
       case 'smart':
@@ -111,15 +120,21 @@ class YamlJSDocInjector {
         if (hasClassDoc && hasConstructorDoc && hasConstructor) {
           targets.documentClass = true;
           targets.documentConstructor = true;
-          console.log(`  🧠 Strategy "smart": both class and constructor have content - using separate`);
+          if (this.debug) {
+            console.log(`  🧠 Strategy "smart": both class and constructor have content - using separate`);
+          }
         } else if (hasConstructorDoc && hasConstructor) {
           targets.documentClass = false;
           targets.documentConstructor = true;
-          console.log(`  🧠 Strategy "smart": only constructor has content - using constructor-only`);
+          if (this.debug) {
+            console.log(`  🧠 Strategy "smart": only constructor has content - using constructor-only`);
+          }
         } else {
           targets.documentClass = true;
           targets.documentConstructor = false;
-          console.log(`  🧠 Strategy "smart": using class-only as fallback`);
+          if (this.debug) {
+            console.log(`  🧠 Strategy "smart": using class-only as fallback`);
+          }
         }
         break;
         
@@ -227,7 +242,9 @@ class YamlJSDocInjector {
     );
     if (classMeta) {
       this.classMetadata.set(key, classMeta);
-      console.log(`✅ Class metadata loaded for ${className} in ${packageName} from ${kebabFileName}.yaml`);
+      if (this.debug) {
+        console.log(`✅ Class metadata loaded for ${className} in ${packageName} from ${kebabFileName}.yaml`);
+      }
     }
   }
 
@@ -253,7 +270,9 @@ class YamlJSDocInjector {
     // Apply format overrides at each level
     this.applyFormatOverridesRecursive(result, format);
     
-    console.log(`  🎨 Applied ${format} format overrides recursively`);
+    if (this.debug) {
+      console.log(`  🎨 Applied ${format} format overrides recursively`);
+    }
     return result;
   }
 
@@ -337,11 +356,15 @@ class YamlJSDocInjector {
       if (classMeta.classes?.[className]) {
         classSpecificMeta = classMeta.classes[className];
         classStrategy = classSpecificMeta.hierarchy?.strategy || 'merge';
-        console.log(`  📊 Found class metadata for ${className} in universal structure (strategy: ${classStrategy})`);
+        if (this.debug) {
+          console.log(`  📊 Found class metadata for ${className} in universal structure (strategy: ${classStrategy})`);
+        }
         
         // CRITICAL: If class uses "replace" strategy, clear previous metadata first
         if (classStrategy === 'replace') {
-          console.log(`  🔄 Applying "replace" strategy - clearing previous metadata`);
+          if (this.debug) {
+            console.log(`  🔄 Applying "replace" strategy - clearing previous metadata`);
+          }
           // Clear fields that exist in class metadata
           Object.keys(classSpecificMeta).forEach(key => {
             if (key !== 'hierarchy' && key !== 'methods' && key !== 'environment') {
@@ -368,10 +391,12 @@ class YamlJSDocInjector {
           resolved.hierarchy = { strategy: 'replace', scope: 'class' };
           console.log(`  ✅ Preserved "replace" strategy in resolved metadata for buildJSDoc()`);
         }
-        console.log(`  🔍 DEBUG: After class metadata, resolved contains:`, Object.keys(resolved));
-        console.log(`  🔍 DEBUG: description = "${resolved.description}"`);
-        console.log(`  🔍 DEBUG: business-context = "${resolved['business-context']}"`);
-        console.log(`  🔍 DEBUG: businessContext = "${resolved.businessContext}"`);
+        if (this.debug) {
+          console.log(`  🔍 DEBUG: After class metadata, resolved contains:`, Object.keys(resolved));
+          console.log(`  🔍 DEBUG: description = "${resolved.description}"`);
+          console.log(`  🔍 DEBUG: business-context = "${resolved['business-context']}"`);
+          console.log(`  🔍 DEBUG: businessContext = "${resolved.businessContext}"`);
+        }
         
         // CRITICAL FIX: Handle special __class-doc__ case for class documentation
         if (methodName === '__class-doc__' && classSpecificMeta['class-doc']) {
@@ -392,7 +417,9 @@ class YamlJSDocInjector {
         
         // CRITICAL: If class uses "replace" strategy, clear previous metadata first
         if (classStrategy === 'replace') {
-          console.log(`  🔄 Applying "replace" strategy - clearing previous metadata`);
+          if (this.debug) {
+            console.log(`  🔄 Applying "replace" strategy - clearing previous metadata`);
+          }
           Object.keys(classMeta).forEach(key => {
             if (key !== 'hierarchy' && key !== 'methods' && key !== 'environment') {
               delete resolved[key];
@@ -452,10 +479,12 @@ class YamlJSDocInjector {
         
         this.mergeMetadata(resolved, methodMetadataWithFormat);
         console.log(`  ✅ Applied method metadata for ${methodName}`);
-        console.log(`  🔍 DEBUG: Final resolved metadata contains:`, Object.keys(resolved));
-        console.log(`  🔍 DEBUG: description = "${resolved.description}"`);
-        console.log(`  🔍 DEBUG: business-context = "${resolved['business-context']}"`);
-        console.log(`  🔍 DEBUG: businessContext = "${resolved.businessContext}"`);
+        if (this.debug) {
+          console.log(`  🔍 DEBUG: Final resolved metadata contains:`, Object.keys(resolved));
+          console.log(`  🔍 DEBUG: description = "${resolved.description}"`);
+          console.log(`  🔍 DEBUG: business-context = "${resolved['business-context']}"`);
+          console.log(`  🔍 DEBUG: businessContext = "${resolved.businessContext}"`);
+        }
       } else if (methodName) {
         console.log(`  ⚠️  No method metadata found for ${className}.${methodName}`);
       }
@@ -499,7 +528,8 @@ class YamlJSDocInjector {
     const strategy = source.hierarchy?.strategy || 'merge';
     
     Object.keys(source).forEach(key => {
-      if (key === 'hierarchy' || key === 'methods' || key === 'environment') return;
+      // Skip metadata control keys and formats (formats should be processed earlier)
+      if (key === 'hierarchy' || key === 'methods' || key === 'environment' || key === 'formats') return;
       
       if (key === 'custom-tags' && target['custom-tags']) {
         target['custom-tags'] = { ...target['custom-tags'], ...source['custom-tags'] };
@@ -526,8 +556,10 @@ class YamlJSDocInjector {
     // This ensures global metadata (like author) is properly inherited
     const resolvedMetadata = this.resolveMetadata(className, '__class-doc__', packageName, format);
     
-    console.log(`  📋 Generating class JSDoc for ${className} with ${format} format`);
-    console.log(`  🔍 Resolved metadata includes author: ${resolvedMetadata.author || 'NOT FOUND'}`);
+    if (this.debug) {
+      console.log(`  📋 Generating class JSDoc for ${className} with ${format} format`);
+      console.log(`  🔍 Resolved metadata includes author: ${resolvedMetadata.author || 'NOT FOUND'}`);
+    }
     
     return this.buildJSDoc(resolvedMetadata, null, className);
   }
@@ -537,20 +569,23 @@ class YamlJSDocInjector {
     
     // CRITICAL: Check hierarchy strategy BEFORE applying format overrides
     const hierarchyStrategy = metadata.hierarchy?.strategy || 'merge';
-    console.log(`  🔍 DEBUG buildJSDoc: Input hierarchy strategy = "${hierarchyStrategy}"`);
-    console.log(`  🔍 DEBUG buildJSDoc: Input description = "${metadata.description}"`);
-    console.log(`  🔍 DEBUG buildJSDoc: Input has formats.jsdoc = ${!!metadata.formats?.jsdoc}`);
+    if (this.debug) {
+      console.log(`  🔍 DEBUG buildJSDoc: Input hierarchy strategy = "${hierarchyStrategy}"`);
+      console.log(`  🔍 DEBUG buildJSDoc: Input description = "${metadata.description}"`);
+      console.log(`  🔍 DEBUG buildJSDoc: Input has formats.jsdoc = ${!!metadata.formats?.jsdoc}`);
+    }
     
     let jsdocFormat = { ...metadata };
     
     // CRITICAL: DO NOT apply format overrides here as it causes hierarchy conflicts
     // Format overrides should have been applied at the appropriate hierarchy level in resolveMetadata
     // This prevents package-level formats from overriding method-level values
-    console.log(`  🔍 DEBUG: Skipping format overrides in buildJSDoc to preserve hierarchy`);
-    
-    console.log(`  🔍 DEBUG buildJSDoc: Processing metadata for method: ${methodName || 'class'}`);
-    console.log(`  🔍 DEBUG buildJSDoc: description = "${jsdocFormat.description}"`);
-    console.log(`  🔍 DEBUG buildJSDoc: business-context = "${jsdocFormat['business-context']}"`);
+    if (this.debug) {
+      console.log(`  🔍 DEBUG: Skipping format overrides in buildJSDoc to preserve hierarchy`);
+      console.log(`  🔍 DEBUG buildJSDoc: Processing metadata for method: ${methodName || 'class'}`);
+      console.log(`  🔍 DEBUG buildJSDoc: description = "${jsdocFormat.description}"`);
+      console.log(`  🔍 DEBUG buildJSDoc: business-context = "${jsdocFormat['business-context']}"`);
+    }
 
     // Dynamic property mapping - każda właściwość YAML staje się @tag
     const skipKeys = ['hierarchy', 'formats', 'examples', 'methods', 'environment', 'custom-tags', 
@@ -561,8 +596,20 @@ class YamlJSDocInjector {
       if (typeof value === 'string' && value.trim() && !skipKeys.includes(key)) {
         // Convert kebab-case to camelCase for JSDoc tags
         const tag = key.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-        console.log(`  🔍 DEBUG buildJSDoc: Adding tag @${tag} = "${value}"`);
+        if (this.debug) {
+          console.log(`  🔍 DEBUG buildJSDoc: Adding tag @${tag} = "${value}"`);
+        }
         lines.push(` * @${tag} ${value}`);
+      } else if (typeof value === 'object' && value !== null && !skipKeys.includes(key)) {
+        // Log warning for non-string values that are being skipped
+        if (this.debug) {
+          console.log(`  ⚠️  WARNING: Skipping non-string value for key "${key}" (type: ${typeof value})`);
+        }
+        if (key === 'formats') {
+          if (this.debug) {
+            console.log(`  ⚠️  formats object should have been processed earlier in resolveMetadata`);
+          }
+        }
       }
     });
 
@@ -650,13 +697,15 @@ class YamlJSDocInjector {
       elements.functions.push(match[1]);
     });
 
-    // Extract classes (both export and non-export)
-    const classMatches = Array.from(contentWithoutJSDoc.matchAll(/(?:export\s+)?(?:declare\s+)?class\s+(\w+)/g));
+    // Extract classes (both export and non-export, including abstract classes)
+    const classMatches = Array.from(contentWithoutJSDoc.matchAll(/(?:export\s+)?(?:declare\s+)?(?:abstract\s+)?class\s+(\w+)/g));
     classMatches.forEach(match => {
       elements.classes.push(match[1]);
     });
 
-    console.log(`  🔍 Found elements: interfaces=${elements.interfaces.length}, types=${elements.types.length}, enums=${elements.enums.length}, functions=${elements.functions.length}, classes=${elements.classes.length}`);
+    if (this.debug) {
+      console.log(`  🔍 Found elements: interfaces=${elements.interfaces.length}, types=${elements.types.length}, enums=${elements.enums.length}, functions=${elements.functions.length}, classes=${elements.classes.length}`);
+    }
     
     return elements;
   }
@@ -664,7 +713,9 @@ class YamlJSDocInjector {
   // NEW: Process file-level elements with YAML metadata
   async processFileElements(content, elements, packageName, className) {
     // Debug: Print all available metadata keys
-    console.log(`  🔍 DEBUG: Available class metadata keys: ${Array.from(this.classMetadata.keys()).join(', ')}`);
+    if (this.debug) {
+      console.log(`  🔍 DEBUG: Available class metadata keys: ${Array.from(this.classMetadata.keys()).join(', ')}`);
+    }
     
     // CRITICAL FIX: File-level elements are at the root level of YAML, not class-specific
     const key = `${packageName}-${className.toLowerCase()}`;
@@ -675,7 +726,9 @@ class YamlJSDocInjector {
       return content;
     }
     
-    console.log(`  ✅ Found metadata for key ${key}`);
+    if (this.debug) {
+      console.log(`  ✅ Found metadata for key ${key}`);
+    }
 
     let updatedContent = content;
     
@@ -683,7 +736,9 @@ class YamlJSDocInjector {
     for (const [elementType, elementNames] of Object.entries(elements)) {
       if (elementNames.length === 0 || !classMetadata[elementType]) continue;
       
-      console.log(`  🔄 Processing ${elementType}: ${elementNames.join(', ')}`);
+      if (this.debug) {
+        console.log(`  🔄 Processing ${elementType}: ${elementNames.join(', ')}`);
+      }
       
       for (const elementName of elementNames) {
         const elementMetadata = classMetadata[elementType]?.[elementName];
@@ -697,7 +752,9 @@ class YamlJSDocInjector {
         if (jsDoc) {
           // Find and replace/add JSDoc for this element
           updatedContent = this.injectElementJSDoc(updatedContent, elementType, elementName, jsDoc);
-          console.log(`    ✅ Generated JSDoc for ${elementType}.${elementName}`);
+          if (this.debug) {
+            console.log(`    ✅ Generated JSDoc for ${elementType}.${elementName}`);
+          }
         }
       }
     }
@@ -824,11 +881,15 @@ class YamlJSDocInjector {
         return content; // Unknown element type
     }
     
-    console.log(`    🔍 Looking for ${elementType} ${elementName} with regex: ${elementRegex.source}`);
+    if (this.debug) {
+      console.log(`    🔍 Looking for ${elementType} ${elementName} with regex: ${elementRegex.source}`);
+    }
     
     const match = elementRegex.exec(content);
     if (match) {
-      console.log(`    ✅ Found match at index ${match.index}`);
+      if (this.debug) {
+        console.log(`    ✅ Found match at index ${match.index}`);
+      }
       
       let existingJSDoc, declaration;
       if (elementType === 'functions' || elementType === 'interfaces' || elementType === 'types' || elementType === 'enums') {
@@ -846,11 +907,15 @@ class YamlJSDocInjector {
                         jsDoc + '\n' + declaration + 
                         content.substring(match.index + match[0].length);
       
-      console.log(`    ✅ Injected JSDoc for ${elementType} ${elementName}`);
+      if (this.debug) {
+        console.log(`    ✅ Injected JSDoc for ${elementType} ${elementName}`);
+      }
       return newContent;
     }
     
-    console.log(`    ⚠️  No match found for ${elementType} ${elementName}`);
+    if (this.debug) {
+      console.log(`    ⚠️  No match found for ${elementType} ${elementName}`);
+    }
     return content;
   }
 
@@ -873,13 +938,17 @@ class YamlJSDocInjector {
       );
     }
     
-    console.log(`    🔍 Looking for method ${methodName} with regex: ${methodRegex.source}`);
+    if (this.debug) {
+      console.log(`    🔍 Looking for method ${methodName} with regex: ${methodRegex.source}`);
+    }
     
     // Use match() instead of exec() to avoid regex state issues
     const match = content.match(methodRegex);
     if (match) {
       const matchIndex = content.indexOf(match[0]);
-      console.log(`    ✅ Found method match at index ${matchIndex}`);
+      if (this.debug) {
+        console.log(`    ✅ Found method match at index ${matchIndex}`);
+      }
       const existingJSDoc = match[1] || '';
       const methodDeclaration = match[2];
       
@@ -888,11 +957,15 @@ class YamlJSDocInjector {
                         jsDoc + '\n' + methodDeclaration + 
                         content.substring(matchIndex + match[0].length);
       
-      console.log(`    ✅ Injected JSDoc for method ${className}.${methodName}`);
+      if (this.debug) {
+        console.log(`    ✅ Injected JSDoc for method ${className}.${methodName}`);
+      }
       return newContent;
     }
     
-    console.log(`    ⚠️  No match found for method ${className}.${methodName}`);
+    if (this.debug) {
+      console.log(`    ⚠️  No match found for method ${className}.${methodName}`);
+    }
     return content;
   }
 
@@ -907,8 +980,8 @@ class YamlJSDocInjector {
     }
     
     // CRITICAL FIX: Find the class declaration first to ensure we only look at methods within the class
-    // More flexible regex to handle JSDoc comments anywhere before the class declaration
-    const classStartRegex = new RegExp(`(?:^|\\n)\\s*(?:\\/\\*\\*[\\s\\S]*?\\*\\/\\s*)?export\\s+(?:declare\\s+)?class\\s+${className}[^{]*\\{`, 'gm');
+    // More flexible regex to handle JSDoc comments anywhere before the class declaration (including abstract classes)
+    const classStartRegex = new RegExp(`(?:^|\\n)\\s*(?:\\/\\*\\*[\\s\\S]*?\\*\\/\\s*)?export\\s+(?:declare\\s+)?(?:abstract\\s+)?class\\s+${className}[^{]*\\{`, 'gm');
     const classStartMatch = classStartRegex.exec(content);
     
     if (!classStartMatch) {
@@ -920,8 +993,10 @@ class YamlJSDocInjector {
     let classEndIndex = -1;
     let searchStartIndex = classStartMatch.index + classStartMatch[0].length;
     
-    console.log(`  🔍 DEBUG: Searching for class end starting from index ${searchStartIndex}`);
-    console.log(`  🔍 DEBUG: Class start match: "${classStartMatch[0].slice(-20)}"`);
+    if (this.debug) {
+      console.log(`  🔍 DEBUG: Searching for class end starting from index ${searchStartIndex}`);
+      console.log(`  🔍 DEBUG: Class start match: "${classStartMatch[0].slice(-20)}"`);
+    }
     
     // Look for the next export statement or end of file
     const nextExportRegex = /\n\s*export\s+/g;
@@ -934,7 +1009,9 @@ class YamlJSDocInjector {
       while (searchIndex > searchStartIndex) {
         if (content[searchIndex] === '}') {
           classEndIndex = searchIndex;
-          console.log(`  ✅ DEBUG: Found class end at index ${classEndIndex} (before next export)`);
+          if (this.debug) {
+            console.log(`  ✅ DEBUG: Found class end at index ${classEndIndex} (before next export)`);
+          }
           break;
         }
         searchIndex--;
@@ -944,7 +1021,9 @@ class YamlJSDocInjector {
       for (let i = content.length - 1; i > searchStartIndex; i--) {
         if (content[i] === '}') {
           classEndIndex = i;
-          console.log(`  ✅ DEBUG: Found class end at index ${classEndIndex} (end of file)`);
+          if (this.debug) {
+            console.log(`  ✅ DEBUG: Found class end at index ${classEndIndex} (end of file)`);
+          }
           break;
         }
       }
@@ -962,6 +1041,7 @@ class YamlJSDocInjector {
     
     // Find all method declarations ONLY within the class body
     // FIXED: More precise regex that only matches method declarations at line beginnings
+    // Capture full JSDoc block if it exists (including newlines between JSDoc and method)
     const allMethodsRegex = /(\/\*\*[\s\S]*?\*\/\s*)?(\n\s+(?:static\s+)?(?:protected|private|public)?\s*(?:constructor|[a-zA-Z_][a-zA-Z0-9_]*)\s*[(<])/g;
     const methodMatches = [];
     let match;
@@ -994,7 +1074,9 @@ class YamlJSDocInjector {
           existingJSDoc,
           methodDeclaration: methodDeclarationFull
         });
-        console.log(`    ✅ Found method ${extractedMethodName} at absolute index ${absoluteMethodIndex}`);
+        if (this.debug) {
+          console.log(`    ✅ Found method ${extractedMethodName} at absolute index ${absoluteMethodIndex}`);
+        }
       }
     }
     
@@ -1013,7 +1095,18 @@ class YamlJSDocInjector {
       // match[2] = method declaration part (starts with \n and spaces)
       
       if (existingJSDoc) {
-        // Case 1: Method has existing JSDoc - replace the JSDoc part only
+        // Case 1: Method has existing JSDoc - check if it's already our JSDoc
+        // Extract the first meaningful line from our new JSDoc (after /**, skipping empty lines)
+        const newJSDocLines = methodJSDoc.split('\n').filter(line => line.trim() && !line.trim().startsWith('/**') && !line.trim().startsWith('*/'));
+        const firstNewLine = newJSDocLines[0]?.trim().replace(/^\*\s*/, ''); // Remove leading * and spaces
+        
+        // Check if existing JSDoc already contains our content
+        if (firstNewLine && existingJSDoc.includes(firstNewLine)) {
+          console.log(`    ⏭️  Skipping ${className}.${methodName} - JSDoc already up to date`);
+          continue; // Skip this method as it already has our JSDoc
+        }
+        
+        // Replace the JSDoc part only
         const jsDocStart = index;
         const jsDocEnd = index + existingJSDoc.length;
         
@@ -1064,11 +1157,15 @@ class YamlJSDocInjector {
   }
 
   async processFileContent(filePath, content) {
-    console.log(`\n🔧 Processing: ${path.relative(this.rootDir, filePath)}`);
+    if (this.debug) {
+      console.log(`\n🔧 Processing: ${path.relative(this.rootDir, filePath)}`);
+    }
     
     // Extract package name from file path
     const packageName = this.extractPackageFromPath(filePath);
-    console.log(`  📦 Package: ${packageName}`);
+    if (this.debug) {
+      console.log(`  📦 Package: ${packageName}`);
+    }
     
     // Load package and class metadata dynamically
     await this.loadPackageMetadata(packageName);
@@ -1079,7 +1176,7 @@ class YamlJSDocInjector {
     let hasChanges = false;
     
     // CRITICAL FIX: Extract and preserve file-level elements before class declaration
-    const classRegex = /export\s+(?:declare\s+)?class\s+(\w+)/g;
+    const classRegex = /export\s+(?:declare\s+)?(?:abstract\s+)?class\s+(\w+)/g;
     const classMatch = classRegex.exec(content);
     
     let fileLevelContent = '';
@@ -1091,21 +1188,29 @@ class YamlJSDocInjector {
       fileLevelContent = content.substring(0, classMatch.index);
       classAndAfterContent = content.substring(classMatch.index);
       detectedClassName = classMatch[1];
-      console.log(`  📋 Preserved ${fileLevelContent.split('\n').length - 1} lines of file-level content for ${detectedClassName}`);
+      if (this.debug) {
+        console.log(`  📋 Preserved ${fileLevelContent.split('\n').length - 1} lines of file-level content for ${detectedClassName}`);
+      }
     }
     
     // Extract all TypeScript elements from file
     const elements = this.extractFileElements(content);
-    console.log(`  📊 Detected elements: ${Object.keys(elements).join(', ')}`);
+    if (this.debug) {
+      console.log(`  📊 Detected elements: ${Object.keys(elements).join(', ')}`);
+    }
     
-    // Extract class name from file - look for primary export class
-    const classMatches = Array.from(content.matchAll(/export\s+(?:declare\s+)?class\s+(\w+)/g));
-    const className = classMatches.length > 0 ? classMatches[0][1] : this.guessClassNameFromFile(filePath);
+    // Extract ALL class names from file (including abstract classes)
+    const classMatches = Array.from(content.matchAll(/export\s+(?:declare\s+)?(?:abstract\s+)?class\s+(\w+)/g));
+    const classNames = classMatches.map(match => match[1]);
     
-    // Load metadata for class if it exists
-    if (className) {
-      console.log(`  📋 Detected class: ${className}`);
-      await this.loadClassMetadata(packageName, className);
+    // Load metadata for ALL classes if they exist
+    if (classNames.length > 0) {
+      if (this.debug) {
+        console.log(`  📋 Detected ${classNames.length} classes: ${classNames.join(', ')}`);
+      }
+      for (const className of classNames) {
+        await this.loadClassMetadata(packageName, className);
+      }
     } else {
       // For files without classes, still try to load metadata using a generic approach
       // Try to guess the metadata file from the TypeScript filename
@@ -1116,57 +1221,67 @@ class YamlJSDocInjector {
     // Process file-level elements (interfaces, types, enums) first, but NOT functions yet
     // Functions will be processed after class to avoid injection conflicts
     const elementsWithoutFunctions = { ...elements, functions: [] };
-    const elementClassName = className || this.guessClassNameFromFile(filePath) || 'AggregateRoot';
+    const elementClassName = classNames[0] || this.guessClassNameFromFile(filePath) || 'AggregateRoot';
     content = await this.processFileElements(content, elementsWithoutFunctions, packageName, elementClassName);
     
-    if (!className) {
+    if (classNames.length === 0) {
       console.log('⚠️  No class found in file, processed file-level elements only');
       return content;
     }
 
-    // NEW YAML SYSTEM: First check if we should generate class-level JSDoc from YAML
-    const classMetadata = this.getClassMetadata(className, packageName);
-    if (classMetadata?.classes?.[className]?.['class-doc']) {
-      console.log(`  🆕 NEW YAML SYSTEM: Found class-doc for ${className} - generating concrete JSDoc`);
-      const classJSDoc = this.generateClassJSDoc(className, packageName, 'jsdoc');
+    // NEW YAML SYSTEM: Process ALL classes in the file
+    for (const className of classNames) {
+      if (this.debug) {
+        console.log(`\n  🏗️ Processing class: ${className}`);
+      }
       
-      if (classJSDoc) {
-        // Find class declaration and replace any existing JSDoc
-        const classRegex = new RegExp(`(/\\*\\*[\\s\\S]*?\\*/\\s*)?(export\\s+(?:declare\\s+)?class\\s+${className})`, 'g');
-        const classMatch = classRegex.exec(content);
+      // First check if we should generate class-level JSDoc from YAML
+      const classMetadata = this.getClassMetadata(className, packageName);
+      if (classMetadata?.classes?.[className]?.['class-doc']) {
+        if (this.debug) {
+          console.log(`  🆕 NEW YAML SYSTEM: Found class-doc for ${className} - generating concrete JSDoc`);
+        }
+        const classJSDoc = this.generateClassJSDoc(className, packageName, 'jsdoc');
         
-        if (classMatch) {
-          const existingJSDoc = classMatch[1] || '';
-          const classDeclaration = classMatch[2];
+        if (classJSDoc) {
+          // Find class declaration and replace any existing JSDoc (including abstract classes)
+          const classRegex = new RegExp(`(/\\*\\*[\\s\\S]*?\\*/\\s*)?(export\\s+(?:declare\\s+)?(?:abstract\\s+)?class\\s+${className})`, 'g');
+          const classMatch = classRegex.exec(content);
           
-          // CRITICAL FIX: Calculate precise replacement boundaries
-          // If there's existing JSDoc, replace from start of JSDoc
-          // If no JSDoc, insert before class declaration
-          const replaceStart = existingJSDoc ? classMatch.index : classMatch.index + classMatch[0].indexOf(classDeclaration);
-          const replaceEnd = classMatch.index + classMatch[0].indexOf(classDeclaration);
-          
-          // Replace old JSDoc (including inject markers) with new concrete JSDoc
-          const newContent = content.substring(0, replaceStart) + 
-                           classJSDoc + '\n' + 
-                           content.substring(replaceEnd);
-          
-          if (newContent !== content) {
-            content = newContent;
-            hasChanges = true;
-            console.log(`  ✅ Generated concrete class JSDoc for ${className} from YAML`);
+          if (classMatch) {
+            const existingJSDoc = classMatch[1] || '';
+            const classDeclaration = classMatch[2];
+            
+            // CRITICAL FIX: Calculate precise replacement boundaries
+            // If there's existing JSDoc, replace from start of JSDoc
+            // If no JSDoc, insert before class declaration
+            const replaceStart = existingJSDoc ? classMatch.index : classMatch.index + classMatch[0].indexOf(classDeclaration);
+            const replaceEnd = classMatch.index + classMatch[0].indexOf(classDeclaration);
+            
+            // Replace old JSDoc (including inject markers) with new concrete JSDoc
+            const newContent = content.substring(0, replaceStart) + 
+                             classJSDoc + '\n' + 
+                             content.substring(replaceEnd);
+            
+            if (newContent !== content) {
+              content = newContent;
+              hasChanges = true;
+              console.log(`  ✅ Generated concrete class JSDoc for ${className} from YAML`);
+            }
           }
         }
       }
-    }
 
-    // NEW YAML SYSTEM: Process method-level JSDoc from YAML metadata
-    const classMetadataForMethods = this.getClassMetadata(className, packageName);
-    if (classMetadataForMethods) {
-      // Get methods from either universal or legacy structure
-      const methods = classMetadataForMethods.classes?.[className]?.methods || classMetadataForMethods.methods;
-      
-      if (methods) {
-        console.log(`  🔧 Processing ${Object.keys(methods).length} methods for ${className}`);
+      // NEW YAML SYSTEM: Process method-level JSDoc from YAML metadata
+      const classMetadataForMethods = this.getClassMetadata(className, packageName);
+      if (classMetadataForMethods) {
+        // Get methods from either universal or legacy structure
+        const methods = classMetadataForMethods.classes?.[className]?.methods || classMetadataForMethods.methods;
+        
+        if (methods) {
+          if (this.debug) {
+            console.log(`  🔧 Processing ${Object.keys(methods).length} methods for ${className}`);
+          }
         
         // Collect all method JSDoc injections to do them in one pass
         const methodInjections = [];
@@ -1184,15 +1299,18 @@ class YamlJSDocInjector {
             
             if (methodJSDoc) {
               methodInjections.push({ methodName, methodJSDoc });
-              console.log(`    ✅ Generated JSDoc for ${className}.${methodName}`);
+              if (this.debug) {
+                console.log(`    ✅ Generated JSDoc for ${className}.${methodName}`);
+              }
             }
           }
-        }
-        
-        // Now inject all method JSDoc in a single pass
-        if (methodInjections.length > 0) {
-          content = this.injectAllMethodJSDoc(content, className, methodInjections);
-          hasChanges = true;
+          }
+          
+          // Now inject all method JSDoc in a single pass
+          if (methodInjections.length > 0) {
+            content = this.injectAllMethodJSDoc(content, className, methodInjections);
+            hasChanges = true;
+          }
         }
       }
     }
@@ -1207,9 +1325,13 @@ class YamlJSDocInjector {
     }
 
     if (hasChanges) {
-      console.log('✅ File processed with changes');
+      if (this.debug) {
+        console.log('✅ File processed with changes');
+      }
     } else {
-      console.log('ℹ️  No changes needed');
+      if (this.debug) {
+        console.log('ℹ️  No changes needed');
+      }
     }
 
     // Return the processed content directly - no need for complex recombination
@@ -1227,8 +1349,8 @@ class YamlJSDocInjector {
       return methodMatch[1];
     }
 
-    // Check if this is a class-level comment
-    const classMatch = afterPosition.match(/^\s*\*\/\s*export\s+(?:declare\s+)?class\s+(\w+)/m);
+    // Check if this is a class-level comment (including abstract classes)
+    const classMatch = afterPosition.match(/^\s*\*\/\s*export\s+(?:declare\s+)?(?:abstract\s+)?class\s+(\w+)/m);
     if (classMatch) {
       return null; // Class-level comment, return null to indicate this
     }
@@ -1250,13 +1372,13 @@ class YamlJSDocInjector {
   }
 
   isClassLevelComment(content, position) {
-    // Check if the JSDoc block is followed by a class declaration
+    // Check if the JSDoc block is followed by a class declaration (including abstract classes)
     const afterPosition = content.substring(position);
     const nextJSDocEnd = afterPosition.indexOf('*/');
     if (nextJSDocEnd === -1) return false;
     
     const afterJSDoc = afterPosition.substring(nextJSDocEnd + 2);
-    return /^\s*export\s+(?:declare\s+)?class\s+/m.test(afterJSDoc);
+    return /^\s*export\s+(?:declare\s+)?(?:abstract\s+)?class\s+/m.test(afterJSDoc);
   }
 
   /**
@@ -1271,12 +1393,16 @@ class YamlJSDocInjector {
       
       // For universal structure, check if class has methods defined
       if (classMeta.classes?.[className]?.methods) {
-        console.log(`  📊 Found methods for ${className} in universal structure`);
+        if (this.debug) {
+          console.log(`  📊 Found methods for ${className} in universal structure`);
+        }
         return classMeta;
       }
       // For legacy structure, check if methods exist at root
       else if (classMeta.methods) {
-        console.log(`  📊 Found methods for ${className} in legacy structure`);
+        if (this.debug) {
+          console.log(`  📊 Found methods for ${className} in legacy structure`);
+        }
         return classMeta;
       }
       // Still return metadata even if no methods (file-level metadata)
@@ -1292,7 +1418,9 @@ class YamlJSDocInjector {
 
 
   async processPackage(packageName) {
-    console.log(`\n📦 Processing package: ${packageName}`);
+    if (this.debug) {
+      console.log(`\n📦 Processing package: ${packageName}`);
+    }
     
     // Load package metadata
     await this.loadPackageMetadata(packageName);
@@ -1305,29 +1433,23 @@ class YamlJSDocInjector {
     for (const file of files) {
       // Extract class name from actual export class declarations only
       const tempContent = await fs.readFile(file, 'utf-8');
-      const classMatches = Array.from(tempContent.matchAll(/export\s+(?:declare\s+)?class\s+(\w+)/g));
+      const classMatches = Array.from(tempContent.matchAll(/export\s+(?:declare\s+)?(?:abstract\s+)?class\s+(\w+)/g));
       
-      // Only process files that have actual class exports
+      // Process ALL classes in the file
       if (classMatches.length > 0) {
-        const className = classMatches[0][1];
+        if (this.debug) {
+          console.log(`  📋 Found ${classMatches.length} classes in ${path.basename(file)}`);
+        }
         
-        // Load class metadata
-        await this.loadClassMetadata(packageName, className);
+        // Load metadata for all classes in the file
+        for (const match of classMatches) {
+          const className = match[1];
+          await this.loadClassMetadata(packageName, className);
+          console.log(`    ✅ Loaded metadata for class: ${className}`);
+        }
         
-        // Process with YAML metadata (only if we have metadata for this class)
-        let content = tempContent;
-        const hasMetadata = this.getClassMetadata(className, packageName);
-        const fileName = path.basename(file, '.d.ts');
-        const expectedFileName = className.toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-        
-        // Fix filename matching logic: AggregateRoot -> aggregate-root
-        const correctExpectedFileName = className
-          .replace(/([A-Z])/g, (match, letter, index) => index === 0 ? letter.toLowerCase() : `-${letter.toLowerCase()}`)
-          .replace(/^-/, ''); // Remove leading dash
-
-        // YAML SYSTEM: Process file content directly without inject markers
-        console.log(`  📋 Processing YAML metadata for class: ${className} in ${fileName}`);
-        const processedContent = await this.processFileContent(file, content);
+        // Process the entire file content once with all loaded metadata
+        const processedContent = await this.processFileContent(file, tempContent);
         
         if (this.dryRun) {
           console.log(`🔍 Dry run - would write to: ${file}`);
@@ -1336,8 +1458,10 @@ class YamlJSDocInjector {
         }
       } else {
         // For files without export class, still process for file-level elements
-        console.log(`\n🔧 Processing: ${path.relative(this.rootDir, file)}`);
-        console.log(`  📋 No export class found - checking for file-level elements`);
+        if (this.debug) {
+          console.log(`\n🔧 Processing: ${path.relative(this.rootDir, file)}`);
+          console.log(`  📋 No export class found - checking for file-level elements`);
+        }
         
         // Process file for file-level elements (interfaces, types, enums, functions)
         const processedContent = await this.processFileContent(file, tempContent);
@@ -1351,7 +1475,9 @@ class YamlJSDocInjector {
             await fs.writeFile(file, processedContent);
           }
         } else {
-          console.log(`ℹ️  No changes needed`);
+          if (this.debug) {
+            console.log(`ℹ️  No changes needed`);
+          }
         }
       }
     }

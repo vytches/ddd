@@ -1,0 +1,160 @@
+# Base Repository - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "base-repository"
+title: "Base Repository Implementation"
+description: "Core repository classes and interfaces for event sourcing"
+business-context: "Provides foundation for aggregate persistence with event sourcing and optimistic concurrency control"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === CLASSES ===
+classes:
+  VersionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: "separate"
+      class-documentation: "enabled"
+      
+    # Class Documentation
+    class-doc:
+      description: "Domain error for version conflicts in optimistic concurrency control"
+      business-context: "Handles concurrent modification conflicts when saving aggregates with event sourcing"
+      
+      # Format-specific
+      formats:
+        jsdoc:
+          description: "Version conflict error for optimistic concurrency control"
+        cli:
+          description: |
+            ## VersionError
+            Domain error for handling version conflicts in optimistic concurrency control
+      
+      custom-tags:
+        since: "1.0.0"
+        domain: "repositories"
+    
+    # Methods
+    methods:
+      withEntityIdAndVersions:
+        description: "Creates a version error with entity ID and version details"
+        business-context: "Factory method for creating detailed version conflict errors"
+        
+        parameters:
+          - name: "id"
+            type: "string | number"
+            description: "Entity identifier"
+          - name: "dbVersion"
+            type: "number"
+            description: "Current version in database"
+          - name: "newVersion" 
+            type: "number"
+            description: "Version being attempted"
+            
+        returns:
+          type: "VersionError"
+          description: "Configured version error instance"
+          
+        custom-tags:
+          since: "1.0.0"
+          static: true
+
+  IBaseRepository:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: "separate"
+      class-documentation: "enabled"
+      
+    # Class Documentation
+    class-doc:
+      description: "Abstract base repository class for event-sourced aggregates"
+      business-context: "Provides core repository functionality with event sourcing and optimistic concurrency control"
+      
+      # Format-specific
+      formats:
+        jsdoc:
+          description: "Base repository with event sourcing support"
+        cli:
+          description: |
+            ## IBaseRepository
+            Abstract base class for repositories with event sourcing capabilities
+      
+      custom-tags:
+        since: "1.0.0"
+        abstract: true
+        domain: "repositories"
+    
+    # Methods
+    methods:
+      constructor:
+        description: "Initializes repository with event dispatcher and persistence handler"
+        business-context: "Sets up event infrastructure for repository operations"
+        
+        parameters:
+          - name: "eventDispatcher"
+            type: "IEnhancedEventDispatcher"
+            description: "Dispatcher for publishing domain events"
+          - name: "eventPersistenceHandler"
+            type: "IEventPersistenceHandler"
+            description: "Handler for persisting events to storage"
+            
+      save:
+        description: "Saves an aggregate by persisting its domain events with optimistic concurrency control"
+        business-context: "Core operation for persisting aggregate changes with version checking"
+        
+        parameters:
+          - name: "aggregate"
+            type: "IRepositoryAggregate"
+            description: "Aggregate to save with its domain events"
+            
+        returns:
+          type: "Promise<void>"
+          description: "Promise that resolves when save is complete"
+          
+        throws:
+          - type: "VersionError"
+            description: "When version conflict occurs during optimistic concurrency control"
+            
+        custom-tags:
+          since: "1.0.0"
+          async: true
+          
+      findById:
+        description: "Abstract method to find an aggregate by its identifier"
+        business-context: "Template method for aggregate retrieval by ID"
+        
+        parameters:
+          - name: "id"
+            type: "unknown"
+            description: "Entity identifier"
+            
+        returns:
+          type: "Promise<unknown | null>"
+          description: "The aggregate if found, null otherwise"
+          
+        custom-tags:
+          since: "1.0.0"
+          abstract: true
+          async: true
+
+# === INTERFACES ===
+interfaces:
+  IRepositoryAggregate:
+    description: "Interface for aggregates that can be persisted by repositories"
+    business-context: "Defines contract for event-sourced aggregates with versioning"
+    
+    methods:
+      getId:
+        description: "Gets the aggregate identifier"
+        returns:
+          type: "EntityId"
+          description: "Unique identifier for the aggregate"
+          
+      getInitialVersion:
+        description: "Gets the initial version of the aggregate"
+        returns:
+          type: "number"
+          description: "Version number for optimistic concurrency control"

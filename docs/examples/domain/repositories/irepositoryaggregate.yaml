@@ -1,0 +1,235 @@
+# IRepositoryAggregate Interface - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "irepository-aggregate"
+title: "Repository Aggregate Interface"
+description: "Interface for aggregates compatible with repository pattern"
+business-context: "Defines the contract for aggregates that can be persisted through repositories"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === INTERFACES ===
+interfaces:
+  IRepositoryAggregate:
+    # Interface Documentation
+    description: "Interface for aggregates compatible with repository persistence patterns"
+    business-context: "Extends IAggregateWithEvents to provide repository-specific aggregate capabilities"
+    
+    # Format-specific
+    formats:
+      jsdoc:
+        description: "Repository-compatible aggregate with event sourcing and versioning"
+      cli:
+        description: |
+          ## IRepositoryAggregate
+          
+          Repository aggregate interface providing:
+          - Domain event capabilities (extends IAggregateWithEvents)
+          - Unique identification through EntityId
+          - Optimistic concurrency through versioning
+          - Event sourcing compatibility
+    
+    # Inheritance
+    inheritance:
+      extends: "IAggregateWithEvents"
+      description: "Inherits domain event capabilities from IAggregateWithEvents"
+    
+    # Methods
+    methods:
+      getId:
+        description: "Gets the unique identifier of the aggregate"
+        business-context: "Provides the EntityId for aggregate identification and persistence"
+        
+        returns:
+          type: "EntityId"
+          description: "The unique identifier of the aggregate"
+          
+        examples:
+          - id: "get-aggregate-id"
+            code: |
+              class UserAggregate implements IRepositoryAggregate {
+                private id: EntityId;
+                
+                constructor(id: EntityId) {
+                  this.id = id;
+                }
+                
+                getId(): EntityId {
+                  return this.id;
+                }
+              }
+              
+              const user = new UserAggregate(EntityId.fromText('user-123'));
+              const aggregateId = user.getId();
+              console.log('Aggregate ID:', aggregateId.getValue());
+              
+        custom-tags:
+          required: "true"
+          identifier: "unique"
+          immutable: "recommended"
+          
+      getInitialVersion:
+        description: "Gets the initial version of the aggregate for optimistic concurrency control"
+        business-context: "Provides version information for detecting concurrent modifications during persistence"
+        
+        returns:
+          type: "number"
+          description: "The initial version number of the aggregate"
+          
+        examples:
+          - id: "version-control"
+            code: |
+              class OrderAggregate implements IRepositoryAggregate {
+                private version: number = 0;
+                
+                constructor(id: EntityId, version: number = 0) {
+                  this.id = id;
+                  this.version = version;
+                }
+                
+                getInitialVersion(): number {
+                  return this.version;
+                }
+                
+                // When loading from event store
+                static fromEvents(id: EntityId, events: DomainEvent[]): OrderAggregate {
+                  const order = new OrderAggregate(id, events.length);
+                  order.loadFromHistory(events);
+                  return order;
+                }
+              }
+              
+              const order = new OrderAggregate(EntityId.fromText('order-456'), 3);
+              console.log('Initial version:', order.getInitialVersion()); // 3
+              
+        custom-tags:
+          required: "true"
+          concurrency: "optimistic"
+          versioning: "required"
+          
+      getDomainEvents:
+        description: "Gets the pending domain events from the aggregate (inherited from IAggregateWithEvents)"
+        business-context: "Provides access to domain events for repository persistence and publishing"
+        
+        returns:
+          type: "DomainEvent[]"
+          description: "Array of pending domain events"
+          
+        examples:
+          - id: "domain-events"
+            code: |
+              class ProductAggregate implements IRepositoryAggregate {
+                private domainEvents: DomainEvent[] = [];
+                
+                updatePrice(newPrice: number): void {
+                  // Business logic
+                  this.price = newPrice;
+                  
+                  // Add domain event
+                  this.domainEvents.push(new ProductPriceUpdatedEvent({
+                    productId: this.getId(),
+                    newPrice,
+                    updatedAt: new Date()
+                  }));
+                }
+                
+                getDomainEvents(): DomainEvent[] {
+                  return [...this.domainEvents];
+                }
+                
+                clearDomainEvents(): void {
+                  this.domainEvents = [];
+                }
+              }
+              
+              const product = new ProductAggregate(EntityId.fromText('product-789'));
+              product.updatePrice(29.99);
+              
+              const events = product.getDomainEvents();
+              console.log(`Aggregate has ${events.length} pending events`);
+              
+        custom-tags:
+          inherited: "true"
+          source: "IAggregateWithEvents"
+          event-sourcing: "required"
+          
+      clearDomainEvents:
+        description: "Clears the pending domain events from the aggregate (inherited from IAggregateWithEvents)"
+        business-context: "Used by repositories after successful event persistence and publishing"
+        
+        returns:
+          type: "void"
+          description: "No return value"
+          
+        examples:
+          - id: "clear-events"
+            code: |
+              // Repository implementation example
+              async save(aggregate: IRepositoryAggregate): Promise<void> {
+                const events = aggregate.getDomainEvents();
+                
+                if (events.length === 0) return;
+                
+                // Persist events to event store
+                await this.eventPersistenceHandler.handleEvents(events);
+                
+                // Publish events
+                await this.eventDispatcher.dispatchEventsForAggregate(aggregate);
+                
+                // Clear events after successful persistence
+                aggregate.clearDomainEvents();
+              }
+              
+        custom-tags:
+          inherited: "true"
+          source: "IAggregateWithEvents"
+          repository-managed: "true"
+          void-return: "true"
+
+# === CONTRACT REQUIREMENTS ===
+contract-requirements:
+  identification:
+    description: "Must provide unique identification through EntityId"
+    requirement: "getId() must return a valid EntityId"
+    
+  versioning:
+    description: "Must support optimistic concurrency control"
+    requirement: "getInitialVersion() must return current version number"
+    
+  event-sourcing:
+    description: "Must support domain event patterns"
+    requirement: "Must implement IAggregateWithEvents methods"
+    
+  immutability:
+    description: "ID and initial version should be immutable"
+    requirement: "getId() and getInitialVersion() should return consistent values"
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  repository-save:
+    description: "Standard repository save pattern"
+    example: |
+      // Repository uses all interface methods
+      async save(aggregate: IRepositoryAggregate): Promise<void> {
+        const id = aggregate.getId();                    // Identification
+        const version = aggregate.getInitialVersion();    // Concurrency control
+        const events = aggregate.getDomainEvents();       // Event sourcing
+        
+        // Persistence logic...
+        await this.persistEvents(id, version, events);
+        
+        // Cleanup
+        aggregate.clearDomainEvents();
+      }
+
+# === USAGE NOTES ===
+usage-notes:
+  - "Aggregates implementing this interface can be persisted through IBaseRepository"
+  - "getId() should return a consistent EntityId for the aggregate's lifetime"
+  - "getInitialVersion() is used for optimistic concurrency control"
+  - "Domain events are managed through inherited IAggregateWithEvents methods"
+  - "Repository automatically clears domain events after successful persistence"
+  - "Version conflicts throw VersionError during save operations"

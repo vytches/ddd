@@ -1,38 +1,11 @@
 // Note: IAggregateRoot is imported from core as peer dependency
 // This creates a dependency on core, but repositories are typically used with aggregates
 
-/**
- * @llm-summary Contract for repository functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * Repository interface implementing domain pattern implementation for repository operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRepository implements IRepository {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IRepository<T extends { getId(): unknown }> {
   /**
    * Find an aggregate by its identifier
    * @param id The aggregate identifier
    * @returns The aggregate if found, null otherwise
-   * @example
-   * ```typescript
-   * const userRepository: IRepository<UserAggregate> = new UserRepository();
-   * const user = await userRepository.findById("user-123");
-   * if (user) {
-   *   console.log("Found user:", user.getName());
-   * }
-   * ```
    */
   findById?(id: unknown): Promise<T | null>;
 
@@ -40,13 +13,6 @@ export interface IRepository<T extends { getId(): unknown }> {
    * Save an aggregate (create or update)
    * @param aggregate The aggregate to save
    * @returns Promise that resolves when save is complete
-   * @example
-   * ```typescript
-   * const userRepository: IRepository<UserAggregate> = new UserRepository();
-   * const user = UserAggregate.create({ name: "John Doe", email: "john@example.com" });
-   * await userRepository.save(user);
-   * console.log("User saved with ID:", user.getId());
-   * ```
    */
   save(aggregate: T): Promise<void>;
 
@@ -58,48 +24,10 @@ export interface IRepository<T extends { getId(): unknown }> {
   delete?(aggregate: T): Promise<void>;
 }
 
-/**
- * @llm-summary Contract for repository provider functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RepositoryProvider interface implementing domain pattern implementation for repository provider operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRepositoryProvider implements IRepositoryProvider {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IRepositoryProvider {
   getRepository<T>(name: string): T | undefined;
 }
 
-/**
- * @llm-summary Contract for extended repository functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ExtendedRepository interface implementing domain pattern implementation for extended repository operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteExtendedRepository implements IExtendedRepository {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IExtendedRepository<T extends { getId(): unknown }> extends IRepository<T> {
   /**
    * Check if an aggregate exists

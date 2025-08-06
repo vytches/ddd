@@ -327,6 +327,44 @@ export class DocumentationGenerator {
   }
 
   /**
+   * Extract examples from various formats into a consistent structure
+   */
+  private extractExamples(examples: any): Array<{ id?: string; code: string }> {
+    if (!examples || !Array.isArray(examples)) {
+      return [];
+    }
+
+    return examples.map((example, index) => {
+      // Handle different example formats
+      if (typeof example === 'string') {
+        // Simple string example
+        return { id: `example-${index + 1}`, code: example };
+      } else if (typeof example === 'object' && example !== null) {
+        // Object with code property
+        if (example.code) {
+          return { 
+            id: example.id || example.title || `example-${index + 1}`, 
+            code: example.code 
+          };
+        }
+        // Object with direct content
+        if (example.content) {
+          return { 
+            id: example.id || example.title || `example-${index + 1}`, 
+            code: example.content 
+          };
+        }
+        // Try to stringify object as fallback
+        return { 
+          id: `example-${index + 1}`, 
+          code: JSON.stringify(example, null, 2) 
+        };
+      }
+      return { id: `example-${index + 1}`, code: String(example) };
+    });
+  }
+
+  /**
    * Converts kebab-case to PascalCase
    */
   private toPascalCase(str: string): string {
@@ -382,7 +420,7 @@ export class DocumentationGenerator {
           description: yamlData.description || classMetadata?.description || '',
           businessContext: yamlData.businessContext || classMetadata?.businessContext || '',
           methods: {},
-          examples: classMetadata?.examples || [],
+          examples: this.extractExamples(classMetadata?.examples || yamlData.examples || []),
           interfaces: {}, // Add interfaces support
           types: {}, // Add types support
           enums: {}, // Add enums support
@@ -406,7 +444,7 @@ export class DocumentationGenerator {
                 businessContext: methodMetadata.businessContext || '',
                 parameters: methodMetadata.parameters || [],
                 returns: methodMetadata.returns || { type: 'void', description: '' },
-                examples: methodMetadata.examples || []
+                examples: this.extractExamples(methodMetadata.examples || [])
               };
             }
           }
