@@ -32,7 +32,7 @@ const CONFIG = {
     repositories: 5,
     aggregates: 10,
     events: 18,
-    cqrs: 10,
+    cqrs: 14,
     validation: 20,
     policies: 40,
     projections: 25,
