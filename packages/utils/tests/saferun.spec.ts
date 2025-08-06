@@ -19,7 +19,7 @@ describe('safeRun', () => {
     it('should return undefined for value and the error when synchronous function throws', () => {
       // Arrange
       const expectedError = new Error('synchronous error');
-      const fn = () => {
+      const fn = (): void => {
         throw expectedError;
       };
 
@@ -53,27 +53,41 @@ describe('safeRun', () => {
     });
 
     it('should handle various error types from synchronous functions', () => {
-      const errorTypes = [
+      // Test actual Error instances
+      const errorInstances = [
         new Error('standard error'),
         new TypeError('type error'),
         new SyntaxError('syntax error'),
-        'string as error',
-        { message: 'object as error' },
       ];
 
-      errorTypes.forEach(expectedError => {
+      errorInstances.forEach(expectedError => {
         // Arrange
-        const fn = () => {
+        const fn = (): void => {
           throw expectedError;
         };
 
         // Act
         const [error, value] = safeRun(fn);
 
-        // Assert
+        // Assert - should preserve original error
         expect(value).toBeUndefined();
         expect(error).toBe(expectedError);
       });
+
+      // Test non-Error types (should be converted to Error)
+      const fnThrowingString = (): void => {
+        throw 'string as error';
+      };
+      const [stringError] = safeRun(fnThrowingString);
+      expect(stringError).toBeInstanceOf(Error);
+      expect(stringError?.message).toBe('string as error');
+
+      const fnThrowingObject = (): void => {
+        throw { message: 'object as error' };
+      };
+      const [objectError] = safeRun(fnThrowingObject);
+      expect(objectError).toBeInstanceOf(Error);
+      expect(objectError?.message).toBe('object as error'); // Uses message property
     });
   });
 
@@ -127,17 +141,15 @@ describe('safeRun', () => {
     });
 
     it('should handle various error types from asynchronous functions', async () => {
-      // Arrange
-      const errorTypes = [
+      // Test actual Error instances
+      const errorInstances = [
         new Error('standard async error'),
         new TypeError('type async error'),
         new SyntaxError('syntax async error'),
-        'string as async error',
-        { message: 'object as async error' },
       ];
 
-      for (const expectedError of errorTypes) {
-        // Arrange (continued)
+      for (const expectedError of errorInstances) {
+        // Arrange
         const fn = async () => {
           throw expectedError;
         };
@@ -145,10 +157,25 @@ describe('safeRun', () => {
         // Act
         const [error, value] = await safeRun(fn);
 
-        // Assert
+        // Assert - should preserve original error
         expect(value).toBeUndefined();
         expect(error).toBe(expectedError);
       }
+
+      // Test non-Error types (should be converted to Error)
+      const fnRejectingString = async () => {
+        throw 'string as async error';
+      };
+      const [stringError] = await safeRun(fnRejectingString);
+      expect(stringError).toBeInstanceOf(Error);
+      expect(stringError?.message).toBe('string as async error');
+
+      const fnRejectingObject = async () => {
+        throw { message: 'object as async error' };
+      };
+      const [objectError] = await safeRun(fnRejectingObject);
+      expect(objectError).toBeInstanceOf(Error);
+      expect(objectError?.message).toBe('object as async error'); // Uses message property
     });
 
     it('should handle promises that reject after a delay', async () => {
@@ -183,11 +210,156 @@ describe('safeRun', () => {
     });
   });
 
+  // Type resolution tests
+  describe('type resolution', () => {
+    interface TestResult {
+      id: string;
+      value: string;
+    }
+
+    it('should properly resolve async function return types without Promise wrapper', async () => {
+      // Arrange - simulate the user's original issue
+      const asyncMethod = async (): Promise<TestResult> => {
+        return { id: '123', value: 'test' };
+      };
+
+      // Act
+      const [error, result] = await safeRun(() => asyncMethod());
+
+      // Assert - This test verifies TypeScript type resolution
+      // The result should be TestResult | undefined, NOT Promise<TestResult> | undefined
+      expect(error).toBeUndefined();
+      expect(result).toEqual({ id: '123', value: 'test' });
+
+      // These property accesses should work without type assertions
+      if (result) {
+        expect(result.id).toBe('123');
+        expect(result.value).toBe('test');
+      }
+    });
+
+    it('should distinguish between sync and async function types', async () => {
+      // Arrange
+      const syncMethod = (): string => 'sync result';
+      const asyncMethod = async (): Promise<string> => 'async result';
+
+      // Act
+      const syncResult = safeRun(() => syncMethod()); // Should return tuple directly
+      const asyncResult = safeRun(() => asyncMethod()); // Should return Promise<tuple>
+
+      // Assert
+      // Sync result should be available immediately
+      const [syncError, syncValue] = syncResult;
+      expect(syncError).toBeUndefined();
+      expect(syncValue).toBe('sync result');
+
+      // Async result needs to be awaited
+      expect(asyncResult).toBeInstanceOf(Promise);
+      const [asyncError, asyncValue] = await asyncResult;
+      expect(asyncError).toBeUndefined();
+      expect(asyncValue).toBe('async result');
+    });
+
+    it('should NOT wrap sync function results in Promise', () => {
+      // Arrange - synchroniczna funkcja zwracająca obiekt
+      interface SyncResult {
+        name: string;
+        age: number;
+      }
+
+      const syncFunction = (): SyncResult => ({
+        name: 'John',
+        age: 30,
+      });
+
+      // Act - wywołanie synchroniczne
+      const [error, result] = safeRun(() => syncFunction());
+
+      // Assert - result powinien być SyncResult | undefined, NIE Promise<SyncResult>
+      expect(error).toBeUndefined();
+      expect(result).toEqual({ name: 'John', age: 30 });
+
+      // Te właściwości powinny być dostępne bezpośrednio (bez await)
+      if (result) {
+        // TypeScript poprawnie rozpoznaje typ jako SyncResult
+        expect(result.name).toBe('John');
+        expect(result.age).toBe(30);
+
+        // @ts-expect-error - result nie jest Promise, więc then nie istnieje
+        expect(result.then).toBeUndefined();
+      }
+    });
+  });
+
   // Edge cases and integration tests
   describe('edge cases and integration', () => {
+    it('should handle non-Error objects thrown', () => {
+      // Arrange - function throwing a string
+      const fnThrowingString = (): void => {
+        throw 'This is a string error';
+      };
+
+      // Act
+      const [error1, value1] = safeRun(fnThrowingString);
+
+      // Assert - should convert to Error
+      expect(value1).toBeUndefined();
+      expect(error1).toBeInstanceOf(Error);
+      expect(error1?.message).toBe('This is a string error');
+    });
+
+    it('should handle non-Error objects rejected in promises', async () => {
+      // Test object with code and details
+      const fnRejectingWithCode = async () => {
+        return Promise.reject({ code: 'ERROR_CODE', details: 'Something went wrong' });
+      };
+
+      const [errorWithCode] = await safeRun(fnRejectingWithCode);
+      expect(errorWithCode).toBeInstanceOf(Error);
+      expect(errorWithCode?.message).toBe('Something went wrong'); // Uses details property
+
+      // Test object with only code
+      const fnRejectingCodeOnly = async () => {
+        return Promise.reject({ code: 'VALIDATION_ERROR' });
+      };
+
+      const [errorCodeOnly] = await safeRun(fnRejectingCodeOnly);
+      expect(errorCodeOnly).toBeInstanceOf(Error);
+      expect(errorCodeOnly?.message).toBe('VALIDATION_ERROR'); // Uses code property
+
+      // Test plain object without special properties
+      const fnRejectingPlainObject = async () => {
+        return Promise.reject({ foo: 'bar', baz: 123 });
+      };
+
+      const [plainObjectError] = await safeRun(fnRejectingPlainObject);
+      expect(plainObjectError).toBeInstanceOf(Error);
+      expect(plainObjectError?.message).toBe('{"foo":"bar","baz":123}'); // JSON stringified
+    });
+
+    it('should handle Promise-like objects (thenables)', async () => {
+      // Arrange - custom thenable object
+      const thenable = {
+        then: (resolve: (value: string) => void) => {
+          resolve('thenable result');
+        },
+      };
+
+      const fnReturningThenable = () => thenable;
+
+      // Act
+      const result = safeRun(fnReturningThenable);
+
+      // Assert - should treat as Promise
+      expect(result).toBeInstanceOf(Promise);
+      const [error, value] = await result;
+      expect(error).toBeUndefined();
+      expect(value).toBe('thenable result');
+    });
+
     it('should correctly identify promises returned by functions', async () => {
       // Arrange
-      const fnReturningPromise = () => Promise.resolve('direct promise');
+      const fnReturningPromise = (): Promise<string> => Promise.resolve('direct promise');
 
       // Act
       const result = safeRun(fnReturningPromise);
@@ -202,10 +374,11 @@ describe('safeRun', () => {
 
     it('should handle the case when fn is called multiple times', () => {
       // Arrange
-      const mockFn = vi.fn().mockReturnValue('multiple calls');
+      const mockFn = vi.fn((): string => 'multiple calls');
 
       // Act - First call
-      const [error1, value1] = safeRun(mockFn);
+      const result1 = safeRun(mockFn);
+      const [error1, value1] = result1 as readonly [Error | undefined, string | undefined];
 
       // Assert - First call
       expect(value1).toBe('multiple calls');
@@ -213,7 +386,8 @@ describe('safeRun', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
 
       // Act - Second call
-      const [error2, value2] = safeRun(mockFn);
+      const result2 = safeRun(mockFn);
+      const [error2, value2] = result2 as readonly [Error | undefined, string | undefined];
 
       // Assert - Second call
       expect(value2).toBe('multiple calls');
