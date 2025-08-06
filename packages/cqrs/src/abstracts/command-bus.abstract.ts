@@ -30,15 +30,15 @@ type CommandConstructor<T extends ICommand = ICommand> = new (...args: unknown[]
  * @public
  */
 export abstract class ICommandBus {
-  abstract register<T extends ICommand>(
+  abstract register<T extends ICommand, TResult = void>(
     commandType: CommandConstructor<T>,
-    handler: ICommandHandler<T>
+    handler: ICommandHandler<T, TResult>
   ): void;
-  abstract registerFactory<T extends ICommand>(
+  abstract registerFactory<T extends ICommand, TResult = void>(
     commandType: CommandConstructor<T>,
-    factory: () => ICommandHandler<T>
+    factory: () => ICommandHandler<T, TResult>
   ): void;
   abstract use(middleware: ICQRSMiddleware): this;
   abstract discoverHandlers(): void;
-  abstract execute<T extends ICommand>(command: T): Promise<void>;
+  abstract execute<T extends ICommand, TResult = void>(command: T): Promise<TResult>;
 }
