@@ -4,37 +4,56 @@ import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
 /**
- * @llm-summary command handler function
- * @llm-domain Architecture
- * @llm-pure false
- *
  * @description
- * CommandHandler function implementing architectural component for command handler operations.
- *
+ * CommandHandler decorator that automatically infers types from the handler class implementation.
+ * When type parameters are not provided, it will infer them from the handler's ICommandHandler interface.
  *
  * @param {new (...args: unknown[]} commandType - commandType parameter
  * @throws {Error} When validation fails
  *
  * @example
  * ```typescript
- * // Basic usage
- * const result = CommandHandler(commandType);
+ * // Basic usage with explicit types (when handler returns void)
+ * @CommandHandler(CreateUserCommand)
+ * class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
+ *   async execute(command: CreateUserCommand): Promise<void> {
+ *     // implementation
+ *   }
+ * }
  * ```
  *
  * @example
  * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => CommandHandler(commandType));
+ * // Auto-inferred types (when handler returns a value)
+ * @CommandHandler(RegisterUserCommand)
+ * class RegisterUserHandler implements ICommandHandler<RegisterUserCommand, AuthenticationResultDto> {
+ *   async execute(command: RegisterUserCommand): Promise<AuthenticationResultDto> {
+ *     // implementation - result type is automatically inferred
+ *   }
+ * }
  * ```
- *
- * @since 1.0.0
- * @public
  */
-export function CommandHandler<T extends ICommand, TResult = void>(
-  commandType: new (...args: any[]) => T,
+export function CommandHandler<TCommand extends ICommand>(
+  commandType: new (...args: any[]) => TCommand,
+  options?: CommandHandlerOptions
+): <THandler extends ICommandHandler<TCommand, any>>(
+  target: new (...args: any[]) => THandler
+) => new (...args: any[]) => THandler;
+
+export function CommandHandler<TCommand extends ICommand, TResult>(
+  commandType: new (...args: any[]) => TCommand,
+  options?: CommandHandlerOptions
+): <THandler extends ICommandHandler<TCommand, TResult>>(
+  target: new (...args: any[]) => THandler
+) => new (...args: any[]) => THandler;
+
+export function CommandHandler<TCommand extends ICommand, TResult = any>(
+  commandType: new (...args: any[]) => TCommand,
   options?: CommandHandlerOptions
 ) {
-  return function <K extends ICommandHandler<T, TResult>>(target: new (...args: any[]) => K) {
+  return function <THandler extends ICommandHandler<TCommand, TResult>>(
+    target: new (...args: any[]) => THandler
+  ) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'command',
