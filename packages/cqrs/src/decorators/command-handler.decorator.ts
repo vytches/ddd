@@ -4,10 +4,6 @@ import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
 /**
- * @llm-summary command handler function
- * @llm-domain Architecture
- * @llm-pure false
- *
  * @description
  * CommandHandler function implementing architectural component for command handler operations.
  *
@@ -16,18 +12,39 @@ import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
  *
  * @example
  * ```typescript
- * // Basic usage
- * const result = CommandHandler(commandType);
+ * // Basic usage with explicit types (when handler returns void)
+ * @CommandHandler(CreateUserCommand)
+ * class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
+ *   async execute(command: CreateUserCommand): Promise<void> {
+ *     // implementation
+ *   }
+ * }
  * ```
  * *
  * @since 1.0.0
  * @public
  */
-export function CommandHandler<T extends ICommand>(
-  commandType: new (...args: unknown[]) => T,
+export function CommandHandler<TCommand extends ICommand>(
+  commandType: new (...args: any[]) => TCommand,
+  options?: CommandHandlerOptions
+): <THandler extends ICommandHandler<TCommand, any>>(
+  target: new (...args: any[]) => THandler
+) => new (...args: any[]) => THandler;
+
+export function CommandHandler<TCommand extends ICommand, TResult>(
+  commandType: new (...args: any[]) => TCommand,
+  options?: CommandHandlerOptions
+): <THandler extends ICommandHandler<TCommand, TResult>>(
+  target: new (...args: any[]) => THandler
+) => new (...args: any[]) => THandler;
+
+export function CommandHandler<TCommand extends ICommand, TResult = any>(
+  commandType: new (...args: any[]) => TCommand,
   options?: CommandHandlerOptions
 ) {
-  return function <K extends ICommandHandler<T>>(target: new (...args: unknown[]) => K) {
+  return function <THandler extends ICommandHandler<TCommand, TResult>>(
+    target: new (...args: any[]) => THandler
+  ) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'command',

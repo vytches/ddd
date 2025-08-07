@@ -24,10 +24,10 @@ import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
  * @public
  */
 export function QueryHandler<T extends IQuery<R>, R>(
-  queryType: new (...args: unknown[]) => T,
+  queryType: new (...args: any[]) => T,
   options?: QueryHandlerOptions
 ) {
-  return function <K extends IQueryHandler<T, R>>(target: new (...args: unknown[]) => K) {
+  return function <K extends IQueryHandler<T, R>>(target: new (...args: any[]) => K) {
     const diOptions = options || {};
     const metadata: DIHandlerMetadata = {
       type: 'query',

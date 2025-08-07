@@ -1,8 +1,4 @@
 /**
- * @llm-summary Contract for specification functionality
- * @llm-domain Core
- * @llm-contract Required
- *
  * @description
  * Specification interface implementing core domain functionality for specification operations.
  *
@@ -13,9 +9,6 @@
  *   // Implementation
  * }
  * ```
- *
- * @since 1.0.0
- * @public
  */
 export interface ISpecification<T> {
   /**
@@ -41,12 +34,12 @@ export interface ISpecification<T> {
   /**
    * Optional name for debugging/logging
    */
-  readonly name?: string;
+  readonly name?: string | undefined;
 
   /**
    * Optional description for debugging/logging
    */
-  readonly description?: string;
+  readonly description?: string | undefined;
 
   /**
    * Optional method to explain why specification failed
@@ -55,10 +48,6 @@ export interface ISpecification<T> {
 }
 
 /**
- * @llm-summary Contract for async specification functionality
- * @llm-domain Core
- * @llm-contract Required
- *
  * @description
  * AsyncSpecification interface implementing core domain functionality for async specification operations.
  *
@@ -69,9 +58,6 @@ export interface ISpecification<T> {
  *   // Implementation
  * }
  * ```
- *
- * @since 1.0.0
- * @public
  */
 export interface IAsyncSpecification<T> {
   /**
@@ -99,12 +85,12 @@ export interface IAsyncSpecification<T> {
   /**
    * Optional name for debugging/logging
    */
-  readonly name?: string;
+  readonly name?: string | undefined;
 
   /**
    * Optional description for debugging/logging
    */
-  readonly description?: string;
+  readonly description?: string | undefined;
 
   /**
    * Optional method to explain why specification failed

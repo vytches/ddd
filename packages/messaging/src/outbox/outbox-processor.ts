@@ -166,7 +166,7 @@ export class OutboxProcessor {
    * Processes a single message through the middleware pipeline
    */
   private async processMessage(message: IOutboxMessage): Promise<void> {
-    const [, error] = await safeRun(async () => {
+    const [error] = await safeRun(async () => {
       // Mark as processing
       await this.repository.updateStatus(message.id, MessageStatus.PROCESSING);
 
@@ -180,8 +180,7 @@ export class OutboxProcessor {
     });
 
     if (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
-      await this.handleMessageError(message, errorInstance);
+      await this.handleMessageError(message, error);
     }
   }
 

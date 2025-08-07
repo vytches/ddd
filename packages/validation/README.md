@@ -337,6 +337,141 @@ const euUsers = new UserLocationSpecification(['DE', 'FR', 'ES', 'IT']);
 const recentEuUsers = recentUsers.and(euUsers);
 ```
 
+### Async Specifications
+
+For specifications that require asynchronous operations like database queries or
+API calls:
+
+```typescript
+import { AsyncCompositeSpecification } from '@vytches/ddd-validation';
+
+// Database-based async specification
+class UserExistsSpecification extends AsyncCompositeSpecification<{
+  email: string;
+  repository: IUserRepository;
+}> {
+  async isSatisfiedByAsync(candidate: {
+    email: string;
+    repository: IUserRepository;
+  }): Promise<boolean> {
+    const existingUser = await candidate.repository.findByEmail(
+      candidate.email
+    );
+    return existingUser !== null;
+  }
+}
+
+// External API validation
+class EmailBlacklistSpecification extends AsyncCompositeSpecification<string> {
+  async isSatisfiedByAsync(email: string): Promise<boolean> {
+    const response = await fetch(
+      `https://api.blacklist.com/check?email=${email}`
+    );
+    const data = await response.json();
+    return !data.isBlacklisted;
+  }
+}
+
+// Permission check specification
+class HasPermissionSpecification extends AsyncCompositeSpecification<{
+  user: User;
+  permission: string;
+  service: IPermissionService;
+}> {
+  async isSatisfiedByAsync(candidate: {
+    user: User;
+    permission: string;
+    service: IPermissionService;
+  }): Promise<boolean> {
+    const permissions = await candidate.service.getUserPermissions(
+      candidate.user.id
+    );
+    return permissions.includes(candidate.permission);
+  }
+}
+
+// Combine async specifications
+const userExists = new UserExistsSpecification();
+const notBlacklisted = new EmailBlacklistSpecification();
+const hasAdminPermission = new HasPermissionSpecification();
+
+// Logical operations work the same way
+const isValidNewUser = userExists.not().and(notBlacklisted);
+
+// Execute async specification
+const isValid = await isValidNewUser.isSatisfiedByAsync({
+  email: 'user@example.com',
+  repository: userRepository,
+});
+
+// Create from async predicate
+const customCheck = AsyncCompositeSpecification.create<User>(
+  async (user, context) => {
+    // Async operation
+    const result = await someAsyncOperation(user, context);
+    return result.isValid;
+  },
+  'CustomAsyncCheck',
+  'Custom async validation check'
+);
+```
+
+### Parallel Execution
+
+Async specifications execute combined operations in parallel for better
+performance:
+
+```typescript
+// Both database and API calls run simultaneously
+const complexValidation = new AndAsyncSpecification(
+  new DatabaseCheckSpecification(), // Runs in parallel
+  new ApiValidationSpecification() // Runs in parallel
+);
+
+// Result is ready when both complete
+const isValid = await complexValidation.isSatisfiedByAsync(candidate);
+
+// OR operations also run in parallel
+const alternativeCheck = new OrAsyncSpecification(
+  new PrimaryValidationSpec(), // Runs in parallel
+  new FallbackValidationSpec() // Runs in parallel
+);
+```
+
+### Error Explanation
+
+Async specifications can provide detailed failure explanations:
+
+```typescript
+class DetailedAsyncSpec extends AsyncCompositeSpecification<User> {
+  async isSatisfiedByAsync(user: User): Promise<boolean> {
+    const result = await this.validateUser(user);
+    return result.isValid;
+  }
+
+  async explainFailureAsync(user: User): Promise<string | null> {
+    const result = await this.validateUser(user);
+    if (!result.isValid) {
+      return `User validation failed: ${result.reason}`;
+    }
+    return null;
+  }
+
+  private async validateUser(user: User) {
+    // Complex async validation logic
+    return { isValid: false, reason: 'Missing required permissions' };
+  }
+}
+
+// Get detailed error explanation
+const spec = new DetailedAsyncSpec();
+const isValid = await spec.isSatisfiedByAsync(user);
+if (!isValid) {
+  const explanation = await spec.explainFailureAsync(user);
+  console.log(explanation); // "User validation failed: Missing required permissions"
+}
+```
+
 ## 📏 Fluent Rules
 
 ### String Rules

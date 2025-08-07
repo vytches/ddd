@@ -3,6 +3,60 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.5](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.5) (2025-08-07)
+
+**Note:** Version bump only for package @vytches/ddd-cqrs
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.4.4](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.4) (2025-08-06)
+
+**Note:** Version bump only for package @vytches/ddd-cqrs
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.4.3](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.3) (2025-08-06)
+
+### Bug Fixes
+
+- fix typing isse for command-handlers
+  ([13e4851](https://github.com/vytches/ddd/commit/13e485197d44253e6190d4212d084f33efd4cdd7))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.2) (2025-08-06)
+
+### Bug Fixes
+
+- fix cqrs handlers return type
+  ([203e5a0](https://github.com/vytches/ddd/commit/203e5a0af36ad2ffee3feabee938eebc715381fb))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.4.1](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.4.0...@vytches/ddd-cqrs@0.4.1) (2025-08-06)
+
+### Bug Fixes
+
+- cqrs typings unknown replaced by any
+  ([bad16a8](https://github.com/vytches/ddd/commit/bad16a845a21622cf0c1f7909ff9163808e6ce80))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.4.0](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.3.11...@vytches/ddd-cqrs@0.4.0) (2025-07-28)
 
 - Release/2025 07 28 1 (#24)

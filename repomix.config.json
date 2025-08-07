@@ -1,0 +1,101 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-output.md",
+    "style": "markdown",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "truncateBase64": false,
+    "copyToClipboard": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/README.md",
+    "packages/*/package.json",
+    "README.md",
+    "QUICK_START.md"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      "**/*.test.tsx",
+      "**/*.spec.tsx",
+      "**/tests/**",
+      "**/test/**",
+      "**/__tests__/**",
+      "**/__mocks__/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "**/.nx/**",
+      "**/.turbo/**",
+      "**/tmp/**",
+      "**/temp/**",
+      "**/*.log",
+      "**/*.lock",
+      "**/*.yaml",
+      "**/*.yml",
+      "**/tsconfig.json",
+      "**/tsconfig.*.json",
+      "**/vite.config.ts",
+      "**/vite.config.mts",
+      "**/vitest.config.ts",
+      "**/vitest.config.mts",
+      "**/jest.config.js",
+      "**/jest.config.ts",
+      "**/.eslintrc.json",
+      "**/.prettierrc",
+      "**/project.json",
+      "packages/*/examples/**",
+      "examples/**",
+      "docs/**",
+      "scripts/**",
+      "templates/**",
+      "config/**",
+      ".github/**",
+      "*.md",
+      "!README.md",
+      "!QUICK_START.md",
+      "!packages/*/README.md",
+      "nx.json",
+      "lerna.json",
+      "renovate.json",
+      "commitlint.config.js",
+      "prettier.config.js",
+      "pnpm-workspace.yaml",
+      "tsconfig.base.json",
+      "CLAUDE.md",
+      "CONTRIBUTING.md",
+      "ROADMAP.md",
+      "LICENSE",
+      "build.log",
+      "lerna-debug.log",
+      ".repomixignore"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}

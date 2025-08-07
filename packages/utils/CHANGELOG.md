@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-utils@0.4.0...@vytches/ddd-utils@0.4.2) (2025-08-07)
+
+**Note:** Version bump only for package @vytches/ddd-utils
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.4.1](https://github.com/vytches/ddd/compare/@vytches/ddd-utils@0.4.0...@vytches/ddd-utils@0.4.1) (2025-08-06)
+
+### Bug Fixes
+
+- **utils:** fix TypeScript type resolution for async functions in safeRun
+  ([d772acb](https://github.com/vytches/ddd/commit/d772acbe26d567008ffb5503f43d608f7e581359))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.4.0](https://github.com/vytches/ddd/compare/@vytches/ddd-utils@0.3.9...@vytches/ddd-utils@0.4.0) (2025-07-28)
 
 - Release/2025 07 28 1 (#24)

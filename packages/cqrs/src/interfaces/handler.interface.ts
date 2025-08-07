@@ -20,8 +20,8 @@ import type { IQuery } from './query.interface';
  * @since 1.0.0
  * @public
  */
-export interface ICommandHandler<TCommand extends ICommand> {
-  execute(command: TCommand): Promise<void>;
+export interface ICommandHandler<TCommand extends ICommand, TResult = void> {
+  execute(command: TCommand): Promise<TResult>;
 }
 
 /**
