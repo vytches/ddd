@@ -31,5 +31,6 @@ export {
   type TestHarnessState,
   type TestResource,
   type TestUser,
-  type TimeAdvanceOptions,
+  type TimeAdvanceOptions
 } from './core';
+

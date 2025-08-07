@@ -7,7 +7,7 @@ export {
   safeRun,
   safeRunTest,
   safeRunWithTimeout,
-  type SafeRunResult,
+  type SafeRunResult
 } from './safe-run';
 
 export {
@@ -15,7 +15,7 @@ export {
   TimeScenarioBuilder,
   withTestClock,
   type TestClockState,
-  type TimeAdvanceOptions,
+  type TimeAdvanceOptions
 } from './test-clock';
 
 export { TestClockSimple } from './test-clock-simple';
@@ -26,7 +26,7 @@ export {
   TestResourceBuilder,
   type TestHarnessOptions,
   type TestHarnessState,
-  type TestResource,
+  type TestResource
 } from './test-harness';
 
 export {
@@ -38,5 +38,6 @@ export {
   type SequenceOptions,
   type TestDataBuilderOptions,
   type TestDomainEvent,
-  type TestUser,
+  type TestUser
 } from './test-data-builder';
+
