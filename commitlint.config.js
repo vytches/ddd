@@ -41,6 +41,7 @@ module.exports = {
         'release',
         'ci',
         'docs',
+        'config',
       ],
     ],
     'subject-case': [2, 'never', ['sentence-case', 'start-case', 'pascal-case', 'upper-case']],

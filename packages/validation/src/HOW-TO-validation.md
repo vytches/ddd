@@ -142,6 +142,101 @@ export class NotSpecification<T> extends CompositeSpecification<T> {
 }
 ```
 
+### AsyncCompositeSpecification Base Class
+
+```typescript
+export abstract class AsyncCompositeSpecification<T>
+  implements IAsyncSpecification<T>
+{
+  abstract isSatisfiedByAsync(
+    candidate: T,
+    context?: Record<string, unknown>
+  ): Promise<boolean>;
+
+  and(other: IAsyncSpecification<T>): IAsyncSpecification<T> {
+    return new AndAsyncSpecification<T>(this, other);
+  }
+
+  or(other: IAsyncSpecification<T>): IAsyncSpecification<T> {
+    return new OrAsyncSpecification<T>(this, other);
+  }
+
+  not(): IAsyncSpecification<T> {
+    return new NotAsyncSpecification<T>(this);
+  }
+
+  static create<T>(
+    predicate: (
+      candidate: T,
+      context?: Record<string, unknown>
+    ) => Promise<boolean>,
+    name?: string,
+    description?: string
+  ): IAsyncSpecification<T> {
+    return new PredicateAsyncSpecification<T>(predicate, name, description);
+  }
+}
+```
+
+### Async Composite Operators
+
+```typescript
+export class AndAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
+  constructor(
+    private readonly left: IAsyncSpecification<T>,
+    private readonly right: IAsyncSpecification<T>
+  ) {
+    super();
+  }
+
+  async isSatisfiedByAsync(
+    candidate: T,
+    context?: Record<string, unknown>
+  ): Promise<boolean> {
+    // Wykonanie równoległe dla lepszej wydajności
+    const [leftResult, rightResult] = await Promise.all([
+      this.left.isSatisfiedByAsync(candidate, context),
+      this.right.isSatisfiedByAsync(candidate, context),
+    ]);
+    return leftResult && rightResult;
+  }
+}
+
+export class OrAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
+  constructor(
+    private readonly left: IAsyncSpecification<T>,
+    private readonly right: IAsyncSpecification<T>
+  ) {
+    super();
+  }
+
+  async isSatisfiedByAsync(
+    candidate: T,
+    context?: Record<string, unknown>
+  ): Promise<boolean> {
+    // Wykonanie równoległe dla lepszej wydajności
+    const [leftResult, rightResult] = await Promise.all([
+      this.left.isSatisfiedByAsync(candidate, context),
+      this.right.isSatisfiedByAsync(candidate, context),
+    ]);
+    return leftResult || rightResult;
+  }
+}
+
+export class NotAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
+  constructor(private readonly spec: IAsyncSpecification<T>) {
+    super();
+  }
+
+  async isSatisfiedByAsync(
+    candidate: T,
+    context?: Record<string, unknown>
+  ): Promise<boolean> {
+    return !(await this.spec.isSatisfiedByAsync(candidate, context));
+  }
+}
+```
+
 ### Specification Helpers & Operators
 
 ```typescript
@@ -775,6 +870,167 @@ const complexUserValidator = BusinessRuleValidator.create<User>()
 ```
 
 ## 7. Zaawansowane Wzorce Użycia
+
+### Asynchroniczne Specyfikacje
+
+```typescript
+// Specyfikacja sprawdzająca czy użytkownik istnieje w bazie
+class ExistingUserByEmailSpecification extends AsyncCompositeSpecification<{
+  email: string;
+  repository: IUserRepository;
+}> {
+  async isSatisfiedByAsync(candidate: {
+    email: string;
+    repository: IUserRepository;
+  }): Promise<boolean> {
+    const existingUser = await candidate.repository.findByEmail(
+      candidate.email
+    );
+    return existingUser !== null;
+  }
+
+  override async explainFailureAsync(): Promise<string | null> {
+    return 'User with this email does not exist';
+  }
+}
+
+// Specyfikacja sprawdzająca dostępność w zewnętrznym API
+class InventoryAvailableSpecification extends AsyncCompositeSpecification<{
+  productId: string;
+  quantity: number;
+  inventoryService: IInventoryService;
+}> {
+  async isSatisfiedByAsync(candidate: {
+    productId: string;
+    quantity: number;
+    inventoryService: IInventoryService;
+  }): Promise<boolean> {
+    const availableStock = await candidate.inventoryService.checkStock(
+      candidate.productId
+    );
+    return availableStock >= candidate.quantity;
+  }
+}
+
+// Kombinowanie async specyfikacji
+const userCanPurchase = new ExistingUserByEmailSpecification()
+  .and(new InventoryAvailableSpecification())
+  .and(
+    AsyncCompositeSpecification.create<PurchaseContext>(
+      async context => {
+        const creditLimit = await context.creditService.getCreditLimit(
+          context.userId
+        );
+        return context.amount <= creditLimit;
+      },
+      'credit-check',
+      'User has sufficient credit limit'
+    )
+  );
+
+// Użycie
+const context: PurchaseContext = {
+  email: 'user@example.com',
+  repository: userRepository,
+  productId: 'PROD-123',
+  quantity: 2,
+  inventoryService: inventoryService,
+  userId: 'USER-456',
+  amount: 1000,
+  creditService: creditService,
+};
+
+const canPurchase = await userCanPurchase.isSatisfiedByAsync(context);
+if (!canPurchase) {
+  const failure = await userCanPurchase.explainFailureAsync(context);
+  console.log('Purchase denied:', failure);
+}
+```
+
+### Mieszanie Sync i Async Specyfikacji
+
+```typescript
+// Adapter do używania sync specyfikacji jako async
+class SyncToAsyncAdapter<T> extends AsyncCompositeSpecification<T> {
+  constructor(private readonly syncSpec: ISpecification<T>) {
+    super();
+  }
+
+  async isSatisfiedByAsync(candidate: T): Promise<boolean> {
+    return Promise.resolve(this.syncSpec.isSatisfiedBy(candidate));
+  }
+}
+
+// Przykład użycia
+const emailValidSpec = new EmailValidSpecification(); // Sync
+const userExistsSpec = new ExistingUserByEmailSpecification(); // Async
+
+// Kombinowanie poprzez adapter
+const combinedSpec = new SyncToAsyncAdapter(emailValidSpec).and(userExistsSpec);
+```
+
+### Walidacja z Async Specyfikacjami
+
+```typescript
+// Async BusinessRuleValidator (rozszerzenie)
+export class AsyncBusinessRuleValidator<T> {
+  private asyncRules: Array<{
+    property: string;
+    validate: (value: T) => Promise<boolean>;
+    message: string;
+    context?: Record<string, any>;
+  }> = [];
+
+  async mustSatisfyAsync(
+    specification: IAsyncSpecification<T>,
+    message: string,
+    context?: Record<string, any>
+  ): Promise<AsyncBusinessRuleValidator<T>> {
+    this.asyncRules.push({
+      property: '',
+      validate: value => specification.isSatisfiedByAsync(value, context),
+      message,
+      context,
+    });
+    return this;
+  }
+
+  async validate(value: T): Promise<Result<T, ValidationErrors>> {
+    const errors: ValidationError[] = [];
+
+    for (const rule of this.asyncRules) {
+      const isValid = await rule.validate(value);
+      if (!isValid) {
+        errors.push(
+          new ValidationError(rule.property, rule.message, rule.context)
+        );
+      }
+    }
+
+    if (errors.length > 0) {
+      return Result.fail(new ValidationErrors(errors));
+    }
+
+    return Result.ok(value);
+  }
+}
+
+// Użycie
+const asyncValidator = new AsyncBusinessRuleValidator<UserRegistrationData>()
+  .mustSatisfyAsync(
+    new ExistingUserByEmailSpecification(),
+    'User with this email already exists'
+  )
+  .mustSatisfyAsync(
+    AsyncCompositeSpecification.create<UserRegistrationData>(async data => {
+      const isBlacklisted = await blacklistService.check(data.email);
+      return !isBlacklisted;
+    }),
+    'Email is blacklisted'
+  );
+
+const result = await asyncValidator.validate(registrationData);
+```
 
 ### Kombinowanie Specyfikacji
 

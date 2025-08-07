@@ -2,9 +2,13 @@
 export {
   Specification,
   CompositeSpecification,
+  AsyncCompositeSpecification,
   NotSpecification,
   AndSpecification,
   OrSpecification,
+  AndAsyncSpecification,
+  OrAsyncSpecification,
+  NotAsyncSpecification,
   AlwaysFalseSpecification,
   AlwaysTrueSpecification,
   SpecificationValidator,
