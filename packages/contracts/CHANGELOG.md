@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.5.0...@vytches/ddd-contracts@0.6.0) (2025-08-07)
+
+### Features
+
+- **validation:** add AsyncCompositeSpecification implementation
+  ([397a61d](https://github.com/vytches/ddd/commit/397a61d4eef892d741212f4f805869501be75408))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.5.1](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.5.0...@vytches/ddd-contracts@0.5.1) (2025-08-06)
 
 **Note:** Version bump only for package @vytches/ddd-contracts

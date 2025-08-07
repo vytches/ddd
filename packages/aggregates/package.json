@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-aggregates",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Aggregate root implementations with capabilities",
   "type": "module",
   "main": "./dist/index.cjs",
