@@ -809,6 +809,71 @@ cat docs/examples/domain/aggregates/aggregate-builder.yaml
 4. **Run JSDoc injection** to apply YAML metadata
 5. **Verify final result** has both declarations and documentation
 
+## CRITICAL: YAML-Only System Status (2025-08-09)
+
+### 🚨 CURRENT STATE: TRANSITIONING TO PURE YAML CONFIGURATION 🚨
+
+**The Enhanced Metadata System V2 has transitioned to a YAML-only approach:**
+
+**✅ COMPLETED TRANSITIONS:**
+- ✅ **Documentation System**: Fully operational YAML-based configuration
+- ✅ **Build Integration**: TypeScript AST processing with YAML metadata injection
+- ✅ **Package Coverage**: 5/22 packages fully documented with YAML files
+- ✅ **File Structure**: All YAML files properly organized in `docs/examples/domain/`
+
+**🔄 ONGOING CLEANUP:**
+- **Source File Cleanup**: Removing old JSDoc markers from 244 TypeScript source files
+- **Progress**: 4 files cleaned, 240+ remaining
+- **Target**: Complete cleanup within 1-2 weeks
+
+**📋 OLD PATTERNS BEING REMOVED:**
+```typescript
+// ❌ OBSOLETE - Being removed from all .ts source files
+/**
+ * @llm-summary Some description
+ * @llm-domain Pattern/Architecture
+ * @llm-complexity Medium
+ * @description-inject
+ * @business-context-inject  
+ * @example-inject
+ */
+```
+
+**✅ NEW APPROACH - Pure implementation files:**
+```typescript
+// ✅ CURRENT - Clean implementation only
+export class SomeClass {
+  // Pure implementation, no documentation markers
+}
+```
+
+**✅ YAML Configuration drives all documentation:**
+```yaml
+# docs/examples/domain/{package}/{filename}.yaml
+classes:
+  SomeClass:
+    class-doc:
+      description: "Class description"
+      business-context: "Business use case"
+    methods:
+      methodName:
+        description: "Method description"
+        examples:
+          - code: |
+              const instance = new SomeClass();
+```
+
+**🚨 IMPORTANT FOR CONTRIBUTORS:**
+- **DO NOT** add `@llm-*` markers to TypeScript source files
+- **DO NOT** add `*-inject` directives to source files  
+- **DO** create YAML files in `docs/examples/domain/{package}/` for new documentation
+- **DO** use the hierarchical YAML structure documented above
+
+**📖 REFERENCE DOCUMENTATION:**
+- `docs/JSDOC_EXAMPLES_ROADMAP.md` - Updated YAML-only system overview
+- `docs/YAML_ONLY_CLEANUP_STATUS.md` - Current transition status
+- `docs/examples/yaml-template.yaml` - YAML structure template
+
 ## Development Commands
 
 ```bash

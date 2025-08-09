@@ -1,22 +1,5 @@
 import type { IValidationError, IValidationErrors } from '@vytches/ddd-contracts';
 
-/**
- * @llm-summary ValidationError class for validation error operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ValidationError class implementing domain pattern implementation for validation error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ValidationError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ValidationError implements IValidationError {
   constructor(
     public readonly property: string,
@@ -29,23 +12,6 @@ export class ValidationError implements IValidationError {
   }
 }
 
-/**
- * @llm-summary ValidationErrors class for validation errors operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ValidationErrors class implementing domain pattern implementation for validation errors operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ValidationErrors();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ValidationErrors extends Error implements IValidationErrors {
   public readonly errors: IValidationError[];
 

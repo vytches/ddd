@@ -2,48 +2,10 @@ import type { ISpecification } from '@vytches/ddd-contracts';
 
 import type { BusinessRuleValidator } from './business-rules/business-rule-validator';
 
-/**
- * @llm-summary Contract for rule function functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RuleFunction interface implementing domain pattern implementation for rule function operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRuleFunction implements RuleFunction {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RuleFunction<T> {
   (validator: BusinessRuleValidator<T>): BusinessRuleValidator<T>;
 }
 
-/**
- * @llm-summary Contract for rules provider functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RulesProvider interface implementing domain pattern implementation for rules provider operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRulesProvider implements IRulesProvider {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IRulesProvider {
   readonly name: string;
 }
@@ -99,23 +61,6 @@ export interface ICoreRules {
   otherwise: <T>(elseRules: (validator: BusinessRuleValidator<T>) => void) => RuleFunction<T>;
 }
 
-/**
- * @llm-summary CoreRules class for core rules operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * CoreRules class implementing domain pattern implementation for core rules operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CoreRules();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class CoreRules implements ICoreRules, IRulesProvider {
   readonly name = 'core';
 

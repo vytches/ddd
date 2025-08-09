@@ -5,25 +5,6 @@ import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './
 import { MessageStatus, MessagePriority } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
-/**
- * @llm-summary Contract for outbox processor options functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * OutboxProcessorOptions interface implementing integration layer component for outbox processor options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteOutboxProcessorOptions implements OutboxProcessorOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface OutboxProcessorOptions {
   /** Maximum number of messages to process in one batch */
   batchSize?: number;

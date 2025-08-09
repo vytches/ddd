@@ -34,14 +34,17 @@ classes:
             Domain error for handling version conflicts in optimistic concurrency control
       
       custom-tags:
-        since: "1.0.0"
-        domain: "repositories"
+        since: "0.0.1"
     
     # Methods
     methods:
       withEntityIdAndVersions:
         description: "Creates a version error with entity ID and version details"
+        description.jsdoc: "Creates VersionError with entity and version info"
+        description.cli: "## Factory Method\n\nCreates detailed version conflict error"
         business-context: "Factory method for creating detailed version conflict errors"
+        business-context.jsdoc: "Handles version conflicts in optimistic concurrency"
+        strategy: "merge"
         
         parameters:
           - name: "id"
@@ -59,7 +62,7 @@ classes:
           description: "Configured version error instance"
           
         custom-tags:
-          since: "1.0.0"
+          since: "0.0.1"
           static: true
 
   IBaseRepository:
@@ -83,7 +86,7 @@ classes:
             Abstract base class for repositories with event sourcing capabilities
       
       custom-tags:
-        since: "1.0.0"
+        since: "0.0.1"
         abstract: true
         domain: "repositories"
     
@@ -119,7 +122,7 @@ classes:
             description: "When version conflict occurs during optimistic concurrency control"
             
         custom-tags:
-          since: "1.0.0"
+          since: "0.0.1"
           async: true
           
       findById:
@@ -136,7 +139,7 @@ classes:
           description: "The aggregate if found, null otherwise"
           
         custom-tags:
-          since: "1.0.0"
+          since: "0.0.1"
           abstract: true
           async: true
 

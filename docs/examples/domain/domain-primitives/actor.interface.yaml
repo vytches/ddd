@@ -1,0 +1,157 @@
+# Actor Interface - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: "actor.interface"
+title: "Actor Interface and Types"
+description: "Core actor interface for tracking who performs actions in the domain"
+business-context: "Provides audit trail and authorization context by identifying actors in domain operations"
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: "merge"
+  scope: "file"
+
+# === ENUMS ===
+enums:
+  DefaultActorType:
+    description: "Enumeration of standard actor types in the system"
+    business-context: "Categorizes actors for authorization and audit purposes"
+    
+    formats:
+      jsdoc:
+        description: "Standard actor type enumeration"
+      cli:
+        description: |
+          ## DefaultActorType
+          Predefined actor types for common scenarios:
+          - USER: Regular system users
+          - SYSTEM: Automated system processes
+          - ADMIN: Administrative users
+          - GUEST: Unauthenticated users
+          - ORGANIZATION: Organizational actors
+          - TEAM: Team-based actors
+          - SERVICE: Microservice actors
+    
+    values:
+      - name: "USER"
+        value: '"user"'
+        description: "Regular authenticated user"
+      - name: "SYSTEM"
+        value: '"system"'
+        description: "System-initiated actions"
+      - name: "ADMIN"
+        value: '"admin"'
+        description: "Administrative user with elevated privileges"
+      - name: "GUEST"
+        value: '"guest"'
+        description: "Unauthenticated or anonymous user"
+      - name: "ORGANIZATION"
+        value: '"organization"'
+        description: "Organization-level actor"
+      - name: "TEAM"
+        value: '"team"'
+        description: "Team or group actor"
+      - name: "SERVICE"
+        value: '"service"'
+        description: "Microservice or external service actor"
+    
+    examples:
+      - id: "actor-types"
+        code: |
+          // Using default actor types
+          const userActor: IActor = {
+            type: DefaultActorType.USER,
+            source: 'web-app',
+            id: 'user-123'
+          };
+          
+          const systemActor: IActor = {
+            type: DefaultActorType.SYSTEM,
+            source: 'cron-job',
+            metadata: { job: 'daily-cleanup' }
+          };
+    
+    custom-tags:
+      since: "1.0.0"
+      extensible: "false"
+
+# === INTERFACES ===
+interfaces:
+  IActor:
+    description: "Contract for identifying actors in domain operations"
+    business-context: "Tracks who initiated actions for audit, authorization, and debugging"
+    
+    formats:
+      jsdoc:
+        description: "Actor identification interface"
+      cli:
+        description: |
+          ## IActor
+          Actor interface for tracking:
+          - Actor type and identity
+          - Source system or application
+          - Optional metadata for context
+          - Audit trail information
+    
+    properties:
+      - name: "type"
+        type: "string | DefaultActorType"
+        description: "Type of actor (user, system, admin, etc.)"
+        required: true
+        
+      - name: "source"
+        type: "string"
+        description: "Source system or application identifier"
+        required: true
+        
+      - name: "id"
+        type: "string"
+        description: "Unique identifier for the actor"
+        required: false
+        
+      - name: "metadata"
+        type: "Record<string, unknown>"
+        description: "Additional context metadata"
+        required: false
+    
+    examples:
+      - id: "user-actor"
+        code: |
+          const actor: IActor = {
+            type: DefaultActorType.USER,
+            source: 'mobile-app',
+            id: 'user-456',
+            metadata: {
+              ip: '192.168.1.1',
+              device: 'iPhone',
+              sessionId: 'sess-789'
+            }
+          };
+          
+      - id: "service-actor"
+        code: |
+          const serviceActor: IActor = {
+            type: DefaultActorType.SERVICE,
+            source: 'payment-service',
+            id: 'svc-payment-01',
+            metadata: {
+              version: '2.1.0',
+              environment: 'production'
+            }
+          };
+          
+      - id: "custom-type"
+        code: |
+          // Using custom actor type
+          const botActor: IActor = {
+            type: 'bot', // Custom type
+            source: 'chatbot-service',
+            id: 'bot-support-01',
+            metadata: {
+              conversation: 'conv-123'
+            }
+          };
+    
+    custom-tags:
+      since: "1.0.0"
+      required-in: "audit-capability"

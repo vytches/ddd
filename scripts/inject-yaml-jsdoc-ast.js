@@ -96,9 +96,125 @@ class ASTJSDocInjector {
   }
 
   /**
-   * Generate JSDoc comment from metadata
+   * Merge metadata hierarchically based on strategy
    */
-  generateJSDoc(metadata, indent = '') {
+  mergeMetadata(base, overlay, strategy = 'merge') {
+    if (!base) return overlay;
+    if (!overlay) return base;
+    
+    switch (strategy) {
+      case 'replace':
+        // Complete replacement
+        return overlay;
+        
+      case 'append':
+        // Append strings, merge arrays and objects
+        const result = { ...base };
+        for (const key in overlay) {
+          if (typeof overlay[key] === 'string' && result[key]) {
+            result[key] = `${result[key]}\n${overlay[key]}`;
+          } else if (Array.isArray(overlay[key])) {
+            result[key] = [...(result[key] || []), ...overlay[key]];
+          } else if (typeof overlay[key] === 'object' && overlay[key] !== null) {
+            result[key] = { ...(result[key] || {}), ...overlay[key] };
+          } else {
+            result[key] = overlay[key];
+          }
+        }
+        return result;
+        
+      case 'merge':
+      default:
+        // Deep merge
+        const merged = { ...base };
+        for (const key in overlay) {
+          if (typeof overlay[key] === 'object' && overlay[key] !== null && !Array.isArray(overlay[key])) {
+            merged[key] = this.mergeMetadata(merged[key], overlay[key], 'merge');
+          } else {
+            merged[key] = overlay[key];
+          }
+        }
+        return merged;
+    }
+  }
+
+  /**
+   * Resolve hierarchical metadata for a specific element
+   */
+  resolveHierarchicalMetadata(packageName, fileBaseName, interfaceOrClassName, methodName = null, format = 'jsdoc') {
+    let resolved = {};
+    
+    // 1. Start with global metadata
+    if (this.globalMetadata) {
+      const globalStrategy = this.globalMetadata.hierarchy?.strategy || 'merge';
+      resolved = this.mergeMetadata(resolved, this.globalMetadata, globalStrategy);
+    }
+    
+    // 2. Apply package metadata
+    const packageMeta = this.packageMetadata.get(packageName);
+    if (packageMeta) {
+      const packageStrategy = packageMeta.hierarchy?.strategy || 'merge';
+      resolved = this.mergeMetadata(resolved, packageMeta, packageStrategy);
+    }
+    
+    // 3. Apply file/class metadata
+    const fileKey = `${packageName}-${fileBaseName.toLowerCase()}`;
+    const fileMeta = this.classMetadata.get(fileKey);
+    if (fileMeta) {
+      const fileStrategy = fileMeta.hierarchy?.strategy || 'merge';
+      
+      // Get class or interface specific metadata
+      let elementMeta = fileMeta.classes?.[interfaceOrClassName] || 
+                        fileMeta.interfaces?.[interfaceOrClassName] ||
+                        fileMeta;
+      
+      if (elementMeta && elementMeta !== fileMeta) {
+        const elementStrategy = elementMeta.hierarchy?.strategy || elementMeta.strategy || fileStrategy;
+        resolved = this.mergeMetadata(resolved, elementMeta, elementStrategy);
+      }
+      
+      // 4. Apply method metadata if specified
+      if (methodName && elementMeta?.methods?.[methodName]) {
+        const methodMeta = elementMeta.methods[methodName];
+        const methodStrategy = methodMeta.hierarchy?.strategy || methodMeta.strategy || 'merge';
+        resolved = this.mergeMetadata(resolved, methodMeta, methodStrategy);
+      }
+    }
+    
+    // 5. Apply format-specific overrides
+    const formatSpecific = {};
+    for (const key in resolved) {
+      // Check for format-specific keys like 'description.jsdoc'
+      if (key.includes('.')) {
+        const [baseKey, formatKey] = key.split('.');
+        if (formatKey === format) {
+          formatSpecific[baseKey] = resolved[key];
+        }
+      }
+    }
+    
+    // Override with format-specific values
+    Object.assign(resolved, formatSpecific);
+    
+    // Clean up format-specific keys from result
+    for (const key in resolved) {
+      if (key.includes('.')) {
+        delete resolved[key];
+      }
+    }
+    
+    return resolved;
+  }
+
+  /**
+   * Generate JSDoc comment from metadata with hierarchy
+   */
+  generateJSDoc(metadata, indent = '', packageName = null, fileBaseName = null, interfaceOrClassName = null, methodName = null) {
+    // If we have hierarchy info, resolve it
+    if (packageName && fileBaseName) {
+      metadata = this.resolveHierarchicalMetadata(packageName, fileBaseName, interfaceOrClassName, methodName, 'jsdoc');
+    }
+    
     const lines = [];
     lines.push(`${indent}/**`);
     
@@ -146,7 +262,10 @@ class ASTJSDocInjector {
     
     if (metadata['custom-tags']) {
       Object.entries(metadata['custom-tags']).forEach(([tag, value]) => {
-        lines.push(`${indent} * @${tag} ${value}`);
+        // Skip format-specific and hierarchy tags
+        if (!tag.includes('.') && tag !== 'hierarchy' && tag !== 'strategy') {
+          lines.push(`${indent} * @${tag} ${value}`);
+        }
       });
     }
     
@@ -199,7 +318,7 @@ class ASTJSDocInjector {
           );
           
           if (!hasJSDoc) {
-            const interfaceJSDoc = this.generateJSDoc(interfaceMetadata);
+            const interfaceJSDoc = this.generateJSDoc(interfaceMetadata, '', packageName, fileBaseName, interfaceName);
             // Find the actual start of the interface declaration
             const interfaceStart = node.getStart(sourceFile);
             // Find the start of the line containing the interface
@@ -228,7 +347,7 @@ class ASTJSDocInjector {
                   const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
                   
                   // Generate JSDoc with the same indent as the member
-                  const methodJSDoc = this.generateJSDoc(methodMetadata, memberIndent);
+                  const methodJSDoc = this.generateJSDoc(methodMetadata, memberIndent, packageName, fileBaseName, interfaceName, memberName);
                   
                   // Find the position to insert JSDoc
                   const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
@@ -268,8 +387,9 @@ class ASTJSDocInjector {
           console.log(`  🔍 Found class: ${className}`);
           
           // Load metadata for this class
-          await this.loadClassMetadata(packageName, className, filePath);
-          const key = `${packageName}-${className.toLowerCase()}`;
+          const fileBaseName = path.basename(filePath, '.d.ts');
+          await this.loadClassMetadata(packageName, fileBaseName, filePath);
+          const key = `${packageName}-${fileBaseName.toLowerCase()}`;
           const metadata = this.classMetadata.get(key);
           
           if (metadata?.classes?.[className]) {
@@ -283,7 +403,7 @@ class ASTJSDocInjector {
               );
               
               if (!hasJSDoc) {
-                const classJSDoc = this.generateJSDoc(classMetadata['class-doc']);
+                const classJSDoc = this.generateJSDoc(classMetadata['class-doc'], '', packageName, fileBaseName, className);
                 // Find the actual start of the class declaration
                 const classStart = node.getStart(sourceFile);
                 // Find the start of the line containing the class
@@ -315,7 +435,7 @@ class ASTJSDocInjector {
                     const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
                     
                     // Generate JSDoc with the same indent as the member
-                    const methodJSDoc = this.generateJSDoc(methodMetadata, memberIndent);
+                    const methodJSDoc = this.generateJSDoc(methodMetadata, memberIndent, packageName, fileBaseName, className, memberName);
                     
                     // Find position to insert JSDoc
                     const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
