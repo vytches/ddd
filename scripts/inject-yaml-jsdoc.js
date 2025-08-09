@@ -226,24 +226,32 @@ class YamlJSDocInjector {
   }
 
   // NEW: Load class-specific metadata dynamically
-  async loadClassMetadata(packageName, className) {
+  async loadClassMetadata(packageName, className, fileName = null) {
     const key = `${packageName}-${className.toLowerCase()}`;
     if (this.classMetadata.has(key)) {
       return; // Already loaded
     }
 
-    // Try to load from kebab-case filename (e.g., AggregateRoot -> aggregate-root.yaml)
-    const kebabFileName = className
-      .replace(/([A-Z])/g, (match, letter, index) => index === 0 ? letter.toLowerCase() : `-${letter.toLowerCase()}`)
-      .replace(/^-/, ''); // Remove leading dash
+    // If fileName is provided, use it to load the metadata file
+    // This handles cases where multiple classes are defined in the same file
+    let yamlFileName;
+    if (fileName) {
+      // Extract base name from .d.ts file (e.g., base-repository.d.ts -> base-repository)
+      yamlFileName = path.basename(fileName, '.d.ts').replace('.interface', '.interface');
+    } else {
+      // Fallback to kebab-case filename (e.g., AggregateRoot -> aggregate-root.yaml)
+      yamlFileName = className
+        .replace(/([A-Z])/g, (match, letter, index) => index === 0 ? letter.toLowerCase() : `-${letter.toLowerCase()}`)
+        .replace(/^-/, ''); // Remove leading dash
+    }
       
     const classMeta = await this.loadYamlFile(
-      path.join(this.rootDir, 'docs', 'examples', 'domain', packageName, `${kebabFileName}.yaml`)
+      path.join(this.rootDir, 'docs', 'examples', 'domain', packageName, `${yamlFileName}.yaml`)
     );
     if (classMeta) {
       this.classMetadata.set(key, classMeta);
       if (this.debug) {
-        console.log(`✅ Class metadata loaded for ${className} in ${packageName} from ${kebabFileName}.yaml`);
+        console.log(`✅ Class metadata loaded for ${className} in ${packageName} from ${yamlFileName}.yaml`);
       }
     }
   }
@@ -756,6 +764,11 @@ class YamlJSDocInjector {
             console.log(`    ✅ Generated JSDoc for ${elementType}.${elementName}`);
           }
         }
+        
+        // NEW: Process interface methods if they exist
+        if (elementType === 'interfaces' && elementMetadata.methods) {
+          updatedContent = this.processInterfaceMethods(updatedContent, elementName, elementMetadata.methods);
+        }
       }
     }
     
@@ -822,20 +835,143 @@ class YamlJSDocInjector {
     }
     
     // Add examples
-    if (metadata.examples) {
-      lines.push(` * @example`);
-      lines.push(` * \`\`\`typescript`);
-      metadata.examples.forEach(example => {
+    if (metadata.examples && metadata.examples.length > 0) {
+      metadata.examples.forEach((example, index) => {
+        lines.push(` * @example`);
+        if (example.id) {
+          lines.push(` * ${example.id}`);
+        }
+        lines.push(` * \`\`\`typescript`);
         if (example.code) {
           example.code.split('\n').forEach(codeLine => {
             lines.push(` * ${codeLine}`);
           });
         }
+        lines.push(` * \`\`\``);
       });
-      lines.push(` * \`\`\``);
     }
     
     lines.push(' */');
+    return lines.join('\n');
+  }
+
+  // NEW: Process methods of an interface
+  processInterfaceMethods(content, interfaceName, methods) {
+    if (!methods || Object.keys(methods).length === 0) {
+      return content;
+    }
+    
+    if (this.debug) {
+      console.log(`    📝 Processing ${Object.keys(methods).length} methods for interface ${interfaceName}`);
+    }
+    
+    // Find the interface in the content - handle various formatting
+    const interfaceRegex = new RegExp(
+      `export\\s+interface\\s+${interfaceName}[^{]*\\{([\\s\\S]*?)^\\}`,
+      'gm'
+    );
+    
+    const match = interfaceRegex.exec(content);
+    if (!match) {
+      console.log(`    ⚠️  Could not find interface ${interfaceName} body`);
+      return content;
+    }
+    
+    let interfaceBody = match[1];
+    const interfaceStart = match.index + match[0].indexOf('{') + 1;
+    
+    // Process each method
+    for (const [methodName, methodMetadata] of Object.entries(methods)) {
+      // Find existing JSDoc and method signature
+      const methodRegex = new RegExp(
+        `(\\s*\\/\\*\\*[\\s\\S]*?\\*\\/)?\\s*(${methodName}\\??\\s*\\([^)]*\\)\\s*:\\s*[^;]+;)`,
+        'g'
+      );
+      
+      const methodMatch = methodRegex.exec(interfaceBody);
+      if (!methodMatch) {
+        console.log(`      ⚠️  Could not find method ${methodName} in interface ${interfaceName}`);
+        continue;
+      }
+      
+      // Generate enhanced JSDoc with examples
+      const enhancedJSDoc = this.generateMethodJSDoc(methodMetadata, methodName);
+      
+      // Replace existing JSDoc (if any) with enhanced version
+      const replacement = enhancedJSDoc + '\n    ' + methodMatch[2];
+      interfaceBody = interfaceBody.replace(methodMatch[0], replacement);
+      
+      console.log(`      ✅ Enhanced JSDoc for ${interfaceName}.${methodName}`);
+    }
+    
+    // Reconstruct the content with updated interface body
+    const updatedContent = content.substring(0, interfaceStart) + 
+                          interfaceBody + 
+                          content.substring(match.index + match[0].length - 1);
+    
+    return updatedContent;
+  }
+  
+  // Generate JSDoc for a method
+  generateMethodJSDoc(metadata, methodName) {
+    const lines = [];
+    lines.push('    /**');
+    
+    // Add description
+    if (metadata.description) {
+      lines.push(`     * ${metadata.description}`);
+    }
+    
+    // Add business context
+    if (metadata['business-context']) {
+      lines.push(`     * @businessContext ${metadata['business-context']}`);
+    }
+    
+    // Add parameters
+    if (metadata.parameters && metadata.parameters.length > 0) {
+      metadata.parameters.forEach(param => {
+        const optional = param.optional ? ' - Optional.' : '';
+        lines.push(`     * @param {${param.type}} ${param.name}${optional} ${param.description}`);
+      });
+    }
+    
+    // Add returns
+    if (metadata.returns) {
+      lines.push(`     * @returns {${metadata.returns.type}} ${metadata.returns.description}`);
+    }
+    
+    // Add throws
+    if (metadata.throws && metadata.throws.length > 0) {
+      metadata.throws.forEach(err => {
+        lines.push(`     * @throws {${err.type}} ${err.description}`);
+      });
+    }
+    
+    // Add examples - this is the key addition!
+    if (metadata.examples && metadata.examples.length > 0) {
+      metadata.examples.forEach((example, index) => {
+        lines.push(`     * @example`);
+        if (example.id) {
+          lines.push(`     * // ${example.id}`);
+        }
+        lines.push(`     * \`\`\`typescript`);
+        if (example.code) {
+          example.code.split('\n').forEach(codeLine => {
+            lines.push(`     * ${codeLine}`);
+          });
+        }
+        lines.push(`     * \`\`\``);
+      });
+    }
+    
+    // Add custom tags
+    if (metadata['custom-tags']) {
+      Object.entries(metadata['custom-tags']).forEach(([tag, value]) => {
+        lines.push(`     * @${tag} ${value}`);
+      });
+    }
+    
+    lines.push('     */');
     return lines.join('\n');
   }
 
@@ -1209,13 +1345,13 @@ class YamlJSDocInjector {
         console.log(`  📋 Detected ${classNames.length} classes: ${classNames.join(', ')}`);
       }
       for (const className of classNames) {
-        await this.loadClassMetadata(packageName, className);
+        await this.loadClassMetadata(packageName, className, filePath);
       }
     } else {
       // For files without classes, still try to load metadata using a generic approach
       // Try to guess the metadata file from the TypeScript filename
       const baseName = this.guessClassNameFromFile(filePath) || 'aggregate-root';
-      await this.loadClassMetadata(packageName, baseName);
+      await this.loadClassMetadata(packageName, baseName, filePath);
     }
     
     // Process file-level elements (interfaces, types, enums) first, but NOT functions yet
@@ -1442,9 +1578,10 @@ class YamlJSDocInjector {
         }
         
         // Load metadata for all classes in the file
+        // Pass the file name so we can load the correct YAML file
         for (const match of classMatches) {
           const className = match[1];
-          await this.loadClassMetadata(packageName, className);
+          await this.loadClassMetadata(packageName, className, file);
           console.log(`    ✅ Loaded metadata for class: ${className}`);
         }
         

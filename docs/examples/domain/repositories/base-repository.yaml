@@ -146,15 +146,48 @@ interfaces:
     description: "Interface for aggregates that can be persisted by repositories"
     business-context: "Defines contract for event-sourced aggregates with versioning"
     
+    # Format-specific
+    formats:
+      jsdoc:
+        description: "Repository-compatible aggregate with event sourcing and versioning"
+      cli:
+        description: |
+          ## IRepositoryAggregate
+          
+          Repository aggregate interface providing:
+          - Domain event capabilities (extends IAggregateWithEvents)
+          - Unique identification through EntityId
+          - Optimistic concurrency through versioning
+          - Event sourcing compatibility
+    
+    # Inheritance
+    inheritance:
+      extends: "IAggregateWithEvents"
+      description: "Inherits domain event capabilities from IAggregateWithEvents"
+    
     methods:
       getId:
-        description: "Gets the aggregate identifier"
+        description: "Gets the unique identifier of the aggregate"
+        business-context: "Provides the EntityId for aggregate identification and persistence"
+        
         returns:
           type: "EntityId"
-          description: "Unique identifier for the aggregate"
+          description: "The unique identifier of the aggregate"
+          
+        custom-tags:
+          required: "true"
+          identifier: "unique"
+          immutable: "recommended"
           
       getInitialVersion:
-        description: "Gets the initial version of the aggregate"
+        description: "Gets the initial version of the aggregate for optimistic concurrency control"
+        business-context: "Provides version information for detecting concurrent modifications during persistence"
+        
         returns:
           type: "number"
-          description: "Version number for optimistic concurrency control"
+          description: "The initial version number of the aggregate"
+          
+        custom-tags:
+          required: "true"
+          concurrency: "optimistic"
+          versioning: "required"

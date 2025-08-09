@@ -446,14 +446,25 @@ Read the specific class file to understand parameters and return types
 
 #### **1. File Placement Pattern:**
 
+**🚨 CRITICAL: ONE YAML file per TypeScript file (1:1 mapping)**
+
 ```
 docs/examples/domain/
-├── {package-name}/           # Package folder (e.g., domain-services, aggregates)
-│   ├── {class-name}.yaml     # Class-level metadata file
-│   └── {class-name}/         # Class folder (e.g., base-domain-service, aggregate-root)
-│       ├── methodName.yaml   # Method-specific metadata file
-│       └── anotherMethod.yaml # Another method metadata
+├── {package-name}/                 # Package folder (e.g., domain-services, aggregates)
+│   ├── {typescript-filename}.yaml  # YAML file matching TypeScript filename EXACTLY
+│   │                               # e.g., base-repository.ts → base-repository.yaml
+│   │                               # Contains ALL classes/interfaces from that .ts file
+│   └── {typescript-filename}/      # Optional: Folder for method-specific files
+│       ├── methodName.yaml         # Method-specific metadata file
+│       └── anotherMethod.yaml      # Another method metadata
 ```
+
+**MANDATORY RULES:**
+- ✅ **1:1 Mapping**: ONE YAML file per TypeScript file
+- ✅ **Exact Name Match**: `aggregate-root.ts` → `aggregate-root.yaml`
+- ✅ **All Elements**: YAML file contains ALL classes, interfaces, types, enums from the .ts file
+- ❌ **NO Separate Files**: Do NOT create separate YAML files for each class (e.g., NO `version-error.yaml` if VersionError is in `base-repository.ts`)
+- ✅ **Multiple Classes**: If `base-repository.ts` contains VersionError AND IBaseRepository, put BOTH in `base-repository.yaml`
 
 #### **2. YAML File Structure - Hierarchical System**
 
