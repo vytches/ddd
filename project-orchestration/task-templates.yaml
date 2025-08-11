@@ -1,0 +1,297 @@
+# VytchesDDD Task Templates
+
+templates:
+  # Feature Implementation Template
+  feature_implementation:
+    name: 'Implement New Feature'
+    complexity: variable
+    agents_required:
+      primary: [library-expert]
+      support: [ddd-patterns-expert, testing-excellence]
+      review: [tech-lead]
+    steps:
+      - analyze_requirements:
+          agent: ddd-patterns-expert
+          inputs: [feature_spec]
+          outputs: [design_doc, patterns_selected]
+
+      - create_adr:
+          agent: tech-lead
+          condition: complexity == 'high'
+          inputs: [design_doc]
+          outputs: [adr_document]
+
+      - implement_feature:
+          agent: library-expert
+          inputs: [design_doc, patterns_selected]
+          outputs: [source_code]
+
+      - write_tests:
+          agent: testing-excellence
+          inputs: [source_code]
+          outputs: [test_suite]
+
+      - document_feature:
+          agent: documentation-master
+          inputs: [source_code, test_suite]
+          outputs: [jsdoc, examples, readme_update]
+
+      - review_code:
+          agent: tech-lead
+          inputs: [source_code, test_suite, documentation]
+          outputs: [approval, feedback]
+
+  # Package Refactoring Template
+  package_refactoring:
+    name: 'Refactor Package'
+    complexity: high
+    agents_required:
+      primary: [library-expert, performance-optimizer]
+      support: [ddd-patterns-expert]
+      review: [tech-lead]
+    steps:
+      - analyze_current_state:
+          agent: performance-optimizer
+          inputs: [package_name]
+          outputs: [current_metrics, issues_identified]
+
+      - design_improvements:
+          agent: ddd-patterns-expert
+          inputs: [current_metrics, issues_identified]
+          outputs: [refactoring_plan]
+
+      - implement_refactoring:
+          agent: library-expert
+          inputs: [refactoring_plan]
+          outputs: [refactored_code]
+
+      - optimize_performance:
+          agent: performance-optimizer
+          inputs: [refactored_code]
+          outputs: [optimized_code, performance_report]
+
+      - validate_refactoring:
+          agent: testing-excellence
+          inputs: [optimized_code]
+          outputs: [test_results, coverage_report]
+
+  # Security Fix Template
+  security_fix:
+    name: 'Security Vulnerability Fix'
+    complexity: critical
+    priority: highest
+    agents_required:
+      primary: [security-audit, library-expert]
+      support: [testing-excellence]
+      review: [tech-lead]
+    steps:
+      - assess_vulnerability:
+          agent: security-audit
+          inputs: [vulnerability_report]
+          outputs: [risk_assessment, fix_requirements]
+
+      - implement_patch:
+          agent: library-expert
+          inputs: [fix_requirements]
+          outputs: [patched_code]
+
+      - security_validation:
+          agent: security-audit
+          inputs: [patched_code]
+          outputs: [security_clearance]
+
+      - test_patch:
+          agent: testing-excellence
+          inputs: [patched_code]
+          outputs: [test_confirmation]
+
+      - emergency_review:
+          agent: tech-lead
+          inputs: [patched_code, security_clearance]
+          outputs: [approval_for_release]
+
+  # Documentation Update Template
+  documentation_update:
+    name: 'Update Documentation'
+    complexity: low
+    agents_required:
+      primary: [documentation-master]
+      support: [library-expert]
+      review: [tech-lead]
+    steps:
+      - identify_gaps:
+          agent: documentation-master
+          inputs: [package_changes]
+          outputs: [documentation_gaps]
+
+      - gather_information:
+          agent: library-expert
+          inputs: [documentation_gaps]
+          outputs: [technical_details]
+
+      - update_docs:
+          agent: documentation-master
+          inputs: [technical_details]
+          outputs: [updated_documentation]
+
+      - validate_accuracy:
+          agent: library-expert
+          inputs: [updated_documentation]
+          outputs: [validation_result]
+
+  # Performance Investigation Template
+  performance_investigation:
+    name: 'Investigate Performance Issue'
+    complexity: medium
+    agents_required:
+      primary: [performance-optimizer]
+      support: [library-expert, testing-excellence]
+      review: [tech-lead]
+    steps:
+      - profile_performance:
+          agent: performance-optimizer
+          inputs: [performance_issue]
+          outputs: [profiling_data, bottlenecks]
+
+      - analyze_code:
+          agent: library-expert
+          inputs: [bottlenecks]
+          outputs: [code_analysis]
+
+      - propose_optimizations:
+          agent: performance-optimizer
+          inputs: [code_analysis]
+          outputs: [optimization_proposals]
+
+      - implement_optimizations:
+          agent: library-expert
+          inputs: [optimization_proposals]
+          outputs: [optimized_code]
+
+      - benchmark:
+          agent: performance-optimizer
+          inputs: [optimized_code]
+          outputs: [benchmark_results]
+
+  # Test Coverage Improvement Template
+  test_improvement:
+    name: 'Improve Test Coverage'
+    complexity: medium
+    agents_required:
+      primary: [testing-excellence]
+      support: [library-expert]
+      review: [tech-lead]
+    steps:
+      - analyze_coverage:
+          agent: testing-excellence
+          inputs: [package_name]
+          outputs: [coverage_report, gaps_identified]
+
+      - prioritize_gaps:
+          agent: testing-excellence
+          inputs: [gaps_identified]
+          outputs: [test_plan]
+
+      - write_tests:
+          agent: testing-excellence
+          inputs: [test_plan]
+          outputs: [new_tests]
+
+      - validate_tests:
+          agent: library-expert
+          inputs: [new_tests]
+          outputs: [validation_results]
+
+      - measure_improvement:
+          agent: testing-excellence
+          inputs: [new_tests]
+          outputs: [updated_coverage_report]
+
+  # API Design Template
+  api_design:
+    name: 'Design New API'
+    complexity: high
+    agents_required:
+      primary: [library-expert, ddd-patterns-expert]
+      support: [documentation-master]
+      review: [tech-lead]
+    steps:
+      - define_requirements:
+          agent: ddd-patterns-expert
+          inputs: [api_requirements]
+          outputs: [api_specification]
+
+      - design_interface:
+          agent: library-expert
+          inputs: [api_specification]
+          outputs: [interface_design]
+
+      - review_design:
+          agent: tech-lead
+          inputs: [interface_design]
+          outputs: [design_feedback]
+
+      - create_examples:
+          agent: documentation-master
+          inputs: [interface_design]
+          outputs: [usage_examples]
+
+      - finalize_api:
+          agent: library-expert
+          inputs: [design_feedback, usage_examples]
+          outputs: [final_api_design]
+
+# Task Properties
+task_properties:
+  complexity_levels:
+    - low: 'Simple, well-defined tasks'
+    - medium: 'Moderate complexity, some design decisions'
+    - high: 'Complex, requires architecture decisions'
+    - critical: 'Urgent, high-impact tasks'
+
+  priority_levels:
+    - lowest: 'Nice to have'
+    - low: 'Should do eventually'
+    - normal: 'Standard priority'
+    - high: 'Important, do soon'
+    - highest: 'Critical, do immediately'
+
+  time_estimates:
+    low: '< 1 hour'
+    medium: '1-4 hours'
+    high: '4-8 hours'
+    very_high: '> 8 hours'
+
+# Agent Skills Matrix
+agent_skills:
+  tech-lead:
+    primary: [architecture, decision_making, code_review]
+    secondary: [mentoring, planning]
+
+  library-expert:
+    primary: [implementation, api_design, debugging]
+    secondary: [refactoring, optimization]
+
+  testing-excellence:
+    primary: [test_design, coverage_analysis, quality_assurance]
+    secondary: [performance_testing, integration_testing]
+
+  documentation-master:
+    primary: [technical_writing, api_documentation, examples]
+    secondary: [changelog, tutorials]
+
+  performance-optimizer:
+    primary: [profiling, optimization, benchmarking]
+    secondary: [caching, lazy_loading]
+
+  ddd-patterns-expert:
+    primary: [domain_modeling, pattern_selection, aggregate_design]
+    secondary: [event_design, bounded_contexts]
+
+  security-audit:
+    primary: [vulnerability_scanning, risk_assessment, compliance]
+    secondary: [penetration_testing, security_design]
+
+  project-orchestrator:
+    primary: [coordination, workflow_management, progress_tracking]
+    secondary: [conflict_resolution, prioritization]
