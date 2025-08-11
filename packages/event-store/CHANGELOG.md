@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/vytches/ddd/compare/@vytches/ddd-event-store@0.4.0...@vytches/ddd-event-store@0.5.1) (2025-08-11)
+
+**Note:** Version bump only for package @vytches/ddd-event-store
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.5.0](https://github.com/vytches/ddd/compare/@vytches/ddd-event-store@0.4.0...@vytches/ddd-event-store@0.5.0) (2025-08-11)
 
 ### Features
